@@ -23,6 +23,8 @@ jobs:
       # ============================
       # 🔷 FRONTEND BUILD & DEPLOY
       # ============================
+      - name: Test SSH connection
+        run: ssh -vvv -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no -p 22 ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST}} "echo connected"
 
       - name: Clean old frontend build
         uses: appleboy/ssh-action@master
