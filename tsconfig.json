@@ -33,5 +33,5 @@
     // Skip lib check untuk kecepatan build
     "skipLibCheck": true
   },
-  "include": ["src", "server", "backend/server/server.ts"]
+  "include": ["src", "server", "server/server.ts"]
 }
