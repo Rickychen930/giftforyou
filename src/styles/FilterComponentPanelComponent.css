@@ -1,0 +1,158 @@
+@import "colors.css";
+
+/* ========== FILTER PANEL CONTAINER ========== */
+.filter-panel {
+  flex: 1 1 280px;
+  background: linear-gradient(135deg, #ffffff, #fdfdfd);
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.filter-panel:hover {
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+  transform: translateY(-6px);
+}
+
+/* ========== HEADER ========== */
+.filter-panel h3 {
+  margin-bottom: 1rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #d48c9c;
+  border-bottom: 2px solid #d48c9c;
+  padding-bottom: 0.6rem;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+/* ========== LABELS ========== */
+.filter-panel label {
+  display: block;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 0.8rem;
+}
+
+/* ========== FILTER GROUPS ========== */
+.filter-group {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+  justify-content: flex-start;
+}
+
+/* ========== FILTER BUTTONS ========== */
+.filter-button {
+  padding: 0.6rem 1.2rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #fff;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filter-button:hover {
+  background-color: #f9f0f3;
+  border-color: #d48c9c;
+  color: #d48c9c;
+  transform: translateY(-2px) scale(1.03);
+}
+
+.filter-button.active {
+  background: linear-gradient(135deg, #d48c9c, #b06b7a);
+  color: #fff;
+  border-color: #d48c9c;
+  box-shadow: 0 4px 12px rgba(212, 140, 156, 0.4);
+  transform: translateY(-2px) scale(1.05);
+}
+
+/* ========== INPUTS & SELECTS ========== */
+.filter-panel input,
+.filter-panel select {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  margin-top: 0.4rem;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.filter-panel input:focus,
+.filter-panel select:focus {
+  border-color: #d48c9c;
+  box-shadow: 0 0 0 4px rgba(212, 140, 156, 0.25);
+  transform: scale(1.02);
+  outline: none;
+}
+
+/* ========== PRICE SLIDER ========== */
+.price-slider {
+  margin-top: 0.8rem;
+}
+
+.price-values {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+@media (max-width: 1024px) {
+  .filter-panel {
+    padding: 1.8rem;
+    gap: 1.2rem;
+  }
+  .filter-panel h3 {
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .filter-panel {
+    flex: 1 1 100%;
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
+  .filter-panel h3 {
+    font-size: 1.3rem;
+  }
+  .filter-button {
+    flex: 1 1 calc(50% - 0.6rem);
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-panel {
+    padding: 1.2rem;
+    border-radius: 12px;
+  }
+  .filter-panel h3 {
+    font-size: 1.2rem;
+  }
+  .filter-group {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .filter-button {
+    width: 100%;
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+  .price-values {
+    font-size: 0.9rem;
+  }
+}

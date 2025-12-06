@@ -1,0 +1,121 @@
+.bouquet-editor {
+  background: linear-gradient(to bottom right, #fffdfd, #f9f9f9);
+  border: 1px solid #e0dede;
+  padding: 1.5rem;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 420px;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.bouquet-editor:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.bouquet-image {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+/* Label styling */
+.bouquet-editor label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: #444;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Input, textarea, and select styling */
+.bouquet-editor input,
+.bouquet-editor textarea,
+.bouquet-editor select {
+  margin-top: 0.4rem;
+  padding: 0.65rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.bouquet-editor input:focus,
+.bouquet-editor textarea:focus,
+.bouquet-editor select:focus {
+  border-color: #d48c9c;
+  box-shadow: 0 0 0 3px rgba(212, 140, 156, 0.2);
+  outline: none;
+}
+
+.bouquet-editor textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* File input */
+.bouquet-editor input[type="file"] {
+  padding: 0.4rem 0;
+  font-size: 0.95rem;
+}
+
+/* Save button */
+.bouquet-editor button {
+  background-color: #d48c9c;
+  color: white;
+  border: none;
+  padding: 0.7rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  align-self: flex-start;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.bouquet-editor button:hover {
+  background-color: #c07888;
+  transform: scale(1.02);
+}
+
+/* Responsive layout */
+@media (max-width: 480px) {
+  .bouquet-editor {
+    max-width: 100%;
+    padding: 1.2rem;
+  }
+
+  .bouquet-editor label {
+    font-size: 0.9rem;
+  }
+
+  .bouquet-editor input,
+  .bouquet-editor textarea,
+  .bouquet-editor select {
+    font-size: 0.95rem;
+  }
+
+  .bouquet-editor button {
+    font-size: 0.95rem;
+    padding: 0.6rem 1rem;
+  }
+}

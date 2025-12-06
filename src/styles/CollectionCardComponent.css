@@ -1,0 +1,269 @@
+@import "colors.css";
+
+/* ========== COLLECTION CARD ========== */
+.collection-card {
+  margin-bottom: 3rem;
+  padding: 2rem;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  animation: fadeInUp 0.8s ease-in-out;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.collection-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+}
+
+/* ========== HEADER ========== */
+.collection-header {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.collection-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--welcome-color-title);
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+
+.collection-title::after {
+  content: "";
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: var(--header-color-border);
+  margin: 0.5rem auto 0;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.collection-title:hover::after {
+  width: 100px;
+}
+
+.collection-description {
+  font-size: 1.1rem;
+  color: var(--welcome-color-text);
+  margin-bottom: 1rem;
+  opacity: 0.9;
+}
+
+/* ========== BOUQUET SCROLL ========== */
+.bouquet-scroll {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  scroll-behavior: smooth;
+}
+
+.bouquet-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.bouquet-scroll::-webkit-scrollbar-thumb {
+  background: var(--header-color-border);
+  border-radius: 4px;
+}
+
+/* ========== BOUQUET CARD ========== */
+.bouquet-card {
+  flex: 0 0 auto;
+  width: 220px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+  text-align: center;
+  padding: 1rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.bouquet-card:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+.bouquet-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 12px;
+  transition: transform 0.4s ease;
+}
+
+.bouquet-card img:hover {
+  transform: scale(1.05);
+}
+
+/* Fallback image styling */
+.bouquet-card .image-fallback {
+  width: 100%;
+  height: 180px;
+  border-radius: 12px;
+  background: repeating-linear-gradient(
+    45deg,
+    #f0f0f0,
+    #f0f0f0 10px,
+    #e0e0e0 10px,
+    #e0e0e0 20px
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.bouquet-name {
+  font-weight: 600;
+  margin-top: 0.7rem;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.bouquet-price {
+  color: var(--header-color-border);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0.3rem 0;
+}
+
+.bouquet-size {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0.7rem;
+}
+
+/* ========== ACTIONS ========== */
+.bouquet-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.bouquet-button {
+  padding: 0.5rem 1rem;
+  background-color: var(--header-color-border);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.bouquet-button:hover {
+  background-color: #d48c9c;
+  transform: translateY(-2px);
+}
+
+.bouquet-trolley {
+  font-size: 1.6rem;
+  text-decoration: none;
+  transition: transform 0.3s ease, color 0.3s ease;
+  color: var(--header-color-border);
+}
+
+.bouquet-trolley:hover {
+  transform: scale(1.2);
+  color: #d48c9c;
+}
+
+/* ========== SEE MORE CARD ========== */
+.see-more-card {
+  flex: 0 0 auto;
+  width: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.85);
+  border: 2px dashed var(--header-color-border);
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.see-more-card:hover {
+  background-color: #fff;
+  transform: translateY(-4px);
+}
+
+.see-more-link {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--header-color-border);
+  text-decoration: none;
+}
+
+.see-more-link:hover {
+  color: #d48c9c;
+}
+
+/* ========== EMPTY STATE ========== */
+.bouquet-empty {
+  text-align: center;
+  font-size: 1rem;
+  color: #999;
+  padding: 2rem;
+  font-style: italic;
+}
+
+/* ========== ANIMATIONS ========== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+@media (max-width: 1024px) {
+  .collection-title {
+    font-size: 1.8rem;
+  }
+  .bouquet-card {
+    width: 180px;
+  }
+}
+
+@media (max-width: 768px) {
+  .collection-card {
+    padding: 1.5rem;
+  }
+  .collection-title {
+    font-size: 1.6rem;
+  }
+  .bouquet-card {
+    width: 160px;
+  }
+}
+
+@media (max-width: 480px) {
+  .collection-card {
+    padding: 1rem;
+  }
+  .collection-title {
+    font-size: 1.4rem;
+  }
+  .bouquet-card {
+    width: 140px;
+    padding: 0.8rem;
+  }
+  .bouquet-name {
+    font-size: 1rem;
+  }
+  .bouquet-price {
+    font-size: 0.9rem;
+  }
+  .bouquet-size {
+    font-size: 0.8rem;
+  }
+}

@@ -1,0 +1,14 @@
+:root {
+  --header-color-text: #d48c9c;;
+  --header-color-border: #ae7481;
+  --header-color-background: #f0f0f0;
+
+  --welcome-color-title: #d48c9c;;
+  --welcome-color-text: #a04c5c;
+
+  --footer-color-background: #ae7481;
+  --footer-color-text: #FFFFFF;
+  --footer-color-text-secondary:#d48c9c;;
+  --footer-color-image-background: #FFFFFF;
+
+}

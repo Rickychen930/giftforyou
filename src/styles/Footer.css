@@ -1,0 +1,166 @@
+@import "colors.css";
+
+/* ========== FOOTER SECTION ========== */
+.footer {
+  background: linear-gradient(135deg, #fff0f4, var(--footer-color-background) );
+  color: var(--footer-color-text);
+  padding: 3rem 2rem;
+  border-top: 2px solid var(--header-color-border);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+/* ========== LOGO ========== */
+.footer-logo img {
+  height: 120px;
+  width: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.footer-logo img:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* ========== TEXT ========== */
+.footer-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.footer-brand {
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.footer-rights {
+  font-size: 1rem;
+  opacity: 0.85;
+  margin: 0;
+}
+
+/* ========== SOCIAL MEDIA ========== */
+.footer-social-media {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.footer-social-media-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--welcome-color-title);
+}
+
+.footer-social {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0.6rem 1.2rem;
+  border: 1px solid var(--footer-color-text);
+  border-radius: 50px;
+  color: var(--footer-color-text);
+  background-color: transparent;
+  transition: all 0.3s ease;
+}
+
+.social-icon {
+  font-size: 1.3rem;
+}
+
+.social-link:hover {
+  background: var(--welcome-color-title);
+  color: #fff;
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+@media (max-width: 1024px) {
+  .footer-wrapper {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .footer-logo img {
+    height: 100px;
+    width: 100px;
+  }
+
+  .footer-brand {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer-social {
+    gap: 0.8rem;
+  }
+
+  .social-link {
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .social-icon {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-wrapper {
+    gap: 1.5rem;
+  }
+
+  .footer-logo img {
+    height: 80px;
+    width: 80px;
+  }
+
+  .footer-brand {
+    font-size: 1rem;
+  }
+
+  .footer-rights {
+    font-size: 0.85rem;
+  }
+
+  .social-link {
+    flex-direction: column;
+    padding: 0.5rem 0.8rem;
+    border-radius: 12px;
+  }
+
+  .social-name {
+    font-size: 0.85rem;
+  }
+}

@@ -1,0 +1,138 @@
+@import "colors.css";
+
+/* ========== SECTION CONTAINER ========== */
+.about-us {
+  background-image: url("../../public/images/about-us-background.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: var(--header-color-text);
+  padding: 6rem 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+  min-height: 80vh;
+}
+
+/* Overlay for readability */
+.about-us::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0.3)
+  );
+  z-index: -1;
+}
+
+/* ========== CONTENT WRAPPER ========== */
+.about-us-wrapper {
+  max-width: 1100px;
+  width: 100%;
+  text-align: center;
+  animation: fadeIn 1.2s ease-in-out;
+  padding: 2rem;
+  backdrop-filter: blur(6px);
+  border-radius: 12px;
+}
+
+/* ========== TEXT BLOCK ========== */
+.about-us-text-wrapper {
+  margin-bottom: 2rem;
+}
+
+.about-us-title {
+  font-size: 2.75rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  color: var(--welcome-color-title);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.about-us-info {
+  font-size: 1.2rem;
+  line-height: 1.9;
+  color: var(--welcome-color-text);
+  opacity: 0.95;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* ========== BUTTON STYLING ========== */
+.about-us-button {
+  display: inline-block;
+  padding: 0.9rem 2rem;
+  background: linear-gradient(135deg, var(--header-color-border), #d48c9c);
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+  max-width: 400px;
+}
+
+.about-us-button:hover {
+  background: linear-gradient(135deg, #d48c9c, var(--header-color-border));
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* ========== ANIMATIONS ========== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+@media (max-width: 1024px) {
+  .about-us-title {
+    font-size: 2.25rem;
+  }
+  .about-us-info {
+    font-size: 1.05rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-us {
+    padding: 4rem 1.5rem;
+    min-height: auto;
+  }
+  .about-us-title {
+    font-size: 2rem;
+  }
+  .about-us-info {
+    font-size: 1rem;
+  }
+  .about-us-button {
+    font-size: 0.95rem;
+    padding: 0.7rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-us {
+    padding: 3rem 1rem;
+  }
+  .about-us-title {
+    font-size: 1.75rem;
+  }
+  .about-us-info {
+    font-size: 0.95rem;
+  }
+  .about-us-button {
+    font-size: 0.9rem;
+    padding: 0.6rem 1.2rem;
+  }
+}

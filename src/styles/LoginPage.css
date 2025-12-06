@@ -1,0 +1,116 @@
+/* 🌸 Page Layout */
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: url("/public/images/login-page-background.jpg") center/cover no-repeat;
+  font-family: "Segoe UI", sans-serif;
+  padding: 1rem;
+}
+
+/* 🌸 Form Container */
+.login-form {
+  background: #fff;
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  animation: fadeIn 0.6s ease;
+}
+
+.login-form h2 {
+  text-align: center;
+  color: #d48c9c;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.login-subtitle {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+/* 🌸 Labels & Inputs */
+.login-form label {
+  font-weight: 600;
+  color: #444;
+}
+
+.login-form input {
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-form input:focus {
+  border-color: #d48c9c;
+  box-shadow: 0 0 0 2px rgba(212, 140, 156, 0.2);
+  outline: none;
+}
+
+/* 🌸 Button */
+.login-button {
+  padding: 0.9rem;
+  background-color: #d48c9c;
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.login-button:hover,
+.login-button:focus {
+  background-color: #c0768a;
+  transform: translateY(-2px);
+}
+
+/* 🌸 Error Message */
+.error-message {
+  background-color: #ffe6e6;
+  color: #b30000;
+  padding: 0.6rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* 🌸 Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 🌸 Responsive Design */
+@media (max-width: 768px) {
+  .login-form {
+    padding: 2rem;
+    max-width: 90%;
+  }
+  .login-form h2 {
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-form {
+    padding: 1.5rem;
+    max-width: 100%;
+  }
+  .login-form h2 {
+    font-size: 1.2rem;
+  }
+  .login-subtitle {
+    font-size: 0.85rem;
+  }
+}

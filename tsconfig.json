@@ -1,26 +1,37 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    // Target ES2020 agar cocok untuk backend dan frontend modern
+    "target": "ES2020",
+
+    // Lib untuk DOM (frontend) dan ESNext (backend)
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+
+    // Izinkan file JS (jika ada), dan dukung interop
     "allowJs": true,
-    "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+
+    // Type safety dan konsistensi
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
-    "module": "esnext",
-    "moduleResolution": "node",
+
+    // Modul dan resolusi untuk Node.js dan React
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+
+    // Dukung import JSON dan isolasi modul
     "resolveJsonModule": true,
     "isolatedModules": true,
+
+    // Untuk React frontend
+    "jsx": "react-jsx",
+
+    // Jangan hasilkan file .js (karena pakai ts-node-dev atau bundler)
     "noEmit": true,
-    "jsx": "react-jsx"
+
+    // Skip lib check untuk kecepatan build
+    "skipLibCheck": true
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src", "server", "backend/server/server.ts"]
 }

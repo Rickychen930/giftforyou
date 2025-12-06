@@ -1,0 +1,198 @@
+@import "colors.css";
+
+/* === Layout Wrapper === */
+.editor-list-wrapper {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* === Controls: Filter + Search === */
+.editor-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.search-bar {
+  flex: 1;
+  min-width: 240px;
+  padding: 0.7rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-bar:focus {
+  border-color: #d48c9c;
+  box-shadow: 0 0 0 3px rgba(212, 140, 156, 0.25);
+  outline: none;
+}
+
+/* === Header: Count + Bulk Actions === */
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.editor-header p {
+  font-weight: 500;
+  color: #444;
+}
+
+.bulk-actions button {
+  margin-left: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #d48c9c;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.bulk-actions button:hover {
+  background: #c07888;
+  transform: translateY(-2px);
+}
+
+/* === Bouquet Editor Card === */
+.bouquet-editor-wrapper {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.bouquet-editor {
+  background: linear-gradient(to bottom right, #ffffff, #f9f9f9);
+  border: 1px solid #e0dede;
+  padding: 1.25rem;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.bouquet-editor:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+}
+
+.bouquet-editor img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.bouquet-editor input,
+.bouquet-editor textarea,
+.bouquet-editor select {
+  padding: 0.6rem 0.75rem;
+  font-size: 0.95rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bouquet-editor input:focus,
+.bouquet-editor textarea:focus,
+.bouquet-editor select:focus {
+  border-color: #d48c9c;
+  box-shadow: 0 0 0 3px rgba(212, 140, 156, 0.25);
+  outline: none;
+}
+
+.bouquet-editor textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+.bouquet-editor button {
+  background: #d48c9c;
+  color: #fff;
+  border: none;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.bouquet-editor button:hover {
+  background: #c07888;
+  transform: translateY(-2px);
+}
+
+/* === Pagination === */
+.pagination {
+  margin-top: 2rem;
+  text-align: center;
+  display: flex;
+  justify-content: right;
+  gap: 0.5rem;
+
+}
+
+.pagination button {
+  padding: 0.5rem 0.9rem;
+  border: 1px solid #ccc;
+  background: #fff;
+  color: #d48c9c;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  width: 70px;
+}
+
+.pagination button:hover {
+  background: #f9f0f3;
+  border-color: #d48c9c;
+  color: #d48c9c;
+  transform: translateY(-2px);
+}
+
+.pagination button.active {
+  background: linear-gradient(135deg, #d48c9c, #b06b7a);
+  color: #fff;
+  font-weight: 600;
+  border-color: #d48c9c;
+  box-shadow: 0 4px 12px rgba(212, 140, 156, 0.3);
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  .editor-controls {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .editor-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .bouquet-editor-wrapper {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
