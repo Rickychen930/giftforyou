@@ -82,10 +82,7 @@ export const updateBouquet = async (req: Request, res: Response) => {
     if (req.file) updatedData.image = `/uploads/${req.file.filename}`;
 
     // Validasi khusus
-    if (
-      updatedData.status &&
-      !["ready", "preorder"].includes(updatedData.status)
-    ) {
+    if (updatedData.status && !["ready", "preorder"].includes(updatedData.status)) {
       return res.status(400).json({ error: "Invalid status." });
     }
     if (updatedData.price && Number(updatedData.price) <= 0) {
