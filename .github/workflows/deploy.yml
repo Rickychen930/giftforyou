@@ -1,4 +1,4 @@
-name: Deploy Fullstack App to VPS
+name: Deploy Frontend App to VPS
 
 on:
   push:
@@ -39,7 +39,7 @@ jobs:
       # ============================
       # 🔷 FRONTEND BUILD & DEPLOY
       # ============================
-      - name: Install dependencies (frontend + backend)
+      - name: Install dependencies
         run: npm ci
 
       - name: Build React app
@@ -64,82 +64,3 @@ jobs:
           source: "build"
           target: ${{ secrets.TARGET_DIR }}
           debug: true
-
-      # ============================
-      # ⚙️ PM2 CONFIG
-      # ============================
-      - name: Install dependencies on VPS
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            cd /root/backend
-            npm install --omit=dev
-
-      - name: Generate PM2 config on VPS
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            cat <<'EOF' > /root/backend/ecosystem.config.js
-            module.exports = {
-              apps: [
-                {
-                  name: 'backend',
-                  script: './dist/main.js',
-                  cwd: '/root/backend',
-                  instances: 1,
-                  autorestart: true,
-                  watch: false,
-                  max_restarts: 10,
-                  env: {
-                    NODE_ENV: 'production',
-                    PORT: 4000
-                  },
-                  env_production: {
-                    NODE_ENV: 'production'
-                  }
-                }
-              ]
-            }
-            EOF
-
-      # ============================
-      # 🔁 RESTART SERVICES
-      # ============================
-      - name: Restart backend and Nginx using PM2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            cd /root/backend
-            pm2 start ecosystem.config.js --env production
-            pm2 save
-            sudo nginx -t && sudo systemctl reload nginx
-
-      # ============================
-      # ✅ HEALTH CHECK
-      # ============================
-      - name: Check backend health
-        run: curl -f http://${{ secrets.SERVER_HOST }}:4000/health || exit 1
-
-      # ============================
-      # 🧹 CLEANUP LOGS
-      # ============================
-      - name: Flush PM2 logs
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: pm2 flush
