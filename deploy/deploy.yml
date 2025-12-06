@@ -37,15 +37,25 @@ jobs:
           # Ganti 'dist' ke 'build' jika pakai CRA
           RSYNC_SRC="dist/"
           RSYNC_DEST="${SERVER_USER}@${SERVER_HOST}:${TARGET_DIR}/"
-          rsync -avz --delete -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no" "$RSYNC_SRC" "$RSYNC_DEST"
+          RSYNC_SSH="ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no"
+          if [ -n "${SSH_PORT}" ]; then
+            RSYNC_SSH="${RSYNC_SSH} -p ${SSH_PORT}"
+          fi
+          rsync -avz --delete -e "${RSYNC_SSH}" "$RSYNC_SRC" "$RSYNC_DEST"
         env:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
           SERVER_USER: ${{ secrets.SERVER_USER }}
           TARGET_DIR: ${{ secrets.TARGET_DIR }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
 
       - name: Reload Nginx
         run: |
-          ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_HOST} "sudo nginx -t && sudo systemctl reload nginx"
+          SSH_CMD="ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no"
+          if [ -n "${SSH_PORT}" ]; then
+            SSH_CMD="${SSH_CMD} -p ${SSH_PORT}"
+          fi
+          ${SSH_CMD} ${SERVER_USER}@${SERVER_HOST} "sudo nginx -t && sudo systemctl reload nginx"
         env:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
           SERVER_USER: ${{ secrets.SERVER_USER }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
