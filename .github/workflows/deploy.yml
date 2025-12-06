@@ -27,9 +27,9 @@ jobs:
       - name: Clean old frontend build
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
             rm -rf /var/www/root/*
@@ -46,9 +46,9 @@ jobs:
       - name: Deploy frontend to VPS
         uses: appleboy/scp-action@master
         with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           source: "build/*"
           target: "/var/www/root"
@@ -70,9 +70,9 @@ jobs:
       - name: Deploy compiled backend to VPS
         uses: appleboy/scp-action@master
         with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           source: "backend/dist/*"
           target: "/root/backend/dist"
@@ -85,9 +85,9 @@ jobs:
       - name: Deploy root package.json
         uses: appleboy/scp-action@master
         with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           source: "package.json"
           target: "/root/backend"
@@ -96,9 +96,9 @@ jobs:
       - name: Deploy backend .env
         uses: appleboy/scp-action@master
         with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           source: ".env"
           target: "/root/backend"
@@ -111,9 +111,9 @@ jobs:
       - name: Install dependencies on VPS
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
             cd /root/backend
@@ -122,9 +122,9 @@ jobs:
       - name: Generate PM2 config on VPS
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
             cat <<'EOF' > /root/backend/ecosystem.config.js
@@ -157,9 +157,9 @@ jobs:
       - name: Restart backend and Nginx using PM2
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
             cd /root/backend
@@ -172,7 +172,7 @@ jobs:
       # ============================
 
       - name: Check backend health
-        run: curl -f http://${{ secrets.HOSTINGER_HOST }}:4000/health || exit 1
+        run: curl -f http://${{ secrets.SERVER_HOST }}:4000/health || exit 1
 
       # ============================
       # 🧹 CLEANUP LOGS
@@ -181,9 +181,9 @@ jobs:
       - name: Flush PM2 logs
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
             pm2 flush
