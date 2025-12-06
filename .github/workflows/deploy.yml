@@ -28,12 +28,12 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_deploy
           chmod 600 ~/.ssh/id_deploy
-          ls -la ~/.ssh
-          head -n 3 ~/.ssh/id_deploy
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_deploy
 
       - name: Test SSH connection
         run: |
-          ssh -vvv -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} \
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} \
           ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "echo connected"
 
       # ============================
@@ -64,3 +64,12 @@ jobs:
           source: "build"
           target: ${{ secrets.TARGET_DIR }}
           debug: true
+
+      - name: Verify files on VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: ls -la ${{ secrets.TARGET_DIR }}
