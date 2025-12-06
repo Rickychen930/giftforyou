@@ -122,7 +122,8 @@ class BouquetEditorSection extends Component<Props, State> {
   }
 
   render(): React.ReactNode {
-    const { bouquets, collections } = this.props;
+    // const { bouquets, collections } = this.props;
+    const { bouquets } = this.props;
     const {
       search,
       priceRange,
