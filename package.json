@@ -8,7 +8,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
 
-    "dev:server": "ts-node-dev --respawn --transpile-only src/server/server.ts",
+    "dev:server": "ts-node-dev --respawn --transpile-only src/server/server.js",
     "build:server": "tsc -p tsconfig.server.json",
     "start:server": "node dist/server/server.ts",
 
