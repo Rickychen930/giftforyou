@@ -8,6 +8,8 @@ import HeroCollectionSlider from "../components/sections/hero-collection-slider"
 import OurCollectionSection from "../components/sections/our-collection-section";
 import StoreLocationSection from "../components/sections/store-location-section";
 
+import { API_BASE } from "../config/api";
+
 type LoadState = "idle" | "loading" | "success" | "error";
 
 type HeroSlide = {
@@ -23,9 +25,7 @@ type HeroSlide = {
 type HeroSliderContent = {
   heading?: string;
   slides: HeroSlide[];
-};
-
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:4000";
+}; // adjust path depending on folder depth
 
 const HomePage: React.FC = () => {
   const [collections, setCollections] = useState<Collection[]>([]);

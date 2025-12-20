@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import "../styles/BouquetCardEditComponent.css";
 import type { Bouquet } from "../models/domain/bouquet";
 
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:4000";
+import { API_BASE } from "../config/api"; // adjust path depending on folder depth
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
 
 interface Props {
