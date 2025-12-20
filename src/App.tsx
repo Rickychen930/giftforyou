@@ -4,7 +4,6 @@ import {
   Routes,
   Route,
   Navigate,
-  useLocation,
 } from "react-router-dom";
 
 import Header from "./view/header";
@@ -27,10 +26,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
 };
 
 const AppLayout: React.FC = () => {
-  const location = useLocation();
   const loggedIn = isLoggedIn();
-
-  const hideHeader = location.pathname === "/login";
 
   const navLinks = loggedIn
     ? [
@@ -46,7 +42,7 @@ const AppLayout: React.FC = () => {
 
   return (
     <>
-      {!hideHeader && <Header navLinks={navLinks} />}
+      {<Header navLinks={navLinks} />}
 
       <Routes>
         <Route path="/" element={<HomePage />} />
