@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import "../styles/BouquetCardEditComponent.css";
 import type { Bouquet } from "../models/domain/bouquet";
 
-import { API_BASE } from "../config/api"; // adjust path depending on folder depth
+import { API_BASE } from "../config/api";
+
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
 
 interface Props {
@@ -51,7 +52,17 @@ const buildPreviewUrl = (preview: string) => {
   if (preview.startsWith("blob:")) return preview;
   if (preview.startsWith("http://") || preview.startsWith("https://"))
     return preview;
+
   const normalized = preview.startsWith("/") ? preview : `/${preview}`;
+
+  // IMPORTANT:
+  // API_BASE can be "" or "/api" in production -> not valid base for new URL().
+  // Use current site origin as base when API_BASE is relative.
+  if (!API_BASE || API_BASE.startsWith("/")) {
+    return new URL(normalized, window.location.origin).toString();
+  }
+
+  // If API_BASE is absolute (e.g. https://api.example.com), this is valid.
   return new URL(normalized, API_BASE).toString();
 };
 
