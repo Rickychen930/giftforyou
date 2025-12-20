@@ -21,16 +21,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # If you need env var at build time:
-      # - name: Create .env
-      #   run: |
-      #     echo "REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}" > .env
+      # ✅ Inject production env for CRA build
+      - name: Create .env.production
+        run: |
+          echo "REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}" > .env.production
 
       - name: Build React app
         run: npm run build
 
-      # ✅ Deploy safely: upload to temp folder, then replace
-      - name: Deploy frontend to VPS (atomic swap)
+      # ✅ Prepare dirs on VPS
+      - name: Prepare VPS directories
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -40,25 +40,28 @@ jobs:
           script: |
             set -e
             TARGET="${{ secrets.TARGET_DIR }}"
-            TMP="${{ secrets.TARGET_DIR }}_tmp"
+            RELEASES="$TARGET/_releases"
+            TS="$(date +%Y%m%d-%H%M%S)"
+            NEW="$RELEASES/$TS"
 
-            mkdir -p "$TARGET"
-            rm -rf "$TMP"
-            mkdir -p "$TMP"
-            echo "Prepared temp dir: $TMP"
+            mkdir -p "$RELEASES"
+            mkdir -p "$NEW"
+            echo "New release dir: $NEW"
 
-      - name: Upload build files (not nested build/)
+      # ✅ Upload build folder into latest release dir
+      - name: Upload build to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: "build/*"
-          target: "${{ secrets.TARGET_DIR }}_tmp"
-          strip_components: 1
+          source: "build/**"
+          target: "${{ secrets.TARGET_DIR }}/_incoming"
+          overwrite: true
 
-      - name: Activate new build
+      # ✅ Activate: move build contents to a new release, then point "current" to it (atomic)
+      - name: Activate release (atomic)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -68,18 +71,30 @@ jobs:
           script: |
             set -e
             TARGET="${{ secrets.TARGET_DIR }}"
-            TMP="${{ secrets.TARGET_DIR }}_tmp"
+            RELEASES="$TARGET/_releases"
+            INCOMING="$TARGET/_incoming/build"
+            TS="$(date +%Y%m%d-%H%M%S)"
+            NEW="$RELEASES/$TS"
+            CURRENT="$TARGET/current"
 
-            # backup (optional)
-            # rm -rf "${TARGET}_bak"
-            # mv "$TARGET" "${TARGET}_bak" || true
+            if [ ! -d "$INCOMING" ]; then
+              echo "ERROR: Incoming build not found at $INCOMING"
+              ls -la "$TARGET/_incoming" || true
+              exit 1
+            fi
 
-            rm -rf "$TARGET"/*
-            cp -a "$TMP"/. "$TARGET"/
-            rm -rf "$TMP"
+            mkdir -p "$NEW"
+            cp -a "$INCOMING"/. "$NEW"/
 
-            # permissions (optional)
-            chmod -R 755 "$TARGET"
+            # atomic switch
+            rm -f "$CURRENT"
+            ln -s "$NEW" "$CURRENT"
 
-            echo "Deployed files in $TARGET:"
-            ls -la "$TARGET" | head -n 50
+            # optional permissions
+            chmod -R 755 "$NEW"
+
+            # cleanup incoming
+            rm -rf "$TARGET/_incoming"
+
+            echo "Current -> $(readlink $CURRENT)"
+            ls -la "$CURRENT" | head -n 50
