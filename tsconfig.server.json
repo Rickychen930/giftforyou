@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+    /* Build target */
+    "target": "ES2020",
+    "lib": ["ES2020"],
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+
+    /* Paths */
+    "rootDir": "src",
+    "outDir": "dist",
+
+    /* Node runtime */
+    "types": ["node"],
+
+    /* Interop */
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    /* Output */
+    "noEmit": false,
+    "sourceMap": true,
+
+    /* Type safety (adjust if needed) */
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+
+  "include": [
+    "src/server/**/*.ts",
+    "src/controllers/**/*.ts",
+    "src/routes/**/*.ts",
+    "src/models/**/*.ts",
+    "src/middleware/**/*.ts",
+    "src/seed/**/*.ts"
+  ],
+
+  "exclude": [
+    "src/**/*.tsx",
+    "src/**/*.test.ts",
+    "src/**/*.spec.ts",
+    "node_modules"
+  ]
+}

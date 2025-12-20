@@ -18,22 +18,40 @@
   margin-bottom: 2rem;
 }
 
+/* ✅ Enhanced Search Bar */
 .search-bar {
   flex: 1;
-  min-width: 240px;
-  padding: 0.7rem 1rem;
+  min-width: 260px;
+  padding: 0.85rem 1.1rem;
   font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  background-color: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  border: 1px solid var(--ed-border);
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--ed-text);
+
+  box-shadow: var(--ed-shadow-soft);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease,
+    background 0.18s ease;
+}
+
+.search-bar::placeholder {
+  color: var(--ed-text);
+  opacity: 0.55;
+  font-weight: 500;
+}
+
+.search-bar:hover {
+  border-color: rgba(0, 0, 0, 0.18);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .search-bar:focus {
-  border-color: #d48c9c;
-  box-shadow: 0 0 0 3px rgba(212, 140, 156, 0.25);
+  border-color: var(--ed-brand);
+  box-shadow: var(--ed-focus-ring), 0 12px 30px rgba(0, 0, 0, 0.08);
   outline: none;
+  transform: translateY(-1px);
 }
 
 /* === Header: Count + Bulk Actions === */
@@ -47,28 +65,46 @@
 }
 
 .editor-header p {
-  font-weight: 500;
-  color: #444;
+  font-weight: 600;
+  color: var(--ed-text);
 }
 
+/* ✅ Enhanced Bulk Actions Buttons */
 .bulk-actions button {
   margin-left: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: #d48c9c;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-weight: 500;
+  padding: 0.65rem 1.05rem;
+
+  background: linear-gradient(135deg, var(--ed-brand), var(--ed-brand-strong, var(--ed-brand)));
+  color: var(--ed-on-brand);
+
+  border: 1px solid transparent;
+  border-radius: 12px;
+
+  font-weight: 750;
+  letter-spacing: 0.01em;
+
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  box-shadow: var(--ed-shadow-soft);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
 }
 
 .bulk-actions button:hover {
-  background: #c07888;
   transform: translateY(-2px);
+  box-shadow: var(--ed-shadow-card-hover, var(--ed-shadow-soft));
+  filter: saturate(1.05);
 }
 
-/* === Bouquet Editor Card === */
+.bulk-actions button:active {
+  transform: translateY(0px);
+  box-shadow: var(--ed-shadow-soft);
+}
+
+.bulk-actions button:focus-visible {
+  outline: none;
+  box-shadow: var(--ed-focus-ring), var(--ed-shadow-card, var(--ed-shadow-soft));
+}
+
+/* === Bouquet Editor Card Wrapper === */
 .bouquet-editor-wrapper {
   display: flex;
   gap: 1.5rem;
@@ -76,107 +112,159 @@
   flex-wrap: wrap;
 }
 
+/* === Bouquet Editor Card === */
 .bouquet-editor {
-  background: linear-gradient(to bottom right, #ffffff, #f9f9f9);
-  border: 1px solid #e0dede;
+  background: linear-gradient(
+    to bottom right,
+    var(--ed-surface),
+    var(--ed-surface-soft, var(--ed-surface))
+  );
+  border: 1px solid var(--ed-border-soft, var(--ed-border));
   padding: 1.25rem;
-  border-radius: 12px;
+  border-radius: 16px;
   width: 100%;
-  max-width: 320px;
+  max-width: 340px;
+
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+
+  box-shadow: var(--ed-shadow-card, var(--ed-shadow-soft));
+  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
 }
 
 .bouquet-editor:hover {
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-  transform: translateY(-4px);
+  box-shadow: var(--ed-shadow-card-hover, var(--ed-shadow-card, var(--ed-shadow-soft)));
+  transform: translateY(-3px);
+  border-color: rgba(0, 0, 0, 0.12);
 }
 
 .bouquet-editor img {
   width: 100%;
-  height: auto;
-  border-radius: 8px;
+  height: 200px;
+  border-radius: 12px;
   object-fit: cover;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--ed-shadow-soft);
 }
 
+/* Inputs */
 .bouquet-editor input,
 .bouquet-editor textarea,
 .bouquet-editor select {
-  padding: 0.6rem 0.75rem;
-  font-size: 0.95rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #fff;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  padding: 0.72rem 0.85rem;
+  font-size: 0.98rem;
+  border: 1px solid var(--ed-border);
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.85);
+  color: var(--ed-text);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.bouquet-editor input:hover,
+.bouquet-editor textarea:hover,
+.bouquet-editor select:hover {
+  border-color: rgba(0, 0, 0, 0.18);
+  background-color: rgba(255, 255, 255, 0.95);
 }
 
 .bouquet-editor input:focus,
 .bouquet-editor textarea:focus,
 .bouquet-editor select:focus {
-  border-color: #d48c9c;
-  box-shadow: 0 0 0 3px rgba(212, 140, 156, 0.25);
+  border-color: var(--ed-brand);
+  box-shadow: var(--ed-focus-ring);
   outline: none;
 }
 
 .bouquet-editor textarea {
   resize: vertical;
-  min-height: 70px;
+  min-height: 78px;
+  line-height: 1.55;
 }
 
+/* ✅ Enhanced Save Button (inside card) */
 .bouquet-editor button {
-  background: #d48c9c;
-  color: #fff;
-  border: none;
-  padding: 0.7rem 1rem;
-  border-radius: 8px;
-  font-weight: 600;
+  background: linear-gradient(135deg, var(--ed-brand), var(--ed-brand-strong, var(--ed-brand)));
+  color: var(--ed-on-brand);
+
+  border: 1px solid transparent;
+  padding: 0.82rem 1rem;
+  border-radius: 12px;
+
+  font-weight: 800;
+  letter-spacing: 0.01em;
+
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  box-shadow: var(--ed-shadow-soft);
+
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
 }
 
 .bouquet-editor button:hover {
-  background: #c07888;
   transform: translateY(-2px);
+  box-shadow: var(--ed-shadow-card-hover, var(--ed-shadow-soft));
+  filter: saturate(1.05);
+}
+
+.bouquet-editor button:active {
+  transform: translateY(0px);
+}
+
+.bouquet-editor button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  filter: none;
 }
 
 /* === Pagination === */
 .pagination {
   margin-top: 2rem;
-  text-align: center;
   display: flex;
-  justify-content: right;
+  justify-content: flex-end;
   gap: 0.5rem;
-
 }
 
+/* ✅ Enhanced Pagination Buttons */
 .pagination button {
-  padding: 0.5rem 0.9rem;
-  border: 1px solid #ccc;
-  background: #fff;
-  color: #d48c9c;
-  border-radius: 8px;
+  padding: 0.55rem 0.95rem;
+  border: 1px solid var(--ed-border);
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--ed-pagination-text);
+  border-radius: 12px;
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-  width: 70px;
+
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease,
+    border-color 0.18s ease, color 0.18s ease;
+
+  min-width: 56px;
 }
 
 .pagination button:hover {
-  background: #f9f0f3;
-  border-color: #d48c9c;
-  color: #d48c9c;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
+  box-shadow: var(--ed-shadow-soft);
+  background: rgba(255, 255, 255, 0.92);
+  border-color: var(--ed-brand);
+  color: var(--ed-brand);
+}
+
+.pagination button:active {
+  transform: translateY(0px);
 }
 
 .pagination button.active {
-  background: linear-gradient(135deg, #d48c9c, #b06b7a);
-  color: #fff;
-  font-weight: 600;
-  border-color: #d48c9c;
-  box-shadow: 0 4px 12px rgba(212, 140, 156, 0.3);
+  background: linear-gradient(135deg, var(--ed-brand), var(--ed-brand-strong, var(--ed-brand)));
+  color: var(--ed-on-brand);
+  font-weight: 850;
+  border-color: transparent;
+  box-shadow: var(--ed-shadow-active, var(--ed-shadow-soft));
+}
+
+.pagination button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* === Responsive === */
@@ -194,5 +282,9 @@
   .bouquet-editor-wrapper {
     flex-direction: column;
     gap: 1rem;
+  }
+
+  .search-bar {
+    min-width: 100%;
   }
 }

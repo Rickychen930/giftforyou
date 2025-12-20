@@ -1,269 +1,319 @@
 @import "colors.css";
 
-/* ========== COLLECTION CARD ========== */
-.collection-card {
-  margin-bottom: 3rem;
-  padding: 2rem;
-  border-radius: 20px;
-  background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-  animation: fadeInUp 0.8s ease-in-out;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.collection-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.12);
-}
-
-/* ========== HEADER ========== */
-.collection-header {
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
-
-.collection-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--welcome-color-title);
-  margin-bottom: 0.5rem;
+/* =========================
+   Collection container
+========================= */
+.collectionCard {
+  width: 100%;                 /* ✅ full width */
   position: relative;
+  padding: 1.7rem;
+  border-radius: 18px;
+  background: var(--cc-surface);
+  border: 1px solid var(--cc-border);
+  box-shadow: var(--cc-shadow);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
 }
 
-.collection-title::after {
+/* subtle premium highlight line */
+.collectionCard::before {
   content: "";
-  display: block;
-  width: 60px;
-  height: 3px;
-  background: var(--header-color-border);
-  margin: 0.5rem auto 0;
-  border-radius: 2px;
-  transition: width 0.3s ease;
-}
-
-.collection-title:hover::after {
-  width: 100px;
-}
-
-.collection-description {
-  font-size: 1.1rem;
-  color: var(--welcome-color-text);
-  margin-bottom: 1rem;
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cc-brand-highlight), transparent);
   opacity: 0.9;
 }
 
-/* ========== BOUQUET SCROLL ========== */
-.bouquet-scroll {
+/* =========================
+   Header
+========================= */
+.collectionCard__header {
   display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 1rem;
-  overflow-x: auto;
-  padding-bottom: 1rem;
-  scroll-behavior: smooth;
+  margin-bottom: 1.2rem;
 }
 
-.bouquet-scroll::-webkit-scrollbar {
+.collectionCard__heading {
+  max-width: 85ch;
+}
+
+.collectionCard__title {
+  margin: 0;
+  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  font-weight: 950;
+  letter-spacing: -0.02em;
+  color: var(--welcome-color-title);
+}
+
+.collectionCard__description {
+  margin: 0.45rem 0 0;
+  color: var(--welcome-color-text);
+  opacity: 0.95;
+  line-height: 1.75;
+}
+
+/* =========================
+   Empty state
+========================= */
+.collectionCard__empty {
+  padding: 1.6rem;
+  text-align: center;
+  border-radius: 16px;
+  background: var(--cc-empty-bg);
+  border: 1px dashed var(--cc-border-strong);
+  color: var(--cc-muted);
+}
+
+.collectionCard__emptyTitle {
+  margin: 0;
+  font-weight: 950;
+  color: var(--cc-text);
+}
+
+.collectionCard__emptyText {
+  margin: 0.55rem 0 0;
+  line-height: 1.65;
+}
+
+/* =========================
+   Horizontal scroller
+========================= */
+.collectionCard__scrollWrap {
+  position: relative;
+}
+
+.collectionCard__scrollWrap::before,
+.collectionCard__scrollWrap::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 42px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.collectionCard__scrollWrap::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--cc-surface-fade-edge), transparent);
+}
+
+.collectionCard__scrollWrap::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--cc-surface-fade-edge), transparent);
+}
+
+.collectionCard__scroll {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(235px, 255px);
+  gap: 1rem;
+
+  overflow-x: auto;
+  padding: 0.25rem 0.25rem 1rem;
+
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.collectionCard__scroll > * {
+  scroll-snap-align: start;
+}
+
+/* thin scrollbar */
+.collectionCard__scroll::-webkit-scrollbar {
   height: 8px;
 }
-
-.bouquet-scroll::-webkit-scrollbar-thumb {
-  background: var(--header-color-border);
-  border-radius: 4px;
+.collectionCard__scroll::-webkit-scrollbar-track {
+  background: var(--cc-scroll-track);
+  border-radius: 999px;
+}
+.collectionCard__scroll::-webkit-scrollbar-thumb {
+  background: var(--cc-scroll-thumb);
+  border-radius: 999px;
 }
 
-/* ========== BOUQUET CARD ========== */
-.bouquet-card {
-  flex: 0 0 auto;
-  width: 220px;
-  background: #fff;
+/* =========================
+   Bouquet card (friendly + aligned)
+========================= */
+.bouquetCard {
   border-radius: 16px;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.1);
-  text-align: center;
-  padding: 1rem;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: var(--cc-surface-strong);
+  border: 1px solid var(--cc-border);
+  overflow: hidden;
+  box-shadow: var(--cc-card-shadow);
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  will-change: transform;
+
+  display: flex;               /* ✅ so body can control vertical layout */
+  flex-direction: column;
+  min-height: 100%;
 }
 
-.bouquet-card:hover {
-  transform: translateY(-6px) scale(1.03);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+.bouquetCard:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--cc-card-shadow-hover);
 }
 
-.bouquet-card img {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 12px;
-  transition: transform 0.4s ease;
+/* Media */
+.bouquetCard__media {
+  position: relative;
+  isolation: isolate;
 }
 
-.bouquet-card img:hover {
-  transform: scale(1.05);
-}
-
-/* Fallback image styling */
-.bouquet-card .image-fallback {
-  width: 100%;
-  height: 180px;
-  border-radius: 12px;
-  background: repeating-linear-gradient(
-    45deg,
-    #f0f0f0,
-    #f0f0f0 10px,
-    #e0e0e0 10px,
-    #e0e0e0 20px
+.bouquetCard__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    var(--cc-media-overlay-top) 35%,
+    var(--cc-media-overlay-bottom) 100%
   );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.bouquetCard__media img {
+  width: 100%;
+  height: 184px;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.02);
+  transition: transform 0.35s ease;
+}
+
+.bouquetCard:hover .bouquetCard__media img {
+  transform: scale(1.06);
+}
+
+/* Badge */
+.bouquetCard__badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+
+  padding: 0.38rem 0.65rem;
+  border-radius: 999px;
+
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+
+  color: var(--cc-btn-text);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--cc-border-badge);
+  background: var(--cc-badge-bg);
+}
+
+.bouquetCard__badge.is-ready {
+  background: var(--cc-ready-bg);
+}
+
+.bouquetCard__badge.is-preorder {
+  background: var(--cc-preorder-bg);
+}
+
+/* Body (✅ fixes CTA offset) */
+.bouquetCard__body {
+  padding: 1rem;
+  text-align: left;
+
+  display: flex;               /* ✅ */
+  flex-direction: column;      /* ✅ */
+  gap: 0.65rem;                /* nicer spacing */
+  flex: 1;                     /* ✅ pushes button consistently */
+}
+
+.bouquetCard__name {
+  margin: 0;
+  font-size: 1.06rem;
+  font-weight: 950;
+  letter-spacing: -0.01em;
+  color: var(--cc-text);
+}
+
+.bouquetCard__price {
+  margin: 0;
+  font-weight: 950;
+  color: var(--cc-brand-wine);
+}
+
+/* Meta chips */
+.bouquetCard__meta {
   display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0.15rem 0 0;
+}
+
+.bouquetCard__chip {
+  font-size: 0.82rem;
+  color: var(--cc-chip-text);
+  background: var(--cc-chip-bg);
+  border: 1px solid var(--cc-border-chip);
+  border-radius: 999px;
+  padding: 0.35rem 0.55rem;
+}
+
+/* CTA (✅ pinned bottom + centered) */
+.bouquetCard__btn {
+  margin-top: auto;  
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #999;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
 
-.bouquet-name {
-  font-weight: 600;
-  margin-top: 0.7rem;
-  font-size: 1.1rem;
-  color: #333;
-}
-
-.bouquet-price {
-  color: var(--header-color-border);
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 0.3rem 0;
-}
-
-.bouquet-size {
-  font-size: 0.9rem;
-  color: #666;
-  margin-bottom: 0.7rem;
-}
-
-/* ========== ACTIONS ========== */
-.bouquet-actions {
-  display: flex;
-  justify-content: center;
-  gap: 0.6rem;
-}
-
-.bouquet-button {
-  padding: 0.5rem 1rem;
-  background-color: var(--header-color-border);
-  color: #fff;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.bouquet-button:hover {
-  background-color: #d48c9c;
-  transform: translateY(-2px);
-}
-
-.bouquet-trolley {
-  font-size: 1.6rem;
-  text-decoration: none;
-  transition: transform 0.3s ease, color 0.3s ease;
-  color: var(--header-color-border);
-}
-
-.bouquet-trolley:hover {
-  transform: scale(1.2);
-  color: #d48c9c;
-}
-
-/* ========== SEE MORE CARD ========== */
-.see-more-card {
-  flex: 0 0 auto;
-  width: 220px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255,255,255,0.85);
-  border: 2px dashed var(--header-color-border);
-  border-radius: 16px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.see-more-card:hover {
-  background-color: #fff;
-  transform: translateY(-4px);
-}
-
-.see-more-link {
-  font-weight: 700;
-  font-size: 1rem;
-  color: var(--header-color-border);
-  text-decoration: none;
-}
-
-.see-more-link:hover {
-  color: #d48c9c;
-}
-
-/* ========== EMPTY STATE ========== */
-.bouquet-empty {
   text-align: center;
-  font-size: 1rem;
-  color: #999;
-  padding: 2rem;
-  font-style: italic;
+  text-decoration: none;
+
+  padding: 0.86rem 0.95rem;
+  border-radius: 999px;
+
+  font-weight: 950;
+  letter-spacing: 0.2px;
+
+  background: linear-gradient(90deg, var(--cc-brand-pink), var(--cc-brand-pink2));
+  color: var(--cc-btn-text);
+
+  box-shadow: var(--cc-btn-shadow);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
 }
 
-/* ========== ANIMATIONS ========== */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.bouquetCard__btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--cc-btn-shadow-hover);
+  filter: saturate(1.03);
 }
 
-/* ========== RESPONSIVE DESIGN ========== */
-@media (max-width: 1024px) {
-  .collection-title {
-    font-size: 1.8rem;
-  }
-  .bouquet-card {
-    width: 180px;
-  }
+.bouquetCard__btn:focus-visible {
+  outline: 3px solid rgba(212, 140, 156, 0.35);
+  outline-offset: 3px;
 }
 
+/* =========================
+   Responsive
+========================= */
 @media (max-width: 768px) {
-  .collection-card {
-    padding: 1.5rem;
+  .collectionCard {
+    padding: 1.25rem;
+    border-radius: 16px;
   }
-  .collection-title {
-    font-size: 1.6rem;
-  }
-  .bouquet-card {
-    width: 160px;
-  }
-}
 
-@media (max-width: 480px) {
-  .collection-card {
-    padding: 1rem;
+  .collectionCard__scroll {
+    grid-auto-columns: minmax(210px, 235px);
   }
-  .collection-title {
-    font-size: 1.4rem;
+
+  .bouquetCard__media img {
+    height: 168px;
   }
-  .bouquet-card {
-    width: 140px;
-    padding: 0.8rem;
-  }
-  .bouquet-name {
-    font-size: 1rem;
-  }
-  .bouquet-price {
-    font-size: 0.9rem;
-  }
-  .bouquet-size {
-    font-size: 0.8rem;
+
+  .collectionCard__scrollWrap::before,
+  .collectionCard__scrollWrap::after {
+    width: 20px;
   }
 }

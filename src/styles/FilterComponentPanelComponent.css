@@ -1,158 +1,175 @@
 @import "colors.css";
 
-/* ========== FILTER PANEL CONTAINER ========== */
-.filter-panel {
-  flex: 1 1 280px;
-  background: linear-gradient(135deg, #ffffff, #fdfdfd);
-  padding: 2rem;
-  border-radius: 20px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+/* =========================
+   Filter Panel (premium)
+========================= */
+.filterPanel {
+  background: linear-gradient(135deg, var(--fp-bg-1), var(--fp-bg-2));
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 18px;
+  box-shadow: var(--fp-shadow);
+  padding: 1.35rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.1rem;
 }
 
-.filter-panel:hover {
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
-  transform: translateY(-6px);
+.filterPanel__header {
+  padding-bottom: 0.95rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-/* ========== HEADER ========== */
-.filter-panel h3 {
-  margin-bottom: 1rem;
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #d48c9c;
-  border-bottom: 2px solid #d48c9c;
-  padding-bottom: 0.6rem;
-  text-align: center;
-  letter-spacing: 0.5px;
+.filterPanel__title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 950;
+  color: var(--fp-text-strong);
+  letter-spacing: -0.01em;
 }
 
-/* ========== LABELS ========== */
-.filter-panel label {
-  display: block;
-  font-weight: 600;
-  color: #444;
-  margin-bottom: 0.8rem;
+.filterPanel__hint {
+  margin: 0.35rem 0 0;
+  color: var(--fp-text-muted);
+  line-height: 1.6;
+  font-weight: 650;
 }
 
-/* ========== FILTER GROUPS ========== */
-.filter-group {
+/* Group */
+.fpGroup {
   display: flex;
-  gap: 0.6rem;
-  margin-top: 0.5rem;
-  justify-content: flex-start;
+  flex-direction: column;
+  gap: 0.65rem;
 }
 
-/* ========== FILTER BUTTONS ========== */
-.filter-button {
-  padding: 0.6rem 1.2rem;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  background-color: #fff;
+.fpGroup__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.fpGroup__title {
+  margin: 0;
   font-size: 0.95rem;
-  font-weight: 500;
-  color: #555;
+  font-weight: 950;
+  color: var(--fp-text);
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.fpGroup__clear {
+  border: 1px solid var(--fp-border);
+  background: var(--fp-surface);
+  color: var(--fp-text-muted);
+  font-weight: 850;
+  font-size: 0.85rem;
+
+  padding: 0.4rem 0.65rem;
+  border-radius: 999px;
   cursor: pointer;
-  transition: all 0.3s ease;
+
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
 }
 
-.filter-button:hover {
-  background-color: #f9f0f3;
-  border-color: #d48c9c;
-  color: #d48c9c;
-  transform: translateY(-2px) scale(1.03);
+.fpGroup__clear:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
-.filter-button.active {
-  background: linear-gradient(135deg, #d48c9c, #b06b7a);
-  color: #fff;
-  border-color: #d48c9c;
-  box-shadow: 0 4px 12px rgba(212, 140, 156, 0.4);
-  transform: translateY(-2px) scale(1.05);
+.fpGroup__clear:hover:not(:disabled) {
+  border-color: var(--fp-border-active);
+  background: var(--fp-hover-surface);
+  transform: translateY(-1px);
 }
 
-/* ========== INPUTS & SELECTS ========== */
-.filter-panel input,
-.filter-panel select {
-  width: 100%;
-  padding: 0.7rem 1rem;
-  margin-top: 0.4rem;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  background-color: #fff;
-  font-size: 1rem;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+.fpGroup__clear:focus-visible {
+  outline: 3px solid rgba(212, 140, 156, 0.25);
+  outline-offset: 3px;
 }
 
-.filter-panel input:focus,
-.filter-panel select:focus {
-  border-color: #d48c9c;
-  box-shadow: 0 0 0 4px rgba(212, 140, 156, 0.25);
-  transform: scale(1.02);
-  outline: none;
+/* Chips layout */
+.fpChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
 }
 
-/* ========== PRICE SLIDER ========== */
-.price-slider {
-  margin-top: 0.8rem;
+/* Chip button */
+.fpChip {
+  border: 1px solid var(--fp-border);
+  background: var(--fp-surface);
+  color: var(--fp-text-muted);
+
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+
+  font-weight: 850;
+  font-size: 0.92rem;
+  cursor: pointer;
+
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease,
+    background 0.18s ease, color 0.18s ease;
 }
 
-.price-values {
+.fpChip:hover {
+  background: var(--fp-hover-surface);
+  border-color: var(--fp-border-active);
+  color: var(--fp-brand);
+  transform: translateY(-1px);
+}
+
+.fpChip.is-active {
+  background: linear-gradient(135deg, var(--fp-brand), var(--fp-brand-strong));
+  border-color: var(--fp-border-active);
+  color: var(--fp-on-brand);
+  box-shadow: var(--fp-shadow-active);
+}
+
+/* Price */
+.fpPrice {
+  padding: 0.85rem;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.fpPrice__values {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.6rem;
-  font-weight: 600;
-  color: #333;
-  font-size: 1rem;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
 }
 
-/* ========== RESPONSIVE DESIGN ========== */
-@media (max-width: 1024px) {
-  .filter-panel {
-    padding: 1.8rem;
-    gap: 1.2rem;
-  }
-  .filter-panel h3 {
-    font-size: 1.4rem;
-  }
+.fpPrice__value {
+  font-weight: 900;
+  color: var(--fp-text-strong);
 }
 
+.fpSlider {
+  padding: 0.25rem 0.1rem 0.1rem;
+}
+
+/* Accessibility focus */
+.fpChip:focus-visible {
+  outline: 3px solid rgba(212, 140, 156, 0.25);
+  outline-offset: 3px;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-  .filter-panel {
-    flex: 1 1 100%;
-    padding: 1.5rem;
+  .filterPanel {
     border-radius: 16px;
+    padding: 1.1rem;
   }
-  .filter-panel h3 {
-    font-size: 1.3rem;
-  }
-  .filter-button {
-    flex: 1 1 calc(50% - 0.6rem);
+
+  .fpChip {
+    flex: 1 1 calc(50% - 0.55rem);
     text-align: center;
   }
 }
 
 @media (max-width: 480px) {
-  .filter-panel {
-    padding: 1.2rem;
-    border-radius: 12px;
-  }
-  .filter-panel h3 {
-    font-size: 1.2rem;
-  }
-  .filter-group {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  .filter-button {
-    width: 100%;
-    padding: 0.6rem;
-    font-size: 0.9rem;
-  }
-  .price-values {
-    font-size: 0.9rem;
+  .fpChip {
+    flex: 1 1 100%;
   }
 }

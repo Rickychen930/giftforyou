@@ -1,33 +1,20 @@
-:root {
-  --color-white: #ffffff;
-  --color-shadow-light: rgba(0,0,0,0.08);
-  --color-shadow-dark: rgba(0,0,0,0.18);
-
-  --color-green: #81c784;
-  --color-blue: #64b5f6;
-  --color-pink: #f48fb1;
-  --color-rose: #c2185b;
-  --color-elegant-green: #388e3c;
-  --color-text-dark: #555;
-
-  --badge-radius: 14px;
-  --badge-font-size: 0.75rem;
-}
+@import "colors.css";
 
 /* Card */
 .bouquet-card {
-  background: var(--color-white);
-  border-radius: 18px;
-  box-shadow: 0 6px 18px var(--color-shadow-light);
+  background: var(--bouquet-color-surface);
+  border-radius: var(--bouquet-radius-card);
+  box-shadow: var(--bouquet-shadow-1);
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
+
 .bouquet-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 12px 28px var(--color-shadow-dark);
+  box-shadow: var(--bouquet-shadow-2);
 }
 
 /* Image */
@@ -36,6 +23,7 @@
   width: 100%;
   overflow: hidden;
 }
+
 .bouquet-image {
   width: 100%;
   height: 260px;
@@ -43,6 +31,7 @@
   display: block;
   transition: transform 0.4s ease, filter 0.4s ease;
 }
+
 .bouquet-card:hover .bouquet-image {
   transform: scale(1.06);
   filter: brightness(0.95);
@@ -50,36 +39,36 @@
 
 /* Badges */
 .bouquet-badge {
-  border-radius: var(--badge-radius);
-  font-size: var(--badge-font-size);
+  border-radius: var(--bouquet-radius-badge);
+  font-size: var(--bouquet-badge-font-size);
   font-weight: 600;
   text-transform: capitalize;
   padding: 4px 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  box-shadow: var(--bouquet-badge-shadow);
   position: absolute;
+  color: var(--bouquet-color-text-inverse);
 }
 
 /* Size badge bottom-left */
 .bouquet-size {
-  background: var(--color-blue);
-  color: #fff;
+  background: var(--bouquet-color-badge-size);
   bottom: 12px;
   left: 12px;
   margin: 0;
 }
 
-/* Status badge bottom-right with dynamic colors */
+/* Status badge bottom-right */
 .bouquet-status {
   bottom: 12px;
   right: 12px;
 }
+
 .bouquet-status.ready {
-  background: var(--color-green);
-  color: #fff;
+  background: var(--bouquet-color-badge-ready);
 }
+
 .bouquet-status.preorder {
-  background: var(--color-pink);
-  color: #fff;
+  background: var(--bouquet-color-badge-preorder);
 }
 
 /* Info */
@@ -89,18 +78,21 @@
   flex-direction: column;
   gap: 0.8rem;
 }
+
 .bouquet-title {
   margin: 0;
   font-size: 1.35rem;
   font-weight: 700;
-  color: var(--color-rose);
+  color: var(--bouquet-color-accent-title);
 }
+
 .bouquet-description {
   margin: 0;
   font-size: 0.95rem;
-  color: var(--color-text-dark);
+  color: var(--bouquet-color-text);
   line-height: 1.6;
 }
+
 .bouquet-footer {
   display: flex;
   justify-content: space-between;
@@ -108,24 +100,27 @@
   margin-top: 1rem;
   flex-direction: column;
 }
+
 .bouquet-price {
   font-size: 1.2rem;
   font-weight: 700;
-  color: var(--color-elegant-green);
+  color: var(--bouquet-color-accent-price);
 }
+
 .bouquet-button {
-  background: var(--color-pink);
-  color: #fff;
+  background: var(--bouquet-color-accent-cta);
+  color: var(--bouquet-color-text-inverse);
   border: none;
-  border-radius: 10px;
+  border-radius: var(--bouquet-radius-button);
   padding: 10px 18px;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.3s ease, transform 0.2s ease;
 }
+
 .bouquet-button:hover {
-  background: var(--color-rose);
+  background: var(--bouquet-color-accent-cta-hover);
   transform: translateY(-2px);
 }
 
@@ -136,12 +131,21 @@
   gap: 28px;
   padding: 28px;
 }
+
 @media (min-width: 600px) {
-  .bouquet-grid { grid-template-columns: repeat(2, 1fr); }
+  .bouquet-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
+
 @media (min-width: 900px) {
-  .bouquet-grid { grid-template-columns: repeat(3, 1fr); }
+  .bouquet-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
+
 @media (min-width: 1200px) {
-  .bouquet-grid { grid-template-columns: repeat(4, 1fr); }
+  .bouquet-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }

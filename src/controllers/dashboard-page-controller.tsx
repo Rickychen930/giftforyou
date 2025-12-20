@@ -1,167 +1,243 @@
-// src/controllers/DashboardController.tsx
 import React, { Component } from "react";
-import { IBouquet } from "../models/bouquet-model-real";
 import DashboardView from "../view/dashboard-page";
+import type { Bouquet } from "../models/domain/bouquet";
+
+type MetricsResponse = {
+  visitorsCount?: number;
+  collectionsCount?: number;
+  collections?: string[];
+};
 
 interface State {
-  bouquets: IBouquet[];
-  visitorsCount: number;
+  bouquets: Bouquet[];
   collectionsCount: number;
+  visitorsCount: number;
   collections: string[];
+
+  loading: boolean;
+  errorMessage?: string;
 }
 
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:4000";
+
+const isNonEmptyString = (v: unknown): v is string =>
+  typeof v === "string" && v.trim().length > 0;
+
 class DashboardController extends Component<{}, State> {
-  private activityInterval: NodeJS.Timeout | null = null;
+  private abortController: AbortController | null = null;
 
   constructor(props: {}) {
     super(props);
     this.state = {
       bouquets: [],
-      visitorsCount: 0,
       collectionsCount: 0,
+      visitorsCount: 0,
       collections: [],
+      loading: true,
+      errorMessage: undefined,
     };
   }
 
-  async componentDidMount() {
+  componentDidMount(): void {
+    this.loadDashboard();
+  }
+
+  componentWillUnmount(): void {
+    this.abortController?.abort();
+  }
+
+  private getAuthHeaders(): HeadersInit {
     const token = localStorage.getItem("authToken");
-    const lastActivity = localStorage.getItem("lastActivity");
-
-    if (!token || !lastActivity) {
-      window.location.href = "/login";
-      return;
-    }
-
-    window.addEventListener("mousemove", this.updateActivity);
-    window.addEventListener("keydown", this.updateActivity);
-
-    this.activityInterval = setInterval(this.checkSessionTimeout, 10000);
-
-    await this.refreshData();
+    return token ? { Authorization: `Bearer ${token}` } : {};
   }
 
-  componentWillUnmount() {
-    if (this.activityInterval) clearInterval(this.activityInterval);
-    window.removeEventListener("mousemove", this.updateActivity);
-    window.removeEventListener("keydown", this.updateActivity);
-  }
+  private normalizeBouquet = (b: any): Bouquet => ({
+    _id: String(b?._id ?? ""),
+    name: isNonEmptyString(b?.name) ? b.name : "",
+    description: isNonEmptyString(b?.description) ? b.description : "",
+    price: Number(b?.price ?? 0),
 
-  /** ✅ SRP: update activity timestamp */
-  updateActivity = () => {
-    localStorage.setItem("lastActivity", Date.now().toString());
-  };
+    type: isNonEmptyString(b?.type) ? b.type : "",
+    size: isNonEmptyString(b?.size) ? b.size : "",
 
-  /** ✅ SRP: check session timeout */
-  checkSessionTimeout = () => {
-    const lastActivity = localStorage.getItem("lastActivity");
-    if (!lastActivity) return;
+    image: isNonEmptyString(b?.image) ? b.image : "",
+    status: b?.status === "preorder" ? "preorder" : "ready",
+    collectionName: isNonEmptyString(b?.collectionName) ? b.collectionName : "",
 
-    const diff = Date.now() - parseInt(lastActivity, 10);
-    const fiveMinutes = 5 * 60 * 1000;
-    if (diff > fiveMinutes) {
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("lastActivity");
-      alert("⚠️ Session expired. Please login again.");
-      window.location.href = "/login";
-    }
-  };
+    occasions: Array.isArray(b?.occasions) ? b.occasions : [],
+    flowers: Array.isArray(b?.flowers) ? b.flowers : [],
+    isNewEdition: Boolean(b?.isNewEdition),
+    isFeatured: Boolean(b?.isFeatured),
 
-  /** ✅ SRP: refresh dashboard data */
-  refreshData = async () => {
+    quantity: typeof b?.quantity === "number" ? b.quantity : 0,
+    careInstructions: isNonEmptyString(b?.careInstructions)
+      ? b.careInstructions
+      : undefined,
+    createdAt: isNonEmptyString(b?.createdAt) ? b.createdAt : undefined,
+    updatedAt: isNonEmptyString(b?.updatedAt) ? b.updatedAt : undefined,
+  });
+
+  private loadDashboard = async (): Promise<void> => {
+    this.abortController?.abort();
+    this.abortController = new AbortController();
+
+    this.setState({ loading: true, errorMessage: undefined });
+
     try {
-      const [bouquetsRes, metricsRes] = await Promise.all([
-        fetch("http://localhost:4000/api/bouquets"),
-        fetch("http://localhost:4000/api/metrics"),
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+        ...this.getAuthHeaders(),
+      };
+
+      const metricsReq = fetch(`${API_BASE}/api/metrics`, {
+        method: "GET",
+        headers,
+        signal: this.abortController.signal,
+      });
+
+      const bouquetsReq = fetch(`${API_BASE}/api/bouquets`, {
+        method: "GET",
+        headers,
+        signal: this.abortController.signal,
+      });
+
+      const [metricsRes, bouquetsRes] = await Promise.all([
+        metricsReq,
+        bouquetsReq,
       ]);
 
-      if (!bouquetsRes.ok || !metricsRes.ok) {
-        console.error("Failed to fetch dashboard data");
-        return;
+      // Handle auth errors clearly
+      if (metricsRes.status === 401 || bouquetsRes.status === 401) {
+        throw new Error("Unauthorized. Please login again.");
       }
 
-      const bouquetsData = await bouquetsRes.json();
-      const metricsData = await metricsRes.json();
+      if (!metricsRes.ok) {
+        const t = await metricsRes.text();
+        throw new Error(`Failed to load metrics (${metricsRes.status}): ${t}`);
+      }
+
+      if (!bouquetsRes.ok) {
+        const t = await bouquetsRes.text();
+        throw new Error(
+          `Failed to load bouquets (${bouquetsRes.status}): ${t}`
+        );
+      }
+
+      const metricsJson = (await metricsRes.json()) as MetricsResponse;
+      const bouquetsJson = (await bouquetsRes.json()) as any;
+
+      const bouquets: Bouquet[] = Array.isArray(bouquetsJson)
+        ? bouquetsJson.map(this.normalizeBouquet)
+        : [];
+
+      const collectionsFromMetrics =
+        Array.isArray(metricsJson.collections) &&
+        metricsJson.collections.length > 0
+          ? metricsJson.collections.filter(isNonEmptyString)
+          : [];
+
+      // fallback collections list derived from bouquets
+      const collectionsFallback = Array.from(
+        new Set(bouquets.map((b) => b.collectionName).filter(isNonEmptyString))
+      );
 
       this.setState({
-        bouquets: bouquetsData,
-        visitorsCount: metricsData.visitorsCount ?? 0,
-        collectionsCount: metricsData.collectionsCount ?? 0,
-        collections: metricsData.collections ?? [], // ✅ ambil collections dari backend
-      });
-    } catch (err) {
-      console.error("❌ Failed to fetch dashboard data", err);
-    }
-  };
-
-  /** ✅ Update bouquet dengan FormData */
-  handleUpdate = async (formData: FormData): Promise<boolean> => {
-    try {
-      const id = formData.get("_id") as string;
-      if (!id) {
-        console.error("❌ Missing bouquet ID in FormData");
-        return false;
-      }
-
-      const res = await fetch(`http://localhost:4000/api/bouquets/${id}`, {
-        method: "PUT",
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-        console.error("❌ Update failed:", text);
-        return false;
-      }
-
-      const data = await res.json();
-
-      this.setState((prev) => ({
-        bouquets: prev.bouquets.map((b) =>
-          String(b._id) === id ? data.bouquet : b
+        bouquets,
+        visitorsCount: Number(metricsJson.visitorsCount ?? 0),
+        collectionsCount: Number(
+          metricsJson.collectionsCount ?? collectionsFallback.length
         ),
-      }));
+        collections: collectionsFromMetrics.length
+          ? collectionsFromMetrics
+          : collectionsFallback,
+        errorMessage: undefined,
+      });
+    } catch (err: unknown) {
+      const anyErr = err as any;
+      if (anyErr?.name === "AbortError") return;
 
-      await this.refreshData();
+      this.setState({
+        errorMessage:
+          err instanceof Error ? err.message : "Failed to load dashboard data.",
+      });
+    } finally {
+      // ✅ critical: stop loading in all cases
+      this.setState({ loading: false });
+    }
+  };
+
+  private onUpload = async (formData: FormData): Promise<boolean> => {
+    try {
+      const res = await fetch(`${API_BASE}/api/bouquets`, {
+        method: "POST",
+        headers: {
+          ...this.getAuthHeaders(),
+          // DO NOT set Content-Type for FormData
+        },
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const t = await res.text();
+        throw new Error(`Upload failed (${res.status}): ${t}`);
+      }
+
+      await this.loadDashboard();
       return true;
-    } catch (err) {
-      console.error("❌ Failed to update bouquet", err);
+    } catch (e) {
+      this.setState({
+        errorMessage: e instanceof Error ? e.message : "Upload failed.",
+      });
       return false;
     }
   };
 
-  /** ✅ Upload bouquet baru ke backend dengan FormData */
-  handleUpload = async (formData: FormData): Promise<boolean> => {
+  private onUpdate = async (formData: FormData): Promise<boolean> => {
     try {
-      const res = await fetch("http://localhost:4000/api/bouquets", {
-        method: "POST",
+      const id = String(formData.get("_id") ?? "");
+      if (!id) throw new Error("Missing bouquet id for update.");
+
+      const res = await fetch(`${API_BASE}/api/bouquets/${id}`, {
+        method: "PUT",
+        headers: {
+          ...this.getAuthHeaders(),
+        },
         body: formData,
       });
+
       if (!res.ok) {
-        const text = await res.text();
-        console.error("❌ Upload failed:", text);
-        return false;
+        const t = await res.text();
+        throw new Error(`Update failed (${res.status}): ${t}`);
       }
-      const data = await res.json();
-      this.setState((prev) => ({
-        bouquets: [...prev.bouquets, data.bouquet],
-      }));
-      await this.refreshData();
+
+      await this.loadDashboard();
       return true;
-    } catch (err) {
-      console.error("❌ Failed to upload bouquet", err);
+    } catch (e) {
+      this.setState({
+        errorMessage: e instanceof Error ? e.message : "Update failed.",
+      });
       return false;
     }
+  };
+
+  private onLogout = () => {
+    localStorage.removeItem("authToken");
+    // optional redirect
+    window.location.href = "/login";
   };
 
   render(): React.ReactNode {
     return (
       <DashboardView
         bouquets={this.state.bouquets}
-        visitorsCount={this.state.visitorsCount}
         collectionsCount={this.state.collectionsCount}
-        onUpdate={this.handleUpdate}
-        onUpload={this.handleUpload}
-        collections={this.state.collections} // ✅ sekarang diteruskan dari backend
+        visitorsCount={this.state.visitorsCount}
+        collections={this.state.collections}
+        loading={this.state.loading}
+        errorMessage={this.state.errorMessage}
+        onUpload={this.onUpload}
+        onUpdate={this.onUpdate}
+        onLogout={this.onLogout}
       />
     );
   }

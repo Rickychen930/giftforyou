@@ -1,121 +1,214 @@
-.bouquet-editor {
-  background: linear-gradient(to bottom right, #fffdfd, #f9f9f9);
-  border: 1px solid #e0dede;
-  padding: 1.5rem;
-  border-radius: 14px;
-  width: 100%;
-  max-width: 420px;
-  min-width: 280px;
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.3s ease, transform 0.2s ease;
-  margin: 0 auto;
-  box-sizing: border-box;
+@import "colors.css";
+
+/* Root card */
+.becCard {
+  border: 1px solid var(--bec-card-border);
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--bec-card-bg);
+  box-shadow: var(--bec-card-shadow);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
-.bouquet-editor:hover {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+.becCard:hover {
   transform: translateY(-2px);
+  box-shadow: var(--bec-card-shadow-hover, var(--bec-card-shadow));
+  border-color: var(--bec-focus-border);
 }
 
-.bouquet-image {
+/* Header */
+.becHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem 1.05rem;
+  border-bottom: 1px solid var(--bec-input-border);
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(10px);
+}
+
+.becHeader__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 950;
+  color: var(--bec-text);
+  letter-spacing: -0.01em;
+}
+
+.becHeader__sub {
+  margin: 0.25rem 0 0;
+  color: var(--bec-placeholder-text);
+  font-weight: 800;
+  font-size: 0.86rem;
+}
+
+.becStatus {
+  align-self: flex-start;
+  border-radius: 999px;
+  padding: 0.45rem 0.75rem;
+  font-weight: 950;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+.becStatus.is-ready {
+  background: rgba(16,185,129,0.12);
+  color: rgba(16,185,129,0.95);
+}
+
+.becStatus.is-preorder {
+  background: rgba(249,115,22,0.12);
+  color: rgba(249,115,22,0.95);
+}
+
+/* Image */
+.becImage {
+  height: 220px;
+  background: var(--bec-input-bg);
+  border-bottom: 1px solid var(--bec-input-border);
+}
+
+.becImage img {
   width: 100%;
-  height: auto;
-  border-radius: 8px;
+  height: 100%;
   object-fit: cover;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  display: block;
 }
 
-/* Label styling */
-.bouquet-editor label {
+.becImage__placeholder {
+  height: 220px;
+  display: grid;
+  place-items: center;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--bec-placeholder-stripe-1),
+    var(--bec-placeholder-stripe-1) 10px,
+    var(--bec-placeholder-stripe-2) 10px,
+    var(--bec-placeholder-stripe-2) 20px
+  );
+  color: var(--bec-placeholder-text);
+  font-weight: 900;
+}
+
+/* Body */
+.becBody {
+  padding: 1.05rem;
+}
+
+/* Inline validation */
+.becAlert {
+  border: 1px solid rgba(239, 68, 68, 0.28);
+  background: rgba(239, 68, 68, 0.08);
+  color: rgba(185, 28, 28, 0.95);
+  border-radius: 14px;
+  padding: 0.75rem 0.85rem;
+  font-weight: 900;
+  margin-bottom: 0.9rem;
+}
+
+/* Grid layout */
+.becGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.becField {
   display: flex;
   flex-direction: column;
-  font-weight: 500;
-  font-size: 0.95rem;
-  color: #444;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
+  gap: 0.35rem;
 }
 
-/* Input, textarea, and select styling */
-.bouquet-editor input,
-.bouquet-editor textarea,
-.bouquet-editor select {
-  margin-top: 0.4rem;
-  padding: 0.65rem 1rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #fff;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
+.becField--full {
+  grid-column: 1 / -1;
 }
 
-.bouquet-editor input:focus,
-.bouquet-editor textarea:focus,
-.bouquet-editor select:focus {
-  border-color: #d48c9c;
-  box-shadow: 0 0 0 3px rgba(212, 140, 156, 0.2);
-  outline: none;
+.becLabel {
+  font-weight: 950;
+  font-size: 0.88rem;
+  color: var(--bec-text);
+  letter-spacing: 0.01em;
 }
 
-.bouquet-editor textarea {
+.becHint {
+  margin-top: 0.35rem;
+  font-size: 0.82rem;
+  color: var(--bec-placeholder-text);
+  font-weight: 750;
+}
+
+.becField input,
+.becField select,
+.becField textarea {
+  border: 1px solid var(--bec-input-border);
+  border-radius: 14px;
+  padding: 0.75rem 0.9rem;
+  background: var(--bec-input-bg);
+  color: var(--bec-text);
+  font-size: 0.98rem;
+  transition: box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.becField textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 92px;
+  line-height: 1.55;
 }
 
-/* File input */
-.bouquet-editor input[type="file"] {
-  padding: 0.4rem 0;
-  font-size: 0.95rem;
+.becField input:hover,
+.becField select:hover,
+.becField textarea:hover {
+  border-color: var(--bec-focus-border);
 }
 
-/* Save button */
-.bouquet-editor button {
-  background-color: #d48c9c;
-  color: white;
+.becField input:focus,
+.becField select:focus,
+.becField textarea:focus {
+  outline: none;
+  border-color: var(--bec-focus-border);
+  box-shadow: var(--bec-focus-ring);
+}
+
+/* Footer / Save */
+.becFooter {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  padding-top: 1rem;
+}
+
+.becSave {
   border: none;
-  padding: 0.7rem 1.2rem;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 1rem;
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-  align-self: flex-start;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
+  padding: 0.95rem 1.05rem;
+  border-radius: 999px;
+  font-weight: 950;
+  color: var(--bec-btn-text);
+  background: linear-gradient(90deg, var(--bec-pink), var(--bec-pink2));
+  box-shadow: var(--bec-btn-shadow);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
 }
 
-.bouquet-editor button:hover {
-  background-color: #c07888;
-  transform: scale(1.02);
+.becSave:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--bec-btn-shadow-hover);
+  filter: saturate(1.03);
 }
 
-/* Responsive layout */
-@media (max-width: 480px) {
-  .bouquet-editor {
-    max-width: 100%;
-    padding: 1.2rem;
-  }
+.becSave:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  filter: none;
+}
 
-  .bouquet-editor label {
-    font-size: 0.9rem;
-  }
-
-  .bouquet-editor input,
-  .bouquet-editor textarea,
-  .bouquet-editor select {
-    font-size: 0.95rem;
-  }
-
-  .bouquet-editor button {
-    font-size: 0.95rem;
-    padding: 0.6rem 1rem;
+/* Responsive */
+@media (max-width: 520px) {
+  .becGrid {
+    grid-template-columns: 1fr;
   }
 }

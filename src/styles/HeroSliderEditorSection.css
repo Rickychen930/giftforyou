@@ -1,0 +1,367 @@
+@import "colors.css";
+
+/* =========================================================
+   Hero Slider Editor (Dashboard)
+   - clean admin layout
+   - readable typography
+   - consistent spacing + focus styles
+========================================================= */
+
+.hsEditor {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: var(--editor-text);
+}
+
+/* ---------- Header ---------- */
+.hsEditor__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.hsEditor__title {
+  margin: 0;
+  font-size: 1.65rem;
+  font-weight: 950;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--editor-text);
+}
+
+.hsEditor__subtitle {
+  margin: 0.45rem 0 0;
+  color: var(--editor-muted);
+  line-height: 1.65;
+  max-width: 70ch;
+}
+
+.hsEditor__headerActions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* ---------- Buttons ---------- */
+.hsEditor__btn {
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--editor-text);
+  border-radius: 999px;
+  padding: 0.72rem 1.05rem;
+  font-weight: 950;
+  letter-spacing: 0.01em;
+
+  cursor: pointer;
+  box-shadow: var(--editor-shadow-soft);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease,
+    border-color 0.18s ease, filter 0.18s ease;
+}
+
+.hsEditor__btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(0, 0, 0, 0.22);
+  box-shadow: var(--editor-shadow);
+}
+
+.hsEditor__btn:active:not(:disabled) {
+  transform: translateY(0px);
+}
+
+.hsEditor__btn:focus-visible {
+  outline: none;
+  box-shadow: var(--editor-focus-ring), var(--editor-shadow);
+}
+
+.hsEditor__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.hsEditor__btn--primary {
+  border: none;
+  color: var(--editor-on-brand);
+  background: linear-gradient(90deg, var(--editor-brand-1), var(--editor-brand-2));
+  box-shadow: var(--editor-shadow-brand);
+}
+
+.hsEditor__btn--primary:hover:not(:disabled) {
+  filter: saturate(1.05);
+}
+
+/* ---------- Main card wrapper ---------- */
+.hsEditor__card {
+  border: 1px solid var(--editor-border);
+  background: rgba(255, 255, 255, 0.76);
+  border-radius: 18px;
+  padding: 1rem;
+  box-shadow: var(--editor-shadow);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* ---------- States / Alerts ---------- */
+.hsState {
+  padding: 1rem 0.25rem;
+  color: var(--editor-muted);
+  font-weight: 850;
+}
+
+.hsAlert {
+  border-radius: 14px;
+  padding: 0.85rem 0.95rem;
+  font-weight: 900;
+  margin: 0.8rem 0;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  line-height: 1.4;
+}
+
+.hsAlert--error {
+  border-color: rgba(239, 68, 68, 0.28);
+  background: rgba(239, 68, 68, 0.08);
+  color: rgba(185, 28, 28, 0.95);
+}
+
+.hsAlert--success {
+  border-color: rgba(16, 185, 129, 0.28);
+  background: rgba(16, 185, 129, 0.08);
+  color: rgba(5, 150, 105, 0.95);
+}
+
+/* ---------- Form fields ---------- */
+.hsField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.hsField--full {
+  grid-column: 1 / -1;
+}
+
+.hsLabel {
+  font-weight: 950;
+  font-size: 0.9rem;
+  letter-spacing: 0.01em;
+  color: var(--editor-text);
+}
+
+.hsField input,
+.hsField textarea,
+.hsField select {
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 14px;
+  padding: 0.78rem 0.9rem;
+  font-size: 0.98rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--editor-text);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.hsField textarea {
+  resize: vertical;
+  min-height: 84px;
+  line-height: 1.55;
+}
+
+.hsField input::placeholder,
+.hsField textarea::placeholder {
+  color: var(--editor-muted);
+  opacity: 0.8;
+}
+
+.hsField input:hover,
+.hsField textarea:hover,
+.hsField select:hover {
+  border-color: rgba(0, 0, 0, 0.22);
+  background: rgba(255, 255, 255, 0.98);
+}
+
+.hsField input:focus,
+.hsField textarea:focus,
+.hsField select:focus {
+  outline: none;
+  border-color: var(--editor-border-strong);
+  box-shadow: var(--editor-focus-ring);
+}
+
+/* ---------- Slides list ---------- */
+.hsSlides {
+  margin-top: 1rem;
+  display: grid;
+  gap: 1rem;
+}
+
+/* Slide card */
+.hsSlideCard {
+  border: 1px solid var(--editor-border);
+  background: rgba(255, 255, 255, 0.72);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--editor-shadow-soft);
+}
+
+.hsSlideCard__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.hsSlideCard__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.hsSlideCard__index {
+  font-weight: 950;
+  color: var(--editor-text);
+  letter-spacing: -0.01em;
+}
+
+.hsSlideCard__id {
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: var(--editor-muted);
+  word-break: break-all;
+}
+
+.hsSlideCard__actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* mini buttons */
+.hsMiniBtn {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--editor-text);
+  border-radius: 12px;
+  padding: 0.5rem 0.65rem;
+  font-weight: 950;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+}
+
+.hsMiniBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.1);
+}
+
+.hsMiniBtn:active:not(:disabled) {
+  transform: translateY(0px);
+}
+
+.hsMiniBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.hsMiniBtn--danger {
+  border-color: rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.08);
+  color: rgba(185, 28, 28, 0.95);
+}
+
+.hsMiniBtn--danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.12);
+}
+
+/* Slide content grid */
+.hsSlideCard__grid {
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+/* CTA groups */
+.hsFieldGroup {
+  grid-column: 1 / -1;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.65);
+  border-radius: 16px;
+  padding: 0.85rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.hsGroupTitle {
+  grid-column: 1 / -1;
+  font-weight: 950;
+  color: var(--editor-text);
+  letter-spacing: -0.01em;
+}
+
+/* Image preview row */
+.hsPreviewRow {
+  margin-top: 0.7rem;
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+.hsPreviewLabel {
+  font-weight: 900;
+  color: var(--editor-muted);
+  font-size: 0.85rem;
+}
+
+.hsPreview {
+  width: 100%;
+  max-width: 420px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .hsEditor__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hsEditor__headerActions {
+    justify-content: flex-start;
+  }
+
+  .hsSlideCard__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hsFieldGroup {
+    grid-template-columns: 1fr;
+  }
+
+  .hsPreviewRow {
+    grid-template-columns: 1fr;
+  }
+
+  .hsPreview {
+    height: 200px;
+    max-width: 100%;
+  }
+}

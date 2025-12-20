@@ -1,70 +1,92 @@
+// src/controllers/home-sections.controllers.tsx
 import React, { Component } from "react";
-import {
-  aboutUsContent,
-  storeData,
-  welcomeContent,
-} from "../models/home-page-model";
-import WelcomeSection from "../view/sections/welcome-section";
-import AboutUsSection from "../view/sections/about-us-section";
-import StoreLocationSection from "../view/sections/store-location-section";
-import OurCollectionSection from "../view/sections/our-collection-section";
-import { ICollection } from "../models/collection-model";
 
-// ✅ Welcome Controller
-class WelcomeController extends Component {
-  public render(): React.ReactNode {
-    return <WelcomeSection content={welcomeContent} />;
+import HeroCollectionSlider from "../components/sections/hero-collection-slider";
+import AboutUsSection from "../components/sections/about-us-section";
+import StoreLocationSection from "../components/sections/store-location-section";
+import OurCollectionSection from "../components/sections/our-collection-section";
+
+import { storeData } from "../models/store-model";
+import { aboutUsContent } from "../models/about-us-model";
+
+import type { Collection } from "../models/domain/collection";
+import { getCollections } from "../services/collection.service";
+
+/** ✅ Hero Controller (uses default slides OR pass content from parent if needed) */
+export class HeroController extends Component {
+  render(): React.ReactNode {
+    return <HeroCollectionSlider />;
   }
 }
 
-// ✅ About Us Controller
-class AboutUsController extends Component {
-  public render(): React.ReactNode {
+/** ✅ About Us Controller */
+export class AboutUsController extends Component {
+  render(): React.ReactNode {
     return <AboutUsSection content={aboutUsContent} />;
   }
 }
 
-// ✅ Store Location Controller
-class StoreLocationController extends Component {
-  public render(): React.ReactNode {
+/** ✅ Store Location Controller */
+export class StoreLocationController extends Component {
+  render(): React.ReactNode {
     return <StoreLocationSection data={storeData} />;
   }
 }
 
-// ✅ Our Collection Controller
+/** ✅ Our Collection Controller (fetches data) */
 interface OurCollectionControllerState {
-  collections: ICollection[];
+  collections: Collection[];
+  loading: boolean;
+  errorMessage: string;
 }
 
-class OurCollectionController extends Component<
+export class OurCollectionController extends Component<
   {},
   OurCollectionControllerState
 > {
-  constructor(props: {}) {
-    super(props);
-    this.state = {
-      collections: [],
-    };
+  private abortController = new AbortController();
+
+  state: OurCollectionControllerState = {
+    collections: [],
+    loading: true,
+    errorMessage: "",
+  };
+
+  async componentDidMount(): Promise<void> {
+    try {
+      const data = await getCollections(this.abortController.signal);
+      this.setState({ collections: data, loading: false, errorMessage: "" });
+    } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
+      const message = err instanceof Error ? err.message : "Unknown error";
+      this.setState({ loading: false, errorMessage: message });
+    }
   }
 
-  componentDidMount() {
-    fetch("http://localhost:4000/api/collections")
-      .then((res) => res.json())
-      .then((data: ICollection[]) => {
-        this.setState({ collections: data });
-      })
-      .catch((err) => console.error("Failed to fetch collections", err));
+  componentWillUnmount(): void {
+    this.abortController.abort();
   }
 
-  public render(): React.ReactNode {
-    console.log("collection: ", this.state.collections);
-    return <OurCollectionSection items={this.state.collections} />;
+  render(): React.ReactNode {
+    const { collections, loading, errorMessage } = this.state;
+
+    if (loading) {
+      return (
+        <section className="home-state" aria-live="polite">
+          Loading collections...
+        </section>
+      );
+    }
+
+    if (errorMessage) {
+      return (
+        <section className="home-state home-state--error" role="alert">
+          <p>Failed to load collections.</p>
+          <small>{errorMessage}</small>
+        </section>
+      );
+    }
+
+    return <OurCollectionSection items={collections} />;
   }
 }
-
-export default {
-  AboutUsController,
-  WelcomeController,
-  StoreLocationController,
-  OurCollectionController,
-};

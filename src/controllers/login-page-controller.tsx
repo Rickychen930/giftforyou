@@ -1,6 +1,12 @@
+// src/controllers/login-controller.tsx
+
 import React, { Component } from "react";
-import { LoginState } from "../models/login-page-model";
+import type { LoginState } from "../models/login-page-model";
 import LoginView from "../view/login-page";
+
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:4000";
+
+type LoginField = "username" | "password";
 
 class LoginController extends Component<{}, LoginState> {
   constructor(props: {}) {
@@ -15,15 +21,18 @@ class LoginController extends Component<{}, LoginState> {
 
   handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    this.setState((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+
+    if (name === "username" || name === "password") {
+      const field = name as LoginField;
+      this.setState({ [field]: value } as Pick<LoginState, LoginField>);
+    }
   };
 
   handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { username, password } = this.state;
+
+    const username = this.state.username.trim();
+    const password = this.state.password;
 
     if (!username || !password) {
       this.setState({ error: "Please enter both username and password." });
@@ -33,50 +42,45 @@ class LoginController extends Component<{}, LoginState> {
     this.setState({ loading: true, error: "" });
 
     try {
-      const response = await fetch(
-        `${
-          process.env.REACT_APP_API_URL || "http://localhost:4000"
-        }/api/users/login`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, password }),
-        }
-      );
+      // ✅ FIXED ENDPOINT
+      const response = await fetch(`${API_BASE}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
 
-      let data;
-      try {
-        data = await response.json();
-      } catch {
-        this.setState({ error: "Invalid server response.", loading: false });
+      const data = await response
+        .json()
+        .catch(() => ({ error: "Invalid server response." }));
+
+      if (!response.ok) {
+        this.setState({
+          error: data?.error || "Login failed. Please check your credentials.",
+          loading: false,
+        });
         return;
       }
 
-      if (!response.ok) {
-        this.setState({ error: data.error || "Login failed", loading: false });
+      if (data?.token) {
+        localStorage.setItem("authToken", data.token);
+        localStorage.setItem("lastActivity", Date.now().toString());
       } else {
-        console.log("✅ Login successful:", data);
-
-        if (data.token) {
-          localStorage.setItem("authToken", data.token);
-          localStorage.setItem("lastActivity", Date.now().toString());
-        }
-
-        this.setState({ error: "", loading: false });
-        window.location.href = "/dashboard";
+        this.setState({
+          error: "Login failed: token not returned by server.",
+          loading: false,
+        });
+        return;
       }
-    } catch (err) {
+
+      this.setState({ loading: false, error: "" });
+      window.location.assign("/dashboard");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Unknown error";
       this.setState({
-        error: "Server error. Please try again later.",
+        error: `Server error. Please try again later. (${message})`,
         loading: false,
       });
     }
-  };
-
-  handleLogout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("lastActivity");
-    window.location.href = "/login";
   };
 
   render(): React.ReactNode {
@@ -85,10 +89,9 @@ class LoginController extends Component<{}, LoginState> {
         username={this.state.username}
         password={this.state.password}
         error={this.state.error}
+        loading={this.state.loading}
         onChange={this.handleChange}
         onSubmit={this.handleSubmit}
-        onLogout={this.handleLogout}
-        loading={this.state.loading}
       />
     );
   }

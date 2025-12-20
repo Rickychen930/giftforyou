@@ -1,4 +1,3 @@
-// src/components/filter-panel-component.tsx
 import React from "react";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
@@ -16,7 +15,9 @@ interface FilterPanelProps {
   selectedTypes: string[];
   selectedSizes: string[];
   allSizes: string[];
+  allTypes: string[];
   sortBy: string;
+
   onPriceChange: (range: Range) => void;
   onToggleFilter: (
     key: "selectedTypes" | "selectedSizes",
@@ -26,11 +27,14 @@ interface FilterPanelProps {
   onSortChange: (value: string) => void;
 }
 
+const formatRp = (n: number) => `Rp ${n.toLocaleString("id-ID")}`;
+
 const FilterPanel: React.FC<FilterPanelProps> = ({
   priceRange,
   selectedTypes,
   selectedSizes,
   allSizes,
+  allTypes,
   sortBy,
   onPriceChange,
   onToggleFilter,
@@ -38,40 +42,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   onSortChange,
 }) => {
   const handlePriceChange = (value: number | number[]) => {
-    if (Array.isArray(value) && value.length === 2) {
+    if (Array.isArray(value) && value.length === 2)
       onPriceChange([value[0], value[1]]);
-    }
   };
-
-  const renderFilterGroup = (
-    label: string,
-    options: string[],
-    selected: string[],
-    key: "selectedTypes" | "selectedSizes"
-  ) => (
-    <label>
-      {label}:
-      <div className="filter-group">
-        {options.map((opt) => (
-          <button
-            key={opt}
-            className={`filter-button ${
-              selected.includes(opt) ? "active" : ""
-            }`}
-            onClick={() => onToggleFilter(key, opt)}
-          >
-            {opt}
-          </button>
-        ))}
-        <button
-          className={`filter-button ${selected.length === 0 ? "active" : ""}`}
-          onClick={() => onClearFilter(key)}
-        >
-          All
-        </button>
-      </div>
-    </label>
-  );
 
   const sortOptions: FilterOption[] = [
     { label: "Default", value: "" },
@@ -81,69 +54,131 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     { label: "Name Z–A", value: "name-desc" },
   ];
 
+  const FilterGroup: React.FC<{
+    title: string;
+    options: string[];
+    selected: string[];
+    k: "selectedTypes" | "selectedSizes";
+  }> = ({ title, options, selected, k }) => (
+    <section className="fpGroup" aria-label={`${title} filter`}>
+      <div className="fpGroup__head">
+        <h4 className="fpGroup__title">{title}</h4>
+        <button
+          type="button"
+          className="fpGroup__clear"
+          onClick={() => onClearFilter(k)}
+          disabled={selected.length === 0}
+        >
+          Clear
+        </button>
+      </div>
+
+      <div className="fpChips" role="list">
+        <button
+          type="button"
+          className={`fpChip ${selected.length === 0 ? "is-active" : ""}`}
+          onClick={() => onClearFilter(k)}
+        >
+          All
+        </button>
+
+        {options.map((opt) => (
+          <button
+            type="button"
+            key={opt}
+            className={`fpChip ${selected.includes(opt) ? "is-active" : ""}`}
+            onClick={() => onToggleFilter(k, opt)}
+          >
+            {opt}
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+
   return (
-    <div className="filter-panel">
-      <h3>Filter Bouquets</h3>
+    <div className="filterPanel" aria-label="Filters panel">
+      <header className="filterPanel__header">
+        <h3 className="filterPanel__title">Filter & Sort</h3>
+        <p className="filterPanel__hint">Refine by price, type, and size.</p>
+      </header>
 
-      {/* Price Range */}
-      <label>
-        Price Range (Rp):
-        <div className="price-slider">
-          <div className="price-values">
-            <span>Rp {priceRange[0].toLocaleString()}</span>
-            <span>Rp {priceRange[1].toLocaleString()}</span>
-          </div>
-          <Slider
-            range
-            min={0}
-            max={1000000}
-            step={50000}
-            value={priceRange}
-            onChange={handlePriceChange}
-            pushable={100000}
-            allowCross={false}
-            trackStyle={[{ backgroundColor: "#d48c9c" }]}
-            handleStyle={[
-              { borderColor: "#d48c9c", backgroundColor: "#fff" },
-              { borderColor: "#d48c9c", backgroundColor: "#fff" },
-            ]}
-          />
+      {/* Price */}
+      <section className="fpGroup" aria-label="Price range filter">
+        <div className="fpGroup__head">
+          <h4 className="fpGroup__title">Price</h4>
         </div>
-      </label>
 
-      {/* Type Filter */}
-      {renderFilterGroup(
-        "Type",
-        ["Orchid", "Mixed"],
-        selectedTypes,
-        "selectedTypes"
-      )}
+        <div className="fpPrice">
+          <div className="fpPrice__values" aria-label="Selected price range">
+            <span className="fpPrice__value">{formatRp(priceRange[0])}</span>
+            <span className="fpPrice__value">{formatRp(priceRange[1])}</span>
+          </div>
 
-      {/* Size Filter */}
-      {renderFilterGroup(
-        "Size",
-        allSizes.length ? allSizes : ["Small", "Medium", "Large"],
-        selectedSizes,
-        "selectedSizes"
-      )}
+          <div className="fpSlider">
+            <Slider
+              range
+              min={0}
+              max={1_000_000}
+              step={50_000}
+              value={priceRange}
+              onChange={handlePriceChange}
+              pushable={100_000}
+              allowCross={false}
+              trackStyle={[{ backgroundColor: "var(--fp-brand)" }]}
+              railStyle={{ backgroundColor: "rgba(0,0,0,0.10)" }}
+              handleStyle={[
+                {
+                  borderColor: "var(--fp-border-active)",
+                  backgroundColor: "#fff",
+                  boxShadow: "var(--fp-focus-ring)",
+                },
+                {
+                  borderColor: "var(--fp-border-active)",
+                  backgroundColor: "#fff",
+                  boxShadow: "var(--fp-focus-ring)",
+                },
+              ]}
+            />
+          </div>
+        </div>
+      </section>
 
-      {/* Sort Options */}
-      <label>
-        Sort By:
-        <div className="filter-group">
+      {/* Type */}
+      <FilterGroup
+        title="Type"
+        options={allTypes.length ? allTypes : ["Orchid", "Mixed"]}
+        selected={selectedTypes}
+        k="selectedTypes"
+      />
+
+      {/* Size */}
+      <FilterGroup
+        title="Size"
+        options={allSizes.length ? allSizes : ["Small", "Medium", "Large"]}
+        selected={selectedSizes}
+        k="selectedSizes"
+      />
+
+      {/* Sort */}
+      <section className="fpGroup" aria-label="Sort options">
+        <div className="fpGroup__head">
+          <h4 className="fpGroup__title">Sort</h4>
+        </div>
+
+        <div className="fpChips">
           {sortOptions.map((opt) => (
             <button
+              type="button"
               key={opt.value}
-              className={`filter-button ${
-                sortBy === opt.value ? "active" : ""
-              }`}
+              className={`fpChip ${sortBy === opt.value ? "is-active" : ""}`}
               onClick={() => onSortChange(opt.value)}
             >
               {opt.label}
             </button>
           ))}
         </div>
-      </label>
+      </section>
     </div>
   );
 };
