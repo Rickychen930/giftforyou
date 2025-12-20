@@ -1,14 +1,565 @@
 :root {
-  --header-color-text: #d48c9c;;
-  --header-color-border: #ae7481;
-  --header-color-background: #f0f0f0;
+  /* =========================================================
+     1) Brand palette (harmonic)
+     ========================================================= */
+  --brand-rose-500: #d48c9c;     /* main brand */
+  --brand-rose-300: #f3b6c3;     /* soft highlight */
+  --brand-wine-700: #a04c5c;     /* deep accent text/link */
+  --brand-sage-400: #a8d5ba;     /* secondary accent */
 
-  --welcome-color-title: #d48c9c;;
-  --welcome-color-text: #a04c5c;
+  /* =========================================================
+     2) Neutrals (clean, premium)
+     ========================================================= */
+  --neutral-0: #ffffff;
+  --neutral-50: #faf7f8;
+  --neutral-100: #f8f4f0;
 
-  --footer-color-background: #ae7481;
-  --footer-color-text: #FFFFFF;
-  --footer-color-text-secondary:#d48c9c;;
-  --footer-color-image-background: #FFFFFF;
+  --ink-900: #2f2f2f;
+  --ink-820: rgba(0, 0, 0, 0.82);
+  --ink-780: rgba(0, 0, 0, 0.78);
+  --ink-700: rgba(0, 0, 0, 0.70);
+  --ink-620: rgba(0, 0, 0, 0.62);
+  --ink-600: rgba(0, 0, 0, 0.60);
+  --ink-550: rgba(0, 0, 0, 0.55);
+  --ink-500: rgba(0, 0, 0, 0.50);
 
+  /* =========================================================
+     3) Surfaces, borders, shadows (consistent elevation)
+     ========================================================= */
+  --surface-1: rgba(255, 255, 255, 0.92);
+  --surface-2: rgba(255, 255, 255, 0.86);
+  --surface-3: rgba(255, 255, 255, 0.82);
+  --surface-4: rgba(255, 255, 255, 0.75);
+  --surface-5: rgba(255, 255, 255, 0.70);
+  --surface-6: rgba(255, 255, 255, 0.65);
+
+  --border-1: rgba(0, 0, 0, 0.06);
+  --border-2: rgba(0, 0, 0, 0.10);
+  --border-3: rgba(0, 0, 0, 0.12);
+  --border-4: rgba(0, 0, 0, 0.14);
+
+  --shadow-1: 0 10px 22px rgba(0, 0, 0, 0.06);
+  --shadow-2: 0 14px 34px rgba(0, 0, 0, 0.10);
+  --shadow-3: 0 18px 52px rgba(0, 0, 0, 0.12);
+
+  --brand-shadow: 0 14px 26px rgba(212, 140, 156, 0.22);
+  --brand-shadow-hover: 0 18px 34px rgba(212, 140, 156, 0.32);
+
+  /* =========================================================
+     4) Status colors (re-used everywhere)
+     ========================================================= */
+  --success-bg: rgba(16, 185, 129, 0.10);
+  --success-border: rgba(16, 185, 129, 0.20);
+  --success-text: #065f46;
+
+  --error-bg: rgba(220, 38, 38, 0.08);
+  --error-border: rgba(220, 38, 38, 0.18);
+  --error-text: #991b1b;
+
+  --warning-bg: rgba(249, 115, 22, 0.10);
+  --warning-border: rgba(249, 115, 22, 0.20);
+  --warning-text: #9a3412;
+
+  /* =========================================================
+     5) Global layout
+     ========================================================= */
+  --max: 1200px;
+
+  /* =========================================================
+     6) Legacy app variables (keep your app working)
+     ========================================================= */
+  --header-color-text: var(--ink-900);
+  --header-color-border: var(--brand-rose-500);
+  --header-color-background: linear-gradient(135deg, var(--neutral-100) 0%, #fce4ec 100%);
+
+  --welcome-color-title: var(--brand-rose-500);
+  --welcome-color-text: var(--brand-wine-700);
+
+  --footer-color-background: var(--brand-rose-500);
+  --footer-color-text: var(--neutral-0);
+  --footer-color-text-secondary: var(--brand-rose-500);
+  --footer-color-image-background: var(--neutral-0);
+
+  /* =========================================================
+     7) ABOUT tokens (now mapped to globals)
+     ========================================================= */
+  --about-bg-gradient-start: var(--neutral-100);
+  --about-bg-gradient-end: #fce4ec;
+  --about-bg-image-opacity: 0.35;
+
+  --about-overlay-radial-1: rgba(255, 255, 255, 0.65);
+  --about-overlay-radial-2: rgba(255, 255, 255, 0.20);
+  --about-overlay-radial-3: rgba(255, 255, 255, 0.08);
+  --about-overlay-linear-top: rgba(255, 255, 255, 0.55);
+  --about-overlay-linear-bottom: rgba(255, 255, 255, 0.15);
+
+  --about-card-bg: var(--surface-4);
+  --about-card-border: var(--border-1);
+  --about-card-shadow: var(--shadow-2);
+
+  --about-kicker-color: var(--ink-550);
+  --about-desc-opacity: 0.95;
+  --about-closing-color: var(--ink-620);
+
+  --about-underline-accent-2: var(--brand-sage-400);
+  --about-btn-shadow: var(--brand-shadow);
+  --about-btn-shadow-hover: var(--brand-shadow-hover);
+
+  /* =========================================================
+     8) Bouquet grid/card tokens (keep, but harmonised)
+     ========================================================= */
+  --bouquet-color-surface: var(--neutral-0);
+  --bouquet-color-text: #555555;
+  --bouquet-color-text-inverse: var(--neutral-0);
+
+  /* align bouquet accents with your brand */
+  --bouquet-color-accent-title: var(--brand-wine-700);
+  --bouquet-color-accent-price: var(--brand-wine-700);
+  --bouquet-color-accent-cta: var(--brand-rose-500);
+  --bouquet-color-accent-cta-hover: var(--brand-wine-700);
+
+  --bouquet-color-badge-size: #64b5f6;
+  --bouquet-color-badge-ready: #81c784;
+  --bouquet-color-badge-preorder: var(--brand-rose-300);
+
+  --bouquet-shadow-1: 0 6px 18px rgba(0, 0, 0, 0.08);
+  --bouquet-shadow-2: 0 12px 28px rgba(0, 0, 0, 0.18);
+  --bouquet-badge-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+
+  --bouquet-radius-card: 18px;
+  --bouquet-radius-badge: 14px;
+  --bouquet-radius-button: 10px;
+
+  --bouquet-badge-font-size: 0.75rem;
+
+  /* =========================================================
+     9) Bouquet editor card tokens (bec-*)
+     ========================================================= */
+  --bec-pink: var(--brand-rose-500);
+  --bec-pink2: var(--brand-rose-300);
+
+  --bec-text: var(--ink-900);
+  --bec-muted: var(--ink-620);
+
+  --bec-card-bg: var(--surface-1);
+  --bec-input-bg: var(--surface-2);
+
+  --bec-card-border: rgba(0, 0, 0, 0.08);
+  --bec-input-border: var(--border-4);
+
+  --bec-focus-border: rgba(212, 140, 156, 0.80);
+  --bec-focus-ring: 0 0 0 4px rgba(212, 140, 156, 0.18);
+
+  --bec-card-shadow: var(--shadow-2);
+  --bec-btn-shadow: var(--brand-shadow);
+  --bec-btn-shadow-hover: var(--brand-shadow-hover);
+
+  --bec-btn-text: var(--neutral-0);
+
+  --bec-placeholder-stripe-1: #f3f3f3;
+  --bec-placeholder-stripe-2: #ededed;
+  --bec-placeholder-text: var(--ink-500);
+
+  /* =========================================================
+     10) Catalog tokens
+     ========================================================= */
+  --catalog-text: var(--ink-900);
+  --catalog-muted: var(--ink-620);
+  --catalog-text-strong: rgba(0, 0, 0, 0.75);
+  --catalog-text-soft: rgba(0, 0, 0, 0.70);
+
+  --catalog-pink: var(--brand-rose-500);
+  --catalog-pink2: var(--brand-rose-300);
+  --catalog-on-brand: var(--neutral-0);
+
+  --catalog-surface: var(--surface-2);
+  --catalog-surface-soft: var(--surface-5);
+
+  --catalog-page-bg-start: var(--neutral-0);
+  --catalog-page-bg-end: var(--neutral-50);
+
+  --catalog-border: var(--border-1);
+  --catalog-shadow: var(--shadow-2);
+  --catalog-shadow-soft: var(--shadow-1);
+  --catalog-hover-shadow: 0 12px 22px rgba(0, 0, 0, 0.08);
+
+  --catalog-error-border: var(--error-border);
+  --catalog-error-bg: var(--error-bg);
+  --catalog-error-text: var(--error-text);
+
+  --catalog-control-bg: var(--surface-2);
+
+  /* =========================================================
+     11) Editor tokens
+     ========================================================= */
+  --editor-text: var(--ink-900);
+  --editor-muted: var(--ink-620);
+
+  --editor-brand-1: var(--brand-rose-500);
+  --editor-brand-2: var(--brand-rose-300);
+  --editor-on-brand: var(--neutral-0);
+
+  --editor-surface: var(--surface-1);
+  --editor-surface-soft: var(--surface-2);
+
+  --editor-border: rgba(0, 0, 0, 0.08);
+  --editor-border-strong: var(--border-3);
+
+  --editor-shadow-brand: 0 14px 26px rgba(212, 140, 156, 0.20);
+
+  /* =========================================================
+     12) Collection Card tokens (cc-*)
+     (use ONE version only)
+     ========================================================= */
+  --cc-surface: var(--surface-2);
+  --cc-surface-strong: var(--surface-1);
+  --cc-surface-fade-edge: rgba(255, 255, 255, 0.92);
+
+  --cc-text: var(--ink-820);
+  --cc-muted: rgba(0, 0, 0, 0.58);
+
+  --cc-border: var(--border-1);
+  --cc-border-strong: var(--border-3);
+  --cc-border-chip: var(--border-1);
+  --cc-border-badge: rgba(255, 255, 255, 0.22);
+
+  --cc-shadow: var(--shadow-3);
+  --cc-card-shadow: var(--shadow-2);
+  --cc-card-shadow-hover: 0 20px 42px rgba(0, 0, 0, 0.14);
+
+  --cc-brand-pink: var(--brand-rose-500);
+  --cc-brand-pink2: var(--brand-rose-300);
+  --cc-brand-wine: rgba(160, 76, 92, 0.95);
+  --cc-brand-highlight: rgba(212, 140, 156, 0.45);
+
+  --cc-media-overlay-top: rgba(0, 0, 0, 0.00);
+  --cc-media-overlay-bottom: rgba(0, 0, 0, 0.28);
+  --cc-badge-bg: rgba(0, 0, 0, 0.35);
+
+  --cc-chip-text: rgba(0, 0, 0, 0.68);
+  --cc-chip-bg: rgba(0, 0, 0, 0.04);
+
+  --cc-scroll-track: rgba(0, 0, 0, 0.05);
+  --cc-scroll-thumb: rgba(0, 0, 0, 0.18);
+
+  --cc-btn-text: var(--neutral-0);
+  --cc-btn-shadow: var(--brand-shadow);
+  --cc-btn-shadow-hover: var(--brand-shadow-hover);
+
+  --cc-ready-bg: rgba(16, 185, 129, 0.30);
+  --cc-preorder-bg: rgba(249, 115, 22, 0.30);
+
+  --cc-empty-bg: rgba(0, 0, 0, 0.02);
+
+  /* =========================================================
+     13) Editor list tokens (ed-*)
+     ========================================================= */
+  --ed-brand: var(--brand-rose-500);
+  --ed-brand-hover: #c07888; /* keep slightly darker hover */
+  --ed-brand-strong: #b06b7a;
+  --ed-on-brand: var(--neutral-0);
+
+  --ed-text: #444444;
+
+  --ed-surface: var(--neutral-0);
+  --ed-surface-soft: #f9f9f9;
+  --ed-surface-hover: #f9f0f3;
+
+  --ed-border: #cccccc;
+  --ed-border-soft: #e0dede;
+
+  --ed-shadow-soft: 0 2px 6px rgba(0, 0, 0, 0.05);
+  --ed-shadow-card: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --ed-shadow-card-hover: 0 6px 18px rgba(0, 0, 0, 0.10);
+  --ed-shadow-active: 0 4px 12px rgba(212, 140, 156, 0.30);
+
+  --ed-focus-ring: 0 0 0 3px rgba(212, 140, 156, 0.25);
+
+  --ed-pagination-text: var(--ed-brand);
+
+  /* =========================================================
+     14) Dashboard tokens
+     ========================================================= */
+  --dash-bg-start: var(--neutral-0);
+  --dash-bg-end: var(--neutral-50);
+
+  --dash-surface: var(--surface-2);
+  --dash-surface-soft: var(--surface-6);
+  --dash-sidebar-bg: rgba(255, 240, 244, 0.90);
+
+  --dash-border: var(--border-1);
+
+  --dash-shadow: var(--shadow-2);
+  --dash-shadow-soft: var(--shadow-1);
+  --dash-logo-shadow: 0 10px 20px rgba(0, 0, 0, 0.10);
+  --dash-metric-shadow: var(--shadow-1);
+  --dash-metric-shadow-hover: var(--shadow-2);
+
+  --dash-brand-pink: var(--brand-rose-500);
+  --dash-brand-pink-2: var(--brand-rose-300);
+  --dash-brand-wine: var(--brand-wine-700);
+  --dash-on-brand: var(--neutral-0);
+
+  --dash-text-main: var(--ink-900);
+  --dash-text-muted: var(--ink-620);
+  --dash-text-soft: var(--ink-550);
+
+  --dash-nav-hover-bg: var(--surface-6);
+  --dash-nav-active-bg: var(--surface-1);
+
+  --dash-focus-outline: rgba(212, 140, 156, 0.35);
+
+  --dash-brand-shadow: var(--brand-shadow);
+  --dash-brand-shadow-hover: var(--brand-shadow-hover);
+
+  --dash-error-border: var(--error-border);
+  --dash-error-bg: var(--error-bg);
+  --dash-error-text: var(--error-text);
+
+  /* =========================================================
+     15) Uploader tokens
+     ========================================================= */
+  --up-surface: var(--surface-2);
+  --up-surface-soft: var(--surface-1);
+  --up-preview-surface: var(--surface-5);
+
+  --up-border: var(--border-1);
+  --up-border-strong: var(--border-4);
+
+  --up-shadow: var(--shadow-2);
+
+  --up-text: var(--ink-900);
+  --up-muted: var(--ink-620);
+  --up-label: rgba(0, 0, 0, 0.70);
+
+  --up-brand-1: var(--brand-rose-500);
+  --up-brand-2: var(--brand-rose-300);
+  --up-on-brand: var(--neutral-0);
+  --up-brand-shadow: var(--brand-shadow);
+
+  --up-focus-border: rgba(212, 140, 156, 0.80);
+  --up-focus-ring: 0 0 0 4px rgba(212, 140, 156, 0.18);
+
+  --up-success-bg: var(--success-bg);
+  --up-success-text: var(--success-text);
+  --up-success-border: var(--success-border);
+
+  --up-error-bg: var(--error-bg);
+  --up-error-text: var(--error-text);
+  --up-error-border: var(--error-border);
+
+  /* =========================================================
+     16) Filter panel tokens
+     ========================================================= */
+  --fp-bg-1: var(--neutral-0);
+    --fp-bg-1: var(--neutral-0);
+  --fp-bg-2: #fdfdfd;
+  --fp-surface: var(--neutral-0);
+  --fp-hover-surface: #f9f0f3;
+
+  --fp-border: #cccccc;
+  --fp-border-active: var(--brand-rose-500);
+
+  --fp-brand: var(--brand-rose-500);
+  --fp-brand-strong: #b06b7a;
+  --fp-on-brand: var(--neutral-0);
+
+  --fp-text: #444444;
+  --fp-text-strong: #333333;
+  --fp-text-muted: #555555;
+
+  --fp-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  --fp-shadow-hover: 0 10px 28px rgba(0, 0, 0, 0.12);
+  --fp-shadow-active: 0 4px 12px rgba(212, 140, 156, 0.40);
+
+  --fp-focus-ring: 0 0 0 4px rgba(212, 140, 156, 0.25);
+
+  /* =========================================================
+     17) Footer tokens
+     ========================================================= */
+  --ft-bg-1: rgba(255, 240, 244, 0.75);
+  --ft-bg-2: var(--neutral-50);
+  --ft-bg-3: var(--neutral-0);
+  --ft-bg-4: var(--neutral-50);
+
+  --ft-surface: var(--surface-4);
+  --ft-surface-btn: var(--surface-2);
+
+  --ft-border: var(--border-1);
+  --ft-btn-border: var(--border-2);
+  --ft-btn-border-hover: rgba(0, 0, 0, 0.16);
+
+  --ft-shadow: var(--shadow-3);
+  --ft-logo-shadow: 0 12px 26px rgba(0, 0, 0, 0.14);
+  --ft-btn-shadow-hover: 0 14px 28px rgba(0, 0, 0, 0.10);
+
+  --ft-text: var(--ink-780);
+  --ft-text-strong: var(--ink-820);
+  --ft-text-title: var(--ink-780);
+  --ft-text-btn: rgba(0, 0, 0, 0.80);
+  --ft-muted: var(--ink-620);
+
+  --ft-wine: var(--brand-wine-700);
+
+  --ft-ig-border-hover: rgba(225, 48, 108, 0.35);
+  --ft-ig-shadow-hover: 0 16px 30px rgba(225, 48, 108, 0.14);
+
+  --ft-wa-border-hover: rgba(37, 211, 102, 0.35);
+  --ft-wa-shadow-hover: 0 16px 30px rgba(37, 211, 102, 0.14);
+
+  --ft-divider: var(--border-1);
+
+  /* =========================================================
+     18) Header tokens
+     ========================================================= */
+  --hd-bg-start: var(--neutral-100);
+  --hd-bg-end: #fce4ec;
+
+  --hd-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
+
+  --hd-accent-1: var(--brand-rose-500);
+  --hd-accent-2: var(--brand-sage-400);
+  --hd-accent-3: #fce4ec;
+
+  --hd-text: rgba(0, 0, 0, 0.72);
+
+  --hd-logo-shadow: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+  --hd-logo-hover-shadow: drop-shadow(0 8px 16px rgba(212, 140, 156, 0.30));
+
+  /* URL-encoded colors for inline SVG patterns (# -> %23) */
+  --hd-pattern-dot-1: %23d48c9c;
+  --hd-pattern-dot-2: %23a8d5ba;
+  --hd-pattern-petal: %23fce4ec;
+
+  --hd-link-hover: var(--brand-rose-500);
+  --hd-icon: var(--brand-sage-400);
+  --hd-icon-hover: var(--brand-rose-500);
+
+  --hd-hamburger: rgba(0, 0, 0, 0.72);
+
+  --hd-underline-1: var(--brand-rose-500);
+  --hd-underline-2: var(--brand-sage-400);
+
+  --hd-topborder-1: var(--brand-rose-500);
+  --hd-topborder-2: var(--brand-sage-400);
+  --hd-topborder-3: #fce4ec;
+
+  /* =========================================================
+     19) Hero tokens
+     ========================================================= */
+  --hero-surface: var(--neutral-0);
+  --hero-kicker: var(--ink-550);
+
+  --hero-shadow-1: 0 24px 70px rgba(0, 0, 0, 0.16);
+  --hero-shadow-2: 0 8px 22px rgba(0, 0, 0, 0.10);
+
+  --hero-text: var(--neutral-0);
+  --hero-subtitle: rgba(255, 255, 255, 0.88);
+
+  --hero-overlay-radial: rgba(0, 0, 0, 0.25);
+  --hero-overlay-90-1: rgba(0, 0, 0, 0.72);
+  --hero-overlay-90-2: rgba(0, 0, 0, 0.28);
+  --hero-overlay-90-3: rgba(0, 0, 0, 0.10);
+  --hero-overlay-180-1: rgba(0, 0, 0, 0.10);
+  --hero-overlay-180-2: rgba(0, 0, 0, 0.62);
+
+  --hero-badge-bg: rgba(255, 255, 255, 0.14);
+  --hero-badge-border: rgba(255, 255, 255, 0.24);
+
+  --hero-title-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+
+  --hero-brand-1: var(--brand-rose-500);
+  --hero-brand-2: var(--brand-rose-300);
+  --hero-btn-text: var(--neutral-0);
+  --hero-btn-shadow: 0 14px 32px rgba(212, 140, 156, 0.38);
+  --hero-btn-shadow-hover: 0 18px 40px rgba(212, 140, 156, 0.50);
+
+  --hero-btn-secondary-bg: rgba(255, 255, 255, 0.14);
+  --hero-btn-secondary-border: rgba(255, 255, 255, 0.26);
+
+  --hero-arrow: var(--neutral-0);
+  --hero-arrow-bg: rgba(0, 0, 0, 0.28);
+  --hero-arrow-shadow: 0 12px 26px rgba(0, 0, 0, 0.22);
+
+  --hero-dot: rgba(255, 255, 255, 0.55);
+  --hero-dot-active: var(--neutral-0);
+
+  /* =========================================================
+     20) Login tokens
+     ========================================================= */
+  --login-bg-grad-1: rgba(248, 244, 240, 0.75);
+  --login-bg-grad-2: rgba(252, 228, 236, 0.55);
+
+  --login-card-bg: var(--surface-2);
+  --login-card-border: var(--border-1);
+  --login-card-shadow: var(--shadow-3);
+
+  --login-logo-shadow: 0 12px 26px rgba(0, 0, 0, 0.12);
+
+  --login-text: var(--ink-900);
+  --login-muted: var(--ink-600);
+  --login-label: rgba(0, 0, 0, 0.72);
+  --login-hint: var(--ink-550);
+
+  --login-input-bg: var(--surface-2);
+  --login-input-border: var(--border-4);
+
+  --login-focus-border: rgba(212, 140, 156, 0.90);
+  --login-focus-ring: 0 0 0 4px rgba(212, 140, 156, 0.18);
+
+  --login-brand-1: var(--brand-rose-500);
+  --login-brand-2: var(--brand-rose-300);
+  --login-on-brand: var(--neutral-0);
+  --login-btn-shadow: 0 14px 26px rgba(212, 140, 156, 0.26);
+  --login-btn-shadow-hover: 0 18px 34px rgba(212, 140, 156, 0.34);
+
+  --login-error-bg: var(--error-bg);
+  --login-error-border: var(--error-border);
+  --login-error-text: var(--error-text);
+
+    /* =========================================================
+     Our Collections section tokens
+     ========================================================= */
+  --oc-bg-1: rgba(255, 240, 244, 0.55);
+  --oc-bg-2: rgba(248, 244, 240, 0.65);
+
+  --oc-surface: var(--surface-3);
+  --oc-border: var(--border-1);
+  --oc-shadow: var(--shadow-2);
+
+  --oc-text: var(--ink-820);
+  --oc-muted: var(--ink-600);
+
+  --oc-pink: var(--brand-rose-500);
+  --oc-pink2: var(--brand-rose-300);
+
+  --oc-empty-bg: var(--surface-4);
+  --oc-empty-border: var(--border-1);
+  --oc-empty-shadow: var(--shadow-2);
+
+    /* =========================================================
+     Store Location section tokens
+     ========================================================= */
+  --sl-bg-1: rgba(255, 240, 244, 0.55);
+  --sl-bg-2: rgba(248, 244, 240, 0.60);
+  --sl-bg-3: var(--page-bg-start);
+  --sl-bg-4: var(--page-bg-end);
+  --sl-section-top-border: rgba(0, 0, 0, 0.04);
+
+  --sl-surface: var(--surface-3);
+  --sl-card-surface: rgba(255, 255, 255, 0.72);
+  --sl-map-surface: rgba(255, 255, 255, 0.55);
+
+  --sl-border: var(--border-1);
+  --sl-card-border: var(--border-1);
+
+  --sl-shadow: var(--shadow-2);
+  --sl-card-shadow: var(--shadow-1);
+  --sl-card-shadow-hover: var(--shadow-2);
+
+  --sl-kicker: var(--ink-550);
+  --sl-title: var(--ink-780);
+  --sl-muted: var(--ink-600);
+
+  --sl-link: var(--brand-wine-700);
 }

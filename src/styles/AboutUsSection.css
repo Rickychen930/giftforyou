@@ -1,92 +1,161 @@
 @import "colors.css";
 
-/* ========== SECTION CONTAINER ========== */
-.about-us {
-  background-image: url("../../public/images/about-us-background.jpg");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  color: var(--header-color-text);
-  padding: 6rem 2rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/* Section */
+.aboutUs {
   position: relative;
-  z-index: 1;
-  min-height: 80vh;
+  padding: clamp(3.5rem, 7vw, 6rem) 1.25rem;
+  color: var(--header-color-text);
+  overflow: hidden;
+
+  /* Use a gradient base in case image fails */
+  background: linear-gradient(
+    135deg,
+    var(--about-bg-gradient-start) 0%,
+    var(--about-bg-gradient-end) 100%
+  );
 }
 
-/* Overlay for readability */
-.about-us::before {
+/* Background image layer */
+.aboutUs::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    rgba(255, 255, 255, 0.6),
-    rgba(255, 255, 255, 0.3)
-  );
-  z-index: -1;
+  background-image: url("/images/about-us-background.jpg");
+  background-size: cover;
+  background-position: center;
+  opacity: var(--about-bg-image-opacity);
+  transform: scale(1.02);
 }
 
-/* ========== CONTENT WRAPPER ========== */
-.about-us-wrapper {
+/* Overlay for readability */
+.aboutUs::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 20% 20%,
+      var(--about-overlay-radial-1),
+      var(--about-overlay-radial-2) 55%,
+      var(--about-overlay-radial-3) 100%
+    ),
+    linear-gradient(
+      180deg,
+      var(--about-overlay-linear-top) 0%,
+      var(--about-overlay-linear-bottom) 100%
+    );
+}
+
+/* Keep content above overlays */
+.aboutUs__container {
+  position: relative;
+  z-index: 1;
   max-width: 1100px;
-  width: 100%;
-  text-align: center;
-  animation: fadeIn 1.2s ease-in-out;
-  padding: 2rem;
-  backdrop-filter: blur(6px);
-  border-radius: 12px;
-}
-
-/* ========== TEXT BLOCK ========== */
-.about-us-text-wrapper {
-  margin-bottom: 2rem;
-}
-
-.about-us-title {
-  font-size: 2.75rem;
-  font-weight: 800;
-  margin-bottom: 1rem;
-  color: var(--welcome-color-title);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-.about-us-info {
-  font-size: 1.2rem;
-  line-height: 1.9;
-  color: var(--welcome-color-text);
-  opacity: 0.95;
-  max-width: 800px;
   margin: 0 auto;
 }
 
-/* ========== BUTTON STYLING ========== */
-.about-us-button {
-  display: inline-block;
-  padding: 0.9rem 2rem;
-  background: linear-gradient(135deg, var(--header-color-border), #d48c9c);
+/* Glass card */
+.aboutUs__card {
+  text-align: center;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  border-radius: 18px;
+  background: var(--about-card-bg);
+  border: 1px solid var(--about-card-border);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--about-card-shadow);
+  animation: aboutFadeUp 0.9s ease both;
+}
+
+/* Small heading */
+.aboutUs__kicker {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--about-kicker-color);
+}
+
+/* Title */
+.aboutUs__title {
+  margin: 0;
+  font-size: clamp(1.8rem, 3.4vw, 2.8rem);
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: var(--welcome-color-title);
+  line-height: 1.15;
+}
+
+/* Decorative underline */
+.aboutUs__title::after {
+  content: "";
+  display: block;
+  width: 72px;
+  height: 4px;
+  margin: 0.9rem auto 0;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--header-color-border),
+    var(--about-underline-accent-2)
+  );
+}
+
+/* Description */
+.aboutUs__description {
+  margin: 1.2rem auto 0;
+  max-width: 78ch;
+  font-size: 1.08rem;
+  line-height: 1.85;
+  color: var(--welcome-color-text);
+  opacity: var(--about-desc-opacity);
+}
+
+/* CTA */
+.aboutUs__actions {
+  margin-top: 1.75rem;
+  display: flex;
+  justify-content: center;
+}
+
+.aboutUs__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  text-decoration: none;
+  padding: 0.95rem 1.6rem;
+  border-radius: 999px;
+
+  font-weight: 800;
+  font-size: 1rem;
   color: #fff;
-  font-weight: 600;
-  font-size: 1.05rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-  max-width: 400px;
+
+  background: linear-gradient(90deg, var(--header-color-border), #f3b6c3);
+  box-shadow: var(--about-btn-shadow);
+
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.about-us-button:hover {
-  background: linear-gradient(135deg, #d48c9c, var(--header-color-border));
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+.aboutUs__button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--about-btn-shadow-hover);
 }
 
-/* ========== ANIMATIONS ========== */
-@keyframes fadeIn {
+/* Optional closing line */
+.aboutUs__closing {
+  margin: 1.5rem auto 0;
+  max-width: 78ch;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--about-closing-color);
+}
+
+/* Animation */
+@keyframes aboutFadeUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(18px);
   }
   to {
     opacity: 1;
@@ -94,45 +163,9 @@
   }
 }
 
-/* ========== RESPONSIVE DESIGN ========== */
-@media (max-width: 1024px) {
-  .about-us-title {
-    font-size: 2.25rem;
-  }
-  .about-us-info {
-    font-size: 1.05rem;
-  }
-}
-
+/* Responsive tweaks */
 @media (max-width: 768px) {
-  .about-us {
-    padding: 4rem 1.5rem;
-    min-height: auto;
-  }
-  .about-us-title {
-    font-size: 2rem;
-  }
-  .about-us-info {
+  .aboutUs__description {
     font-size: 1rem;
-  }
-  .about-us-button {
-    font-size: 0.95rem;
-    padding: 0.7rem 1.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .about-us {
-    padding: 3rem 1rem;
-  }
-  .about-us-title {
-    font-size: 1.75rem;
-  }
-  .about-us-info {
-    font-size: 0.95rem;
-  }
-  .about-us-button {
-    font-size: 0.9rem;
-    padding: 0.6rem 1.2rem;
   }
 }

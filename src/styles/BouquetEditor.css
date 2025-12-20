@@ -1,0 +1,119 @@
+@import "colors.css";
+
+.editorSection {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.editorHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.editorTitle {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 950;
+  color: var(--editor-text);
+}
+
+.editorSubtitle {
+  margin: 0.35rem 0 0;
+  color: var(--editor-muted);
+  line-height: 1.6;
+}
+
+.editorClearAll {
+  border: none;
+  cursor: pointer;
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  font-weight: 950;
+  color: var(--editor-on-brand);
+  background: linear-gradient(90deg, var(--editor-brand-1), var(--editor-brand-2));
+  box-shadow: var(--editor-shadow-brand);
+}
+
+.editorTopBar {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.editorSearch {
+  flex: 1;
+  min-width: 260px;
+  border: 1px solid var(--editor-border-strong);
+  border-radius: 999px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  background: var(--editor-surface-soft);
+  color: var(--editor-text);
+}
+
+.editorCount {
+  color: var(--editor-muted);
+  font-weight: 700;
+}
+
+.editorLayout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.editorFilters {
+  position: sticky;
+  top: 110px;
+}
+
+.editorGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.editorPagination {
+  margin-top: 1.25rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.editorPagination__btn,
+.editorPagination__page {
+  border: 1px solid var(--editor-border);
+  background: var(--editor-surface);
+  cursor: pointer;
+  padding: 0.55rem 0.8rem;
+  border-radius: 12px;
+  font-weight: 850;
+  color: var(--editor-text);
+}
+
+.editorPagination__page.is-active {
+  background: linear-gradient(90deg, var(--editor-brand-1), var(--editor-brand-2));
+  color: var(--editor-on-brand);
+  border-color: transparent;
+}
+
+@media (max-width: 900px) {
+  .editorLayout {
+    grid-template-columns: 1fr;
+  }
+  .editorFilters {
+    position: static;
+  }
+  .editorGrid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -7,8 +7,7 @@ interface Props {
   error: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit: (e: React.FormEvent) => void;
-  onLogout?: () => void;
-  loading?: boolean; // ✅ added
+  loading?: boolean;
 }
 
 class LoginView extends Component<Props> {
@@ -17,44 +16,70 @@ class LoginView extends Component<Props> {
       this.props;
 
     return (
-      <div className="login-page">
-        <form className="login-form" onSubmit={onSubmit}>
-          <h2>Admin Login 🔒</h2>
-          <p className="login-subtitle">For administrators only</p>
+      <div className="loginPage">
+        <form
+          className="loginCard"
+          onSubmit={onSubmit}
+          aria-busy={loading ? "true" : "false"}
+        >
+          <header className="loginHeader">
+            <img
+              src="/images/logo.png"
+              alt="Giftforyou.idn"
+              className="loginLogo"
+              loading="lazy"
+            />
+            <h1 className="loginTitle">Admin Sign In</h1>
+            <p className="loginSubtitle">
+              Secure access for store administrators
+            </p>
+          </header>
 
           {error && (
-            <div className="error-message" role="alert">
+            <div className="loginError" role="alert" id="login-error">
               {error}
             </div>
           )}
 
-          <label htmlFor="username">Username</label>
-          <input
-            id="username"
-            type="text"
-            name="username"
-            value={username}
-            onChange={onChange}
-            placeholder="adminusername"
-            autoComplete="username"
-            required
-          />
+          <div className="loginField">
+            <label htmlFor="username">Username</label>
+            <input
+              id="username"
+              type="text"
+              name="username"
+              value={username}
+              onChange={onChange}
+              placeholder="Enter username"
+              autoComplete="username"
+              required
+              disabled={!!loading}
+              aria-invalid={!!error}
+              aria-describedby={error ? "login-error" : undefined}
+            />
+          </div>
 
-          <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            name="password"
-            value={password}
-            onChange={onChange}
-            placeholder="••••••••"
-            autoComplete="current-password"
-            required
-          />
+          <div className="loginField">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              name="password"
+              value={password}
+              onChange={onChange}
+              placeholder="Enter password"
+              autoComplete="current-password"
+              required
+              disabled={!!loading}
+              aria-invalid={!!error}
+              aria-describedby={error ? "login-error" : undefined}
+            />
+          </div>
 
-          <button type="submit" className="login-button" disabled={loading}>
-            {loading ? "Logging in…" : "Login"}
+          <button type="submit" className="loginButton" disabled={!!loading}>
+            {loading ? "Signing in..." : "Sign In"}
           </button>
+
+          <p className="loginHint">Having trouble? Contact the store owner.</p>
         </form>
       </div>
     );

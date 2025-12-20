@@ -1,12 +1,12 @@
 // src/components/Header.tsx
-
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import "../styles/Header.css";
 
 interface NavItem {
   label: string;
   path: string;
+  icon?: string;
 }
 
 interface HeaderProps {
@@ -19,43 +19,49 @@ interface HeaderState {
 }
 
 class Header extends Component<HeaderProps, HeaderState> {
-  constructor(props: HeaderProps) {
-    super(props);
-    this.state = {
-      isMobileMenuOpen: false,
-    };
-  }
+  state: HeaderState = { isMobileMenuOpen: false };
 
   toggleMobileMenu = () => {
-    this.setState((prevState) => ({
-      isMobileMenuOpen: !prevState.isMobileMenuOpen,
-    }));
+    this.setState((prev) => ({ isMobileMenuOpen: !prev.isMobileMenuOpen }));
+  };
+
+  closeMobileMenu = () => {
+    this.setState({ isMobileMenuOpen: false });
   };
 
   protected createNavLink(): React.ReactNode {
-    return this.props.navLinks.map((item, index) => (
-      <li key={index}>
-        <Link
+    return this.props.navLinks.map((item) => (
+      <li key={item.path} className="nav-item">
+        <NavLink
           to={item.path}
-          onClick={() => this.setState({ isMobileMenuOpen: false })}
+          onClick={this.closeMobileMenu}
+          className={({ isActive }) =>
+            isActive ? "nav-link is-active" : "nav-link"
+          }
         >
-          {item.label}
-        </Link>
+          {item.icon && <i className={item.icon} aria-hidden="true" />}
+          <span>{item.label}</span>
+        </NavLink>
       </li>
     ));
   }
 
-  public render(): React.ReactNode {
+  render(): React.ReactNode {
     const { isMobileMenuOpen } = this.state;
     const { logoSrc = "/images/logo.png" } = this.props;
 
     return (
       <header className="header">
-        <div className="header-top-border"></div>
-        <nav className="nav-bar">
+        <div className="header-top-border" />
+
+        <nav className="nav-bar" aria-label="Main navigation">
           <div className="nav-left">
-            <Link to="/">
-              <img src={logoSrc} alt="Logo" className="logo" />
+            <Link
+              to="/"
+              onClick={this.closeMobileMenu}
+              aria-label="Go to homepage"
+            >
+              <img src={logoSrc} alt="Giftforyou.idn Logo" className="logo" />
             </Link>
           </div>
 
@@ -63,13 +69,21 @@ class Header extends Component<HeaderProps, HeaderState> {
             <div className="nav-title">Giftforyou.idn</div>
           </div>
 
-          <div className="hamburger" onClick={this.toggleMobileMenu}>
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
+          <button
+            type="button"
+            className="hamburger"
+            onClick={this.toggleMobileMenu}
+            aria-label="Toggle navigation menu"
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="primary-navigation"
+          >
+            <span />
+            <span />
+            <span />
+          </button>
 
           <div
+            id="primary-navigation"
             className={`nav-right ${isMobileMenuOpen ? "mobile-active" : ""}`}
           >
             <ul className="nav-links">{this.createNavLink()}</ul>

@@ -1,19 +1,178 @@
 @import "colors.css";
 
-/* ========== SECTION CONTAINER ========== */
-.our-collection-section {
-  color: var(--header-color-text);
-  padding: 4rem 2rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/* =========================
+   Our Collections (Option A + C)
+   - A: centered header + stacked cards
+   - C: cards are full-bleed (edge-to-edge) while header stays in max container
+========================= */
+
+.ourCollection {
+  min-height: 100vh;
+  padding: 5rem 0; /* no side padding here; header/container handles it */
+  background:
+    radial-gradient(900px 460px at 12% 6%, var(--oc-bg-1), transparent 60%),
+    radial-gradient(900px 520px at 92% 18%, var(--oc-bg-2), transparent 62%),
+    linear-gradient(135deg, var(--page-bg-start) 0%, var(--page-bg-end) 100%);
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  overflow: hidden;
 }
 
-/* ========== WRAPPER ========== */
-.our-collection-wrapper {
-  max-width: 1200px;
-  width: 100%;
+/* subtle top highlight line */
+.ourCollection::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212, 140, 156, 0.35), transparent);
+  opacity: 0.9;
+}
+
+.ourCollection__container {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 1.25rem; /* ✅ header padding stays clean */
+}
+
+/* ===== Header (Option A) ===== */
+.ourCollection__header {
+  text-align: center;
+  margin-bottom: 2.2rem;
+}
+
+.ourCollection__eyebrow {
+  margin: 0 0 0.65rem;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  color: var(--ink-550);
+}
+
+.ourCollection__title {
+  margin: 0;
+  font-size: clamp(1.85rem, 2.7vw, 2.55rem);
+  font-weight: 950;
+  letter-spacing: -0.02em;
+  color: var(--welcome-color-title);
+}
+
+/* elegant divider */
+.ourCollection__title::after {
+  content: "";
+  display: block;
+  width: 74px;
+  height: 3px;
+  margin: 0.9rem auto 0;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(212, 140, 156, 0.95),
+    rgba(168, 213, 186, 0.85)
+  );
+}
+
+.ourCollection__subtitle {
+  margin: 0.85rem auto 0;
+  max-width: 72ch;
+  color: var(--welcome-color-text);
+  line-height: 1.8;
+  opacity: 0.95;
+}
+
+/* ===== Grid (Option A) ===== */
+.ourCollection__grid {
   display: flex;
   flex-direction: column;
-  gap: 4rem;
+  gap: 2.2rem;
+}
+
+/* ===== Full-bleed cards (Option C) =====
+   Each CollectionCard stretches edge-to-edge,
+   but we keep comfortable padding by adding an inner gutter.
+*/
+.ourCollection__grid > .collectionCard {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+
+  /* give card content a “safe” gutter */
+  padding-left: clamp(1rem, 3vw, 2.2rem);
+  padding-right: clamp(1rem, 3vw, 2.2rem);
+}
+
+/* Optional: make the horizontal scroller feel nicer on full-bleed cards */
+.ourCollection__grid > .collectionCard .collectionCard__scroll {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+/* ===== Empty state ===== */
+.ourCollection__empty {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 2.2rem 1.9rem;
+  text-align: center;
+
+  background: var(--oc-empty-bg);
+  border: 1px solid var(--oc-empty-border);
+  border-radius: 18px;
+  box-shadow: var(--oc-empty-shadow);
+}
+
+.ourCollection__emptyIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  margin: 0 auto 0.95rem;
+
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.20),
+    rgba(243, 182, 195, 0.18)
+  );
+  border: 1px solid rgba(212, 140, 156, 0.18);
+  box-shadow: 0 14px 28px rgba(212, 140, 156, 0.14);
+}
+
+.ourCollection__emptyTitle {
+  margin: 0 0 0.55rem;
+  font-weight: 950;
+  color: var(--oc-text);
+  letter-spacing: -0.01em;
+}
+
+.ourCollection__emptyText {
+  margin: 0;
+  color: var(--oc-muted);
+  line-height: 1.75;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .ourCollection {
+    padding: 3.8rem 0;
+    min-height: auto;
+  }
+
+  .ourCollection__container {
+    padding: 0 1rem;
+  }
+
+  .ourCollection__grid {
+    gap: 2rem;
+  }
+
+  .ourCollection__title::after {
+    width: 64px;
+  }
+
+  /* keep full-bleed on mobile, but reduce side gutters */
+  .ourCollection__grid > .collectionCard {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 }

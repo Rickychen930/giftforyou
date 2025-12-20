@@ -1,133 +1,169 @@
-import React, { Component } from "react";
+import React, { useMemo } from "react";
+import { Link } from "react-router-dom";
 import "../styles/BouquetDetailPage.css";
-import { IBouquet } from "../models/bouquet-model-real";
-import FilterPanel from "../components/filter-panel-component";
-import BouquetCard from "../components/bouquet-card-component";
+import type { Bouquet } from "../models/domain/bouquet";
 
-interface Props {
-  bouquets: IBouquet[];
-  priceRange: [number, number];
-  selectedTypes: string[];
-  selectedSizes: string[];
-  sortBy: string;
-  currentPage: number;
-  itemsPerPage: number;
-  onPriceChange: (range: [number, number]) => void;
-  onToggleFilter: (
-    key: "selectedTypes" | "selectedSizes",
-    value: string
-  ) => void;
-  onClearFilter: (key: "selectedTypes" | "selectedSizes") => void;
-  onSortChange: (value: string) => void;
-  onPageChange: (page: number) => void;
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:4000";
+const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
+const WA_NUMBER = "6285161428911";
 
-  loading?: boolean;
-  error?: string | null;
+const formatPrice = (price: number) =>
+  new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(price);
+
+const buildImageUrl = (image?: string) => {
+  if (!image) return FALLBACK_IMAGE;
+  if (image.startsWith("http://") || image.startsWith("https://")) return image;
+  return `${API_BASE}${image}`;
+};
+
+function buildWhatsAppLink(b: Bouquet, detailUrl: string) {
+  const lines = [
+    `Halo Giftforyou.idn, saya ingin order bouquet berikut:`,
+    ``,
+    `Nama: ${b.name}`,
+    `Harga: ${formatPrice(b.price)}`,
+    b.size ? `Size: ${b.size}` : "",
+    b.type ? `Type: ${b.type}` : "",
+    detailUrl ? `Link detail: ${detailUrl}` : "",
+  ].filter(Boolean);
+
+  const message = encodeURIComponent(lines.join("\n"));
+  return `https://wa.me/${WA_NUMBER}?text=${message}`;
 }
 
-class BouquetDetailView extends Component<Props> {
-  renderPagination(): React.ReactNode {
-    const totalPages = Math.ceil(
-      this.props.bouquets.length / this.props.itemsPerPage
-    );
-    if (totalPages <= 1) return null;
+export default function BouquetDetailPage({
+  bouquet,
+  loading,
+  error,
+  detailUrl,
+}: {
+  bouquet: Bouquet | null;
+  loading: boolean;
+  error: string | null;
+  detailUrl: string;
+}) {
+  const waLink = useMemo(
+    () => (bouquet ? buildWhatsAppLink(bouquet, detailUrl) : "#"),
+    [bouquet, detailUrl]
+  );
 
+  if (loading) {
     return (
-      <div className="pagination">
-        <button
-          disabled={this.props.currentPage === 1}
-          onClick={() => this.props.onPageChange(this.props.currentPage - 1)}
-        >
-          ‹ Prev
-        </button>
-
-        {[...Array(totalPages)].map((_, i) => (
-          <button
-            key={i}
-            onClick={() => this.props.onPageChange(i + 1)}
-            className={this.props.currentPage === i + 1 ? "active" : ""}
-          >
-            {i + 1}
-          </button>
-        ))}
-
-        <button
-          disabled={this.props.currentPage === totalPages}
-          onClick={() => this.props.onPageChange(this.props.currentPage + 1)}
-        >
-          Next ›
-        </button>
-      </div>
-    );
-  }
-
-  render(): React.ReactNode {
-    const { bouquets, currentPage, itemsPerPage, loading, error } = this.props;
-
-    if (loading) {
-      return (
-        <section className="bouquet-detail-page">
-          <p className="loading">Loading bouquets…</p>
-        </section>
-      );
-    }
-
-    if (error) {
-      return (
-        <section className="bouquet-detail-page">
-          <p className="error">{error}</p>
-        </section>
-      );
-    }
-
-    const start = (currentPage - 1) * itemsPerPage;
-    const paginated = bouquets.slice(start, start + itemsPerPage);
-
-    const allSizes: string[] = Array.from(
-      new Set(bouquets.map((b) => b.size).filter((s): s is string => !!s))
-    );
-
-    return (
-      <section className="bouquet-detail-page">
-        <div className="bouquet-layout">
-          <aside className="filter-panel-wrapper">
-            <FilterPanel
-              priceRange={this.props.priceRange}
-              selectedTypes={this.props.selectedTypes}
-              selectedSizes={this.props.selectedSizes}
-              sortBy={this.props.sortBy}
-              allSizes={allSizes}
-              onPriceChange={this.props.onPriceChange}
-              onToggleFilter={this.props.onToggleFilter}
-              onClearFilter={this.props.onClearFilter}
-              onSortChange={this.props.onSortChange}
-            />
-          </aside>
-          <div className="bouquet-results">
-            {paginated.length > 0 ? (
-              paginated.map((b) => {
-                const plain = {
-                  _id: String(b._id),
-                  name: b.name,
-                  description: b.description,
-                  price: b.price,
-                  type: b.type,
-                  size: b.size,
-                  image: b.image,
-                  status: b.status,
-                  collectionName: b.collectionName,
-                };
-                return <BouquetCard key={plain._id} {...plain} />;
-              })
-            ) : (
-              <p className="no-results">No bouquets found 🌸</p>
-            )}
-            {this.renderPagination()}
+      <section className="bdPage">
+        <div className="bdContainer">
+          <div className="bdState" aria-live="polite">
+            Loading bouquet…
           </div>
         </div>
       </section>
     );
   }
-}
 
-export default BouquetDetailView;
+  if (error || !bouquet) {
+    return (
+      <section className="bdPage">
+        <div className="bdContainer">
+          <div className="bdState bdState--error" role="alert">
+            {error ?? "Bouquet not found."}
+          </div>
+          <Link to="/collection" className="bdBackLink">
+            Back to catalog
+          </Link>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="bdPage" aria-labelledby="bd-title">
+      <div className="bdContainer">
+        <nav className="bdBreadcrumb" aria-label="Breadcrumb">
+          <Link to="/" className="bdBreadcrumb__link">
+            Home
+          </Link>
+          <span className="bdBreadcrumb__sep">/</span>
+          <Link to="/collection" className="bdBreadcrumb__link">
+            Catalog
+          </Link>
+          <span className="bdBreadcrumb__sep">/</span>
+          <span className="bdBreadcrumb__current">{bouquet.name}</span>
+        </nav>
+
+        <div className="bdLayout">
+          <div className="bdMedia">
+            <img
+              src={buildImageUrl(bouquet.image)}
+              alt={bouquet.name}
+              loading="eager"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = FALLBACK_IMAGE;
+              }}
+            />
+            <span
+              className={`bdBadge ${
+                bouquet.status === "ready" ? "is-ready" : "is-preorder"
+              }`}
+            >
+              {bouquet.status === "ready" ? "Ready" : "Preorder"}
+            </span>
+          </div>
+
+          <div className="bdInfo">
+            <h1 id="bd-title" className="bdTitle">
+              {bouquet.name}
+            </h1>
+            <p className="bdPrice">{formatPrice(bouquet.price)}</p>
+
+            {bouquet.description && (
+              <p className="bdDesc">{bouquet.description}</p>
+            )}
+
+            <div className="bdMeta" aria-label="Bouquet details">
+              {bouquet.size && (
+                <span className="bdChip">Size: {bouquet.size}</span>
+              )}
+              {bouquet.type && (
+                <span className="bdChip">Type: {bouquet.type}</span>
+              )}
+              {bouquet.collectionName && (
+                <span className="bdChip">{bouquet.collectionName}</span>
+              )}
+            </div>
+
+            <div className="bdActions">
+              <a
+                className="bdBtn bdBtn--primary"
+                href={waLink}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Order on WhatsApp
+              </a>
+
+              <Link className="bdBtn bdBtn--secondary" to="/collection">
+                Back to Catalog
+              </Link>
+            </div>
+
+            <div className="bdLinkRow">
+              <span className="bdLinkLabel">Bouquet link:</span>
+              <a
+                className="bdLink"
+                href={detailUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {detailUrl}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

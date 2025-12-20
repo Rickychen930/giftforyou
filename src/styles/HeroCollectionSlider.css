@@ -1,0 +1,275 @@
+@import "colors.css";
+
+/* Full screen hero wrapper */
+.hero {
+  position: relative;
+  width: 100%;
+  max-width: none;     /* remove 1200px constraint */
+  margin: 0;
+  padding: 0;          /* full-bleed */
+}
+
+/* “New Collection” label (now overlayed, not pushing layout) */
+.hero__kicker {
+  position: absolute;
+  z-index: 20;
+  top: calc(14px + env(safe-area-inset-top));
+  left: 14px;
+
+  padding: 0.48rem 0.85rem;
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--border-1);
+  backdrop-filter: blur(10px);
+
+  font-weight: 950;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: var(--ink-900);
+
+  box-shadow: var(--shadow-1);
+}
+
+/* Fullscreen slider */
+.hero__swiper {
+  width: 100%;
+  height: 100vh;       /* FULL SCREEN */
+  overflow: hidden;
+  background: var(--hero-surface);
+  border-radius: 0;    /* full-bleed look */
+}
+
+/* Slide */
+.heroSlide {
+  position: relative;
+  height: 100vh;
+  display: grid;
+  align-items: end;
+  isolation: isolate;
+}
+
+.heroSlide__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.02);
+}
+
+/* Overlay (balanced for readability) */
+.heroSlide__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(900px 520px at 24% 20%, rgba(0, 0, 0, 0.32), transparent 62%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.76) 0%, rgba(0, 0, 0, 0.28) 62%, rgba(0, 0, 0, 0.08) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.60) 100%);
+}
+
+/* Soft brand glow */
+.heroSlide__glow {
+  position: absolute;
+  inset: -25%;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(560px 360px at 18% 25%, rgba(212, 140, 156, 0.22), transparent 64%),
+    radial-gradient(560px 360px at 42% 12%, rgba(168, 213, 186, 0.14), transparent 66%);
+  mix-blend-mode: screen;
+  opacity: 0.85;
+}
+
+/* Grain */
+.heroSlide__grain {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.25'/%3E%3C/svg%3E");
+  opacity: 0.09;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* Content */
+.heroSlide__content {
+  position: relative;
+  z-index: 4;
+
+  width: 100%;
+  max-width: var(--max);
+  margin: 0 auto;
+
+  padding: clamp(1.2rem, 4vw, 3.2rem);
+  padding-bottom: clamp(2.2rem, 6vh, 5rem);
+  color: var(--hero-text);
+}
+
+.heroSlide__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.42rem 0.85rem;
+  border-radius: 999px;
+  background: var(--hero-badge-bg);
+  border: 1px solid var(--hero-badge-border);
+  backdrop-filter: blur(10px);
+  font-weight: 950;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  margin-bottom: 0.95rem;
+}
+
+/* Title — less “strange”: wider, better rhythm */
+.heroSlide__title {
+  margin: 0 0 0.9rem;
+  max-width: 28ch;
+  font-size: clamp(2.15rem, 5vw, 3.9rem);
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  text-shadow: var(--hero-title-shadow);
+  font-weight: 950;
+}
+
+.heroSlide__subtitle {
+  margin: 0 0 1.6rem;
+  max-width: 70ch;
+  font-size: clamp(1.05rem, 1.7vw, 1.25rem);
+  line-height: 1.8;
+  color: var(--hero-subtitle);
+}
+
+/* Buttons (more premium) */
+.heroSlide__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.heroSlide__btn {
+  text-decoration: none;
+  border-radius: 999px;
+  padding: 0.92rem 1.15rem;
+  font-weight: 950;
+  letter-spacing: 0.2px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+
+  min-width: 175px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease, background 0.18s ease;
+}
+
+.heroSlide__btn--primary {
+  background: linear-gradient(90deg, var(--hero-brand-1), var(--hero-brand-2));
+  color: var(--hero-btn-text);
+  box-shadow: var(--hero-btn-shadow);
+}
+
+.heroSlide__btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--hero-btn-shadow-hover);
+  filter: saturate(1.03);
+}
+
+.heroSlide__btn--secondary {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: var(--hero-btn-text);
+  backdrop-filter: blur(10px);
+}
+
+.heroSlide__btn--secondary:hover {
+  transform: translateY(-2px);
+}
+
+.heroSlide__btn:focus-visible {
+  outline: 3px solid rgba(212, 140, 156, 0.35);
+  outline-offset: 3px;
+}
+
+/* =========================
+   Swiper arrows (smaller + elegant)
+========================= */
+.hero .swiper-button-next,
+.hero .swiper-button-prev {
+  width: 38px;
+  height: 38px;
+
+  color: #fff;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+
+  border-radius: 999px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.18);
+
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+
+.hero .swiper-button-next::after,
+.hero .swiper-button-prev::after {
+  font-size: 14px; /* smaller chevron */
+  font-weight: 900;
+}
+
+.hero .swiper-button-next:hover,
+.hero .swiper-button-prev:hover {
+  transform: translateY(-1px);
+  background: rgba(0, 0, 0, 0.28);
+}
+
+/* Move arrows slightly in from edges */
+.hero .swiper-button-prev {
+  left: 14px;
+}
+.hero .swiper-button-next {
+  right: 14px;
+}
+
+/* Pagination */
+.hero .swiper-pagination {
+  bottom: 14px !important;
+}
+
+.hero .swiper-pagination-bullet {
+  background: rgba(255, 255, 255, 0.48);
+  opacity: 1;
+  width: 7px;
+  height: 7px;
+}
+
+.hero .swiper-pagination-bullet-active {
+  background: #ffffff;
+  width: 22px;
+  border-radius: 999px;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .hero__kicker {
+    left: 10px;
+    top: calc(10px + env(safe-area-inset-top));
+    font-size: 0.72rem;
+  }
+
+  .hero .swiper-button-next,
+  .hero .swiper-button-prev {
+    display: none;
+  }
+
+  .heroSlide__btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .heroSlide__title {
+    max-width: 30ch;
+  }
+}

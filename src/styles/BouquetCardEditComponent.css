@@ -1,121 +1,103 @@
-.bouquet-editor {
-  background: linear-gradient(to bottom right, #fffdfd, #f9f9f9);
-  border: 1px solid #e0dede;
-  padding: 1.5rem;
-  border-radius: 14px;
-  width: 100%;
-  max-width: 420px;
-  min-width: 280px;
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.3s ease, transform 0.2s ease;
-  margin: 0 auto;
-  box-sizing: border-box;
+@import "colors.css";
+
+.bouquetEditorCard {
+  border: 1px solid var(--bec-card-border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--bec-card-bg);
+  box-shadow: var(--bec-card-shadow);
+  display: grid;
 }
 
-.bouquet-editor:hover {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
-}
-
-.bouquet-image {
+.bouquetEditorCard__image {
   width: 100%;
-  height: auto;
-  border-radius: 8px;
+  height: 200px;
   object-fit: cover;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  display: block;
 }
 
-/* Label styling */
-.bouquet-editor label {
+.bouquetEditorCard__imagePlaceholder {
+  height: 200px;
+  display: grid;
+  place-items: center;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--bec-placeholder-stripe-1),
+    var(--bec-placeholder-stripe-1) 10px,
+    var(--bec-placeholder-stripe-2) 10px,
+    var(--bec-placeholder-stripe-2) 20px
+  );
+  color: var(--bec-placeholder-text);
+  font-weight: 800;
+}
+
+.bouquetEditorCard__body {
+  padding: 1rem;
   display: flex;
   flex-direction: column;
-  font-weight: 500;
-  font-size: 0.95rem;
-  color: #444;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
+  gap: 0.85rem;
 }
 
-/* Input, textarea, and select styling */
-.bouquet-editor input,
-.bouquet-editor textarea,
-.bouquet-editor select {
-  margin-top: 0.4rem;
-  padding: 0.65rem 1rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #fff;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-weight: 800;
+  color: var(--bec-text);
+  font-size: 0.92rem;
 }
 
-.bouquet-editor input:focus,
-.bouquet-editor textarea:focus,
-.bouquet-editor select:focus {
-  border-color: #d48c9c;
-  box-shadow: 0 0 0 3px rgba(212, 140, 156, 0.2);
+.field input,
+.field textarea,
+.field select {
+  border: 1px solid var(--bec-input-border);
+  border-radius: 12px;
+  padding: 0.7rem 0.85rem;
+  font-size: 0.98rem;
+  background: var(--bec-input-bg);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
   outline: none;
+  border-color: var(--bec-focus-border);
+  box-shadow: var(--bec-focus-ring);
 }
 
-.bouquet-editor textarea {
-  resize: vertical;
-  min-height: 80px;
+.fieldRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
 }
 
-/* File input */
-.bouquet-editor input[type="file"] {
-  padding: 0.4rem 0;
-  font-size: 0.95rem;
-}
-
-/* Save button */
-.bouquet-editor button {
-  background-color: #d48c9c;
-  color: white;
+.bouquetEditorCard__save {
   border: none;
-  padding: 0.7rem 1.2rem;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 1rem;
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-  align-self: flex-start;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
+  padding: 0.85rem 1rem;
+  border-radius: 999px;
+  font-weight: 950;
+  color: var(--bec-btn-text);
+  background: linear-gradient(90deg, var(--bec-pink), var(--bec-pink2));
+  box-shadow: var(--bec-btn-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.bouquet-editor button:hover {
-  background-color: #c07888;
-  transform: scale(1.02);
+.bouquetEditorCard__save:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--bec-btn-shadow-hover);
 }
 
-/* Responsive layout */
-@media (max-width: 480px) {
-  .bouquet-editor {
-    max-width: 100%;
-    padding: 1.2rem;
-  }
+.bouquetEditorCard__save:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
 
-  .bouquet-editor label {
-    font-size: 0.9rem;
-  }
-
-  .bouquet-editor input,
-  .bouquet-editor textarea,
-  .bouquet-editor select {
-    font-size: 0.95rem;
-  }
-
-  .bouquet-editor button {
-    font-size: 0.95rem;
-    padding: 0.6rem 1rem;
+@media (max-width: 520px) {
+  .fieldRow {
+    grid-template-columns: 1fr;
   }
 }
