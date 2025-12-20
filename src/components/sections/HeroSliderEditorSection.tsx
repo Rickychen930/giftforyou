@@ -1,14 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "../../styles/HeroSliderEditorSection.css";
 
-import { API_BASE } from "../../config/api"; // adjust path depending on folder depth
+import { API_BASE } from "../../config/api";
 
 type HeroSlide = {
   id: string;
   badge?: string;
   title: string;
   subtitle?: string;
-  image: string; // will store "/uploads/hero/....jpg"
+  image: string; // stores "/uploads/hero/....jpg" or full URL
   primaryCta: { label: string; href: string };
   secondaryCta?: { label: string; href: string };
 };
@@ -29,7 +29,15 @@ const normalizeImageUrl = (img: string) => {
   const v = (img ?? "").trim();
   if (!v) return "";
   if (/^https?:\/\//i.test(v)) return v;
+
   const normalized = v.startsWith("/") ? v : `/${v}`;
+
+  // API_BASE might be "" or "/api" in production -> not a valid base for new URL()
+  if (!API_BASE || API_BASE.startsWith("/")) {
+    return new URL(normalized, window.location.origin).toString();
+  }
+
+  // API_BASE is absolute (e.g. https://api.example.com) -> valid base
   return new URL(normalized, API_BASE).toString();
 };
 
@@ -181,7 +189,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections }) => {
     );
   };
 
-  // ✅ Upload image file for a slide
+  // Upload image file for a slide
   const uploadSlideImage = async (slideId: string, file: File) => {
     setUploadError((prev) => ({ ...prev, [slideId]: "" }));
     setUploading((prev) => ({ ...prev, [slideId]: true }));
@@ -245,7 +253,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections }) => {
             },
             secondaryCta: hasSecondary
               ? { label: secLabel, href: secHref }
-              : undefined, // ✅ FIXED
+              : undefined,
           };
         }),
       };
@@ -406,7 +414,6 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections }) => {
                       />
                     </label>
 
-                    {/* ✅ File upload */}
                     <label className="hsField hsField--full">
                       <span className="hsLabel">Image *</span>
 
