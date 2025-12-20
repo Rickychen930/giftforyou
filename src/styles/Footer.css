@@ -1,8 +1,6 @@
 @import "colors.css";
 
-/* =========================
-   FOOTER (EDGE-TO-EDGE)
-========================= */
+/* FOOTER */
 .footer {
   position: relative;
   width: 100%;
@@ -22,12 +20,7 @@
   position: absolute;
   inset: 0 0 auto 0;
   height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(212, 140, 156, 0.35),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, rgba(212, 140, 156, 0.35), transparent);
   opacity: 0.9;
   pointer-events: none;
 }
@@ -44,9 +37,7 @@
     radial-gradient(7px 7px at 54% 70%, rgba(212, 140, 156, 0.12) 35%, transparent 36%);
 }
 
-/* =========================
-   CONTAINER (LAYOUT)
-========================= */
+/* CONTAINER */
 .footer__container {
   position: relative;
   z-index: 1;
@@ -63,9 +54,7 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 
-  box-shadow:
-    0 -1px 0 rgba(0, 0, 0, 0.03),
-    0 18px 50px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 -1px 0 rgba(0,0,0,0.03), 0 18px 50px rgba(0,0,0,0.08);
 
   display: grid;
   grid-template-columns: minmax(280px, 1.4fr) minmax(220px, 1fr) minmax(260px, 1fr);
@@ -73,16 +62,13 @@
   align-items: start;
 }
 
-/* ✅ critical: allow grid children to shrink (prevents overflow) */
 .footer__brand,
 .footer__block,
 .footer__bottom {
   min-width: 0;
 }
 
-/* =========================
-   Brand
-========================= */
+/* BRAND */
 .footer__brand {
   display: flex;
   gap: 1rem;
@@ -94,14 +80,12 @@
   height: 68px;
   border-radius: 50%;
   object-fit: cover;
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255,255,255,0.55);
   box-shadow: var(--ft-logo-shadow);
   flex: 0 0 auto;
 }
 
-.footer__brandText {
-  min-width: 0;
-}
+.footer__brandText { min-width: 0; }
 
 .footer__brandName {
   font-weight: 950;
@@ -119,9 +103,7 @@
   overflow-wrap: anywhere;
 }
 
-/* =========================
-   Blocks / Links
-========================= */
+/* BLOCKS */
 .footer__blockTitle {
   font-weight: 950;
   color: var(--ft-text-title);
@@ -130,16 +112,19 @@
   font-size: 0.95rem;
 }
 
+.footer__address {
+  font-style: normal;
+  display: grid;
+  gap: 0.35rem;
+}
+
 .footer__link {
   display: inline-flex;
-  align-items: center;
   color: var(--ft-wine);
   text-decoration: none;
   font-weight: 850;
-  margin: 0.28rem 0;
   line-height: 1.65;
-  transition: color 0.18s ease, text-decoration-color 0.18s ease;
-  overflow-wrap: anywhere; /* ✅ email won't overflow */
+  overflow-wrap: anywhere;
 }
 
 .footer__link:hover {
@@ -148,32 +133,33 @@
   text-underline-offset: 3px;
 }
 
-/* =========================
-   Social (FIX: no overflow)
-   Use grid instead of flex-column so it wraps cleanly.
-========================= */
+/* ✅ SOCIAL LIST RESET (fixes layout + no overflow) */
 .footer__socialLinks {
-  /* if you're using <ul>, kill default spacing */
   margin: 0;
   padding: 0;
   list-style: none;
 
   display: grid;
-  grid-template-columns: 1fr; 
+  grid-template-columns: 1fr;
   gap: 0.7rem;
+  min-width: 0;
+}
 
+.footer__socialItem {
+  margin: 0;
+  padding: 0;
+  list-style: none;
   min-width: 0;
 }
 
 .footer__socialBtn {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 0.25rem;
+  gap: 0.75rem;
 
-  width: 50%;
-  min-width: 0;               
-  max-width: 100%;        
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
 
   padding: 0.85rem 1rem;
@@ -182,29 +168,19 @@
   border: 1px solid var(--ft-btn-border);
   background: color-mix(in srgb, var(--ft-surface-btn) 88%, transparent);
   color: var(--ft-text-btn);
-  text-decoration: none;
 
+  text-decoration: none;
   font-weight: 950;
   letter-spacing: 0.01em;
 
-  box-shadow: var(--ft-btn-shadow, 0 10px 24px rgba(0, 0, 0, 0.08));
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease,
-    border-color 0.18s ease,
-    background 0.18s ease,
-    filter 0.18s ease;
+  box-shadow: var(--ft-btn-shadow, 0 10px 24px rgba(0,0,0,0.08));
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
 .footer__socialBtn:hover {
   transform: translateY(-2px);
   box-shadow: var(--ft-btn-shadow-hover);
   border-color: var(--ft-btn-border-hover);
-  filter: saturate(1.05);
-}
-
-.footer__socialBtn:active {
-  transform: translateY(0);
 }
 
 .footer__icon {
@@ -216,25 +192,12 @@
 
 .footer__socialName {
   min-width: 0;
-  overflow: hidden;          /* ✅ prevents overflow */
+  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* Platform-specific hovers */
-.footer__socialBtn--instagram:hover {
-  border-color: var(--ft-ig-border-hover);
-  box-shadow: var(--ft-ig-shadow-hover);
-}
-
-.footer__socialBtn--whatsapp:hover {
-  border-color: var(--ft-wa-border-hover);
-  box-shadow: var(--ft-wa-shadow-hover);
-}
-
-/* =========================
-   Bottom
-========================= */
+/* bottom */
 .footer__bottom {
   grid-column: 1 / -1;
   margin-top: 0.35rem;
@@ -256,30 +219,23 @@
   line-height: 1.6;
 }
 
-/* =========================
-   Responsive
-========================= */
+/* responsive */
 @media (max-width: 980px) {
   .footer__container {
-    grid-template-columns: 1fr 1fr; /* 2 columns */
+    grid-template-columns: 1fr 1fr;
   }
 
-  /* Social full width row for cleaner layout */
+  /* social full width row */
   .footer__block:nth-of-type(2) {
     grid-column: 1 / -1;
   }
 
-  /* Social buttons in 2 columns */
   .footer__socialLinks {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 620px) {
-  .footer {
-    padding: 2.7rem 0 0;
-  }
-
   .footer__container {
     grid-template-columns: 1fr;
     gap: 1.25rem;
@@ -287,7 +243,7 @@
   }
 
   .footer__socialLinks {
-    grid-template-columns: 1fr; /* 1 column */
+    grid-template-columns: 1fr;
   }
 }
 
@@ -295,12 +251,5 @@
   .footer__logo {
     width: 58px;
     height: 58px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .footer__socialBtn,
-  .footer__link {
-    transition: none;
   }
 }

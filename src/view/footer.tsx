@@ -58,12 +58,10 @@ const Footer: React.FC = () => {
         {/* Contact */}
         <div className="footer__block" aria-label="Contact information">
           <div className="footer__blockTitle">Contact</div>
-
-          <address style={{ fontStyle: "normal" }}>
+          <address className="footer__address">
             <a className="footer__link" href="tel:+6285161428911">
               +62 851 6142 8911
             </a>
-            <br />
             <a
               className="footer__link"
               href="mailto:giftforyou.idn01@gmail.com"
@@ -77,9 +75,10 @@ const Footer: React.FC = () => {
         <div className="footer__block" aria-label="Social links">
           <div className="footer__blockTitle">Follow Us</div>
 
-          <ul className="footer__socialLinks" role="list">
+          {/* ✅ removed role="list" (ESLint CI error) */}
+          <ul className="footer__socialLinks">
             {socialPlatforms.map((p) => (
-              <li key={p.name} style={{ listStyle: "none" }}>
+              <li key={p.name} className="footer__socialItem">
                 <a
                   href={p.url}
                   target="_blank"
