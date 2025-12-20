@@ -15,7 +15,7 @@ import "swiper/css/pagination";
 import "swiper/css/effect-fade";
 import "../../styles/HeroCollectionSlider.css";
 
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:4000";
+import { API_BASE } from "../../config/api";
 
 type HeroSlide = {
   id: string;

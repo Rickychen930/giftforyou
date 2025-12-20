@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import "../styles/BouquetDetailPage.css";
 import type { Bouquet } from "../models/domain/bouquet";
 
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:4000";
+import { API_BASE } from "../config/api"; // adjust path depending on folder depth
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
 const WA_NUMBER = "6285161428911";
 

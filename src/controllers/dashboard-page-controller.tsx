@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import DashboardView from "../view/dashboard-page";
 import type { Bouquet } from "../models/domain/bouquet";
 
+import { API_BASE } from "../config/api";
+
 type MetricsResponse = {
   visitorsCount?: number;
   collectionsCount?: number;
@@ -16,9 +18,7 @@ interface State {
 
   loading: boolean;
   errorMessage?: string;
-}
-
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:4000";
+} // adjust path depending on folder depth
 
 const isNonEmptyString = (v: unknown): v is string =>
   typeof v === "string" && v.trim().length > 0;

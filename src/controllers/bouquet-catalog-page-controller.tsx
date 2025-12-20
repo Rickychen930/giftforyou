@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import type { Bouquet } from "../models/domain/bouquet";
 import BouquetCatalogView from "../view/bouquet-catalog-page";
 
+import { API_BASE } from "../config/api";
+
 type Range = [number, number];
 
 interface State {
@@ -17,9 +19,7 @@ interface State {
 
   loading: boolean;
   error: string | null;
-}
-
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:4000";
+} // adjust path depending on folder depth
 
 const isNonEmptyString = (v: unknown): v is string =>
   typeof v === "string" && v.trim().length > 0;

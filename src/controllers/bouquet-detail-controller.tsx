@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import type { Bouquet } from "../models/domain/bouquet";
 import BouquetDetailPage from "../view/bouquet-detail-page";
 
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:4000";
+import { API_BASE } from "../config/api"; // adjust path depending on folder depth
 
 const isNonEmptyString = (v: unknown): v is string =>
   typeof v === "string" && v.trim().length > 0;

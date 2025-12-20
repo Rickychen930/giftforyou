@@ -1,6 +1,8 @@
 import React from "react";
 import "../styles/CollectionCardComponent.css";
 
+import { API_BASE } from "../config/api";
+
 export interface BouquetCardProps {
   _id: string;
   name: string;
@@ -18,9 +20,7 @@ export interface CollectionCardProps {
   name: string;
   description: string;
   bouquets: BouquetCardProps[];
-}
-
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:4000";
+} // adjust path depending on folder depth
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
 
 const formatPrice = (price: number) =>
