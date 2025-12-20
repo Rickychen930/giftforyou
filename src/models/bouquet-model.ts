@@ -1,5 +1,3 @@
-// src/models/bouquet-model.ts
-
 import mongoose, {
   Schema,
   model,
@@ -7,17 +5,16 @@ import mongoose, {
   type HydratedDocument,
 } from "mongoose";
 
-/**
- * Schema shape (do NOT extend Document here).
- * Mongoose will add _id automatically.
- */
 export interface IBouquet {
   name: string;
   description?: string;
   price: number;
 
-  type: "hand-tied" | "vase-arrangement" | "wreath" | "basket" | "bouquet";
-  size: "small" | "medium" | "large" | "extra-large";
+  // allow any type string (no enum validation)
+  type: string;
+
+  // Title Case sizes
+  size: "Small" | "Medium" | "Large" | "Extra-Large";
 
   occasions: string[];
   flowers: string[];
@@ -44,17 +41,13 @@ const BouquetSchema = new Schema<IBouquet>(
     description: { type: String, default: "", trim: true, maxlength: 500 },
     price: { type: Number, required: true, min: 0.01 },
 
-    type: {
-      type: String,
-      enum: ["hand-tied", "vase-arrangement", "wreath", "basket", "bouquet"],
-      default: "bouquet",
-      required: true,
-    },
+    type: { type: String, default: "bouquet", required: true, trim: true },
 
+    // ✅ FIXED: correct enum values
     size: {
       type: String,
-      enum: ["small", "medium", "large", "extra-large"],
-      default: "medium",
+      enum: ["Small", "Medium", "Large", "Extra-Large"],
+      default: "Medium",
       required: true,
     },
 
@@ -80,7 +73,6 @@ const BouquetSchema = new Schema<IBouquet>(
     status: { type: String, enum: ["ready", "preorder"], default: "ready" },
 
     quantity: { type: Number, default: 0, min: 0 },
-
     collectionName: { type: String, default: "", trim: true, maxlength: 100 },
 
     isNewEdition: { type: Boolean, default: false },
@@ -91,28 +83,16 @@ const BouquetSchema = new Schema<IBouquet>(
   { timestamps: true }
 );
 
-// Indexes
 BouquetSchema.index({ name: 1 });
 BouquetSchema.index({ occasions: 1 });
 BouquetSchema.index({ flowers: 1 });
 BouquetSchema.index({ isNewEdition: 1 });
 BouquetSchema.index({ isFeatured: 1 });
 
-/**
- * ✅ The REAL mongoose model instance.
- * Use this in controllers for:
- * - BouquetModel.countDocuments()
- * - BouquetModel.find()
- * - BouquetModel.aggregate()
- */
 export const BouquetModel: Model<IBouquet> =
   (mongoose.models.Bouquet as Model<IBouquet>) ||
   model<IBouquet>("Bouquet", BouquetSchema);
 
-/**
- * Optional (professional): a service layer for bouquet-specific queries.
- * This avoids putting business logic directly in controllers.
- */
 export class BouquetService {
   static async findNewEditions(): Promise<BouquetDocument[]> {
     return BouquetModel.find({ isNewEdition: true, status: "ready" }).exec();
@@ -125,14 +105,16 @@ export class BouquetService {
   static async createBouquet(
     data: Partial<IBouquet>
   ): Promise<BouquetDocument> {
-    const doc = await BouquetModel.create(data);
-    return doc;
+    return BouquetModel.create(data);
   }
 
   static async updateById(
     id: string,
     data: Partial<IBouquet>
   ): Promise<BouquetDocument | null> {
-    return BouquetModel.findByIdAndUpdate(id, data, { new: true }).exec();
+    return BouquetModel.findByIdAndUpdate(id, data, {
+      new: true,
+      runValidators: true,
+    }).exec();
   }
 }

@@ -11,11 +11,10 @@ import Header from "./view/header";
 import Footer from "./view/footer";
 
 import HomePage from "./view/home-page";
-import BouquetDetailController from "./controllers/bouquet-catalog-page-controller";
+import BouquetCatalogController from "./controllers/bouquet-catalog-page-controller";
 import LoginController from "./controllers/login-page-controller";
 import DashboardController from "./controllers/dashboard-page-controller";
-
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:4000";
+import BouquetDetailController from "./controllers/bouquet-detail-controller";
 
 const isLoggedIn = (): boolean => {
   return Boolean(localStorage.getItem("authToken"));
@@ -31,7 +30,6 @@ const AppLayout: React.FC = () => {
   const location = useLocation();
   const loggedIn = isLoggedIn();
 
-  // ✅ Hide header on login page
   const hideHeader = location.pathname === "/login";
 
   const navLinks = loggedIn
@@ -52,8 +50,13 @@ const AppLayout: React.FC = () => {
 
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/collection" element={<BouquetDetailController />} />
+
+        {/* ✅ Catalog */}
+        <Route path="/collection" element={<BouquetCatalogController />} />
+
+        {/* ✅ Detail */}
         <Route path="/bouquet/:id" element={<BouquetDetailController />} />
+
         <Route path="/login" element={<LoginController />} />
 
         <Route
@@ -65,7 +68,6 @@ const AppLayout: React.FC = () => {
           }
         />
 
-        {/* fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 

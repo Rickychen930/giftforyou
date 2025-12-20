@@ -8,6 +8,7 @@ import metricsRoutes from "../routes/metrics-routes";
 import authRoutes from "../routes/auth-routes";
 import bouquetRoutes from "../routes/bouquet-routes";
 import collectionRoutes from "../routes/collection-routes";
+import heroSliderRoutes from "../routes/hero-slider-routes";
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -40,12 +41,12 @@ app.use("/api/metrics", metricsRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/bouquets", bouquetRoutes);
 app.use("/api/collections", collectionRoutes);
+app.use("/api/hero-slider", heroSliderRoutes);
 
 async function start() {
   try {
     await mongoose.connect(MONGO_URI);
     console.log("✅ MongoDB connected");
-
     app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   } catch (err) {
     console.error("❌ MongoDB connection error:", err);

@@ -1,5 +1,4 @@
 // src/controllers/home-sections.controllers.tsx
-
 import React, { Component } from "react";
 
 import HeroCollectionSlider from "../components/sections/hero-collection-slider";
@@ -8,29 +7,28 @@ import StoreLocationSection from "../components/sections/store-location-section"
 import OurCollectionSection from "../components/sections/our-collection-section";
 
 import { storeData } from "../models/store-model";
+import { aboutUsContent } from "../models/about-us-model";
 
 import type { Collection } from "../models/domain/collection";
 import { getCollections } from "../services/collection.service";
-import { aboutUsContent } from "../models/about-us-model";
 
-/** ✅ Hero Controller */
+/** ✅ Hero Controller (uses default slides OR pass content from parent if needed) */
 export class HeroController extends Component {
-  public render(): React.ReactNode {
-    // uses default slides inside component (no content prop required)
+  render(): React.ReactNode {
     return <HeroCollectionSlider />;
   }
 }
 
 /** ✅ About Us Controller */
 export class AboutUsController extends Component {
-  public render(): React.ReactNode {
+  render(): React.ReactNode {
     return <AboutUsSection content={aboutUsContent} />;
   }
 }
 
 /** ✅ Store Location Controller */
 export class StoreLocationController extends Component {
-  public render(): React.ReactNode {
+  render(): React.ReactNode {
     return <StoreLocationSection data={storeData} />;
   }
 }
@@ -48,14 +46,11 @@ export class OurCollectionController extends Component<
 > {
   private abortController = new AbortController();
 
-  constructor(props: {}) {
-    super(props);
-    this.state = {
-      collections: [],
-      loading: true,
-      errorMessage: "",
-    };
-  }
+  state: OurCollectionControllerState = {
+    collections: [],
+    loading: true,
+    errorMessage: "",
+  };
 
   async componentDidMount(): Promise<void> {
     try {
@@ -63,7 +58,6 @@ export class OurCollectionController extends Component<
       this.setState({ collections: data, loading: false, errorMessage: "" });
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === "AbortError") return;
-
       const message = err instanceof Error ? err.message : "Unknown error";
       this.setState({ loading: false, errorMessage: message });
     }
@@ -73,7 +67,7 @@ export class OurCollectionController extends Component<
     this.abortController.abort();
   }
 
-  public render(): React.ReactNode {
+  render(): React.ReactNode {
     const { collections, loading, errorMessage } = this.state;
 
     if (loading) {

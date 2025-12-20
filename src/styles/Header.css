@@ -7,7 +7,6 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  overflow: hidden;
 
   background: var(
     --header-color-background,
@@ -16,16 +15,18 @@
 
   border-bottom: 1px solid var(--border-1);
   box-shadow: var(--hd-shadow);
+
+  /* ✅ prevents dropdown panel from increasing layout outside */
+  overflow: visible;
 }
 
-/* soft pattern without inline SVG vars (reliable) */
+/* soft pattern */
 .header::before {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.55;
-
+  opacity: 0.5;
   background:
     radial-gradient(14px 14px at 12% 40%, rgba(212, 140, 156, 0.18) 25%, transparent 26%),
     radial-gradient(12px 12px at 80% 30%, rgba(168, 213, 186, 0.18) 25%, transparent 26%),
@@ -47,7 +48,7 @@
    Nav bar layout
 ========================= */
 .nav-bar {
-  position: relative;
+  position: relative; /* ✅ anchor for absolute mobile panel */
   z-index: 1;
 
   max-width: var(--max);
@@ -61,9 +62,10 @@
   padding: 0.9rem 1.25rem;
 }
 
+/* Logo */
 .nav-left .logo {
-  height: 66px;
-  width: 66px;
+  height: 64px;
+  width: 64px;
   object-fit: cover;
   border-radius: 50%;
   box-shadow: var(--shadow-1);
@@ -84,10 +86,11 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--header-color-text, var(--ink-900));
+  line-height: 1.2;
 }
 
 /* =========================
-   Nav links (desktop)
+   Desktop nav links
 ========================= */
 .nav-right {
   justify-self: end;
@@ -102,19 +105,24 @@
   margin: 0;
 }
 
+.nav-item {
+  min-width: 0;
+}
+
 .nav-link {
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
 
-  padding: 0.55rem 0.6rem;
+  padding: 0.6rem 0.75rem;
   border-radius: 999px;
 
   text-decoration: none;
   color: var(--ink-900);
   font-weight: 850;
 
-  transition: background 0.2s ease, transform 0.2s ease, color 0.2s ease;
+  transition: background 0.2s ease, transform 0.2s ease, color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .nav-link i {
@@ -123,9 +131,10 @@
 }
 
 .nav-link:hover {
-  background: rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.7);
   transform: translateY(-1px);
   color: var(--brand-rose-500);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
 }
 
 .nav-link:hover i {
@@ -140,37 +149,56 @@
 
 /* =========================
    Hamburger (mobile)
+   ✅ does not change header height
 ========================= */
 .hamburger {
   display: none;
   justify-self: end;
 
   border: 1px solid var(--border-1);
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.78);
   border-radius: 12px;
 
-  padding: 0.55rem;
-  cursor: pointer;
+  width: 44px;
+  height: 44px;
+  padding: 0;
 
+  cursor: pointer;
   box-shadow: var(--shadow-1);
-  transition: transform 0.2s ease, background 0.2s ease;
+
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .hamburger:hover {
   transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--shadow-2);
 }
 
 .hamburger span {
   display: block;
-  width: 28px;
-  height: 3px;
+  width: 22px;
+  height: 2.5px;
+  margin: 0 auto;
   background: rgba(0, 0, 0, 0.72);
-  border-radius: 3px;
+  border-radius: 999px;
+  transition: transform 0.22s ease, opacity 0.22s ease;
 }
 
 .hamburger span + span {
-  margin-top: 7px;
+  margin-top: 6px;
+}
+
+/* Optional: animate to X when open
+   (add class in TSX if you want: hamburger is-open) */
+.hamburger.is-open span:nth-child(1) {
+  transform: translateY(8.5px) rotate(45deg);
+}
+.hamburger.is-open span:nth-child(2) {
+  opacity: 0;
+}
+.hamburger.is-open span:nth-child(3) {
+  transform: translateY(-8.5px) rotate(-45deg);
 }
 
 /* =========================
@@ -183,17 +211,17 @@
 }
 
 /* =========================
-   Responsive (mobile menu panel)
+   Mobile dropdown panel (absolute overlay)
+   ✅ No header height change
 ========================= */
 @media (max-width: 820px) {
   .nav-bar {
-    grid-template-columns: auto 1fr auto;
     padding: 0.8rem 1rem;
   }
 
   .nav-title {
-    font-size: 1.2rem;
-    letter-spacing: 0.10em;
+    font-size: 1.15rem;
+    letter-spacing: 0.1em;
   }
 
   .nav-right {
@@ -201,21 +229,43 @@
   }
 
   .hamburger {
-    display: inline-block;
+    display: inline-grid;
+    place-items: center;
   }
 
   .nav-right.mobile-active {
+    /* ✅ overlay panel */
     display: block;
-    grid-column: 1 / -1;
+    position: absolute;
+    left: 1rem;
+    right: 1rem;
+    top: calc(100% + 0.75rem);
 
-    margin-top: 0.9rem;
-    padding: 0.9rem;
+    margin: 0;
+    padding: 0.85rem;
 
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.92);
     border: 1px solid var(--border-1);
     border-radius: 16px;
     box-shadow: var(--shadow-2);
-    backdrop-filter: blur(10px);
+
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    /* smooth entrance */
+    transform-origin: top;
+    animation: navDrop 140ms ease-out;
+  }
+
+  @keyframes navDrop {
+    from {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
   }
 
   .nav-right.mobile-active .nav-links {
@@ -226,7 +276,13 @@
 
   .nav-right.mobile-active .nav-link {
     justify-content: center;
-    padding: 0.75rem 0.9rem;
+    padding: 0.8rem 0.95rem;
+    background: rgba(255, 255, 255, 0.65);
+  }
+
+  .nav-right.mobile-active .nav-link:hover {
+    background: rgba(255, 255, 255, 0.92);
+    transform: translateY(-1px);
   }
 }
 

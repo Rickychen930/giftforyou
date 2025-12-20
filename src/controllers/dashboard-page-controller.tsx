@@ -1,240 +1,243 @@
-// src/controllers/DashboardController.tsx
-
 import React, { Component } from "react";
-import type { Bouquet } from "../models/domain/bouquet";
 import DashboardView from "../view/dashboard-page";
+import type { Bouquet } from "../models/domain/bouquet";
 
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:4000";
-const SESSION_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
-const CHECK_INTERVAL_MS = 10 * 1000; // 10 seconds
+type MetricsResponse = {
+  visitorsCount?: number;
+  collectionsCount?: number;
+  collections?: string[];
+};
 
 interface State {
   bouquets: Bouquet[];
-  visitorsCount: number;
   collectionsCount: number;
+  visitorsCount: number;
   collections: string[];
 
   loading: boolean;
-  errorMessage: string;
+  errorMessage?: string;
 }
 
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:4000";
+
+const isNonEmptyString = (v: unknown): v is string =>
+  typeof v === "string" && v.trim().length > 0;
+
 class DashboardController extends Component<{}, State> {
-  private activityInterval: ReturnType<typeof setInterval> | null = null;
-  private abortController = new AbortController();
+  private abortController: AbortController | null = null;
 
   constructor(props: {}) {
     super(props);
     this.state = {
       bouquets: [],
-      visitorsCount: 0,
       collectionsCount: 0,
+      visitorsCount: 0,
       collections: [],
       loading: true,
-      errorMessage: "",
+      errorMessage: undefined,
     };
   }
 
   componentDidMount(): void {
-    const token = localStorage.getItem("authToken");
-    const lastActivity = localStorage.getItem("lastActivity");
-
-    if (!token || !lastActivity) {
-      window.location.assign("/login");
-      return;
-    }
-
-    window.addEventListener("mousemove", this.updateActivity);
-    window.addEventListener("keydown", this.updateActivity);
-
-    this.activityInterval = setInterval(
-      this.checkSessionTimeout,
-      CHECK_INTERVAL_MS
-    );
-
-    this.refreshData();
+    this.loadDashboard();
   }
 
   componentWillUnmount(): void {
-    this.abortController.abort();
-    if (this.activityInterval) clearInterval(this.activityInterval);
-
-    window.removeEventListener("mousemove", this.updateActivity);
-    window.removeEventListener("keydown", this.updateActivity);
+    this.abortController?.abort();
   }
 
-  private updateActivity = () => {
-    localStorage.setItem("lastActivity", Date.now().toString());
-  };
-
-  private checkSessionTimeout = () => {
-    const last = localStorage.getItem("lastActivity");
-    if (!last) return;
-
-    const diff = Date.now() - Number(last);
-    if (diff > SESSION_TIMEOUT_MS) {
-      this.handleLogout();
-    }
-  };
-
-  private handleLogout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("lastActivity");
-    window.location.assign("/login");
-  };
-
-  private authHeaders(): HeadersInit {
+  private getAuthHeaders(): HeadersInit {
     const token = localStorage.getItem("authToken");
     return token ? { Authorization: `Bearer ${token}` } : {};
   }
 
-  // ✅ Normalize backend JSON to frontend domain Bouquet
-  private normalizeBouquet = (b: any): Bouquet => {
-    return {
-      _id: String(b?._id ?? ""),
-      name: typeof b?.name === "string" ? b.name : "",
-      description: typeof b?.description === "string" ? b.description : "",
+  private normalizeBouquet = (b: any): Bouquet => ({
+    _id: String(b?._id ?? ""),
+    name: isNonEmptyString(b?.name) ? b.name : "",
+    description: isNonEmptyString(b?.description) ? b.description : "",
+    price: Number(b?.price ?? 0),
 
-      price: Number(b?.price ?? 0),
+    type: isNonEmptyString(b?.type) ? b.type : "",
+    size: isNonEmptyString(b?.size) ? b.size : "",
 
-      type: typeof b?.type === "string" ? b.type : undefined,
-      size: typeof b?.size === "string" ? b.size : undefined,
+    image: isNonEmptyString(b?.image) ? b.image : "",
+    status: b?.status === "preorder" ? "preorder" : "ready",
+    collectionName: isNonEmptyString(b?.collectionName) ? b.collectionName : "",
 
-      // ✅ required fields in Bouquet domain model
-      occasions: Array.isArray(b?.occasions) ? b.occasions : [],
-      flowers: Array.isArray(b?.flowers) ? b.flowers : [],
-      isNewEdition: Boolean(b?.isNewEdition),
-      isFeatured: Boolean(b?.isFeatured),
+    occasions: Array.isArray(b?.occasions) ? b.occasions : [],
+    flowers: Array.isArray(b?.flowers) ? b.flowers : [],
+    isNewEdition: Boolean(b?.isNewEdition),
+    isFeatured: Boolean(b?.isFeatured),
 
-      image: typeof b?.image === "string" ? b.image : undefined,
-      status: b?.status === "preorder" ? "preorder" : "ready",
+    quantity: typeof b?.quantity === "number" ? b.quantity : 0,
+    careInstructions: isNonEmptyString(b?.careInstructions)
+      ? b.careInstructions
+      : undefined,
+    createdAt: isNonEmptyString(b?.createdAt) ? b.createdAt : undefined,
+    updatedAt: isNonEmptyString(b?.updatedAt) ? b.updatedAt : undefined,
+  });
 
-      quantity: typeof b?.quantity === "number" ? b.quantity : undefined,
-      collectionName:
-        typeof b?.collectionName === "string" ? b.collectionName : undefined,
+  private loadDashboard = async (): Promise<void> => {
+    this.abortController?.abort();
+    this.abortController = new AbortController();
 
-      careInstructions:
-        typeof b?.careInstructions === "string"
-          ? b.careInstructions
-          : undefined,
-
-      createdAt: typeof b?.createdAt === "string" ? b.createdAt : undefined,
-      updatedAt: typeof b?.updatedAt === "string" ? b.updatedAt : undefined,
-    };
-  };
-
-  private refreshData = async () => {
-    this.setState({ loading: true, errorMessage: "" });
+    this.setState({ loading: true, errorMessage: undefined });
 
     try {
-      const [bouquetsRes, metricsRes] = await Promise.all([
-        fetch(`${API_BASE}/api/bouquets`, {
-          signal: this.abortController.signal,
-          headers: this.authHeaders(),
-        }),
-        fetch(`${API_BASE}/api/metrics`, {
-          signal: this.abortController.signal,
-          headers: this.authHeaders(),
-        }),
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+        ...this.getAuthHeaders(),
+      };
+
+      const metricsReq = fetch(`${API_BASE}/api/metrics`, {
+        method: "GET",
+        headers,
+        signal: this.abortController.signal,
+      });
+
+      const bouquetsReq = fetch(`${API_BASE}/api/bouquets`, {
+        method: "GET",
+        headers,
+        signal: this.abortController.signal,
+      });
+
+      const [metricsRes, bouquetsRes] = await Promise.all([
+        metricsReq,
+        bouquetsReq,
       ]);
 
-      if (!bouquetsRes.ok) {
-        const text = await bouquetsRes.text();
-        throw new Error(
-          `Bouquets request failed (${bouquetsRes.status}): ${text}`
-        );
+      // Handle auth errors clearly
+      if (metricsRes.status === 401 || bouquetsRes.status === 401) {
+        throw new Error("Unauthorized. Please login again.");
       }
 
       if (!metricsRes.ok) {
-        const text = await metricsRes.text();
+        const t = await metricsRes.text();
+        throw new Error(`Failed to load metrics (${metricsRes.status}): ${t}`);
+      }
+
+      if (!bouquetsRes.ok) {
+        const t = await bouquetsRes.text();
         throw new Error(
-          `Metrics request failed (${metricsRes.status}): ${text}`
+          `Failed to load bouquets (${bouquetsRes.status}): ${t}`
         );
       }
 
-      const bouquetsData = (await bouquetsRes.json()) as any[];
-      const metricsData = (await metricsRes.json()) as any;
+      const metricsJson = (await metricsRes.json()) as MetricsResponse;
+      const bouquetsJson = (await bouquetsRes.json()) as any;
 
-      const bouquets: Bouquet[] = Array.isArray(bouquetsData)
-        ? bouquetsData.map(this.normalizeBouquet)
+      const bouquets: Bouquet[] = Array.isArray(bouquetsJson)
+        ? bouquetsJson.map(this.normalizeBouquet)
         : [];
+
+      const collectionsFromMetrics =
+        Array.isArray(metricsJson.collections) &&
+        metricsJson.collections.length > 0
+          ? metricsJson.collections.filter(isNonEmptyString)
+          : [];
+
+      // fallback collections list derived from bouquets
+      const collectionsFallback = Array.from(
+        new Set(bouquets.map((b) => b.collectionName).filter(isNonEmptyString))
+      );
 
       this.setState({
         bouquets,
-        visitorsCount: Number(metricsData?.visitorsCount ?? 0),
-        collectionsCount: Number(metricsData?.collectionsCount ?? 0),
-        collections: Array.isArray(metricsData?.collections)
-          ? metricsData.collections
-          : [],
-        loading: false,
-        errorMessage: "",
+        visitorsCount: Number(metricsJson.visitorsCount ?? 0),
+        collectionsCount: Number(
+          metricsJson.collectionsCount ?? collectionsFallback.length
+        ),
+        collections: collectionsFromMetrics.length
+          ? collectionsFromMetrics
+          : collectionsFallback,
+        errorMessage: undefined,
       });
     } catch (err: unknown) {
-      if (err instanceof DOMException && err.name === "AbortError") return;
+      const anyErr = err as any;
+      if (anyErr?.name === "AbortError") return;
 
-      const message = err instanceof Error ? err.message : "Unknown error";
-      this.setState({ loading: false, errorMessage: message });
-    }
-  };
-
-  private handleUpdate = async (formData: FormData): Promise<boolean> => {
-    try {
-      const id = String(formData.get("_id") ?? "");
-      if (!id) return false;
-
-      const res = await fetch(`${API_BASE}/api/bouquets/${id}`, {
-        method: "PUT",
-        body: formData,
-        headers: this.authHeaders(),
+      this.setState({
+        errorMessage:
+          err instanceof Error ? err.message : "Failed to load dashboard data.",
       });
-
-      if (!res.ok) {
-        const text = await res.text();
-        console.error("Update failed:", text);
-        return false;
-      }
-
-      await this.refreshData();
-      return true;
-    } catch (err) {
-      console.error("Failed to update bouquet", err);
-      return false;
+    } finally {
+      // ✅ critical: stop loading in all cases
+      this.setState({ loading: false });
     }
   };
 
-  private handleUpload = async (formData: FormData): Promise<boolean> => {
+  private onUpload = async (formData: FormData): Promise<boolean> => {
     try {
       const res = await fetch(`${API_BASE}/api/bouquets`, {
         method: "POST",
+        headers: {
+          ...this.getAuthHeaders(),
+          // DO NOT set Content-Type for FormData
+        },
         body: formData,
-        headers: this.authHeaders(),
       });
 
       if (!res.ok) {
-        const text = await res.text();
-        console.error("Upload failed:", text);
-        return false;
+        const t = await res.text();
+        throw new Error(`Upload failed (${res.status}): ${t}`);
       }
 
-      await this.refreshData();
+      await this.loadDashboard();
       return true;
-    } catch (err) {
-      console.error("Failed to upload bouquet", err);
+    } catch (e) {
+      this.setState({
+        errorMessage: e instanceof Error ? e.message : "Upload failed.",
+      });
       return false;
     }
+  };
+
+  private onUpdate = async (formData: FormData): Promise<boolean> => {
+    try {
+      const id = String(formData.get("_id") ?? "");
+      if (!id) throw new Error("Missing bouquet id for update.");
+
+      const res = await fetch(`${API_BASE}/api/bouquets/${id}`, {
+        method: "PUT",
+        headers: {
+          ...this.getAuthHeaders(),
+        },
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const t = await res.text();
+        throw new Error(`Update failed (${res.status}): ${t}`);
+      }
+
+      await this.loadDashboard();
+      return true;
+    } catch (e) {
+      this.setState({
+        errorMessage: e instanceof Error ? e.message : "Update failed.",
+      });
+      return false;
+    }
+  };
+
+  private onLogout = () => {
+    localStorage.removeItem("authToken");
+    // optional redirect
+    window.location.href = "/login";
   };
 
   render(): React.ReactNode {
     return (
       <DashboardView
         bouquets={this.state.bouquets}
-        visitorsCount={this.state.visitorsCount}
         collectionsCount={this.state.collectionsCount}
+        visitorsCount={this.state.visitorsCount}
         collections={this.state.collections}
         loading={this.state.loading}
         errorMessage={this.state.errorMessage}
-        onUpdate={this.handleUpdate}
-        onUpload={this.handleUpload}
-        onLogout={this.handleLogout}
+        onUpload={this.onUpload}
+        onUpdate={this.onUpdate}
+        onLogout={this.onLogout}
       />
     );
   }

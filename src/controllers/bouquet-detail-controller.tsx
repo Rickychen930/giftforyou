@@ -28,7 +28,7 @@ const normalizeBouquet = (b: any): Bouquet => ({
 
   quantity: typeof b?.quantity === "number" ? b.quantity : 0,
 
-  // ✅ FIXED
+  /* ✅ FIXED */
   careInstructions: isNonEmptyString(b?.careInstructions)
     ? b.careInstructions
     : undefined,

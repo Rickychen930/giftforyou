@@ -12,7 +12,6 @@ const socialPlatforms: SocialPlatform[] = [
 ];
 
 function SocialIcon({ name }: { name: SocialPlatform["name"] }) {
-  // simple inline icons (no dependency)
   if (name === "Instagram") {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true" className="footer__icon">
@@ -24,7 +23,6 @@ function SocialIcon({ name }: { name: SocialPlatform["name"] }) {
     );
   }
 
-  // WhatsApp
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className="footer__icon">
       <path
@@ -52,41 +50,50 @@ const Footer: React.FC = () => {
           <div className="footer__brandText">
             <div className="footer__brandName">Giftforyou.idn</div>
             <div className="footer__tagline">
-              Florist & Gift Shop • Orchid Specialist
+              Florist &amp; Gift Shop • Orchid Specialist
             </div>
           </div>
         </div>
 
         {/* Contact */}
-        <div className="footer__block">
+        <div className="footer__block" aria-label="Contact information">
           <div className="footer__blockTitle">Contact</div>
-          <a className="footer__link" href="tel:+6285161428911">
-            +62 851 6142 8911
-          </a>
-          <a className="footer__link" href="mailto:giftforyou.idn01@gmail.com">
-            giftforyou.idn01@gmail.com
-          </a>
+
+          <address style={{ fontStyle: "normal" }}>
+            <a className="footer__link" href="tel:+6285161428911">
+              +62 851 6142 8911
+            </a>
+            <br />
+            <a
+              className="footer__link"
+              href="mailto:giftforyou.idn01@gmail.com"
+            >
+              giftforyou.idn01@gmail.com
+            </a>
+          </address>
         </div>
 
         {/* Social */}
-        <div className="footer__block">
+        <div className="footer__block" aria-label="Social links">
           <div className="footer__blockTitle">Follow Us</div>
-          <div className="footer__socialLinks">
+
+          <ul className="footer__socialLinks" role="list">
             {socialPlatforms.map((p) => (
-              <a
-                key={p.name}
-                href={p.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`footer__socialBtn footer__socialBtn--${p.name.toLowerCase()}`}
-                aria-label={`Open ${p.name}`}
-                title={p.name}
-              >
-                <SocialIcon name={p.name} />
-                <span className="footer__socialName">{p.name}</span>
-              </a>
+              <li key={p.name} style={{ listStyle: "none" }}>
+                <a
+                  href={p.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`footer__socialBtn footer__socialBtn--${p.name.toLowerCase()}`}
+                  aria-label={`Open ${p.name}`}
+                  title={p.name}
+                >
+                  <SocialIcon name={p.name} />
+                  <span className="footer__socialName">{p.name}</span>
+                </a>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
 
         {/* Bottom */}

@@ -1,10 +1,9 @@
-// src/components/bouquet-card-edit-component.tsx
-
 import React, { useEffect, useMemo, useState } from "react";
 import "../styles/BouquetCardEditComponent.css";
 import type { Bouquet } from "../models/domain/bouquet";
 
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:4000";
+const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
 
 interface Props {
   bouquet: Bouquet;
@@ -12,50 +11,88 @@ interface Props {
   onSave: (formData: FormData) => Promise<boolean> | void;
 }
 
+type BouquetStatus = "ready" | "preorder";
+type BouquetType =
+  | "hand-tied"
+  | "vase-arrangement"
+  | "wreath"
+  | "basket"
+  | "bouquet";
+type BouquetSize = "Small" | "Medium" | "Large" | "Extra-Large";
+
 type FormState = {
   _id: string;
   name: string;
   description: string;
   price: number;
-  type: string;
-  size: string;
-  status: "ready" | "preorder";
+  type: BouquetType;
+  size: BouquetSize;
+  status: BouquetStatus;
   collectionName: string;
+};
+
+const TYPE_OPTIONS: { label: string; value: BouquetType }[] = [
+  { label: "Bouquet", value: "bouquet" },
+  { label: "Hand-tied", value: "hand-tied" },
+  { label: "Vase arrangement", value: "vase-arrangement" },
+  { label: "Wreath", value: "wreath" },
+  { label: "Basket", value: "basket" },
+];
+
+const SIZE_OPTIONS: { label: string; value: BouquetSize }[] = [
+  { label: "Small", value: "Small" },
+  { label: "Medium", value: "Medium" },
+  { label: "Large", value: "Large" },
+  { label: "Extra large", value: "Extra-Large" },
+];
+
+const buildPreviewUrl = (preview: string) => {
+  if (!preview) return "";
+  if (preview.startsWith("blob:")) return preview;
+  if (preview.startsWith("http://") || preview.startsWith("https://"))
+    return preview;
+  const normalized = preview.startsWith("/") ? preview : `/${preview}`;
+  return new URL(normalized, API_BASE).toString();
+};
+
+const formatPrice = (value: number) =>
+  new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(value);
+
+const toNumber = (v: string) => {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
 };
 
 const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
   const [saving, setSaving] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string>(bouquet.image ?? "");
 
   const [form, setForm] = useState<FormState>({
     _id: bouquet._id,
-    name: bouquet.name,
+    name: bouquet.name ?? "",
     description: bouquet.description ?? "",
-    price: bouquet.price,
-    type: bouquet.type ?? "",
-    size: bouquet.size ?? "",
-    status: bouquet.status,
+    price: Number.isFinite(bouquet.price) ? bouquet.price : 0,
+    type: (bouquet.type as BouquetType) || "bouquet",
+    // IMPORTANT: your DB enum is Title Case (Small/Medium/...)
+    size: (bouquet.size as BouquetSize) || "Medium",
+    status: bouquet.status === "preorder" ? "preorder" : "ready",
     collectionName: bouquet.collectionName ?? "",
   });
 
-  const [file, setFile] = useState<File | null>(null);
-
-  /**
-   * preview:
-   * - can be an existing server path (e.g. "/uploads/xxx.jpg")
-   * - or a blob url when user selects new file
-   */
-  const [preview, setPreview] = useState<string>(bouquet.image ?? "");
-
-  // If parent re-renders with a different bouquet, refresh the form
   useEffect(() => {
     setForm({
       _id: bouquet._id,
-      name: bouquet.name,
+      name: bouquet.name ?? "",
       description: bouquet.description ?? "",
-      price: bouquet.price,
-      type: bouquet.type ?? "",
-      size: bouquet.size ?? "",
-      status: bouquet.status,
+      price: Number.isFinite(bouquet.price) ? bouquet.price : 0,
+      type: (bouquet.type as BouquetType) || "bouquet",
+      size: (bouquet.size as BouquetSize) || "Medium",
+      status: bouquet.status === "preorder" ? "preorder" : "ready",
       collectionName: bouquet.collectionName ?? "",
     });
 
@@ -63,81 +100,64 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
     setPreview(bouquet.image ?? "");
   }, [bouquet]);
 
-  // Create a blob preview when user selects a new image
   useEffect(() => {
     if (!file) return;
-
     const objectUrl = URL.createObjectURL(file);
     setPreview(objectUrl);
-
     return () => URL.revokeObjectURL(objectUrl);
   }, [file]);
 
-  const previewUrl = useMemo(() => {
-    if (!preview) return "";
-    if (preview.startsWith("blob:")) return preview;
-    if (preview.startsWith("http://") || preview.startsWith("https://"))
-      return preview;
+  const previewUrl = useMemo(() => buildPreviewUrl(preview), [preview]);
 
-    // assume server path
-    return `${API_BASE}${preview}`;
-  }, [preview]);
-
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value } = e.target;
-
-    setForm((prev) => ({
-      ...prev,
-      [name]: name === "price" ? Number(value) : value,
-    }));
-  };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files?.[0] ?? null;
-    setFile(selected);
-  };
-
-  const validate = (): string | null => {
-    if (!form.name.trim() || form.name.trim().length < 2)
-      return "Name must be at least 2 characters.";
+  const validationError = useMemo((): string | null => {
+    const nm = form.name.trim();
+    if (nm.length < 2) return "Name must be at least 2 characters.";
     if (!Number.isFinite(form.price) || form.price <= 0)
       return "Price must be greater than 0.";
     if (form.status !== "ready" && form.status !== "preorder")
       return "Invalid status.";
     return null;
+  }, [form.name, form.price, form.status]);
+
+  const canSave = !saving && !validationError;
+
+  const handleTextChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: name === "price" ? toNumber(value) : value,
+    }));
+  };
+
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value } as FormState));
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFile(e.target.files?.[0] ?? null);
   };
 
   const handleSave = async () => {
-    const error = validate();
-    if (error) {
-      alert(error);
-      return;
-    }
+    if (validationError) return;
 
     const fd = new FormData();
     fd.append("_id", form._id);
-
-    // only attach image if user selected a new one
     if (file) fd.append("image", file);
 
     fd.append("name", form.name.trim());
     fd.append("description", form.description ?? "");
     fd.append("price", String(form.price));
-    fd.append("type", form.type ?? "");
-    fd.append("size", form.size ?? "");
+    fd.append("type", form.type);
+    fd.append("size", form.size);
     fd.append("status", form.status);
-    fd.append("collectionName", form.collectionName ?? "");
+    fd.append("collectionName", (form.collectionName ?? "").trim());
 
     try {
       setSaving(true);
-
       const result = await onSave(fd);
-
-      // If caller returns boolean, show feedback here. Otherwise caller can handle feedback.
       if (typeof result === "boolean") {
         alert(
           result
@@ -154,119 +174,161 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
   };
 
   return (
-    <article
-      className="bouquetEditorCard"
-      aria-label={`Edit bouquet ${form.name}`}
-    >
-      {previewUrl ? (
-        <img
-          src={previewUrl}
-          alt={form.name}
-          className="bouquetEditorCard__image"
-          onError={(e) => {
-            e.currentTarget.onerror = null;
-            e.currentTarget.src = "/images/placeholder-bouquet.jpg";
-          }}
-        />
-      ) : (
-        <div className="bouquetEditorCard__imagePlaceholder">No Image</div>
-      )}
+    <article className="becCard" aria-label={`Edit bouquet ${form.name}`}>
+      <header className="becHeader">
+        <div className="becHeader__left">
+          <h3
+            className="becHeader__title"
+            title={form.name || "Untitled bouquet"}
+          >
+            {form.name || "Untitled bouquet"}
+          </h3>
+          <p className="becHeader__sub">
+            {formatPrice(form.price)} • {form.type} • {form.size}
+          </p>
+        </div>
 
-      <div className="bouquetEditorCard__body">
-        <label className="field">
-          Name
-          <input
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            placeholder="Bouquet name"
+        <span
+          className={`becStatus ${
+            form.status === "ready" ? "is-ready" : "is-preorder"
+          }`}
+        >
+          {form.status === "ready" ? "Ready" : "Preorder"}
+        </span>
+      </header>
+
+      <div className="becImage">
+        {previewUrl ? (
+          <img
+            src={previewUrl}
+            alt={form.name}
+            loading="lazy"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = FALLBACK_IMAGE;
+            }}
           />
-        </label>
+        ) : (
+          <div className="becImage__placeholder">No Image</div>
+        )}
+      </div>
 
-        <label className="field">
-          Description
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            rows={3}
-            placeholder="Short bouquet description"
-          />
-        </label>
+      <div className="becBody">
+        {validationError && (
+          <div className="becAlert" role="alert">
+            {validationError}
+          </div>
+        )}
 
-        <div className="fieldRow">
-          <label className="field">
-            Price (IDR)
+        <div className="becGrid">
+          <label className="becField">
+            <span className="becLabel">Name</span>
             <input
-              name="price"
-              type="number"
-              value={form.price}
-              onChange={handleChange}
+              name="name"
+              value={form.name}
+              onChange={handleTextChange}
+              placeholder="Bouquet name"
+              autoComplete="off"
             />
           </label>
 
-          <label className="field">
-            Status
-            <select name="status" value={form.status} onChange={handleChange}>
+          <label className="becField">
+            <span className="becLabel">Price (IDR)</span>
+            <input
+              name="price"
+              type="number"
+              min={0}
+              step={1000}
+              value={form.price}
+              onChange={handleTextChange}
+            />
+          </label>
+
+          <label className="becField">
+            <span className="becLabel">Type</span>
+            <select name="type" value={form.type} onChange={handleSelectChange}>
+              {TYPE_OPTIONS.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="becField">
+            <span className="becLabel">Size</span>
+            <select name="size" value={form.size} onChange={handleSelectChange}>
+              {SIZE_OPTIONS.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="becField">
+            <span className="becLabel">Status</span>
+            <select
+              name="status"
+              value={form.status}
+              onChange={handleSelectChange}
+            >
               <option value="ready">Ready</option>
               <option value="preorder">Preorder</option>
             </select>
           </label>
-        </div>
 
-        <div className="fieldRow">
-          <label className="field">
-            Type
-            <input
-              name="type"
-              value={form.type}
-              onChange={handleChange}
-              placeholder="e.g., orchid"
+          <label className="becField">
+            <span className="becLabel">Collection</span>
+            <select
+              name="collectionName"
+              value={form.collectionName}
+              onChange={handleSelectChange}
+            >
+              <option value="">Select collection</option>
+              {collections.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="becField becField--full">
+            <span className="becLabel">Description</span>
+            <textarea
+              name="description"
+              value={form.description}
+              onChange={handleTextChange}
+              rows={3}
+              placeholder="Short bouquet description"
             />
           </label>
 
-          <label className="field">
-            Size
-            <select name="size" value={form.size} onChange={handleChange}>
-              <option value="">Select size</option>
-              {/* Match your backend values if you use small/medium/large */}
-              <option value="small">Small</option>
-              <option value="medium">Medium</option>
-              <option value="large">Large</option>
-              <option value="extra-large">Extra Large</option>
-            </select>
+          <label className="becField becField--full">
+            <span className="becLabel">Image</span>
+            <input
+              type="file"
+              accept="image/*,.heic,.heif"
+              onChange={handleImageChange}
+            />
+            <span className="becHint">
+              PNG/JPG/WEBP/HEIC supported (HEIC will be converted).
+            </span>
           </label>
         </div>
 
-        <label className="field">
-          Collection
-          <select
-            name="collectionName"
-            value={form.collectionName}
-            onChange={handleChange}
+        <div className="becFooter">
+          <button
+            type="button"
+            className="becSave"
+            onClick={handleSave}
+            disabled={!canSave}
+            title={validationError ?? "Save changes"}
           >
-            <option value="">Select collection</option>
-            {collections.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="field">
-          Image
-          <input type="file" accept="image/*" onChange={handleImageChange} />
-        </label>
-
-        <button
-          type="button"
-          className="bouquetEditorCard__save"
-          onClick={handleSave}
-          disabled={saving}
-        >
-          {saving ? "Saving..." : "Save Changes"}
-        </button>
+            {saving ? "Saving..." : "Save Changes"}
+          </button>
+        </div>
       </div>
     </article>
   );

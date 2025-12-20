@@ -15,6 +15,8 @@ import "swiper/css/pagination";
 import "swiper/css/effect-fade";
 import "../../styles/HeroCollectionSlider.css";
 
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:4000";
+
 type HeroSlide = {
   id: string;
   badge?: string;
@@ -78,6 +80,25 @@ const defaultContent: HeroSliderContent = {
 
 const isExternal = (href: string) => /^https?:\/\//i.test(href);
 
+/**
+ * ✅ Fix for uploaded images:
+ * - if image is "/uploads/..." -> serve from backend API_BASE
+ * - if image is "/images/..."  -> serve from frontend public folder (keep as-is)
+ * - if image is "http..."      -> keep as-is
+ */
+const resolveImageSrc = (image: string) => {
+  const v = (image ?? "").trim();
+  if (!v) return "/images/placeholder-bouquet.jpg";
+  if (isExternal(v)) return v;
+
+  if (v.startsWith("/uploads/")) {
+    return `${API_BASE}${v}`;
+  }
+
+  // Default: assume it's a normal public asset (/images/...)
+  return v;
+};
+
 const Cta: React.FC<{
   href: string;
   className: string;
@@ -134,10 +155,13 @@ const HeroCollectionSlider: React.FC<HeroCollectionSliderProps> = ({
             <article className="heroSlide" aria-label={slide.title}>
               <img
                 className="heroSlide__img"
-                src={slide.image}
+                src={resolveImageSrc(slide.image)} // ✅ FIXED
                 alt={slide.title}
                 loading={index === 0 ? "eager" : "lazy"}
-                {...(index === 0 ? { fetchpriority: "high" as any } : {})}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = "/images/placeholder-bouquet.jpg";
+                }}
               />
 
               <div className="heroSlide__overlay" />
@@ -148,9 +172,7 @@ const HeroCollectionSlider: React.FC<HeroCollectionSliderProps> = ({
                 {slide.badge && (
                   <div className="heroSlide__badge">{slide.badge}</div>
                 )}
-
                 <h1 className="heroSlide__title">{slide.title}</h1>
-
                 {slide.subtitle && (
                   <p className="heroSlide__subtitle">{slide.subtitle}</p>
                 )}

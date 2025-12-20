@@ -4,6 +4,7 @@ import "../styles/DashboardPage.css";
 
 import BouquetUploader from "../components/sections/dashboard-uploader-section";
 import BouquetEditorSection from "../components/sections/Bouquet-editor-section";
+import HeroSliderEditorSection from "../components/sections/HeroSliderEditorSection";
 
 interface Props {
   bouquets: Bouquet[];
@@ -19,17 +20,14 @@ interface Props {
   onLogout: () => void;
 }
 
-type ActiveTab = "overview" | "upload" | "edit";
+type ActiveTab = "overview" | "upload" | "edit" | "hero";
 
 interface State {
   activeTab: ActiveTab;
 }
 
 class DashboardView extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { activeTab: "overview" };
-  }
+  state: State = { activeTab: "overview" };
 
   private setActiveTab = (tab: ActiveTab) => {
     this.setState({ activeTab: tab });
@@ -40,6 +38,7 @@ class DashboardView extends Component<Props, State> {
       { key: "overview", label: "Overview" },
       { key: "upload", label: "Upload Bouquet" },
       { key: "edit", label: "Edit Bouquets" },
+      { key: "hero", label: "Hero Slider" },
     ];
 
     return (
@@ -131,12 +130,16 @@ class DashboardView extends Component<Props, State> {
           />
         );
 
+      case "hero":
+        // ✅ pass collections so the editor can link slides to existing collections
+        return <HeroSliderEditorSection collections={collections} />;
+
       default:
         return null;
     }
   }
 
-  public render(): React.ReactNode {
+  render(): React.ReactNode {
     const { loading } = this.props;
     const errorMessage = (this.props.errorMessage ?? "").trim();
 

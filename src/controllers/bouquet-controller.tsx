@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
-
 import { BouquetModel } from "../models/bouquet-model";
 import { CollectionModel } from "../models/collection-model";
+import { saveUploadedImage } from "../middleware/upload"; // ✅ IMPORTANT
 
 type BouquetStatus = "ready" | "preorder";
 
@@ -28,11 +28,6 @@ const validateBouquetInput = (
   return null;
 };
 
-/**
- * Sync bouquet id with collections:
- * - Remove from old collection if changed
- * - Add to new collection (create if not exists)
- */
 const syncBouquetCollection = async (
   bouquetId: string,
   oldCollectionName?: string,
@@ -41,7 +36,6 @@ const syncBouquetCollection = async (
   const oldName = normalizeString(oldCollectionName);
   const newName = normalizeString(newCollectionName);
 
-  // remove from old collection if different
   if (oldName && oldName !== newName) {
     await CollectionModel.updateOne(
       { name: oldName },
@@ -49,13 +43,29 @@ const syncBouquetCollection = async (
     ).exec();
   }
 
-  // add to new collection
   if (newName) {
     await CollectionModel.findOneAndUpdate(
       { name: newName },
       { $addToSet: { bouquets: bouquetId } },
       { upsert: true, new: true }
     ).exec();
+  }
+};
+
+// ✅ Get bouquet by id
+export const getBouquetById = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const bouquet = await BouquetModel.findById(req.params.id).lean().exec();
+    if (!bouquet) {
+      res.status(404).json({ error: "Bouquet not found" });
+      return;
+    }
+    res.status(200).json(bouquet);
+  } catch {
+    res.status(400).json({ error: "Invalid bouquet id" });
   }
 };
 
@@ -82,7 +92,8 @@ export const createBouquet = async (
       return;
     }
 
-    const image = req.file ? `/uploads/${req.file.filename}` : "";
+    // ✅ FIX: memoryStorage => use saveUploadedImage (not req.file.filename)
+    const image = req.file ? await saveUploadedImage(req.file) : "";
 
     const bouquet = await BouquetModel.create({
       name,
@@ -93,15 +104,13 @@ export const createBouquet = async (
       image,
       status,
       collectionName,
-
-      // if your schema requires these:
       occasions: [],
       flowers: [],
       isNewEdition: false,
       isFeatured: false,
     });
 
-    // ✅ FIX: removed extra comma
+    // ✅ FIX: removed broken ", ,"
     await syncBouquetCollection(String(bouquet._id), undefined, collectionName);
 
     res.status(201).json({ message: "Bouquet created successfully", bouquet });
@@ -146,7 +155,6 @@ export const updateBouquet = async (
 
     const oldCollectionName = bouquet.collectionName;
 
-    // Build updates safely (no "any" needed)
     const updates: Record<string, unknown> = {};
 
     if (req.body.name !== undefined)
@@ -177,11 +185,11 @@ export const updateBouquet = async (
       updates.price = price;
     }
 
+    // ✅ FIX: saveUploadedImage instead of req.file.filename
     if (req.file) {
-      updates.image = `/uploads/${req.file.filename}`;
+      updates.image = await saveUploadedImage(req.file);
     }
 
-    // Apply updates
     Object.assign(bouquet, updates);
     await bouquet.save();
 
