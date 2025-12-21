@@ -1,3 +1,4 @@
+// src/App.tsx - Optimized Main Application Component
 import React from "react";
 import {
   BrowserRouter as Router,
@@ -6,6 +7,7 @@ import {
   Navigate,
 } from "react-router-dom";
 
+import { NAV_LINKS } from "./constants/app-constants";
 import Header from "./view/header";
 import Footer from "./view/footer";
 
@@ -27,34 +29,19 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
 
 const AppLayout: React.FC = () => {
   const loggedIn = isLoggedIn();
-
   const navLinks = loggedIn
-    ? [
-        { label: "Home", path: "/" },
-        { label: "Our Collection", path: "/collection" },
-        { label: "Dashboard", path: "/dashboard" },
-      ]
-    : [
-        { label: "Home", path: "/" },
-        { label: "Our Collection", path: "/collection" },
-        { label: "Login", path: "/login" },
-      ];
+    ? [...NAV_LINKS.authenticated]
+    : [...NAV_LINKS.public];
 
   return (
     <>
-      {<Header navLinks={navLinks} />}
+      <Header navLinks={navLinks} />
 
       <Routes>
         <Route path="/" element={<HomePage />} />
-
-        {/* ✅ Catalog */}
         <Route path="/collection" element={<BouquetCatalogController />} />
-
-        {/* ✅ Detail */}
         <Route path="/bouquet/:id" element={<BouquetDetailController />} />
-
         <Route path="/login" element={<LoginController />} />
-
         <Route
           path="/dashboard"
           element={
@@ -63,7 +50,6 @@ const AppLayout: React.FC = () => {
             </ProtectedRoute>
           }
         />
-
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 

@@ -1,108 +1,184 @@
-import React from "react";
+// src/view/footer.tsx - Optimized Footer Component
+import React, { useState } from "react";
+import {
+  BRAND_INFO,
+  CONTACT_INFO,
+  SOCIAL_MEDIA,
+  QUICK_LINKS,
+  BUSINESS_HOURS,
+} from "../constants/app-constants";
+import { SocialIcon } from "../components/icons/SocialIcons";
+import {
+  PhoneIcon,
+  EmailIcon,
+  ClockIcon,
+  ArrowUpIcon,
+} from "../components/icons/UIIcons";
 import "../styles/Footer.css";
-
-type SocialPlatform = {
-  name: "Instagram" | "WhatsApp";
-  url: string;
-};
-
-const socialPlatforms: SocialPlatform[] = [
-  { name: "Instagram", url: "https://www.instagram.com/giftforyou.idn/?hl=en" },
-  { name: "WhatsApp", url: "https://wa.me/6285161428911" },
-];
-
-function SocialIcon({ name }: { name: SocialPlatform["name"] }) {
-  if (name === "Instagram") {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true" className="footer__icon">
-        <path
-          fill="currentColor"
-          d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2Zm0 2A3.5 3.5 0 0 0 4 7.5v9A3.5 3.5 0 0 0 7.5 20h9A3.5 3.5 0 0 0 20 16.5v-9A3.5 3.5 0 0 0 16.5 4h-9Zm10.25 1.75a1 1 0 1 1 0 2 1 1 0 0 1 0-2ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"
-        />
-      </svg>
-    );
-  }
-
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="footer__icon">
-      <path
-        fill="currentColor"
-        d="M20.5 3.5A11 11 0 0 0 3.3 17.7L2 22l4.4-1.2A11 11 0 0 0 20.5 3.5ZM12 20a9 9 0 0 1-4.6-1.3l-.3-.2-2.6.7.7-2.5-.2-.3A9 9 0 1 1 12 20Zm5.2-6.6c-.3-.1-1.8-.9-2.1-1s-.5-.1-.7.1-.8 1-.9 1.2-.3.2-.6.1a7.4 7.4 0 0 1-2.2-1.4 8.3 8.3 0 0 1-1.5-1.9c-.2-.3 0-.5.1-.6l.6-.8c.1-.2.2-.4.3-.6a.6.6 0 0 0 0-.5c-.1-.1-.7-1.7-.9-2.3-.2-.6-.4-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1 2.8 1.1 3c.1.2 2 3 4.9 4.2.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.2-.3-.2-.6-.3Z"
-      />
-    </svg>
-  );
-}
 
 const Footer: React.FC = () => {
   const year = new Date().getFullYear();
+  const [email, setEmail] = useState("");
+  const [subscribeStatus, setSubscribeStatus] = useState<
+    "idle" | "success" | "error"
+  >("idle");
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email && email.includes("@")) {
+      setSubscribeStatus("success");
+      setEmail("");
+      setTimeout(() => setSubscribeStatus("idle"), 3000);
+    } else {
+      setSubscribeStatus("error");
+      setTimeout(() => setSubscribeStatus("idle"), 3000);
+    }
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <footer className="footer" aria-label="Website footer">
       <div className="footer__container">
-        {/* Brand */}
-        <div className="footer__brand">
-          <img
-            src="/images/logo.png"
-            alt="Giftforyou.idn logo"
-            className="footer__logo"
-            loading="lazy"
-          />
-          <div className="footer__brandText">
-            <div className="footer__brandName">Giftforyou.idn</div>
-            <div className="footer__tagline">
-              Florist &amp; Gift Shop • Orchid Specialist
+        {/* Main Content - 3 Columns */}
+        <div className="footer__main">
+          {/* Brand & About */}
+          <div className="footer__section footer__section--brand">
+            <div className="footer__brand">
+              <img
+                src={BRAND_INFO.logoPath}
+                alt={`${BRAND_INFO.fullName} logo`}
+                className="footer__logo"
+                loading="lazy"
+              />
+              <div className="footer__brandText">
+                <div className="footer__brandName">{BRAND_INFO.fullName}</div>
+                <div className="footer__tagline">{BRAND_INFO.tagline}</div>
+              </div>
+            </div>
+            <p className="footer__description">{BRAND_INFO.description}</p>
+          </div>
+
+          {/* Quick Links */}
+          <div className="footer__section">
+            <h3 className="footer__sectionTitle">Quick Links</h3>
+            <nav aria-label="Footer navigation">
+              <ul className="footer__linkList">
+                {QUICK_LINKS.map((link) => (
+                  <li key={link.label} className="footer__linkItem">
+                    <a href={link.href} className="footer__link">
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
+
+          {/* Contact Info */}
+          <div className="footer__section">
+            <h3 className="footer__sectionTitle">Contact Us</h3>
+            <div className="footer__contactGroup">
+              <a href={CONTACT_INFO.phoneLink} className="footer__contactItem">
+                <PhoneIcon />
+                <span>{CONTACT_INFO.phoneDisplay}</span>
+              </a>
+              <a href={CONTACT_INFO.emailLink} className="footer__contactItem">
+                <EmailIcon />
+                <span>{CONTACT_INFO.email}</span>
+              </a>
+              <div className="footer__hoursCompact">
+                <ClockIcon />
+                <span>{BUSINESS_HOURS.compact}</span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Contact */}
-        <div className="footer__block" aria-label="Contact information">
-          <div className="footer__blockTitle">Contact</div>
-          <address className="footer__address">
-            <a className="footer__link" href="tel:+6285161428911">
-              +62 851 6142 8911
-            </a>
-            <a
-              className="footer__link"
-              href="mailto:giftforyou.idn01@gmail.com"
-            >
-              giftforyou.idn01@gmail.com
-            </a>
-          </address>
-        </div>
-
-        {/* Social */}
-        <div className="footer__block" aria-label="Social links">
-          <div className="footer__blockTitle">Follow Us</div>
-
-          {/* ✅ removed role="list" (ESLint CI error) */}
-          <ul className="footer__socialLinks">
-            {socialPlatforms.map((p) => (
-              <li key={p.name} className="footer__socialItem">
+        {/* Social & Newsletter Bar */}
+        <div className="footer__secondary">
+          <div className="footer__socialCompact">
+            <span className="footer__socialLabel">Follow Us:</span>
+            <div className="footer__socialRow">
+              {SOCIAL_MEDIA.map((platform) => (
                 <a
-                  href={p.url}
+                  key={platform.name}
+                  href={platform.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`footer__socialBtn footer__socialBtn--${p.name.toLowerCase()}`}
-                  aria-label={`Open ${p.name}`}
-                  title={p.name}
+                  className={`footer__socialIcon footer__socialIcon--${platform.name.toLowerCase()}`}
+                  aria-label={platform.label}
+                  title={platform.name}
                 >
-                  <SocialIcon name={p.name} />
-                  <span className="footer__socialName">{p.name}</span>
+                  <SocialIcon name={platform.name} className="footer__icon" />
                 </a>
-              </li>
-            ))}
-          </ul>
+              ))}
+            </div>
+          </div>
+
+          <div className="footer__newsletterCompact">
+            <form
+              onSubmit={handleNewsletterSubmit}
+              className="footer__newsletterForm"
+            >
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Subscribe to newsletter"
+                className="footer__newsletterInput"
+                aria-label="Email address for newsletter"
+                required
+              />
+              <button
+                type="submit"
+                className="footer__newsletterBtn"
+                aria-label="Subscribe"
+              >
+                Subscribe
+              </button>
+            </form>
+            {subscribeStatus === "success" && (
+              <p className="footer__newsletterMessage footer__newsletterMessage--success">
+                Subscribed!
+              </p>
+            )}
+            {subscribeStatus === "error" && (
+              <p className="footer__newsletterMessage footer__newsletterMessage--error">
+                Invalid email
+              </p>
+            )}
+          </div>
         </div>
 
-        {/* Bottom */}
+        {/* Bottom Bar */}
         <div className="footer__bottom">
-          <div className="footer__divider" />
           <p className="footer__copyright">
-            © {year} Giftforyou.idn. All rights reserved.
+            © {year} {BRAND_INFO.fullName}. All rights reserved.
           </p>
+          <div className="footer__bottomLinks">
+            <a href="/privacy" className="footer__bottomLink">
+              Privacy
+            </a>
+            <span className="footer__bottomDivider">•</span>
+            <a href="/terms" className="footer__bottomLink">
+              Terms
+            </a>
+          </div>
         </div>
       </div>
+
+      {/* Back to Top Button */}
+      <button
+        onClick={scrollToTop}
+        className="footer__backToTop"
+        aria-label="Back to top"
+        title="Back to top"
+      >
+        <ArrowUpIcon />
+      </button>
     </footer>
   );
 };
