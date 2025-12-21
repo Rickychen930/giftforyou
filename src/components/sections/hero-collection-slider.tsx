@@ -196,6 +196,19 @@ const HeroCollectionSlider: React.FC<HeroCollectionSliderProps> = ({
 
   const data = useMemo(() => content ?? defaultContent, [content]);
 
+  // Toggle autoplay
+  const toggleAutoplay = useCallback(() => {
+    if (!swiperInstance?.autoplay) return;
+
+    if (isPlaying) {
+      swiperInstance.autoplay.stop();
+      setIsPlaying(false);
+    } else {
+      swiperInstance.autoplay.start();
+      setIsPlaying(true);
+    }
+  }, [swiperInstance, isPlaying]);
+
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -221,20 +234,7 @@ const HeroCollectionSlider: React.FC<HeroCollectionSliderProps> = ({
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [swiperInstance]);
-
-  // Toggle autoplay
-  const toggleAutoplay = useCallback(() => {
-    if (!swiperInstance?.autoplay) return;
-
-    if (isPlaying) {
-      swiperInstance.autoplay.stop();
-      setIsPlaying(false);
-    } else {
-      swiperInstance.autoplay.start();
-      setIsPlaying(true);
-    }
-  }, [swiperInstance, isPlaying]);
+  }, [swiperInstance, toggleAutoplay]);
 
   // Handle image load
   const handleImageLoad = useCallback((slideId: string) => {
