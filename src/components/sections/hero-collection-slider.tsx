@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
@@ -9,6 +9,7 @@ import {
   EffectFade,
   A11y,
   Parallax,
+  Keyboard,
 } from "swiper/modules";
 
 import "swiper/css";
@@ -44,11 +45,12 @@ const defaultContent: HeroSliderContent = {
   heading: "New Collections",
   slides: [
     {
-      id: "orchid-luxe",
+      id: "welcome-collection",
       badge: "NEW ARRIVAL",
-      title: "Orchid Luxe Collection",
-      subtitle: "Premium orchids with elegant wrapping—perfect for gifting.",
-      image: "/images/hero/orchid-luxe.jpg",
+      title: "Premium Flower Collection",
+      subtitle:
+        "Exquisite arrangements with elegant wrapping—perfect for gifting.",
+      image: "/images/welcome-image.jpeg",
       primaryCta: { label: "Shop Collection", href: "/collection" },
       secondaryCta: {
         label: "Order via WhatsApp",
@@ -60,7 +62,7 @@ const defaultContent: HeroSliderContent = {
       badge: "SEASONAL",
       title: "Seasonal Blooms",
       subtitle: "Fresh picks curated weekly by our florist.",
-      image: "/images/hero/seasonal.jpg",
+      image: "/images/about-us-background.jpg",
       primaryCta: { label: "Explore Bouquets", href: "/collection" },
       secondaryCta: {
         label: "Custom Request",
@@ -72,7 +74,7 @@ const defaultContent: HeroSliderContent = {
       badge: "BEST SELLER",
       title: "Flowers & Gifts",
       subtitle: "Make it special with add-ons: cards, chocolates, and more.",
-      image: "/images/hero/gifts.jpg",
+      image: "/images/our-collection-background.jpg",
       primaryCta: { label: "Browse Collection", href: "/collection" },
       secondaryCta: {
         label: "Contact Us",
@@ -187,8 +189,57 @@ const HeroCollectionSlider: React.FC<HeroCollectionSliderProps> = ({
 }) => {
   const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [imageLoadStates, setImageLoadStates] = useState<
+    Record<string, boolean>
+  >({});
 
-  const data = content ?? defaultContent;
+  const data = useMemo(() => content ?? defaultContent, [content]);
+
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (!swiperInstance) return;
+
+      switch (e.key) {
+        case "ArrowLeft":
+          e.preventDefault();
+          swiperInstance.slidePrev();
+          break;
+        case "ArrowRight":
+          e.preventDefault();
+          swiperInstance.slideNext();
+          break;
+        case " ":
+          if (e.target === document.body) {
+            e.preventDefault();
+            toggleAutoplay();
+          }
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [swiperInstance]);
+
+  // Toggle autoplay
+  const toggleAutoplay = useCallback(() => {
+    if (!swiperInstance?.autoplay) return;
+
+    if (isPlaying) {
+      swiperInstance.autoplay.stop();
+      setIsPlaying(false);
+    } else {
+      swiperInstance.autoplay.start();
+      setIsPlaying(true);
+    }
+  }, [swiperInstance, isPlaying]);
+
+  // Handle image load
+  const handleImageLoad = useCallback((slideId: string) => {
+    setImageLoadStates((prev) => ({ ...prev, [slideId]: true }));
+  }, []);
 
   // Show skeleton while loading
   if (loading) {
@@ -204,12 +255,24 @@ const HeroCollectionSlider: React.FC<HeroCollectionSliderProps> = ({
       )}
 
       <Swiper
-        modules={[Autoplay, Navigation, Pagination, EffectFade, A11y, Parallax]}
+        modules={[
+          Autoplay,
+          Navigation,
+          Pagination,
+          EffectFade,
+          A11y,
+          Parallax,
+          Keyboard,
+        ]}
         effect="fade"
         slidesPerView={1}
         loop={data.slides.length > 1}
         speed={1200}
         parallax={true}
+        keyboard={{
+          enabled: true,
+          onlyInViewport: true,
+        }}
         navigation={{
           nextEl: ".hero__nav-next",
           prevEl: ".hero__nav-prev",
@@ -234,22 +297,38 @@ const HeroCollectionSlider: React.FC<HeroCollectionSliderProps> = ({
         className="hero__swiper"
         aria-roledescription="carousel"
         aria-label="Hero collections slider"
+        aria-live="polite"
       >
         {data.slides.map((slide, index) => (
           <SwiperSlide key={slide.id}>
             <article className="heroSlide" aria-label={slide.title}>
-              {/* Image with Ken Burns effect */}
+              {/* Image with Ken Burns effect and blur-up loading */}
               <div className="heroSlide__media" data-swiper-parallax="-100">
-                <img
-                  className="heroSlide__img"
-                  src={resolveImageSrc(slide.image)}
-                  alt={slide.title}
-                  loading={index === 0 ? "eager" : "lazy"}
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = "/images/placeholder-bouquet.jpg";
-                  }}
-                />
+                <div
+                  className={`heroSlide__imgWrapper ${
+                    imageLoadStates[slide.id]
+                      ? "heroSlide__imgWrapper--loaded"
+                      : ""
+                  }`}
+                >
+                  <img
+                    className="heroSlide__img"
+                    src={resolveImageSrc(slide.image)}
+                    alt={slide.title}
+                    loading={index === 0 ? "eager" : "lazy"}
+                    onLoad={() => handleImageLoad(slide.id)}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      handleImageLoad(slide.id);
+                    }}
+                  />
+                  {!imageLoadStates[slide.id] && (
+                    <div
+                      className="heroSlide__imgPlaceholder"
+                      aria-hidden="true"
+                    />
+                  )}
+                </div>
               </div>
 
               {/* Overlays for better text readability */}
@@ -299,8 +378,11 @@ const HeroCollectionSlider: React.FC<HeroCollectionSliderProps> = ({
                         href={slide.primaryCta.href}
                         className="heroSlide__btn heroSlide__btn--primary"
                       >
-                        <span>{slide.primaryCta.label}</span>
+                        <span className="heroSlide__btnText">
+                          {slide.primaryCta.label}
+                        </span>
                         <svg
+                          className="heroSlide__btnIcon"
                           width="16"
                           height="16"
                           viewBox="0 0 16 16"
@@ -323,7 +405,26 @@ const HeroCollectionSlider: React.FC<HeroCollectionSliderProps> = ({
                           href={slide.secondaryCta.href}
                           className="heroSlide__btn heroSlide__btn--secondary"
                         >
-                          <span>{slide.secondaryCta.label}</span>
+                          <span className="heroSlide__btnText">
+                            {slide.secondaryCta.label}
+                          </span>
+                          <svg
+                            className="heroSlide__btnIcon heroSlide__btnIcon--secondary"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            aria-hidden="true"
+                          >
+                            <path
+                              d="M6 3l5 5-5 5"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
                         </Cta>
                       )}
                     </div>
@@ -334,13 +435,14 @@ const HeroCollectionSlider: React.FC<HeroCollectionSliderProps> = ({
           </SwiperSlide>
         ))}
 
-        {/* Custom navigation */}
+        {/* Custom navigation with enhanced accessibility */}
         {data.slides.length > 1 && (
           <>
             <button
               className="hero__nav hero__nav-prev"
-              aria-label="Previous slide"
+              aria-label="Previous slide (Left arrow key)"
               type="button"
+              title="Previous slide"
             >
               <svg
                 width="24"
@@ -360,8 +462,9 @@ const HeroCollectionSlider: React.FC<HeroCollectionSliderProps> = ({
             </button>
             <button
               className="hero__nav hero__nav-next"
-              aria-label="Next slide"
+              aria-label="Next slide (Right arrow key)"
               type="button"
+              title="Next slide"
             >
               <svg
                 width="24"
@@ -379,6 +482,56 @@ const HeroCollectionSlider: React.FC<HeroCollectionSliderProps> = ({
                 />
               </svg>
             </button>
+
+            {/* Play/Pause button */}
+            <button
+              className="hero__playPause"
+              onClick={toggleAutoplay}
+              aria-label={
+                isPlaying
+                  ? "Pause autoplay (Space key)"
+                  : "Play autoplay (Space key)"
+              }
+              type="button"
+              title={isPlaying ? "Pause" : "Play"}
+            >
+              {isPlaying ? (
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    x="6"
+                    y="4"
+                    width="4"
+                    height="16"
+                    rx="1"
+                    fill="currentColor"
+                  />
+                  <rect
+                    x="14"
+                    y="4"
+                    width="4"
+                    height="16"
+                    rx="1"
+                    fill="currentColor"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M8 5v14l11-7z" fill="currentColor" />
+                </svg>
+              )}
+            </button>
           </>
         )}
 
@@ -386,12 +539,22 @@ const HeroCollectionSlider: React.FC<HeroCollectionSliderProps> = ({
         <div className="hero__pagination" />
       </Swiper>
 
-      {/* Slide counter */}
+      {/* Enhanced slide counter with progress */}
       {data.slides.length > 1 && (
-        <div className="hero__counter" aria-live="polite" aria-atomic="true">
-          <span className="hero__counter-current">{activeIndex + 1}</span>
-          <span className="hero__counter-separator">/</span>
-          <span className="hero__counter-total">{data.slides.length}</span>
+        <div className="hero__counterWrapper">
+          <div className="hero__counter" aria-live="polite" aria-atomic="true">
+            <span className="hero__counter-current">{activeIndex + 1}</span>
+            <span className="hero__counter-separator">/</span>
+            <span className="hero__counter-total">{data.slides.length}</span>
+          </div>
+          <div className="hero__progress" aria-hidden="true">
+            <div
+              className="hero__progressBar"
+              style={{
+                width: `${((activeIndex + 1) / data.slides.length) * 100}%`,
+              }}
+            />
+          </div>
         </div>
       )}
     </section>

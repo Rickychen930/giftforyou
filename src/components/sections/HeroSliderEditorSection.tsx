@@ -65,8 +65,11 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections }) => {
   const [heading, setHeading] = useState<string>("New Collections");
   const [slides, setSlides] = useState<HeroSlide[]>([]);
 
-  // Per-slide upload state
+  // Per-slide upload state with progress
   const [uploading, setUploading] = useState<Record<string, boolean>>({});
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>(
+    {}
+  );
   const [uploadError, setUploadError] = useState<Record<string, string>>({});
 
   // Drag and drop state
@@ -249,17 +252,59 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections }) => {
   };
 
   const uploadSlideImage = async (slideId: string, file: File) => {
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setUploadError((prev) => ({
+        ...prev,
+        [slideId]: "File size must be less than 5MB",
+      }));
+      return;
+    }
+
+    // Validate file type
+    const validTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+      "image/heic",
+      "image/heif",
+    ];
+    if (!validTypes.includes(file.type)) {
+      setUploadError((prev) => ({
+        ...prev,
+        [slideId]: "Please upload a valid image file (JPEG, PNG, WebP, HEIC)",
+      }));
+      return;
+    }
+
     setUploadError((prev) => ({ ...prev, [slideId]: "" }));
     setUploading((prev) => ({ ...prev, [slideId]: true }));
+    setUploadProgress((prev) => ({ ...prev, [slideId]: 0 }));
 
     try {
       const fd = new FormData();
       fd.append("image", file);
 
+      // Simulate progress for better UX
+      const progressInterval = setInterval(() => {
+        setUploadProgress((prev) => {
+          const current = prev[slideId] || 0;
+          if (current < 90) {
+            return { ...prev, [slideId]: current + 10 };
+          }
+          return prev;
+        });
+      }, 200);
+
       const res = await fetch(`${API_BASE}/api/hero-slider/home/upload`, {
         method: "POST",
         body: fd,
       });
+
+      clearInterval(progressInterval);
+      setUploadProgress((prev) => ({ ...prev, [slideId]: 100 }));
 
       const data = await res.json().catch(() => null);
 
@@ -268,13 +313,17 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections }) => {
       }
 
       updateSlide(slideId, { image: data.path });
-      setSuccess(`Image uploaded successfully for slide!`);
-      setTimeout(() => setSuccess(""), 3000);
+      setSuccess(`✅ Image uploaded successfully for slide!`);
+      setTimeout(() => {
+        setSuccess("");
+        setUploadProgress((prev) => ({ ...prev, [slideId]: 0 }));
+      }, 3000);
     } catch (e) {
       setUploadError((prev) => ({
         ...prev,
         [slideId]: e instanceof Error ? e.message : "Upload failed",
       }));
+      setUploadProgress((prev) => ({ ...prev, [slideId]: 0 }));
     } finally {
       setUploading((prev) => ({ ...prev, [slideId]: false }));
     }
@@ -285,7 +334,9 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections }) => {
     setError("");
 
     if (validationError) {
-      setError(validationError);
+      setError(`❌ ${validationError}`);
+      // Scroll to error
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
@@ -324,12 +375,18 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections }) => {
       });
 
       if (!res.ok) throw new Error(`Save failed (${res.status})`);
+
       setSuccess("✅ Hero slider updated successfully!");
+      // Scroll to top to show success message
+      window.scrollTo({ top: 0, behavior: "smooth" });
 
       // Auto-hide success message
       setTimeout(() => setSuccess(""), 5000);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to save hero slider.");
+      setError(
+        `❌ ${e instanceof Error ? e.message : "Failed to save hero slider."}`
+      );
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setSaving(false);
     }
@@ -593,8 +650,18 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections }) => {
                         />
 
                         {uploading[s.id] && (
-                          <div className="hsState hsState--small">
-                            Uploading image…
+                          <div className="hsUploadProgress">
+                            <div className="hsUploadProgress__bar">
+                              <div
+                                className="hsUploadProgress__fill"
+                                style={{
+                                  width: `${uploadProgress[s.id] || 0}%`,
+                                }}
+                              />
+                            </div>
+                            <div className="hsUploadProgress__text">
+                              Uploading... {uploadProgress[s.id] || 0}%
+                            </div>
                           </div>
                         )}
                         {uploadError[s.id] && (
@@ -622,32 +689,64 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections }) => {
                           />
                         </div>
 
-                        <div className="hsPreviewRow">
-                          <div className="hsPreviewLabel">Preview</div>
-                          <div className="hsPreviewWrapper">
-                            <img
-                              className="hsPreview"
-                              src={
-                                normalizeImageUrl(s.image) ||
-                                "/images/placeholder-bouquet.jpg"
-                              }
-                              alt={s.title || `Slide ${index + 1}`}
-                              onError={(e) => {
-                                e.currentTarget.onerror = null;
-                                e.currentTarget.src =
-                                  "/images/placeholder-bouquet.jpg";
-                              }}
-                              onClick={() =>
-                                setZoomedImage(
+                        {s.image && (
+                          <div className="hsPreviewRow">
+                            <div className="hsPreviewLabel">Preview</div>
+                            <div className="hsPreviewWrapper">
+                              <img
+                                className="hsPreview"
+                                src={
                                   normalizeImageUrl(s.image) ||
-                                    "/images/placeholder-bouquet.jpg"
-                                )
-                              }
-                              style={{ cursor: "pointer" }}
-                              title="Click to zoom"
-                            />
+                                  "/images/placeholder-bouquet.jpg"
+                                }
+                                alt={s.title || `Slide ${index + 1}`}
+                                onError={(e) => {
+                                  e.currentTarget.onerror = null;
+                                  e.currentTarget.src =
+                                    "/images/placeholder-bouquet.jpg";
+                                }}
+                                onClick={() =>
+                                  setZoomedImage(
+                                    normalizeImageUrl(s.image) ||
+                                      "/images/placeholder-bouquet.jpg"
+                                  )
+                                }
+                                style={{ cursor: "pointer" }}
+                                title="Click to zoom"
+                              />
+                              <div className="hsPreviewOverlay">
+                                <svg
+                                  width="24"
+                                  height="24"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <circle
+                                    cx="11"
+                                    cy="11"
+                                    r="8"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                  />
+                                  <path
+                                    d="M21 21l-4.35-4.35"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                  />
+                                  <path
+                                    d="M11 8v6M8 11h6"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                  />
+                                </svg>
+                                <span>Click to zoom</span>
+                              </div>
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </label>
 
                       <div className="hsFieldGroup">

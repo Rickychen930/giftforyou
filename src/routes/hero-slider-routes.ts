@@ -4,13 +4,22 @@ import fs from "fs";
 import multer from "multer";
 import sharp from "sharp";
 import heicConvert from "heic-convert";
+import mongoose from "mongoose";
 
 import {
   getHomeHeroSlider,
   upsertHomeHeroSlider,
 } from "../controllers/hero-slider-controller";
+import { mockHeroSlider } from "../mock-data/collections";
 
 const router = Router();
+
+/**
+ * Check if MongoDB is connected
+ */
+const isMongoConnected = () => {
+  return mongoose.connection.readyState === 1;
+};
 
 const UPLOAD_DIR = path.resolve(process.cwd(), "uploads", "hero");
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
@@ -51,7 +60,26 @@ const upload = multer({
   },
 });
 
-router.get("/home", getHomeHeroSlider);
+/**
+ * GET /api/hero-slider/home
+ * Returns hero slider data for home page
+ * Falls back to mock data if MongoDB is not connected
+ */
+router.get("/home", async (req, res) => {
+  if (!isMongoConnected()) {
+    console.log("⚠️  MongoDB not connected, returning mock hero slider data");
+    return res.status(200).json(mockHeroSlider);
+  }
+
+  try {
+    await getHomeHeroSlider(req, res);
+  } catch (err) {
+    console.error("Failed to fetch hero slider:", err);
+    console.log("⚠️  Error fetching hero slider, returning mock data");
+    res.status(200).json(mockHeroSlider);
+  }
+});
+
 router.put("/home", upsertHomeHeroSlider);
 
 /**

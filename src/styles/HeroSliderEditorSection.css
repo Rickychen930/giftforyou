@@ -443,6 +443,51 @@
   margin-bottom: 0.25rem;
 }
 
+/* Upload progress bar */
+.hsUploadProgress {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(212, 140, 156, 0.05);
+  border: 1px solid rgba(212, 140, 156, 0.15);
+  border-radius: 12px;
+  animation: slideIn 0.3s ease;
+}
+
+.hsUploadProgress__bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.hsUploadProgress__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--editor-brand-1), var(--editor-brand-2));
+  border-radius: 999px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 8px rgba(212, 140, 156, 0.5);
+  animation: progressPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes progressPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.hsUploadProgress__text {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--editor-brand-1);
+  text-align: center;
+}
+
 /* Image preview row */
 .hsPreviewRow {
   margin-top: 1rem;
@@ -463,6 +508,7 @@
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
 }
 
 .hsPreview {
@@ -477,9 +523,40 @@
   display: block;
 }
 
-.hsPreview:hover {
+.hsPreviewWrapper:hover .hsPreview {
   transform: scale(1.02);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+}
+
+/* Preview overlay with zoom icon */
+.hsPreviewOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: white;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.hsPreviewWrapper:hover .hsPreviewOverlay {
+  opacity: 1;
+}
+
+.hsPreviewOverlay svg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.hsPreviewOverlay span {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* ---------- Image Zoom Modal ---------- */
@@ -559,6 +636,38 @@
   }
 }
 
+/* ---------- Enhanced Animations ---------- */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Stagger animation for slide cards */
+.hsSlideCard {
+  animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+.hsSlideCard:nth-child(1) { animation-delay: 0.05s; }
+.hsSlideCard:nth-child(2) { animation-delay: 0.1s; }
+.hsSlideCard:nth-child(3) { animation-delay: 0.15s; }
+.hsSlideCard:nth-child(4) { animation-delay: 0.2s; }
+.hsSlideCard:nth-child(5) { animation-delay: 0.25s; }
+
 /* ---------- Responsive ---------- */
 @media (max-width: 1024px) {
   .hsSlideCard__grid {
@@ -623,6 +732,10 @@
     font-size: 0.9rem;
   }
 
+  .hsPreview {
+    height: 160px;
+  }
+
   .hsZoomModal {
     padding: 1rem;
   }
@@ -641,7 +754,8 @@
   .hsEditor__btn,
   .hsMiniBtn,
   .hsPreview,
-  .hsAlert {
+  .hsAlert,
+  .hsUploadProgress__fill {
     animation: none !important;
     transition: none !important;
   }
@@ -656,4 +770,48 @@
 .hsMiniBtn:focus-visible {
   outline: 2px solid rgba(212, 140, 156, 0.5);
   outline-offset: 2px;
+}
+
+.hsField input:focus-visible,
+.hsField textarea:focus-visible,
+.hsField select:focus-visible {
+  outline: none;
+  border-color: var(--editor-border-strong);
+  box-shadow: var(--editor-focus-ring);
+}
+
+/* Improved visual hierarchy */
+.hsEditor__title {
+  background: linear-gradient(135deg, var(--editor-brand-1), var(--editor-brand-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Enhanced card hover states */
+.hsSlideCard {
+  will-change: transform, box-shadow;
+}
+
+.hsSlideCard:hover {
+  transform: translateY(-2px);
+}
+
+/* Better button feedback */
+.hsEditor__btn,
+.hsMiniBtn {
+  will-change: transform;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  touch-action: manipulation;
 }
