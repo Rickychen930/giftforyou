@@ -1,14 +1,14 @@
 @import "colors.css";
 
 /* =========================
-   Our Collections (Option A + C)
-   - A: centered header + stacked cards
-   - C: cards are full-bleed (edge-to-edge) while header stays in max container
+   Our Collections Section
+   Professional & Beautiful Design
 ========================= */
 
 .ourCollection {
+  position: relative;
   min-height: 100vh;
-  padding: 5rem 0; /* no side padding here; header/container handles it */
+  padding: 5rem 0;
   background:
     radial-gradient(900px 460px at 12% 6%, var(--oc-bg-1), transparent 60%),
     radial-gradient(900px 520px at 92% 18%, var(--oc-bg-2), transparent 62%),
@@ -17,7 +17,7 @@
   overflow: hidden;
 }
 
-/* subtle top highlight line */
+/* Subtle top highlight line */
 .ourCollection::before {
   content: "";
   position: absolute;
@@ -30,13 +30,20 @@
 .ourCollection__container {
   max-width: var(--max);
   margin: 0 auto;
-  padding: 0 1.25rem; /* ✅ header padding stays clean */
+  padding: 0 1.25rem;
 }
 
-/* ===== Header (Option A) ===== */
+/* ===== Header with Fade-in Animation ===== */
 .ourCollection__header {
   text-align: center;
-  margin-bottom: 2.2rem;
+  margin-bottom: 3rem;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+.ourCollection--visible .ourCollection__header {
+  animation: fadeInUp 0.8s ease forwards;
 }
 
 .ourCollection__eyebrow {
@@ -46,6 +53,8 @@
   text-transform: uppercase;
   font-size: 0.78rem;
   color: var(--ink-550);
+  opacity: 0;
+  animation: fadeIn 0.6s ease 0.2s forwards;
 }
 
 .ourCollection__title {
@@ -54,13 +63,15 @@
   font-weight: 950;
   letter-spacing: -0.02em;
   color: var(--welcome-color-title);
+  opacity: 0;
+  animation: fadeInUp 0.8s ease 0.3s forwards;
 }
 
-/* elegant divider */
+/* Elegant animated divider */
 .ourCollection__title::after {
   content: "";
   display: block;
-  width: 74px;
+  width: 0;
   height: 3px;
   margin: 0.9rem auto 0;
   border-radius: 999px;
@@ -69,6 +80,7 @@
     rgba(212, 140, 156, 0.95),
     rgba(168, 213, 186, 0.85)
   );
+  animation: expandWidth 0.8s ease 0.6s forwards;
 }
 
 .ourCollection__subtitle {
@@ -76,70 +88,122 @@
   max-width: 72ch;
   color: var(--welcome-color-text);
   line-height: 1.8;
-  opacity: 0.95;
+  opacity: 0;
+  animation: fadeIn 0.8s ease 0.5s forwards;
 }
 
-/* ===== Grid (Option A) ===== */
+/* ===== Grid with Staggered Animation ===== */
 .ourCollection__grid {
   display: flex;
   flex-direction: column;
-  gap: 2.2rem;
+  gap: 2.5rem;
 }
 
-/* ===== Full-bleed cards (Option C) =====
-   Each CollectionCard stretches edge-to-edge,
-   but we keep comfortable padding by adding an inner gutter.
-*/
+/* Full-bleed cards with animation */
 .ourCollection__grid > .collectionCard {
   width: 100vw;
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
-
   border-radius: 0;
   border-left: none;
   border-right: none;
-
-  /* give card content a “safe” gutter */
   padding-left: clamp(1rem, 3vw, 2.2rem);
   padding-right: clamp(1rem, 3vw, 2.2rem);
+  
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 0.6s ease forwards;
 }
 
-/* Optional: make the horizontal scroller feel nicer on full-bleed cards */
-.ourCollection__grid > .collectionCard .collectionCard__scroll {
-  padding-left: 0.25rem;
-  padding-right: 0.25rem;
+.ourCollection--visible .ourCollection__grid > .collectionCard {
+  animation: fadeInUp 0.6s ease forwards;
 }
 
-/* ===== Empty state ===== */
+/* ===== Loading Skeleton Styles ===== */
+.collectionCard--skeleton {
+  pointer-events: none;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.04) 25%,
+    rgba(0, 0, 0, 0.08) 50%,
+    rgba(0, 0, 0, 0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+.skeleton--title {
+  height: 28px;
+  width: 60%;
+  margin-bottom: 0.75rem;
+}
+
+.skeleton--description {
+  height: 18px;
+  width: 85%;
+}
+
+.skeleton--image {
+  height: 184px;
+  width: 100%;
+  border-radius: 16px 16px 0 0;
+}
+
+.skeleton--text {
+  height: 16px;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton--short {
+  width: 70%;
+}
+
+.bouquetCard--skeleton {
+  background: var(--cc-surface-strong);
+  border: 1px solid var(--cc-border);
+}
+
+/* ===== Empty State with Icon ===== */
 .ourCollection__empty {
   max-width: 760px;
   margin: 0 auto;
-  padding: 2.2rem 1.9rem;
+  padding: 3rem 2rem;
   text-align: center;
-
   background: var(--oc-empty-bg);
   border: 1px solid var(--oc-empty-border);
   border-radius: 18px;
   box-shadow: var(--oc-empty-shadow);
+  opacity: 0;
+  animation: fadeInUp 0.6s ease 0.3s forwards;
 }
 
 .ourCollection__emptyIcon {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
-  margin: 0 auto 0.95rem;
-
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  margin: 0 auto 1.2rem;
   background: linear-gradient(
     135deg,
-    rgba(212, 140, 156, 0.20),
-    rgba(243, 182, 195, 0.18)
+    rgba(212, 140, 156, 0.15),
+    rgba(243, 182, 195, 0.12)
   );
   border: 1px solid rgba(212, 140, 156, 0.18);
-  box-shadow: 0 14px 28px rgba(212, 140, 156, 0.14);
+  box-shadow: 0 14px 28px rgba(212, 140, 156, 0.12);
+  color: var(--brand-rose-500);
 }
 
 .ourCollection__emptyTitle {
-  margin: 0 0 0.55rem;
+  margin: 0 0 0.65rem;
+  font-size: 1.35rem;
   font-weight: 950;
   color: var(--oc-text);
   letter-spacing: -0.01em;
@@ -147,11 +211,60 @@
 
 .ourCollection__emptyText {
   margin: 0;
+  font-size: 1rem;
   color: var(--oc-muted);
   line-height: 1.75;
 }
 
-/* ===== Responsive ===== */
+/* ===== Animations ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes expandWidth {
+  from {
+    width: 0;
+  }
+  to {
+    width: 74px;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* ===== Responsive Design ===== */
 @media (max-width: 768px) {
   .ourCollection {
     padding: 3.8rem 0;
@@ -162,17 +275,56 @@
     padding: 0 1rem;
   }
 
+  .ourCollection__header {
+    margin-bottom: 2.5rem;
+  }
+
   .ourCollection__grid {
     gap: 2rem;
+  }
+
+  .ourCollection__title {
+    font-size: 1.85rem;
   }
 
   .ourCollection__title::after {
     width: 64px;
   }
 
-  /* keep full-bleed on mobile, but reduce side gutters */
   .ourCollection__grid > .collectionCard {
     padding-left: 1rem;
     padding-right: 1rem;
+  }
+
+  .ourCollection__empty {
+    padding: 2.5rem 1.5rem;
+  }
+
+  .ourCollection__emptyIcon {
+    width: 64px;
+    height: 64px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .ourCollection__header,
+  .ourCollection__eyebrow,
+  .ourCollection__title,
+  .ourCollection__subtitle,
+  .ourCollection__grid > .collectionCard,
+  .ourCollection__empty {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .ourCollection__title::after {
+    width: 74px;
+    animation: none;
+  }
+
+  .skeleton {
+    animation: none;
   }
 }
