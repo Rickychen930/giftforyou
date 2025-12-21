@@ -11,3 +11,25 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Global spacing tokens */
+:root {
+  --section-gap: 3.5rem; /* default vertical gap between main sections */
+}
+
+@media (max-width: 820px) {
+  :root {
+    --section-gap: 2.1rem; /* tighter gap on mobile */
+  }
+}
+
+/* Add consistent vertical rhythm between direct children of main */
+main > * + * {
+  margin-top: var(--section-gap);
+}
+
+/* Utility: section wrapper with consistent inner padding */
+.site-section {
+  padding-top: clamp(2rem, 4vw, 3.5rem);
+  padding-bottom: clamp(2rem, 4vw, 3.5rem);
+}

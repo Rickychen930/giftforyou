@@ -1,10 +1,12 @@
 @import "colors.css";
 
 /* =========================
-   Collection container
+   Collection Card Component
+   Professional & Interactive Design
 ========================= */
+
 .collectionCard {
-  width: 100%;                 /* ✅ full width */
+  width: 100%;
   position: relative;
   padding: 1.7rem;
   border-radius: 18px;
@@ -13,9 +15,14 @@
   box-shadow: var(--cc-shadow);
   backdrop-filter: blur(10px);
   overflow: hidden;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
-/* subtle premium highlight line */
+.collectionCard:hover {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+/* Subtle premium highlight line */
 .collectionCard::before {
   content: "";
   position: absolute;
@@ -33,11 +40,20 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.4rem;
 }
 
 .collectionCard__heading {
+  flex: 1;
   max-width: 85ch;
+}
+
+.collectionCard__titleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
 }
 
 .collectionCard__title {
@@ -48,8 +64,21 @@
   color: var(--welcome-color-title);
 }
 
+.collectionCard__count {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  background: linear-gradient(135deg, rgba(212, 140, 156, 0.12), rgba(168, 213, 186, 0.10));
+  color: var(--cc-brand-wine);
+  border: 1px solid rgba(212, 140, 156, 0.20);
+}
+
 .collectionCard__description {
-  margin: 0.45rem 0 0;
+  margin: 0;
   color: var(--welcome-color-text);
   opacity: 0.95;
   line-height: 1.75;
@@ -59,7 +88,7 @@
    Empty state
 ========================= */
 .collectionCard__empty {
-  padding: 1.6rem;
+  padding: 2.5rem 1.6rem;
   text-align: center;
   border-radius: 16px;
   background: var(--cc-empty-bg);
@@ -67,24 +96,33 @@
   color: var(--cc-muted);
 }
 
+.collectionCard__emptyIcon {
+  margin: 0 auto 1rem;
+  color: var(--brand-rose-500);
+  opacity: 0.6;
+}
+
 .collectionCard__emptyTitle {
-  margin: 0;
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
   font-weight: 950;
   color: var(--cc-text);
 }
 
 .collectionCard__emptyText {
-  margin: 0.55rem 0 0;
+  margin: 0;
   line-height: 1.65;
+  font-size: 0.95rem;
 }
 
 /* =========================
-   Horizontal scroller
+   Horizontal scroller with navigation
 ========================= */
 .collectionCard__scrollWrap {
   position: relative;
 }
 
+/* Fade edges */
 .collectionCard__scrollWrap::before,
 .collectionCard__scrollWrap::after {
   content: "";
@@ -94,6 +132,7 @@
   width: 42px;
   pointer-events: none;
   z-index: 2;
+  transition: opacity 0.3s ease;
 }
 
 .collectionCard__scrollWrap::before {
@@ -106,16 +145,71 @@
   background: linear-gradient(270deg, var(--cc-surface-fade-edge), transparent);
 }
 
+/* Navigation Buttons */
+.collectionCard__navBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--cc-border);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  
+  color: var(--cc-brand-wine);
+  cursor: pointer;
+  
+  transition: all 0.25s ease;
+  opacity: 0;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.collectionCard__navBtn:hover {
+  background: var(--brand-rose-500);
+  color: white;
+  box-shadow: 0 12px 28px rgba(212, 140, 156, 0.35);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.collectionCard__navBtn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.collectionCard__navBtn:focus-visible {
+  outline: 3px solid rgba(212, 140, 156, 0.35);
+  outline-offset: 3px;
+}
+
+.collectionCard__navBtn--left {
+  left: 8px;
+}
+
+.collectionCard__navBtn--right {
+  right: 8px;
+}
+
+/* Scroll container */
 .collectionCard__scroll {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: minmax(235px, 255px);
-  gap: 1rem;
+  grid-auto-columns: minmax(245px, 265px);
+  gap: 1.1rem;
 
   overflow-x: auto;
-  padding: 0.25rem 0.25rem 1rem;
+  overflow-y: hidden;
+  padding: 0.25rem 0.25rem 1.2rem;
 
   scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -123,21 +217,49 @@
   scroll-snap-align: start;
 }
 
-/* thin scrollbar */
+/* Scrollbar styling */
 .collectionCard__scroll::-webkit-scrollbar {
   height: 8px;
 }
+
 .collectionCard__scroll::-webkit-scrollbar-track {
   background: var(--cc-scroll-track);
   border-radius: 999px;
+  margin: 0 12px;
 }
+
 .collectionCard__scroll::-webkit-scrollbar-thumb {
   background: var(--cc-scroll-thumb);
   border-radius: 999px;
+  transition: background 0.2s ease;
+}
+
+.collectionCard__scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.28);
+}
+
+/* Progress Indicator */
+.collectionCard__progress {
+  position: relative;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 999px;
+  margin-top: 0.75rem;
+  overflow: hidden;
+}
+
+.collectionCard__progressBar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--brand-rose-500), var(--brand-sage-400));
+  border-radius: 999px;
+  transition: width 0.2s ease;
 }
 
 /* =========================
-   Bouquet card (friendly + aligned)
+   Bouquet Card (Enhanced)
 ========================= */
 .bouquetCard {
   border-radius: 16px;
@@ -145,23 +267,25 @@
   border: 1px solid var(--cc-border);
   overflow: hidden;
   box-shadow: var(--cc-card-shadow);
-  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
 
-  display: flex;               /* ✅ so body can control vertical layout */
+  display: flex;
   flex-direction: column;
   min-height: 100%;
 }
 
 .bouquetCard:hover {
-  transform: translateY(-6px);
+  transform: translateY(-8px);
   box-shadow: var(--cc-card-shadow-hover);
+  border-color: rgba(212, 140, 156, 0.25);
 }
 
 /* Media */
 .bouquetCard__media {
   position: relative;
   isolation: isolate;
+  overflow: hidden;
 }
 
 .bouquetCard__media::after {
@@ -179,25 +303,25 @@
 
 .bouquetCard__media img {
   width: 100%;
-  height: 184px;
+  height: 200px;
   object-fit: cover;
   display: block;
   transform: scale(1.02);
-  transition: transform 0.35s ease;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .bouquetCard:hover .bouquetCard__media img {
-  transform: scale(1.06);
+  transform: scale(1.08);
 }
 
 /* Badge */
 .bouquetCard__badge {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 12px;
+  left: 12px;
   z-index: 2;
 
-  padding: 0.38rem 0.65rem;
+  padding: 0.42rem 0.75rem;
   border-radius: 999px;
 
   font-size: 0.72rem;
@@ -206,40 +330,51 @@
   text-transform: uppercase;
 
   color: var(--cc-btn-text);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
   border: 1px solid var(--cc-border-badge);
   background: var(--cc-badge-bg);
+  
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+}
+
+.bouquetCard:hover .bouquetCard__badge {
+  transform: scale(1.05);
 }
 
 .bouquetCard__badge.is-ready {
   background: var(--cc-ready-bg);
+  border-color: rgba(16, 185, 129, 0.35);
 }
 
 .bouquetCard__badge.is-preorder {
   background: var(--cc-preorder-bg);
+  border-color: rgba(249, 115, 22, 0.35);
 }
 
-/* Body (✅ fixes CTA offset) */
+/* Body */
 .bouquetCard__body {
-  padding: 1rem;
+  padding: 1.1rem;
   text-align: left;
 
-  display: flex;               /* ✅ */
-  flex-direction: column;      /* ✅ */
-  gap: 0.65rem;                /* nicer spacing */
-  flex: 1;                     /* ✅ pushes button consistently */
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  flex: 1;
 }
 
 .bouquetCard__name {
   margin: 0;
-  font-size: 1.06rem;
+  font-size: 1.08rem;
   font-weight: 950;
   letter-spacing: -0.01em;
   color: var(--cc-text);
+  line-height: 1.4;
 }
 
 .bouquetCard__price {
   margin: 0;
+  font-size: 1.15rem;
   font-weight: 950;
   color: var(--cc-brand-wine);
 }
@@ -248,7 +383,7 @@
 .bouquetCard__meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem;
+  gap: 0.5rem;
   margin: 0.15rem 0 0;
 }
 
@@ -258,36 +393,60 @@
   background: var(--cc-chip-bg);
   border: 1px solid var(--cc-border-chip);
   border-radius: 999px;
-  padding: 0.35rem 0.55rem;
+  padding: 0.38rem 0.65rem;
+  transition: all 0.2s ease;
 }
 
-/* CTA (✅ pinned bottom + centered) */
+.bouquetCard:hover .bouquetCard__chip {
+  background: rgba(212, 140, 156, 0.08);
+  border-color: rgba(212, 140, 156, 0.15);
+}
+
+/* CTA Button with Icon */
 .bouquetCard__btn {
-  margin-top: auto;  
+  margin-top: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
 
   text-align: center;
   text-decoration: none;
 
-  padding: 0.86rem 0.95rem;
+  padding: 0.92rem 1rem;
   border-radius: 999px;
 
+  font-size: 0.92rem;
   font-weight: 950;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.3px;
 
   background: linear-gradient(90deg, var(--cc-brand-pink), var(--cc-brand-pink2));
   color: var(--cc-btn-text);
 
   box-shadow: var(--cc-btn-shadow);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  border: none;
+  cursor: pointer;
+}
+
+.bouquetCard__btn svg {
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
 }
 
 .bouquetCard__btn:hover {
   transform: translateY(-2px);
   box-shadow: var(--cc-btn-shadow-hover);
-  filter: saturate(1.03);
+  filter: saturate(1.05) brightness(1.05);
+}
+
+.bouquetCard__btn:hover svg {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.bouquetCard__btn:active {
+  transform: translateY(0);
 }
 
 .bouquetCard__btn:focus-visible {
@@ -296,7 +455,7 @@
 }
 
 /* =========================
-   Responsive
+   Responsive Design
 ========================= */
 @media (max-width: 768px) {
   .collectionCard {
@@ -305,15 +464,73 @@
   }
 
   .collectionCard__scroll {
-    grid-auto-columns: minmax(210px, 235px);
+    grid-auto-columns: minmax(220px, 245px);
+    gap: 0.9rem;
   }
 
   .bouquetCard__media img {
-    height: 168px;
+    height: 180px;
   }
 
   .collectionCard__scrollWrap::before,
   .collectionCard__scrollWrap::after {
-    width: 20px;
+    width: 24px;
+  }
+
+  .collectionCard__navBtn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .collectionCard__navBtn--left {
+    left: 4px;
+  }
+
+  .collectionCard__navBtn--right {
+    right: 4px;
+  }
+
+  .collectionCard__titleRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .bouquetCard__btn {
+    font-size: 0.88rem;
+    padding: 0.85rem 0.9rem;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .bouquetCard:hover {
+    transform: none;
+  }
+
+  .collectionCard__navBtn:hover {
+    transform: translateY(-50%);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .bouquetCard,
+  .bouquetCard__media img,
+  .bouquetCard__badge,
+  .bouquetCard__chip,
+  .bouquetCard__btn,
+  .bouquetCard__btn svg,
+  .collectionCard__navBtn {
+    transition: none;
+    animation: none;
+  }
+
+  .bouquetCard:hover {
+    transform: none;
+  }
+
+  .bouquetCard:hover .bouquetCard__media img {
+    transform: scale(1.02);
   }
 }

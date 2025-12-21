@@ -1,10 +1,11 @@
 @import "colors.css";
 
 /* =========================================================
-   Hero Slider Editor (Dashboard)
-   - clean admin layout
-   - readable typography
-   - consistent spacing + focus styles
+   Hero Slider Editor (Dashboard) - Enhanced Edition
+   - Drag and drop support
+   - Better visual feedback
+   - Image zoom modal
+   - Improved accessibility
 ========================================================= */
 
 .hsEditor {
@@ -19,29 +20,33 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .hsEditor__title {
   margin: 0;
-  font-size: 1.65rem;
+  font-size: 1.85rem;
   font-weight: 950;
   letter-spacing: -0.02em;
   line-height: 1.15;
   color: var(--editor-text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .hsEditor__subtitle {
-  margin: 0.45rem 0 0;
+  margin: 0.5rem 0 0;
   color: var(--editor-muted);
   line-height: 1.65;
-  max-width: 70ch;
+  max-width: 65ch;
+  font-size: 0.95rem;
 }
 
 .hsEditor__headerActions {
   display: flex;
-  gap: 0.6rem;
+  gap: 0.7rem;
   flex-wrap: wrap;
   align-items: center;
 }
@@ -49,22 +54,21 @@
 /* ---------- Buttons ---------- */
 .hsEditor__btn {
   border: 1px solid rgba(0, 0, 0, 0.14);
-  background: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.85);
   color: var(--editor-text);
   border-radius: 999px;
-  padding: 0.72rem 1.05rem;
+  padding: 0.8rem 1.25rem;
   font-weight: 950;
   letter-spacing: 0.01em;
-
   cursor: pointer;
   box-shadow: var(--editor-shadow-soft);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease,
-    border-color 0.18s ease, filter 0.18s ease;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  white-space: nowrap;
 }
 
 .hsEditor__btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.95);
   border-color: rgba(0, 0, 0, 0.22);
   box-shadow: var(--editor-shadow);
 }
@@ -79,66 +83,126 @@
 }
 
 .hsEditor__btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
   box-shadow: none;
+  transform: none;
 }
 
 .hsEditor__btn--primary {
   border: none;
   color: var(--editor-on-brand);
-  background: linear-gradient(90deg, var(--editor-brand-1), var(--editor-brand-2));
+  background: linear-gradient(135deg, var(--editor-brand-1), var(--editor-brand-2));
   box-shadow: var(--editor-shadow-brand);
 }
 
 .hsEditor__btn--primary:hover:not(:disabled) {
-  filter: saturate(1.05);
+  filter: saturate(1.08) brightness(1.05);
+  box-shadow: 0 16px 32px rgba(212, 140, 156, 0.3);
+}
+
+.hsEditor__btn--ghost {
+  background: transparent;
+  border-color: rgba(0, 0, 0, 0.12);
+  color: var(--editor-muted);
+}
+
+.hsEditor__btn--ghost:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: rgba(185, 28, 28, 0.95);
 }
 
 /* ---------- Main card wrapper ---------- */
 .hsEditor__card {
   border: 1px solid var(--editor-border);
-  background: rgba(255, 255, 255, 0.76);
-  border-radius: 18px;
-  padding: 1rem;
+  background: rgba(255, 255, 255, 0.82);
+  border-radius: 20px;
+  padding: 1.5rem;
   box-shadow: var(--editor-shadow);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 /* ---------- States / Alerts ---------- */
 .hsState {
-  padding: 1rem 0.25rem;
+  padding: 1.25rem 0.5rem;
   color: var(--editor-muted);
   font-weight: 850;
+  text-align: center;
+}
+
+.hsState--small {
+  padding: 0.75rem 0.5rem;
+  font-size: 0.9rem;
 }
 
 .hsAlert {
   border-radius: 14px;
-  padding: 0.85rem 0.95rem;
+  padding: 1rem 1.15rem;
   font-weight: 900;
-  margin: 0.8rem 0;
+  margin: 1rem 0;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  line-height: 1.4;
+  line-height: 1.5;
+  animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.hsAlert--small {
+  padding: 0.7rem 0.9rem;
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
 }
 
 .hsAlert--error {
-  border-color: rgba(239, 68, 68, 0.28);
-  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.1);
   color: rgba(185, 28, 28, 0.95);
 }
 
 .hsAlert--success {
-  border-color: rgba(16, 185, 129, 0.28);
-  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.1);
   color: rgba(5, 150, 105, 0.95);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Empty state ---------- */
+.hsEmpty {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: var(--editor-muted);
+  border: 2px dashed rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  margin: 1.5rem 0;
+}
+
+.hsEmpty svg {
+  color: var(--editor-brand-1);
+  opacity: 0.4;
+  margin-bottom: 1rem;
+}
+
+.hsEmpty p {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1.05rem;
 }
 
 /* ---------- Form fields ---------- */
 .hsField {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.5rem;
 }
 
 .hsField--full {
@@ -147,7 +211,7 @@
 
 .hsLabel {
   font-weight: 950;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   letter-spacing: 0.01em;
   color: var(--editor-text);
 }
@@ -157,30 +221,31 @@
 .hsField select {
   border: 1px solid rgba(0, 0, 0, 0.14);
   border-radius: 14px;
-  padding: 0.78rem 0.9rem;
+  padding: 0.85rem 1rem;
   font-size: 0.98rem;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   color: var(--editor-text);
-  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  transition: all 0.2s ease;
+  font-family: inherit;
 }
 
 .hsField textarea {
   resize: vertical;
-  min-height: 84px;
-  line-height: 1.55;
+  min-height: 90px;
+  line-height: 1.6;
 }
 
 .hsField input::placeholder,
 .hsField textarea::placeholder {
   color: var(--editor-muted);
-  opacity: 0.8;
+  opacity: 0.7;
 }
 
 .hsField input:hover,
 .hsField textarea:hover,
 .hsField select:hover {
-  border-color: rgba(0, 0, 0, 0.22);
-  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(0, 0, 0, 0.24);
+  background: rgba(255, 255, 255, 1);
 }
 
 .hsField input:focus,
@@ -189,22 +254,64 @@
   outline: none;
   border-color: var(--editor-border-strong);
   box-shadow: var(--editor-focus-ring);
+  background: #fff;
+}
+
+.hsField input[type="file"] {
+  padding: 0.7rem 1rem;
+  cursor: pointer;
+}
+
+.hsField input[type="file"]::-webkit-file-upload-button {
+  background: linear-gradient(135deg, var(--editor-brand-1), var(--editor-brand-2));
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-right: 1rem;
+  transition: all 0.2s ease;
+}
+
+.hsField input[type="file"]::-webkit-file-upload-button:hover {
+  filter: brightness(1.1);
 }
 
 /* ---------- Slides list ---------- */
 .hsSlides {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   display: grid;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 /* Slide card */
 .hsSlideCard {
-  border: 1px solid var(--editor-border);
-  background: rgba(255, 255, 255, 0.72);
-  border-radius: 18px;
+  border: 2px solid var(--editor-border);
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 20px;
   overflow: hidden;
   box-shadow: var(--editor-shadow-soft);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: grab;
+}
+
+.hsSlideCard:hover {
+  box-shadow: var(--editor-shadow);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.hsSlideCard--dragging {
+  opacity: 0.5;
+  transform: scale(0.98);
+  cursor: grabbing;
+}
+
+.hsSlideCard--dragover {
+  border-color: var(--editor-brand-1);
+  border-style: dashed;
+  background: rgba(212, 140, 156, 0.05);
+  transform: scale(1.02);
 }
 
 .hsSlideCard__top {
@@ -212,9 +319,9 @@
   justify-content: space-between;
   gap: 1rem;
   align-items: flex-start;
-  padding: 0.85rem 1rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  background: rgba(255, 255, 255, 0.6);
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -222,7 +329,7 @@
 .hsSlideCard__meta {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.3rem;
   min-width: 0;
 }
 
@@ -230,38 +337,49 @@
   font-weight: 950;
   color: var(--editor-text);
   letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.05rem;
+}
+
+.hsSlideCard__dragIcon {
+  color: var(--editor-muted);
+  opacity: 0.6;
 }
 
 .hsSlideCard__id {
   font-weight: 800;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--editor-muted);
   word-break: break-all;
 }
 
 .hsSlideCard__actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.6rem;
   align-items: center;
+  flex-wrap: wrap;
 }
 
-/* mini buttons */
+/* Mini buttons */
 .hsMiniBtn {
   border: 1px solid rgba(0, 0, 0, 0.12);
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.9);
   color: var(--editor-text);
   border-radius: 12px;
-  padding: 0.5rem 0.65rem;
+  padding: 0.55rem 0.75rem;
   font-weight: 950;
   cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  font-size: 0.9rem;
 }
 
 .hsMiniBtn:hover:not(:disabled) {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
   background: rgba(255, 255, 255, 1);
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
 .hsMiniBtn:active:not(:disabled) {
@@ -269,39 +387,51 @@
 }
 
 .hsMiniBtn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
   box-shadow: none;
+  transform: none;
+}
+
+.hsMiniBtn--secondary {
+  background: linear-gradient(135deg, rgba(168, 213, 186, 0.2), rgba(168, 213, 186, 0.1));
+  border-color: rgba(168, 213, 186, 0.3);
+  color: rgba(0, 100, 60, 0.9);
+}
+
+.hsMiniBtn--secondary:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(168, 213, 186, 0.3), rgba(168, 213, 186, 0.2));
 }
 
 .hsMiniBtn--danger {
-  border-color: rgba(239, 68, 68, 0.25);
-  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.1);
   color: rgba(185, 28, 28, 0.95);
 }
 
 .hsMiniBtn--danger:hover:not(:disabled) {
-  background: rgba(239, 68, 68, 0.12);
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
 }
 
 /* Slide content grid */
 .hsSlideCard__grid {
-  padding: 1rem;
+  padding: 1.25rem;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.85rem;
+  gap: 1rem;
 }
 
 /* CTA groups */
 .hsFieldGroup {
   grid-column: 1 / -1;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.75);
   border-radius: 16px;
-  padding: 0.85rem;
+  padding: 1rem;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.85rem;
+  gap: 1rem;
 }
 
 .hsGroupTitle {
@@ -309,45 +439,237 @@
   font-weight: 950;
   color: var(--editor-text);
   letter-spacing: -0.01em;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Upload progress bar */
+.hsUploadProgress {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(212, 140, 156, 0.05);
+  border: 1px solid rgba(212, 140, 156, 0.15);
+  border-radius: 12px;
+  animation: slideIn 0.3s ease;
+}
+
+.hsUploadProgress__bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.hsUploadProgress__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--editor-brand-1), var(--editor-brand-2));
+  border-radius: 999px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 8px rgba(212, 140, 156, 0.5);
+  animation: progressPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes progressPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.hsUploadProgress__text {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--editor-brand-1);
+  text-align: center;
 }
 
 /* Image preview row */
 .hsPreviewRow {
-  margin-top: 0.7rem;
+  margin-top: 1rem;
   display: grid;
-  grid-template-columns: 90px 1fr;
-  gap: 0.8rem;
+  grid-template-columns: 100px 1fr;
+  gap: 1rem;
   align-items: center;
 }
 
 .hsPreviewLabel {
   font-weight: 900;
   color: var(--editor-muted);
-  font-size: 0.85rem;
+  font-size: 0.88rem;
+}
+
+.hsPreviewWrapper {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
 }
 
 .hsPreview {
   width: 100%;
-  max-width: 420px;
-  height: 160px;
+  max-width: 480px;
+  height: 180px;
   object-fit: cover;
   border-radius: 14px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
-  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.95);
+  transition: all 0.3s ease;
+  display: block;
 }
 
+.hsPreviewWrapper:hover .hsPreview {
+  transform: scale(1.02);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+}
+
+/* Preview overlay with zoom icon */
+.hsPreviewOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: white;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.hsPreviewWrapper:hover .hsPreviewOverlay {
+  opacity: 1;
+}
+
+.hsPreviewOverlay svg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.hsPreviewOverlay span {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* ---------- Image Zoom Modal ---------- */
+.hsZoomModal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  cursor: zoom-out;
+  animation: fadeIn 0.3s ease;
+}
+
+.hsZoomModal__content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  animation: zoomIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.hsZoomModal__content img {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.hsZoomModal__close {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
+}
+
+.hsZoomModal__close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ---------- Enhanced Animations ---------- */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Stagger animation for slide cards */
+.hsSlideCard {
+  animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+.hsSlideCard:nth-child(1) { animation-delay: 0.05s; }
+.hsSlideCard:nth-child(2) { animation-delay: 0.1s; }
+.hsSlideCard:nth-child(3) { animation-delay: 0.15s; }
+.hsSlideCard:nth-child(4) { animation-delay: 0.2s; }
+.hsSlideCard:nth-child(5) { animation-delay: 0.25s; }
+
 /* ---------- Responsive ---------- */
-@media (max-width: 900px) {
-  .hsEditor__header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .hsEditor__headerActions {
-    justify-content: flex-start;
-  }
-
+@media (max-width: 1024px) {
   .hsSlideCard__grid {
     grid-template-columns: 1fr;
   }
@@ -361,7 +683,135 @@
   }
 
   .hsPreview {
-    height: 200px;
+    height: 220px;
     max-width: 100%;
   }
+}
+
+@media (max-width: 900px) {
+  .hsEditor__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hsEditor__headerActions {
+    justify-content: flex-start;
+  }
+
+  .hsEditor__title {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .hsEditor__card {
+    padding: 1rem;
+    border-radius: 16px;
+  }
+
+  .hsSlideCard {
+    border-radius: 16px;
+  }
+
+  .hsSlideCard__top {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .hsSlideCard__actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .hsSlideCard__grid {
+    padding: 1rem;
+  }
+
+  .hsEditor__btn {
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .hsPreview {
+    height: 160px;
+  }
+
+  .hsZoomModal {
+    padding: 1rem;
+  }
+
+  .hsZoomModal__close {
+    top: -35px;
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+}
+
+/* ---------- Accessibility ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .hsSlideCard,
+  .hsEditor__btn,
+  .hsMiniBtn,
+  .hsPreview,
+  .hsAlert,
+  .hsUploadProgress__fill {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+.hsSlideCard:focus-visible {
+  outline: 3px solid rgba(212, 140, 156, 0.5);
+  outline-offset: 4px;
+}
+
+.hsMiniBtn:focus-visible {
+  outline: 2px solid rgba(212, 140, 156, 0.5);
+  outline-offset: 2px;
+}
+
+.hsField input:focus-visible,
+.hsField textarea:focus-visible,
+.hsField select:focus-visible {
+  outline: none;
+  border-color: var(--editor-border-strong);
+  box-shadow: var(--editor-focus-ring);
+}
+
+/* Improved visual hierarchy */
+.hsEditor__title {
+  background: linear-gradient(135deg, var(--editor-brand-1), var(--editor-brand-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Enhanced card hover states */
+.hsSlideCard {
+  will-change: transform, box-shadow;
+}
+
+.hsSlideCard:hover {
+  transform: translateY(-2px);
+}
+
+/* Better button feedback */
+.hsEditor__btn,
+.hsMiniBtn {
+  will-change: transform;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  touch-action: manipulation;
 }

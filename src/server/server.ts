@@ -11,13 +11,13 @@ import collectionRoutes from "../routes/collection-routes";
 import heroSliderRoutes from "../routes/hero-slider-routes";
 
 /**
- * Read a required env var (crash early if missing)
+ * Read an env var (optional for development with mock data)
  */
-function requireEnv(name: string): string {
+function getEnv(name: string): string {
   const value = process.env[name];
   if (!value || value.trim().length === 0) {
-    console.error(`❌ Missing required env var: ${name}`);
-    process.exit(1);
+    console.warn(`⚠️  Missing env var: ${name} - will use mock data`);
+    return "";
   }
   return value.trim();
 }
@@ -38,7 +38,7 @@ const app = express();
 app.set("trust proxy", 1);
 
 const PORT = Number(process.env.PORT || 4000);
-const MONGO_URI = requireEnv("MONGO_URI");
+const MONGO_URI = getEnv("MONGO_URI");
 const allowedOrigins = parseOrigins(process.env.CORS_ORIGIN);
 
 // Middleware
@@ -89,29 +89,48 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 async function start() {
-  try {
-    await mongoose.connect(MONGO_URI);
-    console.log("✅ MongoDB connected");
-
-    const server = app.listen(PORT, "0.0.0.0", () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-    });
-
-    // Graceful shutdown
-    const shutdown = async () => {
-      console.log("🛑 Shutting down...");
-      server.close(async () => {
-        await mongoose.connection.close().catch(() => undefined);
-        process.exit(0);
-      });
-    };
-
-    process.on("SIGINT", shutdown);
-    process.on("SIGTERM", shutdown);
-  } catch (err) {
-    console.error("❌ MongoDB connection error:", err);
-    process.exit(1);
+  // Try to connect to MongoDB, but don't fail if it's not available
+  if (MONGO_URI) {
+    try {
+      await mongoose.connect(MONGO_URI);
+      console.log("✅ MongoDB connected");
+    } catch (err) {
+      console.warn(
+        "⚠️  MongoDB connection failed - using mock data for development"
+      );
+      console.warn(
+        "   Error:",
+        err instanceof Error ? err.message : String(err)
+      );
+      console.warn("   To fix: Check MONGO_URI in .env.development");
+    }
+  } else {
+    console.warn("⚠️  MONGO_URI not set - using mock data for development");
   }
+
+  const server = app.listen(PORT, "0.0.0.0", () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📊 Header size limit: 16KB (increased from default 8KB)`);
+
+    if (mongoose.connection.readyState !== 1) {
+      console.log(`⚠️  Running in DEVELOPMENT MODE with mock data`);
+      console.log(`   MongoDB is not connected - API will return dummy data`);
+    }
+  });
+
+  // Graceful shutdown
+  const shutdown = async () => {
+    console.log("🛑 Shutting down...");
+    server.close(async () => {
+      if (mongoose.connection.readyState === 1) {
+        await mongoose.connection.close().catch(() => undefined);
+      }
+      process.exit(0);
+    });
+  };
+
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
 }
 
 start();

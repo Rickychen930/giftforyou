@@ -1,16 +1,17 @@
 {
-  "name": "giftforyou",
+  "name": "giftforyou.idn",
   "version": "1.0.0",
   "private": true,
+  "proxy": "http://localhost:4000",
   "scripts": {
-    "start": "react-scripts start",
+    "start": "NODE_OPTIONS='--max-http-header-size=16384' react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
 
-    "dev:server": "ts-node-dev --respawn --transpile-only src/server/server.js",
+    "dev:server": "node --max-http-header-size=16384 -r ts-node/register/transpile-only -r dotenv/config ./node_modules/.bin/ts-node-dev --respawn --transpile-only src/server/server.ts",
     "build:server": "tsc -p tsconfig.server.json",
-    "start:server": "node dist/server/server.ts",
+    "start:server": "node --max-http-header-size=16384 dist/server/server.ts",
 
     "seed": "ts-node src/seed/seed.ts",
 
