@@ -102,12 +102,14 @@ const OurCollectionSection: React.FC<OurCollectionViewProps> = ({
   const sectionRef = useRef<HTMLElement>(null);
 
   const prepared = useMemo(() => {
-    return (items ?? []).map((c) => ({
-      id: c._id,
-      name: c.name,
-      description: c.description ?? "",
-      bouquets: toBouquetProps(c),
-    }));
+    return (items ?? [])
+      .map((c) => ({
+        id: c._id,
+        name: c.name,
+        description: c.description ?? "",
+        bouquets: toBouquetProps(c),
+      }))
+      .filter((c) => c.bouquets.length > 0);
   }, [items]);
 
   // Intersection Observer for scroll animations

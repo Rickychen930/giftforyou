@@ -257,6 +257,10 @@
   overflow-y: hidden;
   padding: 0.25rem 0.25rem 1.2rem;
 
+  /* Prevent Safari/OS "auto" scrollbars from causing layout shifts */
+  scrollbar-gutter: stable;
+  scrollbar-width: none; /* Firefox */
+
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
@@ -266,25 +270,9 @@
   scroll-snap-align: start;
 }
 
-/* Scrollbar styling - modern & elegant */
+/* WebKit (Safari/Chrome): hide scrollbar to avoid height changes on hover */
 .collectionCard__scroll::-webkit-scrollbar {
-  height: 8px;
-}
-
-.collectionCard__scroll::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.03);
-  border-radius: 999px;
-  margin: 0 12px;
-}
-
-.collectionCard__scroll::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(212, 140, 156, 0.4), rgba(168, 213, 186, 0.4));
-  border-radius: 999px;
-  transition: background 0.2s ease;
-}
-
-.collectionCard__scroll::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, rgba(212, 140, 156, 0.6), rgba(168, 213, 186, 0.6));
+  height: 0;
 }
 
 /* Progress Indicator */
