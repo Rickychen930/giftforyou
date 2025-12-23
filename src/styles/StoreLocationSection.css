@@ -7,7 +7,8 @@
   position: relative;
   width: 100%;
   min-height: auto;
-  padding: 4rem 0;
+  --sl-gutter: clamp(1rem, 3vw, 1.5rem);
+  padding: clamp(2.5rem, 5vw, 3.75rem) 0;
   background:
     radial-gradient(900px 460px at 14% 8%, var(--sl-bg-1), transparent 62%),
     radial-gradient(900px 520px at 92% 16%, var(--sl-bg-2), transparent 62%),
@@ -25,28 +26,21 @@
   background: linear-gradient(90deg, transparent, rgba(212, 140, 156, 0.28), transparent);
   opacity: 0.9;
   pointer-events: none;
-  animation: shimmer 3s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-  0%, 100% { opacity: 0.9; }
-  50% { opacity: 0.5; }
 }
 
 /* Full-screen container layout */
 .storeLocation__container {
-  width: 100%;
-  max-width: 1600px;
+  width: calc(100% - (var(--sl-gutter) * 2));
+  max-width: var(--max);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(420px, 480px) 1fr;
+  grid-template-columns: 1fr;
   grid-template-rows: 1fr;
   gap: 0;
-  border-radius: 20px;
+  border-radius: 18px;
   overflow: hidden;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--sl-shadow);
   border: 1px solid var(--sl-border);
-  min-height: 700px;
 }
 
 /* =========================
@@ -57,14 +51,12 @@
   background: linear-gradient(135deg, 
     rgba(255, 255, 255, 0.98) 0%, 
     rgba(252, 244, 248, 0.96) 100%);
-  border-right: 1px solid var(--sl-border);
+  border-right: none;
   backdrop-filter: blur(20px);
-  padding: 3rem 2.5rem;
+  padding: clamp(1.75rem, 2.6vw, 2.5rem) clamp(1.25rem, 2.2vw, 2rem);
   display: flex;
   flex-direction: column;
-  gap: 1.75rem;
-  overflow-y: auto;
-  max-height: 100%;
+  gap: 1.35rem;
 }
 
 /* Custom scrollbar for info panel */
@@ -86,33 +78,31 @@
   background: rgba(212, 140, 156, 0.5);
 }
 
-/* Decorative floating elements */
+/* Decorative floating elements (subtle luxury detail) */
 .storeLocation__decorFloater {
   position: absolute;
   color: var(--brand-rose-500);
   pointer-events: none;
-  opacity: 0.6;
-  animation: float 6s ease-in-out infinite;
+  opacity: 0.26;
 }
 
 .storeLocation__decorFloater--1 {
-  top: 8%;
+  top: 10%;
   right: 10%;
-  animation-delay: 0s;
 }
 
 .storeLocation__decorFloater--2 {
-  bottom: 15%;
+  bottom: 14%;
   left: 8%;
-  animation-delay: 3s;
+  animation-delay: 2.8s;
 }
 
 @keyframes float {
   0%, 100% {
-    transform: translateY(0) rotate(0deg);
+    transform: translateY(0);
   }
   50% {
-    transform: translateY(-20px) rotate(5deg);
+    transform: translateY(-10px);
   }
 }
 
@@ -130,50 +120,27 @@
   .storeLocation__decorFloater {
     display: none !important;
   }
-
-  .storeLocation__card:hover,
-  .storeLocation__navBtn:hover,
-  .storeLocation__directionsBtn:hover,
-  .storeLocation__whatsappBtn:hover {
-    transform: none !important;
-  }
 }
 
-/* Kicker with icon */
+/* Kicker + title (restored base styles) */
 .storeLocation__kicker {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0 0 0.8rem;
-  font-weight: 950;
-  letter-spacing: 0.14em;
+  margin: 0;
+  font-weight: 800;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--sl-kicker);
 }
 
-.storeLocation__kickerIcon {
-  font-size: 1.1rem;
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-}
-
-/* Title with enhanced underline */
 .storeLocation__title {
-  margin: 0 0 1.5rem;
-  font-size: clamp(1.75rem, 2.5vw, 2.2rem);
+  margin: 0.2rem 0 1.15rem;
+  font-size: clamp(1.65rem, 2.4vw, 2.2rem);
   font-weight: 950;
   letter-spacing: -0.02em;
   color: var(--welcome-color-title);
-  line-height: 1.2;
+  line-height: 1.15;
+  font-family: "Playfair Display", Georgia, serif;
+  text-wrap: balance;
 }
 
 .storeLocation__title::after {
@@ -188,18 +155,6 @@
     rgba(212, 140, 156, 0.95),
     rgba(168, 213, 186, 0.85)
   );
-  animation: expandWidth 1s ease-out;
-}
-
-@keyframes expandWidth {
-  from {
-    width: 0;
-    opacity: 0;
-  }
-  to {
-    width: 80px;
-    opacity: 1;
-  }
 }
 
 /* =========================
@@ -208,16 +163,27 @@
 .storeLocation__cards {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.4rem;
+  gap: 1.1rem;
+}
+
+@media (min-width: 980px) {
+  .storeLocation__cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .storeLocation__cards > .storeLocation__card:nth-child(3) {
+    grid-column: 1 / -1;
+  }
 }
 
 .storeLocation__card {
   position: relative;
   border-radius: 16px;
-  padding: 1.5rem 1.4rem;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(212, 140, 156, 0.15);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  padding: 1.3rem 1.25rem;
+  background: var(--sl-card-surface);
+  border: 1px solid var(--sl-card-border);
+  box-shadow: var(--sl-card-shadow);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   backdrop-filter: blur(10px);
@@ -241,17 +207,6 @@
   transition: opacity 0.3s ease;
 }
 
-.storeLocation__card:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 20px 48px rgba(212, 140, 156, 0.28);
-  border-color: rgba(212, 140, 156, 0.35);
-  background: rgba(255, 255, 255, 0.95);
-}
-
-.storeLocation__card:hover::before {
-  opacity: 1;
-}
-
 /* Card icons */
 .storeLocation__cardIcon {
   display: inline-flex;
@@ -264,35 +219,21 @@
   background: linear-gradient(135deg, rgba(212, 140, 156, 0.18), rgba(168, 213, 186, 0.18));
   color: var(--brand-rose-500);
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(212, 140, 156, 0.15);
-}
-
-.storeLocation__card:hover .storeLocation__cardIcon {
-  transform: scale(1.15) rotate(8deg);
-  background: linear-gradient(135deg, rgba(212, 140, 156, 0.3), rgba(168, 213, 186, 0.3));
-  box-shadow: 0 6px 18px rgba(212, 140, 156, 0.25);
+  box-shadow: var(--shadow-1);
 }
 
 .storeLocation__cardIcon svg {
   transition: transform 0.3s ease;
 }
 
-.storeLocation__card:hover .storeLocation__cardIcon svg {
-  transform: scale(1.1);
-}
-
 /* Card titles */
 .storeLocation__cardTitle {
-  margin: 0 0 1.2rem;
+  margin: 0 0 0.95rem;
   font-size: 1.2rem;
   font-weight: 950;
   letter-spacing: -0.01em;
   color: var(--sl-title);
   transition: color 0.3s ease;
-}
-
-.storeLocation__card:hover .storeLocation__cardTitle {
-  color: var(--brand-rose-500);
 }
 
 /* Text with icons */
@@ -315,10 +256,6 @@
   transition: transform 0.3s ease;
 }
 
-.storeLocation__text:hover .storeLocation__textIcon {
-  transform: scale(1.2);
-}
-
 .storeLocation__text a {
   color: var(--sl-link);
   text-decoration: none;
@@ -338,12 +275,10 @@
   transition: width 0.3s ease;
 }
 
-.storeLocation__text a:hover {
-  color: var(--brand-rose-500);
-}
-
-.storeLocation__text a:hover::after {
-  width: 100%;
+.storeLocation__text a:focus-visible {
+  outline: 3px solid rgba(212, 140, 156, 0.35);
+  outline-offset: 3px;
+  border-radius: 8px;
 }
 
 .storeLocation__text--closed {
@@ -369,52 +304,80 @@
   border: none;
 }
 
+.storeLocation__actionsRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+}
+
+.storeLocation__copyBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.7rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(212, 140, 156, 0.22);
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--sl-title);
+  font-size: 0.9rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.storeLocation__copyBtn:focus-visible {
+  outline: 3px solid rgba(212, 140, 156, 0.35);
+  outline-offset: 3px;
+}
+
+.storeLocation__copyHint {
+  min-width: 56px;
+  min-height: 1em;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  color: var(--sl-kicker);
+  transition: opacity 0.2s ease;
+}
+
 .storeLocation__directionsBtn {
   background: linear-gradient(135deg, var(--brand-rose-500), var(--brand-wine-700));
   color: var(--neutral-0);
   border: none;
-  box-shadow: 0 8px 20px rgba(212, 140, 156, 0.3);
-}
-
-.storeLocation__directionsBtn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 14px 32px rgba(212, 140, 156, 0.42);
+  box-shadow: var(--brand-shadow);
 }
 
 .storeLocation__directionsBtn svg {
   transition: transform 0.3s ease;
 }
 
-.storeLocation__directionsBtn:hover svg {
-  transform: translateX(3px);
-}
-
 .storeLocation__whatsappBtn {
-  background: linear-gradient(135deg, #25D366, #128C7E);
-  color: var(--neutral-0);
-  border: none;
-  box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3);
-}
-
-.storeLocation__whatsappBtn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 14px 32px rgba(37, 211, 102, 0.42);
+  background: rgba(255, 255, 255, 0.78);
+  color: rgba(18, 140, 126, 0.95);
+  border: 1px solid rgba(18, 140, 126, 0.30);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
 }
 
 .storeLocation__whatsappBtn svg {
   transition: transform 0.3s ease;
 }
 
-.storeLocation__whatsappBtn:hover svg {
-  transform: scale(1.1) rotate(5deg);
+.storeLocation__directionsBtn:focus-visible,
+.storeLocation__whatsappBtn:focus-visible,
+.storeLocation__socialLink:focus-visible {
+  outline: 3px solid rgba(212, 140, 156, 0.35);
+  outline-offset: 3px;
 }
 
 /* =========================
    Social Media Section
 ========================= */
 .storeLocation__social {
-  padding-top: 2rem;
-  border-top: 1px solid rgba(212, 140, 156, 0.2);
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--sl-card-border);
 }
 
 .storeLocation__socialTitle {
@@ -439,204 +402,132 @@
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(212, 140, 156, 0.15);
+  background: var(--surface-3);
+  border: 1px solid var(--sl-card-border);
   color: var(--sl-muted);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-1);
 }
 
-.storeLocation__socialLink:hover {
-  transform: translateY(-6px) scale(1.1);
-}
 
-.storeLocation__socialLink--instagram:hover {
-  background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-  color: var(--neutral-0);
-  border-color: transparent;
-  box-shadow: 0 12px 28px rgba(225, 48, 108, 0.4);
-}
-
-.storeLocation__socialLink--facebook:hover {
-  background: #1877f2;
-  color: var(--neutral-0);
-  border-color: transparent;
-  box-shadow: 0 12px 28px rgba(24, 119, 242, 0.4);
-}
-
-.storeLocation__socialLink--tiktok:hover {
-  background: #000000;
-  color: var(--neutral-0);
-  border-color: transparent;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
-}
 
 .storeLocation__socialLink svg {
   transition: transform 0.3s ease;
 }
 
-.storeLocation__socialLink:hover svg {
-  transform: scale(1.15) rotate(5deg);
-}
+/* Hover interactions only on hover-capable devices (avoid sticky hover on touch) */
+@media (hover: hover) and (pointer: fine) {
+  .storeLocation__decorFloater {
+    animation: float 9s ease-in-out infinite;
+  }
 
-/* =========================
-   Map Section - Enhanced
-========================= */
-.storeLocation__mapWrapper {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  min-height: 700px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  .storeLocation__text a:hover {
+    color: var(--brand-rose-500);
+  }
 
-.storeLocation__map {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 0;
-  overflow: hidden;
-  background: var(--sl-map-surface);
-}
+  .storeLocation__text a:hover::after {
+    width: 100%;
+  }
+  .storeLocation__card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sl-card-shadow-hover);
+    border-color: rgba(212, 140, 156, 0.28);
+    background: rgba(255, 255, 255, 0.95);
+  }
 
-/* Decorative corner accents */
-.storeLocation__mapDecor {
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  border: 3px solid var(--brand-rose-500);
-  opacity: 0.4;
-  z-index: 2;
-  pointer-events: none;
-  transition: all 0.3s ease;
-}
+  .storeLocation__card:hover::before {
+    opacity: 1;
+  }
 
-.storeLocation__mapDecor--tl {
-  top: 20px;
-  left: 20px;
-  border-right: none;
-  border-bottom: none;
-  border-radius: 12px 0 0 0;
-}
+  .storeLocation__card:hover .storeLocation__cardIcon {
+    transform: scale(1.06) rotate(1deg);
+    background: linear-gradient(135deg, rgba(212, 140, 156, 0.26), rgba(168, 213, 186, 0.22));
+    box-shadow: var(--brand-shadow);
+  }
 
-.storeLocation__mapDecor--tr {
-  top: 20px;
-  right: 20px;
-  border-left: none;
-  border-bottom: none;
-  border-radius: 0 12px 0 0;
-}
+  .storeLocation__card:hover .storeLocation__cardIcon svg {
+    transform: scale(1.05);
+  }
 
-.storeLocation__mapDecor--bl {
-  bottom: 20px;
-  left: 20px;
-  border-right: none;
-  border-top: none;
-  border-radius: 0 0 0 12px;
-}
+  .storeLocation__card:hover .storeLocation__cardTitle {
+    color: var(--brand-rose-500);
+  }
 
-.storeLocation__mapDecor--br {
-  bottom: 20px;
-  right: 20px;
-  border-left: none;
-  border-top: none;
-  border-radius: 0 0 12px 0;
-}
+  .storeLocation__text:hover .storeLocation__textIcon {
+    transform: scale(1.08);
+  }
 
-.storeLocation__map:hover .storeLocation__mapDecor {
-  opacity: 0.7;
-  width: 70px;
-  height: 70px;
-}
+  .storeLocation__copyBtn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--brand-shadow);
+    border-color: rgba(212, 140, 156, 0.32);
+  }
 
-/* Subtle overlay gradient */
-.storeLocation__map::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(800px 420px at 20% 10%, rgba(255, 255, 255, 0.12), transparent 60%);
-  z-index: 1;
-}
+  .storeLocation__directionsBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--brand-shadow-hover);
+  }
 
-.storeLocation__map iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-  display: block;
-  filter: grayscale(0.1) contrast(1.05);
-  transition: filter 0.3s ease;
-}
+  .storeLocation__directionsBtn:hover svg {
+    transform: translateX(2px);
+  }
 
-.storeLocation__map:hover iframe {
-  filter: grayscale(0) contrast(1.1);
+  .storeLocation__whatsappBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.10);
+    border-color: rgba(18, 140, 126, 0.45);
+  }
+
+  .storeLocation__whatsappBtn:hover svg {
+    transform: scale(1.06);
+  }
+
+  .storeLocation__socialLink:hover {
+    transform: translateY(-2px) scale(1.04);
+  }
+
+  .storeLocation__socialLink:hover svg {
+    transform: scale(1.08);
+  }
+
+  .storeLocation__socialLink--instagram:hover {
+    background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    color: var(--neutral-0);
+    border-color: transparent;
+    box-shadow: 0 12px 24px rgba(225, 48, 108, 0.28);
+  }
+
+  .storeLocation__socialLink--facebook:hover {
+    background: #1877f2;
+    color: var(--neutral-0);
+    border-color: transparent;
+    box-shadow: 0 12px 24px rgba(24, 119, 242, 0.25);
+  }
+
+  .storeLocation__socialLink--tiktok:hover {
+    background: #000000;
+    color: var(--neutral-0);
+    border-color: transparent;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.22);
+  }
+
 }
 
 /* =========================
    Responsive Design
 ========================= */
 
-/* Large Desktops & Ultra-wide (1800px+) */
-@media (min-width: 1800px) {
-  .storeLocation__container {
-    max-width: 1800px;
-    grid-template-columns: 520px 1fr;
-    min-height: 750px;
-  }
-
-  .storeLocation__info {
-    padding: 3.5rem 3rem;
-  }
-
-  .storeLocation__title {
-    font-size: 2.4rem;
-    margin-bottom: 2rem;
-  }
-
-  .storeLocation__card {
-    padding: 1.8rem 1.6rem;
-  }
-
-  .storeLocation__cardIcon {
-    width: 56px;
-    height: 56px;
-  }
-
-  .storeLocation__cardTitle {
-    font-size: 1.3rem;
-  }
-
-  .storeLocation__text {
-    font-size: 1rem;
-  }
-
-  .storeLocation__mapWrapper {
-    min-height: 750px;
-  }
-}
-
 @media (max-width: 1400px) {
   .storeLocation__container {
-    max-width: 1400px;
-    grid-template-columns: 420px 1fr;
-  }
-  
-  .storeLocation__mapWrapper {
-    min-height: 650px;
+    max-width: var(--max);
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 1200px) {
   .storeLocation__container {
-    max-width: 100%;
-    grid-template-columns: 380px 1fr;
+    max-width: var(--max);
+    grid-template-columns: 1fr;
     border-radius: 16px;
   }
   
@@ -644,9 +535,6 @@
     padding: 2.5rem 2rem;
   }
   
-  .storeLocation__mapWrapper {
-    min-height: 600px;
-  }
 }
 
 @media (max-width: 980px) {
@@ -657,16 +545,16 @@
 
   .storeLocation__container {
     grid-template-columns: 1fr;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--sl-shadow);
     border-radius: 12px;
-    max-width: 95%;
+    max-width: var(--max);
     min-height: auto;
   }
 
   .storeLocation__info {
     border-right: none;
-    border-bottom: 1px solid var(--sl-border);
-    padding: 2.5rem 2rem;
+    border-bottom: none;
+    padding: 2rem 1.6rem;
     max-height: none;
   }
 
@@ -678,45 +566,16 @@
     gap: 1.2rem;
   }
 
-  .storeLocation__mapWrapper {
-    min-height: 500px;
-    height: 500px;
-  }
-
-  .storeLocation__mapDecor {
-    width: 40px;
-    height: 40px;
-  }
-
-  .storeLocation__mapDecor--tl,
-  .storeLocation__mapDecor--tr {
-    top: 15px;
-  }
-
-  .storeLocation__mapDecor--bl,
-  .storeLocation__mapDecor--br {
-    bottom: 15px;
-  }
-
-  .storeLocation__mapDecor--tl,
-  .storeLocation__mapDecor--bl {
-    left: 15px;
-  }
-
-  .storeLocation__mapDecor--tr,
-  .storeLocation__mapDecor--br {
-    right: 15px;
-  }
 }
 
 @media (max-width: 640px) {
   .storeLocation__container {
-    max-width: 96%;
+    max-width: var(--max);
     border-radius: 10px;
   }
 
   .storeLocation__info {
-    padding: 2rem 1.5rem;
+    padding: 1.65rem 1.25rem;
   }
 
   .storeLocation__title {
@@ -755,15 +614,20 @@
     height: 48px;
   }
 
-  .storeLocation__mapWrapper {
-    min-height: 420px;
-    height: 420px;
+  .storeLocation__actionsRow {
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .storeLocation__mapDecor {
-    width: 30px;
-    height: 30px;
+  .storeLocation__copyBtn {
+    width: 100%;
   }
+
+  .storeLocation__copyHint {
+    min-width: 0;
+    text-align: center;
+  }
+
 }
 
 @media (max-width: 480px) {
@@ -772,12 +636,12 @@
   }
 
   .storeLocation__container {
-    max-width: 98%;
+    max-width: var(--max);
     border-radius: 8px;
   }
 
   .storeLocation__info {
-    padding: 1.75rem 1.25rem;
+    padding: 1.5rem 1.1rem;
   }
 
   .storeLocation__title {
@@ -813,8 +677,4 @@
     height: 44px;
   }
 
-  .storeLocation__mapWrapper {
-    min-height: 360px;
-    height: 360px;
-  }
 }

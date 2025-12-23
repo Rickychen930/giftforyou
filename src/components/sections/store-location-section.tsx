@@ -7,9 +7,66 @@ interface StoreLocationSectionProps {
   data?: StoreData;
 }
 
+interface StoreLocationSectionState {
+  copiedAddress: boolean;
+}
+
 const DEFAULT_STORE_DATA: StoreData = storeData;
 
-class StoreLocationSection extends Component<StoreLocationSectionProps> {
+class StoreLocationSection extends Component<StoreLocationSectionProps, StoreLocationSectionState> {
+  public state: StoreLocationSectionState = {
+    copiedAddress: false,
+  };
+
+  private copyResetTimer: number | undefined;
+
+  public componentWillUnmount(): void {
+    if (this.copyResetTimer) {
+      window.clearTimeout(this.copyResetTimer);
+    }
+  }
+
+  private copyToClipboard = async (text: string): Promise<void> => {
+    const trimmed = String(text ?? "").trim();
+    if (!trimmed) return;
+
+    const setCopied = () => {
+      this.setState({ copiedAddress: true });
+      if (this.copyResetTimer) {
+        window.clearTimeout(this.copyResetTimer);
+      }
+      this.copyResetTimer = window.setTimeout(() => {
+        this.setState({ copiedAddress: false });
+      }, 1800);
+    };
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(trimmed);
+        setCopied();
+        return;
+      }
+    } catch {
+      // fall back below
+    }
+
+    const textarea = document.createElement("textarea");
+    textarea.value = trimmed;
+    textarea.setAttribute("readonly", "true");
+    textarea.style.position = "fixed";
+    textarea.style.top = "-9999px";
+    textarea.style.left = "-9999px";
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    try {
+      const ok = document.execCommand("copy");
+      if (ok) setCopied();
+    } finally {
+      document.body.removeChild(textarea);
+    }
+  };
+
   protected renderStoreInfo(data: StoreData): React.ReactNode {
     const {
       name,
@@ -23,6 +80,7 @@ class StoreLocationSection extends Component<StoreLocationSectionProps> {
     } = data;
 
     const phoneForTel = String(phone ?? "").replace(/\s+/g, "");
+    const fullAddress = [address, city].filter(Boolean).join(", ");
 
     return (
       <div
@@ -83,13 +141,42 @@ class StoreLocationSection extends Component<StoreLocationSectionProps> {
             <p className="storeLocation__text storeLocation__text--city">
               {city}
             </p>
+
+            <div className="storeLocation__actionsRow">
+              <button
+                type="button"
+                className="storeLocation__copyBtn"
+                onClick={() => this.copyToClipboard(fullAddress)}
+                aria-label="Salin alamat toko"
+                title="Salin alamat"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
+                  <rect x="9" y="9" width="13" height="13" rx="2" />
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                </svg>
+                <span>Salin alamat</span>
+              </button>
+
+              <span className="storeLocation__copyHint" aria-live="polite">
+                {this.state.copiedAddress ? "Tersalin" : ""}
+              </span>
+            </div>
+
             {mapDirectionsUrl && (
               <a
                 href={mapDirectionsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="storeLocation__directionsBtn"
-                aria-label="Get directions to our store"
+                aria-label="Petunjuk arah ke toko"
               >
                 <svg
                   width="16"
@@ -122,12 +209,12 @@ class StoreLocationSection extends Component<StoreLocationSectionProps> {
             </div>
             <h3 className="storeLocation__cardTitle">Hubungi Kami</h3>
             <p className="storeLocation__text storeLocation__text--phone">
-              <a href={`tel:${phoneForTel}`} aria-label={`Call us at ${phone}`}>
+              <a href={`tel:${phoneForTel}`} aria-label={`Telepon ${phone}`}>
                 {phone}
               </a>
             </p>
             <p className="storeLocation__text storeLocation__text--email">
-              <a href={`mailto:${email}`} aria-label={`Email us at ${email}`}>
+              <a href={`mailto:${email}`} aria-label={`Email ${email}`}>
                 {email}
               </a>
             </p>
@@ -137,7 +224,7 @@ class StoreLocationSection extends Component<StoreLocationSectionProps> {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="storeLocation__whatsappBtn"
-                aria-label="Chat with us on WhatsApp"
+                aria-label="Chat lewat WhatsApp"
               >
                 <svg
                   width="16"
@@ -246,40 +333,6 @@ class StoreLocationSection extends Component<StoreLocationSectionProps> {
     );
   }
 
-  protected renderMap(data: StoreData): React.ReactNode {
-    return (
-      <div className="storeLocation__mapWrapper">
-        <div className="storeLocation__map" aria-label="Store location map">
-          {/* Decorative corner accents */}
-          <div
-            className="storeLocation__mapDecor storeLocation__mapDecor--tl"
-            aria-hidden="true"
-          ></div>
-          <div
-            className="storeLocation__mapDecor storeLocation__mapDecor--tr"
-            aria-hidden="true"
-          ></div>
-          <div
-            className="storeLocation__mapDecor storeLocation__mapDecor--bl"
-            aria-hidden="true"
-          ></div>
-          <div
-            className="storeLocation__mapDecor storeLocation__mapDecor--br"
-            aria-hidden="true"
-          ></div>
-
-          <iframe
-            title={`${data.name} Store Location`}
-            src={data.mapEmbedUrl}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            allowFullScreen
-          />
-        </div>
-      </div>
-    );
-  }
-
   public render(): React.ReactNode {
     const data = this.props.data ?? DEFAULT_STORE_DATA;
 
@@ -287,7 +340,6 @@ class StoreLocationSection extends Component<StoreLocationSectionProps> {
       <section className="storeLocation" id="Location">
         <div className="storeLocation__container">
           {this.renderStoreInfo(data)}
-          {this.renderMap(data)}
         </div>
       </section>
     );
