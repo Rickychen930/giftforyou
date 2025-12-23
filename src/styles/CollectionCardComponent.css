@@ -274,6 +274,9 @@
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
+
+  /* Extra guard: Safari sometimes “leaks” vertical overflow when children transform */
+  overflow-y: hidden;
 }
 
 .collectionCard__scroll > * {
@@ -287,23 +290,28 @@
   background: transparent;
 }
 
-/* Safari-specific stability fixes:
-   Safari has known issues where transform/hover inside overflow containers can
-   cause repeated layout shifts. We keep the visual polish (shadow) but disable
-   translateY transforms that can trigger the bug. */
-@supports (-webkit-touch-callout: none) {
+/* Safari-specific stability fixes (macOS + iOS):
+   WebKit can accumulate layout shifts when transformed children live inside
+   an overflow scroller. Keep shadows, drop translate/scale transforms. */
+@supports (color: -webkit-focus-ring-color) {
   .collectionCard {
     animation: none;
     opacity: 1;
+    will-change: auto;
   }
 
   .collectionCard:hover {
     transform: none;
   }
 
+  .collectionCard__navBtn:hover {
+    transform: translateY(-50%);
+  }
+
   .bouquetCard {
     animation: none;
     opacity: 1;
+    will-change: auto;
   }
 
   .bouquetCard:hover {
