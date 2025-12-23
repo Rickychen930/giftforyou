@@ -9,6 +9,7 @@ import OurCollectionSection from "../components/sections/our-collection-section"
 import StoreLocationSection from "../components/sections/store-location-section";
 
 import { API_BASE } from "../config/api";
+import { STORE_PROFILE } from "../config/store-profile";
 import { setSeo } from "../utils/seo";
 
 type LoadState = "idle" | "loading" | "success" | "error";
@@ -42,9 +43,9 @@ const HomePage: React.FC = () => {
     const controller = new AbortController();
 
     setSeo({
-      title: "Giftforyou.idn | Luxury Floral Boutique",
+      title: `${STORE_PROFILE.brand.name} | Florist & Gift Shop Cirebon`,
       description:
-        "Luxury Floral Boutique — curated bouquets & collections. Order easily via WhatsApp.",
+        "Florist di Cirebon — bouquet, gift box, dan artificial bouquet. Pesan cepat lewat WhatsApp.",
       path: "/",
     });
 
@@ -54,10 +55,20 @@ const HomePage: React.FC = () => {
         setErrorMessage("");
 
         // 1) fetch hero content (do not block page if it fails)
-        fetch(`${API_BASE}/api/hero-slider/home`)
+        fetch(`${API_BASE}/api/hero-slider/home`, { signal: controller.signal })
           .then((r) => (r.ok ? r.json() : null))
-          .then((data) => setHeroContent(data))
-          .catch(() => setHeroContent(null));
+          .then((data) => {
+            const hasSlides =
+              data &&
+              typeof data === "object" &&
+              Array.isArray((data as any).slides) &&
+              (data as any).slides.length > 0;
+            setHeroContent(hasSlides ? (data as HeroSliderContent) : null);
+          })
+          .catch((err: unknown) => {
+            if (err instanceof DOMException && err.name === "AbortError") return;
+            setHeroContent(null);
+          });
 
         // 2) fetch collections
         const data = await getCollections(controller.signal);
@@ -79,21 +90,11 @@ const HomePage: React.FC = () => {
       {/* ✅ Big hero slider (DB content if exists, otherwise component uses defaultContent) */}
       <HeroCollectionSlider content={heroContent ?? undefined} />
 
-      {/* Collections section */}
-      {state === "loading" && (
-        <section className="home-state" aria-live="polite">
-          Loading collections...
-        </section>
-      )}
-
-      {state === "error" && (
-        <section className="home-state home-state--error" role="alert">
-          <p>Failed to load collections.</p>
-          <small>{errorMessage}</small>
-        </section>
-      )}
-
-      {state === "success" && <OurCollectionSection items={collections} />}
+      <OurCollectionSection
+        items={collections}
+        loading={state === "loading"}
+        errorMessage={state === "error" ? errorMessage : ""}
+      />
 
       <StoreLocationSection />
     </main>

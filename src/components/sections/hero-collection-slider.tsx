@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
@@ -43,42 +43,41 @@ interface HeroCollectionSliderProps {
 }
 
 const defaultContent: HeroSliderContent = {
-  heading: "New Collections",
+  heading: "Koleksi Pilihan",
   slides: [
     {
       id: "welcome-collection",
-      badge: "NEW ARRIVAL",
-      title: "Premium Flower Collection",
-      subtitle:
-        "Exquisite arrangements with elegant wrapping—perfect for gifting.",
+      badge: "SIGNATURE",
+      title: "Bouquet & Gift Premium",
+      subtitle: "Rangkaian pilihan dengan wrapping elegan—cocok untuk hadiah.",
       image: "/images/welcome-image.jpeg",
-      primaryCta: { label: "Shop Collection", href: "/collection" },
+      primaryCta: { label: "Lihat Koleksi", href: "/collection" },
       secondaryCta: {
-        label: "Order via WhatsApp",
+        label: "Chat lewat WhatsApp",
         href: STORE_PROFILE.whatsapp.url,
       },
     },
     {
       id: "seasonal-blooms",
-      badge: "SEASONAL",
-      title: "Seasonal Blooms",
-      subtitle: "Fresh picks curated weekly by our florist.",
+      badge: "CUSTOM",
+      title: "Request Bouquet Custom",
+      subtitle: "Ceritakan momen, warna, dan budget—kami rekomendasikan yang terbaik.",
       image: "/images/about-us-background.jpg",
-      primaryCta: { label: "Explore Bouquets", href: "/collection" },
+      primaryCta: { label: "Lihat Bouquet", href: "/collection" },
       secondaryCta: {
-        label: "Custom Request",
+        label: "Chat lewat WhatsApp",
         href: STORE_PROFILE.whatsapp.url,
       },
     },
     {
       id: "special-gifts",
       badge: "BEST SELLER",
-      title: "Flowers & Gifts",
-      subtitle: "Make it special with add-ons: cards, chocolates, and more.",
+      title: "Pesan Cepat & Mudah",
+      subtitle: "Pesan lewat WhatsApp—respon cepat dan pelayanan ramah.",
       image: "/images/our-collection-background.jpg",
-      primaryCta: { label: "Browse Collection", href: "/collection" },
+      primaryCta: { label: "Lihat Semua", href: "/collection" },
       secondaryCta: {
-        label: "Contact Us",
+        label: "Chat lewat WhatsApp",
         href: STORE_PROFILE.whatsapp.url,
       },
     },
@@ -168,7 +167,7 @@ const FloralIcon: React.FC = () => (
 
 // Loading skeleton component
 const HeroSkeleton: React.FC = () => (
-  <section className="hero hero--loading" aria-label="Loading hero slider">
+  <section className="hero hero--loading" aria-label="Memuat hero slider">
     <div className="hero__skeleton">
       <div className="hero__skeleton-image" />
       <div className="hero__skeleton-content">
@@ -210,33 +209,6 @@ const HeroCollectionSlider: React.FC<HeroCollectionSliderProps> = ({
     }
   }, [swiperInstance, isPlaying]);
 
-  // Handle keyboard navigation
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (!swiperInstance) return;
-
-      switch (e.key) {
-        case "ArrowLeft":
-          e.preventDefault();
-          swiperInstance.slidePrev();
-          break;
-        case "ArrowRight":
-          e.preventDefault();
-          swiperInstance.slideNext();
-          break;
-        case " ":
-          if (e.target === document.body) {
-            e.preventDefault();
-            toggleAutoplay();
-          }
-          break;
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [swiperInstance, toggleAutoplay]);
-
   // Handle image load
   const handleImageLoad = useCallback((slideId: string) => {
     setImageLoadStates((prev) => ({ ...prev, [slideId]: true }));
@@ -249,6 +221,7 @@ const HeroCollectionSlider: React.FC<HeroCollectionSliderProps> = ({
 
   return (
     <section className="hero" aria-label="Featured collections">
+      <h1 className="srOnly">{STORE_PROFILE.brand.displayName}</h1>
       {data.heading && (
         <div className="hero__kicker-wrapper">
           <p className="hero__kicker">{data.heading}</p>
@@ -359,7 +332,7 @@ const HeroCollectionSlider: React.FC<HeroCollectionSliderProps> = ({
                       data-swiper-parallax="-100"
                     >
                       <FloralIcon />
-                      <h1 className="heroSlide__title">{slide.title}</h1>
+                      <h2 className="heroSlide__title">{slide.title}</h2>
                     </div>
 
                     {slide.subtitle && (
@@ -441,7 +414,7 @@ const HeroCollectionSlider: React.FC<HeroCollectionSliderProps> = ({
           <>
             <button
               className="hero__nav hero__nav-prev"
-              aria-label="Previous slide (Left arrow key)"
+              aria-label="Previous slide"
               type="button"
               title="Previous slide"
             >
@@ -463,7 +436,7 @@ const HeroCollectionSlider: React.FC<HeroCollectionSliderProps> = ({
             </button>
             <button
               className="hero__nav hero__nav-next"
-              aria-label="Next slide (Right arrow key)"
+              aria-label="Next slide"
               type="button"
               title="Next slide"
             >
@@ -489,9 +462,7 @@ const HeroCollectionSlider: React.FC<HeroCollectionSliderProps> = ({
               className="hero__playPause"
               onClick={toggleAutoplay}
               aria-label={
-                isPlaying
-                  ? "Pause autoplay (Space key)"
-                  : "Play autoplay (Space key)"
+                isPlaying ? "Pause autoplay" : "Play autoplay"
               }
               type="button"
               title={isPlaying ? "Pause" : "Play"}

@@ -15,7 +15,7 @@
   max-width: none;
   margin: 0;
   padding: 0;
-  margin-bottom: clamp(2rem, 8vh, 6rem);
+  margin-bottom: 0;
   isolation: isolate;
 }
 
@@ -184,6 +184,31 @@
 /* Ken Burns zoom effect on active slide */
 .swiper-slide-active .heroSlide__img {
   transform: scale(1.1);
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .hero *,
+  .hero *::before,
+  .hero *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .heroSlide__img {
+    transform: none !important;
+  }
+
+  .swiper-slide-active .heroSlide__img {
+    transform: none !important;
+  }
+
+  .heroSlide__glow,
+  .heroSlide__grain {
+    opacity: 0.35 !important;
+  }
 }
 
 /* Overlay (balanced for readability) */

@@ -28,6 +28,7 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
   size,
   image,
   status,
+  collectionName,
 }) => {
   const statusClass =
     status === "ready" ? "bouquet-status ready" : "bouquet-status preorder";
@@ -40,9 +41,22 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
       : `${API_BASE}${image}`
     : FALLBACK_IMAGE;
 
+  const detailHref = `/bouquet/${_id}`;
+
+  const metaParts = [
+    status ? (status === "ready" ? "Siap" : "Preorder") : "",
+    size ? `Ukuran ${size}` : "",
+    type ? `Tipe ${type}` : "",
+    collectionName ? `Koleksi ${collectionName}` : "",
+  ].filter(Boolean);
+
   return (
-    <div className="bouquet-card">
-      <div className="bouquet-image-wrapper">
+    <article className="bouquet-card" aria-label={`Bouquet ${name}`}>
+      <Link
+        to={detailHref}
+        className="bouquet-image-wrapper"
+        aria-label={`Buka detail ${name}`}
+      >
         <img
           src={imageUrl}
           alt={`Bouquet: ${name}`}
@@ -56,20 +70,32 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
         />
         {size && <span className="bouquet-badge bouquet-size">{size}</span>}
         {type && <span className="bouquet-badge bouquet-type">{type}</span>}
-        <span className={`bouquet-badge ${statusClass}`}>{status}</span>
-      </div>
+        <span className={`bouquet-badge ${statusClass}`}>
+          {status === "ready" ? "Siap" : "Preorder"}
+        </span>
+      </Link>
 
       <div className="bouquet-info">
-        <h4 className="bouquet-title">{name}</h4>
+        <h4 className="bouquet-title">
+          <Link to={detailHref} aria-label={`Lihat detail ${name}`}>
+            {name}
+          </Link>
+        </h4>
+
+        {metaParts.length > 0 && (
+          <p className="bouquet-meta" aria-label="Ringkasan bouquet">
+            {metaParts.join(" • ")}
+          </p>
+        )}
         {description && <p className="bouquet-description">{description}</p>}
         <div className="bouquet-footer">
           <p className="bouquet-price">{formatPrice(price)}</p>
-          <Link to={`/bouquet/${_id}`} className="bouquet-button">
-            View details
+          <Link to={detailHref} className="bouquet-button">
+            Lihat detail
           </Link>
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 

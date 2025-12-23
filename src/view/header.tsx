@@ -145,7 +145,7 @@ const Header: React.FC<HeaderProps> = ({
             to="/"
             onClick={closeMobile}
             className="brand"
-            aria-label={`${BRAND_INFO.name} Homepage`}
+            aria-label={`${BRAND_INFO.name} Beranda`}
           >
             <div className="logo-wrapper">
               <img src={logoSrc} alt={BRAND_INFO.name} className="logo" />
@@ -164,9 +164,7 @@ const Header: React.FC<HeaderProps> = ({
             id="primary-navigation"
           >
             {navLinks.map((item) => {
-              const isCollections =
-                item.path === "/collection" ||
-                item.label.toLowerCase().includes("collection");
+              const isCollections = item.path === "/collection";
 
               return (
                 <li
@@ -195,13 +193,13 @@ const Header: React.FC<HeaderProps> = ({
                   {isCollections && (
                     <div className="dropdown">
                       <div className="dropdown-header">
-                        <h3>Our Collections</h3>
-                        <p>Handcrafted with love</p>
+                        <h3>Koleksi Kami</h3>
+                        <p>Dirangkai dengan sepenuh hati</p>
                       </div>
 
                       <div className="dropdown-header" style={{ marginTop: "0.75rem" }}>
-                        <h3>Browse by Type</h3>
-                        <p>Quick filters for the catalog</p>
+                        <h3>Berdasarkan Tipe</h3>
+                        <p>Filter cepat untuk katalog</p>
                       </div>
                       <ul className="dropdown-grid">
                         {typeSuggestions.map((t) => (
@@ -246,7 +244,7 @@ const Header: React.FC<HeaderProps> = ({
           <button
             className="icon-btn search-btn"
             onClick={toggleSearch}
-            aria-label="Search"
+            aria-label="Cari"
           >
             <SearchIcon />
           </button>
@@ -268,7 +266,7 @@ const Header: React.FC<HeaderProps> = ({
           <button
             className={`hamburger ${mobileOpen ? "is-open" : ""}`}
             onClick={onToggleMobile}
-            aria-label="Toggle menu"
+            aria-label="Buka/tutup menu"
             aria-expanded={mobileOpen}
             aria-controls="primary-navigation"
           >
@@ -286,7 +284,7 @@ const Header: React.FC<HeaderProps> = ({
             <button
               className="search-close"
               onClick={() => setSearchOpen(false)}
-              aria-label="Close search"
+              aria-label="Tutup pencarian"
             >
               <CloseIcon />
             </button>
@@ -300,8 +298,8 @@ const Header: React.FC<HeaderProps> = ({
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   className="search-input"
-                  placeholder="Search for bouquets, collections, occasions..."
-                  aria-label="Search"
+                  placeholder="Cari bouquet, koleksi, momen..."
+                  aria-label="Cari"
                 />
                 <datalist id="search-suggestions">
                   {collectionSuggestions.map((s) => (
@@ -310,11 +308,11 @@ const Header: React.FC<HeaderProps> = ({
                 </datalist>
               </div>
               <button type="submit" className="search-submit">
-                Search
+                Cari
               </button>
             </form>
             <div className="search-suggestions">
-              <p className="suggestions-title">Popular Searches</p>
+              <p className="suggestions-title">Pencarian Populer</p>
               <div className="suggestions-tags">
                 {collectionSuggestions.slice(0, 5).map((s) => (
                   <button

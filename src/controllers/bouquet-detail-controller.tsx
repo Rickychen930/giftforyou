@@ -52,7 +52,7 @@ export default function BouquetDetailController() {
   useEffect(() => {
     if (!id) {
       setBouquet(null);
-      setError("Missing bouquet id.");
+      setError("ID bouquet tidak ditemukan.");
       setLoading(false);
       return;
     }
@@ -70,7 +70,7 @@ export default function BouquetDetailController() {
 
         if (!res.ok) {
           const text = await res.text();
-          throw new Error(`Failed to load bouquet (${res.status}): ${text}`);
+          throw new Error(`Gagal memuat bouquet (${res.status}): ${text}`);
         }
 
         const data = await res.json();
@@ -80,7 +80,7 @@ export default function BouquetDetailController() {
         if (anyErr?.name === "AbortError") return;
 
         setBouquet(null);
-        setError(e instanceof Error ? e.message : "Failed to load bouquet.");
+        setError(e instanceof Error ? e.message : "Gagal memuat bouquet.");
       } finally {
         setLoading(false);
       }

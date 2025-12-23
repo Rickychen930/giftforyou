@@ -7,7 +7,7 @@
 
 .ourCollection {
   position: relative;
-  min-height: 100vh;
+  min-height: auto;
   padding: 5rem 0;
   background:
     radial-gradient(900px 460px at 12% 6%, var(--oc-bg-1), transparent 60%),
@@ -216,6 +216,47 @@
   line-height: 1.75;
 }
 
+/* ===== Error State ===== */
+.ourCollection__error {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 2.4rem 2rem;
+  text-align: center;
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  border-radius: 18px;
+  box-shadow: var(--shadow-1);
+  color: var(--error-text);
+  opacity: 0;
+  animation: fadeInUp 0.6s ease 0.2s forwards;
+}
+
+.ourCollection__errorIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  margin: 0 auto 1.2rem;
+  background: rgba(220, 38, 38, 0.10);
+  border: 1px solid rgba(220, 38, 38, 0.18);
+}
+
+.ourCollection__errorTitle {
+  margin: 0 0 0.6rem;
+  font-size: 1.25rem;
+  font-weight: 950;
+  letter-spacing: -0.01em;
+  color: var(--error-text);
+}
+
+.ourCollection__errorText {
+  margin: 0;
+  line-height: 1.65;
+  color: rgba(153, 27, 27, 0.92);
+}
+
 /* ===== Animations ===== */
 @keyframes fadeIn {
   from {
@@ -261,6 +302,34 @@
   }
   50% {
     opacity: 0.7;
+  }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .ourCollection *,
+  .ourCollection *::before,
+  .ourCollection *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .ourCollection__header,
+  .ourCollection__eyebrow,
+  .ourCollection__title,
+  .ourCollection__subtitle,
+  .ourCollection__grid > .collectionCard,
+  .ourCollection__empty,
+  .ourCollection__error {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .ourCollection__title::after {
+    width: 74px;
+    animation: none !important;
   }
 }
 

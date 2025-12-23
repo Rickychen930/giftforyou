@@ -1,4 +1,5 @@
-import React, { useRef, useState, useEffect } from "react";
+import React from "react";
+import { Link } from "react-router-dom";
 import "../styles/CollectionCardComponent.css";
 
 import { API_BASE } from "../config/api";
@@ -42,81 +43,21 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
   bouquets,
   index = 0,
 }) => {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
-
-  // Check scroll position
-  const checkScroll = () => {
-    const element = scrollRef.current;
-    if (!element) return;
-
-    const { scrollLeft, scrollWidth, clientWidth } = element;
-    setCanScrollLeft(scrollLeft > 0);
-    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-
-    // Calculate scroll progress (0-100)
-    const progress = (scrollLeft / (scrollWidth - clientWidth)) * 100;
-    setScrollProgress(isNaN(progress) ? 0 : progress);
-  };
-
-  useEffect(() => {
-    checkScroll();
-    const element = scrollRef.current;
-    if (element) {
-      element.addEventListener("scroll", checkScroll);
-      window.addEventListener("resize", checkScroll);
-    }
-    return () => {
-      if (element) {
-        element.removeEventListener("scroll", checkScroll);
-      }
-      window.removeEventListener("resize", checkScroll);
-    };
-  }, [bouquets]);
-
-  // Smooth scroll function
-  const scroll = (direction: "left" | "right") => {
-    const element = scrollRef.current;
-    if (!element) return;
-
-    const scrollAmount = element.clientWidth * 0.8;
-    const targetScroll =
-      direction === "left"
-        ? element.scrollLeft - scrollAmount
-        : element.scrollLeft + scrollAmount;
-
-    element.scrollTo({
-      left: targetScroll,
-      behavior: "smooth",
-    });
-  };
-
-  // Keyboard navigation
-  const handleKeyDown = (
-    e: React.KeyboardEvent,
-    direction: "left" | "right"
-  ) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      scroll(direction);
-    }
-  };
-
   // Validate bouquets array
   const validBouquets = Array.isArray(bouquets) ? bouquets : [];
+  const previewBouquets = validBouquets.slice(0, 6);
+  const browseHref = `/collection?name=${encodeURIComponent(name)}`;
 
   const renderBouquetCard = (b: BouquetCardProps) => {
     const waMessage = encodeURIComponent(
-      `Halo, saya ingin order bouquet "${b.name}" (${formatPrice(b.price)})${
+      `Halo, saya ingin pesan bouquet "${b.name}" (${formatPrice(b.price)})${
         b.size ? ` ukuran ${b.size}` : ""
       }.`
     );
     const waLink = buildWhatsAppLinkEncoded(waMessage);
 
     const imageUrl = buildImageUrl(b.image);
-    const statusLabel = b.status === "ready" ? "Ready" : "Preorder";
+    const statusLabel = b.status === "ready" ? "Siap" : "Preorder";
 
     return (
       <article key={b._id} className="bouquetCard" role="listitem">
@@ -149,10 +90,10 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
           {(b.size || b.type) && (
             <div className="bouquetCard__meta" aria-label="Bouquet details">
               {b.size && (
-                <span className="bouquetCard__chip">Size: {b.size}</span>
+                <span className="bouquetCard__chip">Ukuran: {b.size}</span>
               )}
               {b.type && (
-                <span className="bouquetCard__chip">Type: {b.type}</span>
+                <span className="bouquetCard__chip">Tipe: {b.type}</span>
               )}
             </div>
           )}
@@ -162,8 +103,8 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
             target="_blank"
             rel="noopener noreferrer"
             className="bouquetCard__btn"
-            aria-label={`Order ${b.name} via WhatsApp`}
-            title="Order via WhatsApp"
+            aria-label={`Chat untuk pesan ${b.name} lewat WhatsApp`}
+            title="Chat lewat WhatsApp"
           >
             <svg
               width="18"
@@ -178,7 +119,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
                 fill="currentColor"
               />
             </svg>
-            <span>Order via WhatsApp</span>
+            <span>Chat lewat WhatsApp</span>
           </a>
         </div>
       </article>
@@ -188,7 +129,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
   return (
     <section
       className="collectionCard"
-      aria-label={`Collection ${name}`}
+      aria-label={`Koleksi ${name}`}
       style={{ animationDelay: `${index * 0.1}s` }}
     >
       <header className="collectionCard__header">
@@ -198,13 +139,24 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
             {validBouquets && validBouquets.length > 0 && (
               <span
                 className="collectionCard__count"
-                aria-label={`${validBouquets.length} items`}
+                aria-label={`${validBouquets.length} produk`}
               >
-                {validBouquets.length} {validBouquets.length === 1 ? "item" : "items"}
+                {validBouquets.length} produk
               </span>
             )}
           </div>
           <p className="collectionCard__description">{description}</p>
+        </div>
+
+        <div className="collectionCard__headerActions">
+          <Link
+            to={browseHref}
+            className="collectionCard__ctaBtn collectionCard__ctaBtn--small"
+            aria-label={`Lihat koleksi ${name}`}
+            title="Lihat koleksi"
+          >
+            Lihat koleksi
+          </Link>
         </div>
       </header>
 
@@ -240,82 +192,42 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
               strokeLinejoin="round"
             />
           </svg>
-          <p className="collectionCard__emptyTitle">No bouquets yet</p>
+          <p className="collectionCard__emptyTitle">Lihat koleksi ini</p>
           <p className="collectionCard__emptyText">
-            New items will appear here when the collection is updated.
+            Lihat semua bouquet di koleksi ini.
           </p>
+
+          <div className="collectionCard__emptyActions">
+            <Link
+              to={browseHref}
+              className="collectionCard__ctaBtn"
+              aria-label={`Lihat koleksi ${name}`}
+              title="Lihat koleksi"
+            >
+              Lihat koleksi
+            </Link>
+          </div>
         </div>
       ) : (
-        <div className="collectionCard__scrollWrap">
-          {/* Navigation Arrows */}
-          {canScrollLeft && (
-            <button
-              className="collectionCard__navBtn collectionCard__navBtn--left"
-              onClick={() => scroll("left")}
-              onKeyDown={(e) => handleKeyDown(e, "left")}
-              aria-label="Scroll left"
-              type="button"
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M15 18L9 12L15 6"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-          )}
-
-          {canScrollRight && (
-            <button
-              className="collectionCard__navBtn collectionCard__navBtn--right"
-              onClick={() => scroll("right")}
-              onKeyDown={(e) => handleKeyDown(e, "right")}
-              aria-label="Scroll right"
-              type="button"
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M9 18L15 12L9 6"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-          )}
-
+        <div className="collectionCard__previewWrap">
           <div
-            ref={scrollRef}
-            className="collectionCard__scroll"
+            className="collectionCard__previewGrid"
             role="list"
-            aria-label={`${name} bouquets`}
+            aria-label={`Bouquet di koleksi ${name}`}
           >
-            {validBouquets.map(renderBouquetCard)}
+            {previewBouquets.map(renderBouquetCard)}
           </div>
 
-          {/* Scroll Progress Indicator - Show always when scrollable */}
-          {validBouquets.length > 0 && (
-            <div className="collectionCard__progress" aria-hidden="true">
-              <div
-                className="collectionCard__progressBar"
-                style={{ width: `${scrollProgress}%` }}
-              />
+          {validBouquets.length > previewBouquets.length && (
+            <div className="collectionCard__footer">
+              <Link
+                to={browseHref}
+                className="collectionCard__ctaBtn"
+                aria-label={`Lihat semua bouquet di koleksi ${name}`}
+                title="Lihat semua"
+              >
+                Lihat semua ({validBouquets.length})
+              </Link>
             </div>
           )}
         </div>

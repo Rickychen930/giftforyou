@@ -14,8 +14,8 @@ interface Props {
 class LoginView extends Component<Props> {
   componentDidMount(): void {
     setSeo({
-      title: "Admin Login | Giftforyou.idn",
-      description: "Administrator login for Giftforyou.idn.",
+      title: "Login Admin | Giftforyou.idn",
+      description: "Halaman login administrator untuk Giftforyou.idn.",
       path: "/login",
       noIndex: true,
     });
@@ -39,9 +39,9 @@ class LoginView extends Component<Props> {
               className="loginLogo"
               loading="lazy"
             />
-            <h1 className="loginTitle">Admin Sign In</h1>
+            <h1 className="loginTitle">Login Admin</h1>
             <p className="loginSubtitle">
-              Secure access for store administrators
+              Akses aman untuk administrator toko
             </p>
           </header>
 
@@ -59,7 +59,7 @@ class LoginView extends Component<Props> {
               name="username"
               value={username}
               onChange={onChange}
-              placeholder="Enter username"
+              placeholder="Masukkan username"
               autoComplete="username"
               required
               disabled={!!loading}
@@ -76,7 +76,7 @@ class LoginView extends Component<Props> {
               name="password"
               value={password}
               onChange={onChange}
-              placeholder="Enter password"
+              placeholder="Masukkan password"
               autoComplete="current-password"
               required
               disabled={!!loading}
@@ -86,10 +86,10 @@ class LoginView extends Component<Props> {
           </div>
 
           <button type="submit" className="loginButton" disabled={!!loading}>
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? "Sedang masuk..." : "Masuk"}
           </button>
 
-          <p className="loginHint">Having trouble? Contact the store owner.</p>
+          <p className="loginHint">Ada kendala? Hubungi pemilik toko.</p>
         </form>
       </div>
     );

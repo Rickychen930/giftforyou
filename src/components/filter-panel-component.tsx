@@ -15,16 +15,22 @@ interface FilterPanelProps {
   priceRange: Range;
   selectedTypes: string[];
   selectedSizes: string[];
+  selectedCollections: string[];
   allSizes: string[];
   allTypes: string[];
+  allCollections: string[];
   sortBy: string;
+
+  disabled?: boolean;
 
   onPriceChange: (range: Range) => void;
   onToggleFilter: (
-    key: "selectedTypes" | "selectedSizes",
+    key: "selectedTypes" | "selectedSizes" | "selectedCollections",
     value: string
   ) => void;
-  onClearFilter: (key: "selectedTypes" | "selectedSizes") => void;
+  onClearFilter: (
+    key: "selectedTypes" | "selectedSizes" | "selectedCollections"
+  ) => void;
   onSortChange: (value: string) => void;
 }
 
@@ -34,9 +40,12 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   priceRange,
   selectedTypes,
   selectedSizes,
+  selectedCollections,
   allSizes,
   allTypes,
+  allCollections,
   sortBy,
+  disabled,
   onPriceChange,
   onToggleFilter,
   onClearFilter,
@@ -48,29 +57,29 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   };
 
   const sortOptions: FilterOption[] = [
-    { label: "Default", value: "" },
-    { label: "Price ↑", value: "price-asc" },
-    { label: "Price ↓", value: "price-desc" },
-    { label: "Name A–Z", value: "name-asc" },
-    { label: "Name Z–A", value: "name-desc" },
+    { label: "Rekomendasi", value: "" },
+    { label: "Termurah", value: "price-asc" },
+    { label: "Termahal", value: "price-desc" },
+    { label: "Nama A–Z", value: "name-asc" },
+    { label: "Nama Z–A", value: "name-desc" },
   ];
 
   const FilterGroup: React.FC<{
     title: string;
     options: string[];
     selected: string[];
-    k: "selectedTypes" | "selectedSizes";
+    k: "selectedTypes" | "selectedSizes" | "selectedCollections";
   }> = ({ title, options, selected, k }) => (
-    <section className="fpGroup" aria-label={`${title} filter`}>
+    <section className="fpGroup" aria-label={`Filter ${title}`}>
       <div className="fpGroup__head">
         <h4 className="fpGroup__title">{title}</h4>
         <button
           type="button"
           className="fpGroup__clear"
           onClick={() => onClearFilter(k)}
-          disabled={selected.length === 0}
+          disabled={Boolean(disabled) || selected.length === 0}
         >
-          Clear
+          Hapus
         </button>
       </div>
 
@@ -79,8 +88,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           type="button"
           className={`fpChip ${selected.length === 0 ? "is-active" : ""}`}
           onClick={() => onClearFilter(k)}
+          disabled={Boolean(disabled)}
         >
-          All
+          Semua
         </button>
 
         {options.map((opt) => (
@@ -89,6 +99,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             key={opt}
             className={`fpChip ${selected.includes(opt) ? "is-active" : ""}`}
             onClick={() => onToggleFilter(k, opt)}
+            disabled={Boolean(disabled)}
           >
             {opt}
           </button>
@@ -98,21 +109,21 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   );
 
   return (
-    <div className="filterPanel" aria-label="Filters panel">
+    <div className="filterPanel" aria-label="Panel filter">
       <header className="filterPanel__header">
-        <h3 className="filterPanel__title">Filter & Sort</h3>
-        <p className="filterPanel__hint">Refine by price, type, and size.</p>
+        <h3 className="filterPanel__title">Filter & Urutkan</h3>
+        <p className="filterPanel__hint">Saring berdasarkan harga, tipe, ukuran, dan koleksi.</p>
       </header>
 
       <div className="filterPanel__body">
         {/* Price */}
-        <section className="fpGroup" aria-label="Price range filter">
+        <section className="fpGroup" aria-label="Filter rentang harga">
           <div className="fpGroup__head">
-            <h4 className="fpGroup__title">Price</h4>
+            <h4 className="fpGroup__title">Harga</h4>
           </div>
 
           <div className="fpPrice">
-            <div className="fpPrice__values" aria-label="Selected price range">
+            <div className="fpPrice__values" aria-label="Rentang harga terpilih">
               <span className="fpPrice__value">{formatRp(priceRange[0])}</span>
               <span className="fpPrice__value">{formatRp(priceRange[1])}</span>
             </div>
@@ -127,6 +138,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 onChange={handlePriceChange}
                 pushable={100_000}
                 allowCross={false}
+                disabled={Boolean(disabled)}
                 trackStyle={[{ backgroundColor: "var(--fp-brand)" }]}
                 railStyle={{ backgroundColor: "rgba(0,0,0,0.10)" }}
                 handleStyle={[
@@ -148,7 +160,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
 
         {/* Type */}
         <FilterGroup
-          title="Type"
+          title="Tipe"
           options={allTypes.length ? allTypes : ["Orchid", "Mixed"]}
           selected={selectedTypes}
           k="selectedTypes"
@@ -156,16 +168,24 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
 
         {/* Size */}
         <FilterGroup
-          title="Size"
+          title="Ukuran"
           options={allSizes.length ? allSizes : [...BOUQUET_SIZES]}
           selected={selectedSizes}
           k="selectedSizes"
         />
 
+        {/* Collection */}
+        <FilterGroup
+          title="Koleksi"
+          options={allCollections}
+          selected={selectedCollections}
+          k="selectedCollections"
+        />
+
         {/* Sort */}
-        <section className="fpGroup" aria-label="Sort options">
+        <section className="fpGroup" aria-label="Opsi pengurutan">
           <div className="fpGroup__head">
-            <h4 className="fpGroup__title">Sort</h4>
+            <h4 className="fpGroup__title">Urutkan</h4>
           </div>
 
           <div className="fpChips">
@@ -175,6 +195,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 key={opt.value}
                 className={`fpChip ${sortBy === opt.value ? "is-active" : ""}`}
                 onClick={() => onSortChange(opt.value)}
+                disabled={Boolean(disabled)}
               >
                 {opt.label}
               </button>

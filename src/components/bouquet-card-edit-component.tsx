@@ -142,13 +142,13 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
 
   const validationError = useMemo((): string | null => {
     const nm = form.name.trim();
-    if (nm.length < 2) return "Name must be at least 2 characters.";
+    if (nm.length < 2) return "Nama minimal 2 karakter.";
     if (!Number.isFinite(form.price) || form.price <= 0)
-      return "Price must be greater than 0.";
+      return "Harga harus lebih dari 0.";
     if (!Number.isFinite(form.quantity) || form.quantity < 0)
-      return "Quantity must be 0 or higher.";
+      return "Stok harus 0 atau lebih.";
     if (form.status !== "ready" && form.status !== "preorder")
-      return "Invalid status.";
+      return "Status tidak valid.";
     return null;
   }, [form.name, form.price, form.quantity, form.status]);
 
@@ -210,13 +210,13 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
       if (typeof result === "boolean") {
         alert(
           result
-            ? "✅ Bouquet saved successfully."
-            : "❌ Failed to save bouquet."
+            ? "✅ Bouquet berhasil disimpan."
+            : "❌ Gagal menyimpan bouquet."
         );
       }
     } catch (err) {
       console.error("Save error:", err);
-      alert("❌ Failed to save bouquet.");
+      alert("❌ Gagal menyimpan bouquet.");
     } finally {
       setSaving(false);
     }
@@ -228,9 +228,9 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
         <div className="becHeader__left">
           <h3
             className="becHeader__title"
-            title={form.name || "Untitled bouquet"}
+            title={form.name || "Bouquet tanpa judul"}
           >
-            {form.name || "Untitled bouquet"}
+            {form.name || "Bouquet tanpa judul"}
           </h3>
           <p className="becHeader__sub">
             {formatPrice(form.price)} • {form.type} • {form.size}
@@ -242,7 +242,7 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
             form.status === "ready" ? "is-ready" : "is-preorder"
           }`}
         >
-          {form.status === "ready" ? "Ready" : "Preorder"}
+          {form.status === "ready" ? "Siap" : "Preorder"}
         </span>
       </header>
 
@@ -258,7 +258,7 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
             }}
           />
         ) : (
-          <div className="becImage__placeholder">No Image</div>
+          <div className="becImage__placeholder">Tanpa gambar</div>
         )}
       </div>
 
@@ -271,18 +271,18 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
 
         <div className="becGrid">
           <label className="becField">
-            <span className="becLabel">Name</span>
+            <span className="becLabel">Nama</span>
             <input
               name="name"
               value={form.name}
               onChange={handleTextChange}
-              placeholder="Bouquet name"
+              placeholder="Nama bouquet"
               autoComplete="off"
             />
           </label>
 
           <label className="becField">
-            <span className="becLabel">Price (IDR)</span>
+            <span className="becLabel">Harga (IDR)</span>
             <input
               name="price"
               type="number"
@@ -294,7 +294,7 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
           </label>
 
           <label className="becField">
-            <span className="becLabel">Quantity</span>
+            <span className="becLabel">Stok</span>
             <input
               name="quantity"
               type="number"
@@ -307,12 +307,12 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
           </label>
 
           <label className="becField">
-            <span className="becLabel">Type</span>
+            <span className="becLabel">Tipe</span>
             <input
               name="type"
               value={form.type}
               onChange={handleTextChange}
-              placeholder="e.g., bouquet"
+              placeholder="mis., bouquet"
               list="bec-type-options"
               autoComplete="off"
             />
@@ -324,7 +324,7 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
           </label>
 
           <label className="becField">
-            <span className="becLabel">Size</span>
+            <span className="becLabel">Ukuran</span>
             <select name="size" value={form.size} onChange={handleSelectChange}>
               {BOUQUET_SIZE_OPTIONS.map((s) => (
                 <option key={s.value} value={s.value}>
@@ -341,19 +341,19 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
               value={form.status}
               onChange={handleSelectChange}
             >
-              <option value="ready">Ready</option>
+              <option value="ready">Siap</option>
               <option value="preorder">Preorder</option>
             </select>
           </label>
 
           <label className="becField">
-            <span className="becLabel">Collection</span>
+            <span className="becLabel">Koleksi</span>
             <select
               name="collectionName"
               value={form.collectionName}
               onChange={handleSelectChange}
             >
-              <option value="">Select collection</option>
+              <option value="">Pilih koleksi</option>
               {collections.map((c) => (
                 <option key={c} value={c}>
                   {c}
@@ -363,8 +363,8 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
           </label>
 
           <div className="becField becField--full">
-            <span className="becLabel">Flags</span>
-            <div className="becToggles" role="group" aria-label="Bouquet flags">
+            <span className="becLabel">Penanda</span>
+            <div className="becToggles" role="group" aria-label="Penanda bouquet">
               <label className="becToggle">
                 <input
                   type="checkbox"
@@ -372,7 +372,7 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
                   checked={form.isNewEdition}
                   onChange={handleToggleChange}
                 />
-                <span>New edition</span>
+                <span>Edisi baru</span>
               </label>
 
               <label className="becToggle">
@@ -382,66 +382,66 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
                   checked={form.isFeatured}
                   onChange={handleToggleChange}
                 />
-                <span>Featured</span>
+                <span>Unggulan</span>
               </label>
             </div>
           </div>
 
           <label className="becField becField--full">
-            <span className="becLabel">Description</span>
+            <span className="becLabel">Deskripsi</span>
             <textarea
               name="description"
               value={form.description}
               onChange={handleTextChange}
               rows={3}
-              placeholder="Short bouquet description"
+              placeholder="Deskripsi singkat bouquet"
             />
           </label>
 
           <label className="becField becField--full">
-            <span className="becLabel">Occasions</span>
+            <span className="becLabel">Acara</span>
             <input
               name="occasionsText"
               value={form.occasionsText}
               onChange={handleTextChange}
-              placeholder="e.g., Birthday, Anniversary, Graduation"
+              placeholder="mis., Ulang Tahun, Anniversary, Wisuda"
               autoComplete="off"
             />
-            <span className="becHint">Separate values with commas.</span>
+            <span className="becHint">Pisahkan dengan koma.</span>
           </label>
 
           <label className="becField becField--full">
-            <span className="becLabel">Flowers</span>
+            <span className="becLabel">Bunga</span>
             <input
               name="flowersText"
               value={form.flowersText}
               onChange={handleTextChange}
-              placeholder="e.g., Orchid, Rose, Lily"
+              placeholder="mis., Orchid, Mawar, Lily"
               autoComplete="off"
             />
-            <span className="becHint">Separate values with commas.</span>
+            <span className="becHint">Pisahkan dengan koma.</span>
           </label>
 
           <label className="becField becField--full">
-            <span className="becLabel">Care instructions</span>
+            <span className="becLabel">Instruksi perawatan</span>
             <textarea
               name="careInstructions"
               value={form.careInstructions}
               onChange={handleTextChange}
               rows={3}
-              placeholder="Optional care tips for the customer"
+              placeholder="Tips perawatan (opsional) untuk pelanggan"
             />
           </label>
 
           <label className="becField becField--full">
-            <span className="becLabel">Image</span>
+            <span className="becLabel">Gambar</span>
             <input
               type="file"
               accept="image/*,.heic,.heif"
               onChange={handleImageChange}
             />
             <span className="becHint">
-              PNG/JPG/WEBP/HEIC supported (HEIC will be converted).
+              PNG/JPG/WEBP/HEIC didukung (HEIC akan dikonversi).
             </span>
           </label>
         </div>
@@ -452,9 +452,9 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
             className="becSave"
             onClick={handleSave}
             disabled={!canSave}
-            title={validationError ?? "Save changes"}
+            title={validationError ?? "Simpan perubahan"}
           >
-            {saving ? "Saving..." : "Save Changes"}
+            {saving ? "Menyimpan..." : "Simpan Perubahan"}
           </button>
         </div>
       </div>

@@ -50,9 +50,9 @@ const emptySlide = (): HeroSlide => ({
   title: "",
   subtitle: "",
   image: "",
-  primaryCta: { label: "Shop Collection", href: "/collection" },
+  primaryCta: { label: "Lihat koleksi", href: "/collection" },
   secondaryCta: {
-    label: "Order via WhatsApp",
+    label: "Pesan via WhatsApp",
     href: STORE_PROFILE.whatsapp.url,
   },
 });
@@ -64,7 +64,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
 
-  const [heading, setHeading] = useState<string>("New Collections");
+  const [heading, setHeading] = useState<string>("Koleksi Terbaru");
   const [slides, setSlides] = useState<HeroSlide[]>([]);
 
   // Per-slide upload state with progress
@@ -94,24 +94,24 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
         setSuccess("");
 
         const res = await fetch(`${API_BASE}/api/hero-slider/home`);
-        if (!res.ok) throw new Error(`Failed to load (${res.status})`);
+        if (!res.ok) throw new Error(`Gagal memuat (${res.status})`);
 
         const data = (await res.json()) as HeroSliderContent | null;
         if (cancelled) return;
 
         if (data && Array.isArray(data.slides) && data.slides.length > 0) {
-          setHeading(data.heading ?? "New Collections");
+          setHeading(data.heading ?? "Koleksi Terbaru");
           setSlides(data.slides);
         } else {
-          setHeading("New Collections");
+          setHeading("Koleksi Terbaru");
           setSlides([emptySlide()]);
         }
       } catch (e) {
         if (cancelled) return;
         setError(
-          e instanceof Error ? e.message : "Failed to load hero slider data."
+          e instanceof Error ? e.message : "Gagal memuat data slider hero."
         );
-        setHeading("New Collections");
+        setHeading("Koleksi Terbaru");
         setSlides([emptySlide()]);
       } finally {
         if (!cancelled) setLoading(false);
@@ -124,17 +124,17 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
   }, []);
 
   const validationError = useMemo(() => {
-    if (!slides.length) return "Add at least 1 slide.";
+    if (!slides.length) return "Tambahkan minimal 1 slide.";
 
     for (let i = 0; i < slides.length; i++) {
       const s = slides[i];
-      if (!s.title.trim()) return `Slide ${i + 1}: title is required.`;
+      if (!s.title.trim()) return `Slide ${i + 1}: judul wajib diisi.`;
       if (!s.image.trim())
-        return `Slide ${i + 1}: image is required (upload or URL/path).`;
+        return `Slide ${i + 1}: gambar wajib diisi (unggah atau URL/path).`;
       if (!s.primaryCta.label.trim())
-        return `Slide ${i + 1}: primary CTA label is required.`;
+        return `Slide ${i + 1}: label CTA utama wajib diisi.`;
       if (!s.primaryCta.href.trim())
-        return `Slide ${i + 1}: primary CTA link is required.`;
+        return `Slide ${i + 1}: tautan CTA utama wajib diisi.`;
     }
     return null;
   }, [slides]);
@@ -179,7 +179,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
       const idx = prev.findIndex((s) => s.id === id);
       if (idx < 0) return prev;
       const slide = prev[idx];
-      const newSlide = { ...slide, id: uid(), title: `${slide.title} (Copy)` };
+      const newSlide = { ...slide, id: uid(), title: `${slide.title} (Salinan)` };
       return [...prev.slice(0, idx + 1), newSlide, ...prev.slice(idx + 1)];
     });
   };
@@ -259,7 +259,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
     if (file.size > maxSize) {
       setUploadError((prev) => ({
         ...prev,
-        [slideId]: "File size must be less than 5MB",
+        [slideId]: "Ukuran file harus kurang dari 5MB",
       }));
       return;
     }
@@ -276,7 +276,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
     if (!validTypes.includes(file.type)) {
       setUploadError((prev) => ({
         ...prev,
-        [slideId]: "Please upload a valid image file (JPEG, PNG, WebP, HEIC)",
+        [slideId]: "Silakan unggah file gambar yang valid (JPEG, PNG, WebP, HEIC)",
       }));
       return;
     }
@@ -311,11 +311,11 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        throw new Error(data?.error || `Upload failed (${res.status})`);
+        throw new Error(data?.error || `Unggah gagal (${res.status})`);
       }
 
       updateSlide(slideId, { image: data.path });
-      setSuccess(`✅ Image uploaded successfully for slide!`);
+      setSuccess(`✅ Gambar berhasil diunggah untuk slide ini!`);
       setTimeout(() => {
         setSuccess("");
         setUploadProgress((prev) => ({ ...prev, [slideId]: 0 }));
@@ -323,7 +323,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
     } catch (e) {
       setUploadError((prev) => ({
         ...prev,
-        [slideId]: e instanceof Error ? e.message : "Upload failed",
+        [slideId]: e instanceof Error ? e.message : "Unggah gagal",
       }));
       setUploadProgress((prev) => ({ ...prev, [slideId]: 0 }));
     } finally {
@@ -376,7 +376,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error(`Save failed (${res.status})`);
+      if (!res.ok) throw new Error(`Gagal menyimpan (${res.status})`);
 
       setSuccess("✅ Hero slider updated successfully!");
 
@@ -390,7 +390,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
       setTimeout(() => setSuccess(""), 5000);
     } catch (e) {
       setError(
-        `❌ ${e instanceof Error ? e.message : "Failed to save hero slider."}`
+        `❌ ${e instanceof Error ? e.message : "Gagal menyimpan slider hero."}`
       );
       window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
@@ -401,22 +401,21 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
   const clearAll = () => {
     if (
       window.confirm(
-        "Are you sure you want to remove all slides? This cannot be undone."
+        "Yakin ingin menghapus semua slide? Tindakan ini tidak bisa dibatalkan."
       )
     ) {
       setSlides([emptySlide()]);
-      setSuccess("All slides cleared. Don't forget to save!");
+      setSuccess("Semua slide dihapus. Jangan lupa simpan!");
     }
   };
 
   return (
-    <section className="hsEditor" aria-label="Hero slider editor">
+    <section className="hsEditor" aria-label="Editor slider hero">
       <header className="hsEditor__header">
         <div>
-          <h2 className="hsEditor__title">🌸 Hero Slider</h2>
+          <h2 className="hsEditor__title">🌸 Slider Hero</h2>
           <p className="hsEditor__subtitle">
-            Configure homepage hero slider with stunning visuals. Drag to
-            reorder slides.
+            Atur slider hero di homepage. Seret untuk mengubah urutan slide.
           </p>
         </div>
 
@@ -426,9 +425,9 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
             className="hsEditor__btn hsEditor__btn--ghost"
             onClick={clearAll}
             disabled={loading || slides.length === 0}
-            title="Clear all slides"
+            title="Hapus semua slide"
           >
-            Clear All
+            Hapus Semua
           </button>
 
           <button
@@ -437,7 +436,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
             onClick={addSlide}
             disabled={loading}
           >
-            + Add Slide
+            + Tambah Slide
           </button>
 
           <button
@@ -445,26 +444,26 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
             className="hsEditor__btn hsEditor__btn--primary"
             onClick={save}
             disabled={saving || loading}
-            title={validationError ?? "Save changes"}
+            title={validationError ?? "Simpan perubahan"}
           >
-            {saving ? "Saving..." : "💾 Save"}
+            {saving ? "Menyimpan..." : "💾 Simpan"}
           </button>
         </div>
       </header>
 
       <div className="hsEditor__card">
         <label className="hsField">
-          <span className="hsLabel">Heading</span>
+          <span className="hsLabel">Judul</span>
           <input
             value={heading}
             onChange={(e) => setHeading(e.target.value)}
-            placeholder="e.g. New Collections"
+            placeholder="mis. Koleksi Terbaru"
             disabled={loading}
           />
         </label>
 
         {loading ? (
-          <div className="hsState">Loading hero slider…</div>
+          <div className="hsState">Memuat slider hero…</div>
         ) : (
           <>
             {error && <div className="hsAlert hsAlert--error">{error}</div>}
@@ -487,7 +486,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                     opacity="0.2"
                   />
                 </svg>
-                <p>No slides yet. Click "Add Slide" to get started!</p>
+                <p>Belum ada slide. Klik "Tambah Slide" untuk memulai!</p>
               </div>
             ) : (
               <div className="hsSlides">
@@ -534,7 +533,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                           className="hsMiniBtn"
                           onClick={() => moveSlide(s.id, "up")}
                           disabled={index === 0}
-                          title="Move up"
+                          title="Geser ke atas"
                         >
                           ↑
                         </button>
@@ -543,7 +542,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                           className="hsMiniBtn"
                           onClick={() => moveSlide(s.id, "down")}
                           disabled={index === slides.length - 1}
-                          title="Move down"
+                          title="Geser ke bawah"
                         >
                           ↓
                         </button>
@@ -551,7 +550,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                           type="button"
                           className="hsMiniBtn hsMiniBtn--secondary"
                           onClick={() => duplicateSlide(s.id)}
-                          title="Duplicate slide"
+                          title="Duplikat slide"
                         >
                           📋
                         </button>
@@ -561,15 +560,15 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                               type="button"
                               className="hsMiniBtn hsMiniBtn--danger"
                               onClick={() => removeSlide(s.id)}
-                              title="Confirm delete"
+                              title="Konfirmasi hapus"
                             >
-                              ✓ Confirm
+                              ✓ Ya, hapus
                             </button>
                             <button
                               type="button"
                               className="hsMiniBtn"
                               onClick={() => setDeleteConfirm(null)}
-                              title="Cancel"
+                              title="Batal"
                             >
                               ✕
                             </button>
@@ -579,7 +578,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                             type="button"
                             className="hsMiniBtn hsMiniBtn--danger"
                             onClick={() => setDeleteConfirm(s.id)}
-                            title="Delete slide"
+                            title="Hapus slide"
                           >
                             🗑️
                           </button>
@@ -590,7 +589,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                     <div className="hsSlideCard__grid">
                       <label className="hsField hsField--full">
                         <span className="hsLabel">
-                          🔗 Link to Collection (Quick Fill)
+                          🔗 Tautkan ke Koleksi (Isi Cepat)
                         </span>
                         <select
                           value=""
@@ -599,7 +598,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                             if (name) setSlideCollection(s.id, name);
                           }}
                         >
-                          <option value="">Select collection…</option>
+                          <option value="">Pilih koleksi…</option>
                           {(collections ?? []).map((c) => (
                             <option key={c} value={c}>
                               {c}
@@ -609,41 +608,41 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                       </label>
 
                       <label className="hsField">
-                        <span className="hsLabel">Badge (Optional)</span>
+                        <span className="hsLabel">Badge (Opsional)</span>
                         <input
                           value={s.badge ?? ""}
                           onChange={(e) =>
                             updateSlide(s.id, { badge: e.target.value })
                           }
-                          placeholder="e.g. NEW ARRIVAL"
+                          placeholder="mis. NEW ARRIVAL"
                         />
                       </label>
 
                       <label className="hsField">
-                        <span className="hsLabel">Title *</span>
+                        <span className="hsLabel">Judul *</span>
                         <input
                           value={s.title}
                           onChange={(e) =>
                             updateSlide(s.id, { title: e.target.value })
                           }
-                          placeholder="e.g. Orchid Luxe Collection"
+                          placeholder="mis. Orchid Luxe Collection"
                         />
                       </label>
 
                       <label className="hsField hsField--full">
-                        <span className="hsLabel">Subtitle (Optional)</span>
+                        <span className="hsLabel">Subjudul (Opsional)</span>
                         <textarea
                           value={s.subtitle ?? ""}
                           onChange={(e) =>
                             updateSlide(s.id, { subtitle: e.target.value })
                           }
                           rows={2}
-                          placeholder="Brief description of the collection..."
+                          placeholder="Deskripsi singkat koleksi..."
                         />
                       </label>
 
                       <label className="hsField hsField--full">
-                        <span className="hsLabel">Image * (Upload or URL)</span>
+                        <span className="hsLabel">Gambar * (Unggah atau URL)</span>
 
                         <input
                           type="file"
@@ -666,7 +665,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                               />
                             </div>
                             <div className="hsUploadProgress__text">
-                              Uploading... {uploadProgress[s.id] || 0}%
+                              Mengunggah... {uploadProgress[s.id] || 0}%
                             </div>
                           </div>
                         )}
@@ -684,7 +683,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                               marginBottom: "0.35rem",
                             }}
                           >
-                            Or paste URL / path
+                            Atau tempel URL / path
                           </span>
                           <input
                             value={s.image}
@@ -697,7 +696,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
 
                         {s.image && (
                           <div className="hsPreviewRow">
-                            <div className="hsPreviewLabel">Preview</div>
+                            <div className="hsPreviewLabel">Pratinjau</div>
                             <div className="hsPreviewWrapper">
                               <img
                                 className="hsPreview"
@@ -718,7 +717,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                                   )
                                 }
                                 style={{ cursor: "pointer" }}
-                                title="Click to zoom"
+                                title="Klik untuk memperbesar"
                               />
                               <div className="hsPreviewOverlay">
                                 <svg
@@ -748,7 +747,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                                     strokeLinecap="round"
                                   />
                                 </svg>
-                                <span>Click to zoom</span>
+                                <span>Klik untuk memperbesar</span>
                               </div>
                             </div>
                           </div>
@@ -756,21 +755,21 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                       </label>
 
                       <div className="hsFieldGroup">
-                        <div className="hsGroupTitle">Primary CTA *</div>
+                        <div className="hsGroupTitle">CTA Utama *</div>
 
                         <label className="hsField">
-                          <span className="hsLabel">Label</span>
+                          <span className="hsLabel">Teks</span>
                           <input
                             value={s.primaryCta.label}
                             onChange={(e) =>
                               updatePrimaryCta(s.id, { label: e.target.value })
                             }
-                            placeholder="e.g. Shop Collection"
+                            placeholder="mis. Lihat koleksi"
                           />
                         </label>
 
                         <label className="hsField">
-                          <span className="hsLabel">Link</span>
+                          <span className="hsLabel">Tautan</span>
                           <input
                             value={s.primaryCta.href}
                             onChange={(e) =>
@@ -783,11 +782,11 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
 
                       <div className="hsFieldGroup">
                         <div className="hsGroupTitle">
-                          Secondary CTA (Optional)
+                          CTA Kedua (Opsional)
                         </div>
 
                         <label className="hsField">
-                          <span className="hsLabel">Label</span>
+                          <span className="hsLabel">Teks</span>
                           <input
                             value={s.secondaryCta?.label ?? ""}
                             onChange={(e) =>
@@ -795,12 +794,12 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                                 label: e.target.value,
                               })
                             }
-                            placeholder="e.g. Order via WhatsApp"
+                            placeholder="mis. Pesan via WhatsApp"
                           />
                         </label>
 
                         <label className="hsField">
-                          <span className="hsLabel">Link</span>
+                          <span className="hsLabel">Tautan</span>
                           <input
                             value={s.secondaryCta?.href ?? ""}
                             onChange={(e) =>
@@ -825,17 +824,17 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
           className="hsZoomModal"
           onClick={() => setZoomedImage(null)}
           role="dialog"
-          aria-label="Image preview"
+          aria-label="Pratinjau gambar"
         >
           <div className="hsZoomModal__content">
             <button
               className="hsZoomModal__close"
               onClick={() => setZoomedImage(null)}
-              aria-label="Close preview"
+              aria-label="Tutup pratinjau"
             >
               ✕
             </button>
-            <img src={zoomedImage} alt="Zoomed preview" />
+            <img src={zoomedImage} alt="Pratinjau diperbesar" />
           </div>
         </div>
       )}

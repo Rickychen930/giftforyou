@@ -1,3 +1,5 @@
+@import "colors.css";
+
 html {
   scroll-behavior: smooth;
 }
@@ -10,4 +12,38 @@ section {
   section {
     scroll-margin-top: 90px;
   }
+}
+
+.Home-page-container {
+  width: 100%;
+  display: block;
+}
+
+/* Legacy state blocks (kept for older controller usage) */
+.home-state {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 1.25rem 1.25rem;
+  border-radius: 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-1);
+  box-shadow: var(--shadow-1);
+  color: var(--ink-780);
+}
+
+.home-state--error {
+  background: var(--error-bg);
+  border-color: var(--error-border);
+  color: var(--error-text);
+}
+
+.home-state p {
+  margin: 0 0 0.35rem;
+  font-weight: 900;
+}
+
+.home-state small {
+  display: block;
+  opacity: 0.9;
+  line-height: 1.5;
 }

@@ -10,6 +10,7 @@ import type { Bouquet } from "../../models/domain/bouquet";
 interface OurCollectionViewProps {
   items: Collection[];
   loading?: boolean;
+  errorMessage?: string;
 }
 
 type RawBouquet = Bouquet & {
@@ -97,18 +98,26 @@ const CollectionSkeleton: React.FC = () => (
 const OurCollectionSection: React.FC<OurCollectionViewProps> = ({
   items,
   loading = false,
+  errorMessage = "",
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
   const prepared = useMemo(() => {
     return (items ?? [])
-      .map((c) => ({
-        id: c._id,
-        name: c.name,
-        description: c.description ?? "",
-        bouquets: toBouquetProps(c),
-      }))
+      .map((c) => {
+        const anyC = c as unknown as { _id?: string; id?: string; name?: string };
+        const id = anyC?._id ?? anyC?.id ?? anyC?.name ?? "";
+        const name = typeof anyC?.name === "string" ? anyC.name.trim() : "";
+
+        return {
+          id,
+          name,
+          description: c.description ?? "",
+          bouquets: toBouquetProps(c),
+        };
+      })
+      .filter((c) => Boolean(c.id) && Boolean(c.name))
       .filter((c) => c.bouquets.length > 0);
   }, [items]);
 
@@ -150,15 +159,15 @@ const OurCollectionSection: React.FC<OurCollectionViewProps> = ({
     >
       <div className="ourCollection__container">
         <header className="ourCollection__header">
-          <p className="ourCollection__eyebrow">Curated for every moment</p>
+          <p className="ourCollection__eyebrow">Pilihan terbaik untuk setiap momen</p>
 
           <h2 id="ourCollection-title" className="ourCollection__title">
-            Our Collections
+            Koleksi Kami
           </h2>
 
           <p className="ourCollection__subtitle">
-            Curated orchid arrangements for gifts, celebrations, and everyday
-            elegance.
+            Bouquet dan gift arrangement pilihan untuk perayaan, kejutan, dan
+            keseharian yang lebih elegan.
           </p>
         </header>
 
@@ -170,6 +179,39 @@ const OurCollectionSection: React.FC<OurCollectionViewProps> = ({
           >
             <CollectionSkeleton />
             <CollectionSkeleton />
+          </div>
+        ) : errorMessage ? (
+          <div className="ourCollection__error" role="alert" aria-live="polite">
+            <div className="ourCollection__errorIcon" aria-hidden="true">
+              <svg
+                width="48"
+                height="48"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 9V13"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M12 17H12.01"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+            <h3 className="ourCollection__errorTitle">Gagal memuat koleksi</h3>
+            <p className="ourCollection__errorText">{errorMessage}</p>
           </div>
         ) : !prepared.length ? (
           <div
@@ -201,10 +243,10 @@ const OurCollectionSection: React.FC<OurCollectionViewProps> = ({
                 />
               </svg>
             </div>
-            <h3 className="ourCollection__emptyTitle">No collections yet</h3>
+            <h3 className="ourCollection__emptyTitle">Belum ada koleksi</h3>
             <p className="ourCollection__emptyText">
-              Please check back soon — new orchid collections are added
-              regularly.
+              Silakan cek kembali — koleksi baru akan ditambahkan secara
+              berkala.
             </p>
           </div>
         ) : (

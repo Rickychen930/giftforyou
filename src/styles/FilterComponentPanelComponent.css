@@ -177,6 +177,19 @@
   transform: translateY(-1px);
 }
 
+.fpChip:disabled {
+  opacity: 0.55;
+  cursor: default;
+  transform: none;
+}
+
+.fpChip:disabled:hover {
+  background: var(--fp-surface);
+  border-color: var(--fp-border);
+  color: var(--fp-text-muted);
+  transform: none;
+}
+
 .fpChip.is-active {
   background: linear-gradient(135deg, var(--fp-brand), var(--fp-brand-strong));
   border-color: var(--fp-brand-strong);

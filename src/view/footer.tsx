@@ -40,7 +40,7 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="footer" aria-label="Website footer">
+    <footer className="footer" aria-label="Footer website">
       <div className="footer__container">
         {/* Main Content - 3 Columns */}
         <div className="footer__main">
@@ -63,7 +63,7 @@ const Footer: React.FC = () => {
 
           {/* Quick Links */}
           <div className="footer__section">
-            <h3 className="footer__sectionTitle">Quick Links</h3>
+            <h3 className="footer__sectionTitle">Tautan Cepat</h3>
             <nav aria-label="Footer navigation">
               <ul className="footer__linkList">
                 {QUICK_LINKS.map((link) => (
@@ -79,7 +79,7 @@ const Footer: React.FC = () => {
 
           {/* Contact Info */}
           <div className="footer__section">
-            <h3 className="footer__sectionTitle">Contact Us</h3>
+            <h3 className="footer__sectionTitle">Hubungi Kami</h3>
             <div className="footer__contactGroup">
               <a href={CONTACT_INFO.phoneLink} className="footer__contactItem">
                 <PhoneIcon />
@@ -100,7 +100,7 @@ const Footer: React.FC = () => {
         {/* Social & Newsletter Bar */}
         <div className="footer__secondary">
           <div className="footer__socialCompact">
-            <span className="footer__socialLabel">Follow Us:</span>
+            <span className="footer__socialLabel">Ikuti Kami:</span>
             <div className="footer__socialRow">
               {SOCIAL_MEDIA.map((platform) => (
                 <a
@@ -127,27 +127,27 @@ const Footer: React.FC = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Subscribe to newsletter"
+                placeholder="Langganan newsletter"
                 className="footer__newsletterInput"
-                aria-label="Email address for newsletter"
+                aria-label="Alamat email untuk newsletter"
                 required
               />
               <button
                 type="submit"
                 className="footer__newsletterBtn"
-                aria-label="Subscribe"
+                aria-label="Langganan"
               >
-                Subscribe
+                Langganan
               </button>
             </form>
             {subscribeStatus === "success" && (
               <p className="footer__newsletterMessage footer__newsletterMessage--success">
-                Subscribed!
+                Berhasil berlangganan!
               </p>
             )}
             {subscribeStatus === "error" && (
               <p className="footer__newsletterMessage footer__newsletterMessage--error">
-                Invalid email
+                Email tidak valid
               </p>
             )}
           </div>
@@ -156,17 +156,8 @@ const Footer: React.FC = () => {
         {/* Bottom Bar */}
         <div className="footer__bottom">
           <p className="footer__copyright">
-            © {year} {BRAND_INFO.fullName}. All rights reserved.
+            © {year} {BRAND_INFO.fullName}. Semua hak dilindungi.
           </p>
-          <div className="footer__bottomLinks">
-            <a href="/privacy" className="footer__bottomLink">
-              Privacy
-            </a>
-            <span className="footer__bottomDivider">•</span>
-            <a href="/terms" className="footer__bottomLink">
-              Terms
-            </a>
-          </div>
         </div>
       </div>
 
@@ -174,8 +165,8 @@ const Footer: React.FC = () => {
       <button
         onClick={scrollToTop}
         className="footer__backToTop"
-        aria-label="Back to top"
-        title="Back to top"
+        aria-label="Kembali ke atas"
+        title="Kembali ke atas"
       >
         <ArrowUpIcon />
       </button>

@@ -23,22 +23,22 @@ export const SOCIAL_MEDIA = [
   {
     name: "Instagram" as const,
     url: STORE_PROFILE.social.instagram,
-    label: "Follow us on Instagram",
+    label: "Ikuti kami di Instagram",
   },
   {
     name: "WhatsApp" as const,
     url: STORE_PROFILE.whatsapp.url,
-    label: "Contact us on WhatsApp",
+    label: "Chat lewat WhatsApp",
   },
   {
     name: "Facebook" as const,
     url: STORE_PROFILE.social.facebook,
-    label: "Follow us on Facebook",
+    label: "Ikuti kami di Facebook",
   },
   {
     name: "TikTok" as const,
     url: STORE_PROFILE.social.tiktok,
-    label: "Follow us on TikTok",
+    label: "Ikuti kami di TikTok",
   },
 ] as const;
 
@@ -50,34 +50,34 @@ export const BUSINESS_HOURS = {
 } as const;
 
 export const COLLECTION_SUGGESTIONS = [
-  "Orchid Collection",
-  "Premium Roses",
-  "Exotic Lilies",
-  "Seasonal Specials",
-  "Birthday Bouquets",
-  "Anniversary Gifts",
-  "Best Sellers",
-  "New Arrivals",
+  "Koleksi Orchid",
+  "Mawar Premium",
+  "Lili Eksotis",
+  "Spesial Musiman",
+  "Bouquet Ulang Tahun",
+  "Hadiah Anniversary",
+  "Best Seller",
+  "Produk Terbaru",
 ] as const;
 
 export const NAV_LINKS = {
   public: [
-    { label: "Home", path: "/" },
-    { label: "Our Collection", path: "/collection" },
+    { label: "Beranda", path: "/" },
+    { label: "Koleksi", path: "/collection" },
     { label: "Login", path: "/login" },
   ],
   authenticated: [
-    { label: "Home", path: "/" },
-    { label: "Our Collection", path: "/collection" },
+    { label: "Beranda", path: "/" },
+    { label: "Koleksi", path: "/collection" },
     { label: "Dashboard", path: "/dashboard" },
   ],
 } as const;
 
 export const QUICK_LINKS = [
-  { label: "Home", href: "/" },
-  { label: "Bouquet Catalog", href: "/collection" },
-  { label: "Collections", href: "/#collections" },
-  { label: "About Us", href: "/#about" },
+  { label: "Beranda", href: "/" },
+  { label: "Katalog Bouquet", href: "/collection" },
+  { label: "Koleksi", href: "/#collections" },
+  { label: "Tentang Kami", href: "/#about" },
 ] as const;
 
 export type SocialPlatform = (typeof SOCIAL_MEDIA)[number]["name"];

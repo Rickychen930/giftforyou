@@ -13,6 +13,7 @@ interface State {
   priceRange: Range;
   selectedTypes: string[];
   selectedSizes: string[];
+  selectedCollections: string[];
   sortBy: string;
 
   currentPage: number;
@@ -38,6 +39,7 @@ class BouquetCatalogController extends Component<{ locationSearch?: string }, St
       priceRange: [0, 1_000_000],
       selectedTypes: [],
       selectedSizes: [],
+      selectedCollections: [],
       sortBy: "",
       currentPage: 1,
       itemsPerPage: 9,
@@ -88,9 +90,14 @@ class BouquetCatalogController extends Component<{ locationSearch?: string }, St
 
     const typeParams = params.getAll("type").flatMap(splitCsv);
     const sizeParams = params.getAll("size").flatMap(splitCsv);
+    const collectionParams = params
+      .getAll("collection")
+      .concat(name ? [name] : [])
+      .flatMap(splitCsv);
 
     const types = Array.from(new Set(typeParams));
     const sizes = Array.from(new Set(sizeParams));
+    const collections = Array.from(new Set(collectionParams));
 
     const sameArray = (a: string[], b: string[]) =>
       a.length === b.length && a.every((v, i) => v === b[i]);
@@ -99,7 +106,8 @@ class BouquetCatalogController extends Component<{ locationSearch?: string }, St
       name !== this.state.collectionNameFilter ||
       q !== this.state.searchQuery ||
       !sameArray(types, this.state.selectedTypes) ||
-      !sameArray(sizes, this.state.selectedSizes);
+      !sameArray(sizes, this.state.selectedSizes) ||
+      !sameArray(collections, this.state.selectedCollections);
 
     if (needsUpdate) {
       this.setState({
@@ -107,6 +115,7 @@ class BouquetCatalogController extends Component<{ locationSearch?: string }, St
         searchQuery: q,
         selectedTypes: types,
         selectedSizes: sizes,
+        selectedCollections: collections,
         currentPage: 1,
       });
     }
@@ -181,7 +190,7 @@ class BouquetCatalogController extends Component<{ locationSearch?: string }, St
   };
 
   private toggleFilter = (
-    key: "selectedTypes" | "selectedSizes",
+    key: "selectedTypes" | "selectedSizes" | "selectedCollections",
     value: string
   ) => {
     if (key === "selectedTypes") {
@@ -195,6 +204,21 @@ class BouquetCatalogController extends Component<{ locationSearch?: string }, St
       return;
     }
 
+    if (key === "selectedCollections") {
+      this.setState((prev) => {
+        const selected = prev.selectedCollections.includes(value)
+          ? prev.selectedCollections.filter((v) => v !== value)
+          : [...prev.selectedCollections, value];
+
+        return {
+          selectedCollections: selected,
+          collectionNameFilter: "",
+          currentPage: 1,
+        };
+      });
+      return;
+    }
+
     this.setState((prev) => {
       const selected = prev.selectedSizes.includes(value)
         ? prev.selectedSizes.filter((v) => v !== value)
@@ -204,9 +228,15 @@ class BouquetCatalogController extends Component<{ locationSearch?: string }, St
     });
   };
 
-  private clearFilter = (key: "selectedTypes" | "selectedSizes") => {
+  private clearFilter = (
+    key: "selectedTypes" | "selectedSizes" | "selectedCollections"
+  ) => {
     if (key === "selectedTypes") {
       this.setState({ selectedTypes: [], currentPage: 1 });
+      return;
+    }
+    if (key === "selectedCollections") {
+      this.setState({ selectedCollections: [], collectionNameFilter: "", currentPage: 1 });
       return;
     }
     this.setState({ selectedSizes: [], currentPage: 1 });
@@ -217,7 +247,10 @@ class BouquetCatalogController extends Component<{ locationSearch?: string }, St
       priceRange: [0, 1_000_000],
       selectedTypes: [],
       selectedSizes: [],
+      selectedCollections: [],
       sortBy: "",
+      collectionNameFilter: "",
+      searchQuery: "",
       currentPage: 1,
     });
   };
@@ -236,6 +269,7 @@ class BouquetCatalogController extends Component<{ locationSearch?: string }, St
       priceRange,
       selectedTypes,
       selectedSizes,
+      selectedCollections,
       collectionNameFilter,
       searchQuery,
     } = this.state;
@@ -244,6 +278,10 @@ class BouquetCatalogController extends Component<{ locationSearch?: string }, St
     const collectionNeedle = collectionNameFilter.trim().toLowerCase();
     const queryNeedle = searchQuery.trim().toLowerCase();
 
+    const selectedCollectionsNormalized = selectedCollections
+      .map((v) => v.trim())
+      .filter(Boolean);
+
     return bouquets.filter((b) => {
       const priceOk = b.price >= min && b.price <= max;
       const typeOk =
@@ -251,9 +289,11 @@ class BouquetCatalogController extends Component<{ locationSearch?: string }, St
       const sizeOk =
         selectedSizes.length === 0 || selectedSizes.includes(b.size ?? "");
 
+      const collectionName = (b.collectionName ?? "").trim();
       const collectionOk =
-        !collectionNeedle ||
-        (b.collectionName ?? "").trim().toLowerCase() === collectionNeedle;
+        selectedCollectionsNormalized.length > 0
+          ? selectedCollectionsNormalized.includes(collectionName)
+          : !collectionNeedle || collectionName.toLowerCase() === collectionNeedle;
 
       const queryOk =
         !queryNeedle ||
@@ -298,18 +338,30 @@ class BouquetCatalogController extends Component<{ locationSearch?: string }, St
       new Set(this.state.bouquets.map((b) => b.type).filter(isNonEmptyString))
     );
 
-        const allSizes: string[] = getBouquetSizeFilterOptions(
-          this.state.bouquets.map((b) => b.size)
-        );
+    const allSizes: string[] = getBouquetSizeFilterOptions(
+      this.state.bouquets.map((b) => b.size)
+    );
+
+    const allCollections: string[] = Array.from(
+      new Set(
+        this.state.bouquets
+          .map((b) => b.collectionName)
+          .filter(isNonEmptyString)
+          .map((v) => v.trim())
+          .filter(Boolean)
+      )
+    );
 
     return (
       <BouquetCatalogView
         bouquets={sorted}
         allTypes={allTypes.length ? allTypes : ["Orchid", "Mixed"]}
-            allSizes={allSizes}
+        allSizes={allSizes}
+        allCollections={allCollections}
         priceRange={this.state.priceRange}
         selectedTypes={this.state.selectedTypes}
         selectedSizes={this.state.selectedSizes}
+        selectedCollections={this.state.selectedCollections}
         sortBy={this.state.sortBy}
         currentPage={this.state.currentPage}
         itemsPerPage={this.state.itemsPerPage}

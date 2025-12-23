@@ -6,7 +6,7 @@
 .storeLocation {
   position: relative;
   width: 100%;
-  min-height: 100vh;
+  min-height: auto;
   padding: 4rem 0;
   background:
     radial-gradient(900px 460px at 14% 8%, var(--sl-bg-1), transparent 62%),
@@ -14,9 +14,6 @@
     linear-gradient(135deg, var(--sl-bg-3) 0%, var(--sl-bg-4) 100%);
   border-top: 1px solid var(--sl-section-top-border);
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 /* Animated gradient overlay */
@@ -116,6 +113,29 @@
   }
   50% {
     transform: translateY(-20px) rotate(5deg);
+  }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .storeLocation *,
+  .storeLocation *::before,
+  .storeLocation *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .storeLocation__decorFloater {
+    display: none !important;
+  }
+
+  .storeLocation__card:hover,
+  .storeLocation__navBtn:hover,
+  .storeLocation__directionsBtn:hover,
+  .storeLocation__whatsappBtn:hover {
+    transform: none !important;
   }
 }
 

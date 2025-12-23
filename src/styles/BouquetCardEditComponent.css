@@ -65,7 +65,7 @@
 
 /* Image */
 .becImage {
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 4 / 5;
   background: var(--bec-input-bg);
   border-bottom: 1px solid var(--bec-input-border);
 }

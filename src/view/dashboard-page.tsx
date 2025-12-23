@@ -43,9 +43,9 @@ class DashboardView extends Component<Props, State> {
 
   private applySeo(): void {
     const titleByTab: Record<ActiveTab, string> = {
-      overview: "Dashboard Overview",
+      overview: "Ringkasan Dashboard",
       upload: "Upload Bouquet",
-      edit: "Edit Bouquets",
+      edit: "Edit Bouquet",
       hero: "Hero Slider",
     };
 
@@ -63,14 +63,14 @@ class DashboardView extends Component<Props, State> {
 
   private renderSidebar(): React.ReactNode {
     const tabs: { key: ActiveTab; label: string }[] = [
-      { key: "overview", label: "Overview" },
+      { key: "overview", label: "Ringkasan" },
       { key: "upload", label: "Upload Bouquet" },
-      { key: "edit", label: "Edit Bouquets" },
+      { key: "edit", label: "Edit Bouquet" },
       { key: "hero", label: "Hero Slider" },
     ];
 
     return (
-      <aside className="dashboardSidebar" aria-label="Dashboard navigation">
+      <aside className="dashboardSidebar" aria-label="Navigasi dashboard">
         <div className="dashboardBrand">
           <img
             src="/images/logo.png"
@@ -80,11 +80,11 @@ class DashboardView extends Component<Props, State> {
           />
           <div>
             <div className="dashboardBrand__title">Giftforyou.idn</div>
-            <div className="dashboardBrand__subtitle">Admin Dashboard</div>
+            <div className="dashboardBrand__subtitle">Dashboard Admin</div>
           </div>
         </div>
 
-        <nav className="dashboardNav" aria-label="Dashboard tabs">
+        <nav className="dashboardNav" aria-label="Tab dashboard">
           {tabs.map((t) => {
             const isActive = this.state.activeTab === t.key;
             return (
@@ -106,7 +106,7 @@ class DashboardView extends Component<Props, State> {
           className="dashboardLogout"
           onClick={this.props.onLogout}
         >
-          Logout
+          Keluar
         </button>
       </aside>
     );
@@ -118,14 +118,14 @@ class DashboardView extends Component<Props, State> {
     const collectionsCount = this.props.collectionsCount ?? 0;
 
     return (
-      <section className="dashboardMetrics" aria-label="Store metrics">
+      <section className="dashboardMetrics" aria-label="Metrik toko">
         <div className="metricCard">
-          <p className="metricCard__label">Visitors</p>
+          <p className="metricCard__label">Pengunjung</p>
           <p className="metricCard__value">{visitorsCount}</p>
         </div>
 
         <div className="metricCard">
-          <p className="metricCard__label">Collections</p>
+          <p className="metricCard__label">Koleksi</p>
           <p className="metricCard__value">{collectionsCount}</p>
         </div>
 
@@ -179,20 +179,20 @@ class DashboardView extends Component<Props, State> {
     const activeTab = this.state.activeTab;
     const tabMeta: Record<ActiveTab, { title: string; subtitle: string }> = {
       overview: {
-        title: "Overview",
-        subtitle: "Key store metrics and activity at a glance.",
+        title: "Ringkasan",
+        subtitle: "Metrik utama toko dan aktivitas secara singkat.",
       },
       upload: {
         title: "Upload Bouquet",
-        subtitle: "Add new bouquets to your catalog with complete details.",
+        subtitle: "Tambahkan bouquet baru ke katalog dengan detail lengkap.",
       },
       edit: {
-        title: "Edit Bouquets",
-        subtitle: "Search, filter, and update bouquets in your database.",
+        title: "Edit Bouquet",
+        subtitle: "Cari, filter, dan perbarui bouquet di database.",
       },
       hero: {
         title: "Hero Slider",
-        subtitle: "Manage homepage hero slides and collection links.",
+        subtitle: "Kelola slide hero di beranda dan tautan koleksi.",
       },
     };
 
@@ -205,14 +205,14 @@ class DashboardView extends Component<Props, State> {
         <main className="dashboardMain">
           <div className="dashboardContainer">
             <header className="dashboardHeader">
-              <p className="dashboardHeader__kicker">Admin Dashboard</p>
+              <p className="dashboardHeader__kicker">Dashboard Admin</p>
               <h1 className="dashboardHeader__title">{title}</h1>
               <p className="dashboardHeader__subtitle">{subtitle}</p>
             </header>
 
             {loading && (
               <div className="dashboardState" aria-live="polite">
-                Loading dashboard data...
+                Memuat data dashboard...
               </div>
             )}
 

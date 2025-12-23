@@ -73,7 +73,7 @@ export class OurCollectionController extends Component<
     if (loading) {
       return (
         <section className="home-state" aria-live="polite">
-          Loading collections...
+          Memuat koleksi...
         </section>
       );
     }
@@ -81,7 +81,7 @@ export class OurCollectionController extends Component<
     if (errorMessage) {
       return (
         <section className="home-state home-state--error" role="alert">
-          <p>Failed to load collections.</p>
+          <p>Gagal memuat koleksi.</p>
           <small>{errorMessage}</small>
         </section>
       );

@@ -75,12 +75,18 @@ export function setSeo(input: SeoInput): void {
   setCanonical(canonical);
 
   // OpenGraph + Twitter
-  ensureMetaByProperty("og:title").setAttribute("content", title || "Giftforyou.idn");
+  ensureMetaByProperty("og:title").setAttribute(
+    "content",
+    title || `${STORE_PROFILE.brand.name} | ${STORE_PROFILE.brand.tagline}`
+  );
   ensureMetaByProperty("og:description").setAttribute(
     "content",
-    description || "Luxury floral boutique — curated bouquets and collections."
+    description || STORE_PROFILE.brand.description
   );
-  ensureMetaByProperty("og:site_name").setAttribute("content", "Giftforyou.idn");
+  ensureMetaByProperty("og:site_name").setAttribute(
+    "content",
+    STORE_PROFILE.brand.name
+  );
   ensureMetaByProperty("og:locale").setAttribute("content", "id_ID");
   ensureMetaByProperty("og:url").setAttribute("content", canonical);
   ensureMetaByProperty("og:type").setAttribute("content", "website");
@@ -91,10 +97,13 @@ export function setSeo(input: SeoInput): void {
   ensureMetaByProperty("og:image").setAttribute("content", ogImage);
 
   ensureMetaByName("twitter:card").setAttribute("content", "summary_large_image");
-  ensureMetaByName("twitter:title").setAttribute("content", title || "Giftforyou.idn");
+  ensureMetaByName("twitter:title").setAttribute(
+    "content",
+    title || `${STORE_PROFILE.brand.name} | ${STORE_PROFILE.brand.tagline}`
+  );
   ensureMetaByName("twitter:description").setAttribute(
     "content",
-    description || "Luxury floral boutique — curated bouquets and collections."
+    description || STORE_PROFILE.brand.description
   );
   ensureMetaByName("twitter:image").setAttribute("content", ogImage);
 

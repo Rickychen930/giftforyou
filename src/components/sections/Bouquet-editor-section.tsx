@@ -19,6 +19,7 @@ interface State {
   priceRange: Range;
   selectedTypes: string[];
   selectedSizes: string[];
+  selectedCollections: string[];
   sortBy: SortBy;
   currentPage: number;
   itemsPerPage: number;
@@ -36,7 +37,8 @@ function filterBouquets(
   search: string,
   priceRange: Range,
   selectedTypes: string[],
-  selectedSizes: string[]
+  selectedSizes: string[],
+  selectedCollections: string[]
 ): Bouquet[] {
   const [min, max] = priceRange;
   const q = search.trim().toLowerCase();
@@ -45,6 +47,7 @@ function filterBouquets(
     const name = (b.name ?? "").toLowerCase();
     const typeValue = (b.type ?? "").trim();
     const sizeValue = (b.size ?? "").trim();
+    const collectionValue = (b.collectionName ?? "").trim();
 
     const matchSearch = q.length === 0 || name.includes(q);
     const matchPrice = b.price >= min && b.price <= max;
@@ -52,8 +55,11 @@ function filterBouquets(
       selectedTypes.length === 0 || selectedTypes.includes(typeValue);
     const matchSize =
       selectedSizes.length === 0 || selectedSizes.includes(sizeValue);
+    const matchCollection =
+      selectedCollections.length === 0 ||
+      selectedCollections.includes(collectionValue);
 
-    return matchSearch && matchPrice && matchType && matchSize;
+    return matchSearch && matchPrice && matchType && matchSize && matchCollection;
   });
 }
 
@@ -91,6 +97,7 @@ export default class BouquetEditorSection extends Component<Props, State> {
     priceRange: DEFAULT_PRICE,
     selectedTypes: [],
     selectedSizes: [],
+    selectedCollections: [],
     sortBy: "",
     currentPage: 1,
     itemsPerPage: 9,
@@ -100,7 +107,7 @@ export default class BouquetEditorSection extends Component<Props, State> {
     formData: FormData
   ): Promise<boolean> => {
     const ok = await this.props.onSave(formData);
-    alert(ok ? "✅ Saved successfully!" : "❌ Failed to save bouquet.");
+    alert(ok ? "✅ Berhasil disimpan!" : "❌ Gagal menyimpan bouquet.");
     return ok;
   };
 
@@ -126,10 +133,19 @@ export default class BouquetEditorSection extends Component<Props, State> {
     }));
   };
 
+  private toggleCollection = (value: string) => {
+    this.setState((prev) => ({
+      selectedCollections: toggleInList(prev.selectedCollections, value),
+      currentPage: 1,
+    }));
+  };
+
   private clearTypes = () =>
     this.setState({ selectedTypes: [], currentPage: 1 });
   private clearSizes = () =>
     this.setState({ selectedSizes: [], currentPage: 1 });
+  private clearCollections = () =>
+    this.setState({ selectedCollections: [], currentPage: 1 });
 
   private resetAll = () => {
     this.setState({
@@ -137,6 +153,7 @@ export default class BouquetEditorSection extends Component<Props, State> {
       priceRange: DEFAULT_PRICE,
       selectedTypes: [],
       selectedSizes: [],
+      selectedCollections: [],
       sortBy: "",
       currentPage: 1,
     });
@@ -154,14 +171,14 @@ export default class BouquetEditorSection extends Component<Props, State> {
     for (let p = start; p <= end; p++) pages.push(p);
 
     return (
-      <nav className="editorPagination" aria-label="Pagination">
+      <nav className="editorPagination" aria-label="Paginasi">
         <button
           type="button"
           className="editorPagination__btn"
           disabled={currentPage === 1}
           onClick={() => this.setState({ currentPage: currentPage - 1 })}
         >
-          Prev
+          Sebelumnya
         </button>
 
         {pages.map((p) => (
@@ -184,7 +201,7 @@ export default class BouquetEditorSection extends Component<Props, State> {
           disabled={currentPage === totalPages}
           onClick={() => this.setState({ currentPage: currentPage + 1 })}
         >
-          Next
+          Berikutnya
         </button>
       </nav>
     );
@@ -197,6 +214,7 @@ export default class BouquetEditorSection extends Component<Props, State> {
       priceRange,
       selectedTypes,
       selectedSizes,
+      selectedCollections,
       sortBy,
       currentPage,
       itemsPerPage,
@@ -219,7 +237,8 @@ export default class BouquetEditorSection extends Component<Props, State> {
       search,
       priceRange,
       selectedTypes,
-      selectedSizes
+      selectedSizes,
+      selectedCollections
     );
     const sorted = sortBouquets(filtered, sortBy);
     const paginated = paginate(sorted, currentPage, itemsPerPage);
@@ -229,16 +248,17 @@ export default class BouquetEditorSection extends Component<Props, State> {
       sortBy === "" &&
       selectedTypes.length === 0 &&
       selectedSizes.length === 0 &&
+      selectedCollections.length === 0 &&
       priceRange[0] === DEFAULT_PRICE[0] &&
       priceRange[1] === DEFAULT_PRICE[1];
 
     return (
-      <section className="editorSection" aria-label="Bouquet editor section">
+      <section className="editorSection" aria-label="Bagian editor bouquet">
         <header className="editorHeader">
           <div className="editorHeader__text">
-            <h2 className="editorTitle">Edit Bouquets</h2>
+            <h2 className="editorTitle">Edit Bouquet</h2>
             <p className="editorSubtitle">
-              Search, filter, and edit bouquets. Saved to database.
+              Cari, filter, dan edit bouquet. Tersimpan ke database.
             </p>
           </div>
 
@@ -248,7 +268,7 @@ export default class BouquetEditorSection extends Component<Props, State> {
               className="editorClearAll"
               onClick={this.resetAll}
               disabled={isDefaultFilters}
-              title="Reset filters"
+              title="Reset filter"
             >
               Reset
             </button>
@@ -260,7 +280,7 @@ export default class BouquetEditorSection extends Component<Props, State> {
             <input
               type="text"
               className="editorSearch"
-              placeholder="Search bouquets…"
+              placeholder="Cari bouquet…"
               value={search}
               onChange={(e) => this.setSearch(e.target.value)}
             />
@@ -270,14 +290,14 @@ export default class BouquetEditorSection extends Component<Props, State> {
                 className="editorSearchClear"
                 onClick={() => this.setSearch("")}
               >
-                Clear
+                Hapus
               </button>
             )}
           </div>
 
-          <div className="editorStats" aria-label="Results summary">
+          <div className="editorStats" aria-label="Ringkasan hasil">
             <span className="editorStats__pill">
-              Showing <b>{paginated.length}</b> / <b>{sorted.length}</b>
+              Menampilkan <b>{paginated.length}</b> / <b>{sorted.length}</b>
             </span>
             <span className="editorStats__pill">
               Total: <b>{bouquets.length}</b>
@@ -286,25 +306,31 @@ export default class BouquetEditorSection extends Component<Props, State> {
         </div>
 
         <div className="editorLayout">
-          <aside className="editorFilters" aria-label="Filters">
+          <aside className="editorFilters" aria-label="Filter">
             <div className="editorFilters__card">
               <FilterPanel
                 priceRange={priceRange}
                 selectedTypes={selectedTypes}
                 selectedSizes={selectedSizes}
+                selectedCollections={selectedCollections}
                 sortBy={sortBy}
                 allTypes={allTypes}
                 allSizes={allSizes}
+                allCollections={collections}
                 onPriceChange={this.setPriceRange}
                 onToggleFilter={(key, value) =>
                   key === "selectedTypes"
                     ? this.toggleType(value)
-                    : this.toggleSize(value)
+                    : key === "selectedCollections"
+                      ? this.toggleCollection(value)
+                      : this.toggleSize(value)
                 }
                 onClearFilter={(key) =>
                   key === "selectedTypes"
                     ? this.clearTypes()
-                    : this.clearSizes()
+                    : key === "selectedCollections"
+                      ? this.clearCollections()
+                      : this.clearSizes()
                 }
                 onSortChange={(v) => this.setSortBy(v as SortBy)}
               />
@@ -314,18 +340,18 @@ export default class BouquetEditorSection extends Component<Props, State> {
           <div className="editorGridWrap">
             {paginated.length === 0 ? (
               <div className="editorEmpty" role="status">
-                <h3>No results</h3>
-                <p>Try adjusting filters or search keywords.</p>
+                <h3>Tidak ada hasil</h3>
+                <p>Coba ubah filter atau kata kunci pencarian.</p>
                 <button
                   type="button"
                   className="editorEmpty__btn"
                   onClick={this.resetAll}
                 >
-                  Reset filters
+                  Reset filter
                 </button>
               </div>
             ) : (
-              <div className="editorGrid" aria-label="Bouquet editor grid">
+              <div className="editorGrid" aria-label="Grid editor bouquet">
                 {paginated.map((bouquet) => (
                   <BouquetEditor
                     key={bouquet._id}

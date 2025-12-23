@@ -111,11 +111,11 @@ class BouquetUploader extends Component<Props, State> {
     const name = this.state.name.trim();
     const price = this.state.price;
 
-    if (!this.state.size) return "Please select a size.";
+    if (!this.state.size) return "Silakan pilih ukuran.";
 
-    if (name.length < 2) return "Name must be at least 2 characters.";
+    if (name.length < 2) return "Nama minimal 2 karakter.";
     if (!Number.isFinite(price) || price <= 0)
-      return "Price must be greater than 0.";
+      return "Harga harus lebih dari 0.";
     // image optional; if required, validate here
     return null;
   }
@@ -174,13 +174,13 @@ class BouquetUploader extends Component<Props, State> {
           file: null,
           previewUrl: "",
           submitting: false,
-          message: "Bouquet uploaded successfully.",
+          message: "Bouquet berhasil diunggah.",
           messageType: "success",
         });
       } else {
         this.setState({
           submitting: false,
-          message: "Upload failed. Please try again.",
+          message: "Unggah gagal. Silakan coba lagi.",
           messageType: "error",
         });
       }
@@ -188,7 +188,7 @@ class BouquetUploader extends Component<Props, State> {
       console.error("Upload error:", err);
       this.setState({
         submitting: false,
-        message: "Server error. Please try again.",
+        message: "Terjadi kesalahan server. Silakan coba lagi.",
         messageType: "error",
       });
     }
@@ -200,29 +200,29 @@ class BouquetUploader extends Component<Props, State> {
     return (
       <section className="uploader">
         <header className="uploader__header">
-          <h2 className="uploader__title">Upload New Bouquet</h2>
+          <h2 className="uploader__title">Unggah Bouquet Baru</h2>
           <p className="uploader__subtitle">
-            Add a new product to your store catalog. Fields marked * are
-            required.
+            Tambahkan produk baru ke katalog toko. Kolom bertanda * wajib
+            diisi.
           </p>
         </header>
 
         <form className="uploader__form" onSubmit={this.handleSubmit}>
           <div className="uploader__grid">
             <label className="uploader__field">
-              Name *
+              Nama *
               <input
                 name="name"
                 value={this.state.name}
                 onChange={this.handleChange}
-                placeholder="e.g., Orchid Elegance"
+                placeholder="mis., Orchid Elegance"
                 disabled={submitting}
                 required
               />
             </label>
 
             <label className="uploader__field">
-              Price (IDR) *
+              Harga (IDR) *
               <input
                 name="price"
                 type="number"
@@ -242,35 +242,35 @@ class BouquetUploader extends Component<Props, State> {
                 onChange={this.handleChange}
                 disabled={submitting}
               >
-                <option value="ready">Ready</option>
+                <option value="ready">Siap</option>
                 <option value="preorder">Preorder</option>
               </select>
             </label>
 
             <label className="uploader__field">
-              Collection
+              Koleksi
               <input
                 name="collectionName"
                 value={this.state.collectionName}
                 onChange={this.handleChange}
-                placeholder="e.g., New Edition"
+                placeholder="mis., New Edition"
                 disabled={submitting}
               />
             </label>
 
             <label className="uploader__field">
-              Type
+              Tipe
               <input
                 name="type"
                 value={this.state.type}
                 onChange={this.handleChange}
-                placeholder="e.g., bouquet"
+                placeholder="mis., bouquet"
                 disabled={submitting}
               />
             </label>
 
             <label className="uploader__field">
-              Size
+              Ukuran
               <select
                 name="size"
                 value={this.state.size}
@@ -287,7 +287,7 @@ class BouquetUploader extends Component<Props, State> {
             </label>
 
             <label className="uploader__field">
-              Quantity
+              Stok
               <input
                 name="quantity"
                 type="number"
@@ -300,8 +300,8 @@ class BouquetUploader extends Component<Props, State> {
             </label>
 
             <label className="uploader__field uploader__field--full">
-              Flags
-              <div className="uploader__toggles" role="group" aria-label="Bouquet flags">
+              Penanda
+              <div className="uploader__toggles" role="group" aria-label="Penanda bouquet">
                 <label className="uploader__toggle">
                   <input
                     type="checkbox"
@@ -310,7 +310,7 @@ class BouquetUploader extends Component<Props, State> {
                     onChange={this.handleChange}
                     disabled={submitting}
                   />
-                  <span>New edition</span>
+                  <span>Edisi baru</span>
                 </label>
 
                 <label className="uploader__toggle">
@@ -321,59 +321,59 @@ class BouquetUploader extends Component<Props, State> {
                     onChange={this.handleChange}
                     disabled={submitting}
                   />
-                  <span>Featured</span>
+                  <span>Unggulan</span>
                 </label>
               </div>
             </label>
 
             <label className="uploader__field uploader__field--full">
-              Description
+              Deskripsi
               <textarea
                 name="description"
                 value={this.state.description}
                 onChange={this.handleChange}
                 rows={4}
-                placeholder="Short description..."
+                placeholder="Deskripsi singkat..."
                 disabled={submitting}
               />
             </label>
 
             <label className="uploader__field uploader__field--full">
-              Occasions
+              Acara
               <input
                 name="occasionsText"
                 value={this.state.occasionsText}
                 onChange={this.handleChange}
-                placeholder="e.g., Birthday, Anniversary"
+                placeholder="mis., Ulang Tahun, Anniversary"
                 disabled={submitting}
               />
             </label>
 
             <label className="uploader__field uploader__field--full">
-              Flowers
+              Bunga
               <input
                 name="flowersText"
                 value={this.state.flowersText}
                 onChange={this.handleChange}
-                placeholder="e.g., Orchid, Rose"
+                placeholder="mis., Orchid, Mawar"
                 disabled={submitting}
               />
             </label>
 
             <label className="uploader__field uploader__field--full">
-              Care instructions
+              Instruksi perawatan
               <textarea
                 name="careInstructions"
                 value={this.state.careInstructions}
                 onChange={this.handleChange}
                 rows={3}
-                placeholder="Optional care tips"
+                placeholder="Tips perawatan (opsional)"
                 disabled={submitting}
               />
             </label>
 
             <label className="uploader__field uploader__field--full">
-              Image
+              Gambar
               <input
                 type="file"
                 accept="image/*,.heic,.heif"
@@ -385,11 +385,11 @@ class BouquetUploader extends Component<Props, State> {
 
           {previewUrl && (
             <div className="uploader__preview">
-              <p className="uploader__previewLabel">Preview</p>
+              <p className="uploader__previewLabel">Pratinjau</p>
               <img
                 className="uploader__previewImg"
                 src={previewUrl}
-                alt="Preview"
+                alt="Pratinjau"
               />
             </div>
           )}
@@ -399,7 +399,7 @@ class BouquetUploader extends Component<Props, State> {
             type="submit"
             disabled={submitting}
           >
-            {submitting ? "Uploading..." : "Upload Bouquet"}
+            {submitting ? "Mengunggah..." : "Unggah Bouquet"}
           </button>
 
           {message && (
