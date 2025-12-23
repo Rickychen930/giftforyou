@@ -238,6 +238,10 @@
   transform: rotate(180deg);
 }
 
+.nav-item--dropdown.is-open .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
 /* =========================
    Premium Dropdown Menu
 ========================= */
@@ -268,7 +272,6 @@
   padding: 1.5rem;
   display: none;
   z-index: 100;
-  animation: dropdownSlide 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes dropdownSlide {
@@ -285,6 +288,14 @@
 .nav-item--dropdown:hover .dropdown,
 .nav-item--dropdown:focus-within .dropdown {
   display: block;
+}
+
+.nav-item--dropdown.is-open .dropdown {
+  display: block;
+}
+
+.nav-item--dropdown.is-open.is-animate .dropdown {
+  animation: dropdownSlide 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dropdown-header {
@@ -658,7 +669,26 @@
    Responsive Design
 ========================= */
 
-/* Hide top bar on mobile */
+.mobileMenuBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 1400;
+}
+
+@keyframes mobileMenuSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 980px) {
   .header-top-bar {
     display: none;
@@ -666,42 +696,42 @@
 
   .nav-container {
     padding: 0.85rem 1.25rem;
+    overflow: visible;
   }
 
+  /* Keep nav-center available for the dropdown panel, but remove from layout */
   .nav-center {
-    display: none;
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    pointer-events: none;
   }
 
   .hamburger {
     display: flex;
+    position: relative;
+    z-index: 1600;
+  }
+
+  .nav-links {
+    display: none;
   }
 
   .nav-links.open {
+    pointer-events: auto;
     display: flex;
     flex-direction: column;
-    position: absolute;
-    top: calc(100% + 1rem);
-    left: 1rem;
-    right: 1rem;
-    background: white;
+    gap: 0.6rem;
+    margin: 0.85rem 1rem 0;
+    background: rgba(255, 255, 255, 0.98);
     border: 1px solid rgba(212, 140, 156, 0.15);
-    border-radius: 20px;
-    padding: 1.5rem;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-    gap: 0.5rem;
-    animation: mobileMenuSlide 0.3s ease-out;
-    z-index: 100;
-  }
-
-  @keyframes mobileMenuSlide {
-    from {
-      opacity: 0;
-      transform: translateY(-15px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    border-radius: 18px;
+    padding: 1rem;
+    box-shadow: 0 24px 72px rgba(0, 0, 0, 0.16);
+    z-index: 1500;
+    animation: mobileMenuSlide 0.22s ease-out;
   }
 
   .nav-links.open .nav-item {
@@ -711,15 +741,19 @@
   .nav-links.open .nav-link {
     width: 100%;
     justify-content: flex-start;
-    padding: 1rem 1.25rem;
-    font-size: 1.05rem;
+    padding: 0.9rem 1rem;
+    font-size: 1.02rem;
   }
 
+  /* Mobile: dropdown content must be visible (no hover on touch) */
   .nav-links.open .dropdown {
+    display: block;
     position: static;
     transform: none;
-    margin-top: 0.75rem;
+    margin-top: 0.6rem;
     min-width: 100%;
+    box-shadow: none;
+    border-radius: 14px;
   }
 
   .dropdown-grid {
@@ -780,60 +814,6 @@
   .search-submit {
     width: 100%;
   }
-}
-
-@media (max-width: 980px) {
-  /* keep the nav-center container so the dropdown can position relative to it */
-  .nav-center { display: block; position: relative; }
-  .mobile-only{ display:inline-flex; }
-  .hamburger{ display:inline-grid }
-
-  /* hide the inline links by default on mobile; show when `.open` added */
-  .nav-links { display: none; }
-  .nav-links.open {
-    display: flex;
-    flex-direction: column;
-    gap: 0.65rem;
-    position: absolute;
-    left: 1rem;
-    right: 1rem;
-    top: calc(100% + 10px);
-    padding: 0.85rem;
-    background: rgba(255,255,255,0.98);
-    border-radius: 12px;
-    box-shadow: var(--shadow-2);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    z-index: 1200;
-  }
-
-  .nav-links.open .nav-link { justify-content: flex-start; padding: 0.75rem 0.85rem; }
-}
-/* Strong mobile overrides: ensure hamburger reveals menu above header content */
-@media (max-width: 980px) {
-  .nav-container { overflow: visible; }
-
-  .nav-links.open {
-    display: flex !important;
-    flex-direction: column !important;
-    position: absolute !important;
-    top: 100% !important;
-    left: 0 !important;
-    right: 0 !important;
-    margin: 0 auto;
-    max-width: var(--max);
-    padding: 1rem !important;
-    background: white !important;
-    border-radius: 0 0 14px 14px !important;
-    box-shadow: 0 24px 72px rgba(0,0,0,0.16) !important;
-    z-index: 1500 !important;
-  }
-
-  .hamburger { z-index: 1600; }
-}
-  .nav-container {
-    gap: 0.75rem;
-  
 }
 
 /* =========================
