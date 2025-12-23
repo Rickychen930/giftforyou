@@ -120,17 +120,13 @@
   border-radius: 20px;
 }
 
-/* On mobile, allow a gentle full-bleed look (no harsh edges) */
+/* Mobile: keep cards fully contained to prevent horizontal overflow */
 @media (max-width: 768px) {
   .ourCollection__grid > .collectionCard {
-    width: 100vw;
-    margin-left: calc(50% - 50vw);
-    margin-right: calc(50% - 50vw);
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    border-radius: 18px;
   }
 }
 
