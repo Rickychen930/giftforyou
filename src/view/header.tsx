@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { BRAND_INFO, COLLECTION_SUGGESTIONS } from "../constants/app-constants";
 import { getCollections } from "../services/collection.service";
+import { API_BASE } from "../config/api";
 import {
   SearchIcon,
   CartIcon,
@@ -33,6 +34,7 @@ const Header: React.FC<HeaderProps> = ({
   const [query, setQuery] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const [collectionNames, setCollectionNames] = useState<string[]>([]);
+  const [typeNames, setTypeNames] = useState<string[]>([]);
   const searchRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
 
@@ -50,7 +52,16 @@ const Header: React.FC<HeaderProps> = ({
 
     (async () => {
       try {
-        const collections = await getCollections(ac.signal);
+        const [collections, bouquets] = await Promise.all([
+          getCollections(ac.signal),
+          fetch(`${API_BASE}/api/bouquets`, { signal: ac.signal })
+            .then(async (r) => {
+              if (!r.ok) return [];
+              const j = await r.json().catch(() => []);
+              return Array.isArray(j) ? j : [];
+            })
+            .catch(() => []),
+        ]);
         if (cancelled) return;
 
         const names = Array.from(
@@ -62,10 +73,21 @@ const Header: React.FC<HeaderProps> = ({
         ).sort((a, b) => a.localeCompare(b));
 
         setCollectionNames(names);
+
+        const types = Array.from(
+          new Set(
+            (bouquets ?? [])
+              .map((b: any) => (typeof b?.type === "string" ? b.type.trim() : ""))
+              .filter(Boolean)
+          )
+        ).sort((a, b) => a.localeCompare(b));
+
+        setTypeNames(types);
       } catch (e) {
         // Non-blocking: header can fall back to static suggestions.
         if (cancelled) return;
         setCollectionNames([]);
+        setTypeNames([]);
       }
     })();
 
@@ -110,6 +132,8 @@ const Header: React.FC<HeaderProps> = ({
     collectionNames.length > 0
       ? collectionNames
       : Array.from(COLLECTION_SUGGESTIONS);
+
+  const typeSuggestions = typeNames.length > 0 ? typeNames : ["Orchid", "Mixed"];
 
   return (
     <header className={`header ${scrolled ? "header--scrolled" : ""}`}>
@@ -174,6 +198,26 @@ const Header: React.FC<HeaderProps> = ({
                         <h3>Our Collections</h3>
                         <p>Handcrafted with love</p>
                       </div>
+
+                      <div className="dropdown-header" style={{ marginTop: "0.75rem" }}>
+                        <h3>Browse by Type</h3>
+                        <p>Quick filters for the catalog</p>
+                      </div>
+                      <ul className="dropdown-grid">
+                        {typeSuggestions.map((t) => (
+                          <li key={t}>
+                            <Link
+                              to={`/collection?type=${encodeURIComponent(t)}`}
+                              onClick={closeMobile}
+                              className="dropdown-link"
+                            >
+                              <span className="dropdown-icon">🏷️</span>
+                              <span>{t}</span>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+
                       <ul className="dropdown-grid">
                         {collectionSuggestions.map((c) => (
                           <li key={c}>

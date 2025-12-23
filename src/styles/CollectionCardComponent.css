@@ -38,6 +38,7 @@
 .collectionCard {
   width: 100%;
   position: relative;
+  box-sizing: border-box;
   padding: 1.7rem;
   border-radius: 18px;
   background: var(--cc-surface);
@@ -46,8 +47,17 @@
   backdrop-filter: blur(10px);
   overflow: hidden;
   transition: box-shadow 0.3s ease, transform 0.3s ease;
+
+  /* Prevent Safari from “reflowing” the page on hover/scroll effects */
+  contain: layout paint;
+  transform: translateZ(0);
+
   animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   opacity: 0;
+}
+
+.collectionCard * {
+  box-sizing: border-box;
 }
 
 @keyframes slideIn {
@@ -273,6 +283,32 @@
 /* WebKit (Safari/Chrome): hide scrollbar to avoid height changes on hover */
 .collectionCard__scroll::-webkit-scrollbar {
   height: 0;
+  width: 0;
+  background: transparent;
+}
+
+/* Safari-specific stability fixes:
+   Safari has known issues where transform/hover inside overflow containers can
+   cause repeated layout shifts. We keep the visual polish (shadow) but disable
+   translateY transforms that can trigger the bug. */
+@supports (-webkit-touch-callout: none) {
+  .collectionCard {
+    animation: none;
+    opacity: 1;
+  }
+
+  .collectionCard:hover {
+    transform: none;
+  }
+
+  .bouquetCard {
+    animation: none;
+    opacity: 1;
+  }
+
+  .bouquetCard:hover {
+    transform: none;
+  }
 }
 
 /* Progress Indicator */

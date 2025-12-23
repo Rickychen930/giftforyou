@@ -3,6 +3,7 @@ import express, { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import path from "path";
+import multer from "multer";
 
 import metricsRoutes from "../routes/metrics-routes";
 import authRoutes from "../routes/auth-routes";
@@ -100,6 +101,21 @@ app.use((_req, res) => {
 // Error handler (must be last)
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   console.error("❌ API error:", err);
+
+  // Make upload/update failures understandable for the dashboard.
+  if (err instanceof multer.MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({ message: "Image is too large. Max 8MB." });
+    }
+    return res.status(400).json({ message: err.message });
+  }
+
+  if (err instanceof Error) {
+    if (/unsupported image type/i.test(err.message)) {
+      return res.status(400).json({ message: err.message });
+    }
+  }
+
   res.status(500).json({ message: "Internal server error" });
 });
 

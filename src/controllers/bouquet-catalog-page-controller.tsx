@@ -73,13 +73,42 @@ class BouquetCatalogController extends Component<{ locationSearch?: string }, St
       return;
     }
 
-    const params = new URLSearchParams(search.startsWith("?") ? search : `?${search}`);
+    const params = new URLSearchParams(
+      search.startsWith("?") ? search : `?${search}`
+    );
+
     const name = (params.get("name") ?? params.get("filter") ?? "").trim();
     const q = (params.get("q") ?? "").trim();
 
-    // Only update if changed to avoid render loops.
-    if (name !== this.state.collectionNameFilter || q !== this.state.searchQuery) {
-      this.setState({ collectionNameFilter: name, searchQuery: q, currentPage: 1 });
+    const splitCsv = (v: string) =>
+      v
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+    const typeParams = params.getAll("type").flatMap(splitCsv);
+    const sizeParams = params.getAll("size").flatMap(splitCsv);
+
+    const types = Array.from(new Set(typeParams));
+    const sizes = Array.from(new Set(sizeParams));
+
+    const sameArray = (a: string[], b: string[]) =>
+      a.length === b.length && a.every((v, i) => v === b[i]);
+
+    const needsUpdate =
+      name !== this.state.collectionNameFilter ||
+      q !== this.state.searchQuery ||
+      !sameArray(types, this.state.selectedTypes) ||
+      !sameArray(sizes, this.state.selectedSizes);
+
+    if (needsUpdate) {
+      this.setState({
+        collectionNameFilter: name,
+        searchQuery: q,
+        selectedTypes: types,
+        selectedSizes: sizes,
+        currentPage: 1,
+      });
     }
   };
 

@@ -201,7 +201,7 @@ class DashboardView extends Component<Props, State> {
               </div>
             )}
 
-            {!loading && !errorMessage && this.renderMainContent()}
+            {!loading && this.renderMainContent()}
           </div>
         </main>
       </div>
