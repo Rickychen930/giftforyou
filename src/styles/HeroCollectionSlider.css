@@ -45,8 +45,8 @@
 }
 
 .hero__kicker:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16), 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14), 0 4px 12px rgba(0, 0, 0, 0.09);
 }
 
 /* Slide counter wrapper with progress bar */
@@ -120,6 +120,7 @@
 .hero__swiper {
   width: 100%;
   height: clamp(600px, 85vh, 900px);
+  height: clamp(600px, 85svh, 900px);
   overflow: hidden;
   background: var(--hero-surface);
   border-radius: 0;
@@ -217,9 +218,9 @@
   inset: 0;
   z-index: 1;
   background:
-    radial-gradient(900px 520px at 24% 20%, rgba(0, 0, 0, 0.35), transparent 62%),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.32) 58%, rgba(0, 0, 0, 0.12) 100%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.65) 100%);
+    radial-gradient(900px 520px at 24% 20%, rgba(0, 0, 0, 0.28), transparent 62%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.26) 58%, rgba(0, 0, 0, 0.10) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.06) 0%, rgba(0, 0, 0, 0.56) 100%);
 }
 
 /* Soft brand glow - enhanced for florist aesthetic */
@@ -232,8 +233,12 @@
     radial-gradient(600px 400px at 18% 25%, rgba(212, 140, 156, 0.28), transparent 68%),
     radial-gradient(600px 400px at 42% 12%, rgba(168, 213, 186, 0.18), transparent 70%);
   mix-blend-mode: screen;
-  opacity: 0.9;
-  animation: glowPulse 6s ease-in-out infinite;
+  opacity: 0.7;
+}
+
+.swiper-slide-active .heroSlide__glow {
+  opacity: 0.85;
+  animation: glowPulse 10s ease-in-out infinite;
 }
 
 @keyframes glowPulse {
@@ -248,7 +253,7 @@
   z-index: 3;
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.25'/%3E%3C/svg%3E");
-  opacity: 0.1;
+  opacity: 0.07;
   mix-blend-mode: overlay;
   pointer-events: none;
 }
@@ -276,8 +281,8 @@
   backdrop-filter: blur(16px) saturate(1.1);
   -webkit-backdrop-filter: blur(16px) saturate(1.1);
   box-shadow: 
-    0 20px 60px rgba(0, 0, 0, 0.4),
-    0 8px 24px rgba(0, 0, 0, 0.3),
+    0 18px 54px rgba(0, 0, 0, 0.34),
+    0 7px 20px rgba(0, 0, 0, 0.24),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -301,13 +306,7 @@
   text-transform: uppercase;
   font-size: 0.72rem;
   margin-bottom: 1.1rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  animation: badgePulse 3s ease-in-out infinite;
-}
-
-@keyframes badgePulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
 }
 
 /* Heading with flower icon */
@@ -326,17 +325,15 @@
 }
 
 .heroSlide__flower-petals {
-  animation: petalRotate 20s linear infinite;
   transform-origin: center;
 }
 
 .heroSlide__flower-center {
-  animation: centerPulse 2s ease-in-out infinite;
+  /* animation is applied only on the active slide for a calmer, luxury feel */
 }
 
-@keyframes petalRotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.swiper-slide-active .heroSlide__flower-center {
+  animation: centerPulse 3.6s ease-in-out infinite;
 }
 
 @keyframes centerPulse {
@@ -359,6 +356,12 @@
   color: #fff;
 }
 
+@supports (text-wrap: balance) {
+  .heroSlide__title {
+    text-wrap: balance;
+  }
+}
+
 .heroSlide__subtitle {
   margin: 0 0 1.5rem;
   max-width: 58ch;
@@ -368,6 +371,12 @@
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
   font-weight: 400;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+@supports (text-wrap: pretty) {
+  .heroSlide__subtitle {
+    text-wrap: pretty;
+  }
 }
 
 /* Entrance animations for active slide */
@@ -486,7 +495,7 @@
 }
 
 .heroSlide__btn--primary:hover {
-  transform: translateY(-3px) scale(1.02);
+  transform: translateY(-2px) scale(1.01);
   box-shadow: 
     0 16px 36px rgba(212, 140, 156, 0.45),
     0 6px 16px rgba(212, 140, 156, 0.35);
@@ -510,7 +519,7 @@
 }
 
 .heroSlide__btn--secondary:hover {
-  transform: translateY(-3px) scale(1.02);
+  transform: translateY(-2px) scale(1.01);
   background: rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 255, 255, 0.4);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
@@ -634,25 +643,56 @@
 }
 
 .hero__pagination .swiper-pagination-bullet {
-  background: rgba(255, 255, 255, 0.5);
+  appearance: none;
+  border: none;
+  background: transparent;
   opacity: 1;
-  width: 8px;
-  height: 8px;
+  width: 28px;
+  height: 28px;
   margin: 0 !important;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+}
+
+.hero__pagination .swiper-pagination-bullet::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .hero__pagination .swiper-pagination-bullet:hover {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.08);
   transform: scale(1.2);
 }
 
+.hero__pagination .swiper-pagination-bullet:hover::after {
+  background: rgba(255, 255, 255, 0.8);
+  transform: scale(1.15);
+}
+
 .hero__pagination .swiper-pagination-bullet-active {
-  background: #ffffff;
+  width: 44px;
+}
+
+.hero__pagination .swiper-pagination-bullet-active::after {
   width: 24px;
+  height: 8px;
+  background: #ffffff;
   border-radius: 999px;
   box-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
+}
+
+.hero__pagination .swiper-pagination-bullet:focus-visible {
+  outline: 3px solid rgba(212, 140, 156, 0.55);
+  outline-offset: 3px;
 }
 
 /* =========================
@@ -666,6 +706,7 @@
   position: relative;
   width: 100%;
   height: clamp(600px, 85vh, 900px);
+  height: clamp(600px, 85svh, 900px);
   overflow: hidden;
 }
 
@@ -688,6 +729,24 @@
   left: clamp(20px, 6vw, 80px);
   width: min(58%, 750px);
   padding: clamp(1.25rem, 3.5vw, 2.5rem);
+}
+
+/* Ultra-wide refinement: keep the panel present and balanced */
+@media (min-width: 1440px) {
+  .heroSlide__panel {
+    width: min(46%, 920px);
+    margin-left: clamp(72px, 8vw, 160px);
+    border-radius: 18px;
+  }
+
+  .heroSlide__title {
+    max-width: 30ch;
+  }
+
+  .hero__skeleton-content {
+    left: clamp(72px, 8vw, 160px);
+    width: min(46%, 920px);
+  }
 }
 
 .hero__skeleton-badge,
@@ -784,6 +843,7 @@
 @media (max-width: 768px) {
   .hero__swiper {
     height: clamp(500px, 75vh, 700px);
+    height: clamp(500px, 75svh, 700px);
   }
 
   .hero__kicker-wrapper {
@@ -819,8 +879,12 @@
     margin-left: 12px;
     margin-right: 12px;
     border-radius: 14px;
-    background: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.2));
+    background: linear-gradient(135deg, rgba(0,0,0,0.30), rgba(0,0,0,0.18));
     border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow:
+      0 14px 42px rgba(0, 0, 0, 0.30),
+      0 6px 18px rgba(0, 0, 0, 0.20),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
   .heroSlide__panel-inner {
@@ -871,6 +935,7 @@
 @media (max-width: 480px) {
   .hero__swiper {
     height: clamp(450px, 70vh, 600px);
+    height: clamp(450px, 70svh, 600px);
   }
 
   .heroSlide__title {
@@ -891,6 +956,7 @@
 @media (max-height: 600px) and (orientation: landscape) {
   .hero__swiper {
     height: 90vh;
+    height: 90svh;
   }
 
   .heroSlide__content {

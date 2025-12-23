@@ -290,6 +290,8 @@ const HeroCollectionSlider: React.FC<HeroCollectionSliderProps> = ({
                     src={resolveImageSrc(slide.image)}
                     alt={slide.title}
                     loading={index === 0 ? "eager" : "lazy"}
+                    decoding="async"
+                    fetchPriority={index === 0 ? "high" : "auto"}
                     onLoad={() => handleImageLoad(slide.id)}
                     onError={(e) => {
                       e.currentTarget.onerror = null;
