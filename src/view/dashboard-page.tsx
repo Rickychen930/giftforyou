@@ -17,6 +17,7 @@ interface Props {
 
   onUpdate: (formData: FormData) => Promise<boolean>;
   onUpload: (formData: FormData) => Promise<boolean>;
+  onHeroSaved?: () => void | Promise<void>;
   onLogout: () => void;
 }
 
@@ -132,7 +133,12 @@ class DashboardView extends Component<Props, State> {
 
       case "hero":
         // ✅ pass collections so the editor can link slides to existing collections
-        return <HeroSliderEditorSection collections={collections} />;
+        return (
+          <HeroSliderEditorSection
+            collections={collections}
+            onSaved={this.props.onHeroSaved}
+          />
+        );
 
       default:
         return null;
@@ -143,35 +149,60 @@ class DashboardView extends Component<Props, State> {
     const { loading } = this.props;
     const errorMessage = (this.props.errorMessage ?? "").trim();
 
+    const activeTab = this.state.activeTab;
+    const tabMeta: Record<ActiveTab, { title: string; subtitle: string }> = {
+      overview: {
+        title: "Overview",
+        subtitle: "Key store metrics and activity at a glance.",
+      },
+      upload: {
+        title: "Upload Bouquet",
+        subtitle: "Add new bouquets to your catalog with complete details.",
+      },
+      edit: {
+        title: "Edit Bouquets",
+        subtitle: "Search, filter, and update bouquets in your database.",
+      },
+      hero: {
+        title: "Hero Slider",
+        subtitle: "Manage homepage hero slides and collection links.",
+      },
+    };
+
+    const { title, subtitle } = tabMeta[activeTab];
+
     return (
       <div className="dashboardLayout">
         {this.renderSidebar()}
 
         <main className="dashboardMain">
-          <header className="dashboardHeader">
-            <h1 className="dashboardHeader__title">Bouquet Management</h1>
-            <p className="dashboardHeader__subtitle">
-              Manage products, keep collections updated, and monitor store
-              activity.
-            </p>
-          </header>
+          <div className="dashboardContainer">
+            <header className="dashboardHeader">
+              <p className="dashboardHeader__kicker">Admin Dashboard</p>
+              <h1 className="dashboardHeader__title">{title}</h1>
+              <p className="dashboardHeader__subtitle">{subtitle}</p>
+            </header>
 
-          {loading && (
-            <div className="dashboardState" aria-live="polite">
-              Loading dashboard data...
-            </div>
-          )}
+            {loading && (
+              <div className="dashboardState" aria-live="polite">
+                Loading dashboard data...
+              </div>
+            )}
 
-          {!loading && errorMessage && (
-            <div className="dashboardState dashboardState--error" role="alert">
-              <p className="dashboardState__title">
-                Failed to load dashboard data
-              </p>
-              <p className="dashboardState__text">{errorMessage}</p>
-            </div>
-          )}
+            {!loading && errorMessage && (
+              <div
+                className="dashboardState dashboardState--error"
+                role="alert"
+              >
+                <p className="dashboardState__title">
+                  Failed to load dashboard data
+                </p>
+                <p className="dashboardState__text">{errorMessage}</p>
+              </div>
+            )}
 
-          {!loading && !errorMessage && this.renderMainContent()}
+            {!loading && !errorMessage && this.renderMainContent()}
+          </div>
         </main>
       </div>
     );

@@ -13,7 +13,7 @@ import Header from "./view/header";
 import Footer from "./view/footer";
 
 import HomePage from "./view/home-page";
-import BouquetCatalogController from "./controllers/bouquet-catalog-page-controller";
+import BouquetCatalogRoute from "./view/bouquet-catalog-route";
 import LoginController from "./controllers/login-page-controller";
 import DashboardController from "./controllers/dashboard-page-controller";
 import BouquetDetailController from "./controllers/bouquet-detail-controller";
@@ -45,7 +45,7 @@ const AppLayout: React.FC = () => {
 
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/collection" element={<BouquetCatalogController />} />
+        <Route path="/collection" element={<BouquetCatalogRoute />} />
         <Route path="/bouquet/:id" element={<BouquetDetailController />} />
         <Route path="/search" element={<SearchRedirect />} />
         <Route path="/cart" element={<Navigate to="/collection" replace />} />

@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { BRAND_INFO, COLLECTION_SUGGESTIONS } from "../constants/app-constants";
+import { getCollections } from "../services/collection.service";
 import {
   SearchIcon,
   CartIcon,
@@ -31,6 +32,7 @@ const Header: React.FC<HeaderProps> = ({
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [scrolled, setScrolled] = useState(false);
+  const [collectionNames, setCollectionNames] = useState<string[]>([]);
   const searchRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
 
@@ -40,6 +42,37 @@ const Header: React.FC<HeaderProps> = ({
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const ac = new AbortController();
+
+    (async () => {
+      try {
+        const collections = await getCollections(ac.signal);
+        if (cancelled) return;
+
+        const names = Array.from(
+          new Set(
+            (collections ?? [])
+              .map((c) => (typeof c?.name === "string" ? c.name.trim() : ""))
+              .filter(Boolean)
+          )
+        ).sort((a, b) => a.localeCompare(b));
+
+        setCollectionNames(names);
+      } catch (e) {
+        // Non-blocking: header can fall back to static suggestions.
+        if (cancelled) return;
+        setCollectionNames([]);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      ac.abort();
+    };
   }, []);
 
   useEffect(() => {
@@ -72,6 +105,11 @@ const Header: React.FC<HeaderProps> = ({
       setTimeout(() => searchRef.current?.focus(), 100);
     }
   };
+
+  const collectionSuggestions =
+    collectionNames.length > 0
+      ? collectionNames
+      : Array.from(COLLECTION_SUGGESTIONS);
 
   return (
     <header className={`header ${scrolled ? "header--scrolled" : ""}`}>
@@ -137,10 +175,10 @@ const Header: React.FC<HeaderProps> = ({
                         <p>Handcrafted with love</p>
                       </div>
                       <ul className="dropdown-grid">
-                        {COLLECTION_SUGGESTIONS.map((c) => (
+                        {collectionSuggestions.map((c) => (
                           <li key={c}>
                             <Link
-                              to={`/collection?filter=${encodeURIComponent(c)}`}
+                              to={`/collection?name=${encodeURIComponent(c)}`}
                               onClick={closeMobile}
                               className="dropdown-link"
                             >
@@ -222,7 +260,7 @@ const Header: React.FC<HeaderProps> = ({
                   aria-label="Search"
                 />
                 <datalist id="search-suggestions">
-                  {COLLECTION_SUGGESTIONS.map((s) => (
+                  {collectionSuggestions.map((s) => (
                     <option key={s} value={s} />
                   ))}
                 </datalist>
@@ -234,7 +272,7 @@ const Header: React.FC<HeaderProps> = ({
             <div className="search-suggestions">
               <p className="suggestions-title">Popular Searches</p>
               <div className="suggestions-tags">
-                {COLLECTION_SUGGESTIONS.slice(0, 5).map((s) => (
+                {collectionSuggestions.slice(0, 5).map((s) => (
                   <button
                     key={s}
                     type="button"

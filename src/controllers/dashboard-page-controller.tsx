@@ -25,6 +25,8 @@ const isNonEmptyString = (v: unknown): v is string =>
 
 class DashboardController extends Component<{}, State> {
   private abortController: AbortController | null = null;
+  private metricsAbortController: AbortController | null = null;
+  private metricsIntervalId: number | null = null;
 
   constructor(props: {}) {
     super(props);
@@ -40,10 +42,17 @@ class DashboardController extends Component<{}, State> {
 
   componentDidMount(): void {
     this.loadDashboard();
+
+    // Keep visitor + collections metrics fresh without reloading the whole dashboard UI.
+    this.metricsIntervalId = window.setInterval(() => {
+      void this.refreshMetrics();
+    }, 60_000);
   }
 
   componentWillUnmount(): void {
     this.abortController?.abort();
+    this.metricsAbortController?.abort();
+    if (this.metricsIntervalId) window.clearInterval(this.metricsIntervalId);
   }
 
   private getAuthHeaders(): HeadersInit {
@@ -166,6 +175,75 @@ class DashboardController extends Component<{}, State> {
     }
   };
 
+  private refreshMetrics = async (): Promise<void> => {
+    this.metricsAbortController?.abort();
+    this.metricsAbortController = new AbortController();
+
+    try {
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+        ...this.getAuthHeaders(),
+      };
+
+      const metricsRes = await fetch(`${API_BASE}/api/metrics`, {
+        method: "GET",
+        headers,
+        signal: this.metricsAbortController.signal,
+      });
+
+      if (metricsRes.status === 401) {
+        throw new Error("Unauthorized. Please login again.");
+      }
+
+      if (!metricsRes.ok) {
+        const t = await metricsRes.text();
+        throw new Error(`Failed to load metrics (${metricsRes.status}): ${t}`);
+      }
+
+      const metricsJson = (await metricsRes.json()) as MetricsResponse;
+
+      this.setState((prev) => {
+        const collectionsFromMetrics =
+          Array.isArray(metricsJson.collections) &&
+          metricsJson.collections.length > 0
+            ? metricsJson.collections.filter(isNonEmptyString)
+            : [];
+
+        const collectionsFallback = Array.from(
+          new Set(
+            (prev.bouquets ?? [])
+              .map((b) => b.collectionName)
+              .filter(isNonEmptyString)
+          )
+        );
+
+        return {
+          visitorsCount: Number(metricsJson.visitorsCount ?? prev.visitorsCount),
+          collectionsCount: Number(
+            metricsJson.collectionsCount ??
+              (collectionsFromMetrics.length
+                ? collectionsFromMetrics.length
+                : collectionsFallback.length)
+          ),
+          collections: collectionsFromMetrics.length
+            ? collectionsFromMetrics
+            : prev.collections.length
+              ? prev.collections
+              : collectionsFallback,
+          errorMessage: undefined,
+        };
+      });
+    } catch (err: unknown) {
+      const anyErr = err as any;
+      if (anyErr?.name === "AbortError") return;
+
+      this.setState({
+        errorMessage:
+          err instanceof Error ? err.message : "Failed to load metrics.",
+      });
+    }
+  };
+
   private onUpload = async (formData: FormData): Promise<boolean> => {
     try {
       const res = await fetch(`${API_BASE}/api/bouquets`, {
@@ -237,6 +315,7 @@ class DashboardController extends Component<{}, State> {
         errorMessage={this.state.errorMessage}
         onUpload={this.onUpload}
         onUpdate={this.onUpdate}
+        onHeroSaved={this.refreshMetrics}
         onLogout={this.onLogout}
       />
     );

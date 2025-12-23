@@ -21,6 +21,7 @@ type HeroSliderContent = {
 
 interface Props {
   collections: string[];
+  onSaved?: () => void | Promise<void>;
 }
 
 const uid = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -55,7 +56,7 @@ const emptySlide = (): HeroSlide => ({
   },
 });
 
-const HeroSliderEditorSection: React.FC<Props> = ({ collections }) => {
+const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -377,6 +378,10 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections }) => {
       if (!res.ok) throw new Error(`Save failed (${res.status})`);
 
       setSuccess("✅ Hero slider updated successfully!");
+
+      // Allow parent (Dashboard) to refresh metrics/visitors after saving.
+      await Promise.resolve(onSaved?.());
+
       // Scroll to top to show success message
       window.scrollTo({ top: 0, behavior: "smooth" });
 

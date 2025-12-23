@@ -18,6 +18,9 @@ interface State {
   currentPage: number;
   itemsPerPage: number;
 
+  collectionNameFilter: string;
+  searchQuery: string;
+
   loading: boolean;
   error: string | null;
 } // adjust path depending on folder depth
@@ -25,7 +28,7 @@ interface State {
 const isNonEmptyString = (v: unknown): v is string =>
   typeof v === "string" && v.trim().length > 0;
 
-class BouquetCatalogController extends Component<{}, State> {
+class BouquetCatalogController extends Component<{ locationSearch?: string }, State> {
   private abortController: AbortController | null = null;
 
   constructor(props: {}) {
@@ -38,18 +41,47 @@ class BouquetCatalogController extends Component<{}, State> {
       sortBy: "",
       currentPage: 1,
       itemsPerPage: 9,
+      collectionNameFilter: "",
+      searchQuery: "",
       loading: true,
       error: null,
     };
   }
 
   componentDidMount(): void {
+    this.applyLocationSearch(this.props.locationSearch);
     this.loadBouquets();
+  }
+
+  componentDidUpdate(prevProps: Readonly<{ locationSearch?: string }>): void {
+    if ((prevProps.locationSearch ?? "") !== (this.props.locationSearch ?? "")) {
+      this.applyLocationSearch(this.props.locationSearch);
+    }
   }
 
   componentWillUnmount(): void {
     this.abortController?.abort();
   }
+
+  private applyLocationSearch = (locationSearch?: string) => {
+    const search = (locationSearch ?? "").trim();
+    if (!search) {
+      // If user navigates to /collection with no query, clear URL-driven filters.
+      if (this.state.collectionNameFilter || this.state.searchQuery) {
+        this.setState({ collectionNameFilter: "", searchQuery: "", currentPage: 1 });
+      }
+      return;
+    }
+
+    const params = new URLSearchParams(search.startsWith("?") ? search : `?${search}`);
+    const name = (params.get("name") ?? params.get("filter") ?? "").trim();
+    const q = (params.get("q") ?? "").trim();
+
+    // Only update if changed to avoid render loops.
+    if (name !== this.state.collectionNameFilter || q !== this.state.searchQuery) {
+      this.setState({ collectionNameFilter: name, searchQuery: q, currentPage: 1 });
+    }
+  };
 
   /** Must match your domain Bouquet type (including required fields) */
   private normalizeBouquet = (b: any): Bouquet => ({
@@ -170,8 +202,18 @@ class BouquetCatalogController extends Component<{}, State> {
   };
 
   private getFilteredBouquets(): Bouquet[] {
-    const { bouquets, priceRange, selectedTypes, selectedSizes } = this.state;
+    const {
+      bouquets,
+      priceRange,
+      selectedTypes,
+      selectedSizes,
+      collectionNameFilter,
+      searchQuery,
+    } = this.state;
     const [min, max] = priceRange;
+
+    const collectionNeedle = collectionNameFilter.trim().toLowerCase();
+    const queryNeedle = searchQuery.trim().toLowerCase();
 
     return bouquets.filter((b) => {
       const priceOk = b.price >= min && b.price <= max;
@@ -179,7 +221,24 @@ class BouquetCatalogController extends Component<{}, State> {
         selectedTypes.length === 0 || selectedTypes.includes(b.type ?? "");
       const sizeOk =
         selectedSizes.length === 0 || selectedSizes.includes(b.size ?? "");
-      return priceOk && typeOk && sizeOk;
+
+      const collectionOk =
+        !collectionNeedle ||
+        (b.collectionName ?? "").trim().toLowerCase() === collectionNeedle;
+
+      const queryOk =
+        !queryNeedle ||
+        [
+          b.name,
+          b.description,
+          b.type,
+          b.size,
+          b.collectionName,
+        ]
+          .filter(isNonEmptyString)
+          .some((v) => v.toLowerCase().includes(queryNeedle));
+
+      return priceOk && typeOk && sizeOk && collectionOk && queryOk;
     });
   }
 

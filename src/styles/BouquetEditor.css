@@ -170,9 +170,7 @@
 
 /* Sticky filters on desktop */
 .editorFilters {
-  position: sticky;
-  top: 16px;
-  z-index: 5;
+  position: static;
 }
 
 .editorFilters__card {
