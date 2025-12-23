@@ -142,6 +142,7 @@ const Header: React.FC<HeaderProps> = ({
 
   const closeMobile = (opts?: { returnFocus?: boolean }) => {
     setMobileOpen(false);
+    setCollectionsOpen(false);
     if (opts?.returnFocus) {
       setTimeout(() => hamburgerButtonRef.current?.focus(), 0);
     }
@@ -356,14 +357,26 @@ const Header: React.FC<HeaderProps> = ({
                     to={item.path}
                     onClick={(e) => {
                       if (isCollections) {
-                        // Desktop/touch: first click opens dropdown, second click navigates.
-                        if (!mobileOpen && !collectionsOpen) {
-                          e.preventDefault();
-                          setCollectionsOpen(true);
-                          pulseCollectionsAnimate();
-                          return;
+                        // Desktop: first click opens dropdown, second click navigates.
+                        if (!mobileOpen) {
+                          if (!collectionsOpen) {
+                            e.preventDefault();
+                            setCollectionsOpen(true);
+                            pulseCollectionsAnimate();
+                            return;
+                          }
+                          setCollectionsOpen(false);
+                        } else {
+                          // Mobile: treat as an accordion toggle (avoid huge always-open list).
+                          if (!collectionsOpen) {
+                            e.preventDefault();
+                            setCollectionsOpen(true);
+                            pulseCollectionsAnimate(220);
+                            return;
+                          }
+                          // If already open, allow navigation to /collection
+                          setCollectionsOpen(false);
                         }
-                        setCollectionsOpen(false);
                       } else {
                         setCollectionsOpen(false);
                       }
@@ -386,7 +399,7 @@ const Header: React.FC<HeaderProps> = ({
                     )}
                   </NavLink>
 
-                  {isCollections && (
+                  {isCollections && (!mobileOpen || collectionsOpen) && (
                     <div className="dropdown" id="collections-dropdown" aria-label="Menu koleksi">
                       <div className="dropdown-header">
                         <h3>Koleksi Kami</h3>
