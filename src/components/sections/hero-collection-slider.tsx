@@ -18,6 +18,7 @@ import "swiper/css/pagination";
 import "swiper/css/effect-fade";
 import "swiper/css/parallax";
 import "../../styles/HeroCollectionSlider.css";
+import { STORE_PROFILE } from "../../config/store-profile";
 
 import { API_BASE } from "../../config/api";
 
@@ -54,7 +55,7 @@ const defaultContent: HeroSliderContent = {
       primaryCta: { label: "Shop Collection", href: "/collection" },
       secondaryCta: {
         label: "Order via WhatsApp",
-        href: "https://wa.me/6285161428911",
+        href: STORE_PROFILE.whatsapp.url,
       },
     },
     {
@@ -66,7 +67,7 @@ const defaultContent: HeroSliderContent = {
       primaryCta: { label: "Explore Bouquets", href: "/collection" },
       secondaryCta: {
         label: "Custom Request",
-        href: "https://wa.me/6285161428911",
+        href: STORE_PROFILE.whatsapp.url,
       },
     },
     {
@@ -78,7 +79,7 @@ const defaultContent: HeroSliderContent = {
       primaryCta: { label: "Browse Collection", href: "/collection" },
       secondaryCta: {
         label: "Contact Us",
-        href: "https://wa.me/6285161428911",
+        href: STORE_PROFILE.whatsapp.url,
       },
     },
   ],

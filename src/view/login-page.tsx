@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import "../styles/LoginPage.css";
+import { setSeo } from "../utils/seo";
 
 interface Props {
   username: string;
@@ -11,6 +12,15 @@ interface Props {
 }
 
 class LoginView extends Component<Props> {
+  componentDidMount(): void {
+    setSeo({
+      title: "Admin Login | Giftforyou.idn",
+      description: "Administrator login for Giftforyou.idn.",
+      path: "/login",
+      noIndex: true,
+    });
+  }
+
   render(): React.ReactNode {
     const { username, password, error, onChange, onSubmit, loading } =
       this.props;

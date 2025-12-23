@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "../../styles/HeroSliderEditorSection.css";
+import { STORE_PROFILE } from "../../config/store-profile";
 
 import { API_BASE } from "../../config/api";
 
@@ -52,7 +53,7 @@ const emptySlide = (): HeroSlide => ({
   primaryCta: { label: "Shop Collection", href: "/collection" },
   secondaryCta: {
     label: "Order via WhatsApp",
-    href: "https://wa.me/6285161428911",
+    href: STORE_PROFILE.whatsapp.url,
   },
 });
 

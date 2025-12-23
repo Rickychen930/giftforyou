@@ -3,6 +3,7 @@ import "../styles/BouquetCardEditComponent.css";
 import type { Bouquet } from "../models/domain/bouquet";
 
 import { API_BASE } from "../config/api";
+import { formatIDR } from "../utils/money";
 import {
   BOUQUET_SIZE_OPTIONS,
   type BouquetSize,
@@ -64,12 +65,7 @@ const buildPreviewUrl = (preview: string) => {
   return new URL(normalized, API_BASE).toString();
 };
 
-const formatPrice = (value: number) =>
-  new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(value);
+const formatPrice = formatIDR;
 
 const toNumber = (v: string) => {
   const n = Number(v);

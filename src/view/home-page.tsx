@@ -9,6 +9,7 @@ import OurCollectionSection from "../components/sections/our-collection-section"
 import StoreLocationSection from "../components/sections/store-location-section";
 
 import { API_BASE } from "../config/api";
+import { setSeo } from "../utils/seo";
 
 type LoadState = "idle" | "loading" | "success" | "error";
 
@@ -39,6 +40,13 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     const controller = new AbortController();
+
+    setSeo({
+      title: "Giftforyou.idn | Luxury Floral Boutique",
+      description:
+        "Luxury Floral Boutique — curated bouquets & collections. Order easily via WhatsApp.",
+      path: "/",
+    });
 
     const load = async () => {
       try {

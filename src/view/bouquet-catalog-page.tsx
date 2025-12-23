@@ -4,6 +4,7 @@ import "../styles/BouquetCatalogPage.css";
 import type { Bouquet } from "../models/domain/bouquet";
 import FilterPanel from "../components/filter-panel-component";
 import BouquetCard from "../components/bouquet-card-component";
+import { setSeo } from "../utils/seo";
 
 type Range = [number, number];
 
@@ -35,6 +36,38 @@ interface Props {
 }
 
 class BouquetCatalogView extends Component<Props> {
+  componentDidMount(): void {
+    this.applySeo();
+  }
+
+  componentDidUpdate(prevProps: Props): void {
+    if (
+      prevProps.selectedTypes !== this.props.selectedTypes ||
+      prevProps.selectedSizes !== this.props.selectedSizes ||
+      prevProps.priceRange !== this.props.priceRange ||
+      prevProps.sortBy !== this.props.sortBy
+    ) {
+      this.applySeo();
+    }
+  }
+
+  private applySeo(): void {
+    const selectedTypes = this.props.selectedTypes ?? [];
+    const selectedSizes = this.props.selectedSizes ?? [];
+
+    const filters: string[] = [];
+    if (selectedTypes.length) filters.push(selectedTypes.join(", "));
+    if (selectedSizes.length) filters.push(selectedSizes.join(", "));
+
+    const suffix = filters.length ? ` (${filters.join(" • ")})` : "";
+    setSeo({
+      title: `Bouquet Catalog${suffix} | Giftforyou.idn`,
+      description:
+        "Browse bouquets by type, size, and price — then order instantly via WhatsApp.",
+      path: "/collection",
+    });
+  }
+
   private renderPagination(totalItems: number): React.ReactNode {
     const { currentPage, itemsPerPage, onPageChange } = this.props;
 

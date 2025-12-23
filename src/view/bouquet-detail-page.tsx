@@ -2,17 +2,14 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import "../styles/BouquetDetailPage.css";
 import type { Bouquet } from "../models/domain/bouquet";
+import { setSeo } from "../utils/seo";
+import { STORE_PROFILE } from "../config/store-profile";
+import { formatIDR } from "../utils/money";
 
 import { API_BASE } from "../config/api"; // adjust path depending on folder depth
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
-const WA_NUMBER = "6285161428911";
 
-const formatPrice = (price: number) =>
-  new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(price);
+const formatPrice = formatIDR;
 
 const buildImageUrl = (image?: string) => {
   if (!image) return FALLBACK_IMAGE;
@@ -32,7 +29,7 @@ const buildWhatsAppLink = (b: Bouquet, detailUrl: string) => {
   ].filter(Boolean);
 
   const message = encodeURIComponent(lines.join("\n"));
-  return `https://wa.me/${WA_NUMBER}?text=${message}`;
+  return `${STORE_PROFILE.whatsapp.url}?text=${message}`;
 };
 
 interface Props {
@@ -43,6 +40,48 @@ interface Props {
 }
 
 class BouquetDetailPage extends Component<Props> {
+  componentDidMount(): void {
+    this.applySeo();
+  }
+
+  componentDidUpdate(prevProps: Props): void {
+    if (
+      prevProps.bouquet !== this.props.bouquet ||
+      prevProps.detailUrl !== this.props.detailUrl ||
+      prevProps.error !== this.props.error
+    ) {
+      this.applySeo();
+    }
+  }
+
+  private applySeo(): void {
+    const { bouquet } = this.props;
+    if (!bouquet) {
+      setSeo({
+        title: "Bouquet Details | Giftforyou.idn",
+        description: "View bouquet details and order via WhatsApp.",
+        path: window.location.pathname,
+      });
+      return;
+    }
+
+    const details = [bouquet.type, bouquet.size].filter(Boolean).join(" • ");
+    const price = Number.isFinite(bouquet.price)
+      ? formatPrice(bouquet.price)
+      : undefined;
+    const titleParts = [bouquet.name, details].filter(Boolean).join(" — ");
+
+    setSeo({
+      title: `${titleParts} | Giftforyou.idn`,
+      description:
+        `${bouquet.name}${details ? ` (${details})` : ""}` +
+        (price ? ` — ${price}.` : ".") +
+        " Order easily via WhatsApp.",
+      path: window.location.pathname,
+      ogImagePath: bouquet.image ? bouquet.image : undefined,
+    });
+  }
+
   render(): React.ReactNode {
     const { bouquet, loading, error, detailUrl } = this.props;
 

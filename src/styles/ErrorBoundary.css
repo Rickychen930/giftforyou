@@ -1,0 +1,79 @@
+@import "colors.css";
+
+.errorBoundary {
+  width: 100%;
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  background: linear-gradient(135deg, var(--neutral-0) 0%, var(--neutral-50) 100%);
+}
+
+.errorBoundary__card {
+  width: 100%;
+  max-width: 520px;
+  border-radius: 18px;
+  border: 1px solid var(--border-2);
+  background: var(--surface-1);
+  box-shadow: var(--shadow-2);
+  padding: 1.25rem 1.25rem 1.1rem;
+}
+
+.errorBoundary__title {
+  font-weight: 950;
+  letter-spacing: -0.02em;
+  color: var(--ink-900);
+  font-size: 1.1rem;
+  margin: 0 0 0.35rem;
+}
+
+.errorBoundary__text {
+  color: var(--ink-620);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  margin: 0 0 1rem;
+}
+
+.errorBoundary__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.errorBoundary__btn {
+  appearance: none;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 0.7rem 0.95rem;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.errorBoundary__btn--primary {
+  background: var(--brand-rose-500);
+  color: var(--neutral-0);
+  box-shadow: var(--brand-shadow);
+}
+
+.errorBoundary__btn--primary:hover {
+  background: var(--brand-wine-700);
+  box-shadow: var(--brand-shadow-hover);
+}
+
+.errorBoundary__btn--secondary {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--brand-wine-700);
+  border-color: rgba(0, 0, 0, 0.10);
+}
+
+.errorBoundary__btn--secondary:hover {
+  border-color: rgba(0, 0, 0, 0.14);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .errorBoundary__btn--primary:hover {
+    box-shadow: var(--brand-shadow);
+  }
+}

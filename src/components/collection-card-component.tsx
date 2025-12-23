@@ -2,6 +2,8 @@ import React, { useRef, useState, useEffect } from "react";
 import "../styles/CollectionCardComponent.css";
 
 import { API_BASE } from "../config/api";
+import { formatIDR } from "../utils/money";
+import { buildWhatsAppLinkEncoded } from "../utils/whatsapp";
 
 export interface BouquetCardProps {
   _id: string;
@@ -25,12 +27,7 @@ export interface CollectionCardProps {
 
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
 
-const formatPrice = (price: number) =>
-  new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(price);
+const formatPrice = formatIDR;
 
 const buildImageUrl = (image?: string) => {
   if (!image) return FALLBACK_IMAGE;
@@ -116,7 +113,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
         b.size ? ` ukuran ${b.size}` : ""
       }.`
     );
-    const waLink = `https://wa.me/6285161428911?text=${waMessage}`;
+    const waLink = buildWhatsAppLinkEncoded(waMessage);
 
     const imageUrl = buildImageUrl(b.image);
     const statusLabel = b.status === "ready" ? "Ready" : "Preorder";

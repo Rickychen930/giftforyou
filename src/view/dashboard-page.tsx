@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import type { Bouquet } from "../models/domain/bouquet";
 import "../styles/DashboardPage.css";
+import { setSeo } from "../utils/seo";
 
 import BouquetUploader from "../components/sections/dashboard-uploader-section";
 import BouquetEditorSection from "../components/sections/Bouquet-editor-section";
@@ -29,6 +30,32 @@ interface State {
 
 class DashboardView extends Component<Props, State> {
   state: State = { activeTab: "overview" };
+
+  componentDidMount(): void {
+    this.applySeo();
+  }
+
+  componentDidUpdate(prevProps: Props, prevState: State): void {
+    if (prevState.activeTab !== this.state.activeTab) {
+      this.applySeo();
+    }
+  }
+
+  private applySeo(): void {
+    const titleByTab: Record<ActiveTab, string> = {
+      overview: "Dashboard Overview",
+      upload: "Upload Bouquet",
+      edit: "Edit Bouquets",
+      hero: "Hero Slider",
+    };
+
+    setSeo({
+      title: `${titleByTab[this.state.activeTab]} | Giftforyou.idn Admin`,
+      description: "Giftforyou.idn admin dashboard.",
+      path: "/dashboard",
+      noIndex: true,
+    });
+  }
 
   private setActiveTab = (tab: ActiveTab) => {
     this.setState({ activeTab: tab });

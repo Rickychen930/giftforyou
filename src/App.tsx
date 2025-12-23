@@ -17,6 +17,8 @@ import BouquetCatalogRoute from "./view/bouquet-catalog-route";
 import LoginController from "./controllers/login-page-controller";
 import DashboardController from "./controllers/dashboard-page-controller";
 import BouquetDetailController from "./controllers/bouquet-detail-controller";
+import ErrorBoundary from "./components/error-boundary";
+import ScrollToTop from "./components/scroll-to-top";
 
 const isLoggedIn = (): boolean => {
   return Boolean(localStorage.getItem("authToken"));
@@ -69,7 +71,10 @@ const AppLayout: React.FC = () => {
 const App: React.FC = () => {
   return (
     <Router>
-      <AppLayout />
+      <ErrorBoundary>
+        <ScrollToTop />
+        <AppLayout />
+      </ErrorBoundary>
     </Router>
   );
 };

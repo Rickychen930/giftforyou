@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import "../styles/BouquetCardComponent.css";
 
 import { API_BASE } from "../config/api"; // adjust path depending on folder depth
+import { formatIDR } from "../utils/money";
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
 
 // Plain props untuk komponen UI
@@ -31,12 +32,7 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
   const statusClass =
     status === "ready" ? "bouquet-status ready" : "bouquet-status preorder";
 
-  const formatPrice = (value: number) =>
-    new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(value);
+  const formatPrice = formatIDR;
 
   const imageUrl = image
     ? image.startsWith("http")
