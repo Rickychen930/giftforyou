@@ -163,7 +163,7 @@
 /* ---------- layout ---------- */
 .editorLayout {
   display: grid;
-  grid-template-columns: 360px 1fr;
+  grid-template-columns: 1fr;
   gap: 1rem;
   align-items: start;
 }
@@ -171,7 +171,8 @@
 /* Sticky filters on desktop */
 .editorFilters {
   position: sticky;
-  top: 110px;
+  top: 16px;
+  z-index: 5;
 }
 
 .editorFilters__card {

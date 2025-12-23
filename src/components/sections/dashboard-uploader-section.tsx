@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import "../../styles/DashboardUploaderSection.css";
+import { BOUQUET_SIZE_OPTIONS } from "../../constants/bouquet-constants";
 
 interface Props {
   onUpload: (formData: FormData) => Promise<boolean>;
@@ -277,12 +278,11 @@ class BouquetUploader extends Component<Props, State> {
                 disabled={submitting}
                 required
               >
-                <option value="Extra-Small">Extra small</option>
-                <option value="Small">Small</option>
-                <option value="Medium">Medium</option>
-                <option value="Large">Large</option>
-                <option value="Extra-Large">Extra large</option>
-                <option value="Jumbo">Jumbo</option>
+                {BOUQUET_SIZE_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
               </select>
             </label>
 

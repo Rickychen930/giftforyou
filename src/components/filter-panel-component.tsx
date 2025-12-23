@@ -2,6 +2,7 @@ import React from "react";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 import "../styles/FilterComponentPanelComponent.css";
+import { BOUQUET_SIZES } from "../constants/bouquet-constants";
 
 type Range = [number, number];
 
@@ -103,93 +104,84 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
         <p className="filterPanel__hint">Refine by price, type, and size.</p>
       </header>
 
-      {/* Price */}
-      <section className="fpGroup" aria-label="Price range filter">
-        <div className="fpGroup__head">
-          <h4 className="fpGroup__title">Price</h4>
-        </div>
-
-        <div className="fpPrice">
-          <div className="fpPrice__values" aria-label="Selected price range">
-            <span className="fpPrice__value">{formatRp(priceRange[0])}</span>
-            <span className="fpPrice__value">{formatRp(priceRange[1])}</span>
+      <div className="filterPanel__body">
+        {/* Price */}
+        <section className="fpGroup" aria-label="Price range filter">
+          <div className="fpGroup__head">
+            <h4 className="fpGroup__title">Price</h4>
           </div>
 
-          <div className="fpSlider">
-            <Slider
-              range
-              min={0}
-              max={1_000_000}
-              step={50_000}
-              value={priceRange}
-              onChange={handlePriceChange}
-              pushable={100_000}
-              allowCross={false}
-              trackStyle={[{ backgroundColor: "var(--fp-brand)" }]}
-              railStyle={{ backgroundColor: "rgba(0,0,0,0.10)" }}
-              handleStyle={[
-                {
-                  borderColor: "var(--fp-border-active)",
-                  backgroundColor: "#fff",
-                  boxShadow: "var(--fp-focus-ring)",
-                },
-                {
-                  borderColor: "var(--fp-border-active)",
-                  backgroundColor: "#fff",
-                  boxShadow: "var(--fp-focus-ring)",
-                },
-              ]}
-            />
+          <div className="fpPrice">
+            <div className="fpPrice__values" aria-label="Selected price range">
+              <span className="fpPrice__value">{formatRp(priceRange[0])}</span>
+              <span className="fpPrice__value">{formatRp(priceRange[1])}</span>
+            </div>
+
+            <div className="fpSlider">
+              <Slider
+                range
+                min={0}
+                max={1_000_000}
+                step={50_000}
+                value={priceRange}
+                onChange={handlePriceChange}
+                pushable={100_000}
+                allowCross={false}
+                trackStyle={[{ backgroundColor: "var(--fp-brand)" }]}
+                railStyle={{ backgroundColor: "rgba(0,0,0,0.10)" }}
+                handleStyle={[
+                  {
+                    borderColor: "var(--fp-border-active)",
+                    backgroundColor: "#fff",
+                    boxShadow: "var(--fp-focus-ring)",
+                  },
+                  {
+                    borderColor: "var(--fp-border-active)",
+                    backgroundColor: "#fff",
+                    boxShadow: "var(--fp-focus-ring)",
+                  },
+                ]}
+              />
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Type */}
-      <FilterGroup
-        title="Type"
-        options={allTypes.length ? allTypes : ["Orchid", "Mixed"]}
-        selected={selectedTypes}
-        k="selectedTypes"
-      />
+        {/* Type */}
+        <FilterGroup
+          title="Type"
+          options={allTypes.length ? allTypes : ["Orchid", "Mixed"]}
+          selected={selectedTypes}
+          k="selectedTypes"
+        />
 
-      {/* Size */}
-      <FilterGroup
-        title="Size"
-        options={
-          allSizes.length
-            ? allSizes
-            : [
-                "Extra-Small",
-                "Small",
-                "Medium",
-                "Large",
-                "Extra-Large",
-                "Jumbo",
-              ]
-        }
-        selected={selectedSizes}
-        k="selectedSizes"
-      />
+        {/* Size */}
+        <FilterGroup
+          title="Size"
+          options={allSizes.length ? allSizes : [...BOUQUET_SIZES]}
+          selected={selectedSizes}
+          k="selectedSizes"
+        />
 
-      {/* Sort */}
-      <section className="fpGroup" aria-label="Sort options">
-        <div className="fpGroup__head">
-          <h4 className="fpGroup__title">Sort</h4>
-        </div>
+        {/* Sort */}
+        <section className="fpGroup" aria-label="Sort options">
+          <div className="fpGroup__head">
+            <h4 className="fpGroup__title">Sort</h4>
+          </div>
 
-        <div className="fpChips">
-          {sortOptions.map((opt) => (
-            <button
-              type="button"
-              key={opt.value}
-              className={`fpChip ${sortBy === opt.value ? "is-active" : ""}`}
-              onClick={() => onSortChange(opt.value)}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </section>
+          <div className="fpChips">
+            {sortOptions.map((opt) => (
+              <button
+                type="button"
+                key={opt.value}
+                className={`fpChip ${sortBy === opt.value ? "is-active" : ""}`}
+                onClick={() => onSortChange(opt.value)}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </section>
+      </div>
     </div>
   );
 };

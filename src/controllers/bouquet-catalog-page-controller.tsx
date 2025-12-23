@@ -3,6 +3,7 @@ import type { Bouquet } from "../models/domain/bouquet";
 import BouquetCatalogView from "../view/bouquet-catalog-page";
 
 import { API_BASE } from "../config/api";
+import { getBouquetSizeFilterOptions } from "../constants/bouquet-constants";
 
 type Range = [number, number];
 
@@ -209,26 +210,15 @@ class BouquetCatalogController extends Component<{}, State> {
       new Set(this.state.bouquets.map((b) => b.type).filter(isNonEmptyString))
     );
 
-    const allSizes: string[] = Array.from(
-      new Set(this.state.bouquets.map((b) => b.size).filter(isNonEmptyString))
-    );
+        const allSizes: string[] = getBouquetSizeFilterOptions(
+          this.state.bouquets.map((b) => b.size)
+        );
 
     return (
       <BouquetCatalogView
         bouquets={sorted}
         allTypes={allTypes.length ? allTypes : ["Orchid", "Mixed"]}
-        allSizes={
-          allSizes.length
-            ? allSizes
-            : [
-                "Extra-Small",
-                "Small",
-                "Medium",
-                "Large",
-                "Extra-Large",
-                "Jumbo",
-              ]
-        }
+            allSizes={allSizes}
         priceRange={this.state.priceRange}
         selectedTypes={this.state.selectedTypes}
         selectedSizes={this.state.selectedSizes}

@@ -3,6 +3,10 @@ import "../styles/BouquetCardEditComponent.css";
 import type { Bouquet } from "../models/domain/bouquet";
 
 import { API_BASE } from "../config/api";
+import {
+  BOUQUET_SIZE_OPTIONS,
+  type BouquetSize,
+} from "../constants/bouquet-constants";
 
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
 
@@ -13,13 +17,6 @@ interface Props {
 }
 
 type BouquetStatus = "ready" | "preorder";
-type BouquetSize =
-  | "Extra-Small"
-  | "Small"
-  | "Medium"
-  | "Large"
-  | "Extra-Large"
-  | "Jumbo";
 
 type FormState = {
   _id: string;
@@ -46,14 +43,7 @@ const TYPE_OPTIONS: { label: string; value: string }[] = [
   { label: "Basket", value: "basket" },
 ];
 
-const SIZE_OPTIONS: { label: string; value: BouquetSize }[] = [
-  { label: "Extra small", value: "Extra-Small" },
-  { label: "Small", value: "Small" },
-  { label: "Medium", value: "Medium" },
-  { label: "Large", value: "Large" },
-  { label: "Extra large", value: "Extra-Large" },
-  { label: "Jumbo", value: "Jumbo" },
-];
+
 
 const buildPreviewUrl = (preview: string) => {
   if (!preview) return "";
@@ -340,7 +330,7 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
           <label className="becField">
             <span className="becLabel">Size</span>
             <select name="size" value={form.size} onChange={handleSelectChange}>
-              {SIZE_OPTIONS.map((s) => (
+              {BOUQUET_SIZE_OPTIONS.map((s) => (
                 <option key={s.value} value={s.value}>
                   {s.label}
                 </option>

@@ -51,6 +51,8 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
           src={imageUrl}
           alt={`Bouquet: ${name}`}
           className="bouquet-image"
+          loading="lazy"
+          decoding="async"
           onError={(e) => {
             e.currentTarget.onerror = null;
             e.currentTarget.src = FALLBACK_IMAGE;
@@ -67,7 +69,7 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
         <div className="bouquet-footer">
           <p className="bouquet-price">{formatPrice(price)}</p>
           <Link to={`/bouquet/${_id}`} className="bouquet-button">
-            More Detail
+            View details
           </Link>
         </div>
       </div>

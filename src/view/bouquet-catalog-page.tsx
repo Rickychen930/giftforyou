@@ -129,6 +129,14 @@ class BouquetCatalogView extends Component<Props> {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const pageItems = bouquets.slice(startIndex, startIndex + itemsPerPage);
 
+    const DEFAULT_PRICE: Range = [0, 1_000_000];
+    const hasActiveFilters =
+      (selectedTypes?.length ?? 0) > 0 ||
+      (selectedSizes?.length ?? 0) > 0 ||
+      Boolean(sortBy) ||
+      priceRange[0] !== DEFAULT_PRICE[0] ||
+      priceRange[1] !== DEFAULT_PRICE[1];
+
     return (
       <section className="catalogPage" aria-labelledby="catalog-title">
         <header className="catalogHeader">
@@ -144,6 +152,7 @@ class BouquetCatalogView extends Component<Props> {
             <button
               className="catalogSummary__clear"
               onClick={this.props.onClearAll}
+              disabled={!hasActiveFilters}
             >
               Clear all filters
             </button>
@@ -152,7 +161,7 @@ class BouquetCatalogView extends Component<Props> {
 
         <div className="catalogLayout">
           <aside className="catalogFilters" aria-label="Filters">
-            <details className="catalogFilters__mobile" open>
+            <details className="catalogFilters__mobile">
               <summary className="catalogFilters__summary">
                 Filters & Sort
               </summary>

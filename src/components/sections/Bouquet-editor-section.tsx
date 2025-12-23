@@ -3,6 +3,7 @@ import type { Bouquet } from "../../models/domain/bouquet";
 import FilterPanel from "../filter-panel-component";
 import "../../styles/BouquetEditor.css";
 import BouquetEditor from "../bouquet-card-edit-component";
+import { getBouquetSizeFilterOptions } from "../../constants/bouquet-constants";
 
 type Range = [number, number];
 type SortBy = "" | "price-asc" | "price-desc" | "name-asc" | "name-desc";
@@ -204,9 +205,7 @@ export default class BouquetEditorSection extends Component<Props, State> {
     const allTypes = uniq(
       bouquets.map((b) => b.type).filter(isNonEmptyString)
     ).sort();
-    const allSizes = uniq(
-      bouquets.map((b) => b.size).filter(isNonEmptyString)
-    ).sort();
+    const allSizes = getBouquetSizeFilterOptions(bouquets.map((b) => b.size));
 
     const collections =
       this.props.collections?.length > 0
