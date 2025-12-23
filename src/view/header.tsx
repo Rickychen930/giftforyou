@@ -6,7 +6,6 @@ import { getCollections } from "../services/collection.service";
 import { API_BASE } from "../config/api";
 import {
   SearchIcon,
-  CartIcon,
   CloseIcon,
   ChevronDownIcon,
 } from "../components/icons/UIIcons";
@@ -21,13 +20,11 @@ type NavItem = {
 interface HeaderProps {
   navLinks: NavItem[];
   logoSrc?: string;
-  cartCount?: number;
 }
 
 const Header: React.FC<HeaderProps> = ({
   navLinks,
   logoSrc = BRAND_INFO.logoPath,
-  cartCount = 0,
 }) => {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -448,19 +445,6 @@ const Header: React.FC<HeaderProps> = ({
           >
             <SearchIcon />
           </button>
-
-          {/* Cart */}
-          <Link
-            to="/cart"
-            className="icon-btn cart-btn"
-            aria-label={`View cart${
-              cartCount > 0 ? ` (${cartCount} items)` : ""
-            }`}
-            onClick={() => closeMobile()}
-          >
-            <CartIcon />
-            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
-          </Link>
 
           {/* Mobile Menu Toggle */}
           <button
