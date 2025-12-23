@@ -36,10 +36,14 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 1320px;
+  max-width: var(--max);
   margin: 0 auto;
-  padding: 2.5rem clamp(1rem, 4vw, 4rem);
+  padding: clamp(2rem, 4vw, 2.75rem) clamp(1rem, 3vw, 1.5rem);
   box-sizing: border-box;
+
+  /* Fallbacks first (Safari/older browsers), then progressive enhancement */
+  background: var(--ft-surface);
+  border-top: 1px solid var(--ft-border);
 
   background: color-mix(in srgb, var(--ft-surface) 88%, transparent);
   border-top: 1px solid color-mix(in srgb, var(--ft-border) 70%, transparent);
@@ -49,13 +53,22 @@
 
   box-shadow:
     0 -1px 0 rgba(0,0,0,0.02),
-    0 16px 48px rgba(0,0,0,0.07);
+    var(--ft-shadow);
 
   display: flex;
   flex-direction: column;
   gap: 2rem;
   overflow-x: hidden;
   overflow-y: visible;
+}
+
+/* Graceful fallback when backdrop-filter isn't supported */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .footer__container {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--ft-surface);
+  }
 }
 
 /* =========================================================
@@ -88,7 +101,8 @@
   font-size: 0.95rem;
   color: var(--ft-text-strong);
   margin: 0 0 0.25rem 0;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   line-height: 1.2;
 }
 
@@ -126,11 +140,12 @@
 
 .footer__brandName {
   font-weight: 950;
-  letter-spacing: 0.06em;
+  letter-spacing: -0.01em;
   color: var(--ft-text-strong);
   font-size: 1.05rem;
   line-height: 1.2;
   margin-bottom: 0.25rem;
+  font-family: "Playfair Display", Georgia, serif;
   word-break: break-word;
   overflow-wrap: break-word;
 }
@@ -283,8 +298,8 @@
   justify-content: space-between;
   gap: 1.5rem;
   padding: 1.25rem 0;
-  border-top: 1px solid rgba(0,0,0,0.06);
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  border-top: 1px solid var(--ft-divider);
+  border-bottom: 1px solid var(--ft-divider);
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
@@ -323,6 +338,7 @@
   height: 40px;
   border-radius: 50%;
   border: 1px solid var(--ft-btn-border);
+  background: var(--ft-surface-btn);
   background: color-mix(in srgb, var(--ft-surface-btn) 88%, transparent);
   color: var(--ft-text-btn);
   text-decoration: none;
@@ -394,6 +410,7 @@
   padding: 0.6rem 0.7rem;
   border: 1px solid var(--ft-btn-border);
   border-radius: 8px;
+  background: var(--ft-surface-btn);
   background: color-mix(in srgb, var(--ft-surface-btn) 92%, transparent);
   color: var(--ft-text);
   font-size: 0.8rem;
@@ -537,7 +554,15 @@
   box-shadow: 0 6px 18px rgba(212, 140, 156, 0.32);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 100;
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+.footer__backToTop.footer__backToTop--visible {
   opacity: 0.95;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 .footer__backToTop:hover {
@@ -564,17 +589,6 @@
   }
 }
 
-@media (min-width: 1024px) {
-  .footer__backToTop:hover {
-    transform: translateY(-5px) scale(1.08);
-    box-shadow: 0 12px 28px rgba(212, 140, 156, 0.48);
-  }
-
-  .footer__backToTop:active {
-    transform: translateY(-2px) scale(1.02);
-  }
-}
-
 .footer__backToTopIcon {
   width: 24px;
   height: 24px;
@@ -587,8 +601,8 @@
 /* Ultrawide Displays (2000px+) */
 @media (min-width: 2000px) {
   .footer__container {
-    max-width: 1720px;
-    padding: 3.5rem clamp(4rem, 6vw, 6rem);
+    max-width: var(--max);
+    padding: clamp(2.25rem, 4vw, 3rem) clamp(1rem, 3vw, 1.5rem);
   }
 
   .footer__main {
@@ -660,8 +674,8 @@
 /* Large Desktops & iMacs (1600px+) */
 @media (min-width: 1600px) {
   .footer__container {
-    max-width: 1480px;
-    padding: 3rem clamp(3rem, 5vw, 5rem);
+    max-width: var(--max);
+    padding: clamp(2.25rem, 4vw, 3rem) clamp(1rem, 3vw, 1.5rem);
   }
 
   .footer__main {
@@ -733,8 +747,8 @@
 /* Desktop (1280px - 1599px) - Default optimal view */
 @media (min-width: 1280px) and (max-width: 1599px) {
   .footer__container {
-    max-width: 1320px;
-    padding: 2.5rem clamp(2rem, 4vw, 3.5rem);
+    max-width: var(--max);
+    padding: clamp(2rem, 4vw, 2.75rem) clamp(1rem, 3vw, 1.5rem);
   }
 
   .footer__main {
@@ -749,6 +763,18 @@
   .footer__newsletterCompact {
     flex: 0 1 360px;
     max-width: 360px;
+  }
+}
+
+/* Avoid sticky hover transforms on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .footer__logo:hover,
+  .footer__link:hover,
+  .footer__contactItem:hover,
+  .footer__socialIcon:hover,
+  .footer__newsletterBtn:hover,
+  .footer__backToTop:hover {
+    transform: none;
   }
 }
 
@@ -1054,6 +1080,10 @@
   .footer__backToTop,
   .footer__logo {
     transition: none;
+  }
+
+  .footer__backToTop {
+    transform: none;
   }
 }
 

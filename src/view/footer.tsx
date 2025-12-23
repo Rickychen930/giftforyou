@@ -1,5 +1,5 @@
 // src/view/footer.tsx - Optimized Footer Component
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   BRAND_INFO,
   CONTACT_INFO,
@@ -19,9 +19,34 @@ import "../styles/Footer.css";
 const Footer: React.FC = () => {
   const year = new Date().getFullYear();
   const [email, setEmail] = useState("");
+  const [showBackToTop, setShowBackToTop] = useState(false);
   const [subscribeStatus, setSubscribeStatus] = useState<
     "idle" | "success" | "error"
   >("idle");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let rafId = 0;
+
+    const update = () => {
+      rafId = 0;
+      const y = window.scrollY || document.documentElement.scrollTop || 0;
+      setShowBackToTop(y > 420);
+    };
+
+    const onScroll = () => {
+      if (rafId) return;
+      rafId = window.requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafId) window.cancelAnimationFrame(rafId);
+    };
+  }, []);
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +61,12 @@ const Footer: React.FC = () => {
   };
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    window.scrollTo({ top: 0, behavior: prefersReducedMotion ? "auto" : "smooth" });
   };
 
   return (
@@ -141,12 +171,19 @@ const Footer: React.FC = () => {
               </button>
             </form>
             {subscribeStatus === "success" && (
-              <p className="footer__newsletterMessage footer__newsletterMessage--success">
+              <p
+                className="footer__newsletterMessage footer__newsletterMessage--success"
+                role="status"
+                aria-live="polite"
+              >
                 Berhasil berlangganan!
               </p>
             )}
             {subscribeStatus === "error" && (
-              <p className="footer__newsletterMessage footer__newsletterMessage--error">
+              <p
+                className="footer__newsletterMessage footer__newsletterMessage--error"
+                role="alert"
+              >
                 Email tidak valid
               </p>
             )}
@@ -164,7 +201,7 @@ const Footer: React.FC = () => {
       {/* Back to Top Button */}
       <button
         onClick={scrollToTop}
-        className="footer__backToTop"
+        className={`footer__backToTop ${showBackToTop ? "footer__backToTop--visible" : ""}`}
         aria-label="Kembali ke atas"
         title="Kembali ke atas"
       >
