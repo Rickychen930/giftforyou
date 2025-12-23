@@ -642,6 +642,18 @@
   transform: translateY(-2px);
 }
 
+.nav-link:focus-visible,
+.dropdown-link:focus-visible,
+.icon-btn:focus-visible,
+.hamburger:focus-visible,
+.search-close:focus-visible,
+.search-submit:focus-visible,
+.suggestion-tag:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(212, 140, 156, 0.18);
+  border-radius: 12px;
+}
+
 /* =========================
    Responsive Design
 ========================= */

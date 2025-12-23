@@ -64,6 +64,29 @@
   background: var(--up-surface-soft);
 }
 
+.uploader__toggles {
+  display: flex;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  padding: 0.7rem 0.75rem;
+  border: 1px solid var(--up-border-strong);
+  border-radius: 12px;
+  background: var(--up-surface-soft);
+}
+
+.uploader__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-weight: 850;
+}
+
+.uploader__toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--up-brand-1);
+}
+
 .uploader__field input:focus,
 .uploader__field textarea:focus,
 .uploader__field select:focus {
@@ -87,7 +110,8 @@
 
 .uploader__previewImg {
   width: 100%;
-  max-height: 320px;
+  aspect-ratio: 3 / 4;
+  max-height: 360px;
   object-fit: cover;
   border-radius: 12px;
   display: block;

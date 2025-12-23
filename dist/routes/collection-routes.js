@@ -1,18 +1,35 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 // src/routes/collection-routes.ts
 const express_1 = require("express");
 const mongoose_1 = require("mongoose");
+const mongoose_2 = __importDefault(require("mongoose"));
 const collection_model_1 = require("../models/collection-model");
 const bouquet_model_1 = require("../models/bouquet-model");
+const collections_1 = require("../mock-data/collections");
 const router = (0, express_1.Router)();
 const normalizeString = (v) => (typeof v === "string" ? v.trim() : "");
 /**
+ * Check if MongoDB is connected
+ */
+const isMongoConnected = () => {
+    return mongoose_2.default.connection.readyState === 1;
+};
+/**
  * GET /api/collections
  * Returns all collections with populated bouquets
+ * Falls back to mock data if MongoDB is not connected
  */
 router.get("/", async (_req, res) => {
     try {
+        // If MongoDB is not connected, return mock data
+        if (!isMongoConnected()) {
+            console.log("⚠️  MongoDB not connected, returning mock collections data");
+            return res.status(200).json(collections_1.mockCollections);
+        }
         const collections = await collection_model_1.CollectionModel.find()
             .sort({ createdAt: -1 })
             .populate("bouquets")
@@ -22,7 +39,9 @@ router.get("/", async (_req, res) => {
     }
     catch (err) {
         console.error("Failed to fetch collections:", err);
-        res.status(500).json({ error: "Failed to fetch collections" });
+        // Fallback to mock data on error
+        console.log("⚠️  Error fetching collections, returning mock data");
+        res.status(200).json(collections_1.mockCollections);
     }
 });
 /**
@@ -49,9 +68,7 @@ router.post("/", async (req, res) => {
             description,
             bouquets: [],
         });
-        res
-            .status(201)
-            .json({
+        res.status(201).json({
             message: "Collection created successfully",
             collection: created,
         });
@@ -123,9 +140,7 @@ router.delete("/:id/bouquets/:bouquetId", async (req, res) => {
             res.status(404).json({ error: "Collection not found" });
             return;
         }
-        res
-            .status(200)
-            .json({
+        res.status(200).json({
             message: "Bouquet removed from collection",
             collection: updated,
         });

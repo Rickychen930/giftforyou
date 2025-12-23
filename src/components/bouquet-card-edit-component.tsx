@@ -13,26 +13,32 @@ interface Props {
 }
 
 type BouquetStatus = "ready" | "preorder";
-type BouquetType =
-  | "hand-tied"
-  | "vase-arrangement"
-  | "wreath"
-  | "basket"
-  | "bouquet";
-type BouquetSize = "Small" | "Medium" | "Large" | "Extra-Large";
+type BouquetSize =
+  | "Extra-Small"
+  | "Small"
+  | "Medium"
+  | "Large"
+  | "Extra-Large"
+  | "Jumbo";
 
 type FormState = {
   _id: string;
   name: string;
   description: string;
   price: number;
-  type: BouquetType;
+  type: string;
   size: BouquetSize;
   status: BouquetStatus;
   collectionName: string;
+  quantity: number;
+  occasionsText: string;
+  flowersText: string;
+  isNewEdition: boolean;
+  isFeatured: boolean;
+  careInstructions: string;
 };
 
-const TYPE_OPTIONS: { label: string; value: BouquetType }[] = [
+const TYPE_OPTIONS: { label: string; value: string }[] = [
   { label: "Bouquet", value: "bouquet" },
   { label: "Hand-tied", value: "hand-tied" },
   { label: "Vase arrangement", value: "vase-arrangement" },
@@ -41,10 +47,12 @@ const TYPE_OPTIONS: { label: string; value: BouquetType }[] = [
 ];
 
 const SIZE_OPTIONS: { label: string; value: BouquetSize }[] = [
+  { label: "Extra small", value: "Extra-Small" },
   { label: "Small", value: "Small" },
   { label: "Medium", value: "Medium" },
   { label: "Large", value: "Large" },
   { label: "Extra large", value: "Extra-Large" },
+  { label: "Jumbo", value: "Jumbo" },
 ];
 
 const buildPreviewUrl = (preview: string) => {
@@ -78,6 +86,20 @@ const toNumber = (v: string) => {
   return Number.isFinite(n) ? n : 0;
 };
 
+const joinCsv = (list: unknown): string => {
+  if (!Array.isArray(list)) return "";
+  return list
+    .map((v) => (typeof v === "string" ? v.trim() : ""))
+    .filter(Boolean)
+    .join(", ");
+};
+
+const toNonNegativeInt = (v: string) => {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.trunc(n));
+};
+
 const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
   const [saving, setSaving] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -88,11 +110,17 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
     name: bouquet.name ?? "",
     description: bouquet.description ?? "",
     price: Number.isFinite(bouquet.price) ? bouquet.price : 0,
-    type: (bouquet.type as BouquetType) || "bouquet",
-    // IMPORTANT: your DB enum is Title Case (Small/Medium/...)
+    type: bouquet.type ?? "",
+    // IMPORTANT: your DB enum is Title Case (Extra-Small..Jumbo)
     size: (bouquet.size as BouquetSize) || "Medium",
     status: bouquet.status === "preorder" ? "preorder" : "ready",
     collectionName: bouquet.collectionName ?? "",
+    quantity: typeof bouquet.quantity === "number" ? bouquet.quantity : 0,
+    occasionsText: joinCsv(bouquet.occasions),
+    flowersText: joinCsv(bouquet.flowers),
+    isNewEdition: Boolean(bouquet.isNewEdition),
+    isFeatured: Boolean(bouquet.isFeatured),
+    careInstructions: bouquet.careInstructions ?? "",
   });
 
   useEffect(() => {
@@ -101,10 +129,16 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
       name: bouquet.name ?? "",
       description: bouquet.description ?? "",
       price: Number.isFinite(bouquet.price) ? bouquet.price : 0,
-      type: (bouquet.type as BouquetType) || "bouquet",
+      type: bouquet.type ?? "",
       size: (bouquet.size as BouquetSize) || "Medium",
       status: bouquet.status === "preorder" ? "preorder" : "ready",
       collectionName: bouquet.collectionName ?? "",
+      quantity: typeof bouquet.quantity === "number" ? bouquet.quantity : 0,
+      occasionsText: joinCsv(bouquet.occasions),
+      flowersText: joinCsv(bouquet.flowers),
+      isNewEdition: Boolean(bouquet.isNewEdition),
+      isFeatured: Boolean(bouquet.isFeatured),
+      careInstructions: bouquet.careInstructions ?? "",
     });
 
     setFile(null);
@@ -125,10 +159,12 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
     if (nm.length < 2) return "Name must be at least 2 characters.";
     if (!Number.isFinite(form.price) || form.price <= 0)
       return "Price must be greater than 0.";
+    if (!Number.isFinite(form.quantity) || form.quantity < 0)
+      return "Quantity must be 0 or higher.";
     if (form.status !== "ready" && form.status !== "preorder")
       return "Invalid status.";
     return null;
-  }, [form.name, form.price, form.status]);
+  }, [form.name, form.price, form.quantity, form.status]);
 
   const canSave = !saving && !validationError;
 
@@ -138,13 +174,23 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
     const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: name === "price" ? toNumber(value) : value,
+      [name]:
+        name === "price"
+          ? toNumber(value)
+          : name === "quantity"
+            ? toNonNegativeInt(value)
+            : value,
     }));
   };
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value } as FormState));
+  };
+
+  const handleToggleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setForm((prev) => ({ ...prev, [name]: checked } as FormState));
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -161,10 +207,16 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
     fd.append("name", form.name.trim());
     fd.append("description", form.description ?? "");
     fd.append("price", String(form.price));
-    fd.append("type", form.type);
+    fd.append("type", (form.type ?? "").trim());
     fd.append("size", form.size);
     fd.append("status", form.status);
     fd.append("collectionName", (form.collectionName ?? "").trim());
+    fd.append("quantity", String(form.quantity ?? 0));
+    fd.append("occasions", form.occasionsText ?? "");
+    fd.append("flowers", form.flowersText ?? "");
+    fd.append("isNewEdition", String(Boolean(form.isNewEdition)));
+    fd.append("isFeatured", String(Boolean(form.isFeatured)));
+    fd.append("careInstructions", form.careInstructions ?? "");
 
     try {
       setSaving(true);
@@ -256,14 +308,33 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
           </label>
 
           <label className="becField">
+            <span className="becLabel">Quantity</span>
+            <input
+              name="quantity"
+              type="number"
+              min={0}
+              step={1}
+              value={form.quantity}
+              onChange={handleTextChange}
+              placeholder="0"
+            />
+          </label>
+
+          <label className="becField">
             <span className="becLabel">Type</span>
-            <select name="type" value={form.type} onChange={handleSelectChange}>
+            <input
+              name="type"
+              value={form.type}
+              onChange={handleTextChange}
+              placeholder="e.g., bouquet"
+              list="bec-type-options"
+              autoComplete="off"
+            />
+            <datalist id="bec-type-options">
               {TYPE_OPTIONS.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
+                <option key={t.value} value={t.value} />
               ))}
-            </select>
+            </datalist>
           </label>
 
           <label className="becField">
@@ -305,6 +376,31 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
             </select>
           </label>
 
+          <div className="becField becField--full">
+            <span className="becLabel">Flags</span>
+            <div className="becToggles" role="group" aria-label="Bouquet flags">
+              <label className="becToggle">
+                <input
+                  type="checkbox"
+                  name="isNewEdition"
+                  checked={form.isNewEdition}
+                  onChange={handleToggleChange}
+                />
+                <span>New edition</span>
+              </label>
+
+              <label className="becToggle">
+                <input
+                  type="checkbox"
+                  name="isFeatured"
+                  checked={form.isFeatured}
+                  onChange={handleToggleChange}
+                />
+                <span>Featured</span>
+              </label>
+            </div>
+          </div>
+
           <label className="becField becField--full">
             <span className="becLabel">Description</span>
             <textarea
@@ -313,6 +409,41 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
               onChange={handleTextChange}
               rows={3}
               placeholder="Short bouquet description"
+            />
+          </label>
+
+          <label className="becField becField--full">
+            <span className="becLabel">Occasions</span>
+            <input
+              name="occasionsText"
+              value={form.occasionsText}
+              onChange={handleTextChange}
+              placeholder="e.g., Birthday, Anniversary, Graduation"
+              autoComplete="off"
+            />
+            <span className="becHint">Separate values with commas.</span>
+          </label>
+
+          <label className="becField becField--full">
+            <span className="becLabel">Flowers</span>
+            <input
+              name="flowersText"
+              value={form.flowersText}
+              onChange={handleTextChange}
+              placeholder="e.g., Orchid, Rose, Lily"
+              autoComplete="off"
+            />
+            <span className="becHint">Separate values with commas.</span>
+          </label>
+
+          <label className="becField becField--full">
+            <span className="becLabel">Care instructions</span>
+            <textarea
+              name="careInstructions"
+              value={form.careInstructions}
+              onChange={handleTextChange}
+              rows={3}
+              placeholder="Optional care tips for the customer"
             />
           </label>
 

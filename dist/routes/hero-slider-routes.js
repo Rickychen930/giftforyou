@@ -9,8 +9,16 @@ const fs_1 = __importDefault(require("fs"));
 const multer_1 = __importDefault(require("multer"));
 const sharp_1 = __importDefault(require("sharp"));
 const heic_convert_1 = __importDefault(require("heic-convert"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const hero_slider_controller_1 = require("../controllers/hero-slider-controller");
+const collections_1 = require("../mock-data/collections");
 const router = (0, express_1.Router)();
+/**
+ * Check if MongoDB is connected
+ */
+const isMongoConnected = () => {
+    return mongoose_1.default.connection.readyState === 1;
+};
 const UPLOAD_DIR = path_1.default.resolve(process.cwd(), "uploads", "hero");
 fs_1.default.mkdirSync(UPLOAD_DIR, { recursive: true });
 const allowedMime = new Set([
@@ -42,7 +50,25 @@ const upload = (0, multer_1.default)({
         cb(new Error("Unsupported file type. Allowed: HEIC/HEIF/JPG/JPEG/PNG/WEBP"));
     },
 });
-router.get("/home", hero_slider_controller_1.getHomeHeroSlider);
+/**
+ * GET /api/hero-slider/home
+ * Returns hero slider data for home page
+ * Falls back to mock data if MongoDB is not connected
+ */
+router.get("/home", async (req, res) => {
+    if (!isMongoConnected()) {
+        console.log("⚠️  MongoDB not connected, returning mock hero slider data");
+        return res.status(200).json(collections_1.mockHeroSlider);
+    }
+    try {
+        await (0, hero_slider_controller_1.getHomeHeroSlider)(req, res);
+    }
+    catch (err) {
+        console.error("Failed to fetch hero slider:", err);
+        console.log("⚠️  Error fetching hero slider, returning mock data");
+        res.status(200).json(collections_1.mockHeroSlider);
+    }
+});
 router.put("/home", hero_slider_controller_1.upsertHomeHeroSlider);
 /**
  * POST /api/hero-slider/home/upload

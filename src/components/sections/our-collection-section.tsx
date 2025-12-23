@@ -12,30 +12,61 @@ interface OurCollectionViewProps {
   loading?: boolean;
 }
 
-const isBouquetObject = (v: unknown): v is Bouquet =>
-  typeof v === "object" &&
-  v !== null &&
-  "_id" in (v as any) &&
-  "name" in (v as any);
+type RawBouquet = Bouquet & {
+  imageUrl?: string;
+  category?: string;
+  inStock?: boolean;
+};
+
+const normalizeBouquet = (
+  raw: unknown,
+  collectionName: string
+): BouquetCardProps | null => {
+  if (!raw || typeof raw !== "object") return null;
+
+  const data = raw as Partial<RawBouquet> & { id?: string };
+
+  const id = data._id ?? data.id;
+  const name = data.name;
+
+  if (!id || !name) return null;
+
+  const imageCandidate =
+    (typeof data.image === "string" && data.image) ||
+    (typeof data.imageUrl === "string" && data.imageUrl) ||
+    "";
+
+  const typeCandidate =
+    (typeof data.type === "string" && data.type) ||
+    (typeof (data as any).category === "string" &&
+      (data as any).category) ||
+    "";
+
+  const statusCandidate = data.status === "preorder" ? "preorder" : "ready";
+
+  return {
+    _id: String(id),
+    name,
+    description: data.description ?? "",
+    price: typeof data.price === "number" ? data.price : Number(data.price) || 0,
+    type: typeCandidate,
+    size: data.size ?? "",
+    image: imageCandidate,
+    status:
+      statusCandidate === "ready" && data.inStock === false
+        ? "preorder"
+        : statusCandidate,
+    collectionName: data.collectionName ?? collectionName,
+  };
+};
 
 const toBouquetProps = (collection: Collection): BouquetCardProps[] => {
   const list = collection.bouquets;
-
   if (!Array.isArray(list) || list.length === 0) return [];
-  if (typeof list[0] === "string") return [];
-  if (!isBouquetObject(list[0])) return [];
 
-  return (list as Bouquet[]).map((b) => ({
-    _id: String(b._id),
-    name: b.name,
-    description: b.description ?? "",
-    price: b.price,
-    type: b.type ?? "",
-    size: b.size ?? "",
-    image: b.image ?? "",
-    status: b.status,
-    collectionName: b.collectionName ?? collection.name,
-  }));
+  return list
+    .map((item) => normalizeBouquet(item, collection.name))
+    .filter((b): b is BouquetCardProps => Boolean(b));
 };
 
 // Loading skeleton component

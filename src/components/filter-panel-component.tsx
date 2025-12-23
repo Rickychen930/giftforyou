@@ -155,7 +155,18 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
       {/* Size */}
       <FilterGroup
         title="Size"
-        options={allSizes.length ? allSizes : ["Small", "Medium", "Large"]}
+        options={
+          allSizes.length
+            ? allSizes
+            : [
+                "Extra-Small",
+                "Small",
+                "Medium",
+                "Large",
+                "Extra-Large",
+                "Jumbo",
+              ]
+        }
         selected={selectedSizes}
         k="selectedSizes"
       />

@@ -1,24 +1,43 @@
 @import "colors.css";
 
+:root {
+  --catalog-page-bg-start: #fdf7fb;
+  --catalog-page-bg-end: #f4f8f5;
+  --catalog-text: #24303a;
+  --catalog-text-strong: #1a242d;
+  --catalog-text-soft: rgba(36, 48, 58, 0.78);
+  --catalog-muted: rgba(36, 48, 58, 0.65);
+  --catalog-border: rgba(36, 48, 58, 0.08);
+  --catalog-surface: rgba(255, 255, 255, 0.9);
+  --catalog-surface-soft: rgba(255, 255, 255, 0.82);
+  --catalog-control-bg: rgba(255, 255, 255, 0.92);
+  --catalog-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+  --catalog-shadow-soft: 0 10px 26px rgba(0, 0, 0, 0.06);
+  --catalog-hover-shadow: 0 14px 32px rgba(0, 0, 0, 0.12);
+  --catalog-pink: #d48c9c;
+  --catalog-pink2: #b56f80;
+  --catalog-on-brand: #ffffff;
+  --catalog-error-bg: rgba(254, 242, 242, 0.9);
+  --catalog-error-border: rgba(239, 68, 68, 0.35);
+  --catalog-error-text: #991b1b;
+  --max: 1200px;
+}
+
 .catalogPage {
-  padding: 2.5rem 1.25rem 4rem;
-  background: linear-gradient(
-    135deg,
-    var(--catalog-page-bg-start) 0%,
-    var(--catalog-page-bg-end) 100%
-  );
+  padding: 3rem 1.25rem 4.5rem;
+  background: linear-gradient(135deg, var(--catalog-page-bg-start) 0%, var(--catalog-page-bg-end) 100%);
   color: var(--catalog-text);
 }
 
 .catalogHeader {
   max-width: var(--max);
-  margin: 0 auto 1.5rem;
+  margin: 0 auto 2rem;
   text-align: center;
 }
 
 .catalogTitle {
   margin: 0;
-  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+  font-size: clamp(1.9rem, 3vw, 2.75rem);
   font-weight: 950;
   letter-spacing: 0.3px;
 }
@@ -27,7 +46,7 @@
   margin: 0.65rem auto 0;
   max-width: 80ch;
   color: var(--catalog-muted);
-  line-height: 1.7;
+  line-height: 1.75;
 }
 
 .catalogSummary {
@@ -52,18 +71,19 @@
 .catalogSummary__clear {
   border: none;
   cursor: pointer;
-  padding: 0.55rem 0.9rem;
+  padding: 0.6rem 1rem;
   border-radius: 999px;
   font-weight: 900;
   color: var(--catalog-on-brand);
-  background: linear-gradient(90deg, var(--catalog-pink), var(--catalog-pink2));
-  box-shadow: 0 14px 26px rgba(212, 140, 156, 0.22); /* optional: also tokenizable */
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: linear-gradient(135deg, var(--catalog-pink), var(--catalog-pink2));
+  box-shadow: 0 14px 28px rgba(212, 140, 156, 0.26);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 
 .catalogSummary__clear:hover {
   transform: translateY(-2px);
-  box-shadow: 0 18px 34px rgba(212, 140, 156, 0.32); /* optional: also tokenizable */
+  box-shadow: 0 18px 38px rgba(212, 140, 156, 0.34);
+  filter: brightness(1.03) saturate(1.02);
 }
 
 /* Layout */
@@ -72,7 +92,7 @@
   margin: 0 auto;
   display: grid;
   grid-template-columns: 340px 1fr;
-  gap: 1.5rem;
+  gap: 1.6rem;
   align-items: start;
 }
 
@@ -98,6 +118,9 @@
   color: var(--catalog-text-strong);
   background: var(--catalog-surface-soft);
   border-bottom: 1px solid var(--catalog-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .catalogResults {
@@ -109,6 +132,7 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
+  align-items: stretch;
 }
 
 /* Empty state */
@@ -202,6 +226,7 @@
   }
   .catalogGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.1rem;
   }
 }
 
@@ -221,11 +246,13 @@
 
   .catalogGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.1rem;
   }
 }
 
 @media (max-width: 520px) {
   .catalogGrid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
 }

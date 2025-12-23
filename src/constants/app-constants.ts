@@ -2,7 +2,7 @@
 // Centralized constants for the application
 
 export const BRAND_INFO = {
-  name: "Giftforyou",
+  name: "Giftforyou.idn",
   fullName: "Giftforyou.idn",
   tagline: "Luxury Floral Boutique",
   description:

@@ -16,6 +16,53 @@ const parsePrice = (value: unknown): number => {
   return Number.isFinite(n) ? n : NaN;
 };
 
+const parseBoolean = (value: unknown): boolean => {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value === 1;
+  if (typeof value !== "string") return false;
+  const v = value.trim().toLowerCase();
+  return v === "true" || v === "1" || v === "yes" || v === "on";
+};
+
+const parseNonNegativeInt = (value: unknown): number => {
+  const n = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.trunc(n));
+};
+
+const parseCsvList = (value: unknown): string[] => {
+  if (Array.isArray(value)) {
+    return value
+      .map((v) => (typeof v === "string" ? v.trim() : ""))
+      .filter(Boolean);
+  }
+
+  if (typeof value !== "string") return [];
+
+  // Support both comma-separated and newline-separated input.
+  return value
+    .split(/[\n,]/g)
+    .map((v) => v.trim())
+    .filter(Boolean);
+};
+
+const normalizeSize = (value: unknown): string => {
+  const raw = normalizeString(value);
+  if (!raw) return "";
+
+  const v = raw.toLowerCase();
+  if (v === "extra-small" || v === "extra small" || v === "xs" || v === "xsmall")
+    return "Extra-Small";
+  if (v === "small") return "Small";
+  if (v === "medium") return "Medium";
+  if (v === "large") return "Large";
+  if (v === "extra-large" || v === "extra large" || v === "x-large")
+    return "Extra-Large";
+  if (v === "jumbo" || v === "xl" || v === "xxl") return "Jumbo";
+
+  return raw;
+};
+
 const validateBouquetInput = (
   name: string,
   price: number,
@@ -77,8 +124,8 @@ export const createBouquet = async (
   try {
     const name = normalizeString(req.body.name);
     const description = normalizeString(req.body.description);
-    const type = normalizeString(req.body.type);
-    const size = normalizeString(req.body.size);
+    const type = normalizeString(req.body.type) || "bouquet";
+    const size = normalizeSize(req.body.size) || "Medium";
     const collectionName = normalizeString(req.body.collectionName);
 
     const status: BouquetStatus = isValidStatus(req.body.status)
@@ -95,6 +142,13 @@ export const createBouquet = async (
     // ✅ FIX: memoryStorage => use saveUploadedImage (not req.file.filename)
     const image = req.file ? await saveUploadedImage(req.file) : "";
 
+    const occasions = parseCsvList(req.body.occasions);
+    const flowers = parseCsvList(req.body.flowers);
+    const isNewEdition = parseBoolean(req.body.isNewEdition);
+    const isFeatured = parseBoolean(req.body.isFeatured);
+    const quantity = parseNonNegativeInt(req.body.quantity);
+    const careInstructions = normalizeString(req.body.careInstructions);
+
     const bouquet = await BouquetModel.create({
       name,
       description,
@@ -104,10 +158,12 @@ export const createBouquet = async (
       image,
       status,
       collectionName,
-      occasions: [],
-      flowers: [],
-      isNewEdition: false,
-      isFeatured: false,
+      occasions,
+      flowers,
+      isNewEdition,
+      isFeatured,
+      quantity,
+      careInstructions,
     });
 
     // ✅ FIX: removed broken ", ,"
@@ -161,12 +217,41 @@ export const updateBouquet = async (
       updates.name = normalizeString(req.body.name);
     if (req.body.description !== undefined)
       updates.description = normalizeString(req.body.description);
-    if (req.body.type !== undefined)
-      updates.type = normalizeString(req.body.type);
-    if (req.body.size !== undefined)
-      updates.size = normalizeString(req.body.size);
+    if (req.body.type !== undefined) {
+      const t = normalizeString(req.body.type);
+      if (t) updates.type = t;
+    }
+
+    if (req.body.size !== undefined) {
+      const s = normalizeSize(req.body.size);
+      if (s) updates.size = s;
+    }
     if (req.body.collectionName !== undefined)
       updates.collectionName = normalizeString(req.body.collectionName);
+
+    if (req.body.occasions !== undefined) {
+      updates.occasions = parseCsvList(req.body.occasions);
+    }
+
+    if (req.body.flowers !== undefined) {
+      updates.flowers = parseCsvList(req.body.flowers);
+    }
+
+    if (req.body.isNewEdition !== undefined) {
+      updates.isNewEdition = parseBoolean(req.body.isNewEdition);
+    }
+
+    if (req.body.isFeatured !== undefined) {
+      updates.isFeatured = parseBoolean(req.body.isFeatured);
+    }
+
+    if (req.body.quantity !== undefined) {
+      updates.quantity = parseNonNegativeInt(req.body.quantity);
+    }
+
+    if (req.body.careInstructions !== undefined) {
+      updates.careInstructions = normalizeString(req.body.careInstructions);
+    }
 
     if (req.body.status !== undefined) {
       if (!isValidStatus(req.body.status)) {

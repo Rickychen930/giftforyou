@@ -14,7 +14,13 @@ export interface IBouquet {
   type: string;
 
   // Title Case sizes
-  size: "Small" | "Medium" | "Large" | "Extra-Large";
+  size:
+    | "Extra-Small"
+    | "Small"
+    | "Medium"
+    | "Large"
+    | "Extra-Large"
+    | "Jumbo";
 
   occasions: string[];
   flowers: string[];
@@ -46,7 +52,14 @@ const BouquetSchema = new Schema<IBouquet>(
     // ✅ FIXED: correct enum values
     size: {
       type: String,
-      enum: ["Small", "Medium", "Large", "Extra-Large"],
+      enum: [
+        "Extra-Small",
+        "Small",
+        "Medium",
+        "Large",
+        "Extra-Large",
+        "Jumbo",
+      ],
       default: "Medium",
       required: true,
     },

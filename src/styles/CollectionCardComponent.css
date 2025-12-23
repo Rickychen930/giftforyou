@@ -1,5 +1,35 @@
 @import "colors.css";
 
+:root {
+  --cc-surface: rgba(255, 255, 255, 0.92);
+  --cc-surface-strong: rgba(255, 255, 255, 0.98);
+  --cc-surface-fade-edge: rgba(255, 255, 255, 0.92);
+  --cc-border: rgba(0, 0, 0, 0.08);
+  --cc-border-strong: rgba(0, 0, 0, 0.14);
+  --cc-shadow: 0 14px 34px rgba(0, 0, 0, 0.08);
+  --cc-card-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  --cc-card-shadow-hover: 0 16px 32px rgba(0, 0, 0, 0.12);
+  --cc-brand-highlight: rgba(212, 140, 156, 0.5);
+  --cc-brand-wine: #a04c5c;
+  --cc-text: #2f2f2f;
+  --cc-muted: rgba(0, 0, 0, 0.58);
+  --cc-empty-bg: rgba(255, 255, 255, 0.7);
+  --cc-border-badge: rgba(255, 255, 255, 0.45);
+  --cc-badge-bg: rgba(255, 255, 255, 0.3);
+  --cc-ready-bg: rgba(16, 185, 129, 0.16);
+  --cc-preorder-bg: rgba(249, 115, 22, 0.16);
+  --cc-chip-text: #4a4a4a;
+  --cc-chip-bg: rgba(0, 0, 0, 0.02);
+  --cc-border-chip: rgba(0, 0, 0, 0.08);
+  --cc-btn-text: #ffffff;
+  --cc-brand-pink: #d48c9c;
+  --cc-brand-pink2: #b56f80;
+  --cc-btn-shadow: 0 6px 16px rgba(212, 140, 156, 0.24);
+  --cc-btn-shadow-hover: 0 10px 24px rgba(212, 140, 156, 0.32);
+  --cc-scroll-track: rgba(0, 0, 0, 0.06);
+  --cc-scroll-thumb: rgba(0, 0, 0, 0.18);
+}
+
 /* =========================
    Collection Card Component
    Professional & Interactive Design
@@ -16,10 +46,24 @@
   backdrop-filter: blur(10px);
   overflow: hidden;
   transition: box-shadow 0.3s ease, transform 0.3s ease;
+  animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  opacity: 0;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .collectionCard:hover {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
 
 /* Subtle premium highlight line */
@@ -129,9 +173,9 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 42px;
+  width: 50px;
   pointer-events: none;
-  z-index: 2;
+  z-index: 1;
   transition: opacity 0.3s ease;
 }
 
@@ -173,6 +217,11 @@
   animation: fadeIn 0.3s ease forwards;
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 .collectionCard__navBtn:hover {
   background: var(--brand-rose-500);
   color: white;
@@ -190,11 +239,11 @@
 }
 
 .collectionCard__navBtn--left {
-  left: 8px;
+  left: 12px;
 }
 
 .collectionCard__navBtn--right {
-  right: 8px;
+  right: 12px;
 }
 
 /* Scroll container */
@@ -217,35 +266,36 @@
   scroll-snap-align: start;
 }
 
-/* Scrollbar styling */
+/* Scrollbar styling - modern & elegant */
 .collectionCard__scroll::-webkit-scrollbar {
   height: 8px;
 }
 
 .collectionCard__scroll::-webkit-scrollbar-track {
-  background: var(--cc-scroll-track);
+  background: rgba(0, 0, 0, 0.03);
   border-radius: 999px;
   margin: 0 12px;
 }
 
 .collectionCard__scroll::-webkit-scrollbar-thumb {
-  background: var(--cc-scroll-thumb);
+  background: linear-gradient(180deg, rgba(212, 140, 156, 0.4), rgba(168, 213, 186, 0.4));
   border-radius: 999px;
   transition: background 0.2s ease;
 }
 
 .collectionCard__scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.28);
+  background: linear-gradient(180deg, rgba(212, 140, 156, 0.6), rgba(168, 213, 186, 0.6));
 }
 
 /* Progress Indicator */
 .collectionCard__progress {
   position: relative;
   height: 3px;
-  background: rgba(0, 0, 0, 0.06);
+  background: rgba(0, 0, 0, 0.04);
   border-radius: 999px;
   margin-top: 0.75rem;
   overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .collectionCard__progressBar {
@@ -256,6 +306,7 @@
   background: linear-gradient(90deg, var(--brand-rose-500), var(--brand-sage-400));
   border-radius: 999px;
   transition: width 0.2s ease;
+  box-shadow: 0 0 10px rgba(212, 140, 156, 0.3);
 }
 
 /* =========================
@@ -273,6 +324,20 @@
   display: flex;
   flex-direction: column;
   min-height: 100%;
+
+  animation: scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  opacity: 0;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .bouquetCard:hover {
@@ -286,6 +351,8 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
+  aspect-ratio: 3 / 4;
+  background: linear-gradient(135deg, #f5f5f5, #fafafa);
 }
 
 .bouquetCard__media::after {
@@ -294,8 +361,9 @@
   inset: 0;
   background: linear-gradient(
     180deg,
-    var(--cc-media-overlay-top) 35%,
-    var(--cc-media-overlay-bottom) 100%
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.08) 70%,
+    rgba(0, 0, 0, 0.12) 100%
   );
   pointer-events: none;
   z-index: 1;
@@ -303,7 +371,7 @@
 
 .bouquetCard__media img {
   width: 100%;
-  height: 200px;
+  height: 100%;
   object-fit: cover;
   display: block;
   transform: scale(1.02);
@@ -321,12 +389,12 @@
   left: 12px;
   z-index: 2;
 
-  padding: 0.42rem 0.75rem;
+  padding: 0.5rem 0.85rem;
   border-radius: 999px;
 
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 950;
-  letter-spacing: 0.10em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 
   color: var(--cc-btn-text);
@@ -334,72 +402,79 @@
   border: 1px solid var(--cc-border-badge);
   background: var(--cc-badge-bg);
   
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: transform 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .bouquetCard:hover .bouquetCard__badge {
-  transform: scale(1.05);
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 .bouquetCard__badge.is-ready {
-  background: var(--cc-ready-bg);
-  border-color: rgba(16, 185, 129, 0.35);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.08));
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #10b981;
 }
 
 .bouquetCard__badge.is-preorder {
-  background: var(--cc-preorder-bg);
-  border-color: rgba(249, 115, 22, 0.35);
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(249, 115, 22, 0.08));
+  border-color: rgba(249, 115, 22, 0.4);
+  color: #f97316;
 }
 
 /* Body */
 .bouquetCard__body {
-  padding: 1.1rem;
+  padding: 1.15rem;
   text-align: left;
 
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: 0.65rem;
   flex: 1;
 }
 
 .bouquetCard__name {
   margin: 0;
-  font-size: 1.08rem;
+  font-size: 1.05rem;
   font-weight: 950;
   letter-spacing: -0.01em;
   color: var(--cc-text);
   line-height: 1.4;
+  word-break: break-word;
 }
 
 .bouquetCard__price {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   font-weight: 950;
   color: var(--cc-brand-wine);
+  letter-spacing: -0.02em;
 }
 
 /* Meta chips */
 .bouquetCard__meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 0.15rem 0 0;
+  gap: 0.55rem;
+  margin: 0.3rem 0 0;
 }
 
 .bouquetCard__chip {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: var(--cc-chip-text);
-  background: var(--cc-chip-bg);
-  border: 1px solid var(--cc-border-chip);
+  background: linear-gradient(135deg, rgba(212, 140, 156, 0.08), rgba(168, 213, 186, 0.06));
+  border: 1px solid rgba(212, 140, 156, 0.12);
   border-radius: 999px;
-  padding: 0.38rem 0.65rem;
+  padding: 0.4rem 0.7rem;
   transition: all 0.2s ease;
+  font-weight: 500;
 }
 
 .bouquetCard:hover .bouquetCard__chip {
-  background: rgba(212, 140, 156, 0.08);
-  border-color: rgba(212, 140, 156, 0.15);
+  background: rgba(212, 140, 156, 0.12);
+  border-color: rgba(212, 140, 156, 0.25);
+  transform: translateY(-1px);
 }
 
 /* CTA Button with Icon */
@@ -408,45 +483,70 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
 
   text-align: center;
   text-decoration: none;
 
-  padding: 0.92rem 1rem;
+  padding: 0.95rem 1.1rem;
   border-radius: 999px;
 
-  font-size: 0.92rem;
+  font-size: 0.93rem;
   font-weight: 950;
   letter-spacing: 0.3px;
 
-  background: linear-gradient(90deg, var(--cc-brand-pink), var(--cc-brand-pink2));
+  background: linear-gradient(135deg, var(--cc-brand-pink) 0%, var(--cc-brand-pink2) 100%);
+  background-color: var(--cc-brand-pink);
   color: var(--cc-btn-text);
 
   box-shadow: var(--cc-btn-shadow);
+  border: 1px solid rgba(0, 0, 0, 0.04);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   
   border: none;
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.bouquetCard__btn:visited,
+.bouquetCard__btn:active,
+.bouquetCard__btn:focus-visible {
+  color: var(--cc-btn-text);
+}
+
+.bouquetCard__btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.bouquetCard__btn:hover::before {
+  opacity: 1;
 }
 
 .bouquetCard__btn svg {
   flex-shrink: 0;
   transition: transform 0.25s ease;
+  width: 18px;
+  height: 18px;
 }
 
 .bouquetCard__btn:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
   box-shadow: var(--cc-btn-shadow-hover);
-  filter: saturate(1.05) brightness(1.05);
+  filter: saturate(1.08) brightness(1.06);
 }
 
 .bouquetCard__btn:hover svg {
-  transform: scale(1.1) rotate(5deg);
+  transform: scale(1.15) rotate(-5deg);
 }
 
 .bouquetCard__btn:active {
-  transform: translateY(0);
+  transform: translateY(-1px);
 }
 
 .bouquetCard__btn:focus-visible {
@@ -464,30 +564,27 @@
   }
 
   .collectionCard__scroll {
-    grid-auto-columns: minmax(220px, 245px);
+    grid-auto-columns: minmax(200px, 230px);
     gap: 0.9rem;
-  }
-
-  .bouquetCard__media img {
-    height: 180px;
   }
 
   .collectionCard__scrollWrap::before,
   .collectionCard__scrollWrap::after {
-    width: 24px;
+    width: 30px;
   }
 
   .collectionCard__navBtn {
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
+    font-size: 0.9rem;
   }
 
   .collectionCard__navBtn--left {
-    left: 4px;
+    left: 8px;
   }
 
   .collectionCard__navBtn--right {
-    right: 4px;
+    right: 8px;
   }
 
   .collectionCard__titleRow {
@@ -496,9 +593,62 @@
     gap: 0.5rem;
   }
 
+  .bouquetCard__body {
+    padding: 1rem;
+  }
+
   .bouquetCard__btn {
-    font-size: 0.88rem;
-    padding: 0.85rem 0.9rem;
+    font-size: 0.85rem;
+    padding: 0.85rem 0.95rem;
+    gap: 0.4rem;
+  }
+
+  .bouquetCard__media {
+    aspect-ratio: 3 / 4;
+  }
+}
+
+@media (max-width: 480px) {
+  .collectionCard {
+    padding: 1rem;
+    border-radius: 14px;
+  }
+
+  .collectionCard__title {
+    font-size: clamp(1.2rem, 5vw, 1.5rem);
+  }
+
+  .collectionCard__description {
+    font-size: 0.9rem;
+  }
+
+  .collectionCard__scroll {
+    grid-auto-columns: minmax(170px, 200px);
+    gap: 0.75rem;
+    padding: 0.2rem 0.2rem 1rem;
+  }
+
+  .collectionCard__navBtn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .bouquetCard__name {
+    font-size: 0.95rem;
+  }
+
+  .bouquetCard__price {
+    font-size: 1.05rem;
+  }
+
+  .bouquetCard__body {
+    padding: 0.9rem;
+    gap: 0.5rem;
+  }
+
+  .bouquetCard__btn {
+    font-size: 0.8rem;
+    padding: 0.75rem 0.85rem;
   }
 }
 
@@ -508,22 +658,29 @@
     transform: none;
   }
 
+  .bouquetCard:hover .bouquetCard__media img {
+    transform: scale(1.04);
+  }
+
+  .bouquetCard:hover .bouquetCard__badge {
+    transform: scale(1.02);
+  }
+
   .collectionCard__navBtn:hover {
-    transform: translateY(-50%);
+    transform: translateY(-50%) scale(1.04);
+  }
+
+  .bouquetCard__btn:hover {
+    transform: translateY(-1px);
   }
 }
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .bouquetCard,
-  .bouquetCard__media img,
-  .bouquetCard__badge,
-  .bouquetCard__chip,
-  .bouquetCard__btn,
-  .bouquetCard__btn svg,
-  .collectionCard__navBtn {
-    transition: none;
-    animation: none;
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 
   .bouquetCard:hover {

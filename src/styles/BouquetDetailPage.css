@@ -71,11 +71,13 @@
   border: 1px solid var(--border-1);
   box-shadow: var(--shadow-3);
   background: var(--surface-1);
+  aspect-ratio: 3 / 4;
+  max-height: min(540px, 62vh);
 }
 
 .bdMedia img {
   width: 100%;
-  height: min(540px, 62vh);
+  height: 100%;
   object-fit: cover;
   display: block;
   transform: scale(1.01);
@@ -224,8 +226,8 @@
     grid-template-columns: 1fr;
   }
 
-  .bdMedia img {
-    height: min(420px, 55vh);
+  .bdMedia {
+    max-height: min(420px, 55vh);
   }
 }
 

@@ -33,7 +33,14 @@ const BouquetSchema = new mongoose_1.Schema({
     // ✅ FIXED: correct enum values
     size: {
         type: String,
-        enum: ["Small", "Medium", "Large", "Extra-Large"],
+        enum: [
+            "Extra-Small",
+            "Small",
+            "Medium",
+            "Large",
+            "Extra-Large",
+            "Jumbo",
+        ],
         default: "Medium",
         required: true,
     },

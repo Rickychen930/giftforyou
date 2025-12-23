@@ -9,7 +9,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
 
-    "dev:server": "node --max-http-header-size=16384 -r ts-node/register/transpile-only -r dotenv/config ./node_modules/.bin/ts-node-dev --respawn --transpile-only src/server/server.ts",
+    "dev:server": "DOTENV_CONFIG_PATH=.env.development node --max-http-header-size=16384 -r ts-node/register/transpile-only -r dotenv/config ./node_modules/.bin/ts-node-dev --respawn --transpile-only src/server/server.ts",
     "build:server": "tsc -p tsconfig.server.json",
     "start:server": "node --max-http-header-size=16384 dist/server/server.ts",
 

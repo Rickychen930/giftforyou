@@ -11,10 +11,6 @@ module.exports = function(app) {
       agent: new (require('http').Agent)({
         maxHeaderSize: 16384
       }),
-      onProxyReq: (proxyReq) => {
-        // Log for debugging
-        console.log('Proxying API request to:', proxyReq.path);
-      },
       onError: (err, req, res) => {
         console.error('Proxy error:', err);
         res.writeHead(500, {

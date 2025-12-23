@@ -14,6 +14,13 @@ interface State {
   status: "ready" | "preorder";
   collectionName: string;
 
+  quantity: number;
+  occasionsText: string;
+  flowersText: string;
+  isNewEdition: boolean;
+  isFeatured: boolean;
+  careInstructions: string;
+
   file: File | null;
   previewUrl: string;
 
@@ -29,10 +36,17 @@ class BouquetUploader extends Component<Props, State> {
       name: "",
       description: "",
       price: 0,
-      type: "",
-      size: "",
+      type: "bouquet",
+      size: "Medium",
       status: "ready",
       collectionName: "",
+
+      quantity: 0,
+      occasionsText: "",
+      flowersText: "",
+      isNewEdition: false,
+      isFeatured: false,
+      careInstructions: "",
 
       file: null,
       previewUrl: "",
@@ -58,10 +72,20 @@ class BouquetUploader extends Component<Props, State> {
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
-    const { name, value } = e.target;
+    const { name } = e.target;
+    const value =
+      e.target instanceof HTMLInputElement && e.target.type === "checkbox"
+        ? e.target.checked
+        : e.target.value;
+
     this.setState((prev) => ({
       ...prev,
-      [name]: name === "price" ? Number(value) : value,
+      [name]:
+        name === "price"
+          ? Number(value)
+          : name === "quantity"
+            ? Math.max(0, Math.trunc(Number(value)))
+            : value,
     }));
   };
 
@@ -86,6 +110,8 @@ class BouquetUploader extends Component<Props, State> {
     const name = this.state.name.trim();
     const price = this.state.price;
 
+    if (!this.state.size) return "Please select a size.";
+
     if (name.length < 2) return "Name must be at least 2 characters.";
     if (!Number.isFinite(price) || price <= 0)
       return "Price must be greater than 0.";
@@ -100,10 +126,17 @@ class BouquetUploader extends Component<Props, State> {
     fd.append("name", this.state.name.trim());
     fd.append("description", this.state.description ?? "");
     fd.append("price", String(this.state.price));
-    fd.append("type", this.state.type ?? "");
-    fd.append("size", this.state.size ?? "");
+    fd.append("type", (this.state.type ?? "bouquet").trim() || "bouquet");
+    fd.append("size", this.state.size ?? "Medium");
     fd.append("status", this.state.status);
     fd.append("collectionName", this.state.collectionName ?? "");
+
+    fd.append("quantity", String(this.state.quantity ?? 0));
+    fd.append("occasions", this.state.occasionsText ?? "");
+    fd.append("flowers", this.state.flowersText ?? "");
+    fd.append("isNewEdition", String(Boolean(this.state.isNewEdition)));
+    fd.append("isFeatured", String(Boolean(this.state.isFeatured)));
+    fd.append("careInstructions", this.state.careInstructions ?? "");
 
     return fd;
   }
@@ -131,6 +164,12 @@ class BouquetUploader extends Component<Props, State> {
           size: "",
           status: "ready",
           collectionName: "",
+          quantity: 0,
+          occasionsText: "",
+          flowersText: "",
+          isNewEdition: false,
+          isFeatured: false,
+          careInstructions: "",
           file: null,
           previewUrl: "",
           submitting: false,
@@ -224,20 +263,67 @@ class BouquetUploader extends Component<Props, State> {
                 name="type"
                 value={this.state.type}
                 onChange={this.handleChange}
-                placeholder="e.g., orchid"
+                placeholder="e.g., bouquet"
                 disabled={submitting}
               />
             </label>
 
             <label className="uploader__field">
               Size
-              <input
+              <select
                 name="size"
                 value={this.state.size}
                 onChange={this.handleChange}
-                placeholder="e.g., medium"
+                disabled={submitting}
+                required
+              >
+                <option value="Extra-Small">Extra small</option>
+                <option value="Small">Small</option>
+                <option value="Medium">Medium</option>
+                <option value="Large">Large</option>
+                <option value="Extra-Large">Extra large</option>
+                <option value="Jumbo">Jumbo</option>
+              </select>
+            </label>
+
+            <label className="uploader__field">
+              Quantity
+              <input
+                name="quantity"
+                type="number"
+                min={0}
+                step={1}
+                value={this.state.quantity}
+                onChange={this.handleChange}
                 disabled={submitting}
               />
+            </label>
+
+            <label className="uploader__field uploader__field--full">
+              Flags
+              <div className="uploader__toggles" role="group" aria-label="Bouquet flags">
+                <label className="uploader__toggle">
+                  <input
+                    type="checkbox"
+                    name="isNewEdition"
+                    checked={this.state.isNewEdition}
+                    onChange={this.handleChange}
+                    disabled={submitting}
+                  />
+                  <span>New edition</span>
+                </label>
+
+                <label className="uploader__toggle">
+                  <input
+                    type="checkbox"
+                    name="isFeatured"
+                    checked={this.state.isFeatured}
+                    onChange={this.handleChange}
+                    disabled={submitting}
+                  />
+                  <span>Featured</span>
+                </label>
+              </div>
             </label>
 
             <label className="uploader__field uploader__field--full">
@@ -253,10 +339,44 @@ class BouquetUploader extends Component<Props, State> {
             </label>
 
             <label className="uploader__field uploader__field--full">
+              Occasions
+              <input
+                name="occasionsText"
+                value={this.state.occasionsText}
+                onChange={this.handleChange}
+                placeholder="e.g., Birthday, Anniversary"
+                disabled={submitting}
+              />
+            </label>
+
+            <label className="uploader__field uploader__field--full">
+              Flowers
+              <input
+                name="flowersText"
+                value={this.state.flowersText}
+                onChange={this.handleChange}
+                placeholder="e.g., Orchid, Rose"
+                disabled={submitting}
+              />
+            </label>
+
+            <label className="uploader__field uploader__field--full">
+              Care instructions
+              <textarea
+                name="careInstructions"
+                value={this.state.careInstructions}
+                onChange={this.handleChange}
+                rows={3}
+                placeholder="Optional care tips"
+                disabled={submitting}
+              />
+            </label>
+
+            <label className="uploader__field uploader__field--full">
               Image
               <input
                 type="file"
-                accept="image/*"
+                accept="image/*,.heic,.heif"
                 onChange={this.handleImageChange}
                 disabled={submitting}
               />

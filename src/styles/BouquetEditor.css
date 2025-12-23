@@ -135,6 +135,11 @@
   transform: translateY(0px);
 }
 
+.editorSearchClear:focus-visible {
+  outline: none;
+  box-shadow: var(--editor-focus-ring), var(--editor-shadow-soft);
+}
+
 .editorStats {
   display: flex;
   gap: 0.55rem;

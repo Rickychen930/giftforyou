@@ -5,6 +5,7 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 
 import { NAV_LINKS } from "./constants/app-constants";
@@ -27,6 +28,11 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   return isLoggedIn() ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
+const SearchRedirect: React.FC = () => {
+  const location = useLocation();
+  return <Navigate to={`/collection${location.search ?? ""}`} replace />;
+};
+
 const AppLayout: React.FC = () => {
   const loggedIn = isLoggedIn();
   const navLinks = loggedIn
@@ -41,6 +47,8 @@ const AppLayout: React.FC = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/collection" element={<BouquetCatalogController />} />
         <Route path="/bouquet/:id" element={<BouquetDetailController />} />
+        <Route path="/search" element={<SearchRedirect />} />
+        <Route path="/cart" element={<Navigate to="/collection" replace />} />
         <Route path="/login" element={<LoginController />} />
         <Route
           path="/dashboard"

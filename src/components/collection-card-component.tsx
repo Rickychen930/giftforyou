@@ -107,6 +107,9 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
     }
   };
 
+  // Validate bouquets array
+  const validBouquets = Array.isArray(bouquets) ? bouquets : [];
+
   const renderBouquetCard = (b: BouquetCardProps) => {
     const waMessage = encodeURIComponent(
       `Halo, saya ingin order bouquet "${b.name}" (${formatPrice(b.price)})${
@@ -195,12 +198,12 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
         <div className="collectionCard__heading">
           <div className="collectionCard__titleRow">
             <h2 className="collectionCard__title">{name}</h2>
-            {bouquets && bouquets.length > 0 && (
+            {validBouquets && validBouquets.length > 0 && (
               <span
                 className="collectionCard__count"
-                aria-label={`${bouquets.length} items`}
+                aria-label={`${validBouquets.length} items`}
               >
-                {bouquets.length} {bouquets.length === 1 ? "item" : "items"}
+                {validBouquets.length} {validBouquets.length === 1 ? "item" : "items"}
               </span>
             )}
           </div>
@@ -208,7 +211,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
         </div>
       </header>
 
-      {!bouquets || bouquets.length === 0 ? (
+      {!validBouquets || validBouquets.length === 0 ? (
         <div className="collectionCard__empty" role="status" aria-live="polite">
           <svg
             width="48"
@@ -306,11 +309,11 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
             role="list"
             aria-label={`${name} bouquets`}
           >
-            {bouquets.map(renderBouquetCard)}
+            {validBouquets.map(renderBouquetCard)}
           </div>
 
-          {/* Scroll Progress Indicator */}
-          {bouquets.length > 3 && (
+          {/* Scroll Progress Indicator - Show always when scrollable */}
+          {validBouquets.length > 0 && (
             <div className="collectionCard__progress" aria-hidden="true">
               <div
                 className="collectionCard__progressBar"

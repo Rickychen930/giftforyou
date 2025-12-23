@@ -89,7 +89,6 @@ class BouquetCatalogController extends Component<{}, State> {
 
     try {
       const url = `${API_BASE}/api/bouquets`;
-      console.log("Fetching bouquets:", url);
 
       const res = await fetch(url, {
         signal: this.abortController.signal,
@@ -218,7 +217,18 @@ class BouquetCatalogController extends Component<{}, State> {
       <BouquetCatalogView
         bouquets={sorted}
         allTypes={allTypes.length ? allTypes : ["Orchid", "Mixed"]}
-        allSizes={allSizes.length ? allSizes : ["small", "medium", "large"]}
+        allSizes={
+          allSizes.length
+            ? allSizes
+            : [
+                "Extra-Small",
+                "Small",
+                "Medium",
+                "Large",
+                "Extra-Large",
+                "Jumbo",
+              ]
+        }
         priceRange={this.state.priceRange}
         selectedTypes={this.state.selectedTypes}
         selectedSizes={this.state.selectedSizes}

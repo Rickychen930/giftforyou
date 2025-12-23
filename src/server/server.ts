@@ -41,6 +41,8 @@ const PORT = Number(process.env.PORT || 4000);
 const MONGO_URI = requireEnv("MONGO_URI");
 const allowedOrigins = parseOrigins(process.env.CORS_ORIGIN);
 
+const isMongoConnected = () => mongoose.connection.readyState === 1;
+
 // Middleware
 app.use(
   cors({
@@ -48,9 +50,11 @@ app.use(
       // Allow requests without Origin header (curl, server-to-server, health checks)
       if (!origin) return cb(null, true);
 
-      // If CORS_ORIGIN is not set, default to localhost in dev only
+      // In development, be permissive to avoid local-network/origin mismatches
+      if (process.env.NODE_ENV !== "production") return cb(null, true);
+
+      // If CORS_ORIGIN is not set, require it in production
       if (allowedOrigins.length === 0) {
-        if (process.env.NODE_ENV !== "production") return cb(null, true);
         return cb(new Error("CORS_ORIGIN is not configured"));
       }
 
@@ -65,10 +69,21 @@ app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 // Health check
-app.get("/api/health", (_req, res) => res.status(200).json({ ok: true }));
+app.get("/api/health", (_req, res) =>
+  res.status(200).json({ ok: true, db: isMongoConnected() ? "up" : "down" })
+);
 
 // Static uploads (make sure this folder exists on server)
 app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
+
+// If DB is down, return a clear response (prevents proxy ECONNREFUSED)
+app.use((req, res, next) => {
+  if (req.path === "/api/health") return next();
+  if (req.path.startsWith("/api/") && !isMongoConnected()) {
+    return res.status(503).json({ message: "Database unavailable" });
+  }
+  return next();
+});
 
 // Routes
 app.use("/api/metrics", metricsRoutes);
@@ -89,28 +104,31 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 async function start() {
+  const server = app.listen(PORT, "0.0.0.0", () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+  });
+
+  // Graceful shutdown
+  const shutdown = async () => {
+    console.log("🛑 Shutting down...");
+    server.close(async () => {
+      await mongoose.connection.close().catch(() => undefined);
+      process.exit(0);
+    });
+  };
+
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
+
   try {
     await mongoose.connect(MONGO_URI);
     console.log("✅ MongoDB connected");
-
-    const server = app.listen(PORT, "0.0.0.0", () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-    });
-
-    // Graceful shutdown
-    const shutdown = async () => {
-      console.log("🛑 Shutting down...");
-      server.close(async () => {
-        await mongoose.connection.close().catch(() => undefined);
-        process.exit(0);
-      });
-    };
-
-    process.on("SIGINT", shutdown);
-    process.on("SIGTERM", shutdown);
   } catch (err) {
     console.error("❌ MongoDB connection error:", err);
-    process.exit(1);
+    // In production we should fail fast; in dev allow UI work without DB.
+    if (process.env.NODE_ENV === "production") {
+      process.exit(1);
+    }
   }
 }
 
