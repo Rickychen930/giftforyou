@@ -8,7 +8,7 @@
 .ourCollection {
   position: relative;
   min-height: auto;
-  padding: 5rem 0;
+  padding: clamp(3.5rem, 6vw, 5rem) 0;
   background:
     radial-gradient(900px 460px at 12% 6%, var(--oc-bg-1), transparent 60%),
     radial-gradient(900px 520px at 92% 18%, var(--oc-bg-2), transparent 62%),
@@ -30,7 +30,7 @@
 .ourCollection__container {
   max-width: var(--max);
   margin: 0 auto;
-  padding: 0 1.25rem;
+  padding: 0 clamp(1rem, 3vw, 1.5rem);
 }
 
 /* ===== Header with Fade-in Animation ===== */
@@ -38,23 +38,25 @@
   text-align: center;
   margin-bottom: 3rem;
   opacity: 0;
-  transform: translateY(20px);
-  animation: fadeInUp 0.8s ease forwards;
+  transform: translateY(14px);
 }
 
 .ourCollection--visible .ourCollection__header {
-  animation: fadeInUp 0.8s ease forwards;
+  animation: fadeInUp 0.75s ease forwards;
 }
 
 .ourCollection__eyebrow {
   margin: 0 0 0.65rem;
-  font-weight: 950;
-  letter-spacing: 0.14em;
+  font-weight: 800;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--ink-550);
   opacity: 0;
-  animation: fadeIn 0.6s ease 0.2s forwards;
+}
+
+.ourCollection--visible .ourCollection__eyebrow {
+  animation: fadeIn 0.6s ease 0.15s forwards;
 }
 
 .ourCollection__title {
@@ -64,7 +66,13 @@
   letter-spacing: -0.02em;
   color: var(--welcome-color-title);
   opacity: 0;
-  animation: fadeInUp 0.8s ease 0.3s forwards;
+  font-family: "Playfair Display", Georgia, serif;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.ourCollection--visible .ourCollection__title {
+  animation: fadeInUp 0.8s ease 0.25s forwards;
 }
 
 /* Elegant animated divider */
@@ -80,6 +88,9 @@
     rgba(212, 140, 156, 0.95),
     rgba(168, 213, 186, 0.85)
   );
+}
+
+.ourCollection--visible .ourCollection__title::after {
   animation: expandWidth 0.8s ease 0.6s forwards;
 }
 
@@ -87,36 +98,40 @@
   margin: 0.85rem auto 0;
   max-width: 72ch;
   color: var(--welcome-color-text);
-  line-height: 1.8;
+  font-size: clamp(0.98rem, 1.2vw, 1.05rem);
+  line-height: 1.75;
+  text-wrap: pretty;
   opacity: 0;
-  animation: fadeIn 0.8s ease 0.5s forwards;
+}
+
+.ourCollection--visible .ourCollection__subtitle {
+  animation: fadeIn 0.8s ease 0.45s forwards;
 }
 
 /* ===== Grid with Staggered Animation ===== */
 .ourCollection__grid {
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: clamp(1.75rem, 3.25vw, 2.6rem);
 }
 
-/* Full-bleed cards with animation */
+/* Keep cards nicely contained for a premium feel */
 .ourCollection__grid > .collectionCard {
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
-  border-radius: 0;
-  border-left: none;
-  border-right: none;
-  padding-left: clamp(1rem, 3vw, 2.2rem);
-  padding-right: clamp(1rem, 3vw, 2.2rem);
-  
-  opacity: 0;
-  transform: translateY(30px);
-  animation: fadeInUp 0.6s ease forwards;
+  border-radius: 20px;
 }
 
-.ourCollection--visible .ourCollection__grid > .collectionCard {
-  animation: fadeInUp 0.6s ease forwards;
+/* On mobile, allow a gentle full-bleed look (no harsh edges) */
+@media (max-width: 768px) {
+  .ourCollection__grid > .collectionCard {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 }
 
 /* ===== Loading Skeleton Styles ===== */
@@ -270,7 +285,7 @@
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(22px);
   }
   to {
     opacity: 1;
@@ -372,28 +387,5 @@
   .ourCollection__emptyIcon {
     width: 64px;
     height: 64px;
-  }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  .ourCollection__header,
-  .ourCollection__eyebrow,
-  .ourCollection__title,
-  .ourCollection__subtitle,
-  .ourCollection__grid > .collectionCard,
-  .ourCollection__empty {
-    animation: none;
-    opacity: 1;
-    transform: none;
-  }
-
-  .ourCollection__title::after {
-    width: 74px;
-    animation: none;
-  }
-
-  .skeleton {
-    animation: none;
   }
 }

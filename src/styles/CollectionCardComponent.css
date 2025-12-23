@@ -52,7 +52,7 @@
   contain: layout paint;
   transform: translateZ(0);
 
-  animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   opacity: 0;
 }
 
@@ -63,7 +63,7 @@
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -71,10 +71,7 @@
   }
 }
 
-.collectionCard:hover {
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
-}
+
 
 /* Subtle premium highlight line */
 .collectionCard::before {
@@ -128,6 +125,9 @@
   font-weight: 950;
   letter-spacing: -0.02em;
   color: var(--welcome-color-title);
+  font-family: "Playfair Display", Georgia, serif;
+  line-height: 1.2;
+  text-wrap: balance;
 }
 
 .collectionCard__count {
@@ -147,7 +147,10 @@
   margin: 0;
   color: var(--welcome-color-text);
   opacity: 0.95;
-  line-height: 1.75;
+  font-size: 0.98rem;
+  line-height: 1.7;
+  max-width: 72ch;
+  text-wrap: pretty;
 }
 
 /* =========================
@@ -230,9 +233,9 @@
   gap: 1rem;
 }
 
-/* Make preview cards feel like a catalog: less tall images */
+/* Keep preview media consistent with product photography (4:5) */
 .collectionCard__previewGrid .bouquetCard__media {
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 4 / 5;
 }
 
 .collectionCard__previewGrid .bouquetCard__body {
@@ -254,9 +257,12 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1.15rem;
   }
+}
 
-  .collectionCard__previewGrid .bouquetCard__media {
-    aspect-ratio: 21 / 9;
+@media (min-width: 1024px) {
+  .collectionCard__previewGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.15rem;
   }
 }
 
@@ -448,7 +454,7 @@
   flex-direction: column;
   min-height: 100%;
 
-  animation: scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: scaleIn 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   opacity: 0;
 }
 
@@ -463,11 +469,7 @@
   }
 }
 
-.bouquetCard:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--cc-card-shadow-hover);
-  border-color: rgba(212, 140, 156, 0.25);
-}
+
 
 /* Media */
 .bouquetCard__media {
@@ -497,13 +499,11 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  transform: scale(1.02);
+  transform: scale(1.01);
   transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.bouquetCard:hover .bouquetCard__media img {
-  transform: scale(1.08);
-}
+
 
 /* Badge */
 .bouquetCard__badge {
@@ -517,7 +517,7 @@
 
   font-size: 0.75rem;
   font-weight: 950;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
 
   color: var(--cc-btn-text);
@@ -525,14 +525,10 @@
   border: 1px solid var(--cc-border-badge);
   background: var(--cc-badge-bg);
   
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.10);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.bouquetCard:hover .bouquetCard__badge {
-  transform: scale(1.05) translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
 
 .bouquetCard__badge.is-ready {
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.08));
@@ -565,6 +561,7 @@
   color: var(--cc-text);
   line-height: 1.4;
   word-break: break-word;
+  text-wrap: balance;
 }
 
 .bouquetCard__price {
@@ -594,11 +591,7 @@
   font-weight: 500;
 }
 
-.bouquetCard:hover .bouquetCard__chip {
-  background: rgba(212, 140, 156, 0.12);
-  border-color: rgba(212, 140, 156, 0.25);
-  transform: translateY(-1px);
-}
+
 
 /* CTA Button with Icon */
 .bouquetCard__btn {
@@ -659,13 +652,52 @@
 }
 
 .bouquetCard__btn:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   box-shadow: var(--cc-btn-shadow-hover);
-  filter: saturate(1.08) brightness(1.06);
+  filter: saturate(1.04) brightness(1.03);
 }
 
 .bouquetCard__btn:hover svg {
-  transform: scale(1.15) rotate(-5deg);
+  transform: scale(1.08);
+}
+
+/* Apply hover interactions only on hover-capable devices */
+@media (hover: hover) and (pointer: fine) {
+  .collectionCard:hover {
+    box-shadow: 0 16px 46px rgba(0, 0, 0, 0.13);
+    transform: translateY(-1px);
+  }
+
+  .bouquetCard:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--cc-card-shadow-hover);
+    border-color: rgba(212, 140, 156, 0.25);
+  }
+
+  .bouquetCard:hover .bouquetCard__media img {
+    transform: scale(1.04);
+  }
+
+  .bouquetCard:hover .bouquetCard__badge {
+    transform: scale(1.03) translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.13);
+  }
+
+  .bouquetCard:hover .bouquetCard__chip {
+    background: rgba(212, 140, 156, 0.12);
+    border-color: rgba(212, 140, 156, 0.25);
+    transform: translateY(-0.5px);
+  }
+
+  .bouquetCard__btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--cc-btn-shadow-hover);
+    filter: saturate(1.04) brightness(1.03);
+  }
+
+  .bouquetCard__btn:hover svg {
+    transform: scale(1.08);
+  }
 }
 
 .bouquetCard__btn:active {
@@ -775,35 +807,24 @@
   }
 }
 
-/* Touch device optimizations */
-@media (hover: none) and (pointer: coarse) {
-  .bouquetCard:hover {
-    transform: none;
-  }
-
-  .bouquetCard:hover .bouquetCard__media img {
-    transform: scale(1.04);
-  }
-
-  .bouquetCard:hover .bouquetCard__badge {
-    transform: scale(1.02);
-  }
-
-  .collectionCard__navBtn:hover {
-    transform: translateY(-50%) scale(1.04);
-  }
-
-  .bouquetCard__btn:hover {
-    transform: translateY(-1px);
+@media (max-width: 360px) {
+  .collectionCard__previewGrid {
+    grid-template-columns: 1fr;
   }
 }
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  * {
+  .collectionCard,
+  .collectionCard * {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .collectionCard {
+    animation: none !important;
+    opacity: 1 !important;
   }
 
   .bouquetCard:hover {
