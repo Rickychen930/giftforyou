@@ -236,6 +236,17 @@
   color: var(--editor-text);
 }
 
+.hsLabel--sub {
+  display: block;
+  margin: 0.35rem 0;
+  color: var(--editor-muted);
+  font-weight: 900;
+}
+
+.hsAltSource {
+  margin-top: 0.5rem;
+}
+
 .hsField input,
 .hsField textarea,
 .hsField select {
@@ -541,6 +552,7 @@
   background: rgba(255, 255, 255, 0.95);
   transition: all 0.3s ease;
   display: block;
+  cursor: pointer;
 }
 
 .hsPreviewWrapper:hover .hsPreview {
@@ -600,6 +612,7 @@
   max-width: 90vw;
   max-height: 90vh;
   animation: zoomIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: default;
 }
 
 .hsZoomModal__content img {
@@ -634,6 +647,11 @@
 .hsZoomModal__close:hover {
   background: rgba(255, 255, 255, 0.3);
   transform: scale(1.1);
+}
+
+.hsZoomModal__close:focus-visible {
+  outline: none;
+  box-shadow: var(--editor-focus-ring);
 }
 
 @keyframes fadeIn {

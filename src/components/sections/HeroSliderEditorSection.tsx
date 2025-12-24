@@ -85,6 +85,17 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!zoomedImage) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setZoomedImage(null);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [zoomedImage]);
+
+  useEffect(() => {
     let cancelled = false;
 
     (async () => {
@@ -503,6 +514,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                     onDrop={(e) => handleDrop(e, index)}
                     onDragEnd={handleDragEnd}
                     aria-label={`Slide ${index + 1}`}
+                    tabIndex={0}
                   >
                     <div className="hsSlideCard__top">
                       <div className="hsSlideCard__meta">
@@ -595,6 +607,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                             const name = e.target.value;
                             if (name) setSlideCollection(s.id, name);
                           }}
+                          aria-label={`Tautkan slide ${index + 1} ke koleksi`}
                         >
                           <option value="">Pilih koleksi…</option>
                           {(collections ?? []).map((c) => (
@@ -650,6 +663,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                             if (file) uploadSlideImage(s.id, file);
                           }}
                           disabled={uploading[s.id]}
+                          aria-label={`Unggah gambar untuk slide ${index + 1}`}
                         />
 
                         {uploading[s.id] && (
@@ -673,14 +687,8 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                           </div>
                         )}
 
-                        <div style={{ marginTop: "0.5rem" }}>
-                          <span
-                            className="hsLabel"
-                            style={{
-                              display: "block",
-                              marginBottom: "0.35rem",
-                            }}
-                          >
+                        <div className="hsAltSource">
+                          <span className="hsLabel hsLabel--sub">
                             Atau tempel URL / path
                           </span>
                           <input
@@ -714,8 +722,17 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                                       "/images/placeholder-bouquet.jpg"
                                   )
                                 }
-                                style={{ cursor: "pointer" }}
                                 title="Klik untuk memperbesar"
+                                tabIndex={0}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter" || e.key === " ") {
+                                    e.preventDefault();
+                                    setZoomedImage(
+                                      normalizeImageUrl(s.image) ||
+                                        "/images/placeholder-bouquet.jpg"
+                                    );
+                                  }
+                                }}
                               />
                               <div className="hsPreviewOverlay">
                                 <svg
@@ -823,8 +840,12 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
           onClick={() => setZoomedImage(null)}
           role="dialog"
           aria-label="Pratinjau gambar"
+          tabIndex={-1}
         >
-          <div className="hsZoomModal__content">
+          <div
+            className="hsZoomModal__content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               className="hsZoomModal__close"
               onClick={() => setZoomedImage(null)}
