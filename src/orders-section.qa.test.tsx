@@ -1,6 +1,6 @@
 import React from "react";
 import "@testing-library/jest-dom";
-import { render, screen, within, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import OrdersSection from "./components/sections/orders-section";
@@ -29,10 +29,27 @@ const textResp = (text: string, status = 200): MockResponse => ({
 });
 
 describe("OrdersSection QA smoke", () => {
+  let consoleErrorSpy: jest.SpyInstance | undefined;
+  let originalConsoleError: typeof console.error;
+
   beforeEach(() => {
     jest.restoreAllMocks();
     (global as any).fetch = jest.fn();
     localStorage.clear();
+
+    // Keep CI output readable: OrdersSection triggers async state updates from effects,
+    // which can produce noisy act() warnings in JSDOM even when behavior is correct.
+    originalConsoleError = console.error;
+    consoleErrorSpy = jest.spyOn(console, "error").mockImplementation((...args: unknown[]) => {
+      const msg = args.map((a) => String(a)).join(" ");
+      if (msg.includes("not wrapped in act")) return;
+      originalConsoleError(...(args as any[]));
+    });
+  });
+
+  afterEach(() => {
+    consoleErrorSpy?.mockRestore();
+    consoleErrorSpy = undefined;
   });
 
   test("drawer open/close + add user auto-select then show order details", async () => {
@@ -90,7 +107,7 @@ describe("OrdersSection QA smoke", () => {
     expect(within(selectedNotice).getByText(/jl\. mawar/i)).toBeInTheDocument();
 
     // Close via Escape (open/close sanity)
-    fireEvent.keyDown(window, { key: "Escape" });
+    await user.keyboard("{Escape}");
     await waitFor(() => expect(screen.queryByRole("dialog", { name: /form order/i })).not.toBeInTheDocument());
   });
 
@@ -132,7 +149,7 @@ describe("OrdersSection QA smoke", () => {
     await user.click(card);
 
     // Drawer open in update mode
-    await screen.findByRole("dialog", { name: /form order/i });
+    const dialog = await screen.findByRole("dialog", { name: /form order/i });
 
     // Ensure we actually tried fetching the customer by id
     await waitFor(() => {
@@ -145,5 +162,13 @@ describe("OrdersSection QA smoke", () => {
 
     await waitFor(() => expect(userSelect).toHaveTextContent(/budi/i));
     await waitFor(() => expect(userSelect.value).toBe("c9"));
+
+    const buyerNameInput = within(dialog).getByRole("textbox", { name: /nama pembeli/i });
+    const phoneInput = within(dialog).getByRole("textbox", { name: /no\. hp/i });
+    const addressInput = within(dialog).getByRole("textbox", { name: /^alamat$/i });
+
+    await waitFor(() => expect(buyerNameInput).toHaveValue("Budi"));
+    await waitFor(() => expect(phoneInput).toHaveValue("0800"));
+    await waitFor(() => expect(addressInput).toHaveValue("Somewhere"));
   });
 });
