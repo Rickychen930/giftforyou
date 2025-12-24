@@ -76,6 +76,7 @@ jobs:
             TS="$(date +%Y%m%d-%H%M%S)"
             NEW="$RELEASES/$TS"
             CURRENT="$TARGET/current"
+            BUILD_ROOT="$TARGET/build"
 
             if [ ! -d "$INCOMING" ]; then
               echo "ERROR: Incoming build not found at $INCOMING"
@@ -90,6 +91,14 @@ jobs:
             rm -f "$CURRENT"
             ln -s "$NEW" "$CURRENT"
 
+            # Keep nginx root in sync.
+            # Your nginx config uses: root /var/www/root/build;
+            # This makes $TARGET/build always point at the latest release.
+            if [ -e "$BUILD_ROOT" ] || [ -L "$BUILD_ROOT" ]; then
+              rm -rf "$BUILD_ROOT"
+            fi
+            ln -s "$NEW" "$BUILD_ROOT"
+
             # optional permissions
             chmod -R 755 "$NEW"
 
@@ -97,4 +106,5 @@ jobs:
             rm -rf "$TARGET/_incoming"
 
             echo "Current -> $(readlink $CURRENT)"
+            echo "BuildRoot -> $(readlink $BUILD_ROOT)"
             ls -la "$CURRENT" | head -n 50
