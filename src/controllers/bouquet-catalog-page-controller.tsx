@@ -4,6 +4,7 @@ import BouquetCatalogView from "../view/bouquet-catalog-page";
 
 import { API_BASE } from "../config/api";
 import { getBouquetSizeFilterOptions } from "../constants/bouquet-constants";
+import { trackSearch } from "../services/analytics.service";
 
 type Range = [number, number];
 
@@ -60,9 +61,19 @@ class BouquetCatalogController extends Component<
     this.loadBouquets();
   }
 
-  componentDidUpdate(prevProps: Readonly<{ locationSearch?: string }>): void {
+  componentDidUpdate(
+    prevProps: Readonly<{ locationSearch?: string }>,
+    prevState: Readonly<State>
+  ): void {
     if ((prevProps.locationSearch ?? "") !== (this.props.locationSearch ?? "")) {
       this.applyLocationSearch(this.props.locationSearch);
+    }
+
+    if (prevState.searchQuery !== this.state.searchQuery) {
+      const term = (this.state.searchQuery ?? "").trim();
+      if (term.length >= 2) {
+        trackSearch(term, "/collection", this.props.locationSearch ?? "");
+      }
     }
 
     // Keep URL in sync with current filters/sort/page so the state is shareable.

@@ -315,7 +315,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
       }
 
       updateSlide(slideId, { image: data.path });
-      setSuccess(`✅ Gambar berhasil diunggah untuk slide ini!`);
+      setSuccess("Gambar berhasil diunggah untuk slide ini.");
       setTimeout(() => {
         setSuccess("");
         setUploadProgress((prev) => ({ ...prev, [slideId]: 0 }));
@@ -336,7 +336,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
     setError("");
 
     if (validationError) {
-      setError(`❌ ${validationError}`);
+      setError(validationError);
       // Scroll to error
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
@@ -378,7 +378,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
 
       if (!res.ok) throw new Error(`Gagal menyimpan (${res.status})`);
 
-      setSuccess("✅ Hero slider updated successfully!");
+      setSuccess("Hero slider berhasil disimpan.");
 
       // Allow parent (Dashboard) to refresh metrics/visitors after saving.
       await Promise.resolve(onSaved?.());
@@ -389,9 +389,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
       // Auto-hide success message
       setTimeout(() => setSuccess(""), 5000);
     } catch (e) {
-      setError(
-        `❌ ${e instanceof Error ? e.message : "Gagal menyimpan slider hero."}`
-      );
+      setError(e instanceof Error ? e.message : "Gagal menyimpan slider hero.");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setSaving(false);
@@ -413,7 +411,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
     <section className="hsEditor" aria-label="Editor slider hero">
       <header className="hsEditor__header">
         <div>
-          <h2 className="hsEditor__title">🌸 Slider Hero</h2>
+          <h2 className="hsEditor__title">Hero Slider</h2>
           <p className="hsEditor__subtitle">
             Atur slider hero di homepage. Seret untuk mengubah urutan slide.
           </p>
@@ -446,7 +444,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
             disabled={saving || loading}
             title={validationError ?? "Simpan perubahan"}
           >
-            {saving ? "Menyimpan..." : "💾 Simpan"}
+            {saving ? "Menyimpan..." : "Simpan"}
           </button>
         </div>
       </header>
@@ -552,7 +550,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                           onClick={() => duplicateSlide(s.id)}
                           title="Duplikat slide"
                         >
-                          📋
+                          Duplikat
                         </button>
                         {deleteConfirm === s.id ? (
                           <>
@@ -580,7 +578,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                             onClick={() => setDeleteConfirm(s.id)}
                             title="Hapus slide"
                           >
-                            🗑️
+                            Hapus
                           </button>
                         )}
                       </div>
@@ -589,7 +587,7 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                     <div className="hsSlideCard__grid">
                       <label className="hsField hsField--full">
                         <span className="hsLabel">
-                          🔗 Tautkan ke Koleksi (Isi Cepat)
+                          Tautkan ke Koleksi (Isi Cepat)
                         </span>
                         <select
                           value=""

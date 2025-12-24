@@ -208,7 +208,9 @@ class BouquetUploader extends Component<Props, State> {
         </header>
 
         <form className="uploader__form" onSubmit={this.handleSubmit}>
-          <div className="uploader__grid">
+          <div className="uploader__layout">
+            <div className="uploader__col uploader__col--form">
+              <div className="uploader__grid">
             <label className="uploader__field">
               Nama *
               <input
@@ -381,18 +383,26 @@ class BouquetUploader extends Component<Props, State> {
                 disabled={submitting}
               />
             </label>
-          </div>
-
-          {previewUrl && (
-            <div className="uploader__preview">
-              <p className="uploader__previewLabel">Pratinjau</p>
-              <img
-                className="uploader__previewImg"
-                src={previewUrl}
-                alt="Pratinjau"
-              />
+              </div>
             </div>
-          )}
+
+            <aside className="uploader__col uploader__col--preview" aria-label="Pratinjau gambar">
+              <div className="uploader__preview">
+                <p className="uploader__previewLabel">Pratinjau</p>
+                {previewUrl ? (
+                  <img
+                    className="uploader__previewImg"
+                    src={previewUrl}
+                    alt="Pratinjau"
+                  />
+                ) : (
+                  <div className="uploader__previewEmpty" aria-label="Belum ada gambar">
+                    Pilih gambar untuk melihat pratinjau.
+                  </div>
+                )}
+              </div>
+            </aside>
+          </div>
 
           <button
             className="uploader__submit"

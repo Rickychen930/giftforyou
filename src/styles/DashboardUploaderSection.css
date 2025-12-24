@@ -7,11 +7,22 @@
   border: 1px solid var(--up-border);
   border-radius: 16px;
   box-shadow: var(--up-shadow);
-  padding: 1.5rem;
+  padding: clamp(1.1rem, 2vw, 1.5rem);
+  overflow: hidden;
+  position: relative;
+}
+
+.uploader::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212, 140, 156, 0.24), transparent);
+  opacity: 0.95;
 }
 
 .uploader__header {
-  text-align: center;
+  text-align: left;
   margin-bottom: 1.25rem;
 }
 
@@ -23,7 +34,7 @@
 }
 
 .uploader__subtitle {
-  margin: 0.5rem auto 0;
+  margin: 0.5rem 0 0;
   max-width: 75ch;
   color: var(--up-muted);
   line-height: 1.6;
@@ -32,12 +43,23 @@
 .uploader__form {
   display: flex;
   flex-direction: column;
+  gap: 1.05rem;
+}
+
+.uploader__layout {
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 1rem;
+  align-items: start;
+}
+
+.uploader__col {
+  min-width: 0;
 }
 
 .uploader__grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
   gap: 1rem;
 }
 
@@ -102,6 +124,20 @@
   background: var(--up-preview-surface);
 }
 
+.uploader__previewEmpty {
+  border: 1px dashed rgba(0, 0, 0, 0.16);
+  border-radius: 12px;
+  padding: 1rem;
+  color: var(--up-muted);
+  background: rgba(255, 255, 255, 0.55);
+  line-height: 1.6;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
 .uploader__previewLabel {
   margin: 0 0 0.75rem;
   font-weight: 900;
@@ -154,7 +190,24 @@
 }
 
 @media (max-width: 720px) {
-  .uploader__grid {
-    grid-template-columns: 1fr;
+  .uploader__header {
+    text-align: center;
+  }
+
+  .uploader__subtitle {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (min-width: 980px) {
+  .uploader__layout {
+    grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.85fr);
+    gap: 1.15rem;
+  }
+
+  .uploader__col--preview {
+    position: sticky;
+    top: 7.25rem;
   }
 }

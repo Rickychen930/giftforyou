@@ -100,7 +100,7 @@ exports.mockHeroSlider = {
             subtitle: "Exotic orchids for the discerning flower lover",
             image: "/images/welcome-image.jpeg",
             primaryCta: {
-                label: "Shop Collection",
+                label: "Lihat Koleksi",
                 href: "/collection",
             },
             secondaryCta: null,
@@ -110,7 +110,7 @@ exports.mockHeroSlider = {
             subtitle: "Fresh picks curated weekly by our florist",
             image: "/images/about-us-background.jpg",
             primaryCta: {
-                label: "Explore Bouquets",
+                label: "Lihat Bouquet",
                 href: "/collection",
             },
             secondaryCta: null,
@@ -120,7 +120,7 @@ exports.mockHeroSlider = {
             subtitle: "Make it special with add-ons: cards, chocolates, and more",
             image: "/images/our-collection-background.jpg",
             primaryCta: {
-                label: "Browse Collection",
+                label: "Lihat Koleksi",
                 href: "/collection",
             },
             secondaryCta: null,

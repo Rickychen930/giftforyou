@@ -4,6 +4,7 @@ import type { Bouquet } from "../models/domain/bouquet";
 import BouquetDetailPage from "../view/bouquet-detail-page";
 
 import { API_BASE } from "../config/api"; // adjust path depending on folder depth
+import { trackBouquetView } from "../services/analytics.service";
 
 const isNonEmptyString = (v: unknown): v is string =>
   typeof v === "string" && v.trim().length > 0;
@@ -56,6 +57,8 @@ export default function BouquetDetailController() {
       setLoading(false);
       return;
     }
+
+    trackBouquetView(id, `/bouquet/${id}`);
 
     const ac = new AbortController();
 

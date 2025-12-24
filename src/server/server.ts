@@ -10,6 +10,8 @@ import authRoutes from "../routes/auth-routes";
 import bouquetRoutes from "../routes/bouquet-routes";
 import collectionRoutes from "../routes/collection-routes";
 import heroSliderRoutes from "../routes/hero-slider-routes";
+import orderRoutes from "../routes/order-routes";
+import customerRoutes from "../routes/customer-routes";
 
 /**
  * Read a required env var (crash early if missing)
@@ -92,6 +94,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/bouquets", bouquetRoutes);
 app.use("/api/collections", collectionRoutes);
 app.use("/api/hero-slider", heroSliderRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/customers", customerRoutes);
 
 // 404 handler
 app.use((_req, res) => {

@@ -10,9 +10,30 @@
 
 .hsEditor {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
+  padding: clamp(1.1rem, 2vw, 1.5rem);
+  background: var(--editor-surface);
+  border: 1px solid var(--editor-border);
+  border-radius: 16px;
+  box-shadow: var(--editor-shadow);
   color: var(--editor-text);
+  position: relative;
+  overflow: hidden;
+}
+
+.hsEditor::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(212, 140, 156, 0.24),
+    transparent
+  );
+  opacity: 0.95;
 }
 
 /* ---------- Header ---------- */
@@ -62,7 +83,8 @@
   letter-spacing: 0.01em;
   cursor: pointer;
   box-shadow: var(--editor-shadow-soft);
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease,
+    background 0.18s ease, border-color 0.18s ease;
   white-space: nowrap;
 }
 
@@ -97,8 +119,8 @@
 }
 
 .hsEditor__btn--primary:hover:not(:disabled) {
-  filter: saturate(1.08) brightness(1.05);
-  box-shadow: 0 16px 32px rgba(212, 140, 156, 0.3);
+  filter: saturate(1.05) brightness(1.03);
+  box-shadow: var(--editor-shadow-brand);
 }
 
 .hsEditor__btn--ghost {
@@ -116,12 +138,10 @@
 /* ---------- Main card wrapper ---------- */
 .hsEditor__card {
   border: 1px solid var(--editor-border);
-  background: rgba(255, 255, 255, 0.82);
-  border-radius: 20px;
-  padding: 1.5rem;
-  box-shadow: var(--editor-shadow);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--editor-surface-soft);
+  border-radius: 14px;
+  padding: clamp(1rem, 1.8vw, 1.25rem);
+  box-shadow: var(--editor-shadow-soft);
 }
 
 /* ---------- States / Alerts ---------- */
@@ -287,12 +307,13 @@
 
 /* Slide card */
 .hsSlideCard {
-  border: 2px solid var(--editor-border);
-  background: rgba(255, 255, 255, 0.85);
-  border-radius: 20px;
+  border: 1px solid var(--editor-border);
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 16px;
   overflow: hidden;
   box-shadow: var(--editor-shadow-soft);
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease,
+    background 0.18s ease;
   cursor: grab;
 }
 
@@ -319,11 +340,9 @@
   justify-content: space-between;
   gap: 1rem;
   align-items: flex-start;
-  padding: 1rem 1.25rem;
+  padding: 0.95rem 1.1rem;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .hsSlideCard__meta {
@@ -371,7 +390,8 @@
   padding: 0.55rem 0.75rem;
   font-weight: 950;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease,
+    border-color 0.18s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   font-size: 0.9rem;
 }

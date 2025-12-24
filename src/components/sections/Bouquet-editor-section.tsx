@@ -306,37 +306,76 @@ export default class BouquetEditorSection extends Component<Props, State> {
         </div>
 
         <div className="editorLayout">
-          <aside className="editorFilters" aria-label="Filter">
-            <div className="editorFilters__card">
-              <FilterPanel
-                embedded
-                priceRange={priceRange}
-                selectedTypes={selectedTypes}
-                selectedSizes={selectedSizes}
-                selectedCollections={selectedCollections}
-                sortBy={sortBy}
-                allTypes={allTypes}
-                allSizes={allSizes}
-                allCollections={collections}
-                onPriceChange={this.setPriceRange}
-                onToggleFilter={(key, value) =>
-                  key === "selectedTypes"
-                    ? this.toggleType(value)
-                    : key === "selectedCollections"
-                      ? this.toggleCollection(value)
-                      : this.toggleSize(value)
-                }
-                onClearFilter={(key) =>
-                  key === "selectedTypes"
-                    ? this.clearTypes()
-                    : key === "selectedCollections"
-                      ? this.clearCollections()
-                      : this.clearSizes()
-                }
-                onSortChange={(v) => this.setSortBy(v as SortBy)}
-              />
+          <div className="editorFiltersTop" aria-label="Filter">
+            <details className="editorFiltersMobile">
+              <summary className="editorFiltersSummary">Filter & Urutkan</summary>
+
+              <div className="editorFiltersBody">
+                <FilterPanel
+                  embedded
+                  hideHeader
+                  priceRange={priceRange}
+                  selectedTypes={selectedTypes}
+                  selectedSizes={selectedSizes}
+                  selectedCollections={selectedCollections}
+                  sortBy={sortBy}
+                  allTypes={allTypes}
+                  allSizes={allSizes}
+                  allCollections={collections}
+                  onPriceChange={this.setPriceRange}
+                  onToggleFilter={(key, value) =>
+                    key === "selectedTypes"
+                      ? this.toggleType(value)
+                      : key === "selectedCollections"
+                        ? this.toggleCollection(value)
+                        : this.toggleSize(value)
+                  }
+                  onClearFilter={(key) =>
+                    key === "selectedTypes"
+                      ? this.clearTypes()
+                      : key === "selectedCollections"
+                        ? this.clearCollections()
+                        : this.clearSizes()
+                  }
+                  onSortChange={(v) => this.setSortBy(v as SortBy)}
+                />
+              </div>
+            </details>
+
+            <div className="editorFiltersDesktop">
+              <div className="editorFiltersPanel">
+                <FilterPanel
+                  embedded
+                  hideHeader
+                  variant="topbar"
+                  priceRange={priceRange}
+                  selectedTypes={selectedTypes}
+                  selectedSizes={selectedSizes}
+                  selectedCollections={selectedCollections}
+                  sortBy={sortBy}
+                  allTypes={allTypes}
+                  allSizes={allSizes}
+                  allCollections={collections}
+                  onPriceChange={this.setPriceRange}
+                  onToggleFilter={(key, value) =>
+                    key === "selectedTypes"
+                      ? this.toggleType(value)
+                      : key === "selectedCollections"
+                        ? this.toggleCollection(value)
+                        : this.toggleSize(value)
+                  }
+                  onClearFilter={(key) =>
+                    key === "selectedTypes"
+                      ? this.clearTypes()
+                      : key === "selectedCollections"
+                        ? this.clearCollections()
+                        : this.clearSizes()
+                  }
+                  onSortChange={(v) => this.setSortBy(v as SortBy)}
+                />
+              </div>
             </div>
-          </aside>
+          </div>
 
           <div className="editorGridWrap">
             {paginated.length === 0 ? (

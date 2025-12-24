@@ -10,11 +10,25 @@ type MetricsResponse = {
   collections?: string[];
 };
 
+type InsightsResponse = {
+  days?: number;
+  pageviews30d?: number;
+  topSearchTerms?: Array<{ term: string; count: number }>;
+  topBouquetsDays?: Array<{ bouquetId: string; count: number }>;
+  topBouquets7d?: Array<{ bouquetId: string; count: number }>;
+  visitHours?: Array<{ hour: number; count: number }>;
+  uniqueVisitors30d?: number;
+  uniqueVisitorsAvailable?: boolean;
+};
+
 interface State {
   bouquets: Bouquet[];
   collectionsCount: number;
   visitorsCount: number;
   collections: string[];
+
+  insights?: InsightsResponse;
+  insightsError?: string;
 
   loading: boolean;
   errorMessage?: string;
@@ -35,6 +49,8 @@ class DashboardController extends Component<{}, State> {
       collectionsCount: 0,
       visitorsCount: 0,
       collections: [],
+      insights: undefined,
+      insightsError: undefined,
       loading: true,
       errorMessage: undefined,
     };
@@ -104,15 +120,22 @@ class DashboardController extends Component<{}, State> {
         signal: this.abortController.signal,
       });
 
+      const insightsReq = fetch(`${API_BASE}/api/metrics/insights?days=30`, {
+        method: "GET",
+        headers,
+        signal: this.abortController.signal,
+      });
+
       const bouquetsReq = fetch(`${API_BASE}/api/bouquets`, {
         method: "GET",
         headers,
         signal: this.abortController.signal,
       });
 
-      const [metricsRes, bouquetsRes] = await Promise.all([
+      const [metricsRes, bouquetsRes, insightsRes] = await Promise.all([
         metricsReq,
         bouquetsReq,
+        insightsReq,
       ]);
 
       // Handle auth errors clearly
@@ -134,6 +157,19 @@ class DashboardController extends Component<{}, State> {
 
       const metricsJson = (await metricsRes.json()) as MetricsResponse;
       const bouquetsJson = (await bouquetsRes.json()) as any;
+
+      let insights: InsightsResponse | undefined;
+      let insightsError: string | undefined;
+      try {
+        if (insightsRes.ok) {
+          insights = (await insightsRes.json()) as InsightsResponse;
+        } else {
+          const t = await insightsRes.text();
+          insightsError = `Failed to load insights (${insightsRes.status}): ${t}`;
+        }
+      } catch (e: unknown) {
+        insightsError = e instanceof Error ? e.message : "Failed to load insights.";
+      }
 
       const bouquets: Bouquet[] = Array.isArray(bouquetsJson)
         ? bouquetsJson.map(this.normalizeBouquet)
@@ -159,6 +195,8 @@ class DashboardController extends Component<{}, State> {
         collections: collectionsFromMetrics.length
           ? collectionsFromMetrics
           : collectionsFallback,
+        insights,
+        insightsError,
         errorMessage: undefined,
       });
     } catch (err: unknown) {
@@ -311,6 +349,8 @@ class DashboardController extends Component<{}, State> {
         collectionsCount={this.state.collectionsCount}
         visitorsCount={this.state.visitorsCount}
         collections={this.state.collections}
+        insights={this.state.insights}
+        insightsError={this.state.insightsError}
         loading={this.state.loading}
         errorMessage={this.state.errorMessage}
         onUpload={this.onUpload}

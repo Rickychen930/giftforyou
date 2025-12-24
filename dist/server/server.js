@@ -8,11 +8,13 @@ const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const cors_1 = __importDefault(require("cors"));
 const path_1 = __importDefault(require("path"));
+const multer_1 = __importDefault(require("multer"));
 const metrics_routes_1 = __importDefault(require("../routes/metrics-routes"));
 const auth_routes_1 = __importDefault(require("../routes/auth-routes"));
 const bouquet_routes_1 = __importDefault(require("../routes/bouquet-routes"));
 const collection_routes_1 = __importDefault(require("../routes/collection-routes"));
 const hero_slider_routes_1 = __importDefault(require("../routes/hero-slider-routes"));
+const order_routes_1 = __importDefault(require("../routes/order-routes"));
 /**
  * Read a required env var (crash early if missing)
  */
@@ -80,6 +82,7 @@ app.use("/api/auth", auth_routes_1.default);
 app.use("/api/bouquets", bouquet_routes_1.default);
 app.use("/api/collections", collection_routes_1.default);
 app.use("/api/hero-slider", hero_slider_routes_1.default);
+app.use("/api/orders", order_routes_1.default);
 // 404 handler
 app.use((_req, res) => {
     res.status(404).json({ message: "Not found" });
@@ -87,6 +90,18 @@ app.use((_req, res) => {
 // Error handler (must be last)
 app.use((err, _req, res, _next) => {
     console.error("❌ API error:", err);
+    // Make upload/update failures understandable for the dashboard.
+    if (err instanceof multer_1.default.MulterError) {
+        if (err.code === "LIMIT_FILE_SIZE") {
+            return res.status(400).json({ message: "Image is too large. Max 8MB." });
+        }
+        return res.status(400).json({ message: err.message });
+    }
+    if (err instanceof Error) {
+        if (/unsupported image type/i.test(err.message)) {
+            return res.status(400).json({ message: err.message });
+        }
+    }
     res.status(500).json({ message: "Internal server error" });
 });
 async function start() {

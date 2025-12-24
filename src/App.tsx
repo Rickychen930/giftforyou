@@ -19,6 +19,7 @@ import DashboardController from "./controllers/dashboard-page-controller";
 import BouquetDetailController from "./controllers/bouquet-detail-controller";
 import ErrorBoundary from "./components/error-boundary";
 import ScrollToTop from "./components/scroll-to-top";
+import { trackPageview } from "./services/analytics.service";
 
 const isLoggedIn = (): boolean => {
   return Boolean(localStorage.getItem("authToken"));
@@ -40,6 +41,14 @@ const AppLayout: React.FC = () => {
   const navLinks = loggedIn
     ? [...NAV_LINKS.authenticated]
     : [...NAV_LINKS.public];
+
+  const location = useLocation();
+
+  React.useEffect(() => {
+    // Track public site traffic only (avoid skew from admin dashboard hash-tabs).
+    if (location.pathname.startsWith("/dashboard")) return;
+    trackPageview(location.pathname, location.search);
+  }, [location.pathname, location.search]);
 
   return (
     <>
