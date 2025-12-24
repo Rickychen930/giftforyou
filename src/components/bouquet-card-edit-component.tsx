@@ -86,10 +86,14 @@ const toNonNegativeInt = (v: string) => {
   return Math.max(0, Math.trunc(n));
 };
 
+type SaveStatus = "idle" | "success" | "error";
+
 const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
   const [saving, setSaving] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>(bouquet.image ?? "");
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  const [saveMessage, setSaveMessage] = useState<string>("");
 
   const [form, setForm] = useState<FormState>({
     _id: bouquet._id,
@@ -108,6 +112,25 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
     isFeatured: Boolean(bouquet.isFeatured),
     careInstructions: bouquet.careInstructions ?? "",
   });
+
+  const initialForm = useMemo<FormState>(() => {
+    return {
+      _id: bouquet._id,
+      name: bouquet.name ?? "",
+      description: bouquet.description ?? "",
+      price: Number.isFinite(bouquet.price) ? bouquet.price : 0,
+      type: bouquet.type ?? "",
+      size: (bouquet.size as BouquetSize) || "Medium",
+      status: bouquet.status === "preorder" ? "preorder" : "ready",
+      collectionName: bouquet.collectionName ?? "",
+      quantity: typeof bouquet.quantity === "number" ? bouquet.quantity : 0,
+      occasionsText: joinCsv(bouquet.occasions),
+      flowersText: joinCsv(bouquet.flowers),
+      isNewEdition: Boolean(bouquet.isNewEdition),
+      isFeatured: Boolean(bouquet.isFeatured),
+      careInstructions: bouquet.careInstructions ?? "",
+    };
+  }, [bouquet]);
 
   useEffect(() => {
     setForm({
@@ -129,7 +152,18 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
 
     setFile(null);
     setPreview(bouquet.image ?? "");
+    setSaveStatus("idle");
+    setSaveMessage("");
   }, [bouquet]);
+
+  useEffect(() => {
+    if (saveStatus === "idle") return;
+    const t = window.setTimeout(() => {
+      setSaveStatus("idle");
+      setSaveMessage("");
+    }, 3500);
+    return () => window.clearTimeout(t);
+  }, [saveStatus]);
 
   useEffect(() => {
     if (!file) return;
@@ -153,6 +187,25 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
   }, [form.name, form.price, form.quantity, form.status]);
 
   const canSave = !saving && !validationError;
+
+  const isDirty = useMemo(() => {
+    if (file) return true;
+    return (
+      form.name !== initialForm.name ||
+      (form.description ?? "") !== (initialForm.description ?? "") ||
+      form.price !== initialForm.price ||
+      (form.type ?? "") !== (initialForm.type ?? "") ||
+      form.size !== initialForm.size ||
+      form.status !== initialForm.status ||
+      (form.collectionName ?? "") !== (initialForm.collectionName ?? "") ||
+      form.quantity !== initialForm.quantity ||
+      (form.occasionsText ?? "") !== (initialForm.occasionsText ?? "") ||
+      (form.flowersText ?? "") !== (initialForm.flowersText ?? "") ||
+      Boolean(form.isNewEdition) !== Boolean(initialForm.isNewEdition) ||
+      Boolean(form.isFeatured) !== Boolean(initialForm.isFeatured) ||
+      (form.careInstructions ?? "") !== (initialForm.careInstructions ?? "")
+    );
+  }, [file, form, initialForm]);
 
   const handleTextChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -181,10 +234,20 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFile(e.target.files?.[0] ?? null);
+    setSaveStatus("idle");
+    setSaveMessage("");
+  };
+
+  const resetImage = () => {
+    setFile(null);
+    setPreview(bouquet.image ?? "");
+    setSaveStatus("idle");
+    setSaveMessage("");
   };
 
   const handleSave = async () => {
     if (validationError) return;
+    if (!isDirty) return;
 
     const fd = new FormData();
     fd.append("_id", form._id);
@@ -208,15 +271,18 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
       setSaving(true);
       const result = await onSave(fd);
       if (typeof result === "boolean") {
-        alert(
-          result
-            ? "✅ Bouquet berhasil disimpan."
-            : "❌ Gagal menyimpan bouquet."
+        setSaveStatus(result ? "success" : "error");
+        setSaveMessage(
+          result ? "Perubahan tersimpan." : "Gagal menyimpan. Coba lagi."
         );
+      } else {
+        setSaveStatus("success");
+        setSaveMessage("Perubahan tersimpan.");
       }
     } catch (err) {
       console.error("Save error:", err);
-      alert("❌ Gagal menyimpan bouquet.");
+      setSaveStatus("error");
+      setSaveMessage("Gagal menyimpan. Coba lagi.");
     } finally {
       setSaving(false);
     }
@@ -436,23 +502,53 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave }) => {
           <label className="becField becField--full">
             <span className="becLabel">Gambar</span>
             <input
+              className="becFile"
               type="file"
               accept="image/*,.heic,.heif"
               onChange={handleImageChange}
             />
-            <span className="becHint">
-              PNG/JPG/WEBP/HEIC didukung (HEIC akan dikonversi).
-            </span>
+            <div className="becFileRow">
+              <span className="becHint">
+                PNG/JPG/WEBP/HEIC didukung (HEIC akan dikonversi).
+              </span>
+              <button
+                type="button"
+                className="becGhost"
+                onClick={resetImage}
+                disabled={!file && preview === (bouquet.image ?? "")}
+                title="Kembalikan ke gambar semula"
+              >
+                Reset gambar
+              </button>
+            </div>
           </label>
         </div>
 
         <div className="becFooter">
+          <div
+            className={`becSaveNote ${saveStatus !== "idle" ? "is-show" : ""} ${
+              saveStatus === "success"
+                ? "is-success"
+                : saveStatus === "error"
+                  ? "is-error"
+                  : ""
+            }`}
+            aria-live="polite"
+          >
+            {saveMessage}
+          </div>
           <button
             type="button"
             className="becSave"
             onClick={handleSave}
-            disabled={!canSave}
-            title={validationError ?? "Simpan perubahan"}
+            disabled={!canSave || !isDirty}
+            title={
+              validationError
+                ? validationError
+                : !isDirty
+                  ? "Tidak ada perubahan"
+                  : "Simpan perubahan"
+            }
           >
             {saving ? "Menyimpan..." : "Simpan Perubahan"}
           </button>

@@ -103,12 +103,8 @@ export default class BouquetEditorSection extends Component<Props, State> {
     itemsPerPage: 9,
   };
 
-  private handleSaveWithPopup = async (
-    formData: FormData
-  ): Promise<boolean> => {
-    const ok = await this.props.onSave(formData);
-    alert(ok ? "✅ Berhasil disimpan!" : "❌ Gagal menyimpan bouquet.");
-    return ok;
+  private handleSave = async (formData: FormData): Promise<boolean> => {
+    return this.props.onSave(formData);
   };
 
   private setSearch = (search: string) =>
@@ -397,7 +393,7 @@ export default class BouquetEditorSection extends Component<Props, State> {
                     key={bouquet._id}
                     bouquet={bouquet}
                     collections={collections}
-                    onSave={this.handleSaveWithPopup}
+                    onSave={this.handleSave}
                   />
                 ))}
               </div>
