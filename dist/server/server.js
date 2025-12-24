@@ -15,6 +15,7 @@ const bouquet_routes_1 = __importDefault(require("../routes/bouquet-routes"));
 const collection_routes_1 = __importDefault(require("../routes/collection-routes"));
 const hero_slider_routes_1 = __importDefault(require("../routes/hero-slider-routes"));
 const order_routes_1 = __importDefault(require("../routes/order-routes"));
+const customer_routes_1 = __importDefault(require("../routes/customer-routes"));
 /**
  * Read a required env var (crash early if missing)
  */
@@ -83,6 +84,7 @@ app.use("/api/bouquets", bouquet_routes_1.default);
 app.use("/api/collections", collection_routes_1.default);
 app.use("/api/hero-slider", hero_slider_routes_1.default);
 app.use("/api/orders", order_routes_1.default);
+app.use("/api/customers", customer_routes_1.default);
 // 404 handler
 app.use((_req, res) => {
     res.status(404).json({ message: "Not found" });

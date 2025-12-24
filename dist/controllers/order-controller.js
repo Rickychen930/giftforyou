@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteOrder = exports.getOrders = exports.updateOrder = exports.createOrder = void 0;
 const order_model_1 = require("../models/order-model");
 const bouquet_model_1 = require("../models/bouquet-model");
+const customer_model_1 = require("../models/customer-model");
 const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const normalize = (v, maxLen) => {
     if (typeof v !== "string")
@@ -61,9 +62,20 @@ const resolveBouquetSnapshot = async (bouquetId, fallbackName, fallbackPrice) =>
 };
 async function createOrder(req, res) {
     try {
-        const buyerName = normalize(req.body?.buyerName, 120);
-        const phoneNumber = normalize(req.body?.phoneNumber, 40);
-        const address = normalize(req.body?.address, 500);
+        const customerId = normalize(req.body?.customerId, 64);
+        let buyerName = normalize(req.body?.buyerName, 120);
+        let phoneNumber = normalize(req.body?.phoneNumber, 40);
+        let address = normalize(req.body?.address, 500);
+        if (customerId) {
+            const customer = await customer_model_1.CustomerModel.findById(customerId).lean().exec();
+            if (!customer) {
+                res.status(400).json({ message: "Invalid customerId" });
+                return;
+            }
+            buyerName = normalize(customer.buyerName, 120);
+            phoneNumber = normalize(customer.phoneNumber, 40);
+            address = normalize(customer.address, 500);
+        }
         const bouquetId = normalize(req.body?.bouquetId, 64);
         const bouquetNameRaw = normalize(req.body?.bouquetName, 200);
         const bouquetPriceFromBody = parseNonNegativeNumber(req.body?.bouquetPrice);
@@ -92,6 +104,7 @@ async function createOrder(req, res) {
             return;
         }
         const created = await order_model_1.OrderModel.create({
+            ...(customerId ? { customerId } : {}),
             buyerName,
             phoneNumber,
             address,
@@ -134,79 +147,128 @@ async function updateOrder(req, res) {
             res.status(404).json({ message: "Order not found" });
             return;
         }
-        const patch = {};
+        const existingCustomerId = typeof existing.customerId === "string" ? existing.customerId.trim() : "";
+        const setPatch = {};
+        const unsetPatch = {};
+        const customerId = normalize(req.body?.customerId, 64);
+        const customerIdProvided = req.body?.customerId !== undefined;
+        let willHaveCustomerId = Boolean(existingCustomerId);
+        if (customerIdProvided) {
+            willHaveCustomerId = Boolean(customerId);
+            if (!customerId) {
+                unsetPatch.customerId = 1;
+            }
+            else {
+                const customer = await customer_model_1.CustomerModel.findById(customerId).lean().exec();
+                if (!customer) {
+                    res.status(400).json({ message: "Invalid customerId" });
+                    return;
+                }
+                setPatch.customerId = customerId;
+                setPatch.buyerName = normalize(customer.buyerName, 120);
+                setPatch.phoneNumber = normalize(customer.phoneNumber, 40);
+                setPatch.address = normalize(customer.address, 500);
+            }
+        }
         const buyerName = normalize(req.body?.buyerName, 120);
         const phoneNumber = normalize(req.body?.phoneNumber, 40);
         const address = normalize(req.body?.address, 500);
         const bouquetId = normalize(req.body?.bouquetId, 64);
         const bouquetName = normalize(req.body?.bouquetName, 200);
-        if (buyerName)
-            patch.buyerName = buyerName;
-        if (phoneNumber)
-            patch.phoneNumber = phoneNumber;
-        if (address)
-            patch.address = address;
+        // Keep buyer snapshot consistent with the linked customer.
+        // To manually edit buyer fields, first unlink customerId (send customerId: "").
+        if (!willHaveCustomerId) {
+            if (buyerName)
+                setPatch.buyerName = buyerName;
+            if (phoneNumber)
+                setPatch.phoneNumber = phoneNumber;
+            if (address)
+                setPatch.address = address;
+        }
         if (bouquetId)
-            patch.bouquetId = bouquetId;
+            setPatch.bouquetId = bouquetId;
         if (bouquetName)
-            patch.bouquetName = bouquetName;
+            setPatch.bouquetName = bouquetName;
         const orderStatusRaw = normalize(req.body?.orderStatus, 32);
         if (orderStatusRaw && isOrderStatus(orderStatusRaw))
-            patch.orderStatus = orderStatusRaw;
-        const paymentMethodRaw = normalize(req.body?.paymentMethod, 32);
-        if (paymentMethodRaw && isPaymentMethod(paymentMethodRaw))
-            patch.paymentMethod = paymentMethodRaw;
+            setPatch.orderStatus = orderStatusRaw;
+        if (req.body?.paymentMethod !== undefined) {
+            if (typeof req.body.paymentMethod !== "string") {
+                res.status(400).json({ message: "Invalid paymentMethod" });
+                return;
+            }
+            const paymentMethodRaw = normalize(req.body.paymentMethod, 32);
+            if (!isPaymentMethod(paymentMethodRaw)) {
+                res.status(400).json({ message: "Invalid paymentMethod" });
+                return;
+            }
+            setPatch.paymentMethod = paymentMethodRaw;
+        }
         if (req.body?.downPaymentAmount !== undefined) {
-            patch.downPaymentAmount = parseNonNegativeNumber(req.body.downPaymentAmount);
+            setPatch.downPaymentAmount = parseNonNegativeNumber(req.body.downPaymentAmount);
         }
         if (req.body?.additionalPayment !== undefined) {
-            patch.additionalPayment = parseNonNegativeNumber(req.body.additionalPayment);
+            setPatch.additionalPayment = parseNonNegativeNumber(req.body.additionalPayment);
         }
         if (req.body?.deliveryPrice !== undefined) {
-            patch.deliveryPrice = parseNonNegativeNumber(req.body.deliveryPrice);
+            setPatch.deliveryPrice = parseNonNegativeNumber(req.body.deliveryPrice);
         }
         if (req.body?.bouquetPrice !== undefined) {
-            patch.bouquetPrice = parseNonNegativeNumber(req.body.bouquetPrice);
+            setPatch.bouquetPrice = parseNonNegativeNumber(req.body.bouquetPrice);
         }
-        const deliveryAtRaw = normalize(req.body?.deliveryAt, 40);
-        if (deliveryAtRaw) {
-            const d = new Date(deliveryAtRaw);
-            if (!Number.isFinite(d.getTime())) {
+        const hasDeliveryAt = req.body?.deliveryAt !== undefined;
+        if (hasDeliveryAt) {
+            if (typeof req.body.deliveryAt !== "string") {
                 res.status(400).json({ message: "Invalid deliveryAt" });
                 return;
             }
-            patch.deliveryAt = d;
+            const deliveryAtRaw = normalize(req.body.deliveryAt, 40);
+            if (!deliveryAtRaw) {
+                unsetPatch.deliveryAt = 1;
+            }
+            else {
+                const d = new Date(deliveryAtRaw);
+                if (!Number.isFinite(d.getTime())) {
+                    res.status(400).json({ message: "Invalid deliveryAt" });
+                    return;
+                }
+                setPatch.deliveryAt = d;
+            }
         }
-        const nextBouquetId = (patch.bouquetId ?? existing.bouquetId);
-        let nextBouquetName = (patch.bouquetName ?? existing.bouquetName ?? "");
-        let nextBouquetPrice = parseNonNegativeNumber(patch.bouquetPrice !== undefined ? patch.bouquetPrice : existing.bouquetPrice);
-        if (nextBouquetId && patch.bouquetId) {
+        const nextBouquetId = (setPatch.bouquetId ?? existing.bouquetId);
+        let nextBouquetName = (setPatch.bouquetName ?? existing.bouquetName ?? "");
+        let nextBouquetPrice = parseNonNegativeNumber(setPatch.bouquetPrice !== undefined ? setPatch.bouquetPrice : existing.bouquetPrice);
+        if (nextBouquetId && setPatch.bouquetId) {
             const fallbackName = nextBouquetName;
             const fallbackPrice = nextBouquetPrice;
             const snap = await resolveBouquetSnapshot(nextBouquetId, fallbackName, fallbackPrice);
             nextBouquetName = snap.bouquetName;
             nextBouquetPrice = snap.bouquetPrice;
-            patch.bouquetName = snap.bouquetName;
-            patch.bouquetPrice = snap.bouquetPrice;
+            setPatch.bouquetName = snap.bouquetName;
+            setPatch.bouquetPrice = snap.bouquetPrice;
         }
-        const nextDownPayment = parseNonNegativeNumber(patch.downPaymentAmount !== undefined
-            ? patch.downPaymentAmount
+        const nextDownPayment = parseNonNegativeNumber(setPatch.downPaymentAmount !== undefined
+            ? setPatch.downPaymentAmount
             : existing.downPaymentAmount);
-        const nextAdditional = parseNonNegativeNumber(patch.additionalPayment !== undefined
-            ? patch.additionalPayment
+        const nextAdditional = parseNonNegativeNumber(setPatch.additionalPayment !== undefined
+            ? setPatch.additionalPayment
             : existing.additionalPayment);
-        const nextDelivery = parseNonNegativeNumber(patch.deliveryPrice !== undefined ? patch.deliveryPrice : existing.deliveryPrice);
+        const nextDelivery = parseNonNegativeNumber(setPatch.deliveryPrice !== undefined ? setPatch.deliveryPrice : existing.deliveryPrice);
         const nextTotalAmount = parseNonNegativeNumber(nextBouquetPrice + nextDelivery);
-        patch.totalAmount = nextTotalAmount;
-        patch.paymentStatus = derivePaymentStatus(nextTotalAmount, nextDownPayment, nextAdditional);
-        const nextOrderStatus = (patch.orderStatus ?? existing.orderStatus);
-        const nextPaymentStatus = patch.paymentStatus;
-        const nextPaymentMethod = (patch.paymentMethod ?? existing.paymentMethod ?? "");
+        setPatch.totalAmount = nextTotalAmount;
+        setPatch.paymentStatus = derivePaymentStatus(nextTotalAmount, nextDownPayment, nextAdditional);
+        const nextOrderStatus = (setPatch.orderStatus ?? existing.orderStatus);
+        const nextPaymentStatus = setPatch.paymentStatus;
+        const nextPaymentMethod = (setPatch.paymentMethod ?? existing.paymentMethod ?? "");
         const prevOrderStatus = (existing.orderStatus ?? "bertanya");
         const prevPaymentStatus = (existing.paymentStatus ?? "belum_bayar");
         const prevPaymentMethod = (existing.paymentMethod ?? "");
         const prevDeliveryAt = existing.deliveryAt ? new Date(existing.deliveryAt) : null;
-        const nextDeliveryAt = patch.deliveryAt ? new Date(patch.deliveryAt) : prevDeliveryAt;
+        const nextDeliveryAt = unsetPatch.deliveryAt
+            ? null
+            : setPatch.deliveryAt
+                ? new Date(setPatch.deliveryAt)
+                : prevDeliveryAt;
         const activity = Array.isArray(existing.activity) ? existing.activity.slice(0) : [];
         const push = (kind, message) => {
             activity.push({ at: new Date(), kind, message });
@@ -220,26 +282,31 @@ async function updateOrder(req, res) {
         if (prevPaymentMethod !== nextPaymentMethod) {
             push("payment", `Metode bayar: ${(prevPaymentMethod || "—").replace(/_/g, " ")} → ${(nextPaymentMethod || "—").replace(/_/g, " ")}`);
         }
-        if (patch.deliveryAt) {
+        if (hasDeliveryAt) {
             const prevT = prevDeliveryAt?.getTime() ?? 0;
             const nextT = nextDeliveryAt?.getTime() ?? 0;
             if (prevT !== nextT) {
-                push("delivery", "Waktu deliver diperbarui");
+                push("delivery", nextDeliveryAt ? "Waktu deliver diperbarui" : "Waktu deliver dihapus");
             }
         }
-        if (patch.bouquetId) {
+        if (setPatch.bouquetId) {
             push("bouquet", "Bouquet diperbarui");
         }
-        if (patch.downPaymentAmount !== undefined ||
-            patch.additionalPayment !== undefined ||
-            patch.deliveryPrice !== undefined) {
+        if (setPatch.downPaymentAmount !== undefined ||
+            setPatch.additionalPayment !== undefined ||
+            setPatch.deliveryPrice !== undefined) {
             push("payment", "Nominal pembayaran/ongkir diperbarui");
         }
         if (!activity.length) {
             push("edit", "Order diperbarui");
         }
-        patch.activity = activity.slice(-50);
-        const updated = await order_model_1.OrderModel.findByIdAndUpdate(id, { $set: patch }, { new: true, runValidators: true })
+        setPatch.activity = activity.slice(-50);
+        const updateOps = {};
+        if (Object.keys(setPatch).length > 0)
+            updateOps.$set = setPatch;
+        if (Object.keys(unsetPatch).length > 0)
+            updateOps.$unset = unsetPatch;
+        const updated = await order_model_1.OrderModel.findByIdAndUpdate(id, updateOps, { new: true, runValidators: true })
             .lean()
             .exec();
         if (!updated) {

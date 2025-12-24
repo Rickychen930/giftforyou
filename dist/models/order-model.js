@@ -26,6 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const OrderSchema = new mongoose_1.Schema({
+    customerId: { type: String, required: false, trim: true, maxlength: 64, index: true },
     buyerName: { type: String, required: true, trim: true, maxlength: 120 },
     phoneNumber: { type: String, required: true, trim: true, maxlength: 40 },
     address: { type: String, required: true, trim: true, maxlength: 500 },
