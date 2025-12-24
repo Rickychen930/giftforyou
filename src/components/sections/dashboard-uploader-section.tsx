@@ -25,12 +25,16 @@ interface State {
   file: File | null;
   previewUrl: string;
 
+  isDraggingImage: boolean;
+
   submitting: boolean;
   message: string;
   messageType: "success" | "error" | "";
 }
 
 class BouquetUploader extends Component<Props, State> {
+  private fileInputRef = React.createRef<HTMLInputElement>();
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -51,6 +55,8 @@ class BouquetUploader extends Component<Props, State> {
 
       file: null,
       previewUrl: "",
+
+      isDraggingImage: false,
 
       submitting: false,
       message: "",
@@ -103,9 +109,87 @@ class BouquetUploader extends Component<Props, State> {
       return;
     }
 
+    if (!this.isAcceptableImage(file)) {
+      this.setMessage("File harus berupa gambar (JPG/PNG/HEIC).", "error");
+      this.clearImage();
+      return;
+    }
+
     const previewUrl = URL.createObjectURL(file);
     this.setState({ file, previewUrl });
   };
+
+  private isAcceptableImage(file: File): boolean {
+    const name = (file.name ?? "").toLowerCase();
+    const type = (file.type ?? "").toLowerCase();
+    if (type.startsWith("image/")) return true;
+    return name.endsWith(".heic") || name.endsWith(".heif");
+  }
+
+  private clearImage = () => {
+    if (this.state.previewUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(this.state.previewUrl);
+    }
+
+    if (this.fileInputRef.current) {
+      this.fileInputRef.current.value = "";
+    }
+
+    this.setState({ file: null, previewUrl: "", isDraggingImage: false });
+  };
+
+  private openFilePicker = () => {
+    if (this.state.submitting) return;
+    this.fileInputRef.current?.click();
+  };
+
+  private handleDropzoneKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      this.openFilePicker();
+    }
+  };
+
+  private handleDropzoneDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (this.state.submitting) return;
+    if (!this.state.isDraggingImage) this.setState({ isDraggingImage: true });
+  };
+
+  private handleDropzoneDragLeave = () => {
+    if (this.state.isDraggingImage) this.setState({ isDraggingImage: false });
+  };
+
+  private handleDropzoneDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (this.state.submitting) return;
+
+    const file = e.dataTransfer.files?.[0] ?? null;
+    this.setState({ isDraggingImage: false });
+
+    // cleanup old preview
+    if (this.state.previewUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(this.state.previewUrl);
+    }
+
+    if (!file) return;
+
+    if (!this.isAcceptableImage(file)) {
+      this.setMessage("File harus berupa gambar (JPG/PNG/HEIC).", "error");
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    this.setState({ file, previewUrl });
+  };
+
+  private formatBytes(bytes: number): string {
+    if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+    const units = ["B", "KB", "MB", "GB"];
+    const idx = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+    const val = bytes / Math.pow(1024, idx);
+    return `${val.toFixed(idx === 0 ? 0 : 1)} ${units[idx]}`;
+  }
 
   private validate(): string | null {
     const name = this.state.name.trim();
@@ -195,7 +279,7 @@ class BouquetUploader extends Component<Props, State> {
   };
 
   render(): React.ReactNode {
-    const { submitting, message, messageType, previewUrl } = this.state;
+    const { submitting, message, messageType, previewUrl, file, isDraggingImage } = this.state;
 
     return (
       <section className="uploader">
@@ -374,15 +458,71 @@ class BouquetUploader extends Component<Props, State> {
               />
             </label>
 
-            <label className="uploader__field uploader__field--full">
-              Gambar
-              <input
-                type="file"
-                accept="image/*,.heic,.heif"
-                onChange={this.handleImageChange}
-                disabled={submitting}
-              />
-            </label>
+            <div className="uploader__field uploader__field--full">
+              <span className="uploader__label">Gambar</span>
+              <div
+                className={`uploader__dropzone ${isDraggingImage ? "is-dragging" : ""} ${file ? "has-file" : ""}`}
+                role="button"
+                tabIndex={0}
+                aria-label="Pilih gambar bouquet"
+                aria-disabled={submitting ? "true" : "false"}
+                onClick={this.openFilePicker}
+                onKeyDown={this.handleDropzoneKeyDown}
+                onDragOver={this.handleDropzoneDragOver}
+                onDragLeave={this.handleDropzoneDragLeave}
+                onDrop={this.handleDropzoneDrop}
+              >
+                <div className="uploader__dropzoneText">
+                  <div className="uploader__dropzoneTitle">
+                    {file ? "Gambar dipilih" : "Klik untuk pilih gambar"}
+                  </div>
+                  <div className="uploader__dropzoneSub">
+                    {file
+                      ? `${file.name} • ${this.formatBytes(file.size)}`
+                      : "Atau drag & drop (JPG/PNG/HEIC). Opsional."}
+                  </div>
+                </div>
+
+                <div className="uploader__dropzoneActions" aria-label="Aksi gambar" role="group">
+                  {file ? (
+                    <button
+                      type="button"
+                      className="uploader__ghostBtn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        this.clearImage();
+                      }}
+                      disabled={submitting}
+                    >
+                      Hapus
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="uploader__ghostBtn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        this.openFilePicker();
+                      }}
+                      disabled={submitting}
+                    >
+                      Pilih file
+                    </button>
+                  )}
+                </div>
+
+                <input
+                  ref={this.fileInputRef}
+                  className="uploader__fileInput"
+                  type="file"
+                  accept="image/*,.heic,.heif"
+                  aria-label="Upload gambar bouquet"
+                  onChange={this.handleImageChange}
+                  disabled={submitting}
+                  tabIndex={-1}
+                />
+              </div>
+            </div>
               </div>
             </div>
 
@@ -404,24 +544,22 @@ class BouquetUploader extends Component<Props, State> {
             </aside>
           </div>
 
-          <button
-            className="uploader__submit"
-            type="submit"
-            disabled={submitting}
-          >
-            {submitting ? "Mengunggah..." : "Unggah Bouquet"}
-          </button>
+          <div className="uploader__footer" aria-label="Aksi upload" role="group">
+            <button className="uploader__submit" type="submit" disabled={submitting}>
+              {submitting ? "Mengunggah..." : "Unggah Bouquet"}
+            </button>
 
-          {message && (
-            <div
-              className={`uploader__message ${
-                messageType === "success" ? "is-success" : "is-error"
-              }`}
-              role={messageType === "error" ? "alert" : "status"}
-            >
-              {message}
-            </div>
-          )}
+            {message && (
+              <div
+                className={`uploader__message ${
+                  messageType === "success" ? "is-success" : "is-error"
+                }`}
+                role={messageType === "error" ? "alert" : "status"}
+              >
+                {message}
+              </div>
+            )}
+          </div>
         </form>
       </section>
     );

@@ -47,7 +47,7 @@ exports.STORE_PROFILE = {
         instagram: "https://instagram.com/giftforyou.idn",
         whatsapp: "https://wa.me/6285161428911",
         facebook: "https://facebook.com/giftforyou.idn",
-        tiktok: "https://tiktok.com/@giftforyou.idn",
+        tiktok: "https://tiktok.com/@giftforyouidn",
     },
 };
 //# sourceMappingURL=store-profile.js.map
