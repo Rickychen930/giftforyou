@@ -1,20 +1,20 @@
 @import "colors.css";
 
 :root {
-  --fp-bg-1: rgba(255, 255, 255, 0.96);
-  --fp-bg-2: rgba(252, 244, 248, 0.96);
-  --fp-surface: rgba(255, 255, 255, 0.9);
-  --fp-hover-surface: rgba(255, 255, 255, 0.98);
-  --fp-border: rgba(0, 0, 0, 0.08);
+  --fp-bg-1: var(--surface-2);
+  --fp-bg-2: var(--surface-5);
+  --fp-surface: var(--surface-2);
+  --fp-hover-surface: var(--surface-1);
+  --fp-border: var(--border-2);
   --fp-border-active: rgba(212, 140, 156, 0.45);
-  --fp-shadow: 0 16px 38px rgba(0, 0, 0, 0.08);
-  --fp-shadow-active: 0 10px 24px rgba(212, 140, 156, 0.25);
-  --fp-text: #2f2f2f;
-  --fp-text-strong: #1f1f1f;
-  --fp-text-muted: rgba(0, 0, 0, 0.6);
-  --fp-brand: #d48c9c;
-  --fp-brand-strong: #b56f80;
-  --fp-on-brand: #ffffff;
+  --fp-shadow: var(--shadow-2);
+  --fp-shadow-active: var(--brand-shadow);
+  --fp-text: var(--ink-900);
+  --fp-text-strong: rgba(0, 0, 0, 0.78);
+  --fp-text-muted: var(--ink-620);
+  --fp-brand: var(--brand-rose-500);
+  --fp-brand-strong: var(--brand-wine-700);
+  --fp-on-brand: var(--neutral-0);
   --fp-focus-ring: 0 0 0 3px rgba(212, 140, 156, 0.25);
 }
 
@@ -22,33 +22,136 @@
    Filter Panel (premium)
 ========================= */
 .filterPanel {
-  background: linear-gradient(135deg, var(--fp-bg-1), var(--fp-bg-2));
+  background:
+    radial-gradient(740px 420px at 20% 0%, rgba(212, 140, 156, 0.10), transparent 60%),
+    linear-gradient(135deg, var(--fp-bg-1), var(--fp-bg-2));
   border: 1px solid var(--fp-border);
   border-radius: 18px;
   box-shadow: var(--fp-shadow);
-  padding: 0.95rem 1.1rem;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  padding: 0.9rem 1.05rem;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 0.85rem;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  overflow: visible;
+}
+
+/* Embedded: rely on the parent container card (prevents double-card / messy layout) */
+.filterPanel--embedded {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  gap: 0.9rem;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.filterPanel--embedded .filterPanel__header {
+  padding: 0 0 0.35rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.filterPanel--embedded .filterPanel__title {
+  font-size: 1.05rem;
+}
+
+.filterPanel--embedded .filterPanel__body {
+  gap: 0.9rem;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .filterPanel {
+    background: var(--fp-bg-1);
+  }
 }
 
 .filterPanel__header {
-  padding-bottom: 0;
-  border-bottom: none;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   min-width: 0;
-  flex: 0 0 auto;
+}
+
+.filterPanel__title {
+  font-family: "Playfair Display", Georgia, serif;
+  letter-spacing: -0.01em;
+}
+
+.filterPanel__header::after {
+  display: none;
 }
 
 .filterPanel__body {
-  display: flex;
-  flex: 1 1 auto;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 1rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
   min-width: 0;
+}
+
+/* =========================
+   Topbar variant (horizontal)
+========================= */
+.filterPanel--topbar .filterPanel__body {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.85rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  padding-bottom: 0.35rem;
+  scrollbar-width: none;
+}
+
+/* Desktop+ : wrap into 2 rows when there is room (more premium than forcing horizontal scroll) */
+@media (min-width: 1100px) {
+  .filterPanel--topbar .filterPanel__body {
+    flex-wrap: wrap;
+    overflow: visible;
+    padding-bottom: 0;
+  }
+}
+
+.filterPanel--topbar .filterPanel__body::-webkit-scrollbar {
+  height: 0;
+  width: 0;
+  background: transparent;
+}
+
+.filterPanel--topbar .fpGroup {
+  flex: 0 0 auto;
+  min-width: 260px;
+  max-width: 360px;
+  padding: 0.8rem 0.85rem;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06);
+}
+
+.filterPanel--topbar .fpGroup--price {
+  min-width: 340px;
+  max-width: 420px;
+}
+
+.filterPanel--topbar .fpGroup--sort {
+  min-width: 260px;
+  max-width: 320px;
+}
+
+.fpGroup__toggle--static {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--fp-text);
+  padding: 0;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  min-width: 0;
+  max-width: 100%;
+  flex: 1 1 auto;
 }
 
 .filterPanel__title {
@@ -65,46 +168,118 @@
   line-height: 1.6;
   font-weight: 650;
   max-width: 38ch;
+  overflow-wrap: anywhere;
 }
 
 /* Group */
 .fpGroup {
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
-  min-width: 180px;
-  flex: 0 1 260px;
+  gap: 0.45rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Keep a single-column rhythm for a calmer, luxury sidebar layout */
+
+/* Allow the price group to look like a premium inset panel */
+.fpGroup:first-of-type .fpPrice {
+  border-color: rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.78);
 }
 
 .fpGroup__head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
   flex-wrap: wrap;
+  min-width: 0;
+}
+
+.fpGroup__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+  max-width: 100%;
+  flex: 1 1 auto;
+
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--fp-text);
+  padding: 0.25rem 0.35rem;
+  border-radius: 12px;
+  cursor: pointer;
+
+  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+
+.fpGroup__toggle:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .fpGroup__toggle:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.45);
+    border-color: rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
+  }
+}
+
+.fpGroup__toggle:focus-visible {
+  outline: 3px solid rgba(212, 140, 156, 0.25);
+  outline-offset: 3px;
+}
+
+.fpGroup__meta {
+  font-weight: 850;
+  color: var(--fp-text-muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.fpGroup__chev {
+  margin-left: auto;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-right: 2px solid rgba(0, 0, 0, 0.4);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.4);
+  transform: rotate(45deg);
+}
+
+.fpGroup__toggle[aria-expanded="true"] .fpGroup__chev {
+  transform: rotate(-135deg);
+}
+
+.fpGroup__panel[hidden] {
+  display: none;
 }
 
 .fpGroup__title {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.94rem;
   font-weight: 950;
   color: var(--fp-text);
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
+  letter-spacing: 0.005em;
+  text-transform: none;
+  overflow-wrap: anywhere;
 }
 
 .fpGroup__clear {
-  border: 1px solid var(--fp-border);
-  background: var(--fp-surface);
+  border: 1px solid transparent;
+  background: transparent;
   color: var(--fp-text-muted);
   font-weight: 850;
   font-size: 0.85rem;
 
-  padding: 0.4rem 0.65rem;
+  padding: 0.25rem 0.45rem;
   border-radius: 999px;
   cursor: pointer;
 
-  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease,
+    color 0.18s ease;
 }
 
 .fpGroup__clear:disabled {
@@ -112,10 +287,13 @@
   cursor: default;
 }
 
-.fpGroup__clear:hover:not(:disabled) {
-  border-color: var(--fp-border-active);
-  background: var(--fp-hover-surface);
-  transform: translateY(-1px);
+@media (hover: hover) and (pointer: fine) {
+  .fpGroup__clear:hover:not(:disabled) {
+    border-color: var(--fp-border-active);
+    background: rgba(255, 255, 255, 0.45);
+    color: var(--fp-text);
+    transform: translateY(-1px);
+  }
 }
 
 .fpGroup__clear:focus-visible {
@@ -124,24 +302,63 @@
 }
 
 /* Chips layout */
+/* Chips are now used primarily for Sort (few items) */
 .fpChips {
   display: flex;
-  flex-wrap: nowrap;
-  gap: 0.55rem;
-  overflow-x: auto;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  overflow-x: visible;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
-  padding-bottom: 0.15rem;
+  padding: 0.1rem 0.1rem 0.2rem;
   align-items: center;
   min-width: 0;
+  scroll-padding: 0.5rem;
+}
+
+/* Horizontal scroller polish */
+.fpOptions,
+.fpGroup--sort .fpChips {
+  scrollbar-width: none;
+}
+
+@supports ((-webkit-mask-image: linear-gradient(#000, #000)) or (mask-image: linear-gradient(#000, #000))) {
+  /* Fade edges (luxury hint that it scrolls) */
+  .fpOptions,
+  .fpGroup--sort .fpChips {
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent,
+      #000 16px,
+      #000 calc(100% - 16px),
+      transparent
+    );
+    mask-image: linear-gradient(
+      90deg,
+      transparent,
+      #000 16px,
+      #000 calc(100% - 16px),
+      transparent
+    );
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+  }
 }
 
 .fpChips::-webkit-scrollbar {
   height: 8px;
+  width: 10px;
 }
 
 .fpChips::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.12);
+  border-radius: 999px;
+}
+
+.fpChips::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.04);
   border-radius: 999px;
 }
 
@@ -151,11 +368,12 @@
   background: var(--fp-surface);
   color: var(--fp-text-muted);
 
-  padding: 0.5rem 0.75rem;
+  padding: 0.45rem 0.7rem;
   border-radius: 999px;
 
   font-weight: 850;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  line-height: 1.1;
   cursor: pointer;
 
   /* Safari flex/overflow: prevent weird stacking/shrinking */
@@ -163,18 +381,136 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-height: 38px;
+  min-width: 0;
+  max-width: 100%;
 
   transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease,
     background 0.18s ease, color 0.18s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  white-space: nowrap;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fpChip__label {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.fpChip:hover {
-  background: var(--fp-hover-surface);
-  border-color: var(--fp-border-active);
-  color: var(--fp-brand);
-  transform: translateY(-1px);
+/* === Option list (reconstructed) === */
+.fpOptions {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.55rem;
+  padding: 0.2rem 0.25rem 0.45rem;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-padding: 0.5rem;
+}
+
+.fpOptions::-webkit-scrollbar {
+  height: 0;
+  width: 0;
+  background: transparent;
+}
+
+.fpGroup--sort .fpChips::-webkit-scrollbar {
+  height: 0;
+  width: 0;
+  background: transparent;
+}
+
+.fpOption {
+  width: auto;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+
+  border: 1px solid rgba(0, 0, 0, 0.075);
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--fp-text);
+
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  min-height: 42px;
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.15;
+  min-width: 0;
+
+  scroll-snap-align: start;
+
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.fpOption__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 850;
+  color: var(--fp-text);
+  max-width: 22ch;
+}
+
+.fpOption:disabled {
+  opacity: 0.55;
+  cursor: default;
+  transform: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .fpOption:hover:not(:disabled) {
+    border-color: var(--fp-border-active);
+    background: rgba(255, 255, 255, 0.84);
+    transform: translateY(-1px);
+  }
+}
+
+.fpOption:focus-visible {
+  outline: 3px solid rgba(212, 140, 156, 0.25);
+  outline-offset: 3px;
+}
+
+.fpOption.is-active {
+  border-color: rgba(212, 140, 156, 0.55);
+  background:
+    radial-gradient(520px 220px at 0% 0%, rgba(212, 140, 156, 0.12), transparent 55%),
+    rgba(255, 255, 255, 0.84);
+}
+
+.fpOption.is-active::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--fp-brand), var(--fp-brand-strong));
+  box-shadow: 0 0 0 3px rgba(212, 140, 156, 0.18);
+  flex: 0 0 auto;
+}
+
+@media (min-width: 769px) {
+  .fpOptions {
+    scroll-snap-type: x proximity;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .fpChip:hover {
+    background: var(--fp-hover-surface);
+    border-color: var(--fp-border-active);
+    color: var(--fp-brand);
+    transform: translateY(-1px);
+  }
 }
 
 .fpChip:disabled {
@@ -197,6 +533,10 @@
   box-shadow: var(--fp-shadow-active);
 }
 
+.fpChip:active {
+  transform: translateY(0);
+}
+
 /* Price */
 .fpPrice {
   padding: 0.75rem;
@@ -210,15 +550,41 @@
   justify-content: space-between;
   gap: 0.75rem;
   margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  row-gap: 0.35rem;
 }
 
 .fpPrice__value {
   font-weight: 900;
   color: var(--fp-text-strong);
+  letter-spacing: -0.01em;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .fpSlider {
   padding: 0.25rem 0.1rem 0.1rem;
+  max-width: 100%;
+}
+
+/* rc-slider cosmetics (keep functional behavior the same) */
+.fpSlider .rc-slider-rail {
+  height: 6px;
+}
+
+.fpSlider .rc-slider-track {
+  height: 6px;
+}
+
+.fpSlider .rc-slider-handle {
+  width: 18px;
+  height: 18px;
+  margin-top: -6px;
+}
+
+.fpSlider .rc-slider-handle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(212, 140, 156, 0.22);
 }
 
 /* Accessibility focus */
@@ -232,19 +598,29 @@
   .filterPanel {
     border-radius: 16px;
     padding: 1.1rem;
-    flex-direction: column;
-    align-items: stretch;
+    gap: 0.9rem;
   }
 
   .filterPanel__hint {
     display: none;
   }
 
-  .filterPanel__body {
-    flex-direction: column;
+  /* Mobile: option lists are horizontal scrollers (compact + clean) */
+  .fpGroup__panel .fpOptions {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0.2rem 0.25rem 0.45rem;
   }
 
-  .fpChip {
+  /* Mobile: keep sort chips horizontal (few items, fast scan) */
+  .fpGroup--sort .fpChips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding: 0.15rem 0.2rem 0.35rem;
+  }
+
+  .fpGroup--sort .fpChip {
     flex: 0 0 auto;
   }
 }

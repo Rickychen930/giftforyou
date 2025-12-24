@@ -21,6 +21,15 @@ interface FilterPanelProps {
   allCollections: string[];
   sortBy: string;
 
+  /** When true, renders without the outer panel header/background so it can live inside another container. */
+  embedded?: boolean;
+
+  /** When true, hides the internal header (useful when a parent already provides a header, e.g. <summary>). */
+  hideHeader?: boolean;
+
+  /** Visual/layout variant. Use "topbar" for a horizontal top-of-page filter layout. */
+  variant?: "sidebar" | "topbar";
+
   disabled?: boolean;
 
   onPriceChange: (range: Range) => void;
@@ -45,12 +54,36 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   allTypes,
   allCollections,
   sortBy,
+  embedded,
+  hideHeader,
+  variant = "sidebar",
   disabled,
   onPriceChange,
   onToggleFilter,
   onClearFilter,
   onSortChange,
 }) => {
+  const isTopbar = variant === "topbar";
+  const [openGroups, setOpenGroups] = React.useState<
+    Record<"selectedTypes" | "selectedSizes" | "selectedCollections", boolean>
+  >(() => {
+    const types = allTypes.length ? allTypes : ["Orchid", "Mixed"];
+    const sizes = allSizes.length ? allSizes : [...BOUQUET_SIZES];
+    const collections = allCollections;
+
+    return {
+      selectedTypes: isTopbar ? true : selectedTypes.length > 0 || types.length <= 8,
+      selectedSizes: isTopbar ? true : selectedSizes.length > 0 || sizes.length <= 8,
+      selectedCollections: isTopbar ? true : selectedCollections.length > 0 || collections.length <= 8,
+    };
+  });
+
+  const toggleGroup = (
+    k: "selectedTypes" | "selectedSizes" | "selectedCollections"
+  ) => {
+    setOpenGroups((prev) => ({ ...prev, [k]: !prev[k] }));
+  };
+
   const handlePriceChange = (value: number | number[]) => {
     if (Array.isArray(value) && value.length === 2)
       onPriceChange([value[0], value[1]]);
@@ -69,10 +102,34 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     options: string[];
     selected: string[];
     k: "selectedTypes" | "selectedSizes" | "selectedCollections";
-  }> = ({ title, options, selected, k }) => (
-    <section className="fpGroup" aria-label={`Filter ${title}`}>
-      <div className="fpGroup__head">
-        <h4 className="fpGroup__title">{title}</h4>
+  }> = ({ title, options, selected, k }) => {
+    const isOpen = isTopbar ? true : openGroups[k];
+    const panelId = `fp-panel-${k}`;
+    const meta = selected.length ? `${selected.length} dipilih` : "Semua";
+
+    return (
+      <section className="fpGroup" aria-label={`Filter ${title}`}>
+        <div className="fpGroup__head">
+          {isTopbar ? (
+            <div className="fpGroup__toggle fpGroup__toggle--static" aria-hidden="true">
+              <span className="fpGroup__title">{title}</span>
+              <span className="fpGroup__meta">{meta}</span>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="fpGroup__toggle"
+              aria-expanded={isOpen}
+              aria-controls={panelId}
+              onClick={() => toggleGroup(k)}
+              disabled={Boolean(disabled)}
+            >
+              <span className="fpGroup__title">{title}</span>
+              <span className="fpGroup__meta">{meta}</span>
+              <span className="fpGroup__chev" aria-hidden="true" />
+            </button>
+          )}
+
         <button
           type="button"
           className="fpGroup__clear"
@@ -81,43 +138,69 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
         >
           Hapus
         </button>
-      </div>
+        </div>
 
-      <div className="fpChips" role="list">
-        <button
-          type="button"
-          className={`fpChip ${selected.length === 0 ? "is-active" : ""}`}
-          onClick={() => onClearFilter(k)}
-          disabled={Boolean(disabled)}
-        >
-          Semua
-        </button>
+        <div id={panelId} className="fpGroup__panel" hidden={!isOpen}>
+          <div className="fpOptions" role="list">
+            <button
+              type="button"
+              className={`fpOption ${selected.length === 0 ? "is-active" : ""}`}
+              onClick={() => onClearFilter(k)}
+              disabled={Boolean(disabled)}
+              aria-pressed={selected.length === 0}
+            >
+              <span className="fpOption__label">Semua</span>
+            </button>
 
-        {options.map((opt) => (
-          <button
-            type="button"
-            key={opt}
-            className={`fpChip ${selected.includes(opt) ? "is-active" : ""}`}
-            onClick={() => onToggleFilter(k, opt)}
-            disabled={Boolean(disabled)}
-          >
-            {opt}
-          </button>
-        ))}
-      </div>
-    </section>
-  );
+            {options.map((opt) => {
+              const isSelected = selected.includes(opt);
+              return (
+                <button
+                  type="button"
+                  key={opt}
+                  className={`fpOption ${isSelected ? "is-active" : ""}`}
+                  onClick={() => onToggleFilter(k, opt)}
+                  disabled={Boolean(disabled)}
+                  aria-pressed={isSelected}
+                >
+                  <span className="fpOption__label">{opt}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    );
+  };
+
+  const panelClassName = [
+    "filterPanel",
+    embedded ? "filterPanel--embedded" : "",
+    isTopbar ? "filterPanel--topbar" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <div className="filterPanel" aria-label="Panel filter">
-      <header className="filterPanel__header">
-        <h3 className="filterPanel__title">Filter & Urutkan</h3>
-        <p className="filterPanel__hint">Saring berdasarkan harga, tipe, ukuran, dan koleksi.</p>
-      </header>
+    <div className={panelClassName} aria-label="Panel filter">
+      {!hideHeader && !embedded && (
+        <header className="filterPanel__header">
+          <h3 className="filterPanel__title">Filter & Urutkan</h3>
+          <p className="filterPanel__hint">
+            Saring berdasarkan harga, tipe, ukuran, dan koleksi.
+          </p>
+        </header>
+      )}
+
+      {!hideHeader && embedded && (
+        <header className="filterPanel__header">
+          <h3 className="filterPanel__title">Filter & Urutkan</h3>
+        </header>
+      )}
 
       <div className="filterPanel__body">
         {/* Price */}
-        <section className="fpGroup" aria-label="Filter rentang harga">
+        <section className="fpGroup fpGroup--price" aria-label="Filter rentang harga">
           <div className="fpGroup__head">
             <h4 className="fpGroup__title">Harga</h4>
           </div>
@@ -183,7 +266,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
         />
 
         {/* Sort */}
-        <section className="fpGroup" aria-label="Opsi pengurutan">
+        <section className="fpGroup fpGroup--sort" aria-label="Opsi pengurutan">
           <div className="fpGroup__head">
             <h4 className="fpGroup__title">Urutkan</h4>
           </div>
@@ -197,7 +280,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 onClick={() => onSortChange(opt.value)}
                 disabled={Boolean(disabled)}
               >
-                {opt.label}
+                <span className="fpChip__label">{opt.label}</span>
               </button>
             ))}
           </div>

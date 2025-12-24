@@ -444,12 +444,17 @@
   transition: all 0.3s ease;
   padding: 0;
   gap: 5px;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-.hamburger:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(212, 140, 156, 0.15);
-  background: linear-gradient(135deg, #fef5f7, #ffffff);
+@media (hover: hover) and (pointer: fine) {
+  .hamburger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(212, 140, 156, 0.15);
+    background: linear-gradient(135deg, #fef5f7, #ffffff);
+  }
 }
 
 .hamburger span {
@@ -705,6 +710,8 @@
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   z-index: 1400;
+  cursor: pointer;
+  touch-action: none;
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -741,7 +748,8 @@
     left: 0;
     right: 0;
     top: 100%;
-    pointer-events: auto;
+    /* Prevent invisible overlay from intercepting taps when menu is closed */
+    pointer-events: none;
     z-index: 1500;
   }
 
@@ -774,15 +782,17 @@
     animation: mobileMenuSlide 0.22s ease-out;
 
     /* Prevent overscreen on small devices */
-    max-height: calc(100vh - 96px);
+    max-height: calc(100vh - 96px - env(safe-area-inset-top));
     overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
+
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
   }
 
   @supports (height: 100dvh) {
     .nav-links.open {
-      max-height: calc(100dvh - 96px);
+      max-height: calc(100dvh - 96px - env(safe-area-inset-top));
     }
   }
 
@@ -826,6 +836,16 @@
   .logo-wrapper {
     width: 52px;
     height: 52px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-links.open {
+    animation: none !important;
+  }
+
+  .hamburger span {
+    transition: none !important;
   }
 }
 

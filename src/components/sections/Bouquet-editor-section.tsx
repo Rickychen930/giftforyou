@@ -309,6 +309,7 @@ export default class BouquetEditorSection extends Component<Props, State> {
           <aside className="editorFilters" aria-label="Filter">
             <div className="editorFilters__card">
               <FilterPanel
+                embedded
                 priceRange={priceRange}
                 selectedTypes={selectedTypes}
                 selectedSizes={selectedSizes}

@@ -5,17 +5,63 @@
   background: var(--bouquet-color-surface);
   border-radius: var(--bouquet-radius-card);
   box-shadow: var(--bouquet-shadow-1);
-  border: 1px solid var(--border-1);
+  border: 1px solid var(--border-2);
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
   display: flex;
   flex-direction: column;
   gap: 0;
+  position: relative;
+  isolation: isolate;
+  contain: paint;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.bouquet-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--bouquet-shadow-2);
+.bouquet-card:focus-visible {
+  outline: 3px solid rgba(212, 140, 156, 0.25);
+  outline-offset: 4px;
+}
+
+.bouquet-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212, 140, 156, 0.28), transparent);
+  opacity: 0.9;
+}
+
+.bouquet-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(700px 260px at 12% 0%, rgba(212, 140, 156, 0.10), transparent 60%),
+    radial-gradient(640px 260px at 92% 10%, rgba(168, 213, 186, 0.10), transparent 60%);
+  opacity: 0.45;
+  z-index: 0;
+}
+
+.bouquet-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.bouquet-card:focus-within {
+  box-shadow:
+    0 0 0 4px rgba(212, 140, 156, 0.16),
+    var(--bouquet-shadow-2);
+  border-color: rgba(212, 140, 156, 0.32);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .bouquet-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--bouquet-shadow-2);
+    border-color: rgba(0, 0, 0, 0.10);
+  }
 }
 
 /* Image */
@@ -23,7 +69,15 @@
   position: relative;
   width: 100%;
   overflow: hidden;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 3 / 4;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.02));
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bouquet-image-wrapper:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(212, 140, 156, 0.22);
 }
 
 .bouquet-image-wrapper::after {
@@ -32,11 +86,16 @@
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(
-      to top,
-      rgba(0, 0, 0, 0.28) 0%,
-      rgba(0, 0, 0, 0.00) 55%
-    );
+    linear-gradient(to top, rgba(0, 0, 0, 0.16) 0%, rgba(0, 0, 0, 0.00) 62%);
+}
+
+.bouquet-image-wrapper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(420px 260px at 20% 10%, rgba(255, 255, 255, 0.22), transparent 60%);
+  opacity: 0.65;
 }
 
 .bouquet-image {
@@ -45,81 +104,248 @@
   object-fit: cover;
   display: block;
   transition: transform 0.4s ease, filter 0.4s ease;
+  will-change: transform;
 }
 
-.bouquet-card:hover .bouquet-image {
-  transform: scale(1.06);
-  filter: brightness(0.95);
+@media (hover: hover) and (pointer: fine) {
+  .bouquet-card:hover .bouquet-image {
+    transform: scale(1.06);
+    filter: brightness(0.965) saturate(1.02);
+  }
 }
 
 /* Badges */
 .bouquet-badge {
   border-radius: var(--bouquet-radius-badge);
   font-size: var(--bouquet-badge-font-size);
-  font-weight: 800;
-  text-transform: capitalize;
-  padding: 4px 10px;
-  box-shadow: var(--bouquet-badge-shadow);
+  font-weight: 900;
+  text-transform: none;
+  letter-spacing: 0.03em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  padding: 6px 10px;
+  min-height: 28px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.10);
   position: absolute;
-  color: var(--bouquet-color-text-inverse);
+  color: var(--ink-900);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
 
+/* Bottom badge row (size + status) to prevent overlap on small cards */
+.bouquet-badgeRow {
+  position: absolute;
+  left: clamp(10px, 2.5vw, 12px);
+  right: clamp(10px, 2.5vw, 12px);
+  bottom: clamp(10px, 2.5vw, 12px);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.bouquet-badgeRow--split {
+  justify-content: space-between;
+}
+
+.bouquet-badgeRow .bouquet-badge {
+  position: static;
+  inset: auto;
+  max-width: 100%;
+  pointer-events: none;
+}
+
+/* Fallback: if size/status are rendered without the bottom row wrapper */
+.bouquet-image-wrapper > .bouquet-badge.bouquet-size {
+  position: absolute;
+  bottom: clamp(10px, 2.5vw, 12px);
+  left: clamp(10px, 2.5vw, 12px);
+}
+
+.bouquet-image-wrapper > .bouquet-badge.bouquet-status {
+  position: absolute;
+  bottom: clamp(10px, 2.5vw, 12px);
+  right: clamp(10px, 2.5vw, 12px);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .bouquet-badge {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .bouquet-type {
+    background: rgba(0, 0, 0, 0.70);
+  }
+}
+
 /* Type badge top-left (was previously unpositioned) */
 .bouquet-type {
-  top: 12px;
-  left: 12px;
-  background: rgba(0, 0, 0, 0.55);
+  top: clamp(10px, 2.5vw, 12px);
+  left: clamp(10px, 2.5vw, 12px);
+  background: rgba(0, 0, 0, 0.46);
+  color: var(--neutral-0);
 }
 
 /* Size badge bottom-left */
 .bouquet-size {
-  background: var(--bouquet-color-badge-size);
-  bottom: 12px;
-  left: 12px;
+  background: rgba(255, 255, 255, 0.78);
   margin: 0;
+  color: var(--brand-wine-700);
+  border: 1px solid rgba(0, 0, 0, 0.10);
 }
 
 /* Status badge bottom-right */
 .bouquet-status {
-  bottom: 12px;
-  right: 12px;
+}
+
+/* Prevent long badge text from overflowing on small cards */
+.bouquet-badge {
+  max-width: calc(100% - 24px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* In the bottom row, let each badge size itself without colliding */
+.bouquet-badgeRow--split .bouquet-size {
+  flex: 1 1 10ch;
+  min-width: 0;
+}
+
+.bouquet-badgeRow--split .bouquet-status {
+  flex: 0 1 auto;
+  min-width: 0;
 }
 
 .bouquet-status.ready {
-  background: var(--bouquet-color-badge-ready);
+  background: var(--success-bg);
+  color: var(--success-text);
+  border: 1px solid var(--success-border);
 }
 
 .bouquet-status.preorder {
-  background: var(--bouquet-color-badge-preorder);
+  background:
+    radial-gradient(480px 220px at 10% 10%, rgba(212, 140, 156, 0.22), transparent 60%),
+    rgba(255, 255, 255, 0.76);
+  color: var(--brand-wine-700);
+  border: 1px solid rgba(212, 140, 156, 0.32);
 }
 
 /* Info */
 .bouquet-info {
-  padding: 1.25rem;
+  padding: clamp(1.1rem, 1.55vw, 1.35rem);
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+/* New: luxury kicker row */
+.bouquet-kicker {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.bouquet-kicker__status {
+  flex: 0 0 auto;
+  font-weight: 950;
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-620);
+  padding: 0.22rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.bouquet-kicker__status.is-ready {
+  border-color: rgba(0, 0, 0, 0.10);
+  color: var(--success-text);
+  background: rgba(129, 199, 132, 0.14);
+}
+
+.bouquet-kicker__status.is-preorder {
+  border-color: rgba(212, 140, 156, 0.28);
+  color: var(--brand-wine-700);
+  background: rgba(212, 140, 156, 0.10);
+}
+
+.bouquet-tags {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.bouquet-kicker,
+.bouquet-tags {
+  row-gap: 0.35rem;
+}
+
+.bouquet-tag {
+  flex: 0 0 auto;
+  max-width: 18ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 850;
+  font-size: 0.8rem;
+  color: var(--ink-700);
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 999px;
+  padding: 0.25rem 0.52rem;
+}
+
+@media (max-width: 380px) {
+  .bouquet-info {
+    padding: 1rem;
+    gap: 0.7rem;
+  }
+
+  .bouquet-title {
+    font-size: 1.08rem;
+  }
+
+  .bouquet-price {
+    font-size: 1.15rem;
+  }
 }
 
 .bouquet-title {
   margin: 0;
-  font-size: clamp(1.02rem, 1.35vw, 1.18rem);
-  font-weight: 850;
-  letter-spacing: 0.15px;
+  font-size: clamp(1.1rem, 1.6vw, 1.32rem);
+  font-weight: 950;
+  letter-spacing: -0.01em;
   color: var(--bouquet-color-accent-title);
-  line-height: 1.3;
+  font-family: "Playfair Display", Georgia, serif;
+  line-height: 1.25;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-wrap: balance;
 }
 
 .bouquet-title a {
   display: inline;
   color: inherit;
   text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .bouquet-title a:hover {
@@ -136,9 +362,9 @@
 
 .bouquet-meta {
   margin: 0.25rem 0 0;
-  color: rgba(0, 0, 0, 0.60);
+  color: var(--ink-620);
   font-weight: 800;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   line-height: 1.45;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -149,43 +375,76 @@
 .bouquet-description {
   margin: 0;
   font-size: 0.92rem;
-  color: var(--bouquet-color-text);
+  color: var(--ink-700);
   line-height: 1.6;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-wrap: pretty;
 }
 
 .bouquet-footer {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-top: 0.5rem;
+  align-items: flex-end;
+  margin-top: auto;
+  padding-top: 0.9rem;
   gap: 0.75rem;
   flex-direction: row;
   flex-wrap: wrap;
 }
 
 .bouquet-price {
-  font-size: 1.15rem;
+  font-size: 1.22rem;
   font-weight: 950;
   color: var(--bouquet-color-accent-price);
   margin: 0;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
 }
 
 .bouquet-button {
-  background: var(--bouquet-color-accent-cta);
-  color: var(--bouquet-color-text-inverse);
-  border: none;
-  border-radius: var(--bouquet-radius-button);
-  padding: 10px 16px;
-  font-size: 0.92rem;
-  font-weight: 850;
+  background: rgba(255, 255, 255, 0.74);
+  color: var(--bouquet-color-accent-title);
+  border: 1px solid rgba(212, 140, 156, 0.32);
+  border-radius: 999px;
+  padding: 9px 14px;
+  font-size: 0.9rem;
+  font-weight: 900;
   cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease;
+  transition: background 0.22s ease, transform 0.2s ease, box-shadow 0.22s ease,
+    border-color 0.22s ease, color 0.22s ease;
   text-decoration: none;
   white-space: nowrap;
+  box-shadow: var(--bouquet-shadow-1);
+  position: relative;
+  overflow: hidden;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bouquet-button::after {
+  content: "\2192";
+  margin-left: 0.5rem;
+  opacity: 0.9;
+}
+
+.bouquet-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 0%, rgba(255, 255, 255, 0.18) 38%, transparent 60%);
+  transform: translateX(-120%);
+  transition: transform 0.55s ease;
+  pointer-events: none;
+}
+
+@media (min-width: 980px) {
+  .bouquet-button {
+    padding: 9px 16px;
+  }
 }
 
 @media (min-width: 720px) {
@@ -215,9 +474,18 @@
   }
 }
 
-.bouquet-button:hover {
-  background: var(--bouquet-color-accent-cta-hover);
-  transform: translateY(-2px);
+@media (hover: hover) and (pointer: fine) {
+  .bouquet-button:hover {
+    background: linear-gradient(135deg, var(--brand-rose-500), var(--brand-wine-700));
+    color: var(--bouquet-color-text-inverse);
+    border-color: rgba(255, 255, 255, 0.22);
+    transform: translateY(-2px);
+    box-shadow: var(--bouquet-shadow-2);
+  }
+
+  .bouquet-button:hover::before {
+    transform: translateX(120%);
+  }
 }
 
 .bouquet-button:active {
@@ -228,6 +496,10 @@
   .bouquet-card,
   .bouquet-image,
   .bouquet-button {
+    transition: none !important;
+  }
+
+  .bouquet-button::before {
     transition: none !important;
   }
 

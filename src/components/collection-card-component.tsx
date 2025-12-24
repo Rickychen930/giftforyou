@@ -49,6 +49,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
   const browseHref = `/collection?name=${encodeURIComponent(name)}`;
 
   const renderBouquetCard = (b: BouquetCardProps) => {
+    const detailHref = `/bouquet/${b._id}`;
     const waMessage = encodeURIComponent(
       `Halo, saya ingin pesan bouquet "${b.name}" (${formatPrice(b.price)})${
         b.size ? ` ukuran ${b.size}` : ""
@@ -62,28 +63,42 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
     return (
       <article key={b._id} className="bouquetCard" role="listitem">
         <div className="bouquetCard__media">
-          <img
-            src={imageUrl}
-            alt={b.name}
-            loading="lazy"
-            onError={(e) => {
-              e.currentTarget.onerror = null;
-              e.currentTarget.src = FALLBACK_IMAGE;
-            }}
-          />
-
-          <span
-            className={`bouquetCard__badge ${
-              b.status === "ready" ? "is-ready" : "is-preorder"
-            }`}
-            aria-label={`Status: ${statusLabel}`}
+          <Link
+            to={detailHref}
+            className="bouquetCard__mediaLink"
+            aria-label={`Lihat detail ${b.name}`}
           >
-            {statusLabel}
-          </span>
+            <img
+              src={imageUrl}
+              alt={b.name}
+              loading="lazy"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = FALLBACK_IMAGE;
+              }}
+            />
+
+            <span
+              className={`bouquetCard__badge ${
+                b.status === "ready" ? "is-ready" : "is-preorder"
+              }`}
+              aria-label={`Status: ${statusLabel}`}
+            >
+              {statusLabel}
+            </span>
+          </Link>
         </div>
 
         <div className="bouquetCard__body">
-          <h3 className="bouquetCard__name">{b.name}</h3>
+          <h3 className="bouquetCard__name">
+            <Link
+              to={detailHref}
+              className="bouquetCard__nameLink"
+              aria-label={`Buka detail ${b.name}`}
+            >
+              {b.name}
+            </Link>
+          </h3>
 
           <p className="bouquetCard__price">{formatPrice(b.price)}</p>
 

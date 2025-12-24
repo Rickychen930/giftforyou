@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../styles/BouquetCardComponent.css";
 
 import { API_BASE } from "../config/api"; // adjust path depending on folder depth
@@ -30,9 +30,7 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
   status,
   collectionName,
 }) => {
-  const statusClass =
-    status === "ready" ? "bouquet-status ready" : "bouquet-status preorder";
-
+  const navigate = useNavigate();
   const formatPrice = formatIDR;
 
   const imageUrl = image
@@ -43,15 +41,42 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
 
   const detailHref = `/bouquet/${_id}`;
 
-  const metaParts = [
-    status ? (status === "ready" ? "Siap" : "Preorder") : "",
-    size ? `Ukuran ${size}` : "",
-    type ? `Tipe ${type}` : "",
-    collectionName ? `Koleksi ${collectionName}` : "",
-  ].filter(Boolean);
+  const handleCardNavigate = () => {
+    navigate(detailHref);
+  };
+
+  const handleCardClick: React.MouseEventHandler<HTMLElement> = (e) => {
+    if (e.defaultPrevented) return;
+    const target = e.target as HTMLElement | null;
+    if (!target) return;
+
+    // Don't hijack clicks on interactive elements.
+    if (target.closest("a,button,[role='button'],input,select,textarea,label")) {
+      return;
+    }
+
+    handleCardNavigate();
+  };
+
+  const handleCardKeyDown: React.KeyboardEventHandler<HTMLElement> = (e) => {
+    if (e.defaultPrevented) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleCardNavigate();
+    }
+  };
+
+  const tags = [collectionName, type, size].filter(Boolean) as string[];
 
   return (
-    <article className="bouquet-card" aria-label={`Bouquet ${name}`}>
+    <article
+      className="bouquet-card"
+      aria-label={`Buka detail bouquet ${name}`}
+      role="link"
+      tabIndex={0}
+      onClick={handleCardClick}
+      onKeyDown={handleCardKeyDown}
+    >
       <Link
         to={detailHref}
         className="bouquet-image-wrapper"
@@ -68,26 +93,30 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
             e.currentTarget.src = FALLBACK_IMAGE;
           }}
         />
-        {size && <span className="bouquet-badge bouquet-size">{size}</span>}
-        {type && <span className="bouquet-badge bouquet-type">{type}</span>}
-        <span className={`bouquet-badge ${statusClass}`}>
-          {status === "ready" ? "Siap" : "Preorder"}
-        </span>
       </Link>
 
       <div className="bouquet-info">
+        <div className="bouquet-kicker" aria-label="Informasi singkat">
+          <span className={`bouquet-kicker__status ${status === "ready" ? "is-ready" : "is-preorder"}`}>
+            {status === "ready" ? "Ready" : "Preorder"}
+          </span>
+          {tags.length > 0 && (
+            <div className="bouquet-tags" aria-label="Tag bouquet">
+              {tags.slice(0, 3).map((t) => (
+                <span key={t} className="bouquet-tag">
+                  {t}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
         <h4 className="bouquet-title">
           <Link to={detailHref} aria-label={`Lihat detail ${name}`}>
             {name}
           </Link>
         </h4>
-
-        {metaParts.length > 0 && (
-          <p className="bouquet-meta" aria-label="Ringkasan bouquet">
-            {metaParts.join(" • ")}
-          </p>
-        )}
-        {description && <p className="bouquet-description">{description}</p>}
+        {/* Intentionally hidden in grid for a cleaner luxury layout */}
         <div className="bouquet-footer">
           <p className="bouquet-price">{formatPrice(price)}</p>
           <Link to={detailHref} className="bouquet-button">

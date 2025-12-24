@@ -453,6 +453,7 @@ const Header: React.FC<HeaderProps> = ({
           <button
             className="icon-btn search-btn"
             onClick={toggleSearch}
+            type="button"
             aria-label="Cari"
             ref={searchButtonRef}
           >
@@ -463,6 +464,7 @@ const Header: React.FC<HeaderProps> = ({
           <button
             className={`hamburger ${mobileOpen ? "is-open" : ""}`}
             onClick={onToggleMobile}
+            type="button"
             aria-label="Buka/tutup menu"
             aria-expanded={mobileOpen}
             aria-controls="primary-navigation"
@@ -492,6 +494,7 @@ const Header: React.FC<HeaderProps> = ({
             <button
               className="search-close"
               onClick={() => closeSearch({ returnFocus: true })}
+              type="button"
               aria-label="Tutup pencarian"
             >
               <CloseIcon />

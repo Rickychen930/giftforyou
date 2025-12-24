@@ -1,35 +1,5 @@
 @import "colors.css";
 
-:root {
-  --cc-surface: rgba(255, 255, 255, 0.92);
-  --cc-surface-strong: rgba(255, 255, 255, 0.98);
-  --cc-surface-fade-edge: rgba(255, 255, 255, 0.92);
-  --cc-border: rgba(0, 0, 0, 0.08);
-  --cc-border-strong: rgba(0, 0, 0, 0.14);
-  --cc-shadow: 0 14px 34px rgba(0, 0, 0, 0.08);
-  --cc-card-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
-  --cc-card-shadow-hover: 0 16px 32px rgba(0, 0, 0, 0.12);
-  --cc-brand-highlight: rgba(212, 140, 156, 0.5);
-  --cc-brand-wine: #a04c5c;
-  --cc-text: #2f2f2f;
-  --cc-muted: rgba(0, 0, 0, 0.58);
-  --cc-empty-bg: rgba(255, 255, 255, 0.7);
-  --cc-border-badge: rgba(255, 255, 255, 0.45);
-  --cc-badge-bg: rgba(255, 255, 255, 0.3);
-  --cc-ready-bg: rgba(16, 185, 129, 0.16);
-  --cc-preorder-bg: rgba(249, 115, 22, 0.16);
-  --cc-chip-text: #4a4a4a;
-  --cc-chip-bg: rgba(0, 0, 0, 0.02);
-  --cc-border-chip: rgba(0, 0, 0, 0.08);
-  --cc-btn-text: #ffffff;
-  --cc-brand-pink: #d48c9c;
-  --cc-brand-pink2: #b56f80;
-  --cc-btn-shadow: 0 6px 16px rgba(212, 140, 156, 0.24);
-  --cc-btn-shadow-hover: 0 10px 24px rgba(212, 140, 156, 0.32);
-  --cc-scroll-track: rgba(0, 0, 0, 0.06);
-  --cc-scroll-thumb: rgba(0, 0, 0, 0.18);
-}
-
 /* =========================
    Collection Card Component
    Professional & Interactive Design
@@ -45,6 +15,7 @@
   border: 1px solid var(--cc-border);
   box-shadow: var(--cc-shadow);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   overflow: hidden;
   transition: box-shadow 0.3s ease, transform 0.3s ease;
 
@@ -54,6 +25,14 @@
 
   animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   opacity: 0;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .collectionCard {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--cc-surface-strong);
+  }
 }
 
 .collectionCard * {
@@ -205,10 +184,12 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 
-.collectionCard__ctaBtn:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--cc-btn-shadow-hover);
-  filter: saturate(1.02);
+@media (hover: hover) and (pointer: fine) {
+  .collectionCard__ctaBtn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--cc-btn-shadow-hover);
+    filter: saturate(1.02);
+  }
 }
 
 .collectionCard__ctaBtn:active {
@@ -334,6 +315,12 @@
   color: white;
   box-shadow: 0 12px 28px rgba(212, 140, 156, 0.35);
   transform: translateY(-50%) scale(1.08);
+}
+
+@media (hover: none), (pointer: coarse) {
+  .collectionCard__navBtn:hover {
+    transform: translateY(-50%);
+  }
 }
 
 .collectionCard__navBtn:active {
@@ -480,6 +467,22 @@
   background: linear-gradient(135deg, #f5f5f5, #fafafa);
 }
 
+.bouquetCard__mediaLink {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bouquetCard__mediaLink:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(212, 140, 156, 0.22);
+  border-radius: 14px;
+}
+
 .bouquetCard__media::after {
   content: "";
   position: absolute;
@@ -529,6 +532,13 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .bouquetCard__badge {
+    backdrop-filter: none;
+    background: rgba(0, 0, 0, 0.55);
+  }
+}
+
 
 .bouquetCard__badge.is-ready {
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.08));
@@ -562,6 +572,26 @@
   line-height: 1.4;
   word-break: break-word;
   text-wrap: balance;
+}
+
+.bouquetCard__nameLink {
+  color: inherit;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .bouquetCard__nameLink:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 2px;
+  }
+}
+
+.bouquetCard__nameLink:focus-visible {
+  outline: none;
+  border-radius: 10px;
+  box-shadow: 0 0 0 4px rgba(212, 140, 156, 0.22);
 }
 
 .bouquetCard__price {
@@ -640,8 +670,11 @@
   transition: opacity 0.25s ease;
 }
 
-.bouquetCard__btn:hover::before {
-  opacity: 1;
+
+@media (hover: hover) and (pointer: fine) {
+  .bouquetCard__btn:hover::before {
+    opacity: 1;
+  }
 }
 
 .bouquetCard__btn svg {
@@ -651,15 +684,7 @@
   height: 18px;
 }
 
-.bouquetCard__btn:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--cc-btn-shadow-hover);
-  filter: saturate(1.04) brightness(1.03);
-}
-
-.bouquetCard__btn:hover svg {
-  transform: scale(1.08);
-}
+/* Hover styles are applied only on hover-capable devices below */
 
 /* Apply hover interactions only on hover-capable devices */
 @media (hover: hover) and (pointer: fine) {
@@ -827,11 +852,8 @@
     opacity: 1 !important;
   }
 
-  .bouquetCard:hover {
-    transform: none;
-  }
-
+  .bouquetCard:hover,
   .bouquetCard:hover .bouquetCard__media img {
-    transform: scale(1.02);
+    transform: none !important;
   }
 }

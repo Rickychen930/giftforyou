@@ -7,6 +7,8 @@ import { getBouquetSizeFilterOptions } from "../constants/bouquet-constants";
 
 type Range = [number, number];
 
+type NavigateFn = (to: any, options?: any) => void;
+
 interface State {
   bouquets: Bouquet[];
 
@@ -29,7 +31,10 @@ interface State {
 const isNonEmptyString = (v: unknown): v is string =>
   typeof v === "string" && v.trim().length > 0;
 
-class BouquetCatalogController extends Component<{ locationSearch?: string }, State> {
+class BouquetCatalogController extends Component<
+  { locationSearch?: string; navigate?: NavigateFn },
+  State
+> {
   private abortController: AbortController | null = null;
 
   constructor(props: {}) {
@@ -59,6 +64,10 @@ class BouquetCatalogController extends Component<{ locationSearch?: string }, St
     if ((prevProps.locationSearch ?? "") !== (this.props.locationSearch ?? "")) {
       this.applyLocationSearch(this.props.locationSearch);
     }
+
+    // Keep URL in sync with current filters/sort/page so the state is shareable.
+    // Only runs when we have a navigate function (react-router v6).
+    this.syncUrlFromState();
   }
 
   componentWillUnmount(): void {
@@ -69,8 +78,21 @@ class BouquetCatalogController extends Component<{ locationSearch?: string }, St
     const search = (locationSearch ?? "").trim();
     if (!search) {
       // If user navigates to /collection with no query, clear URL-driven filters.
-      if (this.state.collectionNameFilter || this.state.searchQuery) {
-        this.setState({ collectionNameFilter: "", searchQuery: "", currentPage: 1 });
+      if (
+        this.state.collectionNameFilter ||
+        this.state.searchQuery ||
+        this.state.sortBy ||
+        this.state.currentPage !== 1 ||
+        this.state.priceRange[0] !== 0 ||
+        this.state.priceRange[1] !== 1_000_000
+      ) {
+        this.setState({
+          collectionNameFilter: "",
+          searchQuery: "",
+          sortBy: "",
+          currentPage: 1,
+          priceRange: [0, 1_000_000],
+        });
       }
       return;
     }
@@ -81,6 +103,21 @@ class BouquetCatalogController extends Component<{ locationSearch?: string }, St
 
     const name = (params.get("name") ?? params.get("filter") ?? "").trim();
     const q = (params.get("q") ?? "").trim();
+    const sort = (params.get("sort") ?? "").trim();
+
+    const pageRaw = (params.get("page") ?? "").trim();
+    const pageParsed = Number.parseInt(pageRaw, 10);
+    const page = Number.isFinite(pageParsed) && pageParsed > 0 ? pageParsed : 1;
+
+    const minRaw = (params.get("min") ?? params.get("minPrice") ?? "").trim();
+    const maxRaw = (params.get("max") ?? params.get("maxPrice") ?? "").trim();
+    const minParsed = Number.parseInt(minRaw, 10);
+    const maxParsed = Number.parseInt(maxRaw, 10);
+
+    const DEFAULT_PRICE: Range = [0, 1_000_000];
+    const min = Number.isFinite(minParsed) ? Math.max(0, minParsed) : DEFAULT_PRICE[0];
+    const max = Number.isFinite(maxParsed) ? Math.max(min, maxParsed) : DEFAULT_PRICE[1];
+    const priceRange: Range = [min, max];
 
     const splitCsv = (v: string) =>
       v
@@ -105,6 +142,10 @@ class BouquetCatalogController extends Component<{ locationSearch?: string }, St
     const needsUpdate =
       name !== this.state.collectionNameFilter ||
       q !== this.state.searchQuery ||
+      sort !== this.state.sortBy ||
+      page !== this.state.currentPage ||
+      priceRange[0] !== this.state.priceRange[0] ||
+      priceRange[1] !== this.state.priceRange[1] ||
       !sameArray(types, this.state.selectedTypes) ||
       !sameArray(sizes, this.state.selectedSizes) ||
       !sameArray(collections, this.state.selectedCollections);
@@ -113,13 +154,86 @@ class BouquetCatalogController extends Component<{ locationSearch?: string }, St
       this.setState({
         collectionNameFilter: name,
         searchQuery: q,
+        sortBy: sort,
+        currentPage: page,
+        priceRange,
         selectedTypes: types,
         selectedSizes: sizes,
         selectedCollections: collections,
-        currentPage: 1,
       });
     }
   };
+
+  private buildSearchFromState(): string {
+    const {
+      selectedTypes,
+      selectedSizes,
+      selectedCollections,
+      collectionNameFilter,
+      searchQuery,
+      sortBy,
+      currentPage,
+      priceRange,
+    } = this.state;
+
+    const params = new URLSearchParams();
+
+    (selectedTypes ?? []).forEach((t) => {
+      const v = (t ?? "").trim();
+      if (v) params.append("type", v);
+    });
+
+    (selectedSizes ?? []).forEach((s) => {
+      const v = (s ?? "").trim();
+      if (v) params.append("size", v);
+    });
+
+    const collections = (selectedCollections ?? []).map((v) => v.trim()).filter(Boolean);
+    collections.forEach((c) => params.append("collection", c));
+
+    const name = (collectionNameFilter ?? "").trim();
+    if (!collections.length && name) {
+      params.set("name", name);
+    }
+
+    const q = (searchQuery ?? "").trim();
+    if (q) params.set("q", q);
+
+    const sort = (sortBy ?? "").trim();
+    if (sort) params.set("sort", sort);
+
+    const DEFAULT_PRICE: Range = [0, 1_000_000];
+    if (priceRange[0] !== DEFAULT_PRICE[0] || priceRange[1] !== DEFAULT_PRICE[1]) {
+      params.set("min", String(priceRange[0]));
+      params.set("max", String(priceRange[1]));
+    }
+
+    if (currentPage && currentPage !== 1) {
+      params.set("page", String(currentPage));
+    }
+
+    const s = params.toString();
+    return s ? `?${s}` : "";
+  }
+
+  private syncUrlFromState(): void {
+    const navigate = this.props.navigate;
+    if (typeof navigate !== "function") return;
+
+    const desired = this.buildSearchFromState();
+    const current = (this.props.locationSearch ?? "").trim();
+    const currentNorm = current.startsWith("?") || current === "" ? current : `?${current}`;
+
+    if (desired === currentNorm) return;
+
+    navigate(
+      {
+        pathname: "/collection",
+        search: desired,
+      },
+      { replace: true }
+    );
+  }
 
   /** Must match your domain Bouquet type (including required fields) */
   private normalizeBouquet = (b: any): Bouquet => ({
@@ -255,6 +369,14 @@ class BouquetCatalogController extends Component<{ locationSearch?: string }, St
     });
   };
 
+  private clearSearchQuery = () => {
+    this.setState({ searchQuery: "", currentPage: 1 });
+  };
+
+  private clearCollectionNameFilter = () => {
+    this.setState({ collectionNameFilter: "", currentPage: 1 });
+  };
+
   private setSortBy = (value: string) => {
     this.setState({ sortBy: value, currentPage: 1 });
   };
@@ -358,6 +480,8 @@ class BouquetCatalogController extends Component<{ locationSearch?: string }, St
         allTypes={allTypes.length ? allTypes : ["Orchid", "Mixed"]}
         allSizes={allSizes}
         allCollections={allCollections}
+        collectionNameFilter={this.state.collectionNameFilter}
+        searchQuery={this.state.searchQuery}
         priceRange={this.state.priceRange}
         selectedTypes={this.state.selectedTypes}
         selectedSizes={this.state.selectedSizes}
@@ -370,6 +494,8 @@ class BouquetCatalogController extends Component<{ locationSearch?: string }, St
         onClearFilter={this.clearFilter}
         onClearAll={this.clearAll}
         onSortChange={this.setSortBy}
+        onClearSearchQuery={this.clearSearchQuery}
+        onClearCollectionNameFilter={this.clearCollectionNameFilter}
         onPageChange={(page) => this.setState({ currentPage: page })}
         loading={this.state.loading}
         error={this.state.error}

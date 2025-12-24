@@ -180,6 +180,29 @@
   border: 1px solid var(--cc-border);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .ourCollection__header,
+  .ourCollection__eyebrow,
+  .ourCollection__title,
+  .ourCollection__subtitle,
+  .ourCollection__empty,
+  .ourCollection__error {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .ourCollection__title::after {
+    animation: none !important;
+    width: 80px;
+  }
+
+  .collectionCard--skeleton,
+  .skeleton {
+    animation: none !important;
+  }
+}
+
 /* ===== Empty State with Icon ===== */
 .ourCollection__empty {
   max-width: 760px;
