@@ -71,6 +71,14 @@ class BouquetUploader extends Component<Props, State> {
   }
 
   private setMessage(message: string, messageType: State["messageType"]) {
+    // Show server error details if present
+    if (typeof message === "string" && message.startsWith("Upload failed")) {
+      const match = message.match(/Upload failed \(\d+\): ([\s\S]+)/);
+      if (match) {
+        this.setState({ message: match[1], messageType });
+        return;
+      }
+    }
     this.setState({ message, messageType });
   }
 
@@ -91,8 +99,8 @@ class BouquetUploader extends Component<Props, State> {
         name === "price"
           ? Number(value)
           : name === "quantity"
-            ? Math.max(0, Math.trunc(Number(value)))
-            : value,
+          ? Math.max(0, Math.trunc(Number(value)))
+          : value,
     }));
   };
 
@@ -186,7 +194,10 @@ class BouquetUploader extends Component<Props, State> {
   private formatBytes(bytes: number): string {
     if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
     const units = ["B", "KB", "MB", "GB"];
-    const idx = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+    const idx = Math.min(
+      Math.floor(Math.log(bytes) / Math.log(1024)),
+      units.length - 1
+    );
     const val = bytes / Math.pow(1024, idx);
     return `${val.toFixed(idx === 0 ? 0 : 1)} ${units[idx]}`;
   }
@@ -279,15 +290,21 @@ class BouquetUploader extends Component<Props, State> {
   };
 
   render(): React.ReactNode {
-    const { submitting, message, messageType, previewUrl, file, isDraggingImage } = this.state;
+    const {
+      submitting,
+      message,
+      messageType,
+      previewUrl,
+      file,
+      isDraggingImage,
+    } = this.state;
 
     return (
       <section className="uploader">
         <header className="uploader__header">
           <h2 className="uploader__title">Unggah Bouquet Baru</h2>
           <p className="uploader__subtitle">
-            Tambahkan produk baru ke katalog toko. Kolom bertanda * wajib
-            diisi.
+            Tambahkan produk baru ke katalog toko. Kolom bertanda * wajib diisi.
           </p>
         </header>
 
@@ -295,238 +312,251 @@ class BouquetUploader extends Component<Props, State> {
           <div className="uploader__layout">
             <div className="uploader__col uploader__col--form">
               <div className="uploader__grid">
-            <label className="uploader__field">
-              Nama *
-              <input
-                name="name"
-                value={this.state.name}
-                onChange={this.handleChange}
-                placeholder="mis., Orchid Elegance"
-                disabled={submitting}
-                required
-              />
-            </label>
-
-            <label className="uploader__field">
-              Harga (IDR) *
-              <input
-                name="price"
-                type="number"
-                value={this.state.price}
-                onChange={this.handleChange}
-                disabled={submitting}
-                required
-                min={0}
-              />
-            </label>
-
-            <label className="uploader__field">
-              Status
-              <select
-                name="status"
-                value={this.state.status}
-                onChange={this.handleChange}
-                disabled={submitting}
-              >
-                <option value="ready">Siap</option>
-                <option value="preorder">Preorder</option>
-              </select>
-            </label>
-
-            <label className="uploader__field">
-              Koleksi
-              <input
-                name="collectionName"
-                value={this.state.collectionName}
-                onChange={this.handleChange}
-                placeholder="mis., New Edition"
-                disabled={submitting}
-              />
-            </label>
-
-            <label className="uploader__field">
-              Tipe
-              <input
-                name="type"
-                value={this.state.type}
-                onChange={this.handleChange}
-                placeholder="mis., bouquet"
-                disabled={submitting}
-              />
-            </label>
-
-            <label className="uploader__field">
-              Ukuran
-              <select
-                name="size"
-                value={this.state.size}
-                onChange={this.handleChange}
-                disabled={submitting}
-                required
-              >
-                {BOUQUET_SIZE_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="uploader__field">
-              Stok
-              <input
-                name="quantity"
-                type="number"
-                min={0}
-                step={1}
-                value={this.state.quantity}
-                onChange={this.handleChange}
-                disabled={submitting}
-              />
-            </label>
-
-            <label className="uploader__field uploader__field--full">
-              Penanda
-              <div className="uploader__toggles" role="group" aria-label="Penanda bouquet">
-                <label className="uploader__toggle">
+                <label className="uploader__field">
+                  Nama *
                   <input
-                    type="checkbox"
-                    name="isNewEdition"
-                    checked={this.state.isNewEdition}
+                    name="name"
+                    value={this.state.name}
+                    onChange={this.handleChange}
+                    placeholder="mis., Orchid Elegance"
+                    disabled={submitting}
+                    required
+                  />
+                </label>
+
+                <label className="uploader__field">
+                  Harga (IDR) *
+                  <input
+                    name="price"
+                    type="number"
+                    value={this.state.price}
+                    onChange={this.handleChange}
+                    disabled={submitting}
+                    required
+                    min={0}
+                  />
+                </label>
+
+                <label className="uploader__field">
+                  Status
+                  <select
+                    name="status"
+                    value={this.state.status}
+                    onChange={this.handleChange}
+                    disabled={submitting}
+                  >
+                    <option value="ready">Siap</option>
+                    <option value="preorder">Preorder</option>
+                  </select>
+                </label>
+
+                <label className="uploader__field">
+                  Koleksi
+                  <input
+                    name="collectionName"
+                    value={this.state.collectionName}
+                    onChange={this.handleChange}
+                    placeholder="mis., New Edition"
+                    disabled={submitting}
+                  />
+                </label>
+
+                <label className="uploader__field">
+                  Tipe
+                  <input
+                    name="type"
+                    value={this.state.type}
+                    onChange={this.handleChange}
+                    placeholder="mis., bouquet"
+                    disabled={submitting}
+                  />
+                </label>
+
+                <label className="uploader__field">
+                  Ukuran
+                  <select
+                    name="size"
+                    value={this.state.size}
+                    onChange={this.handleChange}
+                    disabled={submitting}
+                    required
+                  >
+                    {BOUQUET_SIZE_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="uploader__field">
+                  Stok
+                  <input
+                    name="quantity"
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={this.state.quantity}
                     onChange={this.handleChange}
                     disabled={submitting}
                   />
-                  <span>Edisi baru</span>
                 </label>
 
-                <label className="uploader__toggle">
-                  <input
-                    type="checkbox"
-                    name="isFeatured"
-                    checked={this.state.isFeatured}
+                <label className="uploader__field uploader__field--full">
+                  Penanda
+                  <div
+                    className="uploader__toggles"
+                    role="group"
+                    aria-label="Penanda bouquet"
+                  >
+                    <label className="uploader__toggle">
+                      <input
+                        type="checkbox"
+                        name="isNewEdition"
+                        checked={this.state.isNewEdition}
+                        onChange={this.handleChange}
+                        disabled={submitting}
+                      />
+                      <span>Edisi baru</span>
+                    </label>
+
+                    <label className="uploader__toggle">
+                      <input
+                        type="checkbox"
+                        name="isFeatured"
+                        checked={this.state.isFeatured}
+                        onChange={this.handleChange}
+                        disabled={submitting}
+                      />
+                      <span>Unggulan</span>
+                    </label>
+                  </div>
+                </label>
+
+                <label className="uploader__field uploader__field--full">
+                  Deskripsi
+                  <textarea
+                    name="description"
+                    value={this.state.description}
                     onChange={this.handleChange}
+                    rows={4}
+                    placeholder="Deskripsi singkat..."
                     disabled={submitting}
                   />
-                  <span>Unggulan</span>
                 </label>
-              </div>
-            </label>
 
-            <label className="uploader__field uploader__field--full">
-              Deskripsi
-              <textarea
-                name="description"
-                value={this.state.description}
-                onChange={this.handleChange}
-                rows={4}
-                placeholder="Deskripsi singkat..."
-                disabled={submitting}
-              />
-            </label>
+                <label className="uploader__field uploader__field--full">
+                  Acara
+                  <input
+                    name="occasionsText"
+                    value={this.state.occasionsText}
+                    onChange={this.handleChange}
+                    placeholder="mis., Ulang Tahun, Anniversary"
+                    disabled={submitting}
+                  />
+                </label>
 
-            <label className="uploader__field uploader__field--full">
-              Acara
-              <input
-                name="occasionsText"
-                value={this.state.occasionsText}
-                onChange={this.handleChange}
-                placeholder="mis., Ulang Tahun, Anniversary"
-                disabled={submitting}
-              />
-            </label>
+                <label className="uploader__field uploader__field--full">
+                  Bunga
+                  <input
+                    name="flowersText"
+                    value={this.state.flowersText}
+                    onChange={this.handleChange}
+                    placeholder="mis., Orchid, Mawar"
+                    disabled={submitting}
+                  />
+                </label>
 
-            <label className="uploader__field uploader__field--full">
-              Bunga
-              <input
-                name="flowersText"
-                value={this.state.flowersText}
-                onChange={this.handleChange}
-                placeholder="mis., Orchid, Mawar"
-                disabled={submitting}
-              />
-            </label>
+                <label className="uploader__field uploader__field--full">
+                  Instruksi perawatan
+                  <textarea
+                    name="careInstructions"
+                    value={this.state.careInstructions}
+                    onChange={this.handleChange}
+                    rows={3}
+                    placeholder="Tips perawatan (opsional)"
+                    disabled={submitting}
+                  />
+                </label>
 
-            <label className="uploader__field uploader__field--full">
-              Instruksi perawatan
-              <textarea
-                name="careInstructions"
-                value={this.state.careInstructions}
-                onChange={this.handleChange}
-                rows={3}
-                placeholder="Tips perawatan (opsional)"
-                disabled={submitting}
-              />
-            </label>
+                <div className="uploader__field uploader__field--full">
+                  <span className="uploader__label">Gambar</span>
+                  <div
+                    className={`uploader__dropzone ${
+                      isDraggingImage ? "is-dragging" : ""
+                    } ${file ? "has-file" : ""}`}
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Pilih gambar bouquet"
+                    aria-disabled={submitting ? "true" : "false"}
+                    onClick={this.openFilePicker}
+                    onKeyDown={this.handleDropzoneKeyDown}
+                    onDragOver={this.handleDropzoneDragOver}
+                    onDragLeave={this.handleDropzoneDragLeave}
+                    onDrop={this.handleDropzoneDrop}
+                  >
+                    <div className="uploader__dropzoneText">
+                      <div className="uploader__dropzoneTitle">
+                        {file ? "Gambar dipilih" : "Klik untuk pilih gambar"}
+                      </div>
+                      <div className="uploader__dropzoneSub">
+                        {file
+                          ? `${file.name} • ${this.formatBytes(file.size)}`
+                          : "Atau drag & drop (JPG/PNG/HEIC). Opsional."}
+                      </div>
+                    </div>
 
-            <div className="uploader__field uploader__field--full">
-              <span className="uploader__label">Gambar</span>
-              <div
-                className={`uploader__dropzone ${isDraggingImage ? "is-dragging" : ""} ${file ? "has-file" : ""}`}
-                role="button"
-                tabIndex={0}
-                aria-label="Pilih gambar bouquet"
-                aria-disabled={submitting ? "true" : "false"}
-                onClick={this.openFilePicker}
-                onKeyDown={this.handleDropzoneKeyDown}
-                onDragOver={this.handleDropzoneDragOver}
-                onDragLeave={this.handleDropzoneDragLeave}
-                onDrop={this.handleDropzoneDrop}
-              >
-                <div className="uploader__dropzoneText">
-                  <div className="uploader__dropzoneTitle">
-                    {file ? "Gambar dipilih" : "Klik untuk pilih gambar"}
-                  </div>
-                  <div className="uploader__dropzoneSub">
-                    {file
-                      ? `${file.name} • ${this.formatBytes(file.size)}`
-                      : "Atau drag & drop (JPG/PNG/HEIC). Opsional."}
+                    <div
+                      className="uploader__dropzoneActions"
+                      aria-label="Aksi gambar"
+                      role="group"
+                    >
+                      {file ? (
+                        <button
+                          type="button"
+                          className="uploader__ghostBtn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            this.clearImage();
+                          }}
+                          disabled={submitting}
+                        >
+                          Hapus
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="uploader__ghostBtn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            this.openFilePicker();
+                          }}
+                          disabled={submitting}
+                        >
+                          Pilih file
+                        </button>
+                      )}
+                    </div>
+
+                    <input
+                      ref={this.fileInputRef}
+                      className="uploader__fileInput"
+                      type="file"
+                      accept="image/*,.heic,.heif"
+                      aria-label="Upload gambar bouquet"
+                      onChange={this.handleImageChange}
+                      disabled={submitting}
+                      tabIndex={-1}
+                    />
                   </div>
                 </div>
-
-                <div className="uploader__dropzoneActions" aria-label="Aksi gambar" role="group">
-                  {file ? (
-                    <button
-                      type="button"
-                      className="uploader__ghostBtn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        this.clearImage();
-                      }}
-                      disabled={submitting}
-                    >
-                      Hapus
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      className="uploader__ghostBtn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        this.openFilePicker();
-                      }}
-                      disabled={submitting}
-                    >
-                      Pilih file
-                    </button>
-                  )}
-                </div>
-
-                <input
-                  ref={this.fileInputRef}
-                  className="uploader__fileInput"
-                  type="file"
-                  accept="image/*,.heic,.heif"
-                  aria-label="Upload gambar bouquet"
-                  onChange={this.handleImageChange}
-                  disabled={submitting}
-                  tabIndex={-1}
-                />
-              </div>
-            </div>
               </div>
             </div>
 
-            <aside className="uploader__col uploader__col--preview" aria-label="Pratinjau gambar">
+            <aside
+              className="uploader__col uploader__col--preview"
+              aria-label="Pratinjau gambar"
+            >
               <div className="uploader__preview">
                 <p className="uploader__previewLabel">Pratinjau</p>
                 {previewUrl ? (
@@ -536,7 +566,10 @@ class BouquetUploader extends Component<Props, State> {
                     alt="Pratinjau"
                   />
                 ) : (
-                  <div className="uploader__previewEmpty" aria-label="Belum ada gambar">
+                  <div
+                    className="uploader__previewEmpty"
+                    aria-label="Belum ada gambar"
+                  >
                     Pilih gambar untuk melihat pratinjau.
                   </div>
                 )}
@@ -544,8 +577,16 @@ class BouquetUploader extends Component<Props, State> {
             </aside>
           </div>
 
-          <div className="uploader__footer" aria-label="Aksi upload" role="group">
-            <button className="uploader__submit" type="submit" disabled={submitting}>
+          <div
+            className="uploader__footer"
+            aria-label="Aksi upload"
+            role="group"
+          >
+            <button
+              className="uploader__submit"
+              type="submit"
+              disabled={submitting}
+            >
               {submitting ? "Mengunggah..." : "Unggah Bouquet"}
             </button>
 

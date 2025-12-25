@@ -2,8 +2,10 @@ import "dotenv/config";
 import express, { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 import cors from "cors";
+
 import path from "path";
 import multer from "multer";
+import fs from "fs";
 
 import metricsRoutes from "../routes/metrics-routes";
 import authRoutes from "../routes/auth-routes";
@@ -75,9 +77,16 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/api/health", (_req, res) =>
   res.status(200).json({ ok: true, db: isMongoConnected() ? "up" : "down" })
 );
-
-// Static uploads (make sure this folder exists on server)
-app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
+const uploadsPath = path.resolve(process.cwd(), "uploads");
+try {
+  if (!fs.existsSync(uploadsPath)) {
+    fs.mkdirSync(uploadsPath, { recursive: true });
+    console.log("Created /uploads folder");
+  }
+} catch (err) {
+  console.error("Failed to create /uploads folder:", err);
+}
+app.use("/uploads", express.static(uploadsPath));
 
 // If DB is down, return a clear response (prevents proxy ECONNREFUSED)
 app.use((req, res, next) => {
