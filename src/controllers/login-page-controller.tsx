@@ -101,7 +101,6 @@ class LoginController extends Component<{}, LoginState> {
       window.location.replace("/dashboard");
     } catch (err: unknown) {
       console.error("Login error:", err);
-      const message = err instanceof Error ? err.message : "Unknown error";
       this.setState({
         error: `Network error. Please check your connection and try again.`,
         loading: false,
