@@ -43,9 +43,11 @@ const HomePage: React.FC = () => {
     const controller = new AbortController();
 
     setSeo({
-      title: `${STORE_PROFILE.brand.name} | Florist & Gift Shop Cirebon`,
+      title: `Florist Cirebon | Bouquet, Gift Box & Stand Acrylic Terbaik di Jawa Barat`,
       description:
-        "Florist di Cirebon — bouquet, gift box, dan artificial bouquet. Pesan cepat lewat WhatsApp.",
+        "Florist terpercaya di Cirebon, Jawa Barat. Menyediakan bouquet bunga segar, gift box, stand acrylic, artificial bouquet, dan berbagai produk gift lainnya. Pesan mudah via WhatsApp. Pengiriman cepat ke seluruh Cirebon dan sekitarnya.",
+      keywords:
+        "florist cirebon, bouquet cirebon, gift box cirebon, stand acrylic cirebon, florist jawa barat, toko bunga cirebon, artificial bouquet cirebon, hadiah cirebon, kado cirebon, florist mundu, florist pamengkang, gift shop cirebon, bunga cirebon, karangan bunga cirebon",
       path: "/",
     });
 

@@ -6,7 +6,7 @@ export const STORE_PROFILE = {
     logoPath: "/images/logo.png",
     tagline: "Luxury Floral Boutique",
     description:
-      "Florist Cirebon, Indonesia — bouquets, gift box, and artificial bouquet.",
+      "Florist terpercaya di Cirebon, Jawa Barat. Menyediakan bouquet bunga segar, gift box, stand acrylic, artificial bouquet, dan berbagai produk gift lainnya. Pesan mudah via WhatsApp dengan pengiriman cepat ke seluruh Cirebon dan sekitarnya.",
   },
 
   contact: {

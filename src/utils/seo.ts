@@ -3,9 +3,11 @@ import { STORE_PROFILE } from "../config/store-profile";
 type SeoInput = {
   title: string;
   description?: string;
+  keywords?: string; // comma-separated keywords
   path?: string; // used for canonical when provided
   noIndex?: boolean;
   ogImagePath?: string; // e.g. "/images/logo.png"
+  structuredData?: unknown; // Additional structured data
 };
 
 const ensureMetaByName = (name: string): HTMLMetaElement => {
@@ -67,6 +69,23 @@ export function setSeo(input: SeoInput): void {
     ensureMetaByName("description").setAttribute("content", description);
   }
 
+  // Keywords meta tag
+  if (input.keywords) {
+    ensureMetaByName("keywords").setAttribute("content", input.keywords);
+  }
+
+  // Geo-location meta tags for local SEO
+  ensureMetaByName("geo.region").setAttribute("content", "ID-JB"); // Jawa Barat
+  ensureMetaByName("geo.placename").setAttribute("content", "Cirebon");
+  ensureMetaByName("geo.position").setAttribute(
+    "content",
+    `${STORE_PROFILE.location.geo.latitude};${STORE_PROFILE.location.geo.longitude}`
+  );
+  ensureMetaByName("ICBM").setAttribute(
+    "content",
+    `${STORE_PROFILE.location.geo.latitude}, ${STORE_PROFILE.location.geo.longitude}`
+  );
+
   const robots = input.noIndex ? "noindex, nofollow" : "index, follow";
   ensureMetaByName("robots").setAttribute("content", robots);
 
@@ -109,7 +128,7 @@ export function setSeo(input: SeoInput): void {
 
   // JSON-LD (runtime; best-effort on SPA)
   // Includes WebSite + LocalBusiness to help local SEO.
-  setJsonLd({
+  const baseStructuredData = {
     "@context": "https://schema.org",
     "@graph": [
       {
@@ -179,5 +198,14 @@ export function setSeo(input: SeoInput): void {
         ],
       },
     ],
-  });
+  };
+
+  // Merge with additional structured data if provided
+  if (input.structuredData) {
+    if (Array.isArray(baseStructuredData["@graph"])) {
+      baseStructuredData["@graph"].push(input.structuredData as any);
+    }
+  }
+
+  setJsonLd(baseStructuredData);
 }

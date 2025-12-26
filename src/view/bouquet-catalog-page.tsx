@@ -123,9 +123,11 @@ class BouquetCatalogView extends Component<Props> {
 
     const suffix = filters.length ? ` (${filters.join(" • ")})` : "";
     setSeo({
-      title: `Katalog Bouquet${suffix} | Giftforyou.idn`,
+      title: `Katalog Bouquet Cirebon${suffix} | Giftforyou.idn - Florist Terbaik di Jawa Barat`,
       description:
-        "Cari bouquet berdasarkan tipe, ukuran, dan harga — lalu pesan cepat lewat WhatsApp.",
+        `Katalog lengkap bouquet di Cirebon, Jawa Barat. Tersedia berbagai pilihan bouquet bunga segar, gift box, stand acrylic, dan artificial bouquet. Filter berdasarkan tipe, ukuran, dan harga. Pesan mudah via WhatsApp dengan pengiriman cepat ke seluruh Cirebon.`,
+      keywords:
+        "katalog bouquet cirebon, bouquet cirebon murah, gift box cirebon, stand acrylic cirebon, florist cirebon online, toko bunga cirebon, artificial bouquet cirebon, hadiah cirebon, kado cirebon, florist jawa barat",
       path: "/collection",
     });
   }

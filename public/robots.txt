@@ -1,6 +1,34 @@
-# https://www.robotstxt.org/robotstxt.html
-User-agent: *
-Disallow: /login
-Disallow: /dashboard
+# robots.txt for Giftforyou.idn
+# https://giftforyou-idn.cloud/robots.txt
 
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /login
+Disallow: /api/
+
+# Sitemap location
 Sitemap: https://giftforyou-idn.cloud/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Allow all search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# Block bad bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /

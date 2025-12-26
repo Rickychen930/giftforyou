@@ -123,14 +123,35 @@ class BouquetDetailPage extends Component<Props> {
       : undefined;
     const titleParts = [bouquet.name, details].filter(Boolean).join(" — ");
 
+    const locationKeywords = "Cirebon, Jawa Barat";
     setSeo({
-      title: `${titleParts} | Giftforyou.idn`,
+      title: `${titleParts} | Giftforyou.idn - Florist Cirebon`,
       description:
         `${bouquet.name}${details ? ` (${details})` : ""}` +
         (price ? ` — ${price}.` : ".") +
-        " Pesan mudah lewat WhatsApp.",
+        ` Tersedia di Cirebon, Jawa Barat. Pesan mudah lewat WhatsApp dengan pengiriman cepat ke seluruh Cirebon dan sekitarnya.`,
+      keywords:
+        `${bouquet.name.toLowerCase()}, bouquet cirebon, gift box cirebon, stand acrylic cirebon, florist cirebon, toko bunga cirebon, hadiah cirebon, kado cirebon, florist jawa barat, ${locationKeywords}`,
       path: window.location.pathname,
       ogImagePath: bouquet.image ? buildImageUrl(bouquet.image) : undefined,
+      structuredData: {
+        "@type": "Product",
+        name: bouquet.name,
+        description: bouquet.description || `${bouquet.name} tersedia di Cirebon, Jawa Barat`,
+        image: bouquet.image ? buildImageUrl(bouquet.image) : undefined,
+        offers: {
+          "@type": "Offer",
+          price: bouquet.price,
+          priceCurrency: "IDR",
+          availability: bouquet.status === "ready" ? "https://schema.org/InStock" : "https://schema.org/PreOrder",
+          url: window.location.href,
+        },
+        brand: {
+          "@type": "Brand",
+          name: STORE_PROFILE.brand.name,
+        },
+        category: bouquet.type || "Bouquet",
+      },
     });
   }
 
