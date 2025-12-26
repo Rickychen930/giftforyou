@@ -14,10 +14,20 @@
 # misc
 .DS_Store
 
-# environment files
+# environment files - JANGAN commit file .env yang sebenarnya!
+# File sebenarnya (berisi secrets) - HARUS di-ignore
 .env
-.env.*
-!env.example
+.env.local
+.env.development
+.env.production
+.env.*.local
+
+# Exception: BOLEH commit template files (.example) - ini aman karena tidak ada secrets
+# Template files hanya berisi placeholder, tidak ada secrets sebenarnya
+!.env.example
+!.env.development.example
+!.env.production.example
+!.env.local.example
 
 # logs
 npm-debug.log*
