@@ -42,41 +42,68 @@ class LoginController extends Component<{}, LoginState> {
     this.setState({ loading: true, error: "" });
 
     try {
-      // ✅ FIXED ENDPOINT
       const response = await fetch(`${API_BASE}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
 
-      const data = await response
-        .json()
-        .catch(() => ({ error: "Invalid server response." }));
+      // Parse response first (before checking status)
+      let data: any;
+      try {
+        const text = await response.text();
+        data = text ? JSON.parse(text) : {};
+      } catch (parseErr) {
+        console.error("Failed to parse response:", parseErr);
+        this.setState({
+          error: "Invalid server response. Please try again.",
+          loading: false,
+        });
+        return;
+      }
 
+      // Check response status
       if (!response.ok) {
+        const errorMessage = data?.error || response.statusText || "Login failed. Please check your credentials.";
         this.setState({
-          error: data?.error || "Login failed. Please check your credentials.",
+          error: errorMessage,
           loading: false,
         });
         return;
       }
 
-      if (data?.token && data?.refreshToken) {
-        setTokens(data.token, data.refreshToken);
-      } else {
+      // Extract tokens - support multiple formats
+      const accessToken = data?.token || data?.accessToken;
+      const refreshToken = data?.refreshToken;
+
+      if (!accessToken) {
+        // Log full response for debugging
+        console.error("Login response missing token. Full response:", {
+          status: response.status,
+          statusText: response.statusText,
+          data,
+          headers: Object.fromEntries(response.headers.entries()),
+        });
         this.setState({
-          error: "Login failed: token not returned by server.",
+          error: data?.error || "Login failed: token not returned by server. Please contact support.",
           loading: false,
         });
         return;
       }
 
+      // Store tokens (refreshToken is optional for backward compatibility)
+      setTokens(accessToken, refreshToken || "");
+
+      // Success - redirect to dashboard
       this.setState({ loading: false, error: "" });
-      window.location.assign("/dashboard");
+      
+      // Use replace instead of assign to prevent back button issues
+      window.location.replace("/dashboard");
     } catch (err: unknown) {
+      console.error("Login error:", err);
       const message = err instanceof Error ? err.message : "Unknown error";
       this.setState({
-        error: `Server error. Please try again later. (${message})`,
+        error: `Network error. Please check your connection and try again.`,
         loading: false,
       });
     }

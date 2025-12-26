@@ -198,7 +198,8 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
       { expiresIn: "7d" }
     );
 
-    res.status(200).json({
+    // Ensure response is sent correctly
+    const responseData = {
       token: accessToken,
       refreshToken,
       user: {
@@ -206,7 +207,14 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
         username: user.username,
         role: user.role,
       },
-    });
+    };
+
+    // Log for debugging (remove in production or use proper logging)
+    if (process.env.NODE_ENV === "development") {
+      console.log("Login successful for user:", user.username);
+    }
+
+    res.status(200).json(responseData);
   } catch (err) {
     console.error("Login failed:", err);
     // Don't leak error details

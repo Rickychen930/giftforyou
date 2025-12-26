@@ -8,7 +8,7 @@ exports.STORE_PROFILE = {
         domain: "https://giftforyou-idn.cloud",
         logoPath: "/images/logo.png",
         tagline: "Luxury Floral Boutique",
-        description: "Florist Cirebon, Indonesia — bouquets, gift box, and artificial bouquet.",
+        description: "Florist terpercaya di Cirebon, Jawa Barat. Menyediakan bouquet bunga segar, gift box, stand acrylic, artificial bouquet, dan berbagai produk gift lainnya. Pesan mudah via WhatsApp dengan pengiriman cepat ke seluruh Cirebon dan sekitarnya.",
     },
     contact: {
         email: "giftforyou.idn01@gmail.com",

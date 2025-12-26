@@ -156,7 +156,8 @@ async function loginUser(req, res) {
         );
         // Generate refresh token (long-lived)
         const refreshToken = jsonwebtoken_1.default.sign({ id: String(user._id), type: "refresh" }, JWT_SECRET, { expiresIn: "7d" });
-        res.status(200).json({
+        // Ensure response is sent correctly
+        const responseData = {
             token: accessToken,
             refreshToken,
             user: {
@@ -164,7 +165,12 @@ async function loginUser(req, res) {
                 username: user.username,
                 role: user.role,
             },
-        });
+        };
+        // Log for debugging (remove in production or use proper logging)
+        if (process.env.NODE_ENV === "development") {
+            console.log("Login successful for user:", user.username);
+        }
+        res.status(200).json(responseData);
     }
     catch (err) {
         console.error("Login failed:", err);

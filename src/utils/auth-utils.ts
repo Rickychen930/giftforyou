@@ -11,11 +11,22 @@ const TOKEN_EXPIRY_BUFFER = 60000; // 1 minute buffer before expiry
 /**
  * Store tokens securely
  * Note: In production, consider using httpOnly cookies instead of localStorage
+ * @param accessToken - Access token (required)
+ * @param refreshToken - Refresh token (optional, can be empty string)
  */
-export function setTokens(accessToken: string, refreshToken: string): void {
+export function setTokens(accessToken: string, refreshToken?: string): void {
   try {
+    if (!accessToken) {
+      console.error("Cannot store empty access token");
+      return;
+    }
     localStorage.setItem(TOKEN_KEY, accessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    if (refreshToken) {
+      localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    } else {
+      // Remove refresh token if not provided
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+    }
     localStorage.setItem(LAST_ACTIVITY_KEY, Date.now().toString());
   } catch (err) {
     console.error("Failed to store tokens:", err);
