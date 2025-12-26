@@ -426,6 +426,13 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
           <p className="hsEditor__subtitle">
             Atur slider hero di homepage. Seret untuk mengubah urutan slide.
           </p>
+          {slides.length > 0 && (
+            <div className="hsEditor__stats" aria-live="polite" aria-atomic="true">
+              <span className="hsEditor__stat">
+                {slides.length} {slides.length === 1 ? "slide" : "slides"}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="hsEditor__headerActions">
@@ -435,8 +442,12 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
             onClick={clearAll}
             disabled={loading || slides.length === 0}
             title="Hapus semua slide"
+            aria-label="Hapus semua slide"
           >
-            Hapus Semua
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14zM10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+            <span>Hapus Semua</span>
           </button>
 
           <button
@@ -444,18 +455,43 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
             className="hsEditor__btn"
             onClick={addSlide}
             disabled={loading}
+            aria-label="Tambah slide baru"
           >
-            + Tambah Slide
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+              <path d="M12 8v8M8 12h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+            <span>Tambah Slide</span>
           </button>
 
           <button
             type="button"
             className="hsEditor__btn hsEditor__btn--primary"
             onClick={save}
-            disabled={saving || loading}
+            disabled={saving || loading || Boolean(validationError)}
             title={validationError ?? "Simpan perubahan"}
+            aria-label={saving ? "Menyimpan perubahan..." : validationError || "Simpan perubahan"}
+            aria-busy={saving}
           >
-            {saving ? "Menyimpan..." : "Simpan"}
+            {saving ? (
+              <>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ animation: "spin 0.8s linear infinite" }}>
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeDasharray="31.416" strokeDashoffset="31.416">
+                    <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416;0 31.416" repeatCount="indefinite"/>
+                    <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416;-31.416" repeatCount="indefinite"/>
+                  </circle>
+                </svg>
+                <span>Menyimpan...</span>
+              </>
+            ) : (
+              <>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M17 21v-8H7v8M7 3v5h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span>Simpan</span>
+              </>
+            )}
           </button>
         </div>
       </header>
@@ -472,12 +508,28 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
         </label>
 
         {loading ? (
-          <div className="hsState">Memuat slider hero…</div>
+          <div className="hsState" role="status" aria-live="polite" aria-busy="true">
+            <span>Memuat slider hero…</span>
+          </div>
         ) : (
           <>
-            {error && <div className="hsAlert hsAlert--error">{error}</div>}
+            {error && (
+              <div className="hsAlert hsAlert--error" role="alert" aria-live="assertive">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+                <span>{error}</span>
+              </div>
+            )}
             {success && (
-              <div className="hsAlert hsAlert--success">{success}</div>
+              <div className="hsAlert hsAlert--success" role="status" aria-live="polite">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span>{success}</span>
+              </div>
             )}
 
             {slides.length === 0 ? (
@@ -513,9 +565,21 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, index)}
                     onDragEnd={handleDragEnd}
-                    aria-label={`Slide ${index + 1}`}
+                    aria-label={`Slide ${index + 1} dari ${slides.length}`}
+                    aria-describedby={`slide-${s.id}-description`}
                     tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        // Focus first input in the slide
+                        const firstInput = e.currentTarget.querySelector<HTMLElement>('input, textarea, select');
+                        firstInput?.focus();
+                      }
+                    }}
                   >
+                    <div id={`slide-${s.id}-description`} className="hsEditor__srOnly">
+                      {s.title || "Slide tanpa judul"} - {s.image ? "Gambar tersedia" : "Gambar belum diunggah"}
+                    </div>
                     <div className="hsSlideCard__top">
                       <div className="hsSlideCard__meta">
                         <div className="hsSlideCard__index">
