@@ -173,6 +173,8 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  color: transparent; /* Fallback for browsers that don't support background-clip */
+  display: inline-block; /* Required for background-clip to work */
   font-family: "Playfair Display", Georgia, serif;
   line-height: 1.15;
   text-wrap: balance;

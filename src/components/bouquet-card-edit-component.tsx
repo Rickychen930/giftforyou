@@ -194,17 +194,30 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
     }
   }, []);
 
-  // Close quick actions when clicking outside
+  // Close quick actions when clicking outside or pressing Escape
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       if (quickActionsRef.current && !quickActionsRef.current.contains(e.target as Node)) {
         setShowQuickActions(false);
       }
     };
 
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && showQuickActions) {
+        setShowQuickActions(false);
+      }
+    };
+
     if (showQuickActions) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
+      // Use capture phase for better mobile support
+      document.addEventListener("mousedown", handleClickOutside, true);
+      document.addEventListener("touchstart", handleClickOutside, true);
+      document.addEventListener("keydown", handleEscape);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside, true);
+        document.removeEventListener("touchstart", handleClickOutside, true);
+        document.removeEventListener("keydown", handleEscape);
+      };
     }
   }, [showQuickActions]);
 
@@ -782,34 +795,48 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
               </button>
               
               {showQuickActions && (
-                <div className="becQuickActionsMenu">
-                  {onDuplicate && (
-                    <button
-                      type="button"
-                      className="becQuickActionItem"
-                      onClick={handleDuplicate}
-                      disabled={isDuplicating}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M8 8V5C8 3.89543 8.89543 3 10 3H19C20.1046 3 21 3.89543 21 5V14C21 15.1046 20.1046 16 19 16H16M5 8H16C17.1046 8 18 8.89543 18 10V19C18 20.1046 17.1046 21 16 21H5C3.89543 21 3 20.1046 3 19V10C3 8.89543 3.89543 8 5 8Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      {isDuplicating ? "Menduplikasi..." : "Duplikasi"}
-                    </button>
-                  )}
-                  {onDelete && (
-                    <button
-                      type="button"
-                      className="becQuickActionItem becQuickActionItem--danger"
-                      onClick={() => setShowDeleteConfirm(true)}
-                      disabled={isDeleting}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19 7L18.1327 19.1425C18.0579 20.1891 17.187 21 16.1378 21H7.86224C6.81296 21 5.94208 20.1891 5.86732 19.1425L5 7M10 11V17M14 11V17M15 7V4C15 3.44772 14.5523 3 14 3H10C9.44772 3 9 3.44772 9 4V7M4 7H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      Hapus
-                    </button>
-                  )}
-                </div>
+                <>
+                  {/* Mobile overlay */}
+                  <div 
+                    className="becQuickActionsOverlay"
+                    onClick={() => setShowQuickActions(false)}
+                    aria-hidden="true"
+                  />
+                  <div className="becQuickActionsMenu" ref={quickActionsRef}>
+                    {onDuplicate && (
+                      <button
+                        type="button"
+                        className="becQuickActionItem"
+                        onClick={() => {
+                          setShowQuickActions(false);
+                          handleDuplicate();
+                        }}
+                        disabled={isDuplicating}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M8 8V5C8 3.89543 8.89543 3 10 3H19C20.1046 3 21 3.89543 21 5V14C21 15.1046 20.1046 16 19 16H16M5 8H16C17.1046 8 18 8.89543 18 10V19C18 20.1046 17.1046 21 16 21H5C3.89543 21 3 20.1046 3 19V10C3 8.89543 3.89543 8 5 8Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        {isDuplicating ? "Menduplikasi..." : "Duplikasi"}
+                      </button>
+                    )}
+                    {onDelete && (
+                      <button
+                        type="button"
+                        className="becQuickActionItem becQuickActionItem--danger"
+                        onClick={() => {
+                          setShowQuickActions(false);
+                          setShowDeleteConfirm(true);
+                        }}
+                        disabled={isDeleting}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M19 7L18.1327 19.1425C18.0579 20.1891 17.187 21 16.1378 21H7.86224C6.81296 21 5.94208 20.1891 5.86732 19.1425L5 7M10 11V17M14 11V17M15 7V4C15 3.44772 14.5523 3 14 3H10C9.44772 3 9 3.44772 9 4V7M4 7H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        Hapus
+                      </button>
+                    )}
+                  </div>
+                </>
               )}
             </div>
           )}
