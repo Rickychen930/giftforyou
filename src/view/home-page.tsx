@@ -9,7 +9,7 @@ import OurCollectionSection from "../components/sections/our-collection-section"
 import StoreLocationSection from "../components/sections/store-location-section";
 
 import { API_BASE } from "../config/api";
-import { STORE_PROFILE } from "../config/store-profile";
+// import { STORE_PROFILE } from "../config/store-profile"; FIXED ME
 import { setSeo } from "../utils/seo";
 
 type LoadState = "idle" | "loading" | "success" | "error";
