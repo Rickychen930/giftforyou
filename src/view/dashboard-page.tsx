@@ -32,6 +32,8 @@ interface Props {
 
   onUpdate: (formData: FormData) => Promise<boolean>;
   onUpload: (formData: FormData) => Promise<boolean>;
+  onDuplicate?: (bouquetId: string) => Promise<void>;
+  onDelete?: (bouquetId: string) => Promise<void>;
   onHeroSaved?: () => void | Promise<void>;
   onLogout: () => void;
 }
@@ -699,6 +701,8 @@ class DashboardView extends Component<Props, State> {
           <BouquetEditorSection
             bouquets={bouquets}
             onSave={this.props.onUpdate}
+            onDuplicate={this.props.onDuplicate}
+            onDelete={this.props.onDelete}
             collections={collections}
           />
         );

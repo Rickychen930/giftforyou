@@ -336,6 +336,71 @@ class DashboardController extends Component<{}, State> {
     }
   };
 
+  private onDuplicate = async (bouquetId: string): Promise<void> => {
+    try {
+      // Fetch the bouquet to duplicate
+      const res = await fetch(`${API_BASE}/api/bouquets/${bouquetId}`, {
+        headers: {
+          ...this.getAuthHeaders(),
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to fetch bouquet (${res.status})`);
+      }
+
+      const bouquet = await res.json();
+      
+      // Create a new FormData with the bouquet data, but without _id
+      const formData = new FormData();
+      formData.append("name", `${bouquet.name} (Copy)`);
+      formData.append("description", bouquet.description ?? "");
+      formData.append("price", String(bouquet.price));
+      formData.append("type", bouquet.type ?? "");
+      formData.append("size", bouquet.size ?? "Medium");
+      formData.append("status", bouquet.status ?? "ready");
+      formData.append("collectionName", bouquet.collectionName ?? "");
+      formData.append("quantity", String(bouquet.quantity ?? 0));
+      formData.append("occasions", Array.isArray(bouquet.occasions) ? bouquet.occasions.join(", ") : "");
+      formData.append("flowers", Array.isArray(bouquet.flowers) ? bouquet.flowers.join(", ") : "");
+      formData.append("isNewEdition", String(Boolean(bouquet.isNewEdition)));
+      formData.append("isFeatured", String(Boolean(bouquet.isFeatured)));
+      formData.append("customPenanda", Array.isArray(bouquet.customPenanda) ? bouquet.customPenanda.join(",") : "");
+      formData.append("careInstructions", bouquet.careInstructions ?? "");
+
+      // Upload as new bouquet
+      await this.onUpload(formData);
+    } catch (e) {
+      this.setState({
+        errorMessage: e instanceof Error ? e.message : "Duplicate failed.",
+      });
+      throw e;
+    }
+  };
+
+  private onDelete = async (bouquetId: string): Promise<void> => {
+    try {
+      const res = await fetch(`${API_BASE}/api/bouquets/${bouquetId}`, {
+        method: "DELETE",
+        headers: {
+          ...this.getAuthHeaders(),
+        },
+      });
+
+      if (!res.ok) {
+        const t = await res.text();
+        throw new Error(`Delete failed (${res.status}): ${t}`);
+      }
+
+      await this.loadDashboard();
+    } catch (e) {
+      this.setState({
+        errorMessage: e instanceof Error ? e.message : "Delete failed.",
+      });
+      throw e;
+    }
+  };
+
   private onLogout = () => {
     localStorage.removeItem("authToken");
     // optional redirect
@@ -355,6 +420,8 @@ class DashboardController extends Component<{}, State> {
         errorMessage={this.state.errorMessage}
         onUpload={this.onUpload}
         onUpdate={this.onUpdate}
+        onDuplicate={this.onDuplicate}
+        onDelete={this.onDelete}
         onHeroSaved={this.refreshMetrics}
         onLogout={this.onLogout}
       />

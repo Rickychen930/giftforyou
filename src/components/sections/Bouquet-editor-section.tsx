@@ -12,6 +12,8 @@ interface Props {
   bouquets: Bouquet[];
   collections: string[];
   onSave: (formData: FormData) => Promise<boolean>;
+  onDuplicate?: (bouquetId: string) => Promise<void>;
+  onDelete?: (bouquetId: string) => Promise<void>;
 }
 
 interface State {
@@ -107,8 +109,34 @@ export default class BouquetEditorSection extends Component<Props, State> {
     return this.props.onSave(formData);
   };
 
-  private setSearch = (search: string) =>
-    this.setState({ search, currentPage: 1 });
+  private handleDuplicate = async (bouquetId: string): Promise<void> => {
+    if (this.props.onDuplicate) {
+      await this.props.onDuplicate(bouquetId);
+    }
+  };
+
+  private handleDelete = async (bouquetId: string): Promise<void> => {
+    if (this.props.onDelete) {
+      await this.props.onDelete(bouquetId);
+    }
+  };
+
+  componentWillUnmount(): void {
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+  }
+
+  private searchTimeout: NodeJS.Timeout | null = null;
+
+  private setSearch = (search: string) => {
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+    this.searchTimeout = setTimeout(() => {
+      this.setState({ search, currentPage: 1 });
+    }, 300);
+  };
   private setSortBy = (sortBy: SortBy) =>
     this.setState({ sortBy, currentPage: 1 });
   private setPriceRange = (priceRange: Range) =>
@@ -394,6 +422,8 @@ export default class BouquetEditorSection extends Component<Props, State> {
                     bouquet={bouquet}
                     collections={collections}
                     onSave={this.handleSave}
+                    onDuplicate={this.props.onDuplicate ? this.handleDuplicate : undefined}
+                    onDelete={this.props.onDelete ? this.handleDelete : undefined}
                   />
                 ))}
               </div>

@@ -24,6 +24,7 @@ export interface Bouquet {
 
   isNewEdition: boolean;
   isFeatured: boolean;
+  customPenanda?: string[];
 
   careInstructions?: string;
 
