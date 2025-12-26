@@ -18,23 +18,50 @@
   --fp-focus-ring: 0 0 0 3px rgba(212, 140, 156, 0.25);
 }
 
+/* Screen reader only text */
+.filterPanel__srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 /* =========================
    Filter Panel (premium)
 ========================= */
 .filterPanel {
-  background:
-    radial-gradient(740px 420px at 20% 0%, rgba(212, 140, 156, 0.10), transparent 60%),
-    linear-gradient(135deg, var(--fp-bg-1), var(--fp-bg-2));
-  border: 1px solid var(--fp-border);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.98) 100%
+  );
+  border: 1.5px solid rgba(212, 140, 156, 0.15);
   border-radius: 18px;
-  box-shadow: var(--fp-shadow);
-  padding: 0.9rem 1.05rem;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.08),
+    0 8px 24px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  padding: 1rem 1.1rem;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.85rem;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  gap: 0.75rem;
+  /* Backdrop filter blurs content BEHIND the panel, not the panel content itself */
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   overflow: visible;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  /* Create stacking context - child elements should NOT inherit blur */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 /* Embedded: rely on the parent container card (prevents double-card / messy layout) */
@@ -49,8 +76,9 @@
 }
 
 .filterPanel--embedded .filterPanel__header {
-  padding: 0 0 0.35rem;
+  padding: 0 0 0.5rem;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  margin-bottom: 0.15rem;
 }
 
 .filterPanel--embedded .filterPanel__title {
@@ -58,7 +86,7 @@
 }
 
 .filterPanel--embedded .filterPanel__body {
-  gap: 0.9rem;
+  gap: 0.75rem;
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -68,9 +96,86 @@
 }
 
 .filterPanel__header {
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   min-width: 0;
+  margin-bottom: 0.25rem;
+  /* Ensure header content is not affected by parent backdrop-filter */
+  position: relative;
+  z-index: 1;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.filterPanel__headerTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.filterPanel__clearAll {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.75rem;
+  background: linear-gradient(
+    135deg,
+    rgba(239, 68, 68, 0.1) 0%,
+    rgba(239, 68, 68, 0.08) 100%
+  );
+  border: 1.5px solid rgba(239, 68, 68, 0.25);
+  border-radius: 10px;
+  color: rgba(239, 68, 68, 0.9);
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.1);
+}
+
+.filterPanel__clearAll:hover:not(:disabled) {
+  background: linear-gradient(
+    135deg,
+    rgba(239, 68, 68, 0.15) 0%,
+    rgba(239, 68, 68, 0.12) 100%
+  );
+  border-color: rgba(239, 68, 68, 0.35);
+  color: rgba(239, 68, 68, 1);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+  transform: translateY(-1px);
+}
+
+.filterPanel__clearAll:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.filterPanel__clearAll--compact {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.78rem;
+}
+
+.filterPanel__clearAllCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 0.3rem;
+  background: rgba(239, 68, 68, 0.2);
+  border-radius: 9px;
+  font-weight: 800;
+  font-size: 0.7rem;
+  color: rgba(239, 68, 68, 1);
+  line-height: 1;
+}
+
+.filterPanel__hintActive {
+  color: var(--fp-brand);
+  font-weight: 700;
 }
 
 .filterPanel__title {
@@ -85,8 +190,98 @@
 .filterPanel__body {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.85rem;
+  gap: 0.7rem;
   min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  /* Ensure body content is not affected by parent backdrop-filter */
+  position: relative;
+  z-index: 1;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* Big screen: horizontal scroll layout */
+/* Big screen: horizontal scroll layout for efficiency */
+@media (min-width: 1200px) {
+  /* Only apply to non-topbar, non-embedded panels */
+  .filterPanel:not(.filterPanel--topbar):not(.filterPanel--embedded) .filterPanel__body {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 0.75rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    padding-bottom: 0.3rem;
+    scrollbar-width: thin;
+    align-items: flex-start;
+    scroll-snap-type: x proximity;
+    scroll-padding: 0.5rem;
+    /* Smooth scrolling */
+    scroll-behavior: smooth;
+  }
+
+  .filterPanel:not(.filterPanel--topbar):not(.filterPanel--embedded) .filterPanel__body::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .filterPanel:not(.filterPanel--topbar):not(.filterPanel--embedded) .filterPanel__body::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+  }
+
+  .filterPanel:not(.filterPanel--topbar):not(.filterPanel--embedded) .filterPanel__body::-webkit-scrollbar-thumb {
+    background: rgba(212, 140, 156, 0.3);
+    border-radius: 3px;
+    transition: background 0.2s ease;
+  }
+
+  .filterPanel:not(.filterPanel--topbar):not(.filterPanel--embedded) .filterPanel__body::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 140, 156, 0.5);
+  }
+
+  .filterPanel:not(.filterPanel--topbar):not(.filterPanel--embedded) .filterPanel__body .fpGroup {
+    flex: 0 0 auto;
+    min-width: 280px;
+    max-width: 320px;
+    width: auto;
+    scroll-snap-align: start;
+  }
+
+  .filterPanel:not(.filterPanel--topbar):not(.filterPanel--embedded) .filterPanel__body .fpGroup--price {
+    min-width: 320px;
+    max-width: 380px;
+  }
+
+  .filterPanel:not(.filterPanel--topbar):not(.filterPanel--embedded) .filterPanel__body .fpGroup--sort {
+    min-width: 260px;
+    max-width: 300px;
+  }
+}
+
+/* Ultra-wide screens: optimize spacing */
+@media (min-width: 1600px) {
+  .filterPanel:not(.filterPanel--topbar):not(.filterPanel--embedded) .filterPanel__body {
+    gap: 0.85rem;
+  }
+
+  .filterPanel:not(.filterPanel--topbar):not(.filterPanel--embedded) .filterPanel__body .fpGroup {
+    min-width: 300px;
+    max-width: 340px;
+  }
+
+  .filterPanel:not(.filterPanel--topbar):not(.filterPanel--embedded) .filterPanel__body .fpGroup--price {
+    min-width: 340px;
+    max-width: 400px;
+  }
+
+  .filterPanel:not(.filterPanel--topbar):not(.filterPanel--embedded) .filterPanel__body .fpGroup--sort {
+    min-width: 280px;
+    max-width: 320px;
+  }
 }
 
 /* =========================
@@ -95,17 +290,20 @@
 .filterPanel--topbar .filterPanel__body {
   display: flex;
   flex-wrap: nowrap;
-  gap: 0.85rem;
+  gap: 0.7rem;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
-  padding-bottom: 0.35rem;
+  padding-bottom: 0.3rem;
   scrollbar-width: none;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Desktop+ : wrap into 2 rows when there is room (more premium than forcing horizontal scroll) */
-@media (min-width: 1100px) {
+@media (min-width: 1100px) and (max-width: 1199px) {
   .filterPanel--topbar .filterPanel__body {
     flex-wrap: wrap;
     overflow: visible;
@@ -113,30 +311,63 @@
   }
 }
 
+/* Very large screens: keep horizontal scroll for topbar too */
+@media (min-width: 1600px) {
+  .filterPanel--topbar .filterPanel__body {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.3rem;
+  }
+}
+
 .filterPanel--topbar .filterPanel__body::-webkit-scrollbar {
-  height: 0;
-  width: 0;
-  background: transparent;
+  height: 6px;
+  width: 6px;
+}
+
+.filterPanel--topbar .filterPanel__body::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+}
+
+.filterPanel--topbar .filterPanel__body::-webkit-scrollbar-thumb {
+  background: rgba(212, 140, 156, 0.3);
+  border-radius: 3px;
+}
+
+.filterPanel--topbar .filterPanel__body::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 140, 156, 0.5);
 }
 
 .filterPanel--topbar .fpGroup {
   flex: 0 0 auto;
-  min-width: 260px;
+  min-width: 240px;
   max-width: 360px;
-  padding: 0.8rem 0.85rem;
-  border-radius: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: rgba(255, 255, 255, 0.74);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06);
+  padding: 0.7rem 0.75rem;
+  border-radius: 14px;
+  border: 1.5px solid rgba(212, 140, 156, 0.12);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 255, 255, 0.75) 100%
+  );
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+  /* Remove backdrop-filter from child elements - it causes double blur on panel content */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  position: relative;
+  isolation: isolate; /* Create stacking context to prevent blur inheritance */
 }
 
 .filterPanel--topbar .fpGroup--price {
-  min-width: 340px;
+  min-width: 300px;
   max-width: 420px;
 }
 
 .filterPanel--topbar .fpGroup--sort {
-  min-width: 260px;
+  min-width: 240px;
   max-width: 320px;
 }
 
@@ -152,21 +383,29 @@
   min-width: 0;
   max-width: 100%;
   flex: 1 1 auto;
+  width: 100%;
+  box-sizing: border-box;
+  flex-wrap: wrap;
 }
 
 .filterPanel__title {
   margin: 0;
   font-size: 1.15rem;
   font-weight: 950;
-  color: var(--fp-text-strong);
+  background: linear-gradient(135deg, var(--fp-text-strong) 0%, rgba(0, 0, 0, 0.7) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   letter-spacing: -0.01em;
+  line-height: 1.3;
 }
 
 .filterPanel__hint {
-  margin: 0.35rem 0 0;
+  margin: 0.3rem 0 0;
   color: var(--fp-text-muted);
-  line-height: 1.6;
+  line-height: 1.5;
   font-weight: 650;
+  font-size: 0.88rem;
   max-width: 38ch;
   overflow-wrap: anywhere;
 }
@@ -175,9 +414,59 @@
 .fpGroup {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.4rem;
   min-width: 0;
   max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  /* Ensure child elements don't inherit parent's backdrop-filter blur */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  position: relative;
+  z-index: 1; /* Ensure content is above any backdrop blur */
+}
+
+/* Big screen: groups as cards in horizontal scroll */
+/* Big screen: groups as cards in horizontal scroll */
+@media (min-width: 1200px) {
+  .filterPanel:not(.filterPanel--topbar):not(.filterPanel--embedded) .filterPanel__body .fpGroup {
+    padding: 0.75rem 0.85rem;
+    border-radius: 14px;
+    border: 1.5px solid rgba(212, 140, 156, 0.12);
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.88) 0%,
+      rgba(255, 255, 255, 0.78) 100%
+    );
+    box-shadow: 
+      0 6px 20px rgba(0, 0, 0, 0.05),
+      0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+    /* Remove backdrop-filter from child elements - parent already has it */
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    isolation: isolate; /* Create stacking context to prevent blur inheritance */
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .filterPanel:not(.filterPanel--topbar):not(.filterPanel--embedded) .filterPanel__body .fpGroup:hover {
+      box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.08),
+        0 0 0 1px rgba(255, 255, 255, 0.7) inset;
+      transform: translateY(-2px);
+      border-color: rgba(212, 140, 156, 0.2);
+    }
+  }
+
+  /* Ensure groups don't collapse on big screens */
+  .filterPanel:not(.filterPanel--topbar):not(.filterPanel--embedded) .filterPanel__body .fpGroup__head {
+    flex-wrap: nowrap;
+  }
+
+  .filterPanel:not(.filterPanel--topbar):not(.filterPanel--embedded) .filterPanel__body .fpGroup__toggle {
+    min-width: 0;
+  }
 }
 
 /* Keep a single-column rhythm for a calmer, luxury sidebar layout */
@@ -192,27 +481,35 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.6rem;
   flex-wrap: wrap;
   min-width: 0;
+  width: 100%;
+}
+
+.filterPanel--topbar .fpGroup__head {
+  flex-wrap: nowrap;
 }
 
 .fpGroup__toggle {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   min-width: 0;
   max-width: 100%;
   flex: 1 1 auto;
+  width: 100%;
 
   border: 1px solid transparent;
   background: transparent;
   color: var(--fp-text);
-  padding: 0.25rem 0.35rem;
-  border-radius: 12px;
+  padding: 0.3rem 0.45rem;
+  border-radius: 10px;
   cursor: pointer;
+  text-align: left;
 
-  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
 }
 
 .fpGroup__toggle:disabled {
@@ -236,8 +533,44 @@
 .fpGroup__meta {
   font-weight: 850;
   color: var(--fp-text-muted);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.fpGroup__toggle--static .fpGroup__meta {
+  margin-left: 0;
+}
+
+.fpGroup__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 0.45rem;
+  background: linear-gradient(135deg, var(--fp-brand), var(--fp-brand-strong));
+  color: var(--fp-on-brand);
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 0.7rem;
+  box-shadow: 0 2px 6px rgba(212, 140, 156, 0.3);
+  animation: fpBadgePulse 2s ease-in-out infinite;
+  flex-shrink: 0;
+  margin-left: 0.35rem;
+  line-height: 1;
+}
+
+@keyframes fpBadgePulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 6px rgba(212, 140, 156, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 3px 8px rgba(212, 140, 156, 0.4);
+  }
 }
 
 .fpGroup__chev {
@@ -257,29 +590,223 @@
   display: none;
 }
 
+.fpGroup__panel {
+  animation: fpSlideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fpGroup__panel[hidden] {
+  animation: none;
+}
+
+@keyframes fpSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 1000px;
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .fpGroup__panel {
+    animation: none;
+    transition: opacity 0.2s ease;
+  }
+  
+  @keyframes fpSlideDown {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+/* Search within filter groups */
+.fpGroup__search {
+  position: relative;
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+}
+
+.fpGroup__searchIcon {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--fp-text-muted);
+  pointer-events: none;
+  z-index: 1;
+  width: 15px;
+  height: 15px;
+}
+
+.fpGroup__searchInput {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  padding-left: 2.5rem;
+  padding-right: 2.25rem;
+  border: 1.5px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--fp-text);
+  font-size: 0.88rem;
+  font-weight: 700;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fpGroup__searchInput:focus {
+  outline: none;
+  border-color: var(--fp-brand);
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 0 0 3px rgba(212, 140, 156, 0.15);
+  transform: translateY(-1px);
+}
+
+.fpGroup__searchInput:focus-visible {
+  outline: 2px solid var(--fp-brand);
+  outline-offset: 2px;
+}
+
+.fpGroup__searchInput::placeholder {
+  color: rgba(0, 0, 0, 0.4);
+  opacity: 1;
+}
+
+.fpGroup__searchClear {
+  position: absolute;
+  right: 0.6rem;
+  background: rgba(0, 0, 0, 0.05);
+  border: none;
+  padding: 0.35rem;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--fp-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  width: 24px;
+  height: 24px;
+  justify-content: center;
+  border-radius: 5px;
+  transition: all 0.2s ease;
+  z-index: 1;
+  width: 20px;
+  height: 20px;
+}
+
+.fpGroup__searchClear:hover {
+  background: rgba(212, 140, 156, 0.15);
+  color: var(--fp-brand);
+  transform: scale(1.1);
+}
+
+.fpGroup__searchClear:focus-visible {
+  outline: 2px solid var(--fp-brand);
+  outline-offset: 2px;
+  background: rgba(212, 140, 156, 0.2);
+}
+
+.fpGroup__searchClear:active {
+  transform: scale(0.95);
+}
+
+.fpOptions__empty {
+  padding: 1.2rem 0.75rem;
+  text-align: center;
+  color: var(--fp-text-muted);
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.4;
+  grid-column: 1 / -1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.fpOptions__empty span {
+  display: block;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+}
+
+.fpOptions__emptyClear {
+  padding: 0.5rem 1rem;
+  background: rgba(212, 140, 156, 0.1);
+  border: 1px solid rgba(212, 140, 156, 0.2);
+  border-radius: 8px;
+  color: var(--fp-brand);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fpOptions__emptyClear:hover {
+  background: rgba(212, 140, 156, 0.15);
+  border-color: rgba(212, 140, 156, 0.3);
+  transform: translateY(-1px);
+}
+
+.fpOptions__emptyClear:focus-visible {
+  outline: 2px solid var(--fp-brand);
+  outline-offset: 2px;
+}
+
 .fpGroup__title {
   margin: 0;
-  font-size: 0.94rem;
+  font-size: 0.92rem;
   font-weight: 950;
   color: var(--fp-text);
   letter-spacing: 0.005em;
   text-transform: none;
   overflow-wrap: anywhere;
+  flex: 0 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  line-height: 1.3;
 }
 
 .fpGroup__clear {
   border: 1px solid transparent;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.6);
   color: var(--fp-text-muted);
   font-weight: 850;
-  font-size: 0.85rem;
-
-  padding: 0.25rem 0.45rem;
-  border-radius: 999px;
+  font-size: 0.78rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 8px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  flex-shrink: 0;
+  min-height: 30px;
+  white-space: nowrap;
+}
 
-  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease,
-    color 0.18s ease;
+.fpGroup__clear svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+  width: 12px;
+  height: 12px;
 }
 
 .fpGroup__clear:disabled {
@@ -289,10 +816,15 @@
 
 @media (hover: hover) and (pointer: fine) {
   .fpGroup__clear:hover:not(:disabled) {
-    border-color: var(--fp-border-active);
-    background: rgba(255, 255, 255, 0.45);
+    border-color: rgba(212, 140, 156, 0.3);
+    background: rgba(255, 255, 255, 0.9);
     color: var(--fp-text);
     transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  }
+  
+  .fpGroup__clear:hover:not(:disabled) svg {
+    opacity: 1;
   }
 }
 
@@ -301,19 +833,51 @@
   outline-offset: 3px;
 }
 
+.fpGroup__clear:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  pointer-events: none;
+}
+
+/* Disabled state visual feedback */
+.filterPanel[aria-disabled="true"],
+.filterPanel:has([disabled]:not([disabled="false"])) {
+  position: relative;
+}
+
+.filterPanel[aria-disabled="true"]::before,
+.filterPanel:has([disabled]:not([disabled="false"]))::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+  /* No blur on overlay - it would blur the panel content itself */
+  /* The main backdrop-filter already blurs content behind the panel */
+}
+
 /* Chips layout */
 /* Chips are now used primarily for Sort (few items) */
 .fpChips {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem;
+  gap: 0.4rem;
   overflow-x: visible;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
-  padding: 0.1rem 0.1rem 0.2rem;
+  padding: 0.05rem 0.05rem 0.15rem;
   align-items: center;
   min-width: 0;
+  max-width: 100%;
   scroll-padding: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Horizontal scroller polish */
@@ -364,30 +928,30 @@
 
 /* Chip button */
 .fpChip {
-  border: 1px solid var(--fp-border);
-  background: var(--fp-surface);
+  border: 1.5px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.8);
   color: var(--fp-text-muted);
 
-  padding: 0.45rem 0.7rem;
+  padding: 0.5rem 0.8rem;
   border-radius: 999px;
 
   font-weight: 850;
-  font-size: 0.88rem;
-  line-height: 1.1;
+  font-size: 0.86rem;
+  line-height: 1.2;
   cursor: pointer;
 
   /* Safari flex/overflow: prevent weird stacking/shrinking */
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
+  gap: 0.45rem;
   justify-content: center;
   min-height: 38px;
   min-width: 0;
   max-width: 100%;
 
-  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease,
-    background 0.18s ease, color 0.18s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   white-space: nowrap;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
@@ -399,20 +963,27 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex: 1;
+}
+
+.fpChip.is-active .fpChip__label {
+  flex: 1;
 }
 
 /* === Option list (reconstructed) === */
 .fpOptions {
   display: flex;
   flex-wrap: nowrap;
-  gap: 0.55rem;
-  padding: 0.2rem 0.25rem 0.45rem;
+  gap: 0.5rem;
+  padding: 0.15rem 0.2rem 0.4rem;
   max-width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
   scroll-padding: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .fpOptions::-webkit-scrollbar {
@@ -433,23 +1004,27 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.6rem;
 
-  border: 1px solid rgba(0, 0, 0, 0.075);
-  background: rgba(255, 255, 255, 0.68);
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.75);
   color: var(--fp-text);
 
   padding: 0.55rem 0.85rem;
   border-radius: 999px;
-  min-height: 42px;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 40px;
   cursor: pointer;
   text-align: left;
-  line-height: 1.15;
+  line-height: 1.2;
   min-width: 0;
 
   scroll-snap-align: start;
 
-  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .fpOption__label {
@@ -459,7 +1034,9 @@
   white-space: nowrap;
   font-weight: 850;
   color: var(--fp-text);
-  max-width: 22ch;
+  max-width: 24ch;
+  flex: 1;
+  font-size: 0.88rem;
 }
 
 .fpOption:disabled {
@@ -470,9 +1047,16 @@
 
 @media (hover: hover) and (pointer: fine) {
   .fpOption:hover:not(:disabled) {
-    border-color: var(--fp-border-active);
-    background: rgba(255, 255, 255, 0.84);
-    transform: translateY(-1px);
+    border-color: rgba(212, 140, 156, 0.3);
+    background: rgba(255, 255, 255, 0.95);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  
+  .fpChip:hover:not(:disabled) {
+    border-color: rgba(212, 140, 156, 0.3);
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 }
 
@@ -483,19 +1067,33 @@
 
 .fpOption.is-active {
   border-color: rgba(212, 140, 156, 0.55);
-  background:
-    radial-gradient(520px 220px at 0% 0%, rgba(212, 140, 156, 0.12), transparent 55%),
-    rgba(255, 255, 255, 0.84);
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.15) 0%,
+    rgba(212, 140, 156, 0.1) 100%
+  );
+  box-shadow: 
+    0 4px 12px rgba(212, 140, 156, 0.2),
+    0 0 0 1px rgba(212, 140, 156, 0.1) inset;
 }
 
-.fpOption.is-active::after {
-  content: "";
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, var(--fp-brand), var(--fp-brand-strong));
-  box-shadow: 0 0 0 3px rgba(212, 140, 156, 0.18);
-  flex: 0 0 auto;
+.fpOption__check {
+  flex-shrink: 0;
+  color: var(--fp-brand);
+  animation: fpCheckIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 13px;
+  height: 13px;
+}
+
+@keyframes fpCheckIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8) rotate(-90deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
 }
 
 @media (min-width: 769px) {
@@ -530,7 +1128,17 @@
   background: linear-gradient(135deg, var(--fp-brand), var(--fp-brand-strong));
   border-color: var(--fp-brand-strong);
   color: var(--fp-on-brand);
-  box-shadow: var(--fp-shadow-active);
+  box-shadow: 
+    0 4px 16px rgba(212, 140, 156, 0.35),
+    0 2px 8px rgba(212, 140, 156, 0.25);
+}
+
+.fpChip__check {
+  flex-shrink: 0;
+  color: var(--fp-on-brand);
+  animation: fpCheckIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 13px;
+  height: 13px;
 }
 
 .fpChip:active {
@@ -539,31 +1147,77 @@
 
 /* Price */
 .fpPrice {
-  padding: 0.75rem;
-  border-radius: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  background: rgba(255, 255, 255, 0.7);
+  padding: 0.85rem;
+  border-radius: 14px;
+  border: 1.5px solid rgba(212, 140, 156, 0.15);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 255, 255, 0.75) 100%
+  );
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(255, 255, 255, 0.6) inset;
 }
 
 .fpPrice__values {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.65rem;
   margin-bottom: 0.75rem;
   flex-wrap: wrap;
-  row-gap: 0.35rem;
+  row-gap: 0.4rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.fpPrice__valueWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.fpPrice__label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--fp-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
 }
 
 .fpPrice__value {
-  font-weight: 900;
+  font-weight: 950;
   color: var(--fp-text-strong);
   letter-spacing: -0.01em;
+  font-size: 1rem;
   max-width: 100%;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  line-height: 1.25;
+}
+
+.fpPrice__separator {
+  display: flex;
+  align-items: center;
+  color: var(--fp-text-muted);
+  opacity: 0.5;
+  flex-shrink: 0;
+  margin: 0 0.4rem;
+}
+
+.fpPrice__separator svg {
+  width: 18px;
+  height: 18px;
 }
 
 .fpSlider {
-  padding: 0.25rem 0.1rem 0.1rem;
+  padding: 0.2rem 0.1rem 0.05rem;
   max-width: 100%;
 }
 
@@ -580,11 +1234,37 @@
   width: 18px;
   height: 18px;
   margin-top: -6px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: grab;
+}
+
+.fpSlider .rc-slider-handle:active {
+  cursor: grabbing;
+  transform: scale(1.2);
+}
+
+.fpSlider .rc-slider-handle:hover:not(:active) {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(212, 140, 156, 0.3);
 }
 
 .fpSlider .rc-slider-handle:focus-visible {
   outline: none;
   box-shadow: 0 0 0 4px rgba(212, 140, 156, 0.22);
+}
+
+/* Mobile: larger touch targets for slider */
+@media (max-width: 768px) {
+  .fpSlider .rc-slider-handle {
+    width: 22px;
+    height: 22px;
+    margin-top: -8px;
+  }
+  
+  .fpSlider .rc-slider-rail,
+  .fpSlider .rc-slider-track {
+    height: 8px;
+  }
 }
 
 /* Accessibility focus */
@@ -594,15 +1274,144 @@
 }
 
 /* Responsive */
+@media (max-width: 1199px) {
+  /* Revert to vertical layout below 1200px for non-topbar, non-embedded */
+  .filterPanel:not(.filterPanel--topbar):not(.filterPanel--embedded) .filterPanel__body {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    padding-bottom: 0 !important;
+  }
+
+  .filterPanel:not(.filterPanel--topbar):not(.filterPanel--embedded) .filterPanel__body .fpGroup {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  
+  /* Ensure disabled overlay doesn't add extra blur */
+  .filterPanel[aria-disabled="true"]::before,
+  .filterPanel:has([disabled]:not([disabled="false"]))::before {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+@media (max-width: 1440px) {
+  .filterPanel--topbar .fpGroup {
+    min-width: 220px;
+  }
+
+  .filterPanel--topbar .fpGroup--price {
+    min-width: 280px;
+  }
+}
+
+/* Tablet landscape and smaller desktop */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .filterPanel {
+    padding: 0.95rem 1rem;
+    gap: 0.8rem;
+  }
+
+  .filterPanel--topbar .fpGroup {
+    min-width: 200px;
+    max-width: 320px;
+  }
+
+  .filterPanel--topbar .fpGroup--price {
+    min-width: 260px;
+    max-width: 380px;
+  }
+
+  .filterPanel--topbar .fpGroup--sort {
+    min-width: 200px;
+    max-width: 300px;
+  }
+  
+  /* Improve touch targets on tablets */
+  .fpGroup__toggle,
+  .fpGroup__clear,
+  .fpOption,
+  .fpChip {
+    min-height: 42px;
+  }
+}
+
+/* Tablet portrait */
+@media (max-width: 768px) and (min-width: 481px) {
+  .filterPanel {
+    padding: 0.9rem 0.95rem;
+    gap: 0.75rem;
+  }
+  
+  /* Better spacing for tablet */
+  .filterPanel__body {
+    gap: 0.8rem;
+  }
+  
+  .fpGroup__panel {
+    padding-top: 0.5rem;
+  }
+}
+
 @media (max-width: 768px) {
   .filterPanel {
     border-radius: 16px;
-    padding: 1.1rem;
-    gap: 0.9rem;
+    padding: 0.9rem 0.95rem;
+    gap: 0.75rem;
+  }
+
+  .filterPanel__headerTop {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .filterPanel__clearAll {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px; /* Touch target */
   }
 
   .filterPanel__hint {
     display: none;
+  }
+
+  .fpPrice__values {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .fpPrice__valueWrapper {
+    width: 100%;
+  }
+
+  .fpPrice__separator {
+    transform: rotate(90deg);
+    margin: 0.25rem 0;
+    align-self: center;
+  }
+
+  .fpGroup__head {
+    flex-wrap: wrap;
+  }
+
+  .fpGroup__toggle {
+    width: 100%;
+    min-height: 44px; /* Touch target */
+  }
+
+  .fpGroup__clear {
+    min-height: 40px; /* Touch target */
   }
 
   /* Mobile: option lists are horizontal scrollers (compact + clean) */
@@ -610,6 +1419,14 @@
     overflow-x: auto;
     overflow-y: hidden;
     padding: 0.2rem 0.25rem 0.45rem;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    scroll-snap-type: x proximity;
+    scroll-padding: 0.5rem;
+  }
+  
+  .fpGroup__panel .fpOptions .fpOption {
+    scroll-snap-align: start;
   }
 
   /* Mobile: keep sort chips horizontal (few items, fast scan) */
@@ -618,15 +1435,194 @@
     overflow-x: auto;
     overflow-y: visible;
     padding: 0.15rem 0.2rem 0.35rem;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    scroll-snap-type: x proximity;
+  }
+  
+  .fpGroup--sort .fpChips .fpChip {
+    scroll-snap-align: start;
   }
 
   .fpGroup--sort .fpChip {
     flex: 0 0 auto;
   }
+
+  .fpGroup__searchInput {
+    font-size: 0.85rem;
+    padding: 0.55rem 0.7rem;
+    padding-left: 2.4rem;
+    padding-right: 2.1rem;
+    min-height: 44px; /* Touch target */
+  }
+
+  .filterPanel--topbar .filterPanel__body {
+    gap: 0.75rem;
+  }
+
+  .filterPanel--topbar .fpGroup {
+    min-width: 180px;
+    max-width: 280px;
+    padding: 0.7rem 0.75rem;
+  }
+
+  .filterPanel--topbar .fpGroup--price {
+    min-width: 240px;
+    max-width: 340px;
+  }
+
+  .filterPanel--topbar .fpGroup--sort {
+    min-width: 180px;
+    max-width: 260px;
+  }
+}
+
+@media (max-width: 640px) {
+  .filterPanel--topbar .fpGroup {
+    min-width: 160px;
+    max-width: 240px;
+  }
+
+  .filterPanel--topbar .fpGroup--price {
+    min-width: 220px;
+    max-width: 300px;
+  }
 }
 
 @media (max-width: 480px) {
+  .filterPanel {
+    padding: 0.8rem 0.85rem;
+    border-radius: 14px;
+    gap: 0.7rem;
+  }
+
   .fpGroup {
     min-width: 0;
+  }
+
+  .fpGroup__title {
+    font-size: 0.9rem;
+  }
+
+  .fpGroup__meta {
+    font-size: 0.8rem;
+  }
+
+  .fpGroup__badge {
+    min-width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+    padding: 0 0.4rem;
+  }
+
+  .fpPrice {
+    padding: 0.85rem;
+  }
+
+  .fpPrice__value {
+    font-size: 0.95rem;
+  }
+
+  .fpPrice__label {
+    font-size: 0.7rem;
+  }
+
+  .fpOption {
+    padding: 0.55rem 0.8rem;
+    min-height: 44px; /* Touch target */
+    font-size: 0.85rem;
+  }
+
+  .fpChip {
+    padding: 0.5rem 0.8rem;
+    min-height: 44px; /* Touch target */
+    font-size: 0.85rem;
+  }
+
+  .fpGroup__clear {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.75rem;
+    min-height: 40px; /* Touch target */
+  }
+
+  .filterPanel__clearAll {
+    padding: 0.6rem 0.9rem;
+    font-size: 0.8rem;
+    min-height: 44px; /* Touch target */
+  }
+
+  .filterPanel--topbar .fpGroup {
+    min-width: 140px;
+    max-width: 200px;
+    padding: 0.65rem 0.7rem;
+  }
+
+  .filterPanel--topbar .fpGroup--price {
+    min-width: 200px;
+    max-width: 280px;
+  }
+
+  .filterPanel--topbar .fpGroup--sort {
+    min-width: 140px;
+    max-width: 220px;
+  }
+}
+
+@media (max-width: 360px) {
+  .filterPanel {
+    padding: 0.75rem 0.8rem;
+    gap: 0.7rem;
+  }
+
+  .fpGroup__title {
+    font-size: 0.85rem;
+  }
+
+  .fpPrice__value {
+    font-size: 0.9rem;
+  }
+
+  .fpOption {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .fpChip {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .filterPanel--topbar .fpGroup {
+    min-width: 120px;
+    max-width: 180px;
+  }
+}
+
+/* Landscape mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .filterPanel--topbar .filterPanel__body {
+    gap: 0.65rem;
+  }
+
+  .filterPanel--topbar .fpGroup {
+    min-width: 160px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .filterPanel,
+  .fpGroup__panel,
+  .fpOption,
+  .fpChip,
+  .fpGroup__clear,
+  .filterPanel__clearAll,
+  .fpGroup__badge {
+    transition: none;
+    animation: none;
+  }
+  
+  .fpCheckIn {
+    animation: none;
   }
 }
