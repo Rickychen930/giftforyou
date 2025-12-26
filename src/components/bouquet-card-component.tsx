@@ -17,6 +17,7 @@ export interface BouquetCardProps {
   image?: string;
   status: "ready" | "preorder";
   collectionName?: string;
+  customPenanda?: string[];
 }
 
 const BouquetCard: React.FC<BouquetCardProps> = ({
@@ -29,6 +30,7 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
   image,
   status,
   collectionName,
+  customPenanda = [],
 }) => {
   const navigate = useNavigate();
   const formatPrice = formatIDR;
@@ -136,16 +138,21 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
       </Link>
 
       <div className="bouquet-info">
-        {tags.length > 0 && (
+        {(tags.length > 0 || customPenanda.length > 0) && (
           <div className="bouquet-tags" aria-label="Kategori bouquet">
             {tags.slice(0, 2).map((t) => (
               <span key={t} className="bouquet-tag" title={t}>
                 {t}
               </span>
             ))}
-            {tags.length > 2 && (
-              <span className="bouquet-tag bouquet-tag--more" title={tags.slice(2).join(", ")}>
-                +{tags.length - 2}
+            {customPenanda.slice(0, Math.max(0, 2 - tags.length)).map((p, idx) => (
+              <span key={`penanda-${idx}-${p}`} className="bouquet-tag bouquet-tag--penanda" title={p}>
+                {p}
+              </span>
+            ))}
+            {(tags.length + customPenanda.length) > 2 && (
+              <span className="bouquet-tag bouquet-tag--more" title={[...tags, ...customPenanda].slice(2).join(", ")}>
+                +{(tags.length + customPenanda.length) - 2}
               </span>
             )}
           </div>

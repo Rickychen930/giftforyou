@@ -27,15 +27,17 @@ const normalizeBouquet = (b: any): Bouquet => ({
   isNewEdition: Boolean(b?.isNewEdition),
   isFeatured: Boolean(b?.isFeatured),
 
-  quantity: typeof b?.quantity === "number" ? b.quantity : 0,
+    quantity: typeof b?.quantity === "number" ? b.quantity : 0,
 
-  /* ✅ FIXED */
-  careInstructions: isNonEmptyString(b?.careInstructions)
-    ? b.careInstructions
-    : undefined,
+    customPenanda: Array.isArray(b?.customPenanda) ? b.customPenanda : [],
 
-  createdAt: isNonEmptyString(b?.createdAt) ? b.createdAt : undefined,
-  updatedAt: isNonEmptyString(b?.updatedAt) ? b.updatedAt : undefined,
+    /* ✅ FIXED */
+    careInstructions: isNonEmptyString(b?.careInstructions)
+      ? b.careInstructions
+      : undefined,
+
+    createdAt: isNonEmptyString(b?.createdAt) ? b.createdAt : undefined,
+    updatedAt: isNonEmptyString(b?.updatedAt) ? b.updatedAt : undefined,
 });
 
 export default function BouquetDetailController() {

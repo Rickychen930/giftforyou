@@ -269,6 +269,8 @@ class BouquetCatalogController extends Component<
     // ✅ FIX: quantity must not be blank
     quantity: typeof b?.quantity === "number" ? b.quantity : 0,
 
+    customPenanda: Array.isArray(b?.customPenanda) ? b.customPenanda : [],
+
     careInstructions: isNonEmptyString(b?.careInstructions)
       ? b.careInstructions
       : undefined,

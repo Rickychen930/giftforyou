@@ -2,6 +2,7 @@
   /* =========================================================
      1) Brand palette (harmonic)
      ========================================================= */
+  --brand-rose-600: #c07888;     /* darker brand for gradients */
   --brand-rose-500: #d48c9c;     /* main brand */
   --brand-rose-300: #f3b6c3;     /* soft highlight */
   --brand-wine-700: #a04c5c;     /* deep accent text/link */

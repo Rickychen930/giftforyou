@@ -95,6 +95,7 @@ class DashboardController extends Component<{}, State> {
     isFeatured: Boolean(b?.isFeatured),
 
     quantity: typeof b?.quantity === "number" ? b.quantity : 0,
+    customPenanda: Array.isArray(b?.customPenanda) ? b.customPenanda : [],
     careInstructions: isNonEmptyString(b?.careInstructions)
       ? b.careInstructions
       : undefined,
