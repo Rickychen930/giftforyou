@@ -32,6 +32,7 @@ export interface IBouquet {
 
   isNewEdition: boolean;
   isFeatured: boolean;
+  customPenanda?: string[];
 
   careInstructions?: string;
 
@@ -90,6 +91,14 @@ const BouquetSchema = new Schema<IBouquet>(
 
     isNewEdition: { type: Boolean, default: false },
     isFeatured: { type: Boolean, default: false },
+    customPenanda: {
+      type: [String],
+      default: [],
+      validate: {
+        validator: (arr: string[]) => arr.length <= 10,
+        message: "Custom penanda array cannot exceed 10 items.",
+      },
+    },
 
     careInstructions: { type: String, default: "", trim: true, maxlength: 300 },
   },

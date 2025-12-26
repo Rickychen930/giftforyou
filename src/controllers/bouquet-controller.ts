@@ -146,6 +146,7 @@ export const createBouquet = async (
     const flowers = parseCsvList(req.body.flowers);
     const isNewEdition = parseBoolean(req.body.isNewEdition);
     const isFeatured = parseBoolean(req.body.isFeatured);
+    const customPenanda = parseCsvList(req.body.customPenanda);
     const quantity = parseNonNegativeInt(req.body.quantity);
     const careInstructions = normalizeString(req.body.careInstructions);
 
@@ -162,6 +163,7 @@ export const createBouquet = async (
       flowers,
       isNewEdition,
       isFeatured,
+      customPenanda,
       quantity,
       careInstructions,
     });
@@ -243,6 +245,10 @@ export const updateBouquet = async (
 
     if (req.body.isFeatured !== undefined) {
       updates.isFeatured = parseBoolean(req.body.isFeatured);
+    }
+
+    if (req.body.customPenanda !== undefined) {
+      updates.customPenanda = parseCsvList(req.body.customPenanda);
     }
 
     if (req.body.quantity !== undefined) {
