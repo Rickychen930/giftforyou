@@ -125,29 +125,7 @@ const toWaPhone = (raw: string): string | null => {
   return digits;
 };
 
-const copyText = async (text: string): Promise<boolean> => {
-  try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(text);
-      return true;
-    }
-
-    const el = document.createElement("textarea");
-    el.value = text;
-    el.setAttribute("readonly", "true");
-    el.style.position = "fixed";
-    el.style.left = "-9999px";
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand("copy");
-    document.body.removeChild(el);
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-const getAuthHeaders = (): HeadersInit => {
+  const getAuthHeaders = (): HeadersInit => {
   const token = localStorage.getItem("authToken");
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
@@ -189,11 +167,46 @@ export default function OrdersSection({ bouquets }: Props) {
   const [editingId, setEditingId] = useState<string>("");
 
   const [listQuery, setListQuery] = useState<string>("");
+  const [debouncedListQuery, setDebouncedListQuery] = useState<string>("");
+
+  // Filter and sort state
+  const [filterOrderStatus, setFilterOrderStatus] = useState<Order["orderStatus"] | "all">("all");
+  const [filterPaymentStatus, setFilterPaymentStatus] = useState<Order["paymentStatus"] | "all">("all");
+  const [sortBy, setSortBy] = useState<"date" | "name" | "amount" | "status">("date");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [customerSearch, setCustomerSearch] = useState<string>("");
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>("");
   const [showInlineAddUser, setShowInlineAddUser] = useState<boolean>(false);
+
+  // Copy feedback state
+  const [copyFeedback, setCopyFeedback] = useState<string>("");
+
+  // Copy text utility function (moved inside component to access setCopyFeedback)
+  const copyText = useCallback(async (text: string, feedbackMessage?: string): Promise<boolean> => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        if (feedbackMessage) setCopyFeedback(feedbackMessage);
+        return true;
+      }
+
+      const el = document.createElement("textarea");
+      el.value = text;
+      el.setAttribute("readonly", "true");
+      el.style.position = "fixed";
+      el.style.left = "-9999px";
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+      if (feedbackMessage) setCopyFeedback(feedbackMessage);
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
 
   const customerSearchRef = useRef<HTMLInputElement | null>(null);
   const orderDetailsRef = useRef<HTMLDivElement | null>(null);
@@ -405,7 +418,11 @@ export default function OrdersSection({ bouquets }: Props) {
 
   const deleteEditing = async () => {
     if (!editingId) return;
-    const ok = window.confirm("Hapus order ini? Tindakan ini tidak bisa dibatalkan.");
+    const order = orders.find((o) => o._id === editingId);
+    const orderName = order ? `${order.buyerName} - ${order.bouquetName}` : "order ini";
+    const ok = window.confirm(
+      `Hapus order "${orderName}"?\n\nTindakan ini tidak bisa dibatalkan.`
+    );
     if (!ok) return;
 
     setSubmitting(true);
@@ -438,7 +455,11 @@ export default function OrdersSection({ bouquets }: Props) {
   const deleteOrderById = async (orderId: string) => {
     const id = (orderId ?? "").toString();
     if (!id) return;
-    const ok = window.confirm("Hapus order ini? Tindakan ini tidak bisa dibatalkan.");
+    const order = orders.find((o) => o._id === id);
+    const orderName = order ? `${order.buyerName} - ${order.bouquetName}` : "order ini";
+    const ok = window.confirm(
+      `Hapus order "${orderName}"?\n\nTindakan ini tidak bisa dibatalkan.`
+    );
     if (!ok) return;
 
     setSubmitting(true);
@@ -621,8 +642,7 @@ export default function OrdersSection({ bouquets }: Props) {
       `Sisa bayar: ${formatIDR(remaining)}`,
     ];
 
-    const ok = await copyText(lines.join("\n"));
-    setSuccess(ok ? "Pesan WhatsApp tersalin." : "Gagal menyalin pesan.");
+    await copyText(lines.join("\n"), "Pesan WhatsApp tersalin");
   };
 
   const openWaChat = () => {
@@ -635,13 +655,11 @@ export default function OrdersSection({ bouquets }: Props) {
   };
 
   const copyPhone = async () => {
-    const ok = await copyText((phoneNumber ?? "").toString().trim());
-    setSuccess(ok ? "Nomor HP tersalin." : "Gagal menyalin nomor.");
+    await copyText((phoneNumber ?? "").toString().trim(), "Nomor HP tersalin");
   };
 
   const copyAddress = async () => {
-    const ok = await copyText((address ?? "").toString().trim());
-    setSuccess(ok ? "Alamat tersalin." : "Gagal menyalin alamat.");
+    await copyText((address ?? "").toString().trim(), "Alamat tersalin");
   };
 
   const parseAmount = (v: string) => {
@@ -685,8 +703,7 @@ export default function OrdersSection({ bouquets }: Props) {
       `DP: ${formatIDR(derivedNumbers.dp)} • Tambahan: ${formatIDR(derivedNumbers.addPay)} • Delivery: ${formatIDR(derivedNumbers.delivery)}`,
     ];
 
-    const ok = await copyText(lines.join("\n"));
-    setSuccess(ok ? "Ringkasan order tersalin." : "Gagal menyalin ringkasan.");
+    await copyText(lines.join("\n"), "Ringkasan order tersalin");
     setError("");
   };
 
@@ -734,20 +751,153 @@ export default function OrdersSection({ bouquets }: Props) {
     const now = new Date();
     const next = new Date(now.getTime() + Math.max(0, hoursFromNow) * 60 * 60 * 1000);
     setDeliveryAt(toDateTimeLocalFromDate(next));
-    setSuccess("Waktu deliver diisi otomatis.");
+    setSuccess(`Waktu deliver diisi: ${next.toLocaleString("id-ID")}`);
     setError("");
   };
 
-  const filteredOrders = useMemo(() => {
-    const q = listQuery.trim().toLowerCase();
-    if (!q) return orders;
-    return orders.filter((o) => {
-      const buyer = (o.buyerName ?? "").toString().toLowerCase();
-      const phone = (o.phoneNumber ?? "").toString().toLowerCase();
-      const bouquet = (o.bouquetName ?? "").toString().toLowerCase();
-      return buyer.includes(q) || phone.includes(q) || bouquet.includes(q);
+  const applyDeliveryPreset = (preset: "today" | "tomorrow" | "nextWeek") => {
+    const now = new Date();
+    let target: Date;
+    
+    switch (preset) {
+      case "today":
+        target = new Date(now);
+        target.setHours(14, 0, 0, 0); // 2 PM today
+        if (target.getTime() < now.getTime()) {
+          target.setHours(now.getHours() + 2, 0, 0, 0); // 2 hours from now if past 2 PM
+        }
+        break;
+      case "tomorrow":
+        target = new Date(now);
+        target.setDate(target.getDate() + 1);
+        target.setHours(10, 0, 0, 0); // 10 AM tomorrow
+        break;
+      case "nextWeek":
+        target = new Date(now);
+        target.setDate(target.getDate() + 7);
+        target.setHours(10, 0, 0, 0); // 10 AM next week
+        break;
+    }
+    
+    setDeliveryAt(toDateTimeLocalFromDate(target));
+    setSuccess(`Waktu deliver diisi: ${target.toLocaleString("id-ID")}`);
+    setError("");
+  };
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedListQuery(listQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [listQuery]);
+
+  // Clear copy feedback after 2 seconds
+  useEffect(() => {
+    if (copyFeedback) {
+      const timer = setTimeout(() => setCopyFeedback(""), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [copyFeedback]);
+
+  const filteredAndSortedOrders = useMemo(() => {
+    let result = [...orders];
+
+    // Apply search filter
+    const q = debouncedListQuery.trim().toLowerCase();
+    if (q) {
+      result = result.filter((o) => {
+        const buyer = (o.buyerName ?? "").toString().toLowerCase();
+        const phone = (o.phoneNumber ?? "").toString().toLowerCase();
+        const bouquet = (o.bouquetName ?? "").toString().toLowerCase();
+        return buyer.includes(q) || phone.includes(q) || bouquet.includes(q);
+      });
+    }
+
+    // Apply status filters
+    if (filterOrderStatus !== "all") {
+      result = result.filter((o) => (o.orderStatus ?? "bertanya") === filterOrderStatus);
+    }
+    if (filterPaymentStatus !== "all") {
+      result = result.filter((o) => (o.paymentStatus ?? "belum_bayar") === filterPaymentStatus);
+    }
+
+    // Apply sorting
+    result.sort((a, b) => {
+      let comparison = 0;
+      switch (sortBy) {
+        case "date":
+          const dateA = safeDate(a.createdAt)?.getTime() ?? 0;
+          const dateB = safeDate(b.createdAt)?.getTime() ?? 0;
+          comparison = dateA - dateB;
+          break;
+        case "name":
+          comparison = (a.buyerName ?? "").localeCompare(b.buyerName ?? "");
+          break;
+        case "amount": {
+          const totalA = typeof a.totalAmount === "number" ? a.totalAmount : 
+            Math.max(0, Math.round((a.bouquetPrice ?? 0) + (a.deliveryPrice ?? 0)));
+          const totalB = typeof b.totalAmount === "number" ? b.totalAmount :
+            Math.max(0, Math.round((b.bouquetPrice ?? 0) + (b.deliveryPrice ?? 0)));
+          comparison = totalA - totalB;
+          break;
+        }
+        case "status":
+          const statusA = (a.orderStatus ?? "bertanya").replace(/_/g, " ");
+          const statusB = (b.orderStatus ?? "bertanya").replace(/_/g, " ");
+          comparison = statusA.localeCompare(statusB);
+          break;
+      }
+      return sortDirection === "asc" ? comparison : -comparison;
     });
-  }, [listQuery, orders]);
+
+    return result;
+  }, [debouncedListQuery, orders, filterOrderStatus, filterPaymentStatus, sortBy, sortDirection]);
+
+  // Order statistics
+  const orderStats = useMemo(() => {
+    const total = orders.length;
+    const byStatus = {
+      bertanya: orders.filter((o) => (o.orderStatus ?? "bertanya") === "bertanya").length,
+      memesan: orders.filter((o) => (o.orderStatus ?? "bertanya") === "memesan").length,
+      sedang_diproses: orders.filter((o) => (o.orderStatus ?? "bertanya") === "sedang_diproses").length,
+      menunggu_driver: orders.filter((o) => (o.orderStatus ?? "bertanya") === "menunggu_driver").length,
+      pengantaran: orders.filter((o) => (o.orderStatus ?? "bertanya") === "pengantaran").length,
+      terkirim: orders.filter((o) => (o.orderStatus ?? "bertanya") === "terkirim").length,
+    };
+    const byPayment = {
+      belum_bayar: orders.filter((o) => (o.paymentStatus ?? "belum_bayar") === "belum_bayar").length,
+      dp: orders.filter((o) => (o.paymentStatus ?? "belum_bayar") === "dp").length,
+      sudah_bayar: orders.filter((o) => (o.paymentStatus ?? "belum_bayar") === "sudah_bayar").length,
+    };
+    const overdue = orders.filter((o) => {
+      const d = safeDate(o.deliveryAt);
+      const os = o.orderStatus ?? "bertanya";
+      return Boolean(d && os !== "terkirim" && d.getTime() < Date.now());
+    }).length;
+    
+    const totalRevenue = orders.reduce((sum, o) => {
+      const total = typeof o.totalAmount === "number" ? o.totalAmount :
+        Math.max(0, Math.round((o.bouquetPrice ?? 0) + (o.deliveryPrice ?? 0)));
+      return sum + total;
+    }, 0);
+    
+    const paidRevenue = orders.reduce((sum, o) => {
+      const dp = typeof o.downPaymentAmount === "number" ? o.downPaymentAmount : 0;
+      const add = typeof o.additionalPayment === "number" ? o.additionalPayment : 0;
+      return sum + dp + add;
+    }, 0);
+
+    return {
+      total,
+      byStatus,
+      byPayment,
+      overdue,
+      totalRevenue,
+      paidRevenue,
+      pendingRevenue: totalRevenue - paidRevenue,
+    };
+  }, [orders]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -986,20 +1136,151 @@ export default function OrdersSection({ bouquets }: Props) {
       </div>
 
       <div className="ordersLayout is-single">
+        {/* Order Statistics */}
+        {orders.length > 0 && (
+          <div className="ordersStats" aria-label="Statistik order">
+            <div className="ordersStats__grid">
+              <div className="ordersStatCard">
+                <div className="ordersStatCard__label">Total Order</div>
+                <div className="ordersStatCard__value">{orderStats.total}</div>
+              </div>
+              <div className="ordersStatCard ordersStatCard--warning">
+                <div className="ordersStatCard__label">Belum Bayar</div>
+                <div className="ordersStatCard__value">{orderStats.byPayment.belum_bayar}</div>
+              </div>
+              <div className="ordersStatCard ordersStatCard--success">
+                <div className="ordersStatCard__label">Terkirim</div>
+                <div className="ordersStatCard__value">{orderStats.byStatus.terkirim}</div>
+              </div>
+              <div className="ordersStatCard ordersStatCard--danger">
+                <div className="ordersStatCard__label">Terlambat</div>
+                <div className="ordersStatCard__value">{orderStats.overdue}</div>
+              </div>
+              <div className="ordersStatCard ordersStatCard--revenue">
+                <div className="ordersStatCard__label">Total Revenue</div>
+                <div className="ordersStatCard__value">{formatIDR(orderStats.totalRevenue)}</div>
+              </div>
+              <div className="ordersStatCard ordersStatCard--revenue">
+                <div className="ordersStatCard__label">Sudah Dibayar</div>
+                <div className="ordersStatCard__value">{formatIDR(orderStats.paidRevenue)}</div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <aside className="ordersList" aria-label="Daftar order">
           <div className="ordersList__head">
             <h3 className="ordersList__title">Order card</h3>
 
             <div className="ordersList__headRight" aria-label="Pencarian order">
               <div className="ordersListSearch" aria-label="Cari order">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="ordersListSearch__icon" aria-hidden="true">
+                  <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
+                  <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
                 <input
                   className="ordersInput"
                   value={listQuery}
                   onChange={(e) => setListQuery(e.target.value)}
                   placeholder="Cari: nama / nomor / bouquet"
                   inputMode="search"
+                  aria-label="Cari order"
                 />
+                {listQuery && (
+                  <button
+                    type="button"
+                    className="ordersListSearch__clear"
+                    onClick={() => setListQuery("")}
+                    aria-label="Hapus pencarian"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M9 3L3 9M3 3L9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                  </button>
+                )}
               </div>
+            </div>
+          </div>
+
+          {/* Quick Filters and Sort */}
+          <div className="ordersList__filters" aria-label="Filter dan sort order">
+            <div className="ordersFilters">
+              <label className="ordersFilterGroup">
+                <span className="ordersFilterLabel">Status</span>
+                <select
+                  className="ordersFilterSelect"
+                  value={filterOrderStatus}
+                  onChange={(e) => setFilterOrderStatus(e.target.value as any)}
+                  aria-label="Filter status order"
+                >
+                  <option value="all">Semua</option>
+                  <option value="bertanya">Bertanya</option>
+                  <option value="memesan">Memesan</option>
+                  <option value="sedang_diproses">Sedang diproses</option>
+                  <option value="menunggu_driver">Menunggu driver</option>
+                  <option value="pengantaran">Pengantaran</option>
+                  <option value="terkirim">Terkirim</option>
+                </select>
+              </label>
+
+              <label className="ordersFilterGroup">
+                <span className="ordersFilterLabel">Bayar</span>
+                <select
+                  className="ordersFilterSelect"
+                  value={filterPaymentStatus}
+                  onChange={(e) => setFilterPaymentStatus(e.target.value as any)}
+                  aria-label="Filter status pembayaran"
+                >
+                  <option value="all">Semua</option>
+                  <option value="belum_bayar">Belum bayar</option>
+                  <option value="dp">DP</option>
+                  <option value="sudah_bayar">Sudah bayar</option>
+                </select>
+              </label>
+
+              <label className="ordersFilterGroup">
+                <span className="ordersFilterLabel">Urutkan</span>
+                <div className="ordersSortGroup">
+                  <select
+                    className="ordersFilterSelect"
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    aria-label="Sort by"
+                  >
+                    <option value="date">Tanggal</option>
+                    <option value="name">Nama</option>
+                    <option value="amount">Jumlah</option>
+                    <option value="status">Status</option>
+                  </select>
+                  <button
+                    type="button"
+                    className="ordersSortBtn"
+                    onClick={() => setSortDirection((d) => d === "asc" ? "desc" : "asc")}
+                    aria-label={`Sort ${sortDirection === "asc" ? "descending" : "ascending"}`}
+                    title={sortDirection === "asc" ? "Urutkan menurun" : "Urutkan menaik"}
+                  >
+                    {sortDirection === "asc" ? "↑" : "↓"}
+                  </button>
+                </div>
+              </label>
+
+              {(filterOrderStatus !== "all" || filterPaymentStatus !== "all" || listQuery.trim()) && (
+                <button
+                  type="button"
+                  className="ordersFilterClear"
+                  onClick={() => {
+                    setFilterOrderStatus("all");
+                    setFilterPaymentStatus("all");
+                    setListQuery("");
+                  }}
+                  aria-label="Hapus semua filter"
+                >
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                  Reset
+                </button>
+              )}
             </div>
           </div>
 
@@ -1022,20 +1303,84 @@ export default function OrdersSection({ bouquets }: Props) {
             </button>
           </div>
 
-          <p className="ordersList__sub">
-            Total: <b>{filteredOrders.length}</b>
-            {listQuery.trim() ? ` / ${orders.length}` : ""}
-          </p>
+          <div className="ordersList__sub">
+            <span>
+              Menampilkan: <b style={{ color: "var(--dash-brand-pink)" }}>{filteredAndSortedOrders.length}</b>
+              {listQuery.trim() || filterOrderStatus !== "all" || filterPaymentStatus !== "all" 
+                ? ` dari ${orders.length} order` 
+                : " order"}
+            </span>
+            {filteredAndSortedOrders.length !== orders.length && (
+              <button
+                type="button"
+                className="ordersList__showAll"
+                onClick={() => {
+                  setFilterOrderStatus("all");
+                  setFilterPaymentStatus("all");
+                  setListQuery("");
+                }}
+                aria-label="Tampilkan semua order"
+              >
+                Tampilkan semua
+              </button>
+            )}
+          </div>
 
           {loading ? (
-            <div className="ordersEmpty">Memuat...</div>
+            <div className="ordersEmpty" role="status" aria-live="polite" aria-busy="true">
+              <div style={{ 
+                width: "32px", 
+                height: "32px", 
+                border: "3px solid rgba(212, 140, 156, 0.2)", 
+                borderTopColor: "var(--dash-brand-pink)", 
+                borderRadius: "50%", 
+                animation: "spin 0.8s linear infinite",
+                margin: "0 auto 1rem"
+              }} aria-hidden="true" />
+              <span>Memuat order...</span>
+            </div>
           ) : orders.length === 0 ? (
-            <div className="ordersEmpty">Belum ada order.</div>
-          ) : filteredOrders.length === 0 ? (
-            <div className="ordersEmpty">Tidak ada hasil.</div>
+            <div className="ordersEmpty" role="status" aria-live="polite">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginBottom: "1rem", opacity: 0.5 }} aria-hidden="true">
+                <path d="M9 2v2M15 2v2M9 18v2M15 18v2M5 6h14M5 10h14M5 14h14M5 18h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              <p style={{ margin: 0 }}>Belum ada order.</p>
+              <button
+                type="button"
+                className="ordersEmpty__action"
+                onClick={() => {
+                  resetForm();
+                  setMode("add_order");
+                  setShowInlineAddUser(false);
+                  setSuccess("");
+                  setError("");
+                }}
+              >
+                Buat Order Pertama
+              </button>
+            </div>
+          ) : filteredAndSortedOrders.length === 0 ? (
+            <div className="ordersEmpty" role="status" aria-live="polite">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginBottom: "1rem", opacity: 0.5 }} aria-hidden="true">
+                <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
+                <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              <p style={{ margin: 0 }}>Tidak ada hasil untuk filter/pencarian.</p>
+              <button
+                type="button"
+                className="ordersEmpty__action"
+                onClick={() => {
+                  setFilterOrderStatus("all");
+                  setFilterPaymentStatus("all");
+                  setListQuery("");
+                }}
+              >
+                Hapus Filter
+              </button>
+            </div>
           ) : (
             <div className="ordersCards" role="list" aria-label="Daftar order">
-              {filteredOrders.map((o) => {
+              {filteredAndSortedOrders.map((o) => {
                 const isSelected = Boolean(editingId && o._id && editingId === o._id);
                 const os = (o.orderStatus ?? "bertanya") as NonNullable<Order["orderStatus"]>;
                 const ps = (o.paymentStatus ?? "belum_bayar") as NonNullable<Order["paymentStatus"]>;
@@ -1124,9 +1469,33 @@ export default function OrdersSection({ bouquets }: Props) {
                           selectOrderForEdit(o);
                         }}
                         disabled={submitting}
+                        aria-label={`Update order ${o.buyerName}`}
                       >
-                        Update
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <span>Update</span>
                       </button>
+                      {isSelected && (
+                        <button
+                          type="button"
+                          className="ordersBtn ordersBtn--sm"
+                          onClick={(ev) => {
+                            ev.stopPropagation();
+                            const nextStatus = nextOrderStatus(o.orderStatus);
+                            void patchEditing({ orderStatus: nextStatus });
+                          }}
+                          disabled={submitting || !editingId || editingId !== o._id}
+                          aria-label={`Next status untuk order ${o.buyerName}`}
+                          title="Lanjut ke status berikutnya"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                          <span>Next</span>
+                        </button>
+                      )}
                       <button
                         type="button"
                         className="ordersBtn ordersBtn--sm ordersBtn--danger"
@@ -1135,8 +1504,12 @@ export default function OrdersSection({ bouquets }: Props) {
                           void deleteOrderById((o._id ?? "").toString());
                         }}
                         disabled={submitting}
+                        aria-label={`Hapus order ${o.buyerName}`}
                       >
-                        Delete
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14zM10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                        <span>Delete</span>
                       </button>
                     </div>
                   </div>
@@ -1409,18 +1782,38 @@ export default function OrdersSection({ bouquets }: Props) {
                 <button
                   type="button"
                   className="ordersBtn ordersBtn--sm"
+                  onClick={() => applyDeliveryPreset("today")}
+                  disabled={submitting}
+                  title="Hari ini jam 14:00 (atau 2 jam dari sekarang jika sudah lewat)"
+                >
+                  Hari ini
+                </button>
+                <button
+                  type="button"
+                  className="ordersBtn ordersBtn--sm"
+                  onClick={() => applyDeliveryPreset("tomorrow")}
+                  disabled={submitting}
+                  title="Besok jam 10:00"
+                >
+                  Besok
+                </button>
+                <button
+                  type="button"
+                  className="ordersBtn ordersBtn--sm"
                   onClick={() => applyDeliveryQuick(2)}
                   disabled={submitting}
+                  title="2 jam dari sekarang"
                 >
-                  Hari ini +2 jam
+                  +2 jam
                 </button>
                 <button
                   type="button"
                   className="ordersBtn ordersBtn--sm"
                   onClick={() => setDeliveryAt("")}
                   disabled={submitting}
+                  title="Hapus waktu deliver"
                 >
-                  Hapus waktu
+                  Hapus
                 </button>
               </div>
             </label>
@@ -1583,9 +1976,23 @@ export default function OrdersSection({ bouquets }: Props) {
             <div
               className={`ordersNotice ${error ? "is-error" : "is-success"}`}
               role={error ? "alert" : "status"}
-              aria-live="polite"
+              aria-live={error ? "assertive" : "polite"}
+              aria-atomic="true"
             >
-              {error || success}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                {error ? (
+                  <>
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  </>
+                ) : (
+                  <>
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </>
+                )}
+              </svg>
+              <span>{error || success}</span>
             </div>
           )}
 
