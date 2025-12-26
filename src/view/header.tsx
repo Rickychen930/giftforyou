@@ -1,5 +1,5 @@
 // src/view/header.tsx - Optimized Header for Luxury Bouquet Store
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { BRAND_INFO, COLLECTION_SUGGESTIONS } from "../constants/app-constants";
 import { getCollections } from "../services/collection.service";
@@ -76,10 +76,17 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 20);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -157,6 +164,18 @@ const Header: React.FC<HeaderProps> = ({
     }
   };
 
+  const toggleSearch = useCallback(() => {
+    setSearchOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        closeMobile();
+        // Focus after state update
+        setTimeout(() => searchRef.current?.focus(), 100);
+      }
+      return next;
+    });
+  }, []);
+
   useEffect(() => {
     // Close mobile menu on route changes
     closeMobile();
@@ -176,12 +195,16 @@ const Header: React.FC<HeaderProps> = ({
   }, []);
 
   useEffect(() => {
-    if (!collectionsOpen) return;
+    if (!collectionsOpen || mobileOpen) return;
     const onPointerDown = (e: MouseEvent | TouchEvent) => {
       const root = collectionsItemRef.current;
       if (!root) return;
-      if (root.contains(e.target as Node)) return;
-      setCollectionsOpen(false);
+      const target = e.target as Node;
+      if (root.contains(target)) return;
+      // Small delay to allow click events to fire first
+      setTimeout(() => {
+        setCollectionsOpen(false);
+      }, 100);
     };
     document.addEventListener("mousedown", onPointerDown);
     document.addEventListener("touchstart", onPointerDown, { passive: true });
@@ -189,29 +212,61 @@ const Header: React.FC<HeaderProps> = ({
       document.removeEventListener("mousedown", onPointerDown);
       document.removeEventListener("touchstart", onPointerDown);
     };
-  }, [collectionsOpen]);
+  }, [collectionsOpen, mobileOpen]);
 
   useEffect(() => {
     // Lock body scroll when an overlay is open (mobile menu or search)
-    if (!mobileOpen && !searchOpen) return;
+    if (!mobileOpen && !searchOpen) {
+      document.body.style.overflow = "";
+      return;
+    }
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    // Prevent scroll on iOS
+    document.body.style.position = "fixed";
+    document.body.style.width = "100%";
     return () => {
       document.body.style.overflow = prev;
+      document.body.style.position = "";
+      document.body.style.width = "";
     };
   }, [mobileOpen, searchOpen]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      // Escape key closes modals
       if (e.key === "Escape") {
-        closeSearch({ returnFocus: true });
-        closeMobile({ returnFocus: true });
+        if (searchOpen) {
+          closeSearch({ returnFocus: true });
+        }
+        if (mobileOpen) {
+          closeMobile({ returnFocus: true });
+        }
+        return;
+      }
+
+      // Ctrl/Cmd + K opens search (common UX pattern)
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        const target = e.target as HTMLElement;
+        // Don't trigger if user is typing in an input/textarea
+        if (
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable
+        ) {
+          return;
+        }
+        e.preventDefault();
+        if (!searchOpen) {
+          toggleSearch();
+        }
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [searchOpen, mobileOpen, toggleSearch]);
 
+  // Focus trap for search modal
   useEffect(() => {
     if (!searchOpen) return;
 
@@ -224,21 +279,28 @@ const Header: React.FC<HeaderProps> = ({
         root.querySelectorAll<HTMLElement>(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
         )
-      ).filter((el) => !el.hasAttribute("disabled") && !el.getAttribute("aria-hidden"));
+      ).filter((el) => {
+        if (el.hasAttribute("disabled")) return false;
+        if (el.getAttribute("aria-hidden") === "true") return false;
+        // Check visibility
+        const style = window.getComputedStyle(el);
+        return style.display !== "none" && style.visibility !== "hidden";
+      });
 
       if (focusable.length === 0) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
+      const active = document.activeElement as HTMLElement | null;
 
       if (e.shiftKey) {
-        if (document.activeElement === first || !root.contains(document.activeElement)) {
+        if (!active || active === first || !root.contains(active)) {
           e.preventDefault();
           last.focus();
         }
         return;
       }
 
-      if (document.activeElement === last) {
+      if (!active || active === last || !root.contains(active)) {
         e.preventDefault();
         first.focus();
       }
@@ -247,6 +309,51 @@ const Header: React.FC<HeaderProps> = ({
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [searchOpen]);
+
+  // Focus trap for mobile menu
+  const mobileMenuRef = useRef<HTMLUListElement | null>(null);
+  
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const root = mobileMenuRef.current;
+      if (!root) return;
+
+      const focusable = Array.from(
+        root.querySelectorAll<HTMLElement>(
+          'a, button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((el) => {
+        if (el.hasAttribute("disabled")) return false;
+        if (el.getAttribute("aria-hidden") === "true") return false;
+        const style = window.getComputedStyle(el);
+        return style.display !== "none" && style.visibility !== "hidden";
+      });
+
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+
+      if (e.shiftKey) {
+        if (!active || active === first || !root.contains(active)) {
+          e.preventDefault();
+          last.focus();
+        }
+        return;
+      }
+
+      if (!active || active === last || !root.contains(active)) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [mobileOpen]);
 
   const handleSearch: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
@@ -261,14 +368,8 @@ const Header: React.FC<HeaderProps> = ({
     setQuery("");
     closeSearch();
     closeMobile();
-  };
-
-  const toggleSearch = () => {
-    setSearchOpen((prev) => !prev);
-    if (!searchOpen) {
-      closeMobile();
-      setTimeout(() => searchRef.current?.focus(), 100);
-    }
+    // Return focus to search button after navigation
+    setTimeout(() => searchButtonRef.current?.focus(), 100);
   };
 
   const collectionSuggestions =
@@ -298,7 +399,17 @@ const Header: React.FC<HeaderProps> = ({
             aria-label={`${BRAND_INFO.name} Beranda`}
           >
             <div className="logo-wrapper">
-              <img src={logoSrc} alt={BRAND_INFO.name} className="logo" />
+              <img 
+                src={logoSrc} 
+                alt={BRAND_INFO.name} 
+                className="logo"
+                loading="eager"
+                onError={(e) => {
+                  // Fallback if image fails to load
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = "none";
+                }}
+              />
             </div>
             <div className="brand-text">
               <span className="brand-name">{BRAND_INFO.name}</span>
@@ -312,6 +423,7 @@ const Header: React.FC<HeaderProps> = ({
           <ul
             className={`nav-links ${mobileOpen ? "open" : ""}`}
             id="primary-navigation"
+            ref={mobileMenuRef}
           >
             {navLinks.map((item) => {
               const isCollections = item.path === "/collection";
@@ -357,17 +469,12 @@ const Header: React.FC<HeaderProps> = ({
                     to={item.path}
                     onClick={(e) => {
                       if (isCollections) {
-                        // Desktop: first click opens dropdown, second click navigates.
+                        // Desktop: hover opens, click navigates directly (better UX)
                         if (!mobileOpen) {
-                          if (!collectionsOpen) {
-                            e.preventDefault();
-                            setCollectionsOpen(true);
-                            pulseCollectionsAnimate();
-                            return;
-                          }
+                          // On desktop, allow direct navigation - hover handles dropdown
                           setCollectionsOpen(false);
                         } else {
-                          // Mobile: treat as an accordion toggle (avoid huge always-open list).
+                          // Mobile: treat as an accordion toggle
                           if (!collectionsOpen) {
                             e.preventDefault();
                             setCollectionsOpen(true);
@@ -381,6 +488,13 @@ const Header: React.FC<HeaderProps> = ({
                         setCollectionsOpen(false);
                       }
                       closeMobile();
+                    }}
+                    onKeyDown={(e) => {
+                      // Allow Enter/Space to navigate on desktop, toggle on mobile
+                      if (isCollections && !mobileOpen && (e.key === "Enter" || e.key === " ")) {
+                        // On desktop, Enter/Space navigates directly
+                        setCollectionsOpen(false);
+                      }
                     }}
                     className={({ isActive }) =>
                       `nav-link ${isActive ? "is-active" : ""}`
@@ -400,7 +514,12 @@ const Header: React.FC<HeaderProps> = ({
                   </NavLink>
 
                   {isCollections && (!mobileOpen || collectionsOpen) && (
-                    <div className="dropdown" id="collections-dropdown" aria-label="Menu koleksi">
+                    <div 
+                      className="dropdown" 
+                      id="collections-dropdown" 
+                      aria-label="Menu koleksi"
+                      role="menu"
+                    >
                       <div className="dropdown-header">
                         <h3>Koleksi Kami</h3>
                         <p>Dirangkai dengan sepenuh hati</p>
@@ -415,8 +534,12 @@ const Header: React.FC<HeaderProps> = ({
                           <li key={t}>
                             <Link
                               to={`/collection?type=${encodeURIComponent(t)}`}
-                              onClick={() => closeMobile()}
+                              onClick={() => {
+                                closeMobile();
+                                setCollectionsOpen(false);
+                              }}
                               className="dropdown-link"
+                              role="menuitem"
                             >
                               <span className="dropdown-icon">🏷️</span>
                               <span>{t}</span>
@@ -430,8 +553,12 @@ const Header: React.FC<HeaderProps> = ({
                           <li key={c}>
                             <Link
                               to={`/collection?name=${encodeURIComponent(c)}`}
-                              onClick={() => closeMobile()}
+                              onClick={() => {
+                                closeMobile();
+                                setCollectionsOpen(false);
+                              }}
                               className="dropdown-link"
+                              role="menuitem"
                             >
                               <span className="dropdown-icon">🌸</span>
                               <span>{c}</span>
@@ -454,8 +581,11 @@ const Header: React.FC<HeaderProps> = ({
             className="icon-btn search-btn"
             onClick={toggleSearch}
             type="button"
-            aria-label="Cari"
+            aria-label="Cari (Ctrl+K atau Cmd+K)"
+            aria-expanded={searchOpen}
+            aria-controls={searchOpen ? "search-modal" : undefined}
             ref={searchButtonRef}
+            title="Cari (Ctrl+K atau Cmd+K)"
           >
             <SearchIcon />
           </button>
@@ -490,6 +620,7 @@ const Header: React.FC<HeaderProps> = ({
             role="dialog"
             aria-modal="true"
             aria-label="Pencarian"
+            id="search-modal"
           >
             <button
               className="search-close"
@@ -532,7 +663,14 @@ const Header: React.FC<HeaderProps> = ({
                     className="suggestion-tag"
                     onClick={() => {
                       setQuery(s);
-                      searchRef.current?.focus();
+                      // Small delay to ensure state update
+                      setTimeout(() => {
+                        searchRef.current?.focus();
+                        searchRef.current?.setSelectionRange(
+                          searchRef.current.value.length,
+                          searchRef.current.value.length
+                        );
+                      }, 0);
                     }}
                   >
                     {s}
