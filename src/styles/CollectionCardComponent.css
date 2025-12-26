@@ -9,22 +9,50 @@
   width: 100%;
   position: relative;
   box-sizing: border-box;
-  padding: 1.7rem;
-  border-radius: 18px;
-  background: var(--cc-surface);
-  border: 1px solid var(--cc-border);
-  box-shadow: var(--cc-shadow);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  padding: clamp(2rem, 3vw, 2.5rem);
+  border-radius: 28px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.99) 0%,
+    rgba(255, 255, 255, 0.97) 50%,
+    rgba(255, 255, 255, 0.99) 100%
+  );
+  border: 2px solid rgba(212, 140, 156, 0.12);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.06),
+    0 8px 24px rgba(0, 0, 0, 0.04),
+    0 2px 8px rgba(0, 0, 0, 0.02),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset,
+    0 0 0 1px rgba(212, 140, 156, 0.08) inset;
+  backdrop-filter: blur(30px) saturate(200%);
+  -webkit-backdrop-filter: blur(30px) saturate(200%);
   overflow: hidden;
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  isolation: isolate;
 
-  /* Prevent Safari from “reflowing” the page on hover/scroll effects */
+  /* Prevent Safari from "reflowing" the page on hover/scroll effects */
   contain: layout paint;
   transform: translateZ(0);
 
-  animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   opacity: 0;
+}
+
+.collectionCard:hover {
+  transform: translateY(-6px) translateZ(0);
+  box-shadow: 
+    0 32px 80px rgba(0, 0, 0, 0.1),
+    0 16px 40px rgba(0, 0, 0, 0.06),
+    0 4px 16px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(255, 255, 255, 0.95) inset,
+    0 0 0 1px rgba(212, 140, 156, 0.15) inset;
+  border-color: rgba(212, 140, 156, 0.3);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0.98) 50%,
+    rgba(255, 255, 255, 1) 100%
+  );
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -52,14 +80,42 @@
 
 
 
-/* Subtle premium highlight line */
+/* Elegant premium highlight line with gradient */
 .collectionCard::before {
   content: "";
   position: absolute;
   inset: 0 0 auto 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--cc-brand-highlight), transparent);
-  opacity: 0.9;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(212, 140, 156, 0.3) 20%,
+    rgba(212, 140, 156, 0.5) 50%,
+    rgba(168, 213, 186, 0.4) 80%,
+    transparent 100%
+  );
+  opacity: 1;
+  z-index: 1;
+}
+
+/* Subtle inner glow */
+.collectionCard::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(212, 140, 156, 0.1) 50%,
+    rgba(255, 255, 255, 0.6) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* =========================
@@ -69,8 +125,12 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.4rem;
+  gap: 1.5rem;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(212, 140, 156, 0.08);
+  position: relative;
+  z-index: 1;
 }
 
 .collectionCard__headerActions {
@@ -100,36 +160,67 @@
 
 .collectionCard__title {
   margin: 0;
-  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  font-size: clamp(1.6rem, 2.6vw, 2rem);
   font-weight: 950;
-  letter-spacing: -0.02em;
-  color: var(--welcome-color-title);
+  letter-spacing: -0.03em;
+  background: linear-gradient(
+    135deg,
+    var(--welcome-color-title) 0%,
+    rgba(0, 0, 0, 0.9) 40%,
+    var(--brand-rose-600) 70%,
+    var(--brand-sage-500) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   font-family: "Playfair Display", Georgia, serif;
-  line-height: 1.2;
+  line-height: 1.15;
   text-wrap: balance;
+  position: relative;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
 }
 
 .collectionCard__count {
   display: inline-flex;
   align-items: center;
-  padding: 0.35rem 0.75rem;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
   border-radius: 999px;
   font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  background: linear-gradient(135deg, rgba(212, 140, 156, 0.12), rgba(168, 213, 186, 0.10));
-  color: var(--cc-brand-wine);
-  border: 1px solid rgba(212, 140, 156, 0.20);
+  font-weight: 850;
+  letter-spacing: 0.03em;
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.15) 0%,
+    rgba(212, 140, 156, 0.1) 50%,
+    rgba(168, 213, 186, 0.12) 100%
+  );
+  color: var(--brand-rose-700);
+  border: 1.5px solid rgba(212, 140, 156, 0.25);
+  box-shadow: 
+    0 2px 8px rgba(212, 140, 156, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.collectionCard__count::before {
+  content: "📦";
+  font-size: 0.9em;
+  filter: grayscale(0.3);
 }
 
 .collectionCard__description {
-  margin: 0;
+  margin: 0.75rem 0 0;
   color: var(--welcome-color-text);
-  opacity: 0.95;
-  font-size: 0.98rem;
-  line-height: 1.7;
-  max-width: 72ch;
+  opacity: 0.88;
+  font-size: 1rem;
+  line-height: 1.75;
+  max-width: 75ch;
   text-wrap: pretty;
+  font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
 /* =========================
@@ -173,22 +264,62 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.85rem 1.25rem;
+  gap: 0.5rem;
+  padding: 0.9rem 1.5rem;
   border-radius: 999px;
   text-decoration: none;
-  font-weight: 900;
-  letter-spacing: 0.01em;
-  color: var(--cc-btn-text);
-  background: linear-gradient(135deg, var(--cc-brand-pink), var(--cc-brand-pink2));
-  box-shadow: var(--cc-btn-shadow);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  font-weight: 950;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: linear-gradient(
+    135deg,
+    var(--brand-rose-600) 0%,
+    var(--brand-rose-500) 50%,
+    var(--brand-rose-600) 100%
+  );
+  box-shadow: 
+    0 4px 16px rgba(212, 140, 156, 0.3),
+    0 2px 8px rgba(212, 140, 156, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.collectionCard__ctaBtn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.25) 0%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.15) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .collectionCard__ctaBtn:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--cc-btn-shadow-hover);
-    filter: saturate(1.02);
+    transform: translateY(-2px);
+    box-shadow: 
+      0 8px 24px rgba(212, 140, 156, 0.4),
+      0 4px 12px rgba(212, 140, 156, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+    filter: saturate(1.1) brightness(1.05);
+  }
+
+  .collectionCard__ctaBtn:hover::before {
+    opacity: 1;
+  }
+
+  .collectionCard:hover .collectionCard__count {
+    transform: scale(1.05);
+    box-shadow: 
+      0 4px 12px rgba(212, 140, 156, 0.15),
+      0 0 0 1px rgba(255, 255, 255, 0.6) inset;
   }
 }
 
@@ -230,7 +361,11 @@
 .collectionCard__footer {
   display: flex;
   justify-content: center;
-  margin-top: 1.25rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(212, 140, 156, 0.08);
+  position: relative;
+  z-index: 1;
 }
 
 @media (min-width: 720px) {
@@ -464,7 +599,30 @@
   isolation: isolate;
   overflow: hidden;
   aspect-ratio: 4 / 5;
-  background: linear-gradient(135deg, #f5f5f5, #fafafa);
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.05) 0%,
+    rgba(168, 213, 186, 0.05) 50%,
+    rgba(212, 140, 156, 0.05) 100%
+  );
+}
+
+.bouquetCard__overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 10px;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.2) 0%,
+    transparent 35%,
+    transparent 65%,
+    rgba(0, 0, 0, 0.15) 100%
+  );
 }
 
 .bouquetCard__mediaLink {
@@ -510,26 +668,29 @@
 
 /* Badge */
 .bouquetCard__badge {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  z-index: 2;
-
-  padding: 0.5rem 0.85rem;
+  padding: 0.45rem 0.85rem;
   border-radius: 999px;
-
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 950;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-
-  color: var(--cc-btn-text);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--cc-border-badge);
-  background: var(--cc-badge-bg);
-  
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.10);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  color: #fff;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.65) 0%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  line-height: 1;
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -541,15 +702,23 @@
 
 
 .bouquetCard__badge.is-ready {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.08));
-  border-color: rgba(16, 185, 129, 0.4);
-  color: #10b981;
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.6) 0%,
+    rgba(5, 150, 105, 0.5) 100%
+  );
+  border-color: rgba(16, 185, 129, 0.5);
+  color: #fff;
 }
 
 .bouquetCard__badge.is-preorder {
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(249, 115, 22, 0.08));
-  border-color: rgba(249, 115, 22, 0.4);
-  color: #f97316;
+  background: linear-gradient(
+    135deg,
+    rgba(249, 115, 22, 0.6) 0%,
+    rgba(234, 88, 12, 0.5) 100%
+  );
+  border-color: rgba(249, 115, 22, 0.5);
+  color: #fff;
 }
 
 /* Body */
@@ -594,12 +763,51 @@
   box-shadow: 0 0 0 4px rgba(212, 140, 156, 0.22);
 }
 
+.bouquetCard__priceWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0.3rem 0;
+}
+
 .bouquetCard__price {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 950;
-  color: var(--cc-brand-wine);
+  background: linear-gradient(
+    135deg,
+    var(--brand-wine-700) 0%,
+    var(--brand-rose-600) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.bouquetCard__readyHint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 850;
+  color: var(--success-text);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.12) 0%,
+    rgba(5, 150, 105, 0.08) 100%
+  );
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+  line-height: 1;
+  width: fit-content;
+}
+
+.bouquetCard__readyHint svg {
+  flex-shrink: 0;
+  color: var(--success-text);
 }
 
 /* Meta chips */
@@ -611,14 +819,28 @@
 }
 
 .bouquetCard__chip {
-  font-size: 0.8rem;
-  color: var(--cc-chip-text);
-  background: linear-gradient(135deg, rgba(212, 140, 156, 0.08), rgba(168, 213, 186, 0.06));
-  border: 1px solid rgba(212, 140, 156, 0.12);
+  font-size: 0.75rem;
+  color: var(--brand-rose-600);
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.12) 0%,
+    rgba(212, 140, 156, 0.08) 100%
+  );
+  border: 1.5px solid rgba(212, 140, 156, 0.2);
   border-radius: 999px;
-  padding: 0.4rem 0.7rem;
+  padding: 0.35rem 0.65rem;
   transition: all 0.2s ease;
-  font-weight: 500;
+  font-weight: 850;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  line-height: 1;
+}
+
+.bouquetCard__chip svg {
+  flex-shrink: 0;
+  color: var(--brand-rose-600);
+  opacity: 0.8;
 }
 
 
@@ -709,9 +931,21 @@
   }
 
   .bouquetCard:hover .bouquetCard__chip {
-    background: rgba(212, 140, 156, 0.12);
-    border-color: rgba(212, 140, 156, 0.25);
-    transform: translateY(-0.5px);
+    background: linear-gradient(
+      135deg,
+      rgba(212, 140, 156, 0.18) 0%,
+      rgba(212, 140, 156, 0.12) 100%
+    );
+    border-color: rgba(212, 140, 156, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(212, 140, 156, 0.15);
+  }
+
+  .bouquetCard:hover .bouquetCard__badge {
+    transform: scale(1.05);
+    box-shadow: 
+      0 8px 24px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.35) inset;
   }
 
   .bouquetCard__btn:hover {
@@ -739,8 +973,39 @@
 ========================= */
 @media (max-width: 768px) {
   .collectionCard {
-    padding: 1.25rem;
-    border-radius: 16px;
+    padding: 1.5rem;
+    border-radius: 20px;
+  }
+
+  .collectionCard::before {
+    height: 1.5px;
+  }
+
+  .collectionCard__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.25rem;
+  }
+
+  .collectionCard__title {
+    font-size: 1.5rem;
+  }
+
+  .collectionCard__description {
+    font-size: 0.95rem;
+    margin-top: 0.65rem;
+  }
+
+  .collectionCard__count {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .collectionCard__ctaBtn {
+    padding: 0.8rem 1.3rem;
+    font-size: 0.85rem;
   }
 
   .collectionCard__scroll {
@@ -786,20 +1051,85 @@
   .bouquetCard__media {
     aspect-ratio: 4 / 5;
   }
+
+  .bouquetCard__badge {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.65rem;
+  }
+
+  .bouquetCard__badge svg {
+    width: 10px;
+    height: 10px;
+  }
+
+  .bouquetCard__readyHint {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+  }
+
+  .bouquetCard__chip {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.55rem;
+  }
+
+  .bouquetCard__chip svg {
+    width: 10px;
+    height: 10px;
+  }
 }
 
 @media (max-width: 480px) {
   .collectionCard {
-    padding: 1rem;
-    border-radius: 14px;
+    padding: 1.5rem;
+    border-radius: 20px;
+  }
+
+  .collectionCard::before {
+    height: 1px;
+  }
+
+  .collectionCard__header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.25rem;
+    gap: 1rem;
   }
 
   .collectionCard__title {
-    font-size: clamp(1.2rem, 5vw, 1.5rem);
+    font-size: clamp(1.4rem, 5vw, 1.65rem);
+    line-height: 1.2;
+  }
+
+  .collectionCard__titleRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
   }
 
   .collectionCard__description {
     font-size: 0.9rem;
+    line-height: 1.7;
+    margin-top: 0.6rem;
+  }
+
+  .collectionCard__count {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.75rem;
+  }
+
+  .collectionCard__headerActions {
+    width: 100%;
+  }
+
+  .collectionCard__ctaBtn--small {
+    width: 100%;
+    justify-content: center;
+    padding: 0.8rem 1.3rem;
+    font-size: 0.85rem;
+  }
+
+  .collectionCard__footer {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
   }
 
   .collectionCard__scroll {
@@ -830,11 +1160,54 @@
     font-size: 0.8rem;
     padding: 0.75rem 0.85rem;
   }
+
+  .bouquetCard__price {
+    font-size: 1.1rem;
+  }
+
+  .bouquetCard__name {
+    font-size: 0.9rem;
+  }
 }
 
 @media (max-width: 360px) {
+  .collectionCard {
+    padding: 1.25rem;
+    border-radius: 18px;
+  }
+
+  .collectionCard__header {
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+  }
+
+  .collectionCard__title {
+    font-size: 1.35rem;
+  }
+
+  .collectionCard__description {
+    font-size: 0.88rem;
+    line-height: 1.65;
+  }
+
+  .collectionCard__count {
+    font-size: 0.65rem;
+    padding: 0.35rem 0.65rem;
+  }
+
+  .collectionCard__ctaBtn {
+    padding: 0.75rem 1.2rem;
+    font-size: 0.8rem;
+  }
+
+  .collectionCard__footer {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+  }
+
   .collectionCard__previewGrid {
     grid-template-columns: 1fr;
+    gap: 0.9rem;
   }
 }
 

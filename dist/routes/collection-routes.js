@@ -10,6 +10,7 @@ const mongoose_2 = __importDefault(require("mongoose"));
 const collection_model_1 = require("../models/collection-model");
 const bouquet_model_1 = require("../models/bouquet-model");
 const collections_1 = require("../mock-data/collections");
+const auth_middleware_1 = require("../middleware/auth-middleware");
 const router = (0, express_1.Router)();
 const normalizeString = (v) => (typeof v === "string" ? v.trim() : "");
 /**
@@ -47,8 +48,9 @@ router.get("/", async (_req, res) => {
 /**
  * POST /api/collections
  * Body: { name: string, description?: string }
+ * Protected: Admin only
  */
-router.post("/", async (req, res) => {
+router.post("/", auth_middleware_1.authenticate, auth_middleware_1.requireAdmin, async (req, res) => {
     try {
         const name = normalizeString(req.body?.name);
         const description = normalizeString(req.body?.description);
@@ -82,8 +84,9 @@ router.post("/", async (req, res) => {
  * POST /api/collections/:id/bouquets
  * Body: { bouquetId: string }
  * Adds a bouquet to a collection (deduplicated)
+ * Protected: Admin only
  */
-router.post("/:id/bouquets", async (req, res) => {
+router.post("/:id/bouquets", auth_middleware_1.authenticate, auth_middleware_1.requireAdmin, async (req, res) => {
     try {
         const { id } = req.params;
         const bouquetId = normalizeString(req.body?.bouquetId);
@@ -121,8 +124,9 @@ router.post("/:id/bouquets", async (req, res) => {
 /**
  * DELETE /api/collections/:id/bouquets/:bouquetId
  * Removes a bouquet from a collection
+ * Protected: Admin only
  */
-router.delete("/:id/bouquets/:bouquetId", async (req, res) => {
+router.delete("/:id/bouquets/:bouquetId", auth_middleware_1.authenticate, auth_middleware_1.requireAdmin, async (req, res) => {
     try {
         const { id, bouquetId } = req.params;
         if (!mongoose_1.Types.ObjectId.isValid(id)) {

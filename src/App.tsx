@@ -21,8 +21,22 @@ import ErrorBoundary from "./components/error-boundary";
 import ScrollToTop from "./components/scroll-to-top";
 import { trackPageview } from "./services/analytics.service";
 
+import { isAuthenticated, checkSessionTimeout, updateLastActivity } from "./utils/auth-utils";
+
+// Update activity on user interaction
+if (typeof window !== "undefined") {
+  const events = ["mousedown", "keydown", "scroll", "touchstart"];
+  events.forEach((event) => {
+    window.addEventListener(event, updateLastActivity, { passive: true });
+  });
+}
+
 const isLoggedIn = (): boolean => {
-  return Boolean(localStorage.getItem("authToken"));
+  // Check session timeout (30 minutes of inactivity)
+  if (checkSessionTimeout(30)) {
+    return false;
+  }
+  return isAuthenticated();
 };
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({

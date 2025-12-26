@@ -72,8 +72,8 @@ class DashboardController extends Component<{}, State> {
   }
 
   private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem("authToken");
-    return token ? { Authorization: `Bearer ${token}` } : {};
+    const { getAuthHeaders } = require("../utils/auth-utils");
+    return getAuthHeaders();
   }
 
   private normalizeBouquet = (b: any): Bouquet => ({
@@ -402,7 +402,8 @@ class DashboardController extends Component<{}, State> {
   };
 
   private onLogout = () => {
-    localStorage.removeItem("authToken");
+    const { clearAuth } = require("../utils/auth-utils");
+    clearAuth();
     // optional redirect
     window.location.href = "/login";
   };

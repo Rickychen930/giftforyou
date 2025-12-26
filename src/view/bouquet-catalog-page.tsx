@@ -39,6 +39,7 @@ interface Props {
 
   onClearSearchQuery: () => void;
   onClearCollectionNameFilter: () => void;
+  onSearchChange?: (query: string) => void;
 
   loading?: boolean;
   error?: string | null;
@@ -141,35 +142,92 @@ class BouquetCatalogView extends Component<Props> {
     const pages: number[] = [];
     for (let p = start; p <= end; p++) pages.push(p);
 
+    const startItem = (currentPage - 1) * itemsPerPage + 1;
+    const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
     return (
-      <div className="catalogPagination" aria-label="Navigasi halaman">
-        <button
-          className="catalogPagination__btn"
-          disabled={currentPage === 1}
-          onClick={() => onPageChange(currentPage - 1)}
-        >
-          Sebelumnya
-        </button>
-
-        {pages.map((p) => (
+      <div className="catalogPagination-wrapper">
+        <div className="catalogPagination__info" aria-live="polite">
+          Menampilkan <strong>{startItem}</strong>–<strong>{endItem}</strong> dari <strong>{totalItems}</strong> bouquet
+        </div>
+        <nav className="catalogPagination" aria-label="Navigasi halaman">
           <button
-            key={p}
-            className={`catalogPagination__page ${
-              currentPage === p ? "is-active" : ""
-            }`}
-            onClick={() => onPageChange(p)}
+            className="catalogPagination__btn catalogPagination__btn--prev"
+            disabled={currentPage === 1}
+            onClick={() => onPageChange(currentPage - 1)}
+            aria-label="Halaman sebelumnya"
+            aria-disabled={currentPage === 1}
           >
-            {p}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span>Sebelumnya</span>
           </button>
-        ))}
 
-        <button
-          className="catalogPagination__btn"
-          disabled={currentPage === totalPages}
-          onClick={() => onPageChange(currentPage + 1)}
-        >
-          Berikutnya
-        </button>
+          <div className="catalogPagination__pages" role="list">
+            {start > 1 && (
+              <>
+                <button
+                  className="catalogPagination__page"
+                  onClick={() => onPageChange(1)}
+                  aria-label="Halaman 1"
+                  role="listitem"
+                >
+                  1
+                </button>
+                {start > 2 && (
+                  <span className="catalogPagination__ellipsis" aria-hidden="true">
+                    …
+                  </span>
+                )}
+              </>
+            )}
+            {pages.map((p) => (
+              <button
+                key={p}
+                className={`catalogPagination__page ${
+                  currentPage === p ? "is-active" : ""
+                }`}
+                onClick={() => onPageChange(p)}
+                aria-label={`Halaman ${p}`}
+                aria-current={currentPage === p ? "page" : undefined}
+                role="listitem"
+              >
+                {p}
+              </button>
+            ))}
+            {end < totalPages && (
+              <>
+                {end < totalPages - 1 && (
+                  <span className="catalogPagination__ellipsis" aria-hidden="true">
+                    …
+                  </span>
+                )}
+                <button
+                  className="catalogPagination__page"
+                  onClick={() => onPageChange(totalPages)}
+                  aria-label={`Halaman ${totalPages}`}
+                  role="listitem"
+                >
+                  {totalPages}
+                </button>
+              </>
+            )}
+          </div>
+
+          <button
+            className="catalogPagination__btn catalogPagination__btn--next"
+            disabled={currentPage === totalPages}
+            onClick={() => onPageChange(currentPage + 1)}
+            aria-label="Halaman berikutnya"
+            aria-disabled={currentPage === totalPages}
+          >
+            <span>Berikutnya</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        </nav>
       </div>
     );
   }
@@ -318,26 +376,82 @@ class BouquetCatalogView extends Component<Props> {
     return (
       <section className="catalogPage" aria-labelledby="catalog-title">
         <header className="catalogHeader">
-          <h1 id="catalog-title" className="catalogTitle">
-            Katalog Bouquet
-          </h1>
-          <p className="catalogSubtitle">
-            {loading
-              ? "Memuat bouquet…"
-              : "Saring berdasarkan harga, tipe, dan ukuran — lalu pesan cepat lewat WhatsApp."}
-          </p>
+          <div className="catalogHeader__content">
+            <h1 id="catalog-title" className="catalogTitle">
+              Katalog Bouquet
+            </h1>
+            <p className="catalogSubtitle">
+              {loading
+                ? "Memuat bouquet…"
+                : "Temukan bouquet impian Anda dari koleksi terpilih kami"}
+            </p>
+          </div>
 
           <div className="catalogSummary">
-            <span className="catalogSummary__count">
-              {loading ? "Memuat…" : `${total} hasil`}
-            </span>
-            <button
-              className="catalogSummary__clear"
-              onClick={this.props.onClearAll}
-              disabled={loading || !hasActiveFilters}
-            >
-              Hapus semua filter
-            </button>
+            <div className="catalogSearch">
+              <form
+                className="catalogSearch__form"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  const query = (formData.get("q") as string)?.trim() || "";
+                  if (this.props.onSearchChange) {
+                    this.props.onSearchChange(query);
+                  } else {
+                    // Fallback: update URL directly
+                    const params = new URLSearchParams(window.location.search);
+                    if (query) {
+                      params.set("q", query);
+                    } else {
+                      params.delete("q");
+                    }
+                    window.location.search = params.toString() ? `?${params.toString()}` : "";
+                  }
+                }}
+              >
+                <div className="catalogSearch__wrapper">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="catalogSearch__icon" aria-hidden="true">
+                    <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <input
+                    type="search"
+                    name="q"
+                    className="catalogSearch__input"
+                    placeholder="Cari bouquet, koleksi, momen..."
+                    defaultValue={searchQuery}
+                    aria-label="Cari bouquet"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      className="catalogSearch__clear"
+                      onClick={() => {
+                        this.props.onClearSearchQuery();
+                      }}
+                      aria-label="Hapus pencarian"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+            {hasActiveFilters && !loading && (
+              <div className="catalogSummary__actions">
+                <button
+                  className="catalogSummary__clear"
+                  onClick={this.props.onClearAll}
+                  aria-label="Hapus semua filter dan reset pencarian"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>Reset Filter</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {chips.length > 0 && (
@@ -424,8 +538,14 @@ class BouquetCatalogView extends Component<Props> {
           <main className="catalogResults" aria-label="Hasil bouquet" ref={this.resultsRef}>
             {loading ? (
               <>
-                <div className="catalogState" aria-live="polite">
-                  Memuat bouquet…
+                <div className="catalogState catalogState--loading" aria-live="polite" aria-busy="true">
+                  <div className="catalogState__content">
+                    <div className="becSpinner" style={{ width: "24px", height: "24px", borderWidth: "3px" }}></div>
+                    <div className="catalogState__text">
+                      <strong>Memuat bouquet…</strong>
+                      <span>Mohon tunggu sebentar</span>
+                    </div>
+                  </div>
                 </div>
                 <div className="catalogGrid catalogGrid--skeleton" aria-hidden="true">
                   {Array.from({ length: skeletonCount }).map((_, idx) => (
@@ -441,7 +561,7 @@ class BouquetCatalogView extends Component<Props> {
                 </div>
               </>
             ) : pageItems.length > 0 ? (
-              <div className="catalogGrid">
+              <div className="catalogGrid" role="list" aria-label={`Menampilkan ${pageItems.length} dari ${total} bouquet`}>
                 {pageItems.map((b) => (
                   <BouquetCard
                     key={b._id}
@@ -458,9 +578,18 @@ class BouquetCatalogView extends Component<Props> {
                 ))}
               </div>
             ) : (
-              <div className="catalogEmpty">
-                <h3>Tidak ada hasil</h3>
-                <p>Coba hapus beberapa filter atau perluas rentang harga.</p>
+              <div className="catalogEmpty" role="status" aria-live="polite">
+                <div className="catalogEmpty__icon" aria-hidden="true">
+                  <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.4"/>
+                  </svg>
+                </div>
+                <h3 className="catalogEmpty__title">Tidak ada bouquet ditemukan</h3>
+                <p className="catalogEmpty__description">
+                  {hasActiveFilters
+                    ? "Tidak ada bouquet yang sesuai dengan filter Anda. Coba sesuaikan filter atau hapus beberapa filter untuk melihat lebih banyak hasil."
+                    : "Belum ada bouquet tersedia saat ini. Silakan kembali lagi nanti."}
+                </p>
 
                 {chips.length > 0 && (
                   <div className="catalogEmpty__filters" aria-label="Filter aktif">

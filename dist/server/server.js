@@ -9,6 +9,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const cors_1 = __importDefault(require("cors"));
 const path_1 = __importDefault(require("path"));
 const multer_1 = __importDefault(require("multer"));
+const fs_1 = __importDefault(require("fs"));
 const metrics_routes_1 = __importDefault(require("../routes/metrics-routes"));
 const auth_routes_1 = __importDefault(require("../routes/auth-routes"));
 const bouquet_routes_1 = __importDefault(require("../routes/bouquet-routes"));
@@ -16,6 +17,8 @@ const collection_routes_1 = __importDefault(require("../routes/collection-routes
 const hero_slider_routes_1 = __importDefault(require("../routes/hero-slider-routes"));
 const order_routes_1 = __importDefault(require("../routes/order-routes"));
 const customer_routes_1 = __importDefault(require("../routes/customer-routes"));
+const security_headers_1 = require("../middleware/security-headers");
+const rate_limit_middleware_1 = require("../middleware/rate-limit-middleware");
 /**
  * Read a required env var (crash early if missing)
  */
@@ -43,7 +46,9 @@ const PORT = Number(process.env.PORT || 4000);
 const MONGO_URI = requireEnv("MONGO_URI");
 const allowedOrigins = parseOrigins(process.env.CORS_ORIGIN);
 const isMongoConnected = () => mongoose_1.default.connection.readyState === 1;
-// Middleware
+// Security headers (must be first)
+app.use(security_headers_1.securityHeaders);
+// CORS configuration
 app.use((0, cors_1.default)({
     origin: (origin, cb) => {
         // Allow requests without Origin header (curl, server-to-server, health checks)
@@ -61,13 +66,27 @@ app.use((0, cors_1.default)({
         return cb(new Error(`CORS blocked for origin: ${origin}`));
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
 }));
+// Body parsing with size limits
 app.use(express_1.default.json({ limit: "2mb" }));
-app.use(express_1.default.urlencoded({ extended: true }));
+app.use(express_1.default.urlencoded({ extended: true, limit: "2mb" }));
+// Rate limiting for API routes (applied before routes)
+app.use("/api", rate_limit_middleware_1.apiRateLimit);
 // Health check
 app.get("/api/health", (_req, res) => res.status(200).json({ ok: true, db: isMongoConnected() ? "up" : "down" }));
-// Static uploads (make sure this folder exists on server)
-app.use("/uploads", express_1.default.static(path_1.default.resolve(process.cwd(), "uploads")));
+const uploadsPath = path_1.default.resolve(process.cwd(), "uploads");
+try {
+    if (!fs_1.default.existsSync(uploadsPath)) {
+        fs_1.default.mkdirSync(uploadsPath, { recursive: true });
+        console.log("Created /uploads folder");
+    }
+}
+catch (err) {
+    console.error("Failed to create /uploads folder:", err);
+}
+app.use("/uploads", express_1.default.static(uploadsPath));
 // If DB is down, return a clear response (prevents proxy ECONNREFUSED)
 app.use((req, res, next) => {
     if (req.path === "/api/health")

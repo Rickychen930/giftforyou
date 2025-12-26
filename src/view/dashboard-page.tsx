@@ -426,6 +426,9 @@ class DashboardView extends Component<Props, State> {
 
     const overviewText = overviewLines.join("\n");
 
+    // Store overview text for keyboard shortcut access
+    (this as any)._overviewText = overviewText;
+
     const copyStatus = this.state.overviewCopyStatus;
 
     return (
@@ -443,29 +446,64 @@ class DashboardView extends Component<Props, State> {
               type="button"
               className="overviewActionBtn"
               onClick={() => this.setActiveTab("upload")}
+              aria-label="Tambah bouquet baru"
             >
-              Tambah bouquet
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                <path d="M12 8v8M8 12h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              <span>Tambah bouquet</span>
             </button>
             <button
               type="button"
               className="overviewActionBtn"
               onClick={() => this.setActiveTab("edit")}
+              aria-label="Buka editor bouquet"
             >
-              Buka editor
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span>Buka editor</span>
             </button>
             <button
               type="button"
               className="overviewActionBtn"
               onClick={() => this.setActiveTab("hero")}
+              aria-label="Atur hero slider"
             >
-              Atur hero
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2"/>
+                <path d="M3 9h18M9 3v18" stroke="currentColor" strokeWidth="2"/>
+              </svg>
+              <span>Atur hero</span>
             </button>
             <button
               type="button"
               className="overviewActionBtn overviewActionBtn--primary"
               onClick={() => this.copyOverview(overviewText)}
+              aria-label="Salin ringkasan ke clipboard"
+              title="Ctrl/Cmd + C untuk copy"
             >
-              Salin ringkasan
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" strokeWidth="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" strokeWidth="2"/>
+              </svg>
+              <span>Salin ringkasan</span>
+            </button>
+            <button
+              type="button"
+              className="overviewActionBtn"
+              onClick={this.reloadDashboard}
+              aria-label="Muat ulang dashboard"
+              title="Refresh data (Ctrl/Cmd + R)"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M21 3v5h-5M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M8 16H3v5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span>Refresh</span>
             </button>
           </div>
         </div>
@@ -475,24 +513,46 @@ class DashboardView extends Component<Props, State> {
             className="overviewToast"
             role={copyStatus === "failed" ? "alert" : "status"}
             aria-live="polite"
+            aria-atomic="true"
           >
-            {copyStatus === "copied"
-              ? "Ringkasan tersalin."
-              : "Gagal menyalin ringkasan. Silakan coba lagi."}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              {copyStatus === "copied" ? (
+                <>
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </>
+              ) : (
+                <>
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </>
+              )}
+            </svg>
+            <span>
+              {copyStatus === "copied"
+                ? "Ringkasan tersalin."
+                : "Gagal menyalin ringkasan. Silakan coba lagi."}
+            </span>
           </div>
         )}
 
         <div className="overviewLayout" aria-label="Konten ringkasan">
           <div className="overviewCol">
             <div className="dashboardMetrics" aria-label="Metrik toko">
-              <div className="metricCard">
+              <div className="metricCard metricCard--primary">
                 <p className="metricCard__label">Kunjungan (30 hari)</p>
                 <p className="metricCard__value">
                   {insightsError ? visitorsCount : pageviews30d || visitorsCount}
                 </p>
+                <div className="metricCard__icon" aria-hidden="true">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2 12h20M12 2v20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.3"/>
+                    <path d="M3 12c0-4.97 4.03-9 9-9s9 4.03 9 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.5"/>
+                  </svg>
+                </div>
               </div>
 
-              <div className="metricCard">
+              <div className="metricCard metricCard--info">
                 <p className="metricCard__label">Pengunjung unik (30 hari)</p>
                 <p className="metricCard__value">
                   {insightsError
@@ -506,33 +566,69 @@ class DashboardView extends Component<Props, State> {
                     ? "Berbasis visitorId anonim."
                     : "Mulai terekam setelah update."}
                 </p>
+                <div className="metricCard__icon" aria-hidden="true">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2" opacity="0.3"/>
+                    <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" stroke="currentColor" strokeWidth="2" opacity="0.5"/>
+                  </svg>
+                </div>
               </div>
 
-              <div className="metricCard">
+              <div className="metricCard metricCard--success">
                 <p className="metricCard__label">Koleksi</p>
                 <p className="metricCard__value">{collectionsCount}</p>
+                <div className="metricCard__icon" aria-hidden="true">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" opacity="0.3"/>
+                    <rect x="14" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" opacity="0.3"/>
+                    <rect x="14" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2" opacity="0.3"/>
+                    <rect x="3" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2" opacity="0.5"/>
+                  </svg>
+                </div>
               </div>
 
-              <div className="metricCard">
+              <div className="metricCard metricCard--primary">
                 <p className="metricCard__label">Total bouquet</p>
                 <p className="metricCard__value">{bouquets.length}</p>
+                <div className="metricCard__icon" aria-hidden="true">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.3"/>
+                  </svg>
+                </div>
               </div>
 
-              <div className="metricCard">
+              <div className="metricCard metricCard--success">
                 <p className="metricCard__label">Siap</p>
                 <p className="metricCard__value">{readyCount}</p>
                 <p className="metricCard__note">Unit siap: {totalReadyUnits}</p>
+                <div className="metricCard__icon" aria-hidden="true">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" opacity="0.3"/>
+                    <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5"/>
+                  </svg>
+                </div>
               </div>
 
-              <div className="metricCard">
+              <div className="metricCard metricCard--warning">
                 <p className="metricCard__label">Preorder</p>
                 <p className="metricCard__value">{preorderCount}</p>
+                <div className="metricCard__icon" aria-hidden="true">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" opacity="0.3"/>
+                    <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.5"/>
+                  </svg>
+                </div>
               </div>
 
-              <div className="metricCard">
+              <div className="metricCard metricCard--featured">
                 <p className="metricCard__label">Featured</p>
                 <p className="metricCard__value">{featuredCount}</p>
                 <p className="metricCard__note">New edition: {newEditionCount}</p>
+                <div className="metricCard__icon" aria-hidden="true">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.3"/>
+                  </svg>
+                </div>
               </div>
             </div>
           </div>
@@ -542,19 +638,34 @@ class DashboardView extends Component<Props, State> {
               <p className="overviewCard__title">Harga</p>
               <div className="overviewKeyValue">
                 <div className="overviewKeyValue__row">
-                  <span className="overviewKeyValue__key">Min</span>
+                  <span className="overviewKeyValue__key">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ marginRight: "0.4rem", opacity: 0.6 }}>
+                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Min
+                  </span>
                   <span className="overviewKeyValue__val">
                     {priced.length ? formatIDR(priceMin) : "—"}
                   </span>
                 </div>
                 <div className="overviewKeyValue__row">
-                  <span className="overviewKeyValue__key">Rata-rata</span>
+                  <span className="overviewKeyValue__key">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ marginRight: "0.4rem", opacity: 0.6 }}>
+                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Rata-rata
+                  </span>
                   <span className="overviewKeyValue__val">
                     {priced.length ? formatIDR(priceAvg) : "—"}
                   </span>
                 </div>
                 <div className="overviewKeyValue__row">
-                  <span className="overviewKeyValue__key">Max</span>
+                  <span className="overviewKeyValue__key">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ marginRight: "0.4rem", opacity: 0.6 }}>
+                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Max
+                  </span>
                   <span className="overviewKeyValue__val">
                     {priced.length ? formatIDR(priceMax) : "—"}
                   </span>
@@ -565,16 +676,36 @@ class DashboardView extends Component<Props, State> {
             <div className="overviewCard" aria-label="Kualitas data">
               <p className="overviewCard__title">Kualitas data</p>
               <ul className="overviewList" aria-label="Ringkasan kualitas data">
-                <li className="overviewList__item">
-                  <span>Tanpa gambar</span>
+                <li className={`overviewList__item ${missingImageCount > 0 ? "overviewList__item--warning" : ""}`}>
+                  <span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ marginRight: "0.4rem", opacity: 0.6 }}>
+                      <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2"/>
+                      <path d="M9 9h6v6H9z" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                    Tanpa gambar
+                  </span>
                   <b>{missingImageCount}</b>
                 </li>
-                <li className="overviewList__item">
-                  <span>Tanpa koleksi</span>
+                <li className={`overviewList__item ${missingCollectionCount > 0 ? "overviewList__item--warning" : ""}`}>
+                  <span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ marginRight: "0.4rem", opacity: 0.6 }}>
+                      <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2"/>
+                      <rect x="14" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2"/>
+                      <rect x="14" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2"/>
+                      <rect x="3" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2"/>
+                    </svg>
+                    Tanpa koleksi
+                  </span>
                   <b>{missingCollectionCount}</b>
                 </li>
-                <li className="overviewList__item">
-                  <span>Ready qty 0</span>
+                <li className={`overviewList__item ${zeroQtyReadyCount > 0 ? "overviewList__item--warning" : ""}`}>
+                  <span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ marginRight: "0.4rem", opacity: 0.6 }}>
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                      <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                    Ready qty 0
+                  </span>
                   <b>{zeroQtyReadyCount}</b>
                 </li>
               </ul>

@@ -7,6 +7,8 @@ import { CollectionModel } from "../models/collection-model";
 import { BouquetModel } from "../models/bouquet-model";
 import { mockCollections } from "../mock-data/collections";
 
+import { authenticate, requireAdmin } from "../middleware/auth-middleware";
+
 const router = Router();
 
 const normalizeString = (v: unknown) => (typeof v === "string" ? v.trim() : "");
@@ -49,8 +51,9 @@ router.get("/", async (_req, res) => {
 /**
  * POST /api/collections
  * Body: { name: string, description?: string }
+ * Protected: Admin only
  */
-router.post("/", async (req, res) => {
+router.post("/", authenticate, requireAdmin, async (req, res) => {
   try {
     const name = normalizeString(req.body?.name);
     const description = normalizeString(req.body?.description);
@@ -88,8 +91,9 @@ router.post("/", async (req, res) => {
  * POST /api/collections/:id/bouquets
  * Body: { bouquetId: string }
  * Adds a bouquet to a collection (deduplicated)
+ * Protected: Admin only
  */
-router.post("/:id/bouquets", async (req, res) => {
+router.post("/:id/bouquets", authenticate, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const bouquetId = normalizeString(req.body?.bouquetId);
@@ -135,8 +139,9 @@ router.post("/:id/bouquets", async (req, res) => {
 /**
  * DELETE /api/collections/:id/bouquets/:bouquetId
  * Removes a bouquet from a collection
+ * Protected: Admin only
  */
-router.delete("/:id/bouquets/:bouquetId", async (req, res) => {
+router.delete("/:id/bouquets/:bouquetId", authenticate, requireAdmin, async (req, res) => {
   try {
     const { id, bouquetId } = req.params;
 

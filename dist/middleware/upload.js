@@ -20,15 +20,25 @@ const allowedMime = new Set([
     "image/heic",
     "image/heif",
 ]);
+const allowedExt = new Set([
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".webp",
+    ".heic",
+    ".heif",
+]);
 const storage = multer_1.default.memoryStorage();
 exports.upload = (0, multer_1.default)({
     storage,
     limits: { fileSize: 8 * 1024 * 1024 },
     fileFilter: (_req, file, cb) => {
-        if (!allowedMime.has(file.mimetype)) {
-            return cb(new Error("Unsupported image type. Use JPG, PNG, WEBP, or HEIC."));
+        const ext = path_1.default.extname(file.originalname).toLowerCase();
+        // ✅ FIX: Allow by mimetype OR extension (Safari sometimes sends empty/incorrect mimetypes)
+        if (allowedMime.has(file.mimetype) || allowedExt.has(ext)) {
+            return cb(null, true);
         }
-        cb(null, true);
+        return cb(new Error("Unsupported image type. Use JPG, PNG, WEBP, or HEIC."));
     },
 });
 function makeBaseName() {
@@ -49,7 +59,16 @@ function normalizeExtFromOriginalName(originalname) {
  * Returns "/uploads/<filename>"
  */
 async function saveUploadedImage(file) {
+    // Debug logging for Safari upload issues
+    console.log("[UPLOAD] file info:", {
+        originalname: file?.originalname,
+        mimetype: file?.mimetype,
+        size: file?.size,
+        bufferLength: file?.buffer?.length,
+        fieldname: file?.fieldname,
+    });
     if (!file?.buffer || file.buffer.length === 0) {
+        console.error("[UPLOAD] Empty file buffer", file);
         throw new Error("Empty file buffer.");
     }
     const baseName = makeBaseName();

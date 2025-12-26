@@ -66,6 +66,14 @@ const BouquetSchema = new mongoose_1.Schema({
     collectionName: { type: String, default: "", trim: true, maxlength: 100 },
     isNewEdition: { type: Boolean, default: false },
     isFeatured: { type: Boolean, default: false },
+    customPenanda: {
+        type: [String],
+        default: [],
+        validate: {
+            validator: (arr) => arr.length <= 10,
+            message: "Custom penanda array cannot exceed 10 items.",
+        },
+    },
     careInstructions: { type: String, default: "", trim: true, maxlength: 300 },
 }, { timestamps: true });
 BouquetSchema.index({ name: 1 });

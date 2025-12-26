@@ -384,6 +384,10 @@ class BouquetCatalogController extends Component<
     this.setState({ searchQuery: "", currentPage: 1 });
   };
 
+  private setSearchQuery = (query: string) => {
+    this.setState({ searchQuery: query.trim(), currentPage: 1 });
+  };
+
   private clearCollectionNameFilter = () => {
     this.setState({ collectionNameFilter: "", currentPage: 1 });
   };
@@ -507,6 +511,7 @@ class BouquetCatalogController extends Component<
         onSortChange={this.setSortBy}
         onClearSearchQuery={this.clearSearchQuery}
         onClearCollectionNameFilter={this.clearCollectionNameFilter}
+        onSearchChange={this.setSearchQuery}
         onPageChange={(page) => this.setState({ currentPage: page })}
         loading={this.state.loading}
         error={this.state.error}

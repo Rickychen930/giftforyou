@@ -69,13 +69,14 @@ router.get("/home", async (req, res) => {
         res.status(200).json(collections_1.mockHeroSlider);
     }
 });
-router.put("/home", hero_slider_controller_1.upsertHomeHeroSlider);
+const auth_middleware_1 = require("../middleware/auth-middleware");
+router.put("/home", auth_middleware_1.authenticate, auth_middleware_1.requireAdmin, hero_slider_controller_1.upsertHomeHeroSlider);
 /**
  * POST /api/hero-slider/home/upload
  * FormData: image=<file>
  * Returns: { path: "/uploads/hero/<filename>.jpg" }
  */
-router.post("/home/upload", upload.single("image"), async (req, res) => {
+router.post("/home/upload", auth_middleware_1.authenticate, auth_middleware_1.requireAdmin, upload.single("image"), async (req, res) => {
     try {
         if (!req.file?.buffer || req.file.buffer.length === 0) {
             return res.status(400).json({ error: "No file uploaded" });

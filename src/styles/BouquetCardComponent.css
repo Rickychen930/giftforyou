@@ -2,12 +2,19 @@
 
 /* Card */
 .bouquet-card {
-  background: var(--bouquet-color-surface);
-  border-radius: var(--bouquet-radius-card);
-  box-shadow: var(--bouquet-shadow-1);
-  border: 1px solid var(--border-2);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(255, 255, 255, 0.95) 100%
+  );
+  border-radius: 24px;
+  box-shadow: 
+    0 12px 32px rgba(0, 0, 0, 0.08),
+    0 4px 16px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  border: 1.5px solid rgba(212, 140, 156, 0.15);
   overflow: hidden;
-  transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -16,20 +23,36 @@
   contain: paint;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  transform: translateZ(0);
+  will-change: transform, box-shadow;
 }
 
 .bouquet-card:focus-visible {
-  outline: 3px solid rgba(212, 140, 156, 0.25);
+  outline: 3px solid rgba(212, 140, 156, 0.35);
   outline-offset: 4px;
+  box-shadow: 
+    0 0 0 4px rgba(212, 140, 156, 0.15),
+    0 12px 32px rgba(0, 0, 0, 0.08),
+    0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 .bouquet-card::before {
   content: "";
   position: absolute;
   inset: 0 0 auto 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(212, 140, 156, 0.28), transparent);
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(212, 140, 156, 0.3),
+    rgba(212, 140, 156, 0.5),
+    rgba(212, 140, 156, 0.3),
+    transparent
+  );
   opacity: 0.9;
+  z-index: 1;
 }
 
 .bouquet-card::after {
@@ -38,10 +61,11 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(700px 260px at 12% 0%, rgba(212, 140, 156, 0.10), transparent 60%),
-    radial-gradient(640px 260px at 92% 10%, rgba(168, 213, 186, 0.10), transparent 60%);
-  opacity: 0.45;
+    radial-gradient(800px 300px at 10% 5%, rgba(212, 140, 156, 0.08), transparent 65%),
+    radial-gradient(750px 300px at 90% 15%, rgba(168, 213, 186, 0.08), transparent 65%);
+  opacity: 0.5;
   z-index: 0;
+  transition: opacity 0.4s ease;
 }
 
 .bouquet-card > * {
@@ -58,9 +82,17 @@
 
 @media (hover: hover) and (pointer: fine) {
   .bouquet-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--bouquet-shadow-2);
-    border-color: rgba(0, 0, 0, 0.10);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+      0 20px 60px rgba(0, 0, 0, 0.15),
+      0 12px 32px rgba(0, 0, 0, 0.1),
+      0 0 0 1px rgba(255, 255, 255, 0.95) inset,
+      0 0 0 2px rgba(212, 140, 156, 0.2);
+    border-color: rgba(212, 140, 156, 0.35);
+  }
+
+  .bouquet-card:hover::after {
+    opacity: 0.7;
   }
 }
 
@@ -70,14 +102,180 @@
   width: 100%;
   overflow: hidden;
   aspect-ratio: 3 / 4;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.02));
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.05) 0%,
+    rgba(168, 213, 186, 0.05) 50%,
+    rgba(212, 140, 156, 0.05) 100%
+  );
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+.bouquet-image-skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.06) 0%,
+    rgba(0, 0, 0, 0.03) 50%,
+    rgba(0, 0, 0, 0.06) 100%
+  );
+  z-index: 1;
+  overflow: hidden;
+}
+
+.bouquet-image-skeleton__shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: bouquetShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes bouquetShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.bouquet-image {
+  opacity: 0;
+  transition: opacity 0.4s ease, transform 0.4s ease, filter 0.4s ease;
+}
+
+.bouquet-image.is-loaded {
+  opacity: 1;
+}
+
+.bouquet-image.is-error {
+  opacity: 1;
+  filter: grayscale(0.3);
 }
 
 .bouquet-image-wrapper:focus-visible {
   outline: none;
   box-shadow: 0 0 0 4px rgba(212, 140, 156, 0.22);
+}
+
+.bouquet-image-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 12px;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.25) 0%,
+    transparent 35%,
+    transparent 65%,
+    rgba(0, 0, 0, 0.18) 100%
+  );
+}
+
+.bouquet-image-hover-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.15) 0%,
+    rgba(168, 213, 186, 0.1) 100%
+  );
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  animation: bouquetFadeIn 0.3s ease forwards;
+}
+
+@keyframes bouquetFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+.bouquet-image-hover-content {
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
+  border-radius: 999px;
+  border: 1.5px solid rgba(212, 140, 156, 0.3);
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.bouquet-hover-text {
+  font-weight: 950;
+  font-size: 0.85rem;
+  color: var(--brand-rose-700);
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bouquet-status-badge {
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  font-weight: 950;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  color: #fff;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.65) 0%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  line-height: 1;
+}
+
+.bouquet-status-badge.is-ready {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.6) 0%,
+    rgba(5, 150, 105, 0.5) 100%
+  );
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+.bouquet-status-badge.is-preorder {
+  background: linear-gradient(
+    135deg,
+    rgba(249, 115, 22, 0.6) 0%,
+    rgba(234, 88, 12, 0.5) 100%
+  );
+  border-color: rgba(249, 115, 22, 0.5);
 }
 
 .bouquet-image-wrapper::after {
@@ -86,7 +284,8 @@
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(to top, rgba(0, 0, 0, 0.16) 0%, rgba(0, 0, 0, 0.00) 62%);
+    linear-gradient(to top, rgba(0, 0, 0, 0.12) 0%, rgba(0, 0, 0, 0.00) 55%);
+  z-index: 1;
 }
 
 .bouquet-image-wrapper::before {
@@ -94,8 +293,14 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(420px 260px at 20% 10%, rgba(255, 255, 255, 0.22), transparent 60%);
-  opacity: 0.65;
+  background: radial-gradient(500px 300px at 25% 15%, rgba(255, 255, 255, 0.3), transparent 65%);
+  opacity: 0.75;
+  z-index: 1;
+  transition: opacity 0.4s ease;
+}
+
+.bouquet-card:hover .bouquet-image-wrapper::before {
+  opacity: 0.9;
 }
 
 .bouquet-image {
@@ -109,8 +314,23 @@
 
 @media (hover: hover) and (pointer: fine) {
   .bouquet-card:hover .bouquet-image {
-    transform: scale(1.06);
-    filter: brightness(0.965) saturate(1.02);
+    transform: scale(1.08);
+    filter: brightness(1.05) saturate(1.1);
+  }
+
+  .bouquet-card:hover .bouquet-status-badge {
+    transform: scale(1.05);
+    box-shadow: 
+      0 8px 24px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.35) inset;
+  }
+
+  .bouquet-card:hover .bouquet-image-hover-overlay {
+    opacity: 1;
+  }
+
+  .bouquet-card:hover .bouquet-tag {
+    transform: translateY(-1px);
   }
 }
 
@@ -240,75 +460,109 @@
 
 /* Info */
 .bouquet-info {
-  padding: clamp(1.1rem, 1.55vw, 1.35rem);
+  padding: clamp(1.25rem, 1.8vw, 1.5rem);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.85rem;
   flex: 1;
+  position: relative;
+  z-index: 1;
 }
 
-/* New: luxury kicker row */
-.bouquet-kicker {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  min-width: 0;
-}
-
-.bouquet-kicker__status {
-  flex: 0 0 auto;
-  font-weight: 950;
-  font-size: 0.76rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--ink-620);
-  padding: 0.22rem 0.5rem;
-  border-radius: 999px;
-  border: 1px solid rgba(0, 0, 0, 0.10);
-  background: rgba(255, 255, 255, 0.72);
-}
-
-.bouquet-kicker__status.is-ready {
-  border-color: rgba(0, 0, 0, 0.10);
-  color: var(--success-text);
-  background: rgba(129, 199, 132, 0.14);
-}
-
-.bouquet-kicker__status.is-preorder {
-  border-color: rgba(212, 140, 156, 0.28);
-  color: var(--brand-wine-700);
-  background: rgba(212, 140, 156, 0.10);
-}
-
+/* Tags */
 .bouquet-tags {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   min-width: 0;
   flex-wrap: wrap;
   justify-content: flex-start;
-}
-
-.bouquet-kicker,
-.bouquet-tags {
-  row-gap: 0.35rem;
+  margin-bottom: 0.5rem;
 }
 
 .bouquet-tag {
   flex: 0 0 auto;
-  max-width: 18ch;
+  max-width: 20ch;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 850;
-  font-size: 0.8rem;
-  color: var(--ink-700);
-  background: rgba(255, 255, 255, 0.62);
-  border: 1px solid rgba(0, 0, 0, 0.07);
+  font-size: 0.75rem;
+  color: var(--brand-rose-600);
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.12) 0%,
+    rgba(212, 140, 156, 0.08) 100%
+  );
+  border: 1.5px solid rgba(212, 140, 156, 0.2);
   border-radius: 999px;
-  padding: 0.25rem 0.52rem;
+  padding: 0.3rem 0.65rem;
+  transition: all 0.2s ease;
+  cursor: default;
+}
+
+.bouquet-tag:hover {
+  transform: translateY(-1px);
+  border-color: rgba(212, 140, 156, 0.3);
+  box-shadow: 0 2px 8px rgba(212, 140, 156, 0.15);
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.18) 0%,
+    rgba(212, 140, 156, 0.12) 100%
+  );
+}
+
+.bouquet-tag--more {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.08) 0%,
+    rgba(0, 0, 0, 0.05) 100%
+  );
+  color: var(--ink-700);
+  border-color: rgba(0, 0, 0, 0.12);
+  font-weight: 900;
+}
+
+@media (max-width: 520px) {
+  .bouquet-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.85rem;
+  }
+
+  .bouquet-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .bouquet-price-wrapper {
+    align-items: center;
+    text-align: center;
+    width: 100%;
+  }
+
+  .bouquet-image-hover-overlay {
+    display: none;
+  }
+
+  .bouquet-image-skeleton {
+    background: linear-gradient(
+      135deg,
+      rgba(212, 140, 156, 0.08) 0%,
+      rgba(168, 213, 186, 0.08) 50%,
+      rgba(212, 140, 156, 0.08) 100%
+    );
+  }
+
+  .bouquet-status-badge {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.65rem;
+  }
+
+  .bouquet-status-badge svg {
+    width: 10px;
+    height: 10px;
+  }
 }
 
 @media (max-width: 380px) {
@@ -324,14 +578,42 @@
   .bouquet-price {
     font-size: 1.15rem;
   }
+
+  .bouquet-button {
+    padding: 0.7rem 1.1rem;
+    font-size: 0.85rem;
+  }
+
+  .bouquet-status-badge {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.65rem;
+  }
+
+  .bouquet-tag {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.55rem;
+  }
+
+  .bouquet-price-hint {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+  }
 }
 
 .bouquet-title {
   margin: 0;
-  font-size: clamp(1.1rem, 1.6vw, 1.32rem);
+  font-size: clamp(1.15rem, 1.7vw, 1.4rem);
   font-weight: 950;
   letter-spacing: -0.01em;
-  color: var(--bouquet-color-accent-title);
+  background: linear-gradient(
+    135deg,
+    var(--bouquet-color-accent-title) 0%,
+    rgba(0, 0, 0, 0.85) 50%,
+    var(--brand-rose-600) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   font-family: "Playfair Display", Georgia, serif;
   line-height: 1.25;
   display: -webkit-box;
@@ -374,31 +656,71 @@
 
 .bouquet-description {
   margin: 0;
-  font-size: 0.92rem;
-  color: var(--ink-700);
-  line-height: 1.6;
+  font-size: 0.88rem;
+  color: var(--ink-600);
+  line-height: 1.65;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-wrap: pretty;
+  font-weight: 700;
+  opacity: 0.85;
 }
 
 .bouquet-footer {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
   margin-top: auto;
-  padding-top: 0.9rem;
+  padding-top: 1rem;
   gap: 0.75rem;
   flex-direction: row;
   flex-wrap: wrap;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.bouquet-price-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: flex-start;
+}
+
+.bouquet-price-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 850;
+  color: var(--success-text);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.12) 0%,
+    rgba(5, 150, 105, 0.08) 100%
+  );
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+  line-height: 1;
+}
+
+.bouquet-price-hint svg {
+  flex-shrink: 0;
+  color: var(--success-text);
 }
 
 .bouquet-price {
-  font-size: 1.22rem;
+  font-size: clamp(1.25rem, 1.5vw, 1.35rem);
   font-weight: 950;
-  color: var(--bouquet-color-accent-price);
+  background: linear-gradient(
+    135deg,
+    var(--bouquet-color-accent-price) 0%,
+    var(--brand-rose-600) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0;
   letter-spacing: -0.01em;
   line-height: 1.1;
@@ -406,40 +728,53 @@
 }
 
 .bouquet-button {
-  background: rgba(255, 255, 255, 0.74);
-  color: var(--bouquet-color-accent-title);
-  border: 1px solid rgba(212, 140, 156, 0.32);
+  background: linear-gradient(
+    135deg,
+    var(--brand-rose-500) 0%,
+    var(--brand-rose-700) 50%,
+    rgba(160, 76, 92, 0.95) 100%
+  );
+  color: #fff;
+  border: none;
   border-radius: 999px;
-  padding: 9px 14px;
+  padding: 0.75rem 1.25rem;
   font-size: 0.9rem;
-  font-weight: 900;
+  font-weight: 950;
   cursor: pointer;
-  transition: background 0.22s ease, transform 0.2s ease, box-shadow 0.22s ease,
-    border-color 0.22s ease, color 0.22s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
   white-space: nowrap;
-  box-shadow: var(--bouquet-shadow-1);
+  box-shadow: 
+    0 6px 20px rgba(212, 140, 156, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
   position: relative;
   overflow: hidden;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-}
-
-.bouquet-button::after {
-  content: "\2192";
-  margin-left: 0.5rem;
-  opacity: 0.9;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .bouquet-button::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(115deg, transparent 0%, rgba(255, 255, 255, 0.18) 38%, transparent 60%);
-  transform: translateX(-120%);
-  transition: transform 0.55s ease;
-  pointer-events: none;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
+
+.bouquet-button:hover::before {
+  opacity: 1;
+}
+
 
 @media (min-width: 980px) {
   .bouquet-button {
@@ -458,33 +793,14 @@
   box-shadow: 0 0 0 4px rgba(212, 140, 156, 0.25);
 }
 
-@media (max-width: 520px) {
-  .bouquet-info {
-    padding: 1.1rem;
-  }
-
-  .bouquet-footer {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .bouquet-button {
-    width: 100%;
-    text-align: center;
-  }
-}
 
 @media (hover: hover) and (pointer: fine) {
   .bouquet-button:hover {
-    background: linear-gradient(135deg, var(--brand-rose-500), var(--brand-wine-700));
-    color: var(--bouquet-color-text-inverse);
-    border-color: rgba(255, 255, 255, 0.22);
-    transform: translateY(-2px);
-    box-shadow: var(--bouquet-shadow-2);
-  }
-
-  .bouquet-button:hover::before {
-    transform: translateX(120%);
+    transform: translateY(-3px);
+    box-shadow: 
+      0 10px 28px rgba(212, 140, 156, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+    filter: saturate(1.1) brightness(1.05);
   }
 }
 
@@ -495,12 +811,22 @@
 @media (prefers-reduced-motion: reduce) {
   .bouquet-card,
   .bouquet-image,
-  .bouquet-button {
+  .bouquet-button,
+  .bouquet-tag,
+  .bouquet-status-badge {
     transition: none !important;
   }
 
   .bouquet-button::before {
     transition: none !important;
+  }
+
+  .bouquet-image-skeleton__shimmer {
+    animation: none !important;
+  }
+
+  .bouquet-image-hover-overlay {
+    animation: none !important;
   }
 
   .bouquet-card:hover {
@@ -510,6 +836,14 @@
   .bouquet-card:hover .bouquet-image {
     transform: none;
     filter: none;
+  }
+
+  .bouquet-card:hover .bouquet-status-badge {
+    transform: none;
+  }
+
+  .bouquet-card:hover .bouquet-tag {
+    transform: none;
   }
 }
 

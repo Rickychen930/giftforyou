@@ -428,10 +428,101 @@
 }
 
 .metricCard__note {
-  margin: 0.35rem 0 0;
+  margin: 0.5rem 0 0;
   color: var(--dash-text-muted);
   font-weight: 850;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  position: relative;
+  z-index: 1;
+}
+
+.metricCard__icon {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 48px;
+  height: 48px;
+  opacity: 0.15;
+  color: var(--dash-text-main);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.metricCard--primary .metricCard__icon {
+  color: var(--dash-brand-pink);
+  opacity: 0.2;
+}
+
+.metricCard--success .metricCard__icon {
+  color: rgba(5, 150, 105, 0.3);
+}
+
+.metricCard--warning .metricCard__icon {
+  color: var(--warning-text);
+  opacity: 0.2;
+}
+
+.metricCard--info .metricCard__icon {
+  color: rgba(59, 130, 246, 0.3);
+}
+
+.metricCard--featured .metricCard__icon {
+  color: rgba(245, 158, 11, 0.3);
+}
+
+.metricCard--primary .metricCard__value {
+  background: linear-gradient(
+    135deg,
+    var(--dash-brand-pink) 0%,
+    var(--dash-brand-pink-2) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.metricCard--success .metricCard__value {
+  background: linear-gradient(
+    135deg,
+    rgba(5, 150, 105, 0.95) 0%,
+    rgba(16, 185, 129, 0.9) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.metricCard--warning .metricCard__value {
+  background: linear-gradient(
+    135deg,
+    var(--warning-text) 0%,
+    rgba(245, 158, 11, 0.9) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.metricCard--info .metricCard__value {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.95) 0%,
+    rgba(96, 165, 250, 0.9) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.metricCard--featured .metricCard__value {
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.95) 0%,
+    rgba(251, 191, 36, 0.9) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* Overview (Ringkasan) */
@@ -537,24 +628,78 @@
 .overviewActionBtn--primary {
   border: none;
   color: var(--dash-on-brand);
-  background: linear-gradient(90deg, var(--dash-brand-pink), var(--dash-brand-pink-2));
-  box-shadow: var(--dash-brand-shadow);
+  background: linear-gradient(
+    135deg,
+    var(--dash-brand-pink) 0%,
+    var(--dash-brand-pink-2) 50%,
+    rgba(160, 76, 92, 0.95) 100%
+  );
+  box-shadow: 
+    0 8px 24px rgba(212, 140, 156, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+}
+
+.overviewActionBtn--primary::before {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
 }
 
 .overviewActionBtn--primary:hover {
-  box-shadow: var(--dash-brand-shadow-hover);
-  filter: saturate(1.04) brightness(1.03);
+  filter: saturate(1.1) brightness(1.05);
+  box-shadow: 
+    0 12px 32px rgba(212, 140, 156, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+  transform: translateY(-3px);
 }
 
 .overviewToast {
   margin: 0 0 1rem;
-  padding: 0.85rem 1rem;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid var(--dash-border);
-  box-shadow: var(--dash-shadow-soft);
+  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.12) 0%,
+    rgba(16, 185, 129, 0.08) 100%
+  );
+  border: 1.5px solid rgba(16, 185, 129, 0.35);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
   font-weight: 900;
-  color: var(--dash-text-main);
+  color: rgba(5, 150, 105, 0.95);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.overviewToast::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .overviewLayout {
@@ -675,6 +820,9 @@
 .overviewKeyValue__key {
   color: var(--dash-text-muted);
   font-weight: 850;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .overviewKeyValue__val {
@@ -741,6 +889,26 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   font-size: 1.1rem;
+}
+
+.overviewList__item--warning {
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.08) 0%,
+    rgba(255, 255, 255, 0.95) 100%
+  ) !important;
+}
+
+.overviewList__item--warning b {
+  background: linear-gradient(
+    135deg,
+    var(--warning-text) 0%,
+    rgba(245, 158, 11, 0.9) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .overviewRank {
@@ -829,14 +997,6 @@
 .overviewRank__count {
   color: var(--dash-text-muted);
   font-weight: 950;
-  background: linear-gradient(
-    135deg,
-    var(--dash-brand-pink) 0%,
-    var(--dash-brand-pink-2) 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
   font-size: 1.1rem;
   padding: 0.3rem 0.7rem;
   border-radius: 999px;
@@ -847,22 +1007,110 @@
   );
   border: 1px solid rgba(212, 140, 156, 0.2);
   color: var(--dash-brand-pink);
-  -webkit-text-fill-color: var(--dash-brand-pink);
+}
+
+/* Chart visualization */
+.overviewChart {
+  margin: 1rem 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.5rem;
+  height: 120px;
+  padding: 0.5rem;
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.03) 0%,
+    rgba(212, 140, 156, 0.01) 100%
+  );
+  border-radius: 12px;
+  border: 1px solid rgba(212, 140, 156, 0.1);
+}
+
+.overviewChart__bar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  height: 100%;
+  min-width: 0;
+}
+
+.overviewChart__fill {
+  width: 100%;
+  min-height: 4px;
+  background: linear-gradient(
+    180deg,
+    var(--dash-brand-pink) 0%,
+    var(--dash-brand-pink-2) 100%
+  );
+  border-radius: 4px 4px 0 0;
+  transition: all 0.3s ease;
+  position: relative;
+  box-shadow: 
+    0 -2px 8px rgba(212, 140, 156, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+}
+
+.overviewChart__bar:hover .overviewChart__fill {
+  filter: brightness(1.1);
+  box-shadow: 
+    0 -4px 12px rgba(212, 140, 156, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+}
+
+.overviewChart__label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--dash-text-muted);
+  text-align: center;
+  white-space: nowrap;
 }
 
 /* Common section surface */
 .dashboardSurface {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 1.5rem auto 0;
-  padding: 1.5rem;
-  border-radius: 16px;
-  background: var(--dash-surface);
-  border: 1px solid var(--dash-border);
-  box-shadow: var(--dash-shadow);
+  padding: 2rem;
+  border-radius: 24px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(255, 255, 255, 0.95) 100%
+  );
+  border: 1.5px solid rgba(212, 140, 156, 0.15);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.08),
+    0 8px 24px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboardSurface::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(212, 140, 156, 0.4),
+    rgba(212, 140, 156, 0.6),
+    rgba(212, 140, 156, 0.4),
+    transparent
+  );
+  z-index: 1;
 }
 
 .dashboardSurface--metrics {
-  padding: clamp(1.1rem, 2vw, 1.5rem);
+  padding: clamp(1.5rem, 3vw, 2.5rem);
 }
 
 /* Responsive */
@@ -878,27 +1126,71 @@
     gap: 0.75rem;
     border-right: none;
     border-bottom: 1px solid var(--dash-border);
-
+    padding: 1rem 1.25rem;
     position: sticky;
     top: 0;
     height: auto;
-    overflow: visible;
+    overflow-x: auto;
+    overflow-y: visible;
     z-index: 10;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dashboardSidebar::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .dashboardSidebar::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 999px;
   }
 
   .dashboardBrand {
-    flex: 1;
+    flex: 0 0 auto;
+    min-width: 0;
+    padding: 0.5rem;
+  }
+
+  .dashboardBrand__logo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .dashboardBrand__title {
+    font-size: 0.9rem;
+  }
+
+  .dashboardBrand__subtitle {
+    font-size: 0.75rem;
   }
 
   .dashboardNav {
     flex-direction: row;
-    gap: 0.5rem;
+    gap: 0.4rem;
     align-items: center;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding-bottom: 0.25rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dashboardNav::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .dashboardNav::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 999px;
   }
 
   .dashboardNav__btn {
     text-align: center;
     white-space: nowrap;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.85rem;
+    flex: 0 0 auto;
   }
 
   .dashboardNav__btn:hover {
@@ -906,12 +1198,19 @@
   }
 
   .dashboardNav__btn.is-active::before {
-    left: 12px;
+    left: 50%;
+    top: 4px;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
   }
 
   .dashboardLogout {
     margin-top: 0;
     white-space: nowrap;
+    flex: 0 0 auto;
+    padding: 0.65rem 1rem;
+    font-size: 0.85rem;
   }
 
   .dashboardMain {
@@ -939,6 +1238,42 @@
 }
 
 @media (max-width: 768px) {
+  .dashboardSidebar {
+    padding: 0.85rem 1rem;
+    gap: 0.5rem;
+  }
+
+  .dashboardBrand {
+    padding: 0.4rem;
+  }
+
+  .dashboardBrand__logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .dashboardBrand__title {
+    font-size: 0.85rem;
+  }
+
+  .dashboardBrand__subtitle {
+    font-size: 0.7rem;
+  }
+
+  .dashboardNav {
+    gap: 0.3rem;
+  }
+
+  .dashboardNav__btn {
+    padding: 0.6rem 0.7rem;
+    font-size: 0.8rem;
+  }
+
+  .dashboardLogout {
+    padding: 0.6rem 0.85rem;
+    font-size: 0.8rem;
+  }
+
   .dashboardHeader__top {
     flex-direction: column;
     align-items: flex-start;
@@ -949,45 +1284,87 @@
     justify-content: flex-start;
   }
 
-  .dashboardNav {
-    overflow-x: auto;
-    padding-bottom: 0.25rem;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .dashboardNav::-webkit-scrollbar {
-    height: 8px;
-  }
-
-  .dashboardNav::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.12);
-    border-radius: 999px;
-  }
-
   .dashboardHeader__title {
     font-size: 1.6rem;
   }
 
   .dashboardMetrics {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .metricCard {
+    padding: 1.25rem;
   }
 
   .metricCard__value {
-    font-size: 1.7rem;
+    font-size: 2rem;
+  }
+
+  .metricCard__icon {
+    width: 40px;
+    height: 40px;
+    top: 0.85rem;
+    right: 0.85rem;
   }
 
   .overviewHeader {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 1rem;
   }
 
   .overviewHeader__actions {
     width: 100%;
     justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .overviewActionBtn {
+    flex: 1 1 auto;
+    min-width: 140px;
+    justify-content: center;
   }
 
   .overviewLayout {
     grid-template-columns: 1fr;
+  }
+
+  .overviewChart {
+    height: 90px;
+    gap: 0.4rem;
+  }
+
+  .overviewChart__label {
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboardMetrics {
+    grid-template-columns: 1fr;
+  }
+
+  .metricCard__value {
+    font-size: 1.8rem;
+  }
+
+  .overviewActionBtn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .overviewActionBtn span {
+    display: none;
+  }
+
+  .overviewActionBtn svg {
+    margin: 0;
+  }
+
+  .overviewChart {
+    height: 80px;
   }
 }
 
@@ -1005,5 +1382,27 @@
   .dashboardLogout {
     padding: 0.8rem 0.9rem;
     font-size: 0.95rem;
+  }
+
+  .dashboardSurface {
+    padding: 1.25rem;
+    border-radius: 20px;
+  }
+
+  .overviewCard {
+    padding: 1rem;
+  }
+
+  .metricCard {
+    padding: 1rem;
+  }
+
+  .metricCard__value {
+    font-size: 1.6rem;
+  }
+
+  .overviewChart {
+    height: 70px;
+    padding: 0.4rem;
   }
 }

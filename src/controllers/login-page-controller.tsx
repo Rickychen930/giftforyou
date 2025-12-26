@@ -3,8 +3,8 @@
 import React, { Component } from "react";
 import type { LoginState } from "../models/login-page-model";
 import LoginView from "../view/login-page";
-
-import { API_BASE } from "../config/api"; // adjust path depending on folder depth
+import { API_BASE } from "../config/api";
+import { setTokens } from "../utils/auth-utils";
 
 type LoginField = "username" | "password";
 
@@ -61,9 +61,8 @@ class LoginController extends Component<{}, LoginState> {
         return;
       }
 
-      if (data?.token) {
-        localStorage.setItem("authToken", data.token);
-        localStorage.setItem("lastActivity", Date.now().toString());
+      if (data?.token && data?.refreshToken) {
+        setTokens(data.token, data.refreshToken);
       } else {
         this.setState({
           error: "Login failed: token not returned by server.",

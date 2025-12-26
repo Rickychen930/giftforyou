@@ -48,7 +48,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
   const previewBouquets = validBouquets.slice(0, 6);
   const browseHref = `/collection?name=${encodeURIComponent(name)}`;
 
-  const renderBouquetCard = (b: BouquetCardProps) => {
+  const renderBouquetCard = (b: BouquetCardProps, cardIndex: number) => {
     const detailHref = `/bouquet/${b._id}`;
     const waMessage = encodeURIComponent(
       `Halo, saya ingin pesan bouquet "${b.name}" (${formatPrice(b.price)})${
@@ -61,7 +61,12 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
     const statusLabel = b.status === "ready" ? "Siap" : "Preorder";
 
     return (
-      <article key={b._id} className="bouquetCard" role="listitem">
+      <article 
+        key={b._id} 
+        className="bouquetCard" 
+        role="listitem"
+        style={{ animationDelay: `${cardIndex * 0.05}s` }}
+      >
         <div className="bouquetCard__media">
           <Link
             to={detailHref}
@@ -72,20 +77,29 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
               src={imageUrl}
               alt={b.name}
               loading="lazy"
+              decoding="async"
               onError={(e) => {
                 e.currentTarget.onerror = null;
                 e.currentTarget.src = FALLBACK_IMAGE;
               }}
             />
-
-            <span
-              className={`bouquetCard__badge ${
-                b.status === "ready" ? "is-ready" : "is-preorder"
-              }`}
-              aria-label={`Status: ${statusLabel}`}
-            >
-              {statusLabel}
-            </span>
+            <div className="bouquetCard__overlay">
+              <span
+                className={`bouquetCard__badge ${
+                  b.status === "ready" ? "is-ready" : "is-preorder"
+                }`}
+                aria-label={`Status: ${statusLabel}`}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  {b.status === "ready" ? (
+                    <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  ) : (
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  )}
+                </svg>
+                {statusLabel}
+              </span>
+            </div>
           </Link>
         </div>
 
@@ -100,15 +114,36 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
             </Link>
           </h3>
 
-          <p className="bouquetCard__price">{formatPrice(b.price)}</p>
+          <div className="bouquetCard__priceWrapper">
+            <p className="bouquetCard__price">{formatPrice(b.price)}</p>
+            {b.status === "ready" && (
+              <span className="bouquetCard__readyHint" aria-label="Bouquet siap dikirim">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Siap kirim
+              </span>
+            )}
+          </div>
 
           {(b.size || b.type) && (
             <div className="bouquetCard__meta" aria-label="Bouquet details">
               {b.size && (
-                <span className="bouquetCard__chip">Ukuran: {b.size}</span>
+                <span className="bouquetCard__chip">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  {b.size}
+                </span>
               )}
               {b.type && (
-                <span className="bouquetCard__chip">Tipe: {b.type}</span>
+                <span className="bouquetCard__chip">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  {b.type}
+                </span>
               )}
             </div>
           )}
@@ -134,7 +169,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
                 fill="currentColor"
               />
             </svg>
-            <span>Chat lewat WhatsApp</span>
+            <span>Chat WhatsApp</span>
           </a>
         </div>
       </article>
@@ -156,7 +191,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
                 className="collectionCard__count"
                 aria-label={`${validBouquets.length} produk`}
               >
-                {validBouquets.length} produk
+                {validBouquets.length}
               </span>
             )}
           </div>
@@ -230,7 +265,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
             role="list"
             aria-label={`Bouquet di koleksi ${name}`}
           >
-            {previewBouquets.map(renderBouquetCard)}
+            {previewBouquets.map((b, idx) => renderBouquetCard(b, idx))}
           </div>
 
           {validBouquets.length > previewBouquets.length && (

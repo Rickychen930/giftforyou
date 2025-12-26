@@ -71,23 +71,12 @@ const buildPreviewUrl = (preview: string) => {
 
 const formatPrice = formatIDR;
 
-const toNumber = (v: string) => {
-  const n = Number(v);
-  return Number.isFinite(n) ? n : 0;
-};
-
 const joinCsv = (list: unknown): string => {
   if (!Array.isArray(list)) return "";
   return list
     .map((v) => (typeof v === "string" ? v.trim() : ""))
     .filter(Boolean)
     .join(", ");
-};
-
-const toNonNegativeInt = (v: string) => {
-  const n = Number(v);
-  if (!Number.isFinite(n)) return 0;
-  return Math.max(0, Math.trunc(n));
 };
 
 type SaveStatus = "idle" | "success" | "error";
@@ -883,6 +872,8 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
           <div 
             className="becAlert" 
             role="alert"
+            aria-live="polite"
+            aria-atomic="true"
             ref={(el) => {
               if (el && touchedFields.size > 0) {
                 setTimeout(() => {
@@ -891,10 +882,38 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
               }
             }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }} aria-hidden="true">
               <path d="M12 8V12M12 16H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             <span>{validationError}</span>
+          </div>
+        )}
+
+        {saveStatus === "success" && saveMessage && (
+          <div 
+            className="becAlert becAlert--success" 
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }} aria-hidden="true">
+              <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span>{saveMessage}</span>
+          </div>
+        )}
+
+        {saveStatus === "error" && saveMessage && (
+          <div 
+            className="becAlert becAlert--error" 
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }} aria-hidden="true">
+              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span>{saveMessage}</span>
           </div>
         )}
 
@@ -1263,18 +1282,6 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
         </div>
 
         <div className="becFooter">
-          <div
-            className={`becSaveNote ${saveStatus !== "idle" ? "is-show" : ""} ${
-              saveStatus === "success"
-                ? "is-success"
-                : saveStatus === "error"
-                  ? "is-error"
-                  : ""
-            }`}
-            aria-live="polite"
-          >
-            {saveMessage}
-          </div>
           <button
             type="button"
             className="becSave"
@@ -1290,6 +1297,15 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
                     : "Simpan perubahan (Ctrl+S)"
             }
             aria-busy={saving}
+            aria-label={
+              saving
+                ? "Menyimpan perubahan"
+                : validationError
+                  ? `Tidak dapat menyimpan: ${validationError}`
+                  : !isDirty
+                    ? "Tidak ada perubahan untuk disimpan"
+                    : "Simpan perubahan bouquet"
+            }
           >
             {saving ? (
               <>

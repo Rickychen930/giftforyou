@@ -8,23 +8,33 @@
 .ourCollection {
   position: relative;
   min-height: auto;
-  padding: clamp(3.5rem, 6vw, 5rem) 0;
+  padding: clamp(5rem, 8vw, 7rem) 0;
   background:
-    radial-gradient(900px 460px at 12% 6%, var(--oc-bg-1), transparent 60%),
-    radial-gradient(900px 520px at 92% 18%, var(--oc-bg-2), transparent 62%),
+    radial-gradient(1400px 700px at 8% 4%, rgba(212, 140, 156, 0.1), transparent 70%),
+    radial-gradient(1400px 750px at 96% 16%, rgba(168, 213, 186, 0.1), transparent 70%),
+    radial-gradient(1000px 500px at 50% 50%, rgba(255, 255, 255, 0.05), transparent 80%),
     linear-gradient(135deg, var(--page-bg-start) 0%, var(--page-bg-end) 100%);
-  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  border-top: 2px solid rgba(212, 140, 156, 0.1);
   overflow: hidden;
+  isolation: isolate;
 }
 
-/* Subtle top highlight line */
+/* Elegant top highlight line with gradient */
 .ourCollection::before {
   content: "";
   position: absolute;
   inset: 0 0 auto 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(212, 140, 156, 0.35), transparent);
-  opacity: 0.9;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(212, 140, 156, 0.4) 25%,
+    rgba(212, 140, 156, 0.6) 50%,
+    rgba(168, 213, 186, 0.5) 75%,
+    transparent 100%
+  );
+  opacity: 1;
+  z-index: 1;
 }
 
 .ourCollection__container {
@@ -61,33 +71,50 @@
 
 .ourCollection__title {
   margin: 0;
-  font-size: clamp(1.85rem, 2.7vw, 2.55rem);
+  font-size: clamp(2.25rem, 3.5vw, 3rem);
   font-weight: 950;
-  letter-spacing: -0.02em;
-  color: var(--welcome-color-title);
+  letter-spacing: -0.03em;
+  background: linear-gradient(
+    135deg,
+    var(--welcome-color-title) 0%,
+    rgba(0, 0, 0, 0.9) 40%,
+    var(--brand-rose-600) 70%,
+    var(--brand-sage-500) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   opacity: 0;
   font-family: "Playfair Display", Georgia, serif;
-  line-height: 1.15;
+  line-height: 1.1;
   text-wrap: balance;
+  position: relative;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
 }
 
 .ourCollection--visible .ourCollection__title {
   animation: fadeInUp 0.8s ease 0.25s forwards;
 }
 
-/* Elegant animated divider */
+/* Elegant animated divider with enhanced gradient */
 .ourCollection__title::after {
   content: "";
   display: block;
   width: 0;
-  height: 3px;
-  margin: 0.9rem auto 0;
+  height: 4px;
+  margin: 1rem auto 0;
   border-radius: 999px;
   background: linear-gradient(
     90deg,
-    rgba(212, 140, 156, 0.95),
-    rgba(168, 213, 186, 0.85)
+    transparent 0%,
+    rgba(212, 140, 156, 0.6) 20%,
+    rgba(212, 140, 156, 0.95) 50%,
+    rgba(168, 213, 186, 0.9) 80%,
+    transparent 100%
   );
+  box-shadow: 
+    0 2px 8px rgba(212, 140, 156, 0.3),
+    0 0 12px rgba(212, 140, 156, 0.2);
 }
 
 .ourCollection--visible .ourCollection__title::after {
@@ -117,7 +144,20 @@
 
 /* Keep cards nicely contained for a premium feel */
 .ourCollection__grid > .collectionCard {
-  border-radius: 20px;
+  border-radius: 28px;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.06),
+    0 8px 24px rgba(0, 0, 0, 0.04),
+    0 2px 8px rgba(0, 0, 0, 0.02);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ourCollection__grid > .collectionCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 
+    0 32px 80px rgba(0, 0, 0, 0.1),
+    0 16px 40px rgba(0, 0, 0, 0.06),
+    0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 /* Mobile: keep cards fully contained to prevent horizontal overflow */
@@ -126,7 +166,7 @@
     width: 100%;
     margin-left: 0;
     margin-right: 0;
-    border-radius: 18px;
+    border-radius: 24px;
   }
 }
 
@@ -368,9 +408,19 @@
 }
 
 /* ===== Responsive Design ===== */
+@media (max-width: 1024px) {
+  .ourCollection {
+    padding: clamp(3.5rem, 5vw, 4.5rem) 0;
+  }
+
+  .ourCollection__header {
+    margin-bottom: 2.25rem;
+  }
+}
+
 @media (max-width: 768px) {
   .ourCollection {
-    padding: 3.8rem 0;
+    padding: 3.5rem 0;
     min-height: auto;
   }
 
@@ -379,11 +429,11 @@
   }
 
   .ourCollection__header {
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
   }
 
   .ourCollection__grid {
-    gap: 2rem;
+    gap: 1.75rem;
   }
 
   .ourCollection__title {
@@ -391,13 +441,14 @@
   }
 
   .ourCollection__title::after {
-    width: 64px;
+    width: 60px;
+    height: 3px;
   }
 
-  .ourCollection__grid > .collectionCard {
-    padding-left: 1rem;
-    padding-right: 1rem;
+  .ourCollection__subtitle {
+    font-size: 0.95rem;
   }
+
 
   .ourCollection__empty {
     padding: 2.5rem 1.5rem;
@@ -406,5 +457,102 @@
   .ourCollection__emptyIcon {
     width: 64px;
     height: 64px;
+  }
+}
+
+@media (max-width: 640px) {
+  .ourCollection {
+    padding: 3.5rem 0;
+  }
+
+  .ourCollection::before {
+    height: 1.5px;
+  }
+
+  .ourCollection__container {
+    padding: 0 0.85rem;
+  }
+
+  .ourCollection__header {
+    margin-bottom: 1.75rem;
+  }
+
+  .ourCollection__eyebrow {
+    font-size: 0.7rem;
+  }
+
+  .ourCollection__title {
+    font-size: 1.65rem;
+  }
+
+  .ourCollection__subtitle {
+    font-size: 0.9rem;
+    margin-top: 0.75rem;
+  }
+
+  .ourCollection__grid {
+    gap: 1.5rem;
+  }
+
+  .ourCollection__empty {
+    padding: 2rem 1.25rem;
+  }
+
+  .ourCollection__emptyIcon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .ourCollection__emptyTitle {
+    font-size: 1.2rem;
+  }
+
+  .ourCollection__emptyText {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .ourCollection {
+    padding: 2.5rem 0;
+  }
+
+  .ourCollection__container {
+    padding: 0 0.75rem;
+  }
+
+  .ourCollection__header {
+    margin-bottom: 1.5rem;
+  }
+
+  .ourCollection__title {
+    font-size: 1.5rem;
+  }
+
+  .ourCollection__title::after {
+    width: 50px;
+    height: 2.5px;
+  }
+
+  .ourCollection__subtitle {
+    font-size: 0.85rem;
+  }
+
+  .ourCollection__grid {
+    gap: 1.25rem;
+  }
+
+  .ourCollection__empty {
+    padding: 1.75rem 1rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .ourCollection__title {
+    font-size: 1.4rem;
+  }
+
+  .ourCollection__grid {
+    gap: 1rem;
   }
 }

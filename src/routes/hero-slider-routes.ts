@@ -80,14 +80,16 @@ router.get("/home", async (req, res) => {
   }
 });
 
-router.put("/home", upsertHomeHeroSlider);
+import { authenticate, requireAdmin } from "../middleware/auth-middleware";
+
+router.put("/home", authenticate, requireAdmin, upsertHomeHeroSlider);
 
 /**
  * POST /api/hero-slider/home/upload
  * FormData: image=<file>
  * Returns: { path: "/uploads/hero/<filename>.jpg" }
  */
-router.post("/home/upload", upload.single("image"), async (req, res) => {
+router.post("/home/upload", authenticate, requireAdmin, upload.single("image"), async (req, res) => {
   try {
     if (!req.file?.buffer || req.file.buffer.length === 0) {
       return res.status(400).json({ error: "No file uploaded" });

@@ -126,8 +126,8 @@ const toWaPhone = (raw: string): string | null => {
 };
 
   const getAuthHeaders = (): HeadersInit => {
-  const token = localStorage.getItem("authToken");
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  const { getAuthHeaders } = require("../../utils/auth-utils");
+  return getAuthHeaders();
 };
 
 export default function OrdersSection({ bouquets }: Props) {

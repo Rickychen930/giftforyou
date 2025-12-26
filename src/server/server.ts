@@ -14,6 +14,8 @@ import collectionRoutes from "../routes/collection-routes";
 import heroSliderRoutes from "../routes/hero-slider-routes";
 import orderRoutes from "../routes/order-routes";
 import customerRoutes from "../routes/customer-routes";
+import { securityHeaders } from "../middleware/security-headers";
+import { apiRateLimit } from "../middleware/rate-limit-middleware";
 
 /**
  * Read a required env var (crash early if missing)
@@ -48,7 +50,10 @@ const allowedOrigins = parseOrigins(process.env.CORS_ORIGIN);
 
 const isMongoConnected = () => mongoose.connection.readyState === 1;
 
-// Middleware
+// Security headers (must be first)
+app.use(securityHeaders);
+
+// CORS configuration
 app.use(
   cors({
     origin: (origin, cb) => {
@@ -67,11 +72,17 @@ app.use(
       return cb(new Error(`CORS blocked for origin: ${origin}`));
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
+// Body parsing with size limits
 app.use(express.json({ limit: "2mb" }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: "2mb" }));
+
+// Rate limiting for API routes (applied before routes)
+app.use("/api", apiRateLimit);
 
 // Health check
 app.get("/api/health", (_req, res) =>

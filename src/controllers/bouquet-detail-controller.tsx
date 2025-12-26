@@ -44,6 +44,7 @@ export default function BouquetDetailController() {
   const [bouquet, setBouquet] = useState<Bouquet | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [similarBouquets, setSimilarBouquets] = useState<Bouquet[]>([]);
 
   const detailUrl = useMemo(() => {
     if (!id) return "";
@@ -77,7 +78,33 @@ export default function BouquetDetailController() {
         }
 
         const data = await res.json();
-        setBouquet(normalizeBouquet(data));
+        const normalizedBouquet = normalizeBouquet(data);
+        setBouquet(normalizedBouquet);
+
+        // Fetch similar bouquets
+        try {
+          const allRes = await fetch(`${API_BASE}/api/bouquets`, {
+            signal: ac.signal,
+          });
+          if (allRes.ok) {
+            const allData = await allRes.json();
+            const allBouquets = Array.isArray(allData) ? allData.map(normalizeBouquet) : [];
+            
+            // Find similar bouquets (same collection, type, or size, excluding current)
+            const similar = allBouquets
+              .filter((b) => b._id !== normalizedBouquet._id)
+              .filter((b) => 
+                b.collectionName === normalizedBouquet.collectionName ||
+                b.type === normalizedBouquet.type ||
+                b.size === normalizedBouquet.size
+              )
+              .slice(0, 4);
+            
+            setSimilarBouquets(similar);
+          }
+        } catch {
+          // Silently fail for similar bouquets
+        }
       } catch (e: unknown) {
         const anyErr = e as any;
         if (anyErr?.name === "AbortError") return;
@@ -98,6 +125,7 @@ export default function BouquetDetailController() {
       loading={loading}
       error={error}
       detailUrl={detailUrl}
+      similarBouquets={similarBouquets}
     />
   );
 }
