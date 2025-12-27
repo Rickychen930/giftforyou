@@ -347,69 +347,10 @@
   gap: 1rem;
 }
 
-/* Apply collection container styling to BouquetCard in collection context */
-.collectionCard__previewGrid .bouquet-card {
-  /* Override default bouquet-card styling with collection card style */
-  border-radius: 16px;
-  background: var(--cc-surface-strong, #fff);
-  border: 1px solid var(--cc-border, rgba(212, 140, 156, 0.15));
-  box-shadow: var(--cc-card-shadow, 0 2px 8px rgba(0, 0, 0, 0.06));
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  height: 100%;
-  min-height: 100%;
-  animation: scaleIn 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  opacity: 0;
-  will-change: transform;
-}
-
-.collectionCard__previewGrid .bouquet-card::before,
-.collectionCard__previewGrid .bouquet-card::after {
-  display: none; /* Remove default bouquet-card decorative elements */
-}
-
-.collectionCard__previewGrid .bouquet-image-wrapper {
-  aspect-ratio: 4 / 5;
-}
-
-.collectionCard__previewGrid .bouquet-info {
-  padding: 1.15rem;
-  gap: 0.65rem;
-  flex: 1;
-}
-
-.collectionCard__previewGrid .bouquet-title {
-  font-size: 1.05rem;
-  line-height: 1.4;
-  min-height: auto;
-}
-
-.collectionCard__previewGrid .bouquet-price {
-  font-size: 1.25rem;
-}
-
-.collectionCard__previewGrid .bouquet-tags {
-  gap: 0.55rem;
-  margin: 0.3rem 0 0;
-}
-
-.collectionCard__previewGrid .bouquet-tag {
-  font-size: 0.75rem;
-  padding: 0.35rem 0.65rem;
-}
-
-.collectionCard__previewGrid .bouquet-price-wrapper {
-  margin: 0.3rem 0;
-}
-
-/* Hover effect for collection context */
-@media (hover: hover) and (pointer: fine) {
-  .collectionCard__previewGrid .bouquet-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 
-      0 8px 24px rgba(0, 0, 0, 0.12),
-      0 4px 12px rgba(0, 0, 0, 0.08);
-    border-color: rgba(212, 140, 156, 0.3);
-  }
+/* Collection context styling - BouquetCard already uses bouquetCard class */
+.collectionCard__previewGrid .bouquetCard {
+  /* Already styled with luxury design */
+  animation-delay: 0s;
 }
 
 .collectionCard__footer {

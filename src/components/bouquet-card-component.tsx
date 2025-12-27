@@ -41,7 +41,6 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
   const formatPrice = formatIDR;
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
 
   const imageUrl = image
     ? image.startsWith("http")
@@ -111,124 +110,121 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
     formatBouquetSize(size)
   ].filter(Boolean) as string[];
 
+  const statusLabel = status === "ready" ? "Siap" : "Preorder";
+
   return (
     <article
-      className="bouquet-card fade-in hover-lift"
-      style={{ opacity: 1, visibility: 'visible' }}
+      className="bouquetCard"
+      role="listitem"
       aria-label={`Bouquet ${name}, harga ${formatPrice(price)}`}
       tabIndex={0}
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onFocus={() => setIsHovered(true)}
-      onBlur={() => setIsHovered(false)}
     >
-      <Link
-        to={detailHref}
-        className="bouquet-image-wrapper"
-        aria-label={`Lihat detail bouquet ${name}`}
-      >
-        {!imageLoaded && (
-          <div className="bouquet-image-skeleton" aria-hidden="true">
-            <div className="bouquet-image-skeleton__shimmer"></div>
-          </div>
-        )}
-        <img
-          src={imageUrl}
-          alt={`Bouquet ${name}${description ? ` - ${description}` : ""}`}
-          className={`bouquet-image ${imageLoaded ? "is-loaded" : ""} ${imageError ? "is-error" : ""}`}
-          loading="lazy"
-          decoding="async"
-          width="400"
-          height="500"
-          style={{ aspectRatio: "4 / 5" }}
-          onLoad={handleImageLoad}
-          onError={handleImageError}
-        />
-        <div className="bouquet-image-overlay">
-          {/* Top Left - Featured/New Badges */}
-          <div className="bouquet-badge-top-left">
-            {isFeatured && (
-              <span className="bouquet-badge bouquet-badge--featured" aria-label="Bouquet featured">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/>
-                </svg>
-                Featured
-              </span>
-            )}
-            {isNewEdition && !isFeatured && (
-              <span className="bouquet-badge bouquet-badge--new" aria-label="Bouquet baru">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                Baru
-              </span>
-            )}
-          </div>
-
-          {/* Top Right - Status Badge */}
-          <span className={`bouquet-status-badge ${status === "ready" ? "is-ready" : "is-preorder"}`}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              {status === "ready" ? (
-                <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              ) : (
-                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              )}
-            </svg>
-            {status === "ready" ? "Siap" : "Preorder"}
-          </span>
-
-          {/* Bottom Right - Price Badge */}
-          <div className="bouquet-price-badge">
-            <span className="bouquet-price-badge__label">Mulai dari</span>
-            <span className="bouquet-price-badge__amount">{formatPrice(price)}</span>
-          </div>
-        </div>
-        {isHovered && (
-          <div className="bouquet-image-hover-overlay" aria-hidden="true">
-            <div className="bouquet-image-hover-content">
-              <span className="bouquet-hover-text">Klik untuk detail</span>
+      {/* Media Section - Smaller, more informative */}
+      <div className="bouquetCard__media">
+        <Link
+          to={detailHref}
+          className="bouquetCard__mediaLink"
+          aria-label={`Lihat detail ${name}`}
+        >
+          {!imageLoaded && (
+            <div className="bouquetCard__skeleton" aria-hidden="true">
+              <div className="bouquetCard__skeletonShimmer"></div>
             </div>
-          </div>
-        )}
-      </Link>
+          )}
+          <img
+            src={imageUrl}
+            alt={formatBouquetName(name)}
+            className={`bouquetCard__image ${imageLoaded ? "is-loaded" : ""} ${imageError ? "is-error" : ""}`}
+            loading="lazy"
+            decoding="async"
+            onLoad={handleImageLoad}
+            onError={handleImageError}
+          />
+          <div className="bouquetCard__overlay">
+            {/* Top Left - Featured/New Badges */}
+            {(isFeatured || isNewEdition) && (
+              <div className="bouquetCard__badgeTopLeft">
+                {isFeatured && (
+                  <span className="bouquetCard__badge bouquetCard__badge--featured" aria-label="Bouquet featured">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/>
+                    </svg>
+                    Featured
+                  </span>
+                )}
+                {isNewEdition && !isFeatured && (
+                  <span className="bouquetCard__badge bouquetCard__badge--new" aria-label="Bouquet baru">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Baru
+                  </span>
+                )}
+              </div>
+            )}
 
-      <div className="bouquet-info">
-        {/* Simplified: Only Name, Tags, and Price */}
-        <h4 className="bouquet-title">
-          <Link to={detailHref} aria-label={`Lihat detail bouquet ${formatBouquetName(name)}`}>
+            {/* Top Right - Status Badge */}
+            <span
+              className={`bouquetCard__badge bouquetCard__badge--status ${
+                status === "ready" ? "is-ready" : "is-preorder"
+              }`}
+              aria-label={`Status: ${statusLabel}`}
+            >
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                {status === "ready" ? (
+                  <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                ) : (
+                  <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                )}
+              </svg>
+              {statusLabel}
+            </span>
+          </div>
+        </Link>
+      </div>
+
+      {/* Body Section - Name, Price, Badge */}
+      <div className="bouquetCard__body">
+        {/* Name */}
+        <h3 className="bouquetCard__name">
+          <Link
+            to={detailHref}
+            className="bouquetCard__nameLink"
+            aria-label={`Buka detail ${formatBouquetName(name)}`}
+          >
             {formatBouquetName(name)}
           </Link>
-        </h4>
+        </h3>
 
-        {/* Tags - Compact display */}
+        {/* Price */}
+        <div className="bouquetCard__priceWrapper">
+          <p className="bouquetCard__price" aria-label={`Harga ${formatPrice(price)}`}>
+            {formatPrice(price)}
+          </p>
+        </div>
+
+        {/* Badge/Tags */}
         {(tags.length > 0 || customPenanda.length > 0) && (
-          <div className="bouquet-tags" aria-label="Kategori bouquet">
+          <div className="bouquetCard__meta" aria-label="Bouquet details">
             {tags.slice(0, 2).map((t) => (
-              <span key={t} className="bouquet-tag" title={t}>
+              <span key={t} className="bouquetCard__chip" title={t}>
                 {formatTag(t)}
               </span>
             ))}
             {customPenanda.slice(0, Math.max(0, 2 - tags.length)).map((p, idx) => (
-              <span key={`penanda-${idx}-${p}`} className="bouquet-tag bouquet-tag--penanda" title={p}>
+              <span key={`penanda-${idx}-${p}`} className="bouquetCard__chip" title={p}>
                 {formatTag(p)}
               </span>
             ))}
             {(tags.length + customPenanda.length) > 2 && (
-              <span className="bouquet-tag bouquet-tag--more" title={[...tags, ...customPenanda].slice(2).join(", ")}>
+              <span className="bouquetCard__chip bouquetCard__chip--more" title={[...tags, ...customPenanda].slice(2).join(", ")}>
                 +{(tags.length + customPenanda.length) - 2}
               </span>
             )}
           </div>
         )}
-
-        {/* Price - Prominent display */}
-        <div className="bouquet-price-wrapper">
-          <p className="bouquet-price" aria-label={`Harga ${formatPrice(price)}`}>
-            {formatPrice(price)}
-          </p>
-        </div>
       </div>
     </article>
   );
