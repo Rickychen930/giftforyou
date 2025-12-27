@@ -96,7 +96,7 @@ app.use((req, res, next) => {
     }
     return next();
 });
-// Routes
+// Routes - Register all API routes before 404 handler
 app.use("/api/metrics", metrics_routes_1.default);
 app.use("/api/auth", auth_routes_1.default);
 app.use("/api/bouquets", bouquet_routes_1.default);
@@ -104,7 +104,22 @@ app.use("/api/collections", collection_routes_1.default);
 app.use("/api/hero-slider", hero_slider_routes_1.default);
 app.use("/api/orders", order_routes_1.default);
 app.use("/api/customers", customer_routes_1.default);
-// 404 handler
+// Log registered routes in development
+if (process.env.NODE_ENV === "development") {
+    console.log("✅ Registered API routes:");
+    console.log("  - /api/metrics");
+    console.log("  - /api/auth");
+    console.log("  - /api/bouquets");
+    console.log("  - /api/collections");
+    console.log("  - /api/hero-slider");
+    console.log("  - /api/orders");
+    console.log("  - /api/customers");
+}
+// 404 handler for API routes (must come after all route registrations)
+app.use("/api", (_req, res) => {
+    res.status(404).json({ message: "API endpoint not found", path: _req.path });
+});
+// 404 handler for other routes
 app.use((_req, res) => {
     res.status(404).json({ message: "Not found" });
 });

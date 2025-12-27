@@ -3,45 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteBouquet = exports.updateBouquet = exports.getBouquets = exports.createBouquet = exports.getBouquetById = void 0;
 const bouquet_model_1 = require("../models/bouquet-model");
 const collection_model_1 = require("../models/collection-model");
-const upload_1 = require("../middleware/upload"); // ✅ IMPORTANT
+const upload_1 = require("../middleware/upload");
+const validation_1 = require("../utils/validation");
 const isValidStatus = (status) => status === "ready" || status === "preorder";
-const normalizeString = (value, fallback = "") => typeof value === "string" ? value.trim() : fallback;
-const parsePrice = (value) => {
-    const n = typeof value === "number" ? value : Number(value);
-    return Number.isFinite(n) ? n : NaN;
-};
-const parseBoolean = (value) => {
-    if (typeof value === "boolean")
-        return value;
-    if (typeof value === "number")
-        return value === 1;
-    if (typeof value !== "string")
-        return false;
-    const v = value.trim().toLowerCase();
-    return v === "true" || v === "1" || v === "yes" || v === "on";
-};
-const parseNonNegativeInt = (value) => {
-    const n = typeof value === "number" ? value : Number(value);
-    if (!Number.isFinite(n))
-        return 0;
-    return Math.max(0, Math.trunc(n));
-};
-const parseCsvList = (value) => {
-    if (Array.isArray(value)) {
-        return value
-            .map((v) => (typeof v === "string" ? v.trim() : ""))
-            .filter(Boolean);
-    }
-    if (typeof value !== "string")
-        return [];
-    // Support both comma-separated and newline-separated input.
-    return value
-        .split(/[\n,]/g)
-        .map((v) => v.trim())
-        .filter(Boolean);
-};
 const normalizeSize = (value) => {
-    const raw = normalizeString(value);
+    const raw = (0, validation_1.normalizeString)(value);
     if (!raw)
         return "";
     const v = raw.toLowerCase();
@@ -69,8 +35,8 @@ const validateBouquetInput = (name, price, status) => {
     return null;
 };
 const syncBouquetCollection = async (bouquetId, oldCollectionName, newCollectionName) => {
-    const oldName = normalizeString(oldCollectionName);
-    const newName = normalizeString(newCollectionName);
+    const oldName = (0, validation_1.normalizeString)(oldCollectionName);
+    const newName = (0, validation_1.normalizeString)(newCollectionName);
     if (oldName && oldName !== newName) {
         await collection_model_1.CollectionModel.updateOne({ name: oldName }, { $pull: { bouquets: bouquetId } }).exec();
     }
@@ -96,15 +62,15 @@ exports.getBouquetById = getBouquetById;
 // ✅ Create bouquet
 const createBouquet = async (req, res) => {
     try {
-        const name = normalizeString(req.body.name);
-        const description = normalizeString(req.body.description);
-        const type = normalizeString(req.body.type) || "bouquet";
+        const name = (0, validation_1.normalizeString)(req.body.name);
+        const description = (0, validation_1.normalizeString)(req.body.description);
+        const type = (0, validation_1.normalizeString)(req.body.type) || "bouquet";
         const size = normalizeSize(req.body.size) || "Medium";
-        const collectionName = normalizeString(req.body.collectionName);
+        const collectionName = (0, validation_1.normalizeString)(req.body.collectionName);
         const status = isValidStatus(req.body.status)
             ? req.body.status
             : "ready";
-        const price = parsePrice(req.body.price);
+        const price = (0, validation_1.parsePrice)(req.body.price);
         const error = validateBouquetInput(name, price, status);
         if (error) {
             res.status(400).json({ error });
@@ -112,13 +78,13 @@ const createBouquet = async (req, res) => {
         }
         // ✅ FIX: memoryStorage => use saveUploadedImage (not req.file.filename)
         const image = req.file ? await (0, upload_1.saveUploadedImage)(req.file) : "";
-        const occasions = parseCsvList(req.body.occasions);
-        const flowers = parseCsvList(req.body.flowers);
-        const isNewEdition = parseBoolean(req.body.isNewEdition);
-        const isFeatured = parseBoolean(req.body.isFeatured);
-        const customPenanda = parseCsvList(req.body.customPenanda);
-        const quantity = parseNonNegativeInt(req.body.quantity);
-        const careInstructions = normalizeString(req.body.careInstructions);
+        const occasions = (0, validation_1.parseCsvList)(req.body.occasions);
+        const flowers = (0, validation_1.parseCsvList)(req.body.flowers);
+        const isNewEdition = (0, validation_1.parseBoolean)(req.body.isNewEdition);
+        const isFeatured = (0, validation_1.parseBoolean)(req.body.isFeatured);
+        const customPenanda = (0, validation_1.parseCsvList)(req.body.customPenanda);
+        const quantity = (0, validation_1.parseNonNegativeInt)(req.body.quantity);
+        const careInstructions = (0, validation_1.normalizeString)(req.body.careInstructions);
         const bouquet = await bouquet_model_1.BouquetModel.create({
             name,
             description,
@@ -175,11 +141,11 @@ const updateBouquet = async (req, res) => {
         const oldCollectionName = bouquet.collectionName;
         const updates = {};
         if (req.body.name !== undefined)
-            updates.name = normalizeString(req.body.name);
+            updates.name = (0, validation_1.normalizeString)(req.body.name);
         if (req.body.description !== undefined)
-            updates.description = normalizeString(req.body.description);
+            updates.description = (0, validation_1.normalizeString)(req.body.description);
         if (req.body.type !== undefined) {
-            const t = normalizeString(req.body.type);
+            const t = (0, validation_1.normalizeString)(req.body.type);
             if (t)
                 updates.type = t;
         }
@@ -189,27 +155,27 @@ const updateBouquet = async (req, res) => {
                 updates.size = s;
         }
         if (req.body.collectionName !== undefined)
-            updates.collectionName = normalizeString(req.body.collectionName);
+            updates.collectionName = (0, validation_1.normalizeString)(req.body.collectionName);
         if (req.body.occasions !== undefined) {
-            updates.occasions = parseCsvList(req.body.occasions);
+            updates.occasions = (0, validation_1.parseCsvList)(req.body.occasions);
         }
         if (req.body.flowers !== undefined) {
-            updates.flowers = parseCsvList(req.body.flowers);
+            updates.flowers = (0, validation_1.parseCsvList)(req.body.flowers);
         }
         if (req.body.isNewEdition !== undefined) {
-            updates.isNewEdition = parseBoolean(req.body.isNewEdition);
+            updates.isNewEdition = (0, validation_1.parseBoolean)(req.body.isNewEdition);
         }
         if (req.body.isFeatured !== undefined) {
-            updates.isFeatured = parseBoolean(req.body.isFeatured);
+            updates.isFeatured = (0, validation_1.parseBoolean)(req.body.isFeatured);
         }
         if (req.body.customPenanda !== undefined) {
-            updates.customPenanda = parseCsvList(req.body.customPenanda);
+            updates.customPenanda = (0, validation_1.parseCsvList)(req.body.customPenanda);
         }
         if (req.body.quantity !== undefined) {
-            updates.quantity = parseNonNegativeInt(req.body.quantity);
+            updates.quantity = (0, validation_1.parseNonNegativeInt)(req.body.quantity);
         }
         if (req.body.careInstructions !== undefined) {
-            updates.careInstructions = normalizeString(req.body.careInstructions);
+            updates.careInstructions = (0, validation_1.normalizeString)(req.body.careInstructions);
         }
         if (req.body.status !== undefined) {
             if (!isValidStatus(req.body.status)) {
@@ -219,7 +185,7 @@ const updateBouquet = async (req, res) => {
             updates.status = req.body.status;
         }
         if (req.body.price !== undefined) {
-            const price = parsePrice(req.body.price);
+            const price = (0, validation_1.parsePrice)(req.body.price);
             if (!Number.isFinite(price) || price <= 0) {
                 res.status(400).json({ error: "Price must be greater than 0." });
                 return;
@@ -251,7 +217,7 @@ const deleteBouquet = async (req, res) => {
             res.status(404).json({ error: "Bouquet not found" });
             return;
         }
-        const collectionName = normalizeString(bouquet.collectionName);
+        const collectionName = (0, validation_1.normalizeString)(bouquet.collectionName);
         if (collectionName) {
             await collection_model_1.CollectionModel.updateOne({ name: collectionName }, { $pull: { bouquets: String(bouquet._id) } }).exec();
         }

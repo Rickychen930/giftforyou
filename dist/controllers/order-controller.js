@@ -4,18 +4,7 @@ exports.deleteOrder = exports.getOrders = exports.updateOrder = exports.createOr
 const order_model_1 = require("../models/order-model");
 const bouquet_model_1 = require("../models/bouquet-model");
 const customer_model_1 = require("../models/customer-model");
-const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-const normalize = (v, maxLen) => {
-    if (typeof v !== "string")
-        return "";
-    return v.trim().slice(0, maxLen);
-};
-const parseNonNegativeNumber = (v) => {
-    const n = typeof v === "number" ? v : typeof v === "string" ? Number(v) : NaN;
-    if (!Number.isFinite(n))
-        return 0;
-    return Math.max(0, Math.round(n));
-};
+const validation_1 = require("../utils/validation");
 const isOrderStatus = (v) => v === "bertanya" ||
     v === "memesan" ||
     v === "sedang_diproses" ||
@@ -48,7 +37,7 @@ const resolveBouquetSnapshot = async (bouquetId, fallbackName, fallbackPrice) =>
         if (b && typeof b.name === "string") {
             return {
                 bouquetName: b.name.trim().slice(0, 200),
-                bouquetPrice: parseNonNegativeNumber(b.price),
+                bouquetPrice: (0, validation_1.parseNonNegativeInt)(b.price),
             };
         }
     }
@@ -62,38 +51,38 @@ const resolveBouquetSnapshot = async (bouquetId, fallbackName, fallbackPrice) =>
 };
 async function createOrder(req, res) {
     try {
-        const customerId = normalize(req.body?.customerId, 64);
-        let buyerName = normalize(req.body?.buyerName, 120);
-        let phoneNumber = normalize(req.body?.phoneNumber, 40);
-        let address = normalize(req.body?.address, 500);
+        const customerId = (0, validation_1.normalizeString)(req.body?.customerId, "", 64);
+        let buyerName = (0, validation_1.normalizeString)(req.body?.buyerName, "", 120);
+        let phoneNumber = (0, validation_1.normalizeString)(req.body?.phoneNumber, "", 40);
+        let address = (0, validation_1.normalizeString)(req.body?.address, "", 500);
         if (customerId) {
             const customer = await customer_model_1.CustomerModel.findById(customerId).lean().exec();
             if (!customer) {
                 res.status(400).json({ message: "Invalid customerId" });
                 return;
             }
-            buyerName = normalize(customer.buyerName, 120);
-            phoneNumber = normalize(customer.phoneNumber, 40);
-            address = normalize(customer.address, 500);
+            buyerName = (0, validation_1.normalizeString)(customer.buyerName, "", 120);
+            phoneNumber = (0, validation_1.normalizeString)(customer.phoneNumber, "", 40);
+            address = (0, validation_1.normalizeString)(customer.address, "", 500);
         }
-        const bouquetId = normalize(req.body?.bouquetId, 64);
-        const bouquetNameRaw = normalize(req.body?.bouquetName, 200);
-        const bouquetPriceFromBody = parseNonNegativeNumber(req.body?.bouquetPrice);
+        const bouquetId = (0, validation_1.normalizeString)(req.body?.bouquetId, "", 64);
+        const bouquetNameRaw = (0, validation_1.normalizeString)(req.body?.bouquetName, "", 200);
+        const bouquetPriceFromBody = (0, validation_1.parseNonNegativeInt)(req.body?.bouquetPrice);
         const { bouquetName, bouquetPrice } = await resolveBouquetSnapshot(bouquetId, bouquetNameRaw, bouquetPriceFromBody);
-        const orderStatusRaw = normalize(req.body?.orderStatus, 32);
-        const paymentMethodRaw = normalize(req.body?.paymentMethod, 32);
+        const orderStatusRaw = (0, validation_1.normalizeString)(req.body?.orderStatus, "", 32);
+        const paymentMethodRaw = (0, validation_1.normalizeString)(req.body?.paymentMethod, "", 32);
         const orderStatus = isOrderStatus(orderStatusRaw)
             ? orderStatusRaw
             : "bertanya";
         const paymentMethod = isPaymentMethod(paymentMethodRaw)
             ? paymentMethodRaw
             : "";
-        const downPaymentAmount = parseNonNegativeNumber(req.body?.downPaymentAmount);
-        const additionalPayment = parseNonNegativeNumber(req.body?.additionalPayment);
-        const deliveryPrice = parseNonNegativeNumber(req.body?.deliveryPrice);
-        const totalAmount = parseNonNegativeNumber(bouquetPrice + deliveryPrice);
+        const downPaymentAmount = (0, validation_1.parseNonNegativeInt)(req.body?.downPaymentAmount);
+        const additionalPayment = (0, validation_1.parseNonNegativeInt)(req.body?.additionalPayment);
+        const deliveryPrice = (0, validation_1.parseNonNegativeInt)(req.body?.deliveryPrice);
+        const totalAmount = (0, validation_1.parseNonNegativeInt)(bouquetPrice + deliveryPrice);
         const paymentStatus = derivePaymentStatus(totalAmount, downPaymentAmount, additionalPayment);
-        const deliveryAtRaw = normalize(req.body?.deliveryAt, 40);
+        const deliveryAtRaw = (0, validation_1.normalizeString)(req.body?.deliveryAt, "", 40);
         const deliveryAt = deliveryAtRaw ? new Date(deliveryAtRaw) : undefined;
         if (!buyerName || !phoneNumber || !address || !bouquetId || !bouquetName) {
             res.status(400).json({ message: "Missing required fields" });
@@ -137,7 +126,7 @@ async function createOrder(req, res) {
 exports.createOrder = createOrder;
 async function updateOrder(req, res) {
     try {
-        const id = normalize(req.params?.id, 64);
+        const id = (0, validation_1.normalizeString)(req.params?.id, "", 64);
         if (!id) {
             res.status(400).json({ message: "Missing id" });
             return;
@@ -150,7 +139,7 @@ async function updateOrder(req, res) {
         const existingCustomerId = typeof existing.customerId === "string" ? existing.customerId.trim() : "";
         const setPatch = {};
         const unsetPatch = {};
-        const customerId = normalize(req.body?.customerId, 64);
+        const customerId = (0, validation_1.normalizeString)(req.body?.customerId, "", 64);
         const customerIdProvided = req.body?.customerId !== undefined;
         let willHaveCustomerId = Boolean(existingCustomerId);
         if (customerIdProvided) {
@@ -165,16 +154,16 @@ async function updateOrder(req, res) {
                     return;
                 }
                 setPatch.customerId = customerId;
-                setPatch.buyerName = normalize(customer.buyerName, 120);
-                setPatch.phoneNumber = normalize(customer.phoneNumber, 40);
-                setPatch.address = normalize(customer.address, 500);
+                setPatch.buyerName = (0, validation_1.normalizeString)(customer.buyerName, "", 120);
+                setPatch.phoneNumber = (0, validation_1.normalizeString)(customer.phoneNumber, "", 40);
+                setPatch.address = (0, validation_1.normalizeString)(customer.address, "", 500);
             }
         }
-        const buyerName = normalize(req.body?.buyerName, 120);
-        const phoneNumber = normalize(req.body?.phoneNumber, 40);
-        const address = normalize(req.body?.address, 500);
-        const bouquetId = normalize(req.body?.bouquetId, 64);
-        const bouquetName = normalize(req.body?.bouquetName, 200);
+        const buyerName = (0, validation_1.normalizeString)(req.body?.buyerName, "", 120);
+        const phoneNumber = (0, validation_1.normalizeString)(req.body?.phoneNumber, "", 40);
+        const address = (0, validation_1.normalizeString)(req.body?.address, "", 500);
+        const bouquetId = (0, validation_1.normalizeString)(req.body?.bouquetId, "", 64);
+        const bouquetName = (0, validation_1.normalizeString)(req.body?.bouquetName, "", 200);
         // Keep buyer snapshot consistent with the linked customer.
         // To manually edit buyer fields, first unlink customerId (send customerId: "").
         if (!willHaveCustomerId) {
@@ -189,7 +178,7 @@ async function updateOrder(req, res) {
             setPatch.bouquetId = bouquetId;
         if (bouquetName)
             setPatch.bouquetName = bouquetName;
-        const orderStatusRaw = normalize(req.body?.orderStatus, 32);
+        const orderStatusRaw = (0, validation_1.normalizeString)(req.body?.orderStatus, "", 32);
         if (orderStatusRaw && isOrderStatus(orderStatusRaw))
             setPatch.orderStatus = orderStatusRaw;
         if (req.body?.paymentMethod !== undefined) {
@@ -197,7 +186,7 @@ async function updateOrder(req, res) {
                 res.status(400).json({ message: "Invalid paymentMethod" });
                 return;
             }
-            const paymentMethodRaw = normalize(req.body.paymentMethod, 32);
+            const paymentMethodRaw = (0, validation_1.normalizeString)(req.body.paymentMethod, "", 32);
             if (!isPaymentMethod(paymentMethodRaw)) {
                 res.status(400).json({ message: "Invalid paymentMethod" });
                 return;
@@ -205,16 +194,16 @@ async function updateOrder(req, res) {
             setPatch.paymentMethod = paymentMethodRaw;
         }
         if (req.body?.downPaymentAmount !== undefined) {
-            setPatch.downPaymentAmount = parseNonNegativeNumber(req.body.downPaymentAmount);
+            setPatch.downPaymentAmount = (0, validation_1.parseNonNegativeInt)(req.body.downPaymentAmount);
         }
         if (req.body?.additionalPayment !== undefined) {
-            setPatch.additionalPayment = parseNonNegativeNumber(req.body.additionalPayment);
+            setPatch.additionalPayment = (0, validation_1.parseNonNegativeInt)(req.body.additionalPayment);
         }
         if (req.body?.deliveryPrice !== undefined) {
-            setPatch.deliveryPrice = parseNonNegativeNumber(req.body.deliveryPrice);
+            setPatch.deliveryPrice = (0, validation_1.parseNonNegativeInt)(req.body.deliveryPrice);
         }
         if (req.body?.bouquetPrice !== undefined) {
-            setPatch.bouquetPrice = parseNonNegativeNumber(req.body.bouquetPrice);
+            setPatch.bouquetPrice = (0, validation_1.parseNonNegativeInt)(req.body.bouquetPrice);
         }
         const hasDeliveryAt = req.body?.deliveryAt !== undefined;
         if (hasDeliveryAt) {
@@ -222,7 +211,7 @@ async function updateOrder(req, res) {
                 res.status(400).json({ message: "Invalid deliveryAt" });
                 return;
             }
-            const deliveryAtRaw = normalize(req.body.deliveryAt, 40);
+            const deliveryAtRaw = (0, validation_1.normalizeString)(req.body.deliveryAt, "", 40);
             if (!deliveryAtRaw) {
                 unsetPatch.deliveryAt = 1;
             }
@@ -237,7 +226,7 @@ async function updateOrder(req, res) {
         }
         const nextBouquetId = (setPatch.bouquetId ?? existing.bouquetId);
         let nextBouquetName = (setPatch.bouquetName ?? existing.bouquetName ?? "");
-        let nextBouquetPrice = parseNonNegativeNumber(setPatch.bouquetPrice !== undefined ? setPatch.bouquetPrice : existing.bouquetPrice);
+        let nextBouquetPrice = (0, validation_1.parseNonNegativeInt)(setPatch.bouquetPrice !== undefined ? setPatch.bouquetPrice : existing.bouquetPrice);
         if (nextBouquetId && setPatch.bouquetId) {
             const fallbackName = nextBouquetName;
             const fallbackPrice = nextBouquetPrice;
@@ -247,14 +236,14 @@ async function updateOrder(req, res) {
             setPatch.bouquetName = snap.bouquetName;
             setPatch.bouquetPrice = snap.bouquetPrice;
         }
-        const nextDownPayment = parseNonNegativeNumber(setPatch.downPaymentAmount !== undefined
+        const nextDownPayment = (0, validation_1.parseNonNegativeInt)(setPatch.downPaymentAmount !== undefined
             ? setPatch.downPaymentAmount
             : existing.downPaymentAmount);
-        const nextAdditional = parseNonNegativeNumber(setPatch.additionalPayment !== undefined
+        const nextAdditional = (0, validation_1.parseNonNegativeInt)(setPatch.additionalPayment !== undefined
             ? setPatch.additionalPayment
             : existing.additionalPayment);
-        const nextDelivery = parseNonNegativeNumber(setPatch.deliveryPrice !== undefined ? setPatch.deliveryPrice : existing.deliveryPrice);
-        const nextTotalAmount = parseNonNegativeNumber(nextBouquetPrice + nextDelivery);
+        const nextDelivery = (0, validation_1.parseNonNegativeInt)(setPatch.deliveryPrice !== undefined ? setPatch.deliveryPrice : existing.deliveryPrice);
+        const nextTotalAmount = (0, validation_1.parseNonNegativeInt)(nextBouquetPrice + nextDelivery);
         setPatch.totalAmount = nextTotalAmount;
         setPatch.paymentStatus = derivePaymentStatus(nextTotalAmount, nextDownPayment, nextAdditional);
         const nextOrderStatus = (setPatch.orderStatus ?? existing.orderStatus);
@@ -330,7 +319,7 @@ async function getOrders(req, res) {
         const q = qRaw.slice(0, 120);
         const filter = {};
         if (q) {
-            const re = new RegExp(escapeRegex(q), "i");
+            const re = new RegExp((0, validation_1.escapeRegex)(q), "i");
             filter.$or = [{ buyerName: re }, { phoneNumber: re }];
         }
         const orders = await order_model_1.OrderModel.find(filter)
@@ -348,7 +337,7 @@ async function getOrders(req, res) {
 exports.getOrders = getOrders;
 async function deleteOrder(req, res) {
     try {
-        const id = normalize(req.params?.id, 64);
+        const id = (0, validation_1.normalizeString)(req.params?.id, "", 64);
         if (!id) {
             res.status(400).json({ message: "Missing id" });
             return;

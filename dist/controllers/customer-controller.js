@@ -2,12 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCustomerById = exports.createCustomer = exports.getCustomers = void 0;
 const customer_model_1 = require("../models/customer-model");
-const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-const normalize = (v, maxLen) => {
-    if (typeof v !== "string")
-        return "";
-    return v.trim().slice(0, maxLen);
-};
+const validation_1 = require("../utils/validation");
 async function getCustomers(req, res) {
     try {
         const limitRaw = typeof req.query.limit === "string" ? req.query.limit : "200";
@@ -17,7 +12,7 @@ async function getCustomers(req, res) {
         const q = qRaw.slice(0, 120);
         const filter = {};
         if (q) {
-            const re = new RegExp(escapeRegex(q), "i");
+            const re = new RegExp((0, validation_1.escapeRegex)(q), "i");
             filter.$or = [{ buyerName: re }, { phoneNumber: re }];
         }
         const customers = await customer_model_1.CustomerModel.find(filter)
@@ -35,9 +30,9 @@ async function getCustomers(req, res) {
 exports.getCustomers = getCustomers;
 async function createCustomer(req, res) {
     try {
-        const buyerName = normalize(req.body?.buyerName, 120);
-        const phoneNumber = normalize(req.body?.phoneNumber, 40);
-        const address = normalize(req.body?.address, 500);
+        const buyerName = (0, validation_1.normalizeString)(req.body?.buyerName, "", 120);
+        const phoneNumber = (0, validation_1.normalizeString)(req.body?.phoneNumber, "", 40);
+        const address = (0, validation_1.normalizeString)(req.body?.address, "", 500);
         if (!buyerName || !phoneNumber || !address) {
             res.status(400).json({ message: "Missing required fields" });
             return;
@@ -61,7 +56,7 @@ async function createCustomer(req, res) {
 exports.createCustomer = createCustomer;
 async function getCustomerById(req, res) {
     try {
-        const id = normalize(req.params?.id, 64);
+        const id = (0, validation_1.normalizeString)(req.params?.id, "", 64);
         if (!id) {
             res.status(400).json({ message: "Missing id" });
             return;

@@ -21,7 +21,6 @@ exports.storeData = {
     },
     social: {
         instagram: store_profile_1.STORE_PROFILE.social.instagram,
-        facebook: store_profile_1.STORE_PROFILE.social.facebook,
         tiktok: store_profile_1.STORE_PROFILE.social.tiktok,
         whatsapp: store_profile_1.STORE_PROFILE.whatsapp.url,
     },

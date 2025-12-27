@@ -117,6 +117,18 @@ app.use("/api/hero-slider", heroSliderRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/customers", customerRoutes);
 
+// Log registered routes in development
+if (process.env.NODE_ENV === "development") {
+  console.log("✅ Registered API routes:");
+  console.log("  - /api/metrics");
+  console.log("  - /api/auth");
+  console.log("  - /api/bouquets");
+  console.log("  - /api/collections");
+  console.log("  - /api/hero-slider");
+  console.log("  - /api/orders");
+  console.log("  - /api/customers");
+}
+
 // 404 handler for API routes (must come after all route registrations)
 app.use("/api", (_req, res) => {
   res.status(404).json({ message: "API endpoint not found", path: _req.path });
