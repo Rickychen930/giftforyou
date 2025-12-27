@@ -163,9 +163,97 @@ const InvoiceComponent: React.FC<InvoiceComponentProps> = ({ order, onClose }) =
   };
 
   const handleDownloadPDF = () => {
-    // For now, just trigger print dialog
-    // In production, you might want to use a library like jsPDF or html2pdf
-    handlePrint();
+    if (!invoiceRef.current) return;
+
+    // Create a new window with the invoice content
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      // Fallback: trigger print dialog if popup is blocked
+      handlePrint();
+      return;
+    }
+
+    const invoiceNumber = generateInvoiceNumber(order._id, order.createdAt);
+
+    // Get all styles from the document
+    const styles = Array.from(document.styleSheets)
+      .map((sheet) => {
+        try {
+          return Array.from(sheet.cssRules)
+            .map((rule) => rule.cssText)
+            .join("\n");
+        } catch {
+          return "";
+        }
+      })
+      .join("\n");
+
+    const printContent = invoiceRef.current.innerHTML;
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html lang="id">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Invoice - ${invoiceNumber}</title>
+          <style>
+            @page {
+              size: A4;
+              margin: 20mm;
+            }
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+              padding: 40px;
+              background: white;
+              color: #1a1a1a;
+              line-height: 1.6;
+            }
+            ${styles}
+            @media print {
+              .invoice-overlay {
+                background: white;
+                padding: 0;
+              }
+              .invoice-container {
+                max-width: 100%;
+                max-height: 100%;
+                border: none;
+                box-shadow: none;
+                border-radius: 0;
+                margin: 0;
+                padding: 0;
+              }
+              .invoice-header__actions {
+                display: none;
+              }
+              .invoice-watermark {
+                opacity: 0.05;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          ${printContent}
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+
+    // Wait for content to load, then trigger print dialog
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.focus();
+        printWindow.print();
+        // Note: User can save as PDF from the print dialog
+        // For automatic download, we'd need a library like html2pdf.js or jsPDF
+      }, 250);
+    };
   };
 
   const bouquetPrice = order.bouquetPrice || 0;
@@ -186,6 +274,19 @@ const InvoiceComponent: React.FC<InvoiceComponentProps> = ({ order, onClose }) =
               <p className="invoice-brand__tagline">{STORE_PROFILE.brand.tagline}</p>
             </div>
             <div className="invoice-header__actions">
+              <button
+                type="button"
+                className="invoice-btn invoice-btn--download"
+                onClick={handleDownloadPDF}
+                aria-label="Download invoice as PDF"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <polyline points="7 10 12 15 17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Download PDF
+              </button>
               <button
                 type="button"
                 className="invoice-btn invoice-btn--print"
