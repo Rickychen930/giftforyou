@@ -5,6 +5,9 @@ const customer_model_1 = require("../models/customer-model");
 const validation_1 = require("../utils/validation");
 async function getCustomers(req, res) {
     try {
+        if (process.env.NODE_ENV === "development") {
+            console.log(`[getCustomers] Request: ${req.method} ${req.path}`, { query: req.query });
+        }
         const limitRaw = typeof req.query.limit === "string" ? req.query.limit : "200";
         const limitParsed = Number.parseInt(limitRaw, 10);
         const limit = Number.isFinite(limitParsed) ? Math.min(Math.max(limitParsed, 1), 500) : 200;

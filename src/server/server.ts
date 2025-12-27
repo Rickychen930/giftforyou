@@ -124,13 +124,8 @@ console.log("  - /api/orders");
 console.log("  - /api/customers");
 console.log("  - /api/instagram");
 
-// Debug middleware for API routes (always log for debugging)
-app.use("/api", (req, res, next) => {
-  console.log(`[API] ${req.method} ${req.path}${req.url !== req.path ? ` (url: ${req.url})` : ""}`);
-  next();
-});
-
 // 404 handler for API routes (must come after all route registrations)
+// NOTE: Debug middleware removed - it was interfering with route matching
 app.use("/api", (req, res) => {
   // Always log 404s for debugging
   console.warn(`[404] API endpoint not found: ${req.method} ${req.path}`);

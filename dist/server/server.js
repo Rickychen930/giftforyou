@@ -17,6 +17,7 @@ const collection_routes_1 = __importDefault(require("../routes/collection-routes
 const hero_slider_routes_1 = __importDefault(require("../routes/hero-slider-routes"));
 const order_routes_1 = __importDefault(require("../routes/order-routes"));
 const customer_routes_1 = __importDefault(require("../routes/customer-routes"));
+const instagram_routes_1 = __importDefault(require("../routes/instagram-routes"));
 const security_headers_1 = require("../middleware/security-headers");
 const rate_limit_middleware_1 = require("../middleware/rate-limit-middleware");
 /**
@@ -97,6 +98,7 @@ app.use("/api/collections", collection_routes_1.default);
 app.use("/api/hero-slider", hero_slider_routes_1.default);
 app.use("/api/orders", order_routes_1.default);
 app.use("/api/customers", customer_routes_1.default);
+app.use("/api/instagram", instagram_routes_1.default);
 // Log registered routes (always log)
 console.log("✅ Registered API routes:");
 console.log("  - /api/metrics");
@@ -106,6 +108,7 @@ console.log("  - /api/collections");
 console.log("  - /api/hero-slider");
 console.log("  - /api/orders");
 console.log("  - /api/customers");
+console.log("  - /api/instagram");
 // Debug middleware for API routes (always log for debugging)
 app.use("/api", (req, res, next) => {
     console.log(`[API] ${req.method} ${req.path}${req.url !== req.path ? ` (url: ${req.url})` : ""}`);
@@ -128,7 +131,8 @@ app.use("/api", (req, res) => {
             "/api/collections",
             "/api/hero-slider",
             "/api/orders",
-            "/api/customers"
+            "/api/customers",
+            "/api/instagram"
         ]
     });
 });

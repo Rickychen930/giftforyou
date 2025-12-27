@@ -144,30 +144,61 @@ class DashboardController extends Component<{}, State> {
         throw new Error("Unauthorized. Please login again.");
       }
 
+      // Read response texts first to check if they're HTML
+      const metricsText = await metricsRes.text();
+      const bouquetsText = await bouquetsRes.text();
+
       if (!metricsRes.ok) {
-        const t = await metricsRes.text();
-        throw new Error(`Failed to load metrics (${metricsRes.status}): ${t}`);
+        let errorMessage = `Failed to load metrics (${metricsRes.status})`;
+        
+        // Check if response is HTML (404 page or error page)
+        if (metricsText.includes("<!DOCTYPE html>") || metricsText.includes("<html")) {
+          errorMessage = "Endpoint /api/metrics tidak tersedia. Pastikan server berjalan dan route dikonfigurasi dengan benar.";
+        } else {
+          // Try to parse as JSON
+          try {
+            const errorData = JSON.parse(metricsText);
+            errorMessage = errorData.error || errorData.message || errorMessage;
+          } catch {
+            errorMessage = metricsText.length > 200 
+              ? `${errorMessage}: ${metricsText.substring(0, 200)}...` 
+              : `${errorMessage}: ${metricsText}`;
+          }
+        }
+        throw new Error(errorMessage);
       }
 
       if (!bouquetsRes.ok) {
-        const t = await bouquetsRes.text();
-        throw new Error(
-          `Failed to load bouquets (${bouquetsRes.status}): ${t}`
-        );
+        let errorMessage = `Failed to load bouquets (${bouquetsRes.status})`;
+        
+        // Check if response is HTML (404 page or error page)
+        if (bouquetsText.includes("<!DOCTYPE html>") || bouquetsText.includes("<html")) {
+          errorMessage = "Endpoint /api/bouquets tidak tersedia. Pastikan server berjalan dan route dikonfigurasi dengan benar.";
+        } else {
+          // Try to parse as JSON
+          try {
+            const errorData = JSON.parse(bouquetsText);
+            errorMessage = errorData.error || errorData.message || errorMessage;
+          } catch {
+            errorMessage = bouquetsText.length > 200 
+              ? `${errorMessage}: ${bouquetsText.substring(0, 200)}...` 
+              : `${errorMessage}: ${bouquetsText}`;
+          }
+        }
+        throw new Error(errorMessage);
       }
 
+      // Parse successful responses
       let metricsJson: MetricsResponse;
       let bouquetsJson: unknown;
       
       try {
-        const metricsText = await metricsRes.text();
         metricsJson = metricsText.trim() ? JSON.parse(metricsText) : {};
       } catch (e) {
         throw new Error(`Failed to parse metrics response: ${e instanceof Error ? e.message : "Invalid JSON"}`);
       }
 
       try {
-        const bouquetsText = await bouquetsRes.text();
         bouquetsJson = bouquetsText.trim() ? JSON.parse(bouquetsText) : [];
       } catch (e) {
         throw new Error(`Failed to parse bouquets response: ${e instanceof Error ? e.message : "Invalid JSON"}`);
@@ -495,27 +526,74 @@ class DashboardController extends Component<{}, State> {
         },
       });
 
+      // Read response text first to check if it's HTML
+      const responseText = await res.text();
+
       if (!res.ok) {
-        throw new Error(`Failed to fetch bouquet (${res.status})`);
+        let errorMessage = `Failed to fetch bouquet (${res.status})`;
+        
+        // Check if response is HTML (404 page or error page)
+        if (responseText.includes("<!DOCTYPE html>") || responseText.includes("<html")) {
+          errorMessage = "Endpoint /api/bouquets tidak tersedia. Pastikan server berjalan dan route dikonfigurasi dengan benar.";
+        } else {
+          // Try to parse as JSON
+          try {
+            const errorData = JSON.parse(responseText);
+            errorMessage = errorData.error || errorData.message || errorMessage;
+          } catch {
+            errorMessage = responseText.length > 200 
+              ? `${errorMessage}: ${responseText.substring(0, 200)}...` 
+              : `${errorMessage}: ${responseText}`;
+          }
+        }
+        throw new Error(errorMessage);
       }
 
-      const bouquet = await res.json();
+      // Parse successful response
+      let bouquetData: unknown;
+      try {
+        bouquetData = responseText.trim() ? JSON.parse(responseText) : null;
+      } catch (parseErr) {
+        throw new Error(`Failed to parse bouquet response: ${parseErr instanceof Error ? parseErr.message : "Invalid JSON"}`);
+      }
+      
+      if (!bouquetData || typeof bouquetData !== "object") {
+        throw new Error("Invalid bouquet data received");
+      }
+      
+      // Type assertion for bouquet data
+      const bouquet = bouquetData as {
+        name?: string;
+        description?: string;
+        price?: number;
+        type?: string;
+        size?: string;
+        status?: string;
+        collectionName?: string;
+        quantity?: number;
+        occasions?: string[] | string;
+        flowers?: string[] | string;
+        isNewEdition?: boolean;
+        isFeatured?: boolean;
+        customPenanda?: string[] | string;
+        careInstructions?: string;
+      };
       
       // Create a new FormData with the bouquet data, but without _id
       const formData = new FormData();
-      formData.append("name", `${bouquet.name} (Copy)`);
+      formData.append("name", `${bouquet.name || "Bouquet"} (Copy)`);
       formData.append("description", bouquet.description ?? "");
-      formData.append("price", String(bouquet.price));
+      formData.append("price", String(bouquet.price ?? 0));
       formData.append("type", bouquet.type ?? "");
       formData.append("size", bouquet.size ?? "Medium");
       formData.append("status", bouquet.status ?? "ready");
       formData.append("collectionName", bouquet.collectionName ?? "");
       formData.append("quantity", String(bouquet.quantity ?? 0));
-      formData.append("occasions", Array.isArray(bouquet.occasions) ? bouquet.occasions.join(", ") : "");
-      formData.append("flowers", Array.isArray(bouquet.flowers) ? bouquet.flowers.join(", ") : "");
+      formData.append("occasions", Array.isArray(bouquet.occasions) ? bouquet.occasions.join(",") : (typeof bouquet.occasions === "string" ? bouquet.occasions : ""));
+      formData.append("flowers", Array.isArray(bouquet.flowers) ? bouquet.flowers.join(",") : (typeof bouquet.flowers === "string" ? bouquet.flowers : ""));
       formData.append("isNewEdition", String(Boolean(bouquet.isNewEdition)));
       formData.append("isFeatured", String(Boolean(bouquet.isFeatured)));
-      formData.append("customPenanda", Array.isArray(bouquet.customPenanda) ? bouquet.customPenanda.join(",") : "");
+      formData.append("customPenanda", Array.isArray(bouquet.customPenanda) ? bouquet.customPenanda.join(",") : (typeof bouquet.customPenanda === "string" ? bouquet.customPenanda : ""));
       formData.append("careInstructions", bouquet.careInstructions ?? "");
 
       // Upload as new bouquet
@@ -565,9 +643,28 @@ class DashboardController extends Component<{}, State> {
         body: JSON.stringify({ name: newName }),
       });
 
+      // Read response text first to check if it's HTML
+      const responseText = await res.text();
+
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to update collection name.");
+        let errorMessage = `Failed to update collection name (${res.status})`;
+        
+        // Check if response is HTML (404 page or error page)
+        if (responseText.includes("<!DOCTYPE html>") || responseText.includes("<html")) {
+          errorMessage = "Endpoint /api/collections tidak tersedia. Pastikan server berjalan dan route dikonfigurasi dengan benar.";
+        } else {
+          // Try to parse as JSON
+          try {
+            const errorData = JSON.parse(responseText);
+            errorMessage = errorData.error || errorData.message || errorMessage;
+          } catch {
+            // If not JSON, use the text (but limit length)
+            errorMessage = responseText.length > 200 
+              ? `${errorMessage}: ${responseText.substring(0, 200)}...` 
+              : `${errorMessage}: ${responseText}`;
+          }
+        }
+        throw new Error(errorMessage);
       }
 
       // Refresh collections after update
@@ -595,13 +692,43 @@ class DashboardController extends Component<{}, State> {
         body: JSON.stringify({ bouquetId }),
       });
 
+      // Read response text first to check if it's HTML
+      const addResponseText = await addRes.text();
+
       if (!addRes.ok) {
-        const errorData = await addRes.json().catch(() => ({ error: "Failed to move bouquet." }));
-        throw new Error(errorData.error || "Failed to move bouquet.");
+        let errorMessage = `Failed to move bouquet (${addRes.status})`;
+        
+        // Check if response is HTML (404 page or error page)
+        if (addResponseText.includes("<!DOCTYPE html>") || addResponseText.includes("<html")) {
+          errorMessage = "Endpoint /api/collections tidak tersedia. Pastikan server berjalan dan route dikonfigurasi dengan benar.";
+        } else {
+          // Try to parse as JSON
+          try {
+            const errorData = JSON.parse(addResponseText);
+            errorMessage = errorData.error || errorData.message || errorMessage;
+          } catch {
+            errorMessage = addResponseText.length > 200 
+              ? `${errorMessage}: ${addResponseText.substring(0, 200)}...` 
+              : `${errorMessage}: ${addResponseText}`;
+          }
+        }
+        throw new Error(errorMessage);
       }
 
-      const addData = await addRes.json();
-      const newCollectionName = addData.collection?.name;
+      // Parse successful response
+      let addData: unknown;
+      try {
+        addData = addResponseText.trim() ? JSON.parse(addResponseText) : {};
+      } catch (parseErr) {
+        throw new Error(`Failed to parse move response: ${parseErr instanceof Error ? parseErr.message : "Invalid JSON"}`);
+      }
+      
+      // Type assertion for addData
+      const moveResponse = (addData && typeof addData === "object" ? addData : {}) as {
+        collection?: { name?: string };
+      };
+      
+      const newCollectionName = moveResponse.collection?.name;
 
       // Update bouquet's collectionName if we got the new name from response
       if (newCollectionName) {

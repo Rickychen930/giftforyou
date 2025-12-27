@@ -312,9 +312,13 @@ async function updateOrder(req, res) {
 exports.updateOrder = updateOrder;
 async function getOrders(req, res) {
     try {
+        if (process.env.NODE_ENV === "development") {
+            console.log(`[getOrders] Request: ${req.method} ${req.path}`, { query: req.query });
+        }
         const limitRaw = typeof req.query.limit === "string" ? req.query.limit : "100";
         const limitParsed = Number.parseInt(limitRaw, 10);
-        const limit = Number.isFinite(limitParsed) ? Math.min(Math.max(limitParsed, 1), 500) : 100;
+        // Allow up to 1000 for dashboard needs
+        const limit = Number.isFinite(limitParsed) ? Math.min(Math.max(limitParsed, 1), 1000) : 100;
         const qRaw = typeof req.query.q === "string" ? req.query.q.trim() : "";
         const q = qRaw.slice(0, 120);
         const filter = {};

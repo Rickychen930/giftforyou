@@ -12,6 +12,7 @@ const heic_convert_1 = __importDefault(require("heic-convert"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const hero_slider_controller_1 = require("../controllers/hero-slider-controller");
 const collections_1 = require("../mock-data/collections");
+const auth_middleware_1 = require("../middleware/auth-middleware");
 const router = (0, express_1.Router)();
 /**
  * Check if MongoDB is connected
@@ -69,7 +70,6 @@ router.get("/home", async (req, res) => {
         res.status(200).json(collections_1.mockHeroSlider);
     }
 });
-const auth_middleware_1 = require("../middleware/auth-middleware");
 router.put("/home", auth_middleware_1.authenticate, auth_middleware_1.requireAdmin, hero_slider_controller_1.upsertHomeHeroSlider);
 /**
  * POST /api/hero-slider/home/upload
