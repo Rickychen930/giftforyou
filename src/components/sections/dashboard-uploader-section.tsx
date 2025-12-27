@@ -946,30 +946,41 @@ class BouquetUploader extends Component<Props, State> {
 
   private buildFormData(): FormData {
     const fd = new FormData();
-    if (this.state.file) fd.append("image", this.state.file);
+    
+    // Image (only if new file is selected)
+    if (this.state.file) {
+      fd.append("image", this.state.file);
+    }
 
+    // Required fields
     fd.append("name", this.state.name.trim());
-    fd.append("description", this.state.description.trim());
     fd.append("price", String(this.state.price));
-    fd.append("type", (this.state.type ?? "bouquet").trim() || "bouquet");
-    fd.append("size", this.state.size ?? "Medium");
+    fd.append("size", this.state.size || "Medium");
     fd.append("status", this.state.status);
     fd.append("collectionName", this.state.collectionName.trim());
 
-    fd.append("quantity", String(this.state.quantity ?? 0));
-    // Use array if available, otherwise fallback to text
+    // Optional fields
+    fd.append("description", (this.state.description || "").trim());
+    fd.append("type", (this.state.type || "bouquet").trim());
+    fd.append("quantity", String(this.state.quantity || 0));
+    fd.append("careInstructions", (this.state.careInstructions || "").trim());
+
+    // Arrays - use array if available, otherwise fallback to text
     const occasionsValue = this.state.occasions.length > 0 
       ? this.state.occasions.join(",")
-      : this.state.occasionsText.trim();
+      : (this.state.occasionsText || "").trim();
     const flowersValue = this.state.flowers.length > 0
       ? this.state.flowers.join(",")
-      : this.state.flowersText.trim();
+      : (this.state.flowersText || "").trim();
     fd.append("occasions", occasionsValue);
     fd.append("flowers", flowersValue);
+
+    // Boolean flags
     fd.append("isNewEdition", String(Boolean(this.state.isNewEdition)));
     fd.append("isFeatured", String(Boolean(this.state.isFeatured)));
+    
+    // Custom penanda
     fd.append("customPenanda", this.state.customPenanda.join(","));
-    fd.append("careInstructions", this.state.careInstructions.trim());
 
     return fd;
   }
@@ -983,18 +994,12 @@ class BouquetUploader extends Component<Props, State> {
       return;
     }
 
-    // Mark all fields as touched
+    // Mark all required fields as touched (for better error display)
     const allFields = new Set([
       "name",
       "price",
       "size",
-      "description",
-      "collectionName",
-      "occasionsText",
-      "flowersText",
-      "careInstructions",
-      "quantity",
-      "customPenanda",
+      "collectionName", // Required field
     ]);
 
     this.setState((prev) => ({

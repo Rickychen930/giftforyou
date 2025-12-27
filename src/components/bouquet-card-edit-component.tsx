@@ -623,30 +623,45 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
 
   const buildFormData = useCallback((): FormData => {
     const fd = new FormData();
+    
+    // ID for update
     fd.append("_id", form._id);
-    if (file) fd.append("image", file);
+    
+    // Image (only if new file is selected)
+    if (file) {
+      fd.append("image", file);
+    }
 
+    // Required fields
     fd.append("name", form.name.trim());
-    fd.append("description", form.description ?? "");
     fd.append("price", String(form.price));
-    fd.append("type", (form.type ?? "").trim());
     fd.append("size", form.size);
     fd.append("status", form.status);
-    fd.append("collectionName", (form.collectionName ?? "").trim());
-    fd.append("quantity", String(form.quantity ?? 0));
-    // Use array if available, otherwise fallback to text
+    fd.append("collectionName", (form.collectionName || "").trim());
+
+    // Optional fields
+    fd.append("description", (form.description || "").trim());
+    fd.append("type", (form.type || "").trim());
+    fd.append("quantity", String(form.quantity || 0));
+    fd.append("careInstructions", (form.careInstructions || "").trim());
+
+    // Arrays - use array if available, otherwise fallback to text
     const occasionsValue = form.occasions.length > 0 
       ? form.occasions.join(",")
-      : form.occasionsText.trim();
+      : (form.occasionsText || "").trim();
     const flowersValue = form.flowers.length > 0
       ? form.flowers.join(",")
-      : form.flowersText.trim();
+      : (form.flowersText || "").trim();
     fd.append("occasions", occasionsValue);
     fd.append("flowers", flowersValue);
+
+    // Boolean flags
     fd.append("isNewEdition", String(Boolean(form.isNewEdition)));
     fd.append("isFeatured", String(Boolean(form.isFeatured)));
+    
+    // Custom penanda
     fd.append("customPenanda", form.customPenanda.join(","));
-    fd.append("careInstructions", form.careInstructions ?? "");
+
     return fd;
   }, [form, file]);
 

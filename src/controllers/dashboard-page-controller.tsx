@@ -585,23 +585,7 @@ class DashboardController extends Component<{}, State> {
     targetCollectionId: string
   ): Promise<boolean> => {
     try {
-      // First, get the bouquet to find its current collection
-      const bouquetRes = await fetch(`${API_BASE}/api/bouquets/${bouquetId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          ...this.getAuthHeaders(),
-        },
-      });
-
-      if (!bouquetRes.ok) {
-        throw new Error("Failed to fetch bouquet.");
-      }
-
-      const bouquet = await bouquetRes.json();
-      const oldCollectionName = bouquet.collectionName;
-
-      // Add bouquet to target collection
+      // Add bouquet to target collection (API handles removal from old collection)
       const addRes = await fetch(`${API_BASE}/api/collections/${targetCollectionId}/bouquets`, {
         method: "POST",
         headers: {
@@ -612,14 +596,14 @@ class DashboardController extends Component<{}, State> {
       });
 
       if (!addRes.ok) {
-        const errorData = await addRes.json();
+        const errorData = await addRes.json().catch(() => ({ error: "Failed to move bouquet." }));
         throw new Error(errorData.error || "Failed to move bouquet.");
       }
 
       const addData = await addRes.json();
       const newCollectionName = addData.collection?.name;
 
-      // Update bouquet's collectionName
+      // Update bouquet's collectionName if we got the new name from response
       if (newCollectionName) {
         const updateRes = await fetch(`${API_BASE}/api/bouquets/${bouquetId}`, {
           method: "PUT",
