@@ -141,8 +141,8 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
           loading="lazy"
           decoding="async"
           width="400"
-          height="533"
-          style={{ aspectRatio: "3 / 4" }}
+          height="500"
+          style={{ aspectRatio: "4 / 5" }}
           onLoad={handleImageLoad}
           onError={handleImageError}
         />

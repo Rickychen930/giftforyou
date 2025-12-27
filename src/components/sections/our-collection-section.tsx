@@ -1,8 +1,8 @@
 // src/components/sections/our-collection-section.tsx
 import React, { useMemo, useEffect, useRef, useState } from "react";
 import "../../styles/OurCollectionSection.css";
-import CollectionCard from "../collection-card-component";
-import type { BouquetCardProps } from "../collection-card-component";
+import CollectionContainer from "../collection-container-component";
+import type { BouquetCardProps } from "../collection-container-component";
 // formatCollectionName is used in CollectionCard component
 
 import type { Collection } from "../../models/domain/collection";
@@ -255,7 +255,7 @@ const OurCollectionSection: React.FC<OurCollectionViewProps> = ({
         ) : (
           <div className="ourCollection__grid">
             {prepared.map((c, index) => (
-              <CollectionCard
+              <CollectionContainer
                 key={c.id}
                 id={c.id}
                 name={c.name}
