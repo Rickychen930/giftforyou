@@ -178,6 +178,9 @@
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Ensure media section is always visible */
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .bdMedia img {
@@ -185,6 +188,9 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  /* Ensure image is always visible */
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .bdMedia:hover {
@@ -639,6 +645,109 @@
   font-weight: 700;
   margin-top: 0.25rem;
   line-height: 1.5;
+}
+
+/* Quick Order - Instant order button */
+.bdQuickOrder {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.1) 0%,
+    rgba(5, 150, 105, 0.08) 100%
+  );
+  border: 2px solid rgba(16, 185, 129, 0.3);
+  border-radius: 20px;
+  box-shadow: 
+    0 8px 24px rgba(16, 185, 129, 0.15),
+    0 4px 12px rgba(16, 185, 129, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  margin: 1.5rem 0;
+  padding: 1.25rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.bdQuickOrder::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(16, 185, 129, 0.6),
+    rgba(5, 150, 105, 0.8),
+    rgba(16, 185, 129, 0.6),
+    transparent
+  );
+  opacity: 0.9;
+  z-index: 1;
+}
+
+.bdBtn--quickOrder {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 1) 0%,
+    rgba(5, 150, 105, 1) 50%,
+    rgba(4, 120, 87, 1) 100%
+  );
+  color: #fff;
+  box-shadow: 
+    0 8px 24px rgba(16, 185, 129, 0.4),
+    0 4px 12px rgba(5, 150, 105, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+  border: none;
+  width: 100%;
+  justify-content: space-between;
+  font-size: 1rem;
+  font-weight: 950;
+  padding: 1.1rem 1.5rem;
+  min-height: 56px;
+  position: relative;
+  overflow: hidden;
+}
+
+.bdBtn--quickOrder::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0.15) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.bdBtn--quickOrder:hover::before {
+  opacity: 1;
+}
+
+.bdBtn--quickOrder:hover {
+  transform: translateY(-2px);
+  filter: saturate(1.1) brightness(1.05);
+  box-shadow: 
+    0 12px 32px rgba(16, 185, 129, 0.5),
+    0 6px 16px rgba(5, 150, 105, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+}
+
+.bdBtn--quickOrder:active {
+  transform: translateY(0);
+}
+
+.bdQuickOrderHint {
+  margin: 0.75rem 0 0;
+  color: var(--ink-600);
+  font-weight: 750;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  text-align: center;
+  opacity: 0.9;
 }
 
 /* Actions */
@@ -1187,6 +1296,23 @@
   .bdBtn {
     width: 100%;
     justify-content: center;
+  }
+
+  .bdQuickOrder {
+    margin: 1.25rem 0;
+    padding: 1rem 1.25rem;
+    border-radius: 18px;
+  }
+
+  .bdBtn--quickOrder {
+    font-size: 0.95rem;
+    padding: 1rem 1.25rem;
+    min-height: 52px;
+  }
+
+  .bdQuickOrderHint {
+    font-size: 0.8rem;
+    margin-top: 0.65rem;
   }
 
   .bdService__grid {

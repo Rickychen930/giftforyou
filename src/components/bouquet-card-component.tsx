@@ -83,11 +83,29 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
     setImageLoaded(true);
   }, []);
 
+  // Ensure image is visible even if load handler doesn't fire
+  React.useEffect(() => {
+    if (imageUrl && imageUrl !== FALLBACK_IMAGE) {
+      const img = new Image();
+      img.onload = () => {
+        setImageLoaded(true);
+      };
+      img.onerror = () => {
+        setImageError(true);
+        setImageLoaded(true);
+      };
+      img.src = imageUrl;
+    } else {
+      setImageLoaded(true);
+    }
+  }, [imageUrl]);
+
   const tags = [collectionName, type, size].filter(Boolean) as string[];
 
   return (
     <article
       className="bouquet-card fade-in hover-lift"
+      style={{ opacity: 1, visibility: 'visible' }}
       aria-label={`Bouquet ${name}, harga ${formatPrice(price)}`}
       tabIndex={0}
       onClick={handleCardClick}

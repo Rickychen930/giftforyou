@@ -70,15 +70,29 @@ class BouquetCatalogView extends Component<Props> {
   componentDidMount(): void {
     this.applySeo();
     
-    // Initialize luxury enhancements
+    // Initialize luxury enhancements - ensure cards are visible
     setTimeout(() => {
+      // Make all fade-in elements visible immediately
+      const fadeElements = document.querySelectorAll(".fade-in");
+      fadeElements.forEach((el) => {
+        el.classList.add("fade-in-visible");
+      });
+
+      // Make all reveal-on-scroll elements visible immediately
+      const revealElements = document.querySelectorAll(".reveal-on-scroll");
+      revealElements.forEach((el) => {
+        el.classList.add("revealed");
+      });
+
+      // Then set up observers for future elements
       observeFadeIn(".fade-in");
       revealOnScroll();
+      
       const cards = document.querySelectorAll(".bouquet-card");
       if (cards.length > 0) {
         staggerFadeIn(cards as NodeListOf<HTMLElement>, 50, 400);
       }
-    }, 100);
+    }, 50);
   }
 
   componentDidUpdate(prevProps: Props): void {

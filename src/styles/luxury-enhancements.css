@@ -6,31 +6,84 @@
 /* =========================================================
    Fade In Animations
    ========================================================= */
-.fade-in {
-  opacity: 0;
-  transform: translateY(20px);
+/* CRITICAL FIX: Ensure fade-in elements are ALWAYS visible */
+/* This fixes the issue where cards appear transparent */
+.fade-in,
+.fade-in:not(.fade-in-visible),
+.fade-in:not(.fade-in-animate),
+article.fade-in,
+.bouquet-card.fade-in,
+div.fade-in,
+section.fade-in {
+  /* Force visibility - override ALL other rules */
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  visibility: visible !important;
+  display: block !important;
   transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
               transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Override any inline styles or other CSS */
+.fade-in[style*="opacity"],
+.fade-in[style*="opacity: 0"],
+.fade-in[style*="opacity:0"] {
+  opacity: 1 !important;
+}
+
+/* Only hide if explicitly marked for animation */
+.fade-in.fade-in-animate {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
 .fade-in-visible {
-  opacity: 1;
-  transform: translateY(0);
+  opacity: 1 !important;
+  transform: translateY(0) !important;
 }
 
 /* =========================================================
    Reveal on Scroll
    ========================================================= */
-.reveal-on-scroll {
-  opacity: 0;
-  transform: translateY(30px);
+/* CRITICAL FIX: Ensure reveal-on-scroll elements are ALWAYS visible */
+/* Override ALL possible selectors to force visibility */
+.reveal-on-scroll,
+.reveal-on-scroll:not(.revealed),
+.reveal-on-scroll:not(.reveal-on-scroll-animate),
+div.reveal-on-scroll,
+section.reveal-on-scroll,
+.bdMedia.reveal-on-scroll,
+.bdInfo.reveal-on-scroll,
+.bdSimilar.reveal-on-scroll,
+*[class*="reveal-on-scroll"] {
+  /* Force visibility - override ALL other rules including default opacity: 0 */
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  visibility: visible !important;
+  display: block !important;
   transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
               transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Override any inline styles or other CSS rules */
+.reveal-on-scroll[style*="opacity"],
+.reveal-on-scroll[style*="opacity: 0"],
+.reveal-on-scroll[style*="opacity:0"],
+.reveal-on-scroll[style*="opacity:0;"],
+.reveal-on-scroll[style*="opacity: 0;"] {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Only hide if explicitly marked for animation */
+.reveal-on-scroll.reveal-on-scroll-animate {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
 .reveal-on-scroll.revealed {
-  opacity: 1;
-  transform: translateY(0);
+  opacity: 1 !important;
+  transform: translateY(0) !important;
 }
 
 /* =========================================================

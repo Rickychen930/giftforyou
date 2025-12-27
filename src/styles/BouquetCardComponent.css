@@ -28,6 +28,9 @@
   transform: translateZ(0);
   will-change: transform, box-shadow;
   overflow: hidden;
+  /* Ensure card is always visible - override any animation classes */
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .bouquet-card:focus-visible {
@@ -150,8 +153,14 @@
 }
 
 .bouquet-image {
-  opacity: 0;
+  /* Start visible for better UX - only hide if skeleton is showing */
+  opacity: 1;
   transition: opacity 0.4s ease, transform 0.4s ease, filter 0.4s ease;
+}
+
+/* Only hide image if skeleton is actively showing */
+.bouquet-image-wrapper:has(.bouquet-image-skeleton:not([style*="display: none"])) .bouquet-image:not(.is-loaded) {
+  opacity: 0;
 }
 
 .bouquet-image.is-loaded {

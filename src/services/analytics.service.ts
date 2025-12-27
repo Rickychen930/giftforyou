@@ -47,6 +47,12 @@ export async function postAnalyticsEvent(
 ): Promise<void> {
   // Completely silent - no console errors, no network errors visible
   // Analytics is optional and should never affect user experience
+  
+  // Early return if API_BASE is not configured (prevents errors)
+  if (!API_BASE || API_BASE.trim() === "") {
+    return;
+  }
+
   try {
     const url = `${API_BASE}/api/metrics/events`;
 
@@ -60,27 +66,40 @@ export async function postAnalyticsEvent(
     };
 
     // Use sendBeacon for better reliability and silent failures
-    if (navigator.sendBeacon) {
-      const blob = new Blob([JSON.stringify(body)], { type: "application/json" });
-      navigator.sendBeacon(url, blob);
-      return; // sendBeacon doesn't provide response, so we return immediately
+    // sendBeacon only accepts FormData or Blob, not JSON directly
+    if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+      try {
+        // Convert to FormData for sendBeacon compatibility
+        const formData = new FormData();
+        formData.append("data", JSON.stringify(body));
+        const success = navigator.sendBeacon(url, formData);
+        if (success) {
+          return; // Successfully sent, exit silently
+        }
+      } catch {
+        // sendBeacon failed, fall through to fetch
+      }
     }
 
-    // Fallback to fetch with keepalive
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-      keepalive: true,
-      // Suppress all errors
-    }).catch(() => {
-      // Silently ignore all fetch errors
-      return null;
-    });
+    // Fallback to fetch with keepalive - wrapped in requestIdleCallback if available
+    const sendFetch = () => {
+      fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        keepalive: true,
+        // Suppress all errors
+      }).catch(() => {
+        // Silently ignore all fetch errors
+      });
+    };
 
-    // Silently ignore all response errors
-    if (res && !res.ok) {
-      // Do nothing - analytics failures are expected and acceptable
+    // Use requestIdleCallback if available to avoid blocking
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      (window as any).requestIdleCallback(sendFetch, { timeout: 2000 });
+    } else {
+      // Fallback: send immediately but don't await
+      sendFetch();
     }
   } catch {
     // Completely silent - no logging, no errors
