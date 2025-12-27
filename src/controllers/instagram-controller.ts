@@ -62,7 +62,16 @@ export async function getInstagramPosts(req: Request, res: Response): Promise<vo
         return;
       }
 
-      const data = await response.json();
+      const data = await response.json() as {
+        data?: Array<{
+          id: string;
+          caption?: string;
+          media_type?: string;
+          media_url?: string;
+          thumbnail_url?: string;
+          permalink?: string;
+        }>;
+      };
 
       if (!data.data || !Array.isArray(data.data)) {
         res.status(200).json({
@@ -160,7 +169,10 @@ export async function getInstagramProfile(req: Request, res: Response): Promise<
         return;
       }
 
-      const data = await response.json();
+      const data = await response.json() as {
+        username?: string;
+        account_type?: string;
+      };
       
       res.status(200).json({
         username: data.username || process.env.INSTAGRAM_USERNAME || "giftforyou.idn",

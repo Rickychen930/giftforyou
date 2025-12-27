@@ -1,4 +1,4 @@
-name: Deploy Frontend App to VPS
+name: Deploy Full Stack App to VPS
 
 on:
   push:
@@ -21,15 +21,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # ✅ Inject production env for CRA build
-      - name: Create .env.production
+      # ✅ Build Frontend
+      - name: Create .env.production for frontend
         run: |
           echo "REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}" > .env.production
 
       - name: Build React app
         run: npm run build
 
-      # ✅ Prepare dirs on VPS
+      # ✅ Build Backend
+      - name: Build backend server
+        run: npm run build:server
+
+      # ✅ Prepare directories on VPS
       - name: Prepare VPS directories
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -42,17 +46,27 @@ jobs:
           use_insecure_cipher: false
           script: |
             set -e
-            TARGET="${{ secrets.TARGET_DIR }}"
-            RELEASES="$TARGET/_releases"
+            FRONTEND_TARGET="${{ secrets.FRONTEND_TARGET_DIR }}"
+            BACKEND_TARGET="${{ secrets.BACKEND_TARGET_DIR }}"
+            RELEASES="$FRONTEND_TARGET/_releases"
             TS="$(date +%Y%m%d-%H%M%S)"
             NEW="$RELEASES/$TS"
 
+            # Frontend directories
             mkdir -p "$RELEASES"
             mkdir -p "$NEW"
-            echo "New release dir: $NEW"
+            mkdir -p "$FRONTEND_TARGET/_incoming"
 
-      # ✅ Upload build folder into latest release dir
-      - name: Upload build to VPS
+            # Backend directories
+            mkdir -p "$BACKEND_TARGET/dist"
+            mkdir -p "$BACKEND_TARGET/server"
+            mkdir -p "$BACKEND_TARGET/uploads"
+
+            echo "Frontend release dir: $NEW"
+            echo "Backend target: $BACKEND_TARGET"
+
+      # ✅ Upload Frontend build
+      - name: Upload frontend build to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -63,11 +77,40 @@ jobs:
           command_timeout: 20m
           use_insecure_cipher: false
           source: "build/**"
-          target: "${{ secrets.TARGET_DIR }}/_incoming"
+          target: "${{ secrets.FRONTEND_TARGET_DIR }}/_incoming"
           overwrite: true
 
-      # ✅ Activate: move build contents to a new release, then point "current" to it (atomic)
-      - name: Activate release (atomic)
+      # ✅ Upload Backend dist and config
+      - name: Upload backend dist to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          timeout: 180s
+          command_timeout: 20m
+          use_insecure_cipher: false
+          source: "dist/**"
+          target: "${{ secrets.BACKEND_TARGET_DIR }}/_incoming_backend"
+          overwrite: true
+
+      - name: Upload ecosystem.config.js to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          timeout: 60s
+          command_timeout: 5m
+          use_insecure_cipher: false
+          source: "ecosystem.config.js"
+          target: "${{ secrets.BACKEND_TARGET_DIR }}"
+          overwrite: true
+
+      # ✅ Activate Frontend Release
+      - name: Activate frontend release (atomic)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -79,17 +122,17 @@ jobs:
           use_insecure_cipher: false
           script: |
             set -e
-            TARGET="${{ secrets.TARGET_DIR }}"
-            RELEASES="$TARGET/_releases"
-            INCOMING="$TARGET/_incoming/build"
+            FRONTEND_TARGET="${{ secrets.FRONTEND_TARGET_DIR }}"
+            RELEASES="$FRONTEND_TARGET/_releases"
+            INCOMING="$FRONTEND_TARGET/_incoming/build"
             TS="$(date +%Y%m%d-%H%M%S)"
             NEW="$RELEASES/$TS"
-            CURRENT="$TARGET/current"
-            BUILD_ROOT="$TARGET/build"
+            CURRENT="$FRONTEND_TARGET/current"
+            BUILD_ROOT="$FRONTEND_TARGET/build"
 
             if [ ! -d "$INCOMING" ]; then
-              echo "ERROR: Incoming build not found at $INCOMING"
-              ls -la "$TARGET/_incoming" || true
+              echo "ERROR: Incoming frontend build not found at $INCOMING"
+              ls -la "$FRONTEND_TARGET/_incoming" || true
               exit 1
             fi
 
@@ -100,20 +143,157 @@ jobs:
             rm -f "$CURRENT"
             ln -s "$NEW" "$CURRENT"
 
-            # Keep nginx root in sync.
-            # Your nginx config uses: root /var/www/root/build;
-            # This makes $TARGET/build always point at the latest release.
+            # Keep nginx root in sync
             if [ -e "$BUILD_ROOT" ] || [ -L "$BUILD_ROOT" ]; then
               rm -rf "$BUILD_ROOT"
             fi
             ln -s "$NEW" "$BUILD_ROOT"
 
-            # optional permissions
             chmod -R 755 "$NEW"
+            rm -rf "$FRONTEND_TARGET/_incoming"
 
-            # cleanup incoming
-            rm -rf "$TARGET/_incoming"
-
+            echo "✅ Frontend activated"
             echo "Current -> $(readlink $CURRENT)"
             echo "BuildRoot -> $(readlink $BUILD_ROOT)"
-            ls -la "$CURRENT" | head -n 50
+
+      # ✅ Deploy Backend
+      - name: Deploy backend and restart PM2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          timeout: 180s
+          command_timeout: 15m
+          use_insecure_cipher: false
+          script: |
+            set -e
+            BACKEND_TARGET="${{ secrets.BACKEND_TARGET_DIR }}"
+            INCOMING_BACKEND="$BACKEND_TARGET/_incoming_backend/dist"
+            DIST_DIR="$BACKEND_TARGET/dist"
+            ENV_FILE="$BACKEND_TARGET/server/.env"
+            ENV_PROD_FILE="$BACKEND_TARGET/.env.production"
+
+            echo "=== Backend Deployment ==="
+
+            # Check if incoming backend exists
+            if [ ! -d "$INCOMING_BACKEND" ]; then
+              echo "ERROR: Incoming backend dist not found at $INCOMING_BACKEND"
+              ls -la "$BACKEND_TARGET/_incoming_backend" || true
+              exit 1
+            fi
+
+            # Backup current dist (optional, for rollback)
+            if [ -d "$DIST_DIR" ]; then
+              echo "Backing up current dist..."
+              BACKUP_DIR="$BACKEND_TARGET/dist.backup.$(date +%Y%m%d-%H%M%S)"
+              cp -a "$DIST_DIR" "$BACKUP_DIR" || true
+              echo "Backup created at: $BACKUP_DIR"
+            fi
+
+            # Remove old dist and copy new one
+            echo "Deploying new backend dist..."
+            rm -rf "$DIST_DIR"
+            mkdir -p "$DIST_DIR"
+            cp -a "$INCOMING_BACKEND"/. "$DIST_DIR"/
+
+            # Ensure .env file exists (create from secrets if needed, or keep existing)
+            if [ ! -f "$ENV_FILE" ] && [ -f "$ENV_PROD_FILE" ]; then
+              echo "Copying .env.production to server/.env..."
+              mkdir -p "$BACKEND_TARGET/server"
+              cp "$ENV_PROD_FILE" "$ENV_FILE"
+            fi
+
+            # Verify critical files
+            if [ ! -f "$DIST_DIR/server/server.js" ]; then
+              echo "ERROR: server.js not found in dist!"
+              exit 1
+            fi
+
+            echo "✅ Backend files deployed"
+
+            # Stop old PM2 process if running
+            echo "=== PM2 Management ==="
+            pm2 stop giftforyou-api || true
+            pm2 delete giftforyou-api || true
+
+            # Kill any process on port 4000 (safety measure)
+            echo "Checking for processes on port 4000..."
+            PORT_PID=$(lsof -ti:4000 || true)
+            if [ ! -z "$PORT_PID" ]; then
+              echo "Killing process $PORT_PID on port 4000..."
+              kill -9 $PORT_PID || true
+              sleep 2
+            fi
+
+            # Start PM2 with proper environment
+            echo "Starting PM2 process..."
+            cd "$BACKEND_TARGET"
+
+            # Use ecosystem.config.js if exists, otherwise start directly
+            if [ -f "ecosystem.config.js" ]; then
+              pm2 start ecosystem.config.js
+            elif [ -f "server/.env" ]; then
+              pm2 start dist/server/server.js \
+                --name giftforyou-api \
+                --env-file server/.env \
+                --log-date-format "YYYY-MM-DD HH:mm:ss Z" \
+                --merge-logs
+            elif [ -f ".env.production" ]; then
+              pm2 start dist/server/server.js \
+                --name giftforyou-api \
+                --env-file .env.production \
+                --log-date-format "YYYY-MM-DD HH:mm:ss Z" \
+                --merge-logs
+            else
+              # Fallback: start without env-file (assumes env vars are set in system)
+              pm2 start dist/server/server.js \
+                --name giftforyou-api \
+                --log-date-format "YYYY-MM-DD HH:mm:ss Z" \
+                --merge-logs
+            fi
+
+            # Save PM2 configuration
+            pm2 save
+
+            # Cleanup incoming backend
+            rm -rf "$BACKEND_TARGET/_incoming_backend"
+
+            echo "✅ Backend deployment complete"
+
+      # ✅ Verify Deployment
+      - name: Verify deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          timeout: 60s
+          command_timeout: 2m
+          use_insecure_cipher: false
+          script: |
+            set -e
+            echo "=== Verification ==="
+
+            # Check PM2 status
+            echo "PM2 Status:"
+            pm2 status || true
+            pm2 logs giftforyou-api --lines 20 --nostream || true
+
+            # Check backend health
+            echo -e "\nBackend Health Check:"
+            sleep 3
+            curl -f http://localhost:4000/api/health || echo "⚠️ Health check failed (may need more time)"
+
+            # Check frontend
+            echo -e "\nFrontend Check:"
+            if [ -L "${{ secrets.FRONTEND_TARGET_DIR }}/current" ]; then
+              echo "✅ Frontend symlink exists"
+              ls -la "${{ secrets.FRONTEND_TARGET_DIR }}/current" | head -5
+            else
+              echo "⚠️ Frontend symlink not found"
+            fi
+
+            echo -e "\n✅ Deployment verification complete"

@@ -85,7 +85,10 @@ export async function getInstagramProfile(
       return null;
     }
 
-    const data = await res.json();
+    const data = await res.json() as {
+      username?: string;
+      profilePicture?: string;
+    } | null;
     return data;
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError") {
