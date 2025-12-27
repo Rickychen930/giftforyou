@@ -67,7 +67,7 @@ jobs:
 
       # ✅ Upload Frontend build
       - name: Upload frontend build to VPS
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
@@ -76,13 +76,34 @@ jobs:
           timeout: 180s
           command_timeout: 20m
           use_insecure_cipher: false
-          source: "build/**"
+          debug: true
+          source: "build"
           target: "${{ secrets.FRONTEND_TARGET_DIR }}/_incoming"
           overwrite: true
+          strip_components: 0
+
+      # ✅ Ensure backend directories exist before upload
+      - name: Ensure backend upload directories exist
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          timeout: 60s
+          command_timeout: 2m
+          use_insecure_cipher: false
+          script: |
+            set -e
+            BACKEND_TARGET="${{ secrets.BACKEND_TARGET_DIR }}"
+            mkdir -p "$BACKEND_TARGET/_incoming_backend"
+            mkdir -p "$BACKEND_TARGET"
+            chmod -R 755 "$BACKEND_TARGET" || true
+            echo "✅ Backend directories ready"
 
       # ✅ Upload Backend dist and config
       - name: Upload backend dist to VPS
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
@@ -91,12 +112,14 @@ jobs:
           timeout: 180s
           command_timeout: 20m
           use_insecure_cipher: false
-          source: "dist/**"
+          debug: true
+          source: "dist"
           target: "${{ secrets.BACKEND_TARGET_DIR }}/_incoming_backend"
           overwrite: true
+          strip_components: 0
 
       - name: Upload ecosystem.config.js to VPS
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
@@ -105,8 +128,9 @@ jobs:
           timeout: 60s
           command_timeout: 5m
           use_insecure_cipher: false
+          debug: true
           source: "ecosystem.config.js"
-          target: "${{ secrets.BACKEND_TARGET_DIR }}"
+          target: "${{ secrets.BACKEND_TARGET_DIR }}/"
           overwrite: true
 
       # ✅ Activate Frontend Release
@@ -172,6 +196,20 @@ jobs:
             BACKEND_TARGET="${{ secrets.BACKEND_TARGET_DIR }}"
             INCOMING_BACKEND="$BACKEND_TARGET/_incoming_backend/dist"
             DIST_DIR="$BACKEND_TARGET/dist"
+
+            # Handle different upload structures
+            if [ -d "$BACKEND_TARGET/_incoming_backend/dist/dist" ]; then
+              # If nested dist/dist structure
+              INCOMING_BACKEND="$BACKEND_TARGET/_incoming_backend/dist/dist"
+            elif [ -d "$BACKEND_TARGET/_incoming_backend/dist" ]; then
+              # Normal structure
+              INCOMING_BACKEND="$BACKEND_TARGET/_incoming_backend/dist"
+            else
+              # Check if dist is directly in _incoming_backend
+              if [ -d "$BACKEND_TARGET/_incoming_backend/server" ] || [ -f "$BACKEND_TARGET/_incoming_backend/server/server.js" ]; then
+                INCOMING_BACKEND="$BACKEND_TARGET/_incoming_backend"
+              fi
+            fi
             ENV_FILE="$BACKEND_TARGET/server/.env"
             ENV_PROD_FILE="$BACKEND_TARGET/.env.production"
 
