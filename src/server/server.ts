@@ -81,13 +81,15 @@ app.use(
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 
-// Rate limiting for API routes (applied before routes)
-app.use("/api", apiRateLimit);
-
-// Health check
+// Health check (register early, before rate limiting)
 app.get("/api/health", (_req, res) =>
   res.status(200).json({ ok: true, db: isMongoConnected() ? "up" : "down" })
 );
+
+// Rate limiting for API routes (applied before routes, but after health check)
+app.use("/api", apiRateLimit);
+
+// Static file serving
 const uploadsPath = path.resolve(process.cwd(), "uploads");
 try {
   if (!fs.existsSync(uploadsPath)) {
@@ -99,16 +101,8 @@ try {
 }
 app.use("/uploads", express.static(uploadsPath));
 
-// If DB is down, return a clear response (prevents proxy ECONNREFUSED)
-app.use((req, res, next) => {
-  if (req.path === "/api/health") return next();
-  if (req.path.startsWith("/api/") && !isMongoConnected()) {
-    return res.status(503).json({ message: "Database unavailable" });
-  }
-  return next();
-});
-
-// Routes - Register all API routes before 404 handler
+// Routes - Register all API routes BEFORE any blocking middleware
+// IMPORTANT: Routes must be registered before 404 handler
 app.use("/api/metrics", metricsRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/bouquets", bouquetRoutes);
@@ -117,7 +111,7 @@ app.use("/api/hero-slider", heroSliderRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/customers", customerRoutes);
 
-// Log registered routes (always log, not just in development)
+// Log registered routes (always log)
 console.log("✅ Registered API routes:");
 console.log("  - /api/metrics");
 console.log("  - /api/auth");
@@ -126,6 +120,12 @@ console.log("  - /api/collections");
 console.log("  - /api/hero-slider");
 console.log("  - /api/orders");
 console.log("  - /api/customers");
+
+// Debug middleware for API routes (always log for debugging)
+app.use("/api", (req, res, next) => {
+  console.log(`[API] ${req.method} ${req.path}${req.url !== req.path ? ` (url: ${req.url})` : ""}`);
+  next();
+});
 
 // 404 handler for API routes (must come after all route registrations)
 app.use("/api", (req, res) => {
