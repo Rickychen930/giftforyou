@@ -103,6 +103,12 @@ export async function postAnalyticsEvent(
   res: Response
 ): Promise<void> {
   try {
+    // Handle CORS preflight
+    if (req.method === "OPTIONS") {
+      res.status(200).end();
+      return;
+    }
+
     const rawType = (req.body?.type ?? "").toString().trim();
     const type: AnalyticsEventType | "" =
       rawType === "pageview" || rawType === "search" || rawType === "bouquet_view"
@@ -110,7 +116,7 @@ export async function postAnalyticsEvent(
         : "";
 
     if (!type) {
-      res.status(400).json({ error: "Invalid event type" });
+      res.status(200).json({ success: false, error: "Invalid event type" });
       return;
     }
 
@@ -121,12 +127,12 @@ export async function postAnalyticsEvent(
     const visitorId = normalizeVisitorId(req.body?.visitorId);
 
     if (type === "search" && term.length < 2) {
-      res.status(204).end();
+      res.status(200).json({ success: true, skipped: true });
       return;
     }
 
     if (type === "bouquet_view" && !bouquetId) {
-      res.status(204).end();
+      res.status(200).json({ success: true, skipped: true });
       return;
     }
 
@@ -139,11 +145,11 @@ export async function postAnalyticsEvent(
       visitorId,
     });
 
-    res.status(204).end();
+    res.status(200).json({ success: true });
   } catch (err) {
-    // Tracking must never break the app
+    // Tracking must never break the app - return success even on error
     console.error("postAnalyticsEvent failed:", err);
-    res.status(204).end();
+    res.status(200).json({ success: false, error: "Event not saved" });
   }
 }
 

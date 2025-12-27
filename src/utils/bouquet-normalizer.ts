@@ -10,18 +10,30 @@ import { isNonEmptyString } from "./validation";
  * Normalize raw bouquet data from API to Bouquet type
  * Handles all edge cases and ensures type safety
  */
-export function normalizeBouquet(b: unknown): Bouquet {
+export function normalizeBouquet(b: unknown): Bouquet | null {
   if (!b || typeof b !== "object") {
-    return getEmptyBouquet();
+    return null;
   }
 
   const raw = b as Record<string, unknown>;
 
+  // Critical fields - if missing, return null to filter out invalid bouquets
+  const id = String(raw._id ?? raw.id ?? "").trim();
+  const name = isNonEmptyString(raw.name) ? raw.name.trim() : "";
+
+  // If critical fields are missing, return null (will be filtered out)
+  if (!id || !name) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn("Bouquet missing critical fields (_id or name):", raw);
+    }
+    return null;
+  }
+
   return {
-    _id: String(raw._id ?? ""),
-    name: isNonEmptyString(raw.name) ? raw.name : "",
+    _id: id,
+    name,
     description: isNonEmptyString(raw.description) ? raw.description : "",
-    price: typeof raw.price === "number" && Number.isFinite(raw.price) ? raw.price : 0,
+    price: typeof raw.price === "number" && Number.isFinite(raw.price) && raw.price >= 0 ? raw.price : 0,
     type: isNonEmptyString(raw.type) ? raw.type : "",
     size: isNonEmptyString(raw.size) ? raw.size : "",
     image: isNonEmptyString(raw.image) ? raw.image : "",
@@ -35,7 +47,7 @@ export function normalizeBouquet(b: unknown): Bouquet {
       : [],
     isNewEdition: Boolean(raw.isNewEdition),
     isFeatured: Boolean(raw.isFeatured),
-    quantity: typeof raw.quantity === "number" && Number.isFinite(raw.quantity) ? raw.quantity : 0,
+    quantity: typeof raw.quantity === "number" && Number.isFinite(raw.quantity) && raw.quantity >= 0 ? raw.quantity : 0,
     customPenanda: Array.isArray(raw.customPenanda)
       ? raw.customPenanda.filter((v): v is string => typeof v === "string" && v.trim().length > 0)
       : [],
@@ -46,35 +58,12 @@ export function normalizeBouquet(b: unknown): Bouquet {
 }
 
 /**
- * Get empty bouquet object with default values
- */
-function getEmptyBouquet(): Bouquet {
-  return {
-    _id: "",
-    name: "",
-    description: "",
-    price: 0,
-    type: "",
-    size: "",
-    image: "",
-    status: "ready",
-    collectionName: "",
-    occasions: [],
-    flowers: [],
-    isNewEdition: false,
-    isFeatured: false,
-    quantity: 0,
-    customPenanda: [],
-    careInstructions: undefined,
-    createdAt: undefined,
-    updatedAt: undefined,
-  };
-}
-
-/**
  * Normalize array of bouquets
+ * Filters out invalid bouquets (those missing critical fields)
  */
 export function normalizeBouquets(bouquets: unknown[]): Bouquet[] {
-  return bouquets.map(normalizeBouquet);
+  return bouquets
+    .map(normalizeBouquet)
+    .filter((b): b is Bouquet => b !== null);
 }
 

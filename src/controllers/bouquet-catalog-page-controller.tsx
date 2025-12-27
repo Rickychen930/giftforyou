@@ -280,6 +280,16 @@ class BouquetCatalogController extends Component<
 
       const bouquets = normalizeBouquets(data);
 
+      // Log warning if no valid bouquets found
+      if (bouquets.length === 0 && data.length > 0) {
+        console.warn("All bouquets were filtered out during normalization. Check bouquet data structure.");
+      }
+
+      // Log info in development
+      if (process.env.NODE_ENV === "development") {
+        console.log(`Loaded ${bouquets.length} valid bouquets from ${data.length} total items`);
+      }
+
       this.setState({ bouquets, loading: false, error: null });
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === "AbortError") return;

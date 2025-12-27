@@ -57,15 +57,26 @@ export async function postAnalyticsEvent(
       bouquetId: safeTrim(payload.bouquetId, 64),
     };
 
-    await fetch(url, {
+    const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
       // Helps deliver events during navigation/unload in modern browsers
       keepalive: true,
     });
-  } catch {
-    // Tracking must never break UX
+
+    // Silently handle 404 or other errors - analytics should never break UX
+    if (!res.ok && res.status !== 404) {
+      // Only log non-404 errors in development
+      if (process.env.NODE_ENV === "development") {
+        console.warn(`Analytics event failed (${res.status}):`, payload.type);
+      }
+    }
+  } catch (err) {
+    // Tracking must never break UX - silently fail
+    if (process.env.NODE_ENV === "development") {
+      console.warn("Analytics event error (silent):", err);
+    }
   }
 }
 

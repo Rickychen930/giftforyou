@@ -57,41 +57,45 @@ export default function BouquetDetailController() {
           throw new Error(`Failed to parse response: ${parseErr instanceof Error ? parseErr.message : "Invalid JSON"}`);
         }
 
-        const normalizedBouquet = normalizeBouquet(data);
-        setBouquet(normalizedBouquet);
+               const normalizedBouquet = normalizeBouquet(data);
+               if (!normalizedBouquet) {
+                 throw new Error("Bouquet data is invalid (missing _id or name)");
+               }
+               
+               setBouquet(normalizedBouquet);
 
-        // Fetch similar bouquets
-        try {
-          const allRes = await fetch(`${API_BASE}/api/bouquets`, {
-            signal: ac.signal,
-          });
-          if (allRes.ok) {
-            let allData: unknown;
-            try {
-              const allText = await allRes.text();
-              allData = allText.trim() ? JSON.parse(allText) : [];
-            } catch {
-              allData = [];
-            }
-            const allBouquets = Array.isArray(allData) ? normalizeBouquets(allData) : [];
-            
-            // Find similar bouquets (same collection, type, or size, excluding current)
-            if (!ac.signal.aborted) {
-              const similar = allBouquets
-                .filter((b) => b._id !== normalizedBouquet._id)
-                .filter((b) => 
-                  b.collectionName === normalizedBouquet.collectionName ||
-                  b.type === normalizedBouquet.type ||
-                  b.size === normalizedBouquet.size
-                )
-                .slice(0, 4);
-              
-              setSimilarBouquets(similar);
-            }
-          }
-        } catch {
-          // Silently fail for similar bouquets
-        }
+               // Fetch similar bouquets
+               try {
+                 const allRes = await fetch(`${API_BASE}/api/bouquets`, {
+                   signal: ac.signal,
+                 });
+                 if (allRes.ok) {
+                   let allData: unknown;
+                   try {
+                     const allText = await allRes.text();
+                     allData = allText.trim() ? JSON.parse(allText) : [];
+                   } catch {
+                     allData = [];
+                   }
+                   const allBouquets = Array.isArray(allData) ? normalizeBouquets(allData) : [];
+                   
+                   // Find similar bouquets (same collection, type, or size, excluding current)
+                   if (!ac.signal.aborted && normalizedBouquet) {
+                     const similar = allBouquets
+                       .filter((b) => b._id !== normalizedBouquet._id)
+                       .filter((b) => 
+                         b.collectionName === normalizedBouquet.collectionName ||
+                         b.type === normalizedBouquet.type ||
+                         b.size === normalizedBouquet.size
+                       )
+                       .slice(0, 4);
+                     
+                     setSimilarBouquets(similar);
+                   }
+                 }
+               } catch {
+                 // Silently fail for similar bouquets
+               }
       } catch (e: unknown) {
         // Check if error is AbortError (request was cancelled)
         if (e instanceof Error && e.name === "AbortError") {

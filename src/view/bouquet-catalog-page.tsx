@@ -299,6 +299,16 @@ class BouquetCatalogView extends Component<Props> {
       priceRange[0] !== DEFAULT_PRICE[0] ||
       priceRange[1] !== DEFAULT_PRICE[1];
 
+    // Debug logging in development
+    if (process.env.NODE_ENV === "development" && total === 0 && !loading && !error) {
+      console.warn("Catalog: No bouquets to display. Check:", {
+        total,
+        loading,
+        error,
+        hasFilters: hasActiveFilters,
+      });
+    }
+
     const sortLabel = (() => {
       switch (sortBy) {
         case "price-asc":
