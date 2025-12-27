@@ -174,9 +174,17 @@
   );
   aspect-ratio: 4 / 5;
   max-height: min(600px, 70vh);
+  min-height: 400px;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bdMedia img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .bdMedia:hover {
@@ -1014,6 +1022,7 @@
 .bdSimilar__media {
   position: relative;
   aspect-ratio: 4 / 5;
+  min-height: 200px;
   overflow: hidden;
   background: var(--ink-100);
 }
@@ -1022,6 +1031,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
   transition: transform 0.4s ease;
 }
 

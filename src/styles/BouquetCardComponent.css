@@ -103,6 +103,7 @@
   width: 100%;
   overflow: hidden;
   aspect-ratio: 3 / 4;
+  min-height: 300px;
   background: linear-gradient(
     135deg,
     rgba(212, 140, 156, 0.05) 0%,

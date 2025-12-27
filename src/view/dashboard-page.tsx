@@ -921,8 +921,8 @@ class DashboardView extends Component<Props, State> {
               </div>
             </div>
 
-            {/* Sales Metrics Section */}
-            {salesError ? (
+            {/* Sales Metrics Section - Only show if available */}
+            {salesError && salesError.includes("404") ? null : salesError ? (
               <div className="overviewCard overviewCard--error" aria-label="Sales metrics">
                 <p className="overviewCard__title">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ marginRight: "0.5rem", opacity: 0.8 }}>
@@ -932,9 +932,7 @@ class DashboardView extends Component<Props, State> {
                   Penjualan
                 </p>
                 <p className="overviewCard__empty" style={{ color: "var(--error-text)", fontSize: "0.9rem", textAlign: "left" }}>
-                  {salesError.includes("HTML") || salesError.includes("404") 
-                    ? "Orders API tidak tersedia. Pastikan endpoint /api/orders dikonfigurasi dengan benar di server."
-                    : salesError}
+                  {salesError}
                 </p>
               </div>
             ) : salesMetrics ? (

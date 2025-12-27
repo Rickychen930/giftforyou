@@ -263,6 +263,9 @@ class BouquetDetailPage extends Component<Props> {
                 loading="eager"
                 decoding="async"
                 fetchPriority="high"
+                width="600"
+                height="750"
+                style={{ aspectRatio: "4 / 5" }}
                 onError={(e) => {
                   e.currentTarget.onerror = null;
                   e.currentTarget.src = FALLBACK_IMAGE;

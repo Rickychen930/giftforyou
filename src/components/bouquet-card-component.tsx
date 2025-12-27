@@ -113,6 +113,9 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
           className={`bouquet-image ${imageLoaded ? "is-loaded" : ""} ${imageError ? "is-error" : ""}`}
           loading="lazy"
           decoding="async"
+          width="400"
+          height="533"
+          style={{ aspectRatio: "3 / 4" }}
           onLoad={handleImageLoad}
           onError={handleImageError}
         />
