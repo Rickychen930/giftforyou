@@ -102,13 +102,18 @@ interface OrderFormState {
   quantity: number;
 }
 
-class BouquetDetailPage extends Component<Props> {
-  state: OrderFormState = {
+interface BouquetDetailState extends OrderFormState {
+  activeTab: "overview" | "order";
+}
+
+class BouquetDetailPage extends Component<Props, BouquetDetailState> {
+  state: BouquetDetailState = {
     deliveryType: "delivery",
     deliveryDate: "",
     address: "",
     greetingCard: "",
     quantity: 1,
+    activeTab: "overview",
   };
 
   componentDidMount(): void {
@@ -154,7 +159,10 @@ class BouquetDetailPage extends Component<Props> {
     field: keyof OrderFormState,
     value: string | number
   ): void => {
-    this.setState({ [field]: value } as Partial<OrderFormState>);
+    this.setState((prevState) => ({
+      ...prevState,
+      [field]: value,
+    }));
   };
 
   private applySeo(): void {
@@ -335,6 +343,47 @@ class BouquetDetailPage extends Component<Props> {
                 <p className="bdDesc">{formatDescription(bouquet.description)}</p>
               )}
 
+              {/* Tab Navigation */}
+              <div className="bdTabs" role="tablist" aria-label="Detail bouquet tabs">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={this.state.activeTab === "overview"}
+                  aria-controls="bd-tabpanel-overview"
+                  id="bd-tab-overview"
+                  className={`bdTab ${this.state.activeTab === "overview" ? "bdTab--active" : ""}`}
+                  onClick={() => this.setState({ activeTab: "overview" })}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>Overview</span>
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={this.state.activeTab === "order"}
+                  aria-controls="bd-tabpanel-order"
+                  id="bd-tab-order"
+                  className={`bdTab ${this.state.activeTab === "order" ? "bdTab--active" : ""}`}
+                  onClick={() => this.setState({ activeTab: "order" })}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>Pesan</span>
+                </button>
+              </div>
+
+              {/* Tab Panel: Overview */}
+              {this.state.activeTab === "overview" && (
+                <div
+                  role="tabpanel"
+                  id="bd-tabpanel-overview"
+                  aria-labelledby="bd-tab-overview"
+                  className="bdTabPanel"
+                >
               <div className="bdMeta" aria-label="Ringkasan bouquet">
                 {bouquet.size && <span className="bdChip">Ukuran: {formatBouquetSize(bouquet.size)}</span>}
                 {bouquet.type && <span className="bdChip">Tipe: {formatBouquetType(bouquet.type)}</span>}
@@ -469,6 +518,17 @@ class BouquetDetailPage extends Component<Props> {
                 </div>
               </div>
 
+                </div>
+              )}
+
+              {/* Tab Panel: Order */}
+              {this.state.activeTab === "order" && (
+                <div
+                  role="tabpanel"
+                  id="bd-tabpanel-order"
+                  aria-labelledby="bd-tab-order"
+                  className="bdTabPanel"
+                >
               {/* Quick Order Button - Instant order without form */}
               <div className="bdQuickOrder" aria-label="Order langsung">
                 <a
@@ -618,6 +678,8 @@ class BouquetDetailPage extends Component<Props> {
                   Lengkapi form di atas, lalu klik tombol untuk mengirim pesan ke WhatsApp.
                 </p>
               </div>
+                </div>
+              )}
 
               {/* Admin Links - Only visible to admins, minimal design */}
               {isAdmin && (

@@ -623,6 +623,8 @@ class BouquetCatalogView extends Component<Props> {
                     status={b.status}
                     collectionName={b.collectionName}
                     customPenanda={b.customPenanda}
+                    isNewEdition={b.isNewEdition}
+                    isFeatured={b.isFeatured}
                   />
                 ))}
               </div>

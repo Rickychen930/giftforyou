@@ -505,11 +505,11 @@
   width: 100%;
 }
 
-/* Grid results */
+/* Grid results - Optimized for efficiency and visual appeal */
 .catalogGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
-  gap: clamp(1.5rem, 3vw, 2rem);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: clamp(1.25rem, 2.5vw, 1.75rem);
   align-items: stretch;
   grid-auto-rows: auto;
   min-height: 200px;
@@ -517,15 +517,35 @@
   position: relative;
 }
 
-@media (min-width: 1200px) {
+/* Tablet and small desktop - 3 columns */
+@media (min-width: 900px) {
   .catalogGrid {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: clamp(1.5rem, 2.5vw, 2rem);
   }
 }
 
+/* Desktop - 4 columns for better space utilization */
+@media (min-width: 1200px) {
+  .catalogGrid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+  }
+}
+
+/* Large desktop - 4-5 columns depending on screen size */
 @media (min-width: 1440px) {
   .catalogGrid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2.25rem;
+  }
+}
+
+/* Ultra-wide - 5-6 columns */
+@media (min-width: 1920px) {
+  .catalogGrid {
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2.5rem;
   }
 }
 

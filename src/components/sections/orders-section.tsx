@@ -293,15 +293,33 @@ export default function OrdersSection({ bouquets }: Props) {
         },
       });
 
+      // Read response text once
+      const responseText = await res.text();
+
       if (!res.ok) {
-        const t = await res.text();
-        throw new Error(`Gagal memuat order (${res.status}): ${t}`);
+        let errorMessage = `Gagal memuat order (${res.status})`;
+        try {
+          // Check if response is HTML (404 page)
+          if (responseText.includes("<!DOCTYPE html>") || responseText.includes("<html")) {
+            errorMessage = "Endpoint /api/orders tidak tersedia. Pastikan server berjalan dan route dikonfigurasi dengan benar.";
+          } else {
+            // Try to parse as JSON
+            try {
+              const json = JSON.parse(responseText);
+              errorMessage = json.message || json.error || errorMessage;
+            } catch {
+              errorMessage = responseText || errorMessage;
+            }
+          }
+        } catch {
+          errorMessage = responseText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
 
       let data: unknown;
       try {
-        const text = await res.text();
-        data = text.trim() ? JSON.parse(text) : [];
+        data = responseText.trim() ? JSON.parse(responseText) : [];
       } catch (parseErr) {
         throw new Error(`Failed to parse orders response: ${parseErr instanceof Error ? parseErr.message : "Invalid JSON"}`);
       }

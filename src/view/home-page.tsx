@@ -7,6 +7,8 @@ import { getCollections } from "../services/collection.service";
 import HeroCollectionSlider from "../components/sections/hero-collection-slider";
 import OurCollectionSection from "../components/sections/our-collection-section";
 import StoreLocationSection from "../components/sections/store-location-section";
+import InstagramFeedSection from "../components/sections/instagram-feed-section";
+import GoogleMapsReviewsSection from "../components/sections/google-maps-reviews-section";
 
 import { API_BASE } from "../config/api";
 // import { STORE_PROFILE } from "../config/store-profile"; FIXED ME
@@ -113,6 +115,10 @@ const HomePage: React.FC = () => {
       />
 
       <StoreLocationSection />
+
+      <InstagramFeedSection instagramUsername="giftforyou.idn" />
+
+      <GoogleMapsReviewsSection placeName="GiftForYou.idn" />
     </main>
   );
 };

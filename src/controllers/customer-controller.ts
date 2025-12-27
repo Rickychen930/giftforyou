@@ -4,6 +4,10 @@ import { escapeRegex, normalizeString } from "../utils/validation";
 
 export async function getCustomers(req: Request, res: Response): Promise<void> {
   try {
+    if (process.env.NODE_ENV === "development") {
+      console.log(`[getCustomers] Request: ${req.method} ${req.path}`, { query: req.query });
+    }
+
     const limitRaw = typeof req.query.limit === "string" ? req.query.limit : "200";
     const limitParsed = Number.parseInt(limitRaw, 10);
     const limit = Number.isFinite(limitParsed) ? Math.min(Math.max(limitParsed, 1), 500) : 200;

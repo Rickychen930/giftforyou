@@ -1,0 +1,123 @@
+@import "colors.css";
+
+.toast {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  min-width: 300px;
+  max-width: 500px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.toast__icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast__message {
+  flex: 1;
+  line-height: 1.5;
+}
+
+.toast__close {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.toast__close:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* Success Toast */
+.toast--success {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.95) 0%,
+    rgba(5, 150, 105, 0.95) 100%
+  );
+  color: white;
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+/* Error Toast */
+.toast--error {
+  background: linear-gradient(
+    135deg,
+    rgba(239, 68, 68, 0.95) 0%,
+    rgba(220, 38, 38, 0.95) 100%
+  );
+  color: white;
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+/* Info Toast */
+.toast--info {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.95) 0%,
+    rgba(37, 99, 235, 0.95) 100%
+  );
+  color: white;
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+/* Warning Toast */
+.toast--warning {
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.95) 0%,
+    rgba(217, 119, 6, 0.95) 100%
+  );
+  color: white;
+  border-color: rgba(245, 158, 11, 0.5);
+}
+
+@media (max-width: 768px) {
+  .toast {
+    top: 1rem;
+    right: 1rem;
+    left: 1rem;
+    min-width: auto;
+    max-width: none;
+  }
+}
+
