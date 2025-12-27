@@ -1,0 +1,28 @@
+[Unit]
+Description=Giftforyou.idn API Server
+After=network.target mongod.service
+Requires=mongod.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/var/www/root
+Environment=NODE_ENV=production
+EnvironmentFile=/var/www/root/.env
+ExecStart=/usr/bin/node /var/www/root/dist/server/server.js
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=giftforyou-api
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Resource limits
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+
