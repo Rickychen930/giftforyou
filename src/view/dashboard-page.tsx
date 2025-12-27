@@ -64,6 +64,8 @@ interface Props {
   onDelete?: (bouquetId: string) => Promise<void>;
   onHeroSaved?: () => void | Promise<void>;
   onLogout: () => void;
+  onUpdateCollectionName?: (collectionId: string, newName: string) => Promise<boolean>;
+  onMoveBouquet?: (bouquetId: string, targetCollectionId: string) => Promise<boolean>;
 }
 
 type ActiveTab = "overview" | "orders" | "upload" | "edit" | "hero";
@@ -1432,6 +1434,8 @@ class DashboardView extends Component<Props, State> {
             onDuplicate={this.props.onDuplicate}
             onDelete={this.props.onDelete}
             collections={collections}
+            onUpdateCollection={this.props.onUpdateCollectionName}
+            onMoveBouquet={this.props.onMoveBouquet}
           />
         );
 

@@ -219,7 +219,9 @@ class DashboardController extends Component<{}, State> {
             const ordersText = await ordersRes.text();
             // Check if response is HTML (error page)
             if (ordersText.trim().startsWith("<!DOCTYPE") || ordersText.trim().startsWith("<html")) {
-              salesError = "Orders API returned HTML instead of JSON. Please check server configuration.";
+              // Silently fail - sales metrics are optional
+              console.warn("Orders API returned HTML instead of JSON");
+              salesMetrics = undefined;
             } else if (ordersText.trim()) {
               const ordersData = JSON.parse(ordersText) as Array<{
                 _id?: string;
@@ -309,14 +311,21 @@ class DashboardController extends Component<{}, State> {
               };
             }
           } catch (parseErr) {
-            salesError = `Failed to parse sales data: ${parseErr instanceof Error ? parseErr.message : "Invalid JSON"}`;
+            // Silently fail - sales metrics are optional
+            console.warn("Failed to parse sales data:", parseErr);
+            salesMetrics = undefined;
           }
         } else {
-          const t = await ordersRes.text();
-          salesError = `Failed to load sales data (${ordersRes.status}): ${t || ordersRes.statusText}`;
+          // Silently fail - sales metrics are optional
+          if (ordersRes.status !== 404) {
+            console.warn(`Failed to load sales data (${ordersRes.status})`);
+          }
+          salesMetrics = undefined;
         }
       } catch (e: unknown) {
-        salesError = e instanceof Error ? e.message : "Failed to load sales data.";
+        // Silently fail - sales metrics are optional
+        console.warn("Error loading sales data:", e);
+        salesMetrics = undefined;
       }
 
       this.setState({
@@ -542,6 +551,100 @@ class DashboardController extends Component<{}, State> {
     }
   };
 
+  private onUpdateCollectionName = async (
+    collectionId: string,
+    newName: string
+  ): Promise<boolean> => {
+    try {
+      const res = await fetch(`${API_BASE}/api/collections/${collectionId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...this.getAuthHeaders(),
+        },
+        body: JSON.stringify({ name: newName }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to update collection name.");
+      }
+
+      // Refresh collections after update
+      await this.loadDashboard();
+      return true;
+    } catch (error) {
+      console.error("Failed to update collection name:", error);
+      this.setState({ errorMessage: `Gagal memperbarui nama koleksi: ${error instanceof Error ? error.message : String(error)}` });
+      return false;
+    }
+  };
+
+  private onMoveBouquet = async (
+    bouquetId: string,
+    targetCollectionId: string
+  ): Promise<boolean> => {
+    try {
+      // First, get the bouquet to find its current collection
+      const bouquetRes = await fetch(`${API_BASE}/api/bouquets/${bouquetId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...this.getAuthHeaders(),
+        },
+      });
+
+      if (!bouquetRes.ok) {
+        throw new Error("Failed to fetch bouquet.");
+      }
+
+      const bouquet = await bouquetRes.json();
+      const oldCollectionName = bouquet.collectionName;
+
+      // Add bouquet to target collection
+      const addRes = await fetch(`${API_BASE}/api/collections/${targetCollectionId}/bouquets`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...this.getAuthHeaders(),
+        },
+        body: JSON.stringify({ bouquetId }),
+      });
+
+      if (!addRes.ok) {
+        const errorData = await addRes.json();
+        throw new Error(errorData.error || "Failed to move bouquet.");
+      }
+
+      const addData = await addRes.json();
+      const newCollectionName = addData.collection?.name;
+
+      // Update bouquet's collectionName
+      if (newCollectionName) {
+        const updateRes = await fetch(`${API_BASE}/api/bouquets/${bouquetId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            ...this.getAuthHeaders(),
+          },
+          body: JSON.stringify({ collectionName: newCollectionName }),
+        });
+
+        if (!updateRes.ok) {
+          console.warn("Failed to update bouquet's collection name, but bouquet was moved.");
+        }
+      }
+
+      // Refresh dashboard after move
+      await this.loadDashboard();
+      return true;
+    } catch (error) {
+      console.error("Failed to move bouquet:", error);
+      this.setState({ errorMessage: `Gagal memindahkan bouquet: ${error instanceof Error ? error.message : String(error)}` });
+      return false;
+    }
+  };
+
   private onLogout = () => {
     const { clearAuth } = require("../utils/auth-utils");
     clearAuth();
@@ -568,6 +671,8 @@ class DashboardController extends Component<{}, State> {
         onDelete={this.onDelete}
         onHeroSaved={this.refreshMetrics}
         onLogout={this.onLogout}
+        onUpdateCollectionName={this.onUpdateCollectionName}
+        onMoveBouquet={this.onMoveBouquet}
       />
     );
   }

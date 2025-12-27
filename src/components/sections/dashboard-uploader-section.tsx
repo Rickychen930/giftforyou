@@ -884,15 +884,14 @@ class BouquetUploader extends Component<Props, State> {
     const sizeError = this.validateField("size", this.state.size);
     if (sizeError) errors.size = sizeError;
 
+    // Validate required collection field
+    const collError = this.validateField("collectionName", this.state.collectionName);
+    if (collError) errors.collectionName = collError;
+
     // Validate optional fields if they have values
     if (this.state.description.trim()) {
       const descError = this.validateField("description", this.state.description);
       if (descError) errors.description = descError;
-    }
-
-    if (this.state.collectionName.trim()) {
-      const collError = this.validateField("collectionName", this.state.collectionName);
-      if (collError) errors.collectionName = collError;
     }
 
     if (this.state.careInstructions.trim()) {
@@ -1336,11 +1335,6 @@ class BouquetUploader extends Component<Props, State> {
                       aria-describedby={touchedFields.has("price") && fieldErrors.price ? "price-error" : undefined}
                       className="uploader__priceInput"
                     />
-                    {this.state.price > 0 && (
-                      <span className="uploader__pricePreview" aria-label="Format harga">
-                        {this.formatPrice(this.state.price)}
-                      </span>
-                    )}
                   </div>
                   {touchedFields.has("price") && fieldErrors.price && (
                     <span id="price-error" className="uploader__fieldError" role="alert" aria-live="polite">
@@ -1364,7 +1358,9 @@ class BouquetUploader extends Component<Props, State> {
                 </label>
 
                 <label className="uploader__field">
-                  <span className="uploader__fieldLabel">Koleksi</span>
+                  <span className="uploader__fieldLabel">
+                    Koleksi <span className="uploader__required" aria-label="wajib diisi">*</span>
+                  </span>
                   <DropdownWithModal
                     label="Koleksi"
                     value={this.state.collectionName}
@@ -1443,56 +1439,40 @@ class BouquetUploader extends Component<Props, State> {
 
                 <label className="uploader__field">
                   <span className="uploader__fieldLabel">Stok</span>
-                  <div className="uploader__stockWrapper">
-                    <DropdownWithModal
-                      label="Stok"
-                      value={this.state.quantity > 0 ? String(this.state.quantity) : ""}
-                      options={DEFAULT_STOCK_LEVELS}
-                      onChange={(value) => {
-                        const num = parseInt(value, 10);
-                        if (!isNaN(num) && num >= 0) {
-                          this.setState({ quantity: num });
-                          const newTouchedFields = new Set(this.state.touchedFields);
-                          newTouchedFields.add("quantity");
-                          this.setState({ touchedFields: newTouchedFields });
-                          const error = this.validateField("quantity", num);
-                          if (error !== null) {
-                            const newFieldErrors = { ...this.state.fieldErrors };
-                            if (error) {
-                              newFieldErrors.quantity = error;
-                            } else {
-                              delete newFieldErrors.quantity;
-                            }
-                            this.setState({ fieldErrors: newFieldErrors });
+                  <DropdownWithModal
+                    label="Stok"
+                    value={this.state.quantity > 0 ? String(this.state.quantity) : ""}
+                    options={DEFAULT_STOCK_LEVELS}
+                    onChange={(value) => {
+                      const num = parseInt(value, 10);
+                      if (!isNaN(num) && num >= 0) {
+                        this.setState({ quantity: num });
+                        const newTouchedFields = new Set(this.state.touchedFields);
+                        newTouchedFields.add("quantity");
+                        this.setState({ touchedFields: newTouchedFields });
+                        const error = this.validateField("quantity", num);
+                        if (error !== null) {
+                          const newFieldErrors = { ...this.state.fieldErrors };
+                          if (error) {
+                            newFieldErrors.quantity = error;
+                          } else {
+                            delete newFieldErrors.quantity;
                           }
+                          this.setState({ fieldErrors: newFieldErrors });
                         }
-                      }}
-                      onAddNew={(newValue) => {
-                        const num = parseInt(newValue, 10);
-                        if (!isNaN(num) && num >= 0) {
-                          this.setState({ quantity: num });
-                        }
-                      }}
-                      placeholder="Pilih jumlah stok..."
-                      disabled={submitting}
-                      error={touchedFields.has("quantity") && fieldErrors.quantity ? fieldErrors.quantity : undefined}
-                      storageKey="uploader_stock_levels"
-                    />
-                    <span className="uploader__stockSeparator">atau</span>
-                    <input
-                      name="quantity"
-                      type="number"
-                      min={0}
-                      step={1}
-                      value={this.state.quantity || ""}
-                      onChange={this.handleChange}
-                      placeholder="Input manual"
-                      disabled={submitting}
-                      className="uploader__stockInput"
-                      aria-invalid={touchedFields.has("quantity") && fieldErrors.quantity ? "true" : "false"}
-                      aria-describedby={touchedFields.has("quantity") && fieldErrors.quantity ? "quantity-error" : undefined}
-                    />
-                  </div>
+                      }
+                    }}
+                    onAddNew={(newValue) => {
+                      const num = parseInt(newValue, 10);
+                      if (!isNaN(num) && num >= 0) {
+                        this.setState({ quantity: num });
+                      }
+                    }}
+                    placeholder="Pilih jumlah stok..."
+                    disabled={submitting}
+                    error={touchedFields.has("quantity") && fieldErrors.quantity ? fieldErrors.quantity : undefined}
+                    storageKey="uploader_stock_levels"
+                  />
                   {touchedFields.has("quantity") && fieldErrors.quantity && (
                     <span id="quantity-error" className="uploader__fieldError" role="alert" aria-live="polite">
                       {fieldErrors.quantity}
