@@ -22,6 +22,23 @@ type InsightsResponse = {
   uniqueVisitorsAvailable?: boolean;
 };
 
+type SalesMetrics = {
+  totalOrders: number;
+  totalRevenue: number;
+  todayOrders: number;
+  todayRevenue: number;
+  thisMonthOrders: number;
+  thisMonthRevenue: number;
+  pendingOrders: number;
+  processingOrders: number;
+  completedOrders: number;
+  unpaidOrders: number;
+  paidOrders: number;
+  topSellingBouquets: Array<{ bouquetId: string; bouquetName: string; orderCount: number; revenue: number }>;
+  averageOrderValue: number;
+  totalCustomers: number;
+};
+
 interface State {
   bouquets: Bouquet[];
   collectionsCount: number;
@@ -30,6 +47,9 @@ interface State {
 
   insights?: InsightsResponse;
   insightsError?: string;
+
+  salesMetrics?: SalesMetrics;
+  salesError?: string;
 
   loading: boolean;
   errorMessage?: string;
@@ -106,14 +126,21 @@ class DashboardController extends Component<{}, State> {
         signal: this.abortController.signal,
       });
 
-      const [metricsRes, bouquetsRes, insightsRes] = await Promise.all([
+      const ordersReq = fetch(`${API_BASE}/api/orders?limit=1000`, {
+        method: "GET",
+        headers,
+        signal: this.abortController.signal,
+      });
+
+      const [metricsRes, bouquetsRes, insightsRes, ordersRes] = await Promise.all([
         metricsReq,
         bouquetsReq,
         insightsReq,
+        ordersReq,
       ]);
 
       // Handle auth errors clearly
-      if (metricsRes.status === 401 || bouquetsRes.status === 401) {
+      if (metricsRes.status === 401 || bouquetsRes.status === 401 || ordersRes.status === 401) {
         throw new Error("Unauthorized. Please login again.");
       }
 
@@ -183,6 +210,112 @@ class DashboardController extends Component<{}, State> {
         new Set(bouquets.map((b) => b.collectionName).filter((name): name is string => typeof name === "string" && name.trim().length > 0))
       );
 
+      // Process sales metrics from orders
+      let salesMetrics: SalesMetrics | undefined;
+      let salesError: string | undefined;
+      try {
+        if (ordersRes.ok) {
+          try {
+            const ordersText = await ordersRes.text();
+            if (ordersText.trim()) {
+              const ordersData = JSON.parse(ordersText) as Array<{
+                _id?: string;
+                totalAmount?: number;
+                orderStatus?: string;
+                paymentStatus?: string;
+                bouquetId?: string;
+                bouquetName?: string;
+                createdAt?: string;
+                customerId?: string;
+              }>;
+
+              const now = new Date();
+              const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+              const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+              const orders = Array.isArray(ordersData) ? ordersData : [];
+              
+              const totalOrders = orders.length;
+              const totalRevenue = orders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+              
+              const todayOrders = orders.filter((o) => {
+                const created = o.createdAt ? new Date(o.createdAt) : null;
+                return created && created >= todayStart;
+              });
+              const todayRevenue = todayOrders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+              
+              const thisMonthOrders = orders.filter((o) => {
+                const created = o.createdAt ? new Date(o.createdAt) : null;
+                return created && created >= monthStart;
+              });
+              const thisMonthRevenue = thisMonthOrders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+
+              const pendingOrders = orders.filter((o) => 
+                o.orderStatus === "bertanya" || o.orderStatus === "memesan"
+              ).length;
+              const processingOrders = orders.filter((o) => 
+                o.orderStatus === "sedang_diproses" || o.orderStatus === "menunggu_driver" || o.orderStatus === "pengantaran"
+              ).length;
+              const completedOrders = orders.filter((o) => o.orderStatus === "terkirim").length;
+
+              const unpaidOrders = orders.filter((o) => o.paymentStatus === "belum_bayar").length;
+              const paidOrders = orders.filter((o) => 
+                o.paymentStatus === "dp" || o.paymentStatus === "sudah_bayar"
+              ).length;
+
+              // Top selling bouquets
+              const bouquetSales = new Map<string, { name: string; count: number; revenue: number }>();
+              orders.forEach((o) => {
+                if (o.bouquetId && o.bouquetName) {
+                  const existing = bouquetSales.get(o.bouquetId) || { name: o.bouquetName, count: 0, revenue: 0 };
+                  existing.count += 1;
+                  existing.revenue += Number(o.totalAmount) || 0;
+                  bouquetSales.set(o.bouquetId, existing);
+                }
+              });
+              const topSellingBouquets = Array.from(bouquetSales.entries())
+                .map(([id, data]) => ({
+                  bouquetId: id,
+                  bouquetName: data.name,
+                  orderCount: data.count,
+                  revenue: data.revenue,
+                }))
+                .sort((a, b) => b.orderCount - a.orderCount || b.revenue - a.revenue)
+                .slice(0, 5);
+
+              const averageOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
+              
+              const uniqueCustomers = new Set(orders.map((o) => o.customerId).filter((id): id is string => Boolean(id)));
+              const totalCustomers = uniqueCustomers.size;
+
+              salesMetrics = {
+                totalOrders,
+                totalRevenue,
+                todayOrders: todayOrders.length,
+                todayRevenue,
+                thisMonthOrders: thisMonthOrders.length,
+                thisMonthRevenue,
+                pendingOrders,
+                processingOrders,
+                completedOrders,
+                unpaidOrders,
+                paidOrders,
+                topSellingBouquets,
+                averageOrderValue,
+                totalCustomers,
+              };
+            }
+          } catch (parseErr) {
+            salesError = `Failed to parse sales data: ${parseErr instanceof Error ? parseErr.message : "Invalid JSON"}`;
+          }
+        } else {
+          const t = await ordersRes.text();
+          salesError = `Failed to load sales data (${ordersRes.status}): ${t || ordersRes.statusText}`;
+        }
+      } catch (e: unknown) {
+        salesError = e instanceof Error ? e.message : "Failed to load sales data.";
+      }
+
       this.setState({
         bouquets,
         visitorsCount: Number(metricsJson.visitorsCount ?? 0),
@@ -194,6 +327,8 @@ class DashboardController extends Component<{}, State> {
           : collectionsFallback,
         insights,
         insightsError,
+        salesMetrics,
+        salesError,
         errorMessage: undefined,
       });
     } catch (err: unknown) {
@@ -420,6 +555,8 @@ class DashboardController extends Component<{}, State> {
         collections={this.state.collections}
         insights={this.state.insights}
         insightsError={this.state.insightsError}
+        salesMetrics={this.state.salesMetrics}
+        salesError={this.state.salesError}
         loading={this.state.loading}
         errorMessage={this.state.errorMessage}
         onUpload={this.onUpload}

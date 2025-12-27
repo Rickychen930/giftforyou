@@ -3,6 +3,8 @@ import type { Bouquet } from "../models/domain/bouquet";
 import "../styles/DashboardPage.css";
 import { setSeo } from "../utils/seo";
 import { formatIDR } from "../utils/money";
+import { getPerformanceMetrics, getPerformanceScore, formatBytes, formatMs, observeCoreWebVitals } from "../utils/performance-monitor";
+import { analyzeSeo } from "../utils/seo-analyzer";
 
 import BouquetUploader from "../components/sections/dashboard-uploader-section";
 import BouquetEditorSection from "../components/sections/Bouquet-editor-section";
@@ -27,6 +29,24 @@ interface Props {
   };
   insightsError?: string;
 
+  salesMetrics?: {
+    totalOrders: number;
+    totalRevenue: number;
+    todayOrders: number;
+    todayRevenue: number;
+    thisMonthOrders: number;
+    thisMonthRevenue: number;
+    pendingOrders: number;
+    processingOrders: number;
+    completedOrders: number;
+    unpaidOrders: number;
+    paidOrders: number;
+    topSellingBouquets: Array<{ bouquetId: string; bouquetName: string; orderCount: number; revenue: number }>;
+    averageOrderValue: number;
+    totalCustomers: number;
+  };
+  salesError?: string;
+
   loading: boolean;
   errorMessage?: string;
 
@@ -48,6 +68,17 @@ const isActiveTab = (v: string): v is ActiveTab =>
   v === "upload" ||
   v === "edit" ||
   v === "hero";
+
+interface PerformanceState {
+  metrics: ReturnType<typeof getPerformanceMetrics>;
+  score: ReturnType<typeof getPerformanceScore>;
+  loading: boolean;
+}
+
+interface SeoState {
+  analysis: ReturnType<typeof analyzeSeo>;
+  loading: boolean;
+}
 
 const readTabFromLocation = (): ActiveTab | null => {
   try {
@@ -77,10 +108,27 @@ interface State {
   activeTab: ActiveTab;
   copyStatus: "" | "copied" | "failed";
   overviewCopyStatus: "" | "copied" | "failed";
+  performance: PerformanceState;
+  seo: SeoState;
 }
 
 class DashboardView extends Component<Props, State> {
-  state: State = { activeTab: "overview", copyStatus: "", overviewCopyStatus: "" };
+  private performanceCleanup: (() => void) | null = null;
+
+  state: State = {
+    activeTab: "overview",
+    copyStatus: "",
+    overviewCopyStatus: "",
+    performance: {
+      metrics: {},
+      score: { score: 0, grade: "poor", details: {} },
+      loading: true,
+    },
+    seo: {
+      analysis: { score: 0, grade: "poor", checks: [], recommendations: [] },
+      loading: true,
+    },
+  };
 
   componentDidMount(): void {
     const initial =
@@ -97,6 +145,8 @@ class DashboardView extends Component<Props, State> {
     }
 
     this.applySeo();
+    this.loadPerformanceMetrics();
+    this.loadSeoAnalysis();
 
     window.addEventListener("hashchange", this.handleHashChange);
     window.addEventListener("keydown", this.handleKeyDown);
@@ -105,7 +155,52 @@ class DashboardView extends Component<Props, State> {
   componentWillUnmount(): void {
     window.removeEventListener("hashchange", this.handleHashChange);
     window.removeEventListener("keydown", this.handleKeyDown);
+    if (this.performanceCleanup) {
+      this.performanceCleanup();
+    }
   }
+
+  private loadPerformanceMetrics = (): void => {
+    // Get initial metrics
+    const metrics = getPerformanceMetrics();
+    const score = getPerformanceScore(metrics);
+    
+    this.setState({
+      performance: {
+        metrics,
+        score,
+        loading: false,
+      },
+    });
+
+    // Observe Core Web Vitals
+    this.performanceCleanup = observeCoreWebVitals((name, value) => {
+      this.setState((prevState) => {
+        const newMetrics = { ...prevState.performance.metrics, [name]: value };
+        const newScore = getPerformanceScore(newMetrics);
+        return {
+          performance: {
+            metrics: newMetrics,
+            score: newScore,
+            loading: false,
+          },
+        };
+      });
+    });
+  };
+
+  private loadSeoAnalysis = (): void => {
+    // Small delay to ensure DOM is ready
+    setTimeout(() => {
+      const analysis = analyzeSeo();
+      this.setState({
+        seo: {
+          analysis,
+          loading: false,
+        },
+      });
+    }, 100);
+  };
 
   componentDidUpdate(prevProps: Props, prevState: State): void {
     if (prevState.activeTab !== this.state.activeTab) {
@@ -303,6 +398,8 @@ class DashboardView extends Component<Props, State> {
     const bouquets = this.props.bouquets ?? [];
     const visitorsCount = this.props.visitorsCount ?? 0;
     const collectionsCount = this.props.collectionsCount ?? 0;
+    const salesMetrics = this.props.salesMetrics;
+    const salesError = this.props.salesError;
 
     const insights = this.props.insights;
     const insightsError = (this.props.insightsError ?? "").trim();
@@ -673,6 +770,131 @@ class DashboardView extends Component<Props, State> {
               </div>
             </div>
 
+            {/* Sales Metrics Section */}
+            {salesError ? (
+              <div className="overviewCard" aria-label="Sales metrics">
+                <p className="overviewCard__title">Penjualan</p>
+                <p className="overviewCard__empty">{salesError}</p>
+              </div>
+            ) : salesMetrics ? (
+              <>
+                <div className="overviewCard" aria-label="Revenue">
+                  <p className="overviewCard__title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ marginRight: "0.5rem", opacity: 0.8 }}>
+                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Revenue
+                  </p>
+                  <div className="overviewKeyValue">
+                    <div className="overviewKeyValue__row">
+                      <span className="overviewKeyValue__key">Total</span>
+                      <span className="overviewKeyValue__val">{formatIDR(salesMetrics.totalRevenue)}</span>
+                    </div>
+                    <div className="overviewKeyValue__row">
+                      <span className="overviewKeyValue__key">Hari ini</span>
+                      <span className="overviewKeyValue__val">{formatIDR(salesMetrics.todayRevenue)}</span>
+                    </div>
+                    <div className="overviewKeyValue__row">
+                      <span className="overviewKeyValue__key">Bulan ini</span>
+                      <span className="overviewKeyValue__val">{formatIDR(salesMetrics.thisMonthRevenue)}</span>
+                    </div>
+                    <div className="overviewKeyValue__row">
+                      <span className="overviewKeyValue__key">Rata-rata order</span>
+                      <span className="overviewKeyValue__val">{formatIDR(salesMetrics.averageOrderValue)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="overviewCard" aria-label="Orders">
+                  <p className="overviewCard__title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ marginRight: "0.5rem", opacity: 0.8 }}>
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 8 0 4 4 0 0 0-8 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Orders
+                  </p>
+                  <div className="overviewKeyValue">
+                    <div className="overviewKeyValue__row">
+                      <span className="overviewKeyValue__key">Total</span>
+                      <span className="overviewKeyValue__val">{salesMetrics.totalOrders}</span>
+                    </div>
+                    <div className="overviewKeyValue__row">
+                      <span className="overviewKeyValue__key">Hari ini</span>
+                      <span className="overviewKeyValue__val">{salesMetrics.todayOrders}</span>
+                    </div>
+                    <div className="overviewKeyValue__row">
+                      <span className="overviewKeyValue__key">Bulan ini</span>
+                      <span className="overviewKeyValue__val">{salesMetrics.thisMonthOrders}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="overviewCard" aria-label="Order Status">
+                  <p className="overviewCard__title">Status Order</p>
+                  <ul className="overviewList">
+                    <li className="overviewList__item">
+                      <span>Pending</span>
+                      <b>{salesMetrics.pendingOrders}</b>
+                    </li>
+                    <li className="overviewList__item">
+                      <span>Processing</span>
+                      <b>{salesMetrics.processingOrders}</b>
+                    </li>
+                    <li className="overviewList__item">
+                      <span>Completed</span>
+                      <b>{salesMetrics.completedOrders}</b>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="overviewCard" aria-label="Payment Status">
+                  <p className="overviewCard__title">Status Pembayaran</p>
+                  <ul className="overviewList">
+                    <li className="overviewList__item">
+                      <span>Belum Bayar</span>
+                      <b>{salesMetrics.unpaidOrders}</b>
+                    </li>
+                    <li className="overviewList__item">
+                      <span>Sudah Bayar</span>
+                      <b>{salesMetrics.paidOrders}</b>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="overviewCard" aria-label="Top Selling">
+                  <p className="overviewCard__title">Top 5 Produk Terlaris</p>
+                  {salesMetrics.topSellingBouquets.length === 0 ? (
+                    <p className="overviewCard__empty">Belum ada data penjualan.</p>
+                  ) : (
+                    <ol className="overviewRank">
+                      {salesMetrics.topSellingBouquets.map((item) => (
+                        <li key={item.bouquetId} className="overviewRank__item">
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem", minWidth: 0 }}>
+                            <span className="overviewRank__name" title={item.bouquetName}>
+                              {item.bouquetName}
+                            </span>
+                            <span style={{ fontSize: "0.75rem", color: "var(--dash-text-muted)", fontWeight: 700 }}>
+                              {formatIDR(item.revenue)}
+                            </span>
+                          </div>
+                          <span className="overviewRank__count">{item.orderCount}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </div>
+
+                <div className="overviewCard" aria-label="Customers">
+                  <p className="overviewCard__title">Pelanggan</p>
+                  <div className="overviewKeyValue">
+                    <div className="overviewKeyValue__row">
+                      <span className="overviewKeyValue__key">Total Pelanggan</span>
+                      <span className="overviewKeyValue__val">{salesMetrics.totalCustomers}</span>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : null}
+
             <div className="overviewCard" aria-label="Kualitas data">
               <p className="overviewCard__title">Kualitas data</p>
               <ul className="overviewList" aria-label="Ringkasan kualitas data">
@@ -804,6 +1026,143 @@ class DashboardView extends Component<Props, State> {
                     </li>
                   ))}
                 </ol>
+              )}
+            </div>
+
+            {/* Performance Metrics Section */}
+            <div className="overviewCard overviewCard--performance" aria-label="Performance metrics">
+              <p className="overviewCard__title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ marginRight: "0.5rem", opacity: 0.8 }}>
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Performance
+              </p>
+              {this.state.performance.loading ? (
+                <p className="overviewCard__empty">Memuat metrik performa...</p>
+              ) : (
+                <>
+                  <div className="overviewPerformanceScore">
+                    <div className={`overviewPerformanceScore__badge overviewPerformanceScore__badge--${this.state.performance.score.grade}`}>
+                      <span className="overviewPerformanceScore__value">{this.state.performance.score.score}</span>
+                      <span className="overviewPerformanceScore__label">/ 100</span>
+                    </div>
+                    <div className="overviewPerformanceScore__grade">
+                      {this.state.performance.score.grade === "excellent" && "Excellent"}
+                      {this.state.performance.score.grade === "good" && "Good"}
+                      {this.state.performance.score.grade === "needs-improvement" && "Needs Improvement"}
+                      {this.state.performance.score.grade === "poor" && "Poor"}
+                    </div>
+                  </div>
+                  
+                  <div className="overviewKeyValue" style={{ marginTop: "1rem" }}>
+                    {this.state.performance.metrics.fcp !== undefined && (
+                      <div className="overviewKeyValue__row">
+                        <span className="overviewKeyValue__key">First Contentful Paint</span>
+                        <span className="overviewKeyValue__val">{formatMs(this.state.performance.metrics.fcp)}</span>
+                      </div>
+                    )}
+                    {this.state.performance.metrics.lcp !== undefined && (
+                      <div className="overviewKeyValue__row">
+                        <span className="overviewKeyValue__key">Largest Contentful Paint</span>
+                        <span className={`overviewKeyValue__val ${this.state.performance.score.details.lcp?.status === "excellent" ? "overviewKeyValue__val--good" : ""}`}>
+                          {formatMs(this.state.performance.metrics.lcp)}
+                        </span>
+                      </div>
+                    )}
+                    {this.state.performance.metrics.fid !== undefined && (
+                      <div className="overviewKeyValue__row">
+                        <span className="overviewKeyValue__key">First Input Delay</span>
+                        <span className={`overviewKeyValue__val ${this.state.performance.score.details.fid?.status === "excellent" ? "overviewKeyValue__val--good" : ""}`}>
+                          {formatMs(this.state.performance.metrics.fid)}
+                        </span>
+                      </div>
+                    )}
+                    {this.state.performance.metrics.cls !== undefined && (
+                      <div className="overviewKeyValue__row">
+                        <span className="overviewKeyValue__key">Cumulative Layout Shift</span>
+                        <span className={`overviewKeyValue__val ${this.state.performance.score.details.cls?.status === "excellent" ? "overviewKeyValue__val--good" : ""}`}>
+                          {this.state.performance.metrics.cls.toFixed(3)}
+                        </span>
+                      </div>
+                    )}
+                    {this.state.performance.metrics.ttfb !== undefined && (
+                      <div className="overviewKeyValue__row">
+                        <span className="overviewKeyValue__key">Time to First Byte</span>
+                        <span className="overviewKeyValue__val">{formatMs(this.state.performance.metrics.ttfb)}</span>
+                      </div>
+                    )}
+                    {this.state.performance.metrics.loadComplete !== undefined && (
+                      <div className="overviewKeyValue__row">
+                        <span className="overviewKeyValue__key">Load Complete</span>
+                        <span className="overviewKeyValue__val">{formatMs(this.state.performance.metrics.loadComplete)}</span>
+                      </div>
+                    )}
+                    {this.state.performance.metrics.totalSize !== undefined && (
+                      <div className="overviewKeyValue__row">
+                        <span className="overviewKeyValue__key">Total Resources</span>
+                        <span className="overviewKeyValue__val">
+                          {this.state.performance.metrics.totalResources} ({formatBytes(this.state.performance.metrics.totalSize)})
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* SEO Analysis Section */}
+            <div className="overviewCard overviewCard--seo" aria-label="SEO analysis">
+              <p className="overviewCard__title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ marginRight: "0.5rem", opacity: 0.8 }}>
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M12 16v-4M12 8h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+                SEO Analysis
+              </p>
+              {this.state.seo.loading ? (
+                <p className="overviewCard__empty">Menganalisis SEO...</p>
+              ) : (
+                <>
+                  <div className="overviewSeoScore">
+                    <div className={`overviewSeoScore__badge overviewSeoScore__badge--${this.state.seo.analysis.grade}`}>
+                      <span className="overviewSeoScore__value">{this.state.seo.analysis.score}</span>
+                      <span className="overviewSeoScore__label">/ 100</span>
+                    </div>
+                    <div className="overviewSeoScore__grade">
+                      {this.state.seo.analysis.grade === "excellent" && "Excellent"}
+                      {this.state.seo.analysis.grade === "good" && "Good"}
+                      {this.state.seo.analysis.grade === "needs-improvement" && "Needs Improvement"}
+                      {this.state.seo.analysis.grade === "poor" && "Poor"}
+                    </div>
+                  </div>
+
+                  <div className="overviewSeoChecks" style={{ marginTop: "1rem" }}>
+                    {this.state.seo.analysis.checks.slice(0, 6).map((check, idx) => (
+                      <div key={idx} className={`overviewSeoCheck overviewSeoCheck--${check.status}`}>
+                        <span className="overviewSeoCheck__icon">
+                          {check.status === "pass" && "✓"}
+                          {check.status === "warning" && "⚠"}
+                          {check.status === "fail" && "✗"}
+                        </span>
+                        <div className="overviewSeoCheck__content">
+                          <span className="overviewSeoCheck__name">{check.name}</span>
+                          <span className="overviewSeoCheck__message">{check.message}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {this.state.seo.analysis.recommendations.length > 0 && (
+                    <div className="overviewSeoRecommendations" style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid rgba(0,0,0,0.1)" }}>
+                      <p style={{ fontWeight: 800, marginBottom: "0.5rem", fontSize: "0.9rem" }}>Rekomendasi:</p>
+                      <ul style={{ margin: 0, paddingLeft: "1.25rem", fontSize: "0.85rem", lineHeight: "1.6" }}>
+                        {this.state.seo.analysis.recommendations.slice(0, 3).map((rec, idx) => (
+                          <li key={idx} style={{ marginBottom: "0.4rem" }}>{rec}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </aside>
