@@ -104,20 +104,35 @@ app.use("/api/collections", collection_routes_1.default);
 app.use("/api/hero-slider", hero_slider_routes_1.default);
 app.use("/api/orders", order_routes_1.default);
 app.use("/api/customers", customer_routes_1.default);
-// Log registered routes in development
-if (process.env.NODE_ENV === "development") {
-    console.log("✅ Registered API routes:");
-    console.log("  - /api/metrics");
-    console.log("  - /api/auth");
-    console.log("  - /api/bouquets");
-    console.log("  - /api/collections");
-    console.log("  - /api/hero-slider");
-    console.log("  - /api/orders");
-    console.log("  - /api/customers");
-}
+// Log registered routes (always log, not just in development)
+console.log("✅ Registered API routes:");
+console.log("  - /api/metrics");
+console.log("  - /api/auth");
+console.log("  - /api/bouquets");
+console.log("  - /api/collections");
+console.log("  - /api/hero-slider");
+console.log("  - /api/orders");
+console.log("  - /api/customers");
 // 404 handler for API routes (must come after all route registrations)
-app.use("/api", (_req, res) => {
-    res.status(404).json({ message: "API endpoint not found", path: _req.path });
+app.use("/api", (req, res) => {
+    // Always log 404s for debugging
+    console.warn(`[404] API endpoint not found: ${req.method} ${req.path}`);
+    console.warn(`[404] Query:`, req.query);
+    console.warn(`[404] Headers:`, { authorization: req.headers.authorization ? "present" : "missing" });
+    res.status(404).json({
+        message: "API endpoint not found",
+        path: req.path,
+        method: req.method,
+        availableRoutes: [
+            "/api/metrics",
+            "/api/auth",
+            "/api/bouquets",
+            "/api/collections",
+            "/api/hero-slider",
+            "/api/orders",
+            "/api/customers"
+        ]
+    });
 });
 // 404 handler for other routes
 app.use((_req, res) => {
