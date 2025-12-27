@@ -18,13 +18,31 @@ export function normalizeBouquet(b: unknown): Bouquet | null {
   const raw = b as Record<string, unknown>;
 
   // Critical fields - if missing, return null to filter out invalid bouquets
-  const id = String(raw._id ?? raw.id ?? "").trim();
-  const name = isNonEmptyString(raw.name) ? raw.name.trim() : "";
+  // Try multiple possible ID field names
+  const id = String(
+    raw._id ?? 
+    raw.id ?? 
+    (raw as any).bouquetId ?? 
+    ""
+  ).trim();
+  
+  // Try multiple possible name field names
+  const name = (
+    isNonEmptyString(raw.name) ? raw.name.trim() :
+    isNonEmptyString((raw as any).title) ? (raw as any).title.trim() :
+    isNonEmptyString((raw as any).bouquetName) ? (raw as any).bouquetName.trim() :
+    ""
+  );
 
   // If critical fields are missing, return null (will be filtered out)
   if (!id || !name) {
     if (process.env.NODE_ENV === "development") {
-      console.warn("Bouquet missing critical fields (_id or name):", raw);
+      console.warn("[Normalizer] Bouquet missing critical fields:", {
+        hasId: !!id,
+        hasName: !!name,
+        rawKeys: Object.keys(raw),
+        sample: JSON.stringify(raw).slice(0, 200),
+      });
     }
     return null;
   }

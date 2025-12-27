@@ -45,6 +45,8 @@ const safeTrim = (v: unknown, maxLen: number): string => {
 export async function postAnalyticsEvent(
   payload: AnalyticsEventPayload
 ): Promise<void> {
+  // Completely silent - no console errors, no network errors visible
+  // Analytics is optional and should never affect user experience
   try {
     const url = `${API_BASE}/api/metrics/events`;
 
@@ -57,26 +59,32 @@ export async function postAnalyticsEvent(
       bouquetId: safeTrim(payload.bouquetId, 64),
     };
 
+    // Use sendBeacon for better reliability and silent failures
+    if (navigator.sendBeacon) {
+      const blob = new Blob([JSON.stringify(body)], { type: "application/json" });
+      navigator.sendBeacon(url, blob);
+      return; // sendBeacon doesn't provide response, so we return immediately
+    }
+
+    // Fallback to fetch with keepalive
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
-      // Helps deliver events during navigation/unload in modern browsers
       keepalive: true,
+      // Suppress all errors
+    }).catch(() => {
+      // Silently ignore all fetch errors
+      return null;
     });
 
-    // Silently handle 404 or other errors - analytics should never break UX
-    if (!res.ok && res.status !== 404) {
-      // Only log non-404 errors in development
-      if (process.env.NODE_ENV === "development") {
-        console.warn(`Analytics event failed (${res.status}):`, payload.type);
-      }
+    // Silently ignore all response errors
+    if (res && !res.ok) {
+      // Do nothing - analytics failures are expected and acceptable
     }
-  } catch (err) {
-    // Tracking must never break UX - silently fail
-    if (process.env.NODE_ENV === "development") {
-      console.warn("Analytics event error (silent):", err);
-    }
+  } catch {
+    // Completely silent - no logging, no errors
+    // Analytics is optional and failures are expected
   }
 }
 

@@ -59,7 +59,19 @@ export default function BouquetDetailController() {
 
                const normalizedBouquet = normalizeBouquet(data);
                if (!normalizedBouquet) {
+                 if (process.env.NODE_ENV === "development") {
+                   console.error("[Detail] Bouquet normalization failed. Raw data:", data);
+                 }
                  throw new Error("Bouquet data is invalid (missing _id or name)");
+               }
+               
+               if (process.env.NODE_ENV === "development") {
+                 console.log("[Detail] Bouquet loaded:", {
+                   _id: normalizedBouquet._id,
+                   name: normalizedBouquet.name,
+                   price: normalizedBouquet.price,
+                   hasImage: !!normalizedBouquet.image,
+                 });
                }
                
                setBouquet(normalizedBouquet);

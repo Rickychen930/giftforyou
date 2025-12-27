@@ -280,14 +280,27 @@ class BouquetCatalogController extends Component<
 
       const bouquets = normalizeBouquets(data);
 
-      // Log warning if no valid bouquets found
-      if (bouquets.length === 0 && data.length > 0) {
-        console.warn("All bouquets were filtered out during normalization. Check bouquet data structure.");
+      // Log detailed info for debugging
+      if (process.env.NODE_ENV === "development") {
+        console.log(`[Catalog] Loaded ${bouquets.length} valid bouquets from ${data.length} total items`);
+        if (bouquets.length === 0 && data.length > 0) {
+          console.warn("[Catalog] All bouquets were filtered out. Sample data:", data.slice(0, 2));
+        }
+        if (bouquets.length > 0) {
+          console.log("[Catalog] First bouquet sample:", {
+            _id: bouquets[0]._id,
+            name: bouquets[0].name,
+            price: bouquets[0].price,
+            image: bouquets[0].image ? "has image" : "no image",
+          });
+        }
       }
 
-      // Log info in development
-      if (process.env.NODE_ENV === "development") {
-        console.log(`Loaded ${bouquets.length} valid bouquets from ${data.length} total items`);
+      // Log warning if no valid bouquets found
+      if (bouquets.length === 0 && data.length > 0) {
+        console.warn("[Catalog] All bouquets were filtered out during normalization. Check bouquet data structure.");
+        // Show sample of raw data to help debug
+        console.warn("[Catalog] Sample raw data:", JSON.stringify(data.slice(0, 1), null, 2));
       }
 
       this.setState({ bouquets, loading: false, error: null });
