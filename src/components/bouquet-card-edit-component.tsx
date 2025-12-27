@@ -8,6 +8,8 @@ import {
   BOUQUET_SIZE_OPTIONS,
   type BouquetSize,
 } from "../constants/bouquet-constants";
+import DropdownWithModal from "./DropdownWithModal";
+import TagInput from "./TagInput";
 
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
 
@@ -32,7 +34,9 @@ type FormState = {
   collectionName: string;
   quantity: number;
   occasionsText: string;
+  occasions: string[]; // New: array for occasions
   flowersText: string;
+  flowers: string[]; // New: array for flowers
   isNewEdition: boolean;
   isFeatured: boolean;
   customPenanda: string[];
@@ -40,13 +44,39 @@ type FormState = {
   careInstructions: string;
 };
 
-const TYPE_OPTIONS: { label: string; value: string }[] = [
-  { label: "Bouquet", value: "bouquet" },
-  { label: "Hand-tied", value: "hand-tied" },
-  { label: "Vase arrangement", value: "vase-arrangement" },
-  { label: "Wreath", value: "wreath" },
-  { label: "Basket", value: "basket" },
+// Default options for dropdowns (sync with upload form)
+const DEFAULT_COLLECTIONS = [
+  "Best Sellers",
+  "Wedding Collection",
+  "Sympathy Flowers",
+  "New Edition",
+  "Featured",
+  "Special Occasions",
 ];
+
+const DEFAULT_TYPES = [
+  "bouquet",
+  "gift box",
+  "stand acrylic",
+  "artificial bouquet",
+  "fresh flowers",
+  "custom arrangement",
+];
+
+const DEFAULT_STOCK_LEVELS = [
+  "0",
+  "1",
+  "5",
+  "10",
+  "20",
+  "50",
+  "100",
+  "200",
+  "500",
+  "1000",
+];
+
+// TYPE_OPTIONS removed - using DEFAULT_TYPES from DropdownWithModal instead
 
 
 
@@ -111,7 +141,9 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
     collectionName: bouquet.collectionName ?? "",
     quantity: typeof bouquet.quantity === "number" ? bouquet.quantity : 0,
     occasionsText: joinCsv(bouquet.occasions),
+    occasions: Array.isArray(bouquet.occasions) ? bouquet.occasions : (bouquet.occasions ? joinCsv(bouquet.occasions).split(",").map((s: string) => s.trim()).filter(Boolean) : []),
     flowersText: joinCsv(bouquet.flowers),
+    flowers: Array.isArray(bouquet.flowers) ? bouquet.flowers : (bouquet.flowers ? joinCsv(bouquet.flowers).split(",").map((s: string) => s.trim()).filter(Boolean) : []),
     isNewEdition: Boolean(bouquet.isNewEdition),
     isFeatured: Boolean(bouquet.isFeatured),
     customPenanda: Array.isArray(bouquet.customPenanda) ? bouquet.customPenanda : [],
@@ -131,7 +163,9 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
       collectionName: bouquet.collectionName ?? "",
       quantity: typeof bouquet.quantity === "number" ? bouquet.quantity : 0,
       occasionsText: joinCsv(bouquet.occasions),
+      occasions: Array.isArray(bouquet.occasions) ? bouquet.occasions : (bouquet.occasions ? joinCsv(bouquet.occasions).split(",").map((s: string) => s.trim()).filter(Boolean) : []),
       flowersText: joinCsv(bouquet.flowers),
+      flowers: Array.isArray(bouquet.flowers) ? bouquet.flowers : (bouquet.flowers ? joinCsv(bouquet.flowers).split(",").map((s: string) => s.trim()).filter(Boolean) : []),
       isNewEdition: Boolean(bouquet.isNewEdition),
       isFeatured: Boolean(bouquet.isFeatured),
       customPenanda: Array.isArray(bouquet.customPenanda) ? bouquet.customPenanda : [],
@@ -152,7 +186,9 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
       collectionName: bouquet.collectionName ?? "",
       quantity: typeof bouquet.quantity === "number" ? bouquet.quantity : 0,
       occasionsText: joinCsv(bouquet.occasions),
+      occasions: Array.isArray(bouquet.occasions) ? bouquet.occasions : (bouquet.occasions ? joinCsv(bouquet.occasions).split(",").map((s: string) => s.trim()).filter(Boolean) : []),
       flowersText: joinCsv(bouquet.flowers),
+      flowers: Array.isArray(bouquet.flowers) ? bouquet.flowers : (bouquet.flowers ? joinCsv(bouquet.flowers).split(",").map((s: string) => s.trim()).filter(Boolean) : []),
       isNewEdition: Boolean(bouquet.isNewEdition),
       isFeatured: Boolean(bouquet.isFeatured),
       customPenanda: Array.isArray(bouquet.customPenanda) ? bouquet.customPenanda : [],
@@ -312,7 +348,9 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
       (form.collectionName ?? "") !== (initialForm.collectionName ?? "") ||
       form.quantity !== initialForm.quantity ||
       (form.occasionsText ?? "") !== (initialForm.occasionsText ?? "") ||
+      JSON.stringify(form.occasions) !== JSON.stringify(initialForm.occasions) ||
       (form.flowersText ?? "") !== (initialForm.flowersText ?? "") ||
+      JSON.stringify(form.flowers) !== JSON.stringify(initialForm.flowers) ||
       Boolean(form.isNewEdition) !== Boolean(initialForm.isNewEdition) ||
       Boolean(form.isFeatured) !== Boolean(initialForm.isFeatured) ||
       JSON.stringify(form.customPenanda) !== JSON.stringify(initialForm.customPenanda) ||
@@ -596,8 +634,15 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
     fd.append("status", form.status);
     fd.append("collectionName", (form.collectionName ?? "").trim());
     fd.append("quantity", String(form.quantity ?? 0));
-    fd.append("occasions", form.occasionsText ?? "");
-    fd.append("flowers", form.flowersText ?? "");
+    // Use array if available, otherwise fallback to text
+    const occasionsValue = form.occasions.length > 0 
+      ? form.occasions.join(",")
+      : form.occasionsText.trim();
+    const flowersValue = form.flowers.length > 0
+      ? form.flowers.join(",")
+      : form.flowersText.trim();
+    fd.append("occasions", occasionsValue);
+    fd.append("flowers", flowersValue);
     fd.append("isNewEdition", String(Boolean(form.isNewEdition)));
     fd.append("isFeatured", String(Boolean(form.isFeatured)));
     fd.append("customPenanda", form.customPenanda.join(","));
@@ -655,8 +700,18 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
       }
     } catch (err) {
       console.error("Save error:", err);
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : "Gagal menyimpan. Silakan coba lagi.";
       setSaveStatus("error");
-      setSaveMessage("Gagal menyimpan. Coba lagi.");
+      setSaveMessage(errorMessage);
+      // Scroll to error message
+      setTimeout(() => {
+        const messageEl = document.querySelector(".becSaveNote.is-show");
+        if (messageEl) {
+          messageEl.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 100);
     } finally {
       setSaving(false);
     }
@@ -674,7 +729,9 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
       collectionName: bouquet.collectionName ?? "",
       quantity: typeof bouquet.quantity === "number" ? bouquet.quantity : 0,
       occasionsText: joinCsv(bouquet.occasions),
+      occasions: Array.isArray(bouquet.occasions) ? bouquet.occasions : (bouquet.occasions ? joinCsv(bouquet.occasions).split(",").map((s: string) => s.trim()).filter(Boolean) : []),
       flowersText: joinCsv(bouquet.flowers),
+      flowers: Array.isArray(bouquet.flowers) ? bouquet.flowers : (bouquet.flowers ? joinCsv(bouquet.flowers).split(",").map((s: string) => s.trim()).filter(Boolean) : []),
       isNewEdition: Boolean(bouquet.isNewEdition),
       isFeatured: Boolean(bouquet.isFeatured),
       customPenanda: Array.isArray(bouquet.customPenanda) ? bouquet.customPenanda : [],
@@ -993,17 +1050,54 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
 
           <label className="becField">
             <span className="becLabel">Stok</span>
-            <input
-              name="quantity"
-              type="number"
-              min={0}
-              step={1}
-              value={form.quantity || ""}
-              onChange={handleTextChange}
-              placeholder="0"
-              aria-invalid={touchedFields.has("quantity") && fieldErrors.quantity ? "true" : "false"}
-              aria-describedby={touchedFields.has("quantity") && fieldErrors.quantity ? "bec-quantity-error" : undefined}
-            />
+            <div style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start" }}>
+              <div style={{ flex: 1 }}>
+                <DropdownWithModal
+                  label=""
+                  value={form.quantity > 0 ? String(form.quantity) : ""}
+                  options={DEFAULT_STOCK_LEVELS}
+                  onChange={(value) => {
+                    const num = parseInt(value, 10);
+                    if (!isNaN(num) && num >= 0) {
+                      setForm((prev) => ({ ...prev, quantity: num }));
+                      const newTouchedFields = new Set(touchedFields);
+                      newTouchedFields.add("quantity");
+                      setTouchedFields(newTouchedFields);
+                      const error = validateField("quantity", num);
+                      if (error !== null) {
+                        setFieldErrors((prev) => {
+                          const newErrors = { ...prev };
+                          if (error) {
+                            newErrors.quantity = error;
+                          } else {
+                            delete newErrors.quantity;
+                          }
+                          return newErrors;
+                        });
+                      }
+                    }
+                  }}
+                  onAddNew={() => {}}
+                  placeholder="Pilih atau masukkan"
+                  disabled={saving}
+                  error={touchedFields.has("quantity") && fieldErrors.quantity ? fieldErrors.quantity : undefined}
+                  storageKey="uploader_stock_levels"
+                />
+              </div>
+              <span style={{ alignSelf: "center", color: "var(--ink-500)", fontSize: "0.85rem", fontWeight: 700 }}>atau</span>
+              <input
+                name="quantity"
+                type="number"
+                min={0}
+                step={1}
+                value={form.quantity || ""}
+                onChange={handleTextChange}
+                placeholder="Manual"
+                style={{ width: "120px" }}
+                aria-invalid={touchedFields.has("quantity") && fieldErrors.quantity ? "true" : "false"}
+                aria-describedby={touchedFields.has("quantity") && fieldErrors.quantity ? "bec-quantity-error" : undefined}
+              />
+            </div>
             {touchedFields.has("quantity") && fieldErrors.quantity && (
               <span id="bec-quantity-error" className="becHint becHint--error" role="alert">
                 {fieldErrors.quantity}
@@ -1011,22 +1105,22 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
             )}
           </label>
 
-          <label className="becField">
-            <span className="becLabel">Tipe</span>
-            <input
-              name="type"
-              value={form.type}
-              onChange={handleTextChange}
-              placeholder="mis., bouquet"
-              list="bec-type-options"
-              autoComplete="off"
-            />
-            <datalist id="bec-type-options">
-              {TYPE_OPTIONS.map((t) => (
-                <option key={t.value} value={t.value} />
-              ))}
-            </datalist>
-          </label>
+          <DropdownWithModal
+            label="Tipe"
+            value={form.type}
+            options={DEFAULT_TYPES}
+            onChange={(value) => {
+              setForm((prev) => ({ ...prev, type: value }));
+              const newTouchedFields = new Set(touchedFields);
+              newTouchedFields.add("type");
+              setTouchedFields(newTouchedFields);
+            }}
+            onAddNew={() => {}}
+            placeholder="mis., bouquet"
+            disabled={saving}
+            error={touchedFields.has("type") && fieldErrors.type ? fieldErrors.type : undefined}
+            storageKey="uploader_types"
+          />
 
           <label className="becField">
             <span className="becLabel">Ukuran</span>
@@ -1051,21 +1145,34 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
             </select>
           </label>
 
-          <label className="becField">
-            <span className="becLabel">Koleksi</span>
-            <select
-              name="collectionName"
-              value={form.collectionName}
-              onChange={handleSelectChange}
-            >
-              <option value="">Pilih koleksi</option>
-              {collections.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </label>
+          <DropdownWithModal
+            label="Koleksi"
+            value={form.collectionName}
+            options={[...DEFAULT_COLLECTIONS, ...collections.filter((c) => !DEFAULT_COLLECTIONS.includes(c))]}
+            onChange={(value) => {
+              setForm((prev) => ({ ...prev, collectionName: value }));
+              const newTouchedFields = new Set(touchedFields);
+              newTouchedFields.add("collectionName");
+              setTouchedFields(newTouchedFields);
+              const error = validateField("collectionName", value);
+              if (error !== null) {
+                setFieldErrors((prev) => {
+                  const newErrors = { ...prev };
+                  if (error) {
+                    newErrors.collectionName = error;
+                  } else {
+                    delete newErrors.collectionName;
+                  }
+                  return newErrors;
+                });
+              }
+            }}
+            onAddNew={() => {}}
+            placeholder="mis., New Edition"
+            disabled={saving}
+            error={touchedFields.has("collectionName") && fieldErrors.collectionName ? fieldErrors.collectionName : undefined}
+            storageKey="uploader_collections"
+          />
 
           <div className="becField becField--full">
             <span className="becLabel">Penanda</span>
@@ -1181,29 +1288,71 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
             </span>
           </label>
 
-          <label className="becField becField--full">
-            <span className="becLabel">Acara</span>
-            <input
-              name="occasionsText"
-              value={form.occasionsText}
-              onChange={handleTextChange}
-              placeholder="mis., Ulang Tahun, Anniversary, Wisuda"
-              autoComplete="off"
-            />
-            <span className="becHint">Pisahkan dengan koma.</span>
-          </label>
+          <TagInput
+            label="Acara"
+            tags={form.occasions}
+            onChange={(tags) => {
+              setForm((prev) => ({
+                ...prev,
+                occasions: tags,
+                occasionsText: tags.join(", "), // Keep text for backward compatibility
+              }));
+              const newTouchedFields = new Set(touchedFields);
+              newTouchedFields.add("occasionsText");
+              setTouchedFields(newTouchedFields);
+              const error = validateField("occasionsText", tags.join(", "));
+              if (error !== null) {
+                setFieldErrors((prev) => {
+                  const newErrors = { ...prev };
+                  if (error) {
+                    newErrors.occasionsText = error;
+                  } else {
+                    delete newErrors.occasionsText;
+                  }
+                  return newErrors;
+                });
+              }
+            }}
+            placeholder="mis., Ulang Tahun, Anniversary"
+            disabled={saving}
+            maxTags={10}
+            maxLength={50}
+            error={touchedFields.has("occasionsText") && fieldErrors.occasionsText ? fieldErrors.occasionsText : undefined}
+            storageKey="uploader_occasions"
+          />
 
-          <label className="becField becField--full">
-            <span className="becLabel">Bunga</span>
-            <input
-              name="flowersText"
-              value={form.flowersText}
-              onChange={handleTextChange}
-              placeholder="mis., Orchid, Mawar, Lily"
-              autoComplete="off"
-            />
-            <span className="becHint">Pisahkan dengan koma.</span>
-          </label>
+          <TagInput
+            label="Bunga"
+            tags={form.flowers}
+            onChange={(tags) => {
+              setForm((prev) => ({
+                ...prev,
+                flowers: tags,
+                flowersText: tags.join(", "), // Keep text for backward compatibility
+              }));
+              const newTouchedFields = new Set(touchedFields);
+              newTouchedFields.add("flowersText");
+              setTouchedFields(newTouchedFields);
+              const error = validateField("flowersText", tags.join(", "));
+              if (error !== null) {
+                setFieldErrors((prev) => {
+                  const newErrors = { ...prev };
+                  if (error) {
+                    newErrors.flowersText = error;
+                  } else {
+                    delete newErrors.flowersText;
+                  }
+                  return newErrors;
+                });
+              }
+            }}
+            placeholder="mis., Orchid, Mawar"
+            disabled={saving}
+            maxTags={20}
+            maxLength={50}
+            error={touchedFields.has("flowersText") && fieldErrors.flowersText ? fieldErrors.flowersText : undefined}
+            storageKey="uploader_flowers"
+          />
 
           <label className="becField becField--full">
             <span className="becLabel">Instruksi perawatan</span>

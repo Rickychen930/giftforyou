@@ -1,438 +1,534 @@
 import React, { Component } from "react";
 import type { Bouquet } from "../../models/domain/bouquet";
-import FilterPanel from "../filter-panel-component";
-import "../../styles/BouquetEditor.css";
-import BouquetEditor from "../bouquet-card-edit-component";
-import { getBouquetSizeFilterOptions } from "../../constants/bouquet-constants";
-import { isNonEmptyString } from "../../utils/validation";
-
-type Range = [number, number];
-type SortBy = "" | "price-asc" | "price-desc" | "name-asc" | "name-desc";
+import type { Collection } from "../../models/domain/collection";
+import "../../styles/BouquetEditorSection.css";
+import CollectionListView from "./collection-list-view";
+import CollectionDetailView from "./collection-detail-view";
+import BouquetEditForm from "./bouquet-edit-form";
+import { API_BASE } from "../../config/api";
 
 interface Props {
   bouquets: Bouquet[];
-  collections: string[];
+  collections: string[] | Collection[]; // Support both string[] (legacy) and Collection[]
   onSave: (formData: FormData) => Promise<boolean>;
   onDuplicate?: (bouquetId: string) => Promise<void>;
   onDelete?: (bouquetId: string) => Promise<void>;
+  onUpdateCollection?: (collectionId: string, name: string) => Promise<boolean>;
+  onMoveBouquet?: (bouquetId: string, targetCollectionId: string) => Promise<boolean>;
 }
+
+type ViewState = "collections" | "collection-detail" | "bouquet-edit";
 
 interface State {
-  search: string;
-  priceRange: Range;
-  selectedTypes: string[];
-  selectedSizes: string[];
-  selectedCollections: string[];
-  sortBy: SortBy;
-  currentPage: number;
-  itemsPerPage: number;
-}
-
-const DEFAULT_PRICE: Range = [0, 1_000_000];
-
-// Using centralized isNonEmptyString from utils/validation
-
-const uniq = (arr: string[]) => Array.from(new Set(arr));
-
-function filterBouquets(
-  bouquets: Bouquet[],
-  search: string,
-  priceRange: Range,
-  selectedTypes: string[],
-  selectedSizes: string[],
-  selectedCollections: string[]
-): Bouquet[] {
-  const [min, max] = priceRange;
-  const q = search.trim().toLowerCase();
-
-  return bouquets.filter((b) => {
-    const name = (b.name ?? "").toLowerCase();
-    const typeValue = (b.type ?? "").trim();
-    const sizeValue = (b.size ?? "").trim();
-    const collectionValue = (b.collectionName ?? "").trim();
-
-    const matchSearch = q.length === 0 || name.includes(q);
-    const matchPrice = b.price >= min && b.price <= max;
-    const matchType =
-      selectedTypes.length === 0 || selectedTypes.includes(typeValue);
-    const matchSize =
-      selectedSizes.length === 0 || selectedSizes.includes(sizeValue);
-    const matchCollection =
-      selectedCollections.length === 0 ||
-      selectedCollections.includes(collectionValue);
-
-    return matchSearch && matchPrice && matchType && matchSize && matchCollection;
-  });
-}
-
-function sortBouquets(list: Bouquet[], sortBy: SortBy): Bouquet[] {
-  return [...list].sort((a, b) => {
-    switch (sortBy) {
-      case "price-asc":
-        return a.price - b.price;
-      case "price-desc":
-        return b.price - a.price;
-      case "name-asc":
-        return a.name.localeCompare(b.name);
-      case "name-desc":
-        return b.name.localeCompare(a.name);
-      default:
-        return 0;
-    }
-  });
-}
-
-function paginate(list: Bouquet[], page: number, perPage: number): Bouquet[] {
-  const start = (page - 1) * perPage;
-  return list.slice(start, start + perPage);
-}
-
-function toggleInList(list: string[], value: string): string[] {
-  return list.includes(value)
-    ? list.filter((v) => v !== value)
-    : [...list, value];
+  currentView: ViewState;
+  selectedCollectionId: string | null;
+  selectedBouquet: Bouquet | null;
+  collections: Collection[];
+  bouquets: Bouquet[];
 }
 
 export default class BouquetEditorSection extends Component<Props, State> {
-  state: State = {
-    search: "",
-    priceRange: DEFAULT_PRICE,
-    selectedTypes: [],
-    selectedSizes: [],
-    selectedCollections: [],
-    sortBy: "",
-    currentPage: 1,
-    itemsPerPage: 9,
-  };
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      currentView: "collections",
+      selectedCollectionId: null,
+      selectedBouquet: null,
+      collections: [],
+      bouquets: props.bouquets ?? [],
+    };
+  }
 
-  private handleSave = async (formData: FormData): Promise<boolean> => {
-    return this.props.onSave(formData);
-  };
+  componentDidMount(): void {
+    this.loadCollections();
+  }
 
-  private handleDuplicate = async (bouquetId: string): Promise<void> => {
-    if (this.props.onDuplicate) {
-      await this.props.onDuplicate(bouquetId);
-    }
-  };
-
-  private handleDelete = async (bouquetId: string): Promise<void> => {
-    if (this.props.onDelete) {
-      await this.props.onDelete(bouquetId);
-    }
-  };
-
-  componentWillUnmount(): void {
-    if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
+  componentDidUpdate(prevProps: Props): void {
+    if (prevProps.collections !== this.props.collections || prevProps.bouquets !== this.props.bouquets) {
+      this.loadCollections();
     }
   }
 
-  private searchTimeout: NodeJS.Timeout | null = null;
-
-  private setSearch = (search: string) => {
-    if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
+  private loadCollections = async (): Promise<void> => {
+    // If collections is already Collection[], use it
+    if (this.props.collections.length > 0 && typeof this.props.collections[0] === "object") {
+      this.setState({
+        collections: this.normalizeCollections(this.props.collections as Collection[]),
+      });
+      return;
     }
-    this.searchTimeout = setTimeout(() => {
-      this.setState({ search, currentPage: 1 });
-    }, 300);
-  };
-  private setSortBy = (sortBy: SortBy) =>
-    this.setState({ sortBy, currentPage: 1 });
-  private setPriceRange = (priceRange: Range) =>
-    this.setState({ priceRange, currentPage: 1 });
 
-  // ✅ Strongly typed handlers (no computed keys, no Partial<>)
-  private toggleType = (value: string) => {
-    this.setState((prev) => ({
-      selectedTypes: toggleInList(prev.selectedTypes, value),
-      currentPage: 1,
+    // Otherwise, fetch from API
+    try {
+      const { getAuthHeaders } = require("../../utils/auth-utils");
+      const res = await fetch(`${API_BASE}/api/collections`, {
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
+      });
+
+      if (res.ok) {
+        const collections = await res.json();
+        this.setState({
+          collections: this.normalizeCollections(collections),
+        });
+      } else {
+        // Fallback: create collections from bouquets
+        this.setState({
+          collections: this.createCollectionsFromBouquets(),
+        });
+      }
+    } catch (err) {
+      console.error("Failed to load collections:", err);
+      // Fallback: create collections from bouquets
+      this.setState({
+        collections: this.createCollectionsFromBouquets(),
+      });
+    }
+  };
+
+  private createCollectionsFromBouquets(): Collection[] {
+    const collectionMap = new Map<string, Bouquet[]>();
+    
+    this.props.bouquets.forEach((bouquet) => {
+      const collectionName = bouquet.collectionName || "Uncategorized";
+      if (!collectionMap.has(collectionName)) {
+        collectionMap.set(collectionName, []);
+      }
+      collectionMap.get(collectionName)!.push(bouquet);
+    });
+
+    return Array.from(collectionMap.entries()).map(([name, bouquets], index) => ({
+      _id: `collection-${index}`,
+      name,
+      description: "",
+      bouquets,
     }));
-  };
+  }
 
-  private toggleSize = (value: string) => {
-    this.setState((prev) => ({
-      selectedSizes: toggleInList(prev.selectedSizes, value),
-      currentPage: 1,
-    }));
-  };
+  private normalizeCollections(collections: Collection[]): Collection[] {
+    return collections.map((c) => {
+      let bouquets: Bouquet[] = [];
+      
+      if (Array.isArray(c.bouquets)) {
+        // Check if first item is a string (ObjectId) or object (Bouquet)
+        if (c.bouquets.length > 0 && typeof c.bouquets[0] === "string") {
+          // It's string[], need to find matching bouquets
+          const bouquetIds = c.bouquets as string[];
+          bouquets = this.props.bouquets.filter((b) =>
+            bouquetIds.includes(b._id)
+          );
+        } else {
+          // It's Bouquet[]
+          bouquets = (c.bouquets as unknown[]).filter(
+            (b): b is Bouquet =>
+              typeof b === "object" && b !== null && "_id" in b
+          ) as Bouquet[];
+        }
+      }
+      
+      return {
+        ...c,
+        bouquets,
+      };
+    });
+  }
 
-  private toggleCollection = (value: string) => {
-    this.setState((prev) => ({
-      selectedCollections: toggleInList(prev.selectedCollections, value),
-      currentPage: 1,
-    }));
-  };
-
-  private clearTypes = () =>
-    this.setState({ selectedTypes: [], currentPage: 1 });
-  private clearSizes = () =>
-    this.setState({ selectedSizes: [], currentPage: 1 });
-  private clearCollections = () =>
-    this.setState({ selectedCollections: [], currentPage: 1 });
-
-  private resetAll = () => {
+  private handleCollectionSelect = (collectionId: string): void => {
     this.setState({
-      search: "",
-      priceRange: DEFAULT_PRICE,
-      selectedTypes: [],
-      selectedSizes: [],
-      selectedCollections: [],
-      sortBy: "",
-      currentPage: 1,
+      currentView: "collection-detail",
+      selectedCollectionId: collectionId,
+      selectedBouquet: null,
     });
   };
 
-  private renderPagination(totalItems: number): React.ReactNode {
-    const { itemsPerPage, currentPage } = this.state;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    if (totalPages <= 1) return null;
+  private handleBouquetSelect = (bouquet: Bouquet): void => {
+    this.setState({
+      currentView: "bouquet-edit",
+      selectedBouquet: bouquet,
+    });
+  };
 
-    const start = Math.max(1, currentPage - 3);
-    const end = Math.min(totalPages, start + 6);
+  private handleBackToCollections = (): void => {
+    this.setState({
+      currentView: "collections",
+      selectedCollectionId: null,
+      selectedBouquet: null,
+    });
+  };
 
-    const pages: number[] = [];
-    for (let p = start; p <= end; p++) pages.push(p);
+  private handleBackToCollectionDetail = (): void => {
+    this.setState({
+      currentView: "collection-detail",
+      selectedBouquet: null,
+    });
+  };
 
-    return (
-      <nav className="editorPagination" aria-label="Paginasi">
-        <button
-          type="button"
-          className="editorPagination__btn"
-          disabled={currentPage === 1}
-          onClick={() => this.setState({ currentPage: currentPage - 1 })}
-        >
-          Sebelumnya
-        </button>
+  private handleCollectionUpdate = async (
+    collectionId: string,
+    newName: string
+  ): Promise<boolean> => {
+    if (this.props.onUpdateCollection) {
+      const success = await this.props.onUpdateCollection(collectionId, newName);
+      if (success) {
+        // Update local state
+        this.setState((prev) => ({
+          ...prev,
+          collections: prev.collections.map((c) =>
+            c._id === collectionId ? { ...c, name: newName } : c
+          ),
+        }));
+      }
+      return success;
+    }
 
-        {pages.map((p) => (
-          <button
-            type="button"
-            key={p}
-            className={`editorPagination__page ${
-              currentPage === p ? "is-active" : ""
-            }`}
-            onClick={() => this.setState({ currentPage: p })}
-            aria-current={currentPage === p ? "page" : undefined} // ✅ correct
-          >
-            {p}
-          </button>
-        ))}
+    // Fallback: call API directly
+    try {
+      const { getAuthHeaders } = require("../../utils/auth-utils");
+      const res = await fetch(`${API_BASE}/api/collections/${collectionId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify({ name: newName }),
+      });
 
-        <button
-          type="button"
-          className="editorPagination__btn"
-          disabled={currentPage === totalPages}
-          onClick={() => this.setState({ currentPage: currentPage + 1 })}
-        >
-          Berikutnya
-        </button>
-      </nav>
-    );
-  }
+      if (res.ok) {
+        await res.json(); // Read response but don't use it
+        this.setState((prev) => ({
+          ...prev,
+          collections: prev.collections.map((c) =>
+            c._id === collectionId ? { ...c, name: newName } : c
+          ),
+        }));
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error("Failed to update collection:", err);
+      return false;
+    }
+  };
+
+  private handleBouquetMove = async (
+    bouquetId: string,
+    targetCollectionId: string
+  ): Promise<boolean> => {
+    if (this.props.onMoveBouquet) {
+      const success = await this.props.onMoveBouquet(
+        bouquetId,
+        targetCollectionId
+      );
+      if (success) {
+        // Update local state
+        this.setState((prev) => {
+          const bouquet = prev.bouquets.find((b) => b._id === bouquetId);
+          if (!bouquet) return prev;
+
+          const targetCollection = prev.collections.find(
+            (c) => c._id === targetCollectionId
+          );
+          const oldCollection = prev.collections.find(
+            (c) => (c.bouquets as Bouquet[]).some((b) => b._id === bouquetId)
+          );
+
+          const updatedBouquet = {
+            ...bouquet,
+            collectionName: targetCollection?.name || "",
+          };
+
+          return {
+            ...prev,
+            bouquets: prev.bouquets.map((b) =>
+              b._id === bouquetId ? updatedBouquet : b
+            ),
+            collections: prev.collections.map((c) => {
+              if (c._id === targetCollectionId) {
+                // Add to target collection
+                const existing = (c.bouquets as Bouquet[]).find(
+                  (b) => b._id === bouquetId
+                );
+                if (existing) return c;
+                return {
+                  ...c,
+                  bouquets: [...(c.bouquets as Bouquet[]), updatedBouquet],
+                };
+              }
+              if (c._id === oldCollection?._id) {
+                // Remove from old collection
+                return {
+                  ...c,
+                  bouquets: (c.bouquets as Bouquet[]).filter(
+                    (b) => b._id !== bouquetId
+                  ),
+                };
+              }
+              return c;
+            }),
+          };
+        });
+      }
+      return success;
+    }
+
+    // Fallback: call API directly
+    try {
+      const { getAuthHeaders } = require("../../utils/auth-utils");
+      const targetCollection = this.state.collections.find(
+        (c) => c._id === targetCollectionId
+      );
+      if (!targetCollection) return false;
+
+      // Find old collection
+      const oldCollection = this.state.collections.find((c) =>
+        (c.bouquets as Bouquet[]).some((b) => b._id === bouquetId)
+      );
+
+      // Remove from old collection
+      if (oldCollection && oldCollection._id !== targetCollectionId) {
+        const removeRes = await fetch(
+          `${API_BASE}/api/collections/${oldCollection._id}/bouquets/${bouquetId}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              ...getAuthHeaders(),
+            },
+          }
+        );
+        if (!removeRes.ok) {
+          console.error("Failed to remove bouquet from old collection");
+        }
+      }
+
+      // Add to target collection
+      const addRes = await fetch(
+        `${API_BASE}/api/collections/${targetCollectionId}/bouquets`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...getAuthHeaders(),
+          },
+          body: JSON.stringify({ bouquetId }),
+        }
+      );
+
+      if (addRes.ok) {
+        // Update bouquet's collectionName
+        const bouquet = this.state.bouquets.find((b) => b._id === bouquetId);
+        if (bouquet) {
+          const updateRes = await fetch(
+            `${API_BASE}/api/bouquets/${bouquetId}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                ...getAuthHeaders(),
+              },
+              body: JSON.stringify({
+                collectionName: targetCollection.name,
+              }),
+            }
+          );
+          if (updateRes.ok) {
+            // Update local state
+            this.setState((prev) => {
+              const updatedBouquet = {
+                ...prev.bouquets.find((b) => b._id === bouquetId)!,
+                collectionName: targetCollection.name,
+              };
+              return {
+                ...prev,
+                bouquets: prev.bouquets.map((b) =>
+                  b._id === bouquetId ? updatedBouquet : b
+                ),
+                collections: prev.collections.map((c) => {
+                  if (c._id === targetCollectionId) {
+                    return {
+                      ...c,
+                      bouquets: [
+                        ...(c.bouquets as Bouquet[]).filter(
+                          (b) => b._id !== bouquetId
+                        ),
+                        updatedBouquet,
+                      ],
+                    };
+                  }
+                  if (c._id === oldCollection?._id) {
+                    return {
+                      ...c,
+                      bouquets: (c.bouquets as Bouquet[]).filter(
+                        (b) => b._id !== bouquetId
+                      ),
+                    };
+                  }
+                  return c;
+                }),
+              };
+            });
+            return true;
+          }
+        }
+      }
+      return false;
+    } catch (err) {
+      console.error("Failed to move bouquet:", err);
+      return false;
+    }
+  };
+
+  private handleBouquetDelete = async (bouquetId: string): Promise<void> => {
+    if (this.props.onDelete) {
+      try {
+        await this.props.onDelete(bouquetId);
+        // Update local state
+        this.setState((prev) => ({
+          ...prev,
+          bouquets: prev.bouquets.filter((b) => b._id !== bouquetId),
+          collections: prev.collections.map((c) => ({
+            ...c,
+            bouquets: (c.bouquets as Bouquet[]).filter(
+              (b) => b._id !== bouquetId
+            ),
+          })),
+        }));
+        // If we're in collection detail view and the collection is now empty, go back
+        if (this.state.currentView === "collection-detail") {
+          const collection = this.state.collections.find(
+            (c) => c._id === this.state.selectedCollectionId
+          );
+          if (collection && (collection.bouquets as Bouquet[]).length === 0) {
+            setTimeout(() => {
+              this.handleBackToCollections();
+            }, 500);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to delete bouquet:", err);
+        // Error handling is done in the delete handler
+      }
+    }
+  };
+
+  private handleBouquetDuplicate = async (bouquetId: string): Promise<void> => {
+    if (this.props.onDuplicate) {
+      try {
+        await this.props.onDuplicate(bouquetId);
+        // Reload collections to get the new duplicated bouquet
+        await this.loadCollections();
+      } catch (err) {
+        console.error("Failed to duplicate bouquet:", err);
+        // Error handling is done in the duplicate handler
+      }
+    }
+  };
+
+  private handleBouquetSave = async (
+    formData: FormData
+  ): Promise<boolean> => {
+    try {
+      const success = await this.props.onSave(formData);
+      if (success) {
+        // Update local state with saved data
+        const bouquetId = String(formData.get("_id") ?? "");
+        const updatedBouquet = this.state.bouquets.find(
+          (b) => b._id === bouquetId
+        );
+        if (updatedBouquet) {
+          // Update from form data
+          const name = String(formData.get("name") ?? "");
+          const collectionName = String(formData.get("collectionName") ?? "");
+          const updated = {
+            ...updatedBouquet,
+            name,
+            collectionName,
+          };
+          this.setState((prev) => ({
+            ...prev,
+            bouquets: prev.bouquets.map((b) =>
+              b._id === bouquetId ? updated : b
+            ),
+            collections: prev.collections.map((c) => {
+              // Update bouquet in collection if it exists
+              const bouquetIndex = (c.bouquets as Bouquet[]).findIndex(
+                (b) => b._id === bouquetId
+              );
+              if (bouquetIndex >= 0) {
+                const updatedBouquets = [...(c.bouquets as Bouquet[])];
+                updatedBouquets[bouquetIndex] = updated;
+                return { ...c, bouquets: updatedBouquets };
+              }
+              return c;
+            }),
+          }));
+        }
+        // Go back to collection detail after successful save
+        setTimeout(() => {
+          this.handleBackToCollectionDetail();
+        }, 500); // Small delay to show success message
+      }
+      return success;
+    } catch (err) {
+      console.error("Failed to save bouquet:", err);
+      return false;
+    }
+  };
 
   render(): React.ReactNode {
-    const bouquets = this.props.bouquets ?? [];
-    const {
-      search,
-      priceRange,
-      selectedTypes,
-      selectedSizes,
-      selectedCollections,
-      sortBy,
-      currentPage,
-      itemsPerPage,
-    } = this.state;
+    const { currentView, selectedCollectionId, selectedBouquet, collections } =
+      this.state;
 
-    const allTypes = uniq(
-      bouquets.map((b) => b.type).filter(isNonEmptyString)
-    ).sort();
-    const allSizes = getBouquetSizeFilterOptions(bouquets.map((b) => b.size));
-
-    const collections =
-      this.props.collections?.length > 0
-        ? this.props.collections
-        : uniq(
-            bouquets.map((b) => b.collectionName).filter((c): c is string => typeof c === "string" && c.trim().length > 0)
-          ).sort();
-
-    const filtered = filterBouquets(
-      bouquets,
-      search,
-      priceRange,
-      selectedTypes,
-      selectedSizes,
-      selectedCollections
+    const selectedCollection = collections.find(
+      (c) => c._id === selectedCollectionId
     );
-    const sorted = sortBouquets(filtered, sortBy);
-    const paginated = paginate(sorted, currentPage, itemsPerPage);
 
-    const isDefaultFilters =
-      search.trim() === "" &&
-      sortBy === "" &&
-      selectedTypes.length === 0 &&
-      selectedSizes.length === 0 &&
-      selectedCollections.length === 0 &&
-      priceRange[0] === DEFAULT_PRICE[0] &&
-      priceRange[1] === DEFAULT_PRICE[1];
+    switch (currentView) {
+      case "collections":
+        return (
+          <CollectionListView
+            collections={collections}
+            onCollectionSelect={this.handleCollectionSelect}
+            onCollectionUpdate={this.handleCollectionUpdate}
+          />
+        );
 
-    return (
-      <section className="editorSection" aria-label="Bagian editor bouquet">
-        <header className="editorHeader">
-          <div className="editorHeader__text">
-            <h2 className="editorTitle">Edit Bouquet</h2>
-            <p className="editorSubtitle">
-              Cari, filter, dan edit bouquet. Tersimpan ke database.
-            </p>
-          </div>
+      case "collection-detail":
+        if (!selectedCollection) {
+          this.handleBackToCollections();
+          return null;
+        }
+        return (
+          <CollectionDetailView
+            collection={selectedCollection}
+            bouquets={selectedCollection.bouquets as Bouquet[]}
+            allCollections={collections}
+            onBack={this.handleBackToCollections}
+            onBouquetSelect={this.handleBouquetSelect}
+            onBouquetMove={this.handleBouquetMove}
+            onBouquetDelete={this.handleBouquetDelete}
+            onBouquetDuplicate={this.handleBouquetDuplicate}
+          />
+        );
 
-          <div className="editorHeader__actions">
-            <button
-              type="button"
-              className="editorClearAll"
-              onClick={this.resetAll}
-              disabled={isDefaultFilters}
-              title="Reset filter"
-            >
-              Reset
-            </button>
-          </div>
-        </header>
+      case "bouquet-edit":
+        if (!selectedBouquet) {
+          this.handleBackToCollectionDetail();
+          return null;
+        }
+        return (
+          <BouquetEditForm
+            bouquet={selectedBouquet}
+            collections={collections}
+            onSave={this.handleBouquetSave}
+            onBack={this.handleBackToCollectionDetail}
+          />
+        );
 
-        <div className="editorTools">
-          <div className="editorSearchWrap">
-            <input
-              type="text"
-              className="editorSearch"
-              placeholder="Cari bouquet…"
-              value={search}
-              onChange={(e) => this.setSearch(e.target.value)}
-            />
-            {search.trim() && (
-              <button
-                type="button"
-                className="editorSearchClear"
-                onClick={() => this.setSearch("")}
-              >
-                Hapus
-              </button>
-            )}
-          </div>
-
-          <div className="editorStats" aria-label="Ringkasan hasil">
-            <span className="editorStats__pill">
-              Menampilkan <b>{paginated.length}</b> / <b>{sorted.length}</b>
-            </span>
-            <span className="editorStats__pill">
-              Total: <b>{bouquets.length}</b>
-            </span>
-          </div>
-        </div>
-
-        <div className="editorLayout">
-          <div className="editorFiltersTop" aria-label="Filter">
-            <details className="editorFiltersMobile">
-              <summary className="editorFiltersSummary">Filter & Urutkan</summary>
-
-              <div className="editorFiltersBody">
-                <FilterPanel
-                  embedded
-                  hideHeader
-                  priceRange={priceRange}
-                  selectedTypes={selectedTypes}
-                  selectedSizes={selectedSizes}
-                  selectedCollections={selectedCollections}
-                  sortBy={sortBy}
-                  allTypes={allTypes}
-                  allSizes={allSizes}
-                  allCollections={collections}
-                  onPriceChange={this.setPriceRange}
-                  onToggleFilter={(key, value) =>
-                    key === "selectedTypes"
-                      ? this.toggleType(value)
-                      : key === "selectedCollections"
-                        ? this.toggleCollection(value)
-                        : this.toggleSize(value)
-                  }
-                  onClearFilter={(key) =>
-                    key === "selectedTypes"
-                      ? this.clearTypes()
-                      : key === "selectedCollections"
-                        ? this.clearCollections()
-                        : this.clearSizes()
-                  }
-                  onSortChange={(v) => this.setSortBy(v as SortBy)}
-                />
-              </div>
-            </details>
-
-            <div className="editorFiltersDesktop">
-              <div className="editorFiltersPanel">
-                <FilterPanel
-                  embedded
-                  hideHeader
-                  variant="topbar"
-                  priceRange={priceRange}
-                  selectedTypes={selectedTypes}
-                  selectedSizes={selectedSizes}
-                  selectedCollections={selectedCollections}
-                  sortBy={sortBy}
-                  allTypes={allTypes}
-                  allSizes={allSizes}
-                  allCollections={collections}
-                  onPriceChange={this.setPriceRange}
-                  onToggleFilter={(key, value) =>
-                    key === "selectedTypes"
-                      ? this.toggleType(value)
-                      : key === "selectedCollections"
-                        ? this.toggleCollection(value)
-                        : this.toggleSize(value)
-                  }
-                  onClearFilter={(key) =>
-                    key === "selectedTypes"
-                      ? this.clearTypes()
-                      : key === "selectedCollections"
-                        ? this.clearCollections()
-                        : this.clearSizes()
-                  }
-                  onSortChange={(v) => this.setSortBy(v as SortBy)}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="editorGridWrap">
-            {paginated.length === 0 ? (
-              <div className="editorEmpty" role="status">
-                <h3>Tidak ada hasil</h3>
-                <p>Coba ubah filter atau kata kunci pencarian.</p>
-                <button
-                  type="button"
-                  className="editorEmpty__btn"
-                  onClick={this.resetAll}
-                >
-                  Reset filter
-                </button>
-              </div>
-            ) : (
-              <div className="editorGrid" aria-label="Grid editor bouquet">
-                {paginated.map((bouquet) => (
-                  <BouquetEditor
-                    key={bouquet._id}
-                    bouquet={bouquet}
-                    collections={collections}
-                    onSave={this.handleSave}
-                    onDuplicate={this.props.onDuplicate ? this.handleDuplicate : undefined}
-                    onDelete={this.props.onDelete ? this.handleDelete : undefined}
-                  />
-                ))}
-              </div>
-            )}
-
-            {this.renderPagination(sorted.length)}
-          </div>
-        </div>
-      </section>
-    );
+      default:
+        return null;
+    }
   }
 }

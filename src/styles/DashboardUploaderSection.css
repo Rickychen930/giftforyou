@@ -10,40 +10,81 @@
 ========================================================= */
 
 .uploader {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.98) 100%
+    rgba(255, 255, 255, 0.99) 0%,
+    rgba(255, 255, 255, 0.97) 50%,
+    rgba(255, 255, 255, 0.95) 100%
   );
-  border: 1.5px solid rgba(212, 140, 156, 0.15);
-  border-radius: 24px;
-  box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.08),
-    0 8px 24px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
-  padding: clamp(2rem, 4vw, 3rem);
+  border: 2px solid rgba(212, 140, 156, 0.18);
+  border-radius: 28px;
+  box-shadow: 
+    0 32px 80px rgba(0, 0, 0, 0.1),
+    0 16px 40px rgba(0, 0, 0, 0.06),
+    0 8px 20px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset,
+    0 0 0 2px rgba(212, 140, 156, 0.05) inset;
+  padding: clamp(2.5rem, 5vw, 3.5rem);
   overflow: hidden;
   position: relative;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
+  animation: uploaderFadeIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes uploaderFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .uploader::before {
   content: "";
   position: absolute;
   inset: 0 0 auto 0;
-  height: 2px;
+  height: 4px;
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(212, 140, 156, 0.4),
-    rgba(168, 213, 186, 0.3),
-    rgba(212, 140, 156, 0.4),
+    rgba(212, 140, 156, 0.4) 15%,
+    rgba(212, 140, 156, 0.6) 30%,
+    rgba(212, 140, 156, 0.8) 50%,
+    rgba(168, 213, 186, 0.8) 50%,
+    rgba(168, 213, 186, 0.6) 70%,
+    rgba(168, 213, 186, 0.4) 85%,
     transparent
   );
-  opacity: 0.9;
+  opacity: 0.95;
+  z-index: 1;
+  animation: shimmerTop 3s ease-in-out infinite;
+}
+
+@keyframes shimmerTop {
+  0%, 100% {
+    opacity: 0.95;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.uploader::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 10% 20%, rgba(212, 140, 156, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 90% 80%, rgba(168, 213, 186, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 28px;
 }
 
 .uploader__header {
@@ -69,19 +110,23 @@
 
 .uploader__title {
   margin: 0;
-  font-size: clamp(1.75rem, 3.5vw, 2.25rem);
-  font-weight: 900;
-  color: var(--ink-900);
-  letter-spacing: -0.02em;
+  font-size: clamp(2rem, 4vw, 2.5rem);
+  font-weight: 950;
+  letter-spacing: -0.025em;
   background: linear-gradient(
     135deg,
     var(--brand-rose-500) 0%,
+    var(--brand-rose-700) 50%,
     var(--brand-wine-700) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  line-height: 1.2;
+  line-height: 1.25;
+  font-family: "Playfair Display", Georgia, serif;
+  filter: drop-shadow(0 2px 4px rgba(212, 140, 156, 0.2));
+  position: relative;
+  z-index: 1;
 }
 
 .uploader__subtitle {
@@ -219,6 +264,26 @@
   gap: 0.75rem;
 }
 
+/* Stock wrapper */
+.uploader__stockWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.uploader__stockSeparator {
+  font-size: 0.85rem;
+  color: var(--ink-500);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.uploader__stockInput {
+  flex: 1;
+  min-width: 120px;
+}
+
 .uploader__priceInput {
   flex: 1;
 }
@@ -266,51 +331,63 @@
 }
 
 .uploader__fieldLabel {
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: var(--ink-820);
-  letter-spacing: 0.01em;
+  font-weight: 850;
+  font-size: clamp(0.9rem, 1.1vw, 0.95rem);
+  color: var(--ink-900);
+  letter-spacing: -0.01em;
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  margin-bottom: 0.25rem;
 }
 
 .uploader__field input,
 .uploader__field textarea,
 .uploader__field select {
-  border: 1.5px solid rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(212, 140, 156, 0.25);
   border-radius: 14px;
-  padding: 0.9rem 1.1rem;
-  font-size: 1rem;
-  background: rgba(255, 255, 255, 0.8);
+  padding: clamp(0.85rem, 1.4vw, 0.95rem) clamp(1rem, 1.6vw, 1.15rem);
+  font-size: clamp(0.9rem, 1.2vw, 0.95rem);
+  font-weight: 750;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
   color: var(--ink-900);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   font-family: inherit;
-  box-shadow:
+  box-shadow: 
     0 2px 8px rgba(0, 0, 0, 0.04),
-    inset 0 1px 2px rgba(255, 255, 255, 0.8);
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
-.uploader__field input:hover,
-.uploader__field textarea:hover,
-.uploader__field select:hover {
-  border-color: rgba(212, 140, 156, 0.3);
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.06),
-    inset 0 1px 2px rgba(255, 255, 255, 0.9);
+@media (hover: hover) and (pointer: fine) {
+  .uploader__field input:hover,
+  .uploader__field textarea:hover,
+  .uploader__field select:hover {
+    border-color: rgba(212, 140, 156, 0.35);
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 
+      0 4px 12px rgba(0, 0, 0, 0.06),
+      0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+    transform: translateY(-1px);
+  }
 }
 
 .uploader__field input:focus,
 .uploader__field textarea:focus,
 .uploader__field select:focus {
   outline: none;
-  border-color: var(--brand-rose-500);
+  border-color: var(--brand-rose-600);
   background: rgba(255, 255, 255, 1);
-  box-shadow:
-    0 0 0 3px rgba(212, 140, 156, 0.15),
-    0 4px 16px rgba(0, 0, 0, 0.08),
-    inset 0 1px 2px rgba(255, 255, 255, 1);
+  box-shadow: 
+    0 0 0 4px rgba(212, 140, 156, 0.2),
+    0 6px 16px rgba(212, 140, 156, 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
   transform: translateY(-1px);
 }
 

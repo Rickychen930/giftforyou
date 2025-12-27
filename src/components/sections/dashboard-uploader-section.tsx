@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import "../../styles/DashboardUploaderSection.css";
 import { BOUQUET_SIZE_OPTIONS } from "../../constants/bouquet-constants";
+import DropdownWithModal from "../DropdownWithModal";
+import TagInput from "../TagInput";
 
 interface Props {
   onUpload: (formData: FormData) => Promise<boolean>;
@@ -17,7 +19,9 @@ interface State {
 
   quantity: number;
   occasionsText: string;
+  occasions: string[]; // New: array for occasions
   flowersText: string;
+  flowers: string[]; // New: array for flowers
   isNewEdition: boolean;
   isFeatured: boolean;
   customPenanda: string[];
@@ -51,6 +55,40 @@ interface State {
 const DRAFT_STORAGE_KEY = "bouquet_uploader_draft";
 const AUTO_SAVE_INTERVAL = 2000; // 2 seconds
 
+// Default options for dropdowns
+const DEFAULT_COLLECTIONS = [
+  "Best Sellers",
+  "Wedding Collection",
+  "Sympathy Flowers",
+  "New Edition",
+  "Featured",
+  "Special Occasions",
+];
+
+const DEFAULT_TYPES = [
+  "bouquet",
+  "gift box",
+  "stand acrylic",
+  "artificial bouquet",
+  "fresh flowers",
+  "custom arrangement",
+];
+
+// DEFAULT_OCCASIONS removed - using TagInput with localStorage instead
+
+const DEFAULT_STOCK_LEVELS = [
+  "0",
+  "1",
+  "5",
+  "10",
+  "20",
+  "50",
+  "100",
+  "200",
+  "500",
+  "1000",
+];
+
 class BouquetUploader extends Component<Props, State> {
   private fileInputRef = React.createRef<HTMLInputElement>();
   private formRef = React.createRef<HTMLFormElement>();
@@ -74,7 +112,9 @@ class BouquetUploader extends Component<Props, State> {
 
       quantity: 0,
       occasionsText: "",
+      occasions: [],
       flowersText: "",
+      flowers: [],
       isNewEdition: false,
       isFeatured: false,
       customPenanda: [],
@@ -135,7 +175,9 @@ class BouquetUploader extends Component<Props, State> {
           collectionName: draft.collectionName || "",
           quantity: draft.quantity || 0,
           occasionsText: draft.occasionsText || "",
+          occasions: Array.isArray(draft.occasions) ? draft.occasions : (draft.occasionsText ? draft.occasionsText.split(",").map((s: string) => s.trim()).filter(Boolean) : []),
           flowersText: draft.flowersText || "",
+          flowers: Array.isArray(draft.flowers) ? draft.flowers : (draft.flowersText ? draft.flowersText.split(",").map((s: string) => s.trim()).filter(Boolean) : []),
           isNewEdition: draft.isNewEdition || false,
           isFeatured: draft.isFeatured || false,
           customPenanda: Array.isArray(draft.customPenanda) ? draft.customPenanda : [],
@@ -222,7 +264,9 @@ class BouquetUploader extends Component<Props, State> {
           collectionName: draft.collectionName || "",
           quantity: draft.quantity || 0,
           occasionsText: draft.occasionsText || "",
+          occasions: Array.isArray(draft.occasions) ? draft.occasions : (draft.occasionsText ? draft.occasionsText.split(",").map((s: string) => s.trim()).filter(Boolean) : []),
           flowersText: draft.flowersText || "",
+          flowers: Array.isArray(draft.flowers) ? draft.flowers : (draft.flowersText ? draft.flowersText.split(",").map((s: string) => s.trim()).filter(Boolean) : []),
           isNewEdition: draft.isNewEdition || false,
           isFeatured: draft.isFeatured || false,
           customPenanda: Array.isArray(draft.customPenanda) ? draft.customPenanda : [],
@@ -270,7 +314,9 @@ class BouquetUploader extends Component<Props, State> {
         collectionName: this.state.collectionName,
         quantity: this.state.quantity,
         occasionsText: this.state.occasionsText,
+        occasions: this.state.occasions,
         flowersText: this.state.flowersText,
+        flowers: this.state.flowers,
         isNewEdition: this.state.isNewEdition,
         isFeatured: this.state.isFeatured,
         customPenanda: this.state.customPenanda,
@@ -392,7 +438,9 @@ class BouquetUploader extends Component<Props, State> {
       collectionName: "",
       quantity: 0,
       occasionsText: "",
+      occasions: [],
       flowersText: "",
+      flowers: [],
       isNewEdition: false,
       isFeatured: false,
       customPenanda: [],
@@ -910,8 +958,15 @@ class BouquetUploader extends Component<Props, State> {
     fd.append("collectionName", this.state.collectionName.trim());
 
     fd.append("quantity", String(this.state.quantity ?? 0));
-    fd.append("occasions", this.state.occasionsText.trim());
-    fd.append("flowers", this.state.flowersText.trim());
+    // Use array if available, otherwise fallback to text
+    const occasionsValue = this.state.occasions.length > 0 
+      ? this.state.occasions.join(",")
+      : this.state.occasionsText.trim();
+    const flowersValue = this.state.flowers.length > 0
+      ? this.state.flowers.join(",")
+      : this.state.flowersText.trim();
+    fd.append("occasions", occasionsValue);
+    fd.append("flowers", flowersValue);
     fd.append("isNewEdition", String(Boolean(this.state.isNewEdition)));
     fd.append("isFeatured", String(Boolean(this.state.isFeatured)));
     fd.append("customPenanda", this.state.customPenanda.join(","));
@@ -1049,6 +1104,13 @@ class BouquetUploader extends Component<Props, State> {
           message: "Unggah gagal. Silakan periksa koneksi internet dan coba lagi.",
           messageType: "error",
         });
+        // Scroll to error message
+        setTimeout(() => {
+          const messageEl = document.querySelector(".uploader__message");
+          if (messageEl) {
+            messageEl.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }, 100);
       }
     } catch (err) {
       console.error("Upload error:", err);
@@ -1061,6 +1123,13 @@ class BouquetUploader extends Component<Props, State> {
         message: errorMessage,
         messageType: "error",
       });
+      // Scroll to error message
+      setTimeout(() => {
+        const messageEl = document.querySelector(".uploader__message");
+        if (messageEl) {
+          messageEl.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 100);
     }
   };
 
@@ -1296,31 +1365,52 @@ class BouquetUploader extends Component<Props, State> {
 
                 <label className="uploader__field">
                   <span className="uploader__fieldLabel">Koleksi</span>
-                  <input
-                    name="collectionName"
+                  <DropdownWithModal
+                    label="Koleksi"
                     value={this.state.collectionName}
-                    onChange={this.handleChange}
-                    placeholder="mis., New Edition"
+                    options={DEFAULT_COLLECTIONS}
+                    onChange={(value) => {
+                      this.setState({ collectionName: value });
+                      const newTouchedFields = new Set(this.state.touchedFields);
+                      newTouchedFields.add("collectionName");
+                      this.setState({ touchedFields: newTouchedFields });
+                      const error = this.validateField("collectionName", value);
+                      if (error !== null) {
+                        const newFieldErrors = { ...this.state.fieldErrors };
+                        if (error) {
+                          newFieldErrors.collectionName = error;
+                        } else {
+                          delete newFieldErrors.collectionName;
+                        }
+                        this.setState({ fieldErrors: newFieldErrors });
+                      }
+                    }}
+                    onAddNew={(newValue) => {
+                      // Option added, already set in onChange
+                    }}
+                    placeholder="Pilih atau tambahkan koleksi baru..."
                     disabled={submitting}
+                    error={touchedFields.has("collectionName") && fieldErrors.collectionName ? fieldErrors.collectionName : undefined}
                     maxLength={100}
-                    aria-invalid={touchedFields.has("collectionName") && fieldErrors.collectionName ? "true" : "false"}
-                    aria-describedby={touchedFields.has("collectionName") && fieldErrors.collectionName ? "collectionName-error" : undefined}
+                    storageKey="uploader_collections"
                   />
-                  {touchedFields.has("collectionName") && fieldErrors.collectionName && (
-                    <span id="collectionName-error" className="uploader__fieldError" role="alert" aria-live="polite">
-                      {fieldErrors.collectionName}
-                    </span>
-                  )}
                 </label>
 
                 <label className="uploader__field">
                   <span className="uploader__fieldLabel">Tipe</span>
-                  <input
-                    name="type"
+                  <DropdownWithModal
+                    label="Tipe"
                     value={this.state.type}
-                    onChange={this.handleChange}
-                    placeholder="mis., bouquet"
+                    options={DEFAULT_TYPES}
+                    onChange={(value) => {
+                      this.setState({ type: value });
+                    }}
+                    onAddNew={(newValue) => {
+                      // Option added, already set in onChange
+                    }}
+                    placeholder="Pilih atau tambahkan tipe baru..."
                     disabled={submitting}
+                    storageKey="uploader_types"
                   />
                 </label>
 
@@ -1353,18 +1443,56 @@ class BouquetUploader extends Component<Props, State> {
 
                 <label className="uploader__field">
                   <span className="uploader__fieldLabel">Stok</span>
-                  <input
-                    name="quantity"
-                    type="number"
-                    min={0}
-                    step={1}
-                    value={this.state.quantity || ""}
-                    onChange={this.handleChange}
-                    placeholder="0"
-                    disabled={submitting}
-                    aria-invalid={touchedFields.has("quantity") && fieldErrors.quantity ? "true" : "false"}
-                    aria-describedby={touchedFields.has("quantity") && fieldErrors.quantity ? "quantity-error" : undefined}
-                  />
+                  <div className="uploader__stockWrapper">
+                    <DropdownWithModal
+                      label="Stok"
+                      value={this.state.quantity > 0 ? String(this.state.quantity) : ""}
+                      options={DEFAULT_STOCK_LEVELS}
+                      onChange={(value) => {
+                        const num = parseInt(value, 10);
+                        if (!isNaN(num) && num >= 0) {
+                          this.setState({ quantity: num });
+                          const newTouchedFields = new Set(this.state.touchedFields);
+                          newTouchedFields.add("quantity");
+                          this.setState({ touchedFields: newTouchedFields });
+                          const error = this.validateField("quantity", num);
+                          if (error !== null) {
+                            const newFieldErrors = { ...this.state.fieldErrors };
+                            if (error) {
+                              newFieldErrors.quantity = error;
+                            } else {
+                              delete newFieldErrors.quantity;
+                            }
+                            this.setState({ fieldErrors: newFieldErrors });
+                          }
+                        }
+                      }}
+                      onAddNew={(newValue) => {
+                        const num = parseInt(newValue, 10);
+                        if (!isNaN(num) && num >= 0) {
+                          this.setState({ quantity: num });
+                        }
+                      }}
+                      placeholder="Pilih jumlah stok..."
+                      disabled={submitting}
+                      error={touchedFields.has("quantity") && fieldErrors.quantity ? fieldErrors.quantity : undefined}
+                      storageKey="uploader_stock_levels"
+                    />
+                    <span className="uploader__stockSeparator">atau</span>
+                    <input
+                      name="quantity"
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={this.state.quantity || ""}
+                      onChange={this.handleChange}
+                      placeholder="Input manual"
+                      disabled={submitting}
+                      className="uploader__stockInput"
+                      aria-invalid={touchedFields.has("quantity") && fieldErrors.quantity ? "true" : "false"}
+                      aria-describedby={touchedFields.has("quantity") && fieldErrors.quantity ? "quantity-error" : undefined}
+                    />
+                  </div>
                   {touchedFields.has("quantity") && fieldErrors.quantity && (
                     <span id="quantity-error" className="uploader__fieldError" role="alert" aria-live="polite">
                       {fieldErrors.quantity}
@@ -1556,44 +1684,74 @@ class BouquetUploader extends Component<Props, State> {
 
                 <label className="uploader__field uploader__field--full">
                   <span className="uploader__fieldLabel">Acara</span>
-                  <input
-                    name="occasionsText"
-                    value={this.state.occasionsText}
-                    onChange={this.handleChange}
-                    placeholder="mis., Ulang Tahun, Anniversary (pisahkan dengan koma)"
+                  <TagInput
+                    label="Acara"
+                    tags={this.state.occasions}
+                    onChange={(tags) => {
+                      this.setState({ 
+                        occasions: tags,
+                        occasionsText: tags.join(", ") // Keep text for backward compatibility
+                      });
+                      const newTouchedFields = new Set(this.state.touchedFields);
+                      newTouchedFields.add("occasionsText");
+                      this.setState({ touchedFields: newTouchedFields });
+                      const error = this.validateField("occasionsText", tags.join(", "));
+                      if (error !== null) {
+                        const newFieldErrors = { ...this.state.fieldErrors };
+                        if (error) {
+                          newFieldErrors.occasionsText = error;
+                        } else {
+                          delete newFieldErrors.occasionsText;
+                        }
+                        this.setState({ fieldErrors: newFieldErrors });
+                      }
+                    }}
+                    placeholder="Tambahkan acara..."
                     disabled={submitting}
-                    aria-invalid={touchedFields.has("occasionsText") && fieldErrors.occasionsText ? "true" : "false"}
-                    aria-describedby={touchedFields.has("occasionsText") && fieldErrors.occasionsText ? "occasionsText-error" : undefined}
+                    maxTags={10}
+                    maxLength={50}
+                    error={touchedFields.has("occasionsText") && fieldErrors.occasionsText ? fieldErrors.occasionsText : undefined}
+                    storageKey="uploader_occasions"
                   />
-                  <div className="uploader__fieldHint">
-                    Pisahkan dengan koma atau enter. Maksimal 10 acara.
+                  <div className="uploader__fieldHint" style={{ marginTop: "0.5rem" }}>
+                    Klik "Tambah Baru" untuk menambahkan acara baru. Maksimal 10 acara.
                   </div>
-                  {touchedFields.has("occasionsText") && fieldErrors.occasionsText && (
-                    <span id="occasionsText-error" className="uploader__fieldError" role="alert" aria-live="polite">
-                      {fieldErrors.occasionsText}
-                    </span>
-                  )}
                 </label>
 
                 <label className="uploader__field uploader__field--full">
                   <span className="uploader__fieldLabel">Bunga</span>
-                  <input
-                    name="flowersText"
-                    value={this.state.flowersText}
-                    onChange={this.handleChange}
-                    placeholder="mis., Orchid, Mawar (pisahkan dengan koma)"
+                  <TagInput
+                    label="Bunga"
+                    tags={this.state.flowers}
+                    onChange={(tags) => {
+                      this.setState({ 
+                        flowers: tags,
+                        flowersText: tags.join(", ") // Keep text for backward compatibility
+                      });
+                      const newTouchedFields = new Set(this.state.touchedFields);
+                      newTouchedFields.add("flowersText");
+                      this.setState({ touchedFields: newTouchedFields });
+                      const error = this.validateField("flowersText", tags.join(", "));
+                      if (error !== null) {
+                        const newFieldErrors = { ...this.state.fieldErrors };
+                        if (error) {
+                          newFieldErrors.flowersText = error;
+                        } else {
+                          delete newFieldErrors.flowersText;
+                        }
+                        this.setState({ fieldErrors: newFieldErrors });
+                      }
+                    }}
+                    placeholder="Tambahkan jenis bunga..."
                     disabled={submitting}
-                    aria-invalid={touchedFields.has("flowersText") && fieldErrors.flowersText ? "true" : "false"}
-                    aria-describedby={touchedFields.has("flowersText") && fieldErrors.flowersText ? "flowersText-error" : undefined}
+                    maxTags={20}
+                    maxLength={50}
+                    error={touchedFields.has("flowersText") && fieldErrors.flowersText ? fieldErrors.flowersText : undefined}
+                    storageKey="uploader_flowers"
                   />
-                  <div className="uploader__fieldHint">
-                    Pisahkan dengan koma atau enter. Maksimal 20 jenis bunga.
+                  <div className="uploader__fieldHint" style={{ marginTop: "0.5rem" }}>
+                    Ketik dan tekan Enter/koma untuk menambahkan tag. Klik "Tambah Baru" untuk tag baru. Maksimal 20 jenis bunga.
                   </div>
-                  {touchedFields.has("flowersText") && fieldErrors.flowersText && (
-                    <span id="flowersText-error" className="uploader__fieldError" role="alert" aria-live="polite">
-                      {fieldErrors.flowersText}
-                    </span>
-                  )}
                 </label>
 
                 <label className="uploader__field uploader__field--full">

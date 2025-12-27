@@ -177,4 +177,73 @@ router.delete("/:id/bouquets/:bouquetId", authenticate, requireAdmin, async (req
   }
 });
 
+/**
+ * PUT /api/collections/:id
+ * Body: { name: string, description?: string }
+ * Updates a collection name and/or description
+ * Protected: Admin only
+ */
+router.put("/:id", authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const name = normalizeString(req.body?.name);
+    const description = normalizeString(req.body?.description ?? "");
+
+    if (!Types.ObjectId.isValid(id)) {
+      res.status(400).json({ error: "Invalid collection id." });
+      return;
+    }
+
+    if (name.length < 2) {
+      res.status(400).json({ error: "Collection name must be at least 2 characters." });
+      return;
+    }
+
+    // Check if new name already exists (excluding current collection)
+    const exists = await CollectionModel.findOne({ name, _id: { $ne: id } }).lean().exec();
+    if (exists) {
+      res.status(409).json({ error: "Collection name already exists." });
+      return;
+    }
+
+    const collection = await CollectionModel.findById(id).exec();
+    if (!collection) {
+      res.status(404).json({ error: "Collection not found" });
+      return;
+    }
+
+    const oldName = collection.name;
+
+    // Update collection
+    const updated = await CollectionModel.findByIdAndUpdate(
+      id,
+      { name, description: description || undefined },
+      { new: true }
+    )
+      .populate("bouquets")
+      .exec();
+
+    if (!updated) {
+      res.status(404).json({ error: "Collection not found" });
+      return;
+    }
+
+    // Update all bouquets with this collection name
+    if (oldName !== name) {
+      await BouquetModel.updateMany(
+        { collectionName: oldName },
+        { collectionName: name }
+      ).exec();
+    }
+
+    res.status(200).json({
+      message: "Collection updated successfully",
+      collection: updated,
+    });
+  } catch (err) {
+    console.error("Failed to update collection:", err);
+    res.status(500).json({ error: "Failed to update collection" });
+  }
+});
+
 export default router;
