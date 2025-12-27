@@ -20,11 +20,14 @@ async function getCustomers(req, res) {
             .limit(limit)
             .lean()
             .exec();
+        if (process.env.NODE_ENV === "development") {
+            console.log(`[getCustomers] Found ${customers.length} customers`);
+        }
         res.status(200).json(customers);
     }
     catch (err) {
         console.error("getCustomers failed:", err);
-        res.status(500).json({ message: "Failed to get customers" });
+        res.status(500).json({ message: "Failed to get customers", error: err instanceof Error ? err.message : "Unknown error" });
     }
 }
 exports.getCustomers = getCustomers;
@@ -33,24 +36,45 @@ async function createCustomer(req, res) {
         const buyerName = (0, validation_1.normalizeString)(req.body?.buyerName, "", 120);
         const phoneNumber = (0, validation_1.normalizeString)(req.body?.phoneNumber, "", 40);
         const address = (0, validation_1.normalizeString)(req.body?.address, "", 500);
+        if (process.env.NODE_ENV === "development") {
+            console.log("[createCustomer] Request body:", { buyerName, phoneNumber, address: address?.substring(0, 50) + "..." });
+        }
         if (!buyerName || !phoneNumber || !address) {
-            res.status(400).json({ message: "Missing required fields" });
+            const missing = [];
+            if (!buyerName)
+                missing.push("buyerName");
+            if (!phoneNumber)
+                missing.push("phoneNumber");
+            if (!address)
+                missing.push("address");
+            res.status(400).json({ message: "Missing required fields", missing });
             return;
         }
         const existing = await customer_model_1.CustomerModel.findOne({ phoneNumber }).lean().exec();
         if (existing?._id) {
+            if (process.env.NODE_ENV === "development") {
+                console.log(`[createCustomer] Updating existing customer: ${existing._id}`);
+            }
             const updated = await customer_model_1.CustomerModel.findByIdAndUpdate(existing._id, { $set: { buyerName, address } }, { new: true, runValidators: true })
                 .lean()
                 .exec();
             res.status(200).json(updated ?? existing);
             return;
         }
+        if (process.env.NODE_ENV === "development") {
+            console.log("[createCustomer] Creating new customer");
+        }
         const created = await customer_model_1.CustomerModel.create({ buyerName, phoneNumber, address });
         res.status(201).json(created);
     }
     catch (err) {
         console.error("createCustomer failed:", err);
-        res.status(500).json({ message: "Failed to create customer" });
+        if (err instanceof Error && err.message.includes("E11000")) {
+            // Duplicate key error (MongoDB unique constraint)
+            res.status(409).json({ message: "Customer with this phone number already exists" });
+            return;
+        }
+        res.status(500).json({ message: "Failed to create customer", error: err instanceof Error ? err.message : "Unknown error" });
     }
 }
 exports.createCustomer = createCustomer;
