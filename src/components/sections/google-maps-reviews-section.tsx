@@ -22,9 +22,6 @@ const GoogleMapsReviewsSection: React.FC<GoogleMapsReviewsSectionProps> = ({
   placeName = "GiftForYou.idn",
   reviews: providedReviews,
 }) => {
-  const [filterRating, setFilterRating] = useState<number | null>(5); // Default: show 5-star reviews
-  const [showAll, setShowAll] = useState(false);
-
   // Default reviews - you can replace these with actual Google Maps reviews
   const defaultReviews: Review[] = [
     {
@@ -97,35 +94,16 @@ const GoogleMapsReviewsSection: React.FC<GoogleMapsReviewsSectionProps> = ({
     ? providedReviews 
     : defaultReviews;
 
-  // Filter reviews by rating
-  const filteredReviews = filterRating !== null
-    ? allReviews.filter((review) => review.rating === filterRating)
-    : allReviews;
+  // Filter only 5-star reviews
+  const filteredReviews = allReviews.filter((review) => review.rating === 5);
 
   // Sort by time (newest first)
   const sortedReviews = [...filteredReviews].sort((a, b) => 
     new Date(b.time).getTime() - new Date(a.time).getTime()
   );
 
-  // Show only top reviews initially
-  const displayedReviews = showAll ? sortedReviews : sortedReviews.slice(0, 6);
-
-  const handleViewOnGoogleMaps = () => {
-    if (placeId) {
-      window.open(
-        `https://www.google.com/maps/place/?q=place_id:${placeId}`,
-        "_blank",
-        "noopener,noreferrer"
-      );
-    } else {
-      // Fallback: search by place name
-      window.open(
-        `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName)}`,
-        "_blank",
-        "noopener,noreferrer"
-      );
-    }
-  };
+  // For infinite scroll, duplicate reviews to create seamless loop
+  const displayedReviews = [...sortedReviews, ...sortedReviews, ...sortedReviews];
 
   const renderStars = (rating: number) => {
     return [...Array(5)].map((_, index) => (
@@ -168,74 +146,16 @@ const GoogleMapsReviewsSection: React.FC<GoogleMapsReviewsSectionProps> = ({
               Lihat apa kata pelanggan tentang kami di Google Maps
             </p>
           </div>
-          <button
-            type="button"
-            className="google-maps-reviews-view-btn"
-            onClick={handleViewOnGoogleMaps}
-            aria-label="Lihat semua review di Google Maps"
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-            >
-              <path
-                d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Lihat di Google Maps
-          </button>
         </header>
 
-        {/* Filter by rating */}
-        <div className="google-maps-reviews-filters">
-          <button
-            type="button"
-            className={`google-maps-reviews-filter-btn ${filterRating === null ? "active" : ""}`}
-            onClick={() => setFilterRating(null)}
-            aria-label="Tampilkan semua rating"
-          >
-            Semua
-          </button>
-          <button
-            type="button"
-            className={`google-maps-reviews-filter-btn ${filterRating === 5 ? "active" : ""}`}
-            onClick={() => setFilterRating(5)}
-            aria-label="Tampilkan review 5 bintang"
-          >
-            <span className="filter-btn-stars">
-              {renderStars(5)}
-            </span>
-            <span>5 Bintang</span>
-          </button>
-          <button
-            type="button"
-            className={`google-maps-reviews-filter-btn ${filterRating === 4 ? "active" : ""}`}
-            onClick={() => setFilterRating(4)}
-            aria-label="Tampilkan review 4 bintang"
-          >
-            <span className="filter-btn-stars">
-              {renderStars(4)}
-            </span>
-            <span>4 Bintang</span>
-          </button>
-        </div>
-
-        {/* Reviews grid */}
+        {/* Reviews horizontal scroll */}
         {displayedReviews.length > 0 ? (
-          <>
-            <div className="google-maps-reviews-grid" role="list" aria-label="Customer reviews">
-              {displayedReviews.map((review) => (
+          <div className="google-maps-reviews-scroll-container">
+            <div className="google-maps-reviews-scroll" role="list" aria-label="Customer reviews">
+              {displayedReviews.map((review, index) => (
                 <article
-                  key={review.id}
-                  className="google-maps-review-card fade-in"
+                  key={`${review.id}-${index}`}
+                  className="google-maps-review-card"
                   role="listitem"
                 >
                   <div className="google-maps-review-header">
@@ -271,40 +191,10 @@ const GoogleMapsReviewsSection: React.FC<GoogleMapsReviewsSectionProps> = ({
                 </article>
               ))}
             </div>
-
-            {sortedReviews.length > 6 && (
-              <div className="google-maps-reviews-footer">
-                <button
-                  type="button"
-                  className="google-maps-reviews-show-more-btn"
-                  onClick={() => setShowAll(!showAll)}
-                  aria-label={showAll ? "Tampilkan lebih sedikit" : "Tampilkan lebih banyak"}
-                >
-                  {showAll ? "Tampilkan Lebih Sedikit" : `Tampilkan Semua (${sortedReviews.length})`}
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                    style={{ transform: showAll ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.3s ease" }}
-                  >
-                    <path
-                      d="M6 9l6 6 6-6"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-              </div>
-            )}
-          </>
+          </div>
         ) : (
           <div className="google-maps-reviews-empty" role="status" aria-live="polite">
-            <p>Tidak ada review dengan rating {filterRating} bintang</p>
+            <p>Tidak ada review tersedia</p>
           </div>
         )}
       </div>
