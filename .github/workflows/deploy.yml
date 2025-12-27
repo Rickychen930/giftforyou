@@ -52,18 +52,45 @@ jobs:
             TS="$(date +%Y%m%d-%H%M%S)"
             NEW="$RELEASES/$TS"
 
-            # Frontend directories
+            # Create parent directories first
+            mkdir -p "$(dirname "$FRONTEND_TARGET")" 2>/dev/null || true
+            mkdir -p "$(dirname "$BACKEND_TARGET")" 2>/dev/null || true
+            
+            # Frontend directories with explicit permissions
+            echo "Creating frontend directories..."
+            mkdir -p "$FRONTEND_TARGET"
             mkdir -p "$RELEASES"
             mkdir -p "$NEW"
             mkdir -p "$FRONTEND_TARGET/_incoming"
+            chmod -R 755 "$FRONTEND_TARGET" || true
+            # Try to set ownership (may fail if not root, that's ok)
+            chown -R "$(whoami):$(whoami)" "$FRONTEND_TARGET" 2>/dev/null || true
 
-            # Backend directories
+            # Backend directories with explicit permissions
+            echo "Creating backend directories..."
+            mkdir -p "$BACKEND_TARGET"
             mkdir -p "$BACKEND_TARGET/dist"
             mkdir -p "$BACKEND_TARGET/server"
             mkdir -p "$BACKEND_TARGET/uploads"
+            mkdir -p "$BACKEND_TARGET/_incoming_backend"
+            chmod -R 755 "$BACKEND_TARGET" || true
+            # Try to set ownership (may fail if not root, that's ok)
+            chown -R "$(whoami):$(whoami)" "$BACKEND_TARGET" 2>/dev/null || true
 
-            echo "Frontend release dir: $NEW"
-            echo "Backend target: $BACKEND_TARGET"
+            # Verify directories are writable
+            if [ ! -w "$FRONTEND_TARGET/_incoming" ]; then
+              echo "⚠️  Warning: $FRONTEND_TARGET/_incoming may not be writable"
+              ls -ld "$FRONTEND_TARGET/_incoming" || true
+            fi
+            
+            if [ ! -w "$BACKEND_TARGET/_incoming_backend" ]; then
+              echo "⚠️  Warning: $BACKEND_TARGET/_incoming_backend may not be writable"
+              ls -ld "$BACKEND_TARGET/_incoming_backend" || true
+            fi
+
+            echo "✅ Frontend release dir: $NEW"
+            echo "✅ Backend target: $BACKEND_TARGET"
+            echo "✅ All directories created"
 
       # ✅ Upload Frontend build
       - name: Upload frontend build to VPS
