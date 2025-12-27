@@ -27,6 +27,9 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+          eval $(ssh-agent -s)
+          ssh-add ~/.ssh/deploy_key
+          echo "✅ SSH key configured"
 
       # ✅ Build Frontend
       - name: Create .env.production for frontend
@@ -99,57 +102,13 @@ jobs:
             echo "✅ Backend target: $BACKEND_TARGET"
             echo "✅ All directories created"
 
-      # ✅ Upload Frontend build using tar + SSH (more reliable than SCP)
+      # ✅ Upload Frontend build via rsync (reliable method)
       - name: Upload frontend build to VPS
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          timeout: 180s
-          command_timeout: 20m
-          use_insecure_cipher: false
-          script: |
-            set -e
-            FRONTEND_TARGET="${{ secrets.FRONTEND_TARGET_DIR }}"
-            INCOMING_DIR="$FRONTEND_TARGET/_incoming"
-            
-            # Ensure directory exists and is writable
-            mkdir -p "$INCOMING_DIR"
-            chmod -R 755 "$INCOMING_DIR" || true
-            
-            echo "✅ Ready to receive frontend build at: $INCOMING_DIR"
-          script_stop: true
-      
-      - name: Transfer frontend build via base64
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          timeout: 180s
-          command_timeout: 20m
-          use_insecure_cipher: false
-          script: |
-            set -e
-            FRONTEND_TARGET="${{ secrets.FRONTEND_TARGET_DIR }}"
-            INCOMING_DIR="$FRONTEND_TARGET/_incoming"
-            mkdir -p "$INCOMING_DIR"
-            cd "$INCOMING_DIR"
-            echo "Waiting for tar stream..."
-          script_stop: true
-      
-      - name: Upload frontend build files
         run: |
-          cd build
-          tar czf - . | base64 | ssh -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            -p ${{ secrets.SSH_PORT }} \
-            -i <(echo "${{ secrets.SSH_PRIVATE_KEY }}") \
-            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
-            "cd ${{ secrets.FRONTEND_TARGET_DIR }}/_incoming && base64 -d | tar xzf -"
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no" \
+            build/ \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.FRONTEND_TARGET_DIR }}/_incoming/
 
       # ✅ Ensure backend directories exist before upload
       - name: Ensure backend upload directories exist
@@ -178,22 +137,13 @@ jobs:
             chmod -R 755 "$BACKEND_TARGET" || true
             echo "✅ Backend directories ready"
 
-      # ✅ Upload Backend dist and config
+      # ✅ Upload Backend dist via rsync
       - name: Upload backend dist to VPS
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          timeout: 180s
-          command_timeout: 20m
-          use_insecure_cipher: false
-          debug: true
-          source: "dist"
-          target: "${{ secrets.BACKEND_TARGET_DIR }}/_incoming_backend"
-          overwrite: true
-          strip_components: 0
+        run: |
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no" \
+            dist/ \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.BACKEND_TARGET_DIR }}/_incoming_backend/
 
       - name: Upload ecosystem.config.js via SSH
         uses: appleboy/ssh-action@v1.0.3
