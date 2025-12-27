@@ -195,6 +195,14 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
       </Link>
 
       <div className="bouquet-info">
+        {/* Simplified: Only Name, Tags, and Price */}
+        <h4 className="bouquet-title">
+          <Link to={detailHref} aria-label={`Lihat detail bouquet ${formatBouquetName(name)}`}>
+            {formatBouquetName(name)}
+          </Link>
+        </h4>
+
+        {/* Tags - Compact display */}
         {(tags.length > 0 || customPenanda.length > 0) && (
           <div className="bouquet-tags" aria-label="Kategori bouquet">
             {tags.slice(0, 2).map((t) => (
@@ -215,43 +223,11 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
           </div>
         )}
 
-        <h4 className="bouquet-title">
-          <Link to={detailHref} aria-label={`Lihat detail bouquet ${formatBouquetName(name)}`}>
-            {formatBouquetName(name)}
-          </Link>
-        </h4>
-
-        {description && (
-          <p className="bouquet-description" title={description}>
-            {description}
+        {/* Price - Prominent display */}
+        <div className="bouquet-price-wrapper">
+          <p className="bouquet-price" aria-label={`Harga ${formatPrice(price)}`}>
+            {formatPrice(price)}
           </p>
-        )}
-
-        <div className="bouquet-footer">
-          <div className="bouquet-price-wrapper">
-            <p className="bouquet-price" aria-label={`Harga ${formatPrice(price)}`}>
-              {formatPrice(price)}
-            </p>
-            {status === "ready" && (
-              <span className="bouquet-price-hint" aria-label="Bouquet siap dikirim">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                Siap kirim
-              </span>
-            )}
-          </div>
-          <Link 
-            to={detailHref} 
-            className="bouquet-button"
-            onClick={(e) => e.stopPropagation()}
-            aria-label={`Lihat detail lengkap bouquet ${name}`}
-          >
-            <span>Lihat Detail</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </Link>
         </div>
       </div>
     </article>

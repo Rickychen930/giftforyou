@@ -1,115 +1,157 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "../../styles/InstagramFeedSection.css";
-
-interface InstagramPost {
-  id: string;
-  imageUrl: string;
-  caption?: string;
-  link: string; // Link to Instagram post
-  timestamp?: string;
-}
+import { getInstagramPosts, getInstagramProfile, type InstagramPost } from "../../services/instagram.service";
 
 interface InstagramFeedSectionProps {
   instagramUsername?: string; // e.g., "giftforyou.idn"
   posts?: InstagramPost[]; // Optional: if you want to pass posts directly
+  postsToShow?: number; // Number of posts to display
 }
 
 const InstagramFeedSection: React.FC<InstagramFeedSectionProps> = ({
   instagramUsername = "giftforyou.idn",
   posts: providedPosts,
+  postsToShow = 10,
 }) => {
   const [posts, setPosts] = useState<InstagramPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [profileUsername, setProfileUsername] = useState<string>(instagramUsername);
 
-  // Default posts - you can replace these with actual Instagram post links
-  const defaultPosts: InstagramPost[] = [
+  // Default posts as fallback if API is not available
+  // Using useCallback to memoize and avoid dependency issues
+  const getDefaultPosts = useCallback((): InstagramPost[] => [
     {
       id: "1",
       imageUrl: "/images/instagram/instagram-1.jpg",
       caption: "Bouquet Fresh untuk Hari Spesial",
-      link: `https://www.instagram.com/${instagramUsername}/`,
+      link: `https://www.instagram.com/${instagramUsername}/p/C0D_1_1_1_1/`,
       timestamp: "2 hours ago",
     },
     {
       id: "2",
       imageUrl: "/images/instagram/instagram-2.jpg",
       caption: "Gift Box Premium Collection",
-      link: `https://www.instagram.com/${instagramUsername}/`,
+      link: `https://www.instagram.com/${instagramUsername}/p/C0D_2_2_2_2/`,
       timestamp: "5 hours ago",
     },
     {
       id: "3",
       imageUrl: "/images/instagram/instagram-3.jpg",
       caption: "Stand Acrylic Elegant Design",
-      link: `https://www.instagram.com/${instagramUsername}/`,
+      link: `https://www.instagram.com/${instagramUsername}/p/C0D_3_3_3_3/`,
       timestamp: "1 day ago",
     },
     {
       id: "4",
       imageUrl: "/images/instagram/instagram-4.jpg",
       caption: "Artificial Bouquet Terbaru",
-      link: `https://www.instagram.com/${instagramUsername}/`,
+      link: `https://www.instagram.com/${instagramUsername}/p/C0D_4_4_4_4/`,
       timestamp: "2 days ago",
     },
     {
       id: "5",
       imageUrl: "/images/instagram/instagram-5.jpg",
       caption: "Bouquet Custom untuk Pernikahan",
-      link: `https://www.instagram.com/${instagramUsername}/`,
+      link: `https://www.instagram.com/${instagramUsername}/p/C0D_5_5_5_5/`,
       timestamp: "3 days ago",
     },
     {
       id: "6",
       imageUrl: "/images/instagram/instagram-6.jpg",
       caption: "Gift Box Special Edition",
-      link: `https://www.instagram.com/${instagramUsername}/`,
+      link: `https://www.instagram.com/${instagramUsername}/p/C0D_6_6_6_6/`,
       timestamp: "4 days ago",
     },
     {
       id: "7",
       imageUrl: "/images/instagram/instagram-7.jpg",
       caption: "Bouquet Fresh dari Kebun",
-      link: `https://www.instagram.com/${instagramUsername}/`,
+      link: `https://www.instagram.com/${instagramUsername}/p/C0D_7_7_7_7/`,
       timestamp: "5 days ago",
     },
     {
       id: "8",
       imageUrl: "/images/instagram/instagram-8.jpg",
       caption: "Stand Acrylic Premium",
-      link: `https://www.instagram.com/${instagramUsername}/`,
+      link: `https://www.instagram.com/${instagramUsername}/p/C0D_8_8_8_8/`,
       timestamp: "1 week ago",
     },
     {
       id: "9",
       imageUrl: "/images/instagram/instagram-9.jpg",
       caption: "Bouquet Anniversary Special",
-      link: `https://www.instagram.com/${instagramUsername}/`,
+      link: `https://www.instagram.com/${instagramUsername}/p/C0D_9_9_9_9/`,
       timestamp: "1 week ago",
     },
     {
       id: "10",
       imageUrl: "/images/instagram/instagram-10.jpg",
       caption: "Gift Box Valentine Collection",
-      link: `https://www.instagram.com/${instagramUsername}/`,
+      link: `https://www.instagram.com/${instagramUsername}/p/C0D_10_10_10_10/`,
       timestamp: "2 weeks ago",
     },
-  ];
+  ], [instagramUsername]);
 
   useEffect(() => {
-    if (providedPosts && providedPosts.length > 0) {
-      setPosts(providedPosts.slice(0, 10));
-    } else {
-      // Use default posts or fetch from API if needed
-      setPosts(defaultPosts.slice(0, 10));
-    }
+    const defaultPosts = getDefaultPosts();
+    const controller = new AbortController();
+
+    const fetchPosts = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        // If posts are provided directly, use them
+        if (providedPosts && providedPosts.length > 0) {
+          setPosts(providedPosts.slice(0, postsToShow));
+          setLoading(false);
+          return;
+        }
+
+        // Try to fetch from Instagram API
+        const apiPosts = await getInstagramPosts(postsToShow, controller.signal);
+        
+        if (apiPosts && apiPosts.length > 0) {
+          // Use real Instagram posts from API
+          setPosts(apiPosts);
+          
+          // Try to get profile username
+          const profile = await getInstagramProfile(controller.signal);
+          if (profile?.username) {
+            setProfileUsername(profile.username);
+          }
+        } else {
+          // Fallback to default posts if API returns empty
+          setPosts(defaultPosts.slice(0, postsToShow));
+        }
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") {
+          return; // Component unmounted, ignore
+        }
+        console.warn("Failed to fetch Instagram posts, using fallback:", err);
+        // Use fallback posts on error
+        setPosts(defaultPosts.slice(0, postsToShow));
+        setError("Gagal memuat post Instagram. Menampilkan contoh post.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+
+    return () => {
+      controller.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [providedPosts]);
+  }, [providedPosts, postsToShow, instagramUsername]);
 
   const handlePostClick = (link: string) => {
     window.open(link, "_blank", "noopener,noreferrer");
   };
 
   const handleViewAllClick = () => {
-    window.open(`https://www.instagram.com/${instagramUsername}/`, "_blank", "noopener,noreferrer");
+    window.open(`https://www.instagram.com/${profileUsername}/`, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -135,11 +177,11 @@ const InstagramFeedSection: React.FC<InstagramFeedSectionProps> = ({
             </p>
           </div>
           <a
-            href={`https://www.instagram.com/${instagramUsername}/`}
+            href={`https://www.instagram.com/${profileUsername}/`}
             target="_blank"
             rel="noopener noreferrer"
             className="instagram-feed-follow-btn"
-            aria-label={`Follow @${instagramUsername} di Instagram`}
+            aria-label={`Follow @${profileUsername} di Instagram`}
           >
             <svg
               width="18"
@@ -157,11 +199,25 @@ const InstagramFeedSection: React.FC<InstagramFeedSectionProps> = ({
                 strokeLinejoin="round"
               />
             </svg>
-            Follow @{instagramUsername}
+            Follow @{profileUsername}
           </a>
         </header>
 
-        {posts.length > 0 ? (
+        {loading ? (
+          <div className="instagram-feed-loading" aria-live="polite" aria-busy="true">
+            <div className="instagram-feed-skeleton">
+              {Array.from({ length: postsToShow }).map((_, index) => (
+                <div key={index} className="instagram-post-skeleton">
+                  <div className="skeleton-shimmer" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : error && posts.length === 0 ? (
+          <div className="instagram-feed-empty" role="status" aria-live="polite">
+            <p>{error}</p>
+          </div>
+        ) : posts.length > 0 ? (
           <>
             <div className="instagram-feed-grid" role="list" aria-label="Instagram posts">
               {posts.map((post) => (
@@ -224,7 +280,7 @@ const InstagramFeedSection: React.FC<InstagramFeedSectionProps> = ({
                 type="button"
                 className="instagram-feed-view-all-btn"
                 onClick={handleViewAllClick}
-                aria-label="Lihat semua post di Instagram"
+                aria-label={`Lihat semua post dari @${profileUsername} di Instagram`}
               >
                 Lihat Semua di Instagram
                 <svg

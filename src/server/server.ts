@@ -14,6 +14,7 @@ import collectionRoutes from "../routes/collection-routes";
 import heroSliderRoutes from "../routes/hero-slider-routes";
 import orderRoutes from "../routes/order-routes";
 import customerRoutes from "../routes/customer-routes";
+import instagramRoutes from "../routes/instagram-routes";
 import { securityHeaders } from "../middleware/security-headers";
 import { apiRateLimit } from "../middleware/rate-limit-middleware";
 
@@ -110,6 +111,7 @@ app.use("/api/collections", collectionRoutes);
 app.use("/api/hero-slider", heroSliderRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/customers", customerRoutes);
+app.use("/api/instagram", instagramRoutes);
 
 // Log registered routes (always log)
 console.log("✅ Registered API routes:");
@@ -120,6 +122,7 @@ console.log("  - /api/collections");
 console.log("  - /api/hero-slider");
 console.log("  - /api/orders");
 console.log("  - /api/customers");
+console.log("  - /api/instagram");
 
 // Debug middleware for API routes (always log for debugging)
 app.use("/api", (req, res, next) => {
@@ -137,14 +140,15 @@ app.use("/api", (req, res) => {
     message: "API endpoint not found", 
     path: req.path, 
     method: req.method,
-    availableRoutes: [
+      availableRoutes: [
       "/api/metrics",
       "/api/auth",
       "/api/bouquets",
       "/api/collections",
       "/api/hero-slider",
       "/api/orders",
-      "/api/customers"
+      "/api/customers",
+      "/api/instagram"
     ]
   });
 });

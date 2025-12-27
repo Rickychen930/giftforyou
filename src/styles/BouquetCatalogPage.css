@@ -508,8 +508,8 @@
 /* Grid results - Optimized for efficiency and visual appeal */
 .catalogGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
-  gap: clamp(1.25rem, 2.5vw, 1.75rem);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: clamp(1rem, 2vw, 1.5rem);
   align-items: stretch;
   grid-auto-rows: auto;
   min-height: 200px;
@@ -1066,8 +1066,8 @@
   }
 
   .catalogGrid {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
-    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    gap: 1rem;
   }
 
   .catalogHeader__content {
@@ -1094,7 +1094,7 @@
 
   .catalogGrid {
     grid-template-columns: 1fr;
-    gap: 1.1rem;
+    gap: 1rem;
   }
 
   .catalogSummary {

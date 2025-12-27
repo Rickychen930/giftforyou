@@ -100,13 +100,13 @@
   }
 }
 
-/* Image */
+/* Image - Optimized sizing for mobile */
 .bouquet-image-wrapper {
   position: relative;
   width: 100%;
   overflow: hidden;
-  aspect-ratio: 3 / 4;
-  min-height: 300px;
+  aspect-ratio: 4 / 5;
+  min-height: 200px;
   background: linear-gradient(
     135deg,
     rgba(212, 140, 156, 0.05) 0%,
@@ -115,6 +115,30 @@
   );
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Mobile: Smaller image ratio */
+@media (max-width: 767px) {
+  .bouquet-image-wrapper {
+    aspect-ratio: 1 / 1;
+    min-height: 180px;
+  }
+}
+
+/* Tablet: Slightly taller */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .bouquet-image-wrapper {
+    aspect-ratio: 3 / 4;
+    min-height: 240px;
+  }
+}
+
+/* Desktop: Standard ratio */
+@media (min-width: 1024px) {
+  .bouquet-image-wrapper {
+    aspect-ratio: 3 / 4;
+    min-height: 280px;
+  }
 }
 
 .bouquet-image-skeleton {
@@ -586,75 +610,75 @@
   border: 1px solid rgba(212, 140, 156, 0.32);
 }
 
-/* Info - Optimized spacing for efficiency */
+/* Info - Simplified and compact layout */
 .bouquet-info {
-  padding: clamp(1.1rem, 1.6vw, 1.4rem);
+  padding: clamp(0.9rem, 1.4vw, 1.2rem);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.6rem;
   flex: 1;
   position: relative;
   z-index: 1;
-  min-height: 0; /* Allow flex shrinking */
+  min-height: 0;
+  justify-content: space-between;
 }
 
 @media (min-width: 768px) {
   .bouquet-info {
-    padding: clamp(1.2rem, 1.8vw, 1.5rem);
-    gap: 0.85rem;
+    padding: clamp(1rem, 1.6vw, 1.3rem);
+    gap: 0.7rem;
   }
 }
 
-/* Tags */
+/* Tags - Compact display */
 .bouquet-tags {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   min-width: 0;
   flex-wrap: wrap;
   justify-content: flex-start;
-  margin-bottom: 0.5rem;
+  margin: 0;
 }
 
 .bouquet-tag {
   flex: 0 0 auto;
-  max-width: 20ch;
+  max-width: 18ch;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-weight: 850;
-  font-size: 0.75rem;
+  font-weight: 800;
+  font-size: clamp(0.65rem, 0.9vw, 0.7rem);
   color: var(--brand-rose-600);
   background: linear-gradient(
     135deg,
-    var(--brand-rose-600) 0%,
-    var(--brand-rose-500) 50%,
-    var(--brand-rose-600) 100%
+    rgba(212, 140, 156, 0.12) 0%,
+    rgba(212, 140, 156, 0.08) 100%
   );
-  border: 1.5px solid rgba(192, 120, 136, 0.3);
+  border: 1px solid rgba(212, 140, 156, 0.25);
   border-radius: 999px;
-  padding: 0.3rem 0.65rem;
+  padding: 0.25rem 0.55rem;
   transition: all 0.2s ease;
   cursor: default;
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  color: var(--brand-rose-600);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 
 .bouquet-tag--penanda {
   background: linear-gradient(
     135deg,
-    var(--brand-rose-600) 0%,
-    var(--brand-rose-500) 50%,
-    var(--brand-rose-600) 100%
+    rgba(212, 140, 156, 0.15) 0%,
+    rgba(212, 140, 156, 0.1) 100%
   );
-  color: #fff;
-  border-color: rgba(192, 120, 136, 0.4);
+  color: var(--brand-rose-700);
+  border-color: rgba(212, 140, 156, 0.3);
 }
 
 .bouquet-tag:hover {
   transform: translateY(-1px);
-  border-color: rgba(212, 140, 156, 0.3);
-  box-shadow: 0 2px 8px rgba(212, 140, 156, 0.15);
+  border-color: rgba(212, 140, 156, 0.4);
+  box-shadow: 0 2px 6px rgba(212, 140, 156, 0.2);
   background: linear-gradient(
     135deg,
     rgba(212, 140, 156, 0.18) 0%,
@@ -665,12 +689,13 @@
 .bouquet-tag--more {
   background: linear-gradient(
     135deg,
-    rgba(0, 0, 0, 0.08) 0%,
-    rgba(0, 0, 0, 0.05) 100%
+    rgba(0, 0, 0, 0.06) 0%,
+    rgba(0, 0, 0, 0.04) 100%
   );
-  color: var(--ink-700);
-  border-color: rgba(0, 0, 0, 0.12);
-  font-weight: 900;
+  color: var(--ink-600);
+  border-color: rgba(0, 0, 0, 0.1);
+  font-weight: 800;
+  font-size: clamp(0.6rem, 0.85vw, 0.65rem);
 }
 
 @media (max-width: 520px) {
@@ -752,7 +777,7 @@
 
 .bouquet-title {
   margin: 0;
-  font-size: clamp(1.15rem, 1.7vw, 1.4rem);
+  font-size: clamp(0.95rem, 1.3vw, 1.15rem);
   font-weight: 950;
   letter-spacing: -0.01em;
   background: linear-gradient(
@@ -765,12 +790,20 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   font-family: "Playfair Display", Georgia, serif;
-  line-height: 1.25;
+  line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-wrap: balance;
+  min-height: 2.6em; /* Reserve space for 2 lines */
+}
+
+@media (min-width: 768px) {
+  .bouquet-title {
+    font-size: clamp(1rem, 1.4vw, 1.2rem);
+    min-height: 2.8em;
+  }
 }
 
 .bouquet-title a {
@@ -804,71 +837,23 @@
   overflow: hidden;
 }
 
-.bouquet-description {
-  margin: 0;
-  font-size: clamp(0.8rem, 1.2vw, 0.88rem);
-  color: var(--ink-600);
-  line-height: 1.6;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-wrap: pretty;
-  font-weight: 600;
-  opacity: 0.9;
-}
+/* Removed bouquet-description - no longer used in simplified layout */
 
-.bouquet-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: auto;
-  padding-top: 0.875rem;
-  gap: 0.75rem;
-  flex-direction: row;
-  flex-wrap: wrap;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-@media (max-width: 767px) {
-  .bouquet-footer {
-    padding-top: 0.75rem;
-    gap: 0.65rem;
-  }
-}
+/* Removed footer - price is now in main info section */
 
 .bouquet-price-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.25rem;
   align-items: flex-start;
+  margin-top: auto;
+  padding-top: 0.5rem;
 }
 
-.bouquet-price-hint {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.7rem;
-  font-weight: 850;
-  color: var(--success-text);
-  background: linear-gradient(
-    135deg,
-    rgba(16, 185, 129, 0.12) 0%,
-    rgba(5, 150, 105, 0.08) 100%
-  );
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  border-radius: 999px;
-  padding: 0.25rem 0.6rem;
-  line-height: 1;
-}
-
-.bouquet-price-hint svg {
-  flex-shrink: 0;
-  color: var(--success-text);
-}
+/* Removed bouquet-price-hint - no longer used in simplified layout */
 
 .bouquet-price {
-  font-size: clamp(1.2rem, 1.4vw, 1.35rem);
+  font-size: clamp(1.1rem, 1.3vw, 1.25rem);
   font-weight: 950;
   background: linear-gradient(
     135deg,
@@ -880,101 +865,28 @@
   background-clip: text;
   margin: 0;
   letter-spacing: -0.01em;
-  line-height: 1.1;
+  line-height: 1.2;
   font-variant-numeric: tabular-nums;
+  color: var(--brand-rose-600);
 }
 
-.bouquet-button {
-  background: linear-gradient(
-    135deg,
-    var(--brand-rose-500) 0%,
-    var(--brand-rose-600) 50%,
-    var(--brand-rose-700) 100%
-  );
-  color: #fff;
-  border: none;
-  padding: clamp(0.7rem, 1vw, 0.85rem) clamp(1.1rem, 1.5vw, 1.35rem);
-  font-size: clamp(0.85rem, 1.1vw, 0.9rem);
-  border-radius: 999px;
-  font-weight: 950;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  text-decoration: none;
-  white-space: nowrap;
-  box-shadow: 
-    0 6px 20px rgba(212, 140, 156, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
-  position: relative;
-  overflow: hidden;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.bouquet-button::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.2) 0%,
-    rgba(255, 255, 255, 0.1) 100%
-  );
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.bouquet-button:hover::before {
-  opacity: 1;
-}
-
-
-@media (min-width: 980px) {
-  .bouquet-button {
-    padding: 9px 16px;
+/* Fallback for browsers that don't support background-clip */
+@supports not (-webkit-background-clip: text) {
+  .bouquet-price {
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    -webkit-text-fill-color: unset;
+    color: var(--brand-rose-600);
   }
 }
 
-@media (min-width: 720px) {
-  .bouquet-info {
-    padding: 1.2rem;
-  }
-}
-
-.bouquet-button:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 4px rgba(212, 140, 156, 0.25);
-}
-
-
-@media (hover: hover) and (pointer: fine) {
-  .bouquet-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 
-      0 10px 28px rgba(212, 140, 156, 0.4),
-      0 0 0 1px rgba(255, 255, 255, 0.3) inset;
-    filter: saturate(1.1) brightness(1.05);
-  }
-}
-
-.bouquet-button:active {
-  transform: translateY(0px);
-}
+/* Removed bouquet-button - no longer used in simplified layout */
 
 @media (prefers-reduced-motion: reduce) {
   .bouquet-card,
   .bouquet-image,
-  .bouquet-button,
   .bouquet-tag,
   .bouquet-status-badge {
-    transition: none !important;
-  }
-
-  .bouquet-button::before {
     transition: none !important;
   }
 
