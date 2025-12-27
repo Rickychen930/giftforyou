@@ -96,6 +96,14 @@ jobs:
           script: |
             set -e
             BACKEND_TARGET="${{ secrets.BACKEND_TARGET_DIR }}"
+            
+            if [ -z "$BACKEND_TARGET" ]; then
+              echo "❌ ERROR: BACKEND_TARGET_DIR secret is not set!"
+              echo "Please configure BACKEND_TARGET_DIR in GitHub Secrets"
+              exit 1
+            fi
+            
+            echo "Creating directories at: $BACKEND_TARGET"
             mkdir -p "$BACKEND_TARGET/_incoming_backend"
             mkdir -p "$BACKEND_TARGET"
             chmod -R 755 "$BACKEND_TARGET" || true
