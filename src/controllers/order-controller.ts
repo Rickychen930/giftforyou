@@ -3,19 +3,7 @@ import { OrderModel } from "../models/order-model";
 import type { OrderProgressStatus, PaymentMethod, PaymentStatus } from "../models/order-model";
 import { BouquetModel } from "../models/bouquet-model";
 import { CustomerModel } from "../models/customer-model";
-
-const escapeRegex = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-const normalize = (v: unknown, maxLen: number): string => {
-  if (typeof v !== "string") return "";
-  return v.trim().slice(0, maxLen);
-};
-
-const parseNonNegativeNumber = (v: unknown): number => {
-  const n = typeof v === "number" ? v : typeof v === "string" ? Number(v) : NaN;
-  if (!Number.isFinite(n)) return 0;
-  return Math.max(0, Math.round(n));
-};
+import { escapeRegex, normalizeString, parseNonNegativeInt } from "../utils/validation";
 
 const isOrderStatus = (v: string): v is OrderProgressStatus =>
   v === "bertanya" ||
@@ -60,7 +48,7 @@ const resolveBouquetSnapshot = async (
     if (b && typeof b.name === "string") {
       return {
         bouquetName: b.name.trim().slice(0, 200),
-        bouquetPrice: parseNonNegativeNumber((b as any).price),
+        bouquetPrice: parseNonNegativeInt((b as any).price),
       };
     }
   } catch {
@@ -75,11 +63,11 @@ const resolveBouquetSnapshot = async (
 
 export async function createOrder(req: Request, res: Response): Promise<void> {
   try {
-    const customerId = normalize(req.body?.customerId, 64);
+    const customerId = normalizeString(req.body?.customerId, "", 64);
 
-    let buyerName = normalize(req.body?.buyerName, 120);
-    let phoneNumber = normalize(req.body?.phoneNumber, 40);
-    let address = normalize(req.body?.address, 500);
+    let buyerName = normalizeString(req.body?.buyerName, "", 120);
+    let phoneNumber = normalizeString(req.body?.phoneNumber, "", 40);
+    let address = normalizeString(req.body?.address, "", 500);
 
     if (customerId) {
       const customer = await CustomerModel.findById(customerId).lean().exec();
@@ -87,23 +75,23 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
         res.status(400).json({ message: "Invalid customerId" });
         return;
       }
-      buyerName = normalize((customer as any).buyerName, 120);
-      phoneNumber = normalize((customer as any).phoneNumber, 40);
-      address = normalize((customer as any).address, 500);
+      buyerName = normalizeString((customer as any).buyerName, "", 120);
+      phoneNumber = normalizeString((customer as any).phoneNumber, "", 40);
+      address = normalizeString((customer as any).address, "", 500);
     }
 
-    const bouquetId = normalize(req.body?.bouquetId, 64);
-    const bouquetNameRaw = normalize(req.body?.bouquetName, 200);
+    const bouquetId = normalizeString(req.body?.bouquetId, "", 64);
+    const bouquetNameRaw = normalizeString(req.body?.bouquetName, "", 200);
 
-    const bouquetPriceFromBody = parseNonNegativeNumber(req.body?.bouquetPrice);
+    const bouquetPriceFromBody = parseNonNegativeInt(req.body?.bouquetPrice);
     const { bouquetName, bouquetPrice } = await resolveBouquetSnapshot(
       bouquetId,
       bouquetNameRaw,
       bouquetPriceFromBody
     );
 
-    const orderStatusRaw = normalize(req.body?.orderStatus, 32);
-    const paymentMethodRaw = normalize(req.body?.paymentMethod, 32);
+    const orderStatusRaw = normalizeString(req.body?.orderStatus, "", 32);
+    const paymentMethodRaw = normalizeString(req.body?.paymentMethod, "", 32);
 
     const orderStatus: OrderProgressStatus = isOrderStatus(orderStatusRaw)
       ? orderStatusRaw
@@ -112,18 +100,18 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       ? paymentMethodRaw
       : "";
 
-    const downPaymentAmount = parseNonNegativeNumber(req.body?.downPaymentAmount);
-    const additionalPayment = parseNonNegativeNumber(req.body?.additionalPayment);
-    const deliveryPrice = parseNonNegativeNumber(req.body?.deliveryPrice);
+    const downPaymentAmount = parseNonNegativeInt(req.body?.downPaymentAmount);
+    const additionalPayment = parseNonNegativeInt(req.body?.additionalPayment);
+    const deliveryPrice = parseNonNegativeInt(req.body?.deliveryPrice);
 
-    const totalAmount = parseNonNegativeNumber(bouquetPrice + deliveryPrice);
+    const totalAmount = parseNonNegativeInt(bouquetPrice + deliveryPrice);
     const paymentStatus: PaymentStatus = derivePaymentStatus(
       totalAmount,
       downPaymentAmount,
       additionalPayment
     );
 
-    const deliveryAtRaw = normalize(req.body?.deliveryAt, 40);
+    const deliveryAtRaw = normalizeString(req.body?.deliveryAt, "", 40);
     const deliveryAt = deliveryAtRaw ? new Date(deliveryAtRaw) : undefined;
 
     if (!buyerName || !phoneNumber || !address || !bouquetId || !bouquetName) {
@@ -170,7 +158,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
 
 export async function updateOrder(req: Request, res: Response): Promise<void> {
   try {
-    const id = normalize(req.params?.id, 64);
+    const id = normalizeString(req.params?.id, "", 64);
     if (!id) {
       res.status(400).json({ message: "Missing id" });
       return;
@@ -188,7 +176,7 @@ export async function updateOrder(req: Request, res: Response): Promise<void> {
     const setPatch: any = {};
     const unsetPatch: any = {};
 
-    const customerId = normalize(req.body?.customerId, 64);
+    const customerId = normalizeString(req.body?.customerId, "", 64);
     const customerIdProvided = req.body?.customerId !== undefined;
     let willHaveCustomerId = Boolean(existingCustomerId);
 
@@ -205,17 +193,17 @@ export async function updateOrder(req: Request, res: Response): Promise<void> {
         }
 
         setPatch.customerId = customerId;
-        setPatch.buyerName = normalize((customer as any).buyerName, 120);
-        setPatch.phoneNumber = normalize((customer as any).phoneNumber, 40);
-        setPatch.address = normalize((customer as any).address, 500);
+        setPatch.buyerName = normalizeString((customer as any).buyerName, "", 120);
+        setPatch.phoneNumber = normalizeString((customer as any).phoneNumber, "", 40);
+        setPatch.address = normalizeString((customer as any).address, "", 500);
       }
     }
 
-    const buyerName = normalize(req.body?.buyerName, 120);
-    const phoneNumber = normalize(req.body?.phoneNumber, 40);
-    const address = normalize(req.body?.address, 500);
-    const bouquetId = normalize(req.body?.bouquetId, 64);
-    const bouquetName = normalize(req.body?.bouquetName, 200);
+    const buyerName = normalizeString(req.body?.buyerName, "", 120);
+    const phoneNumber = normalizeString(req.body?.phoneNumber, "", 40);
+    const address = normalizeString(req.body?.address, "", 500);
+    const bouquetId = normalizeString(req.body?.bouquetId, "", 64);
+    const bouquetName = normalizeString(req.body?.bouquetName, "", 200);
 
     // Keep buyer snapshot consistent with the linked customer.
     // To manually edit buyer fields, first unlink customerId (send customerId: "").
@@ -227,7 +215,7 @@ export async function updateOrder(req: Request, res: Response): Promise<void> {
     if (bouquetId) setPatch.bouquetId = bouquetId;
     if (bouquetName) setPatch.bouquetName = bouquetName;
 
-    const orderStatusRaw = normalize(req.body?.orderStatus, 32);
+    const orderStatusRaw = normalizeString(req.body?.orderStatus, "", 32);
     if (orderStatusRaw && isOrderStatus(orderStatusRaw)) setPatch.orderStatus = orderStatusRaw;
 
     if (req.body?.paymentMethod !== undefined) {
@@ -236,7 +224,7 @@ export async function updateOrder(req: Request, res: Response): Promise<void> {
         return;
       }
 
-      const paymentMethodRaw = normalize(req.body.paymentMethod, 32);
+      const paymentMethodRaw = normalizeString(req.body.paymentMethod, "", 32);
       if (!isPaymentMethod(paymentMethodRaw)) {
         res.status(400).json({ message: "Invalid paymentMethod" });
         return;
@@ -246,17 +234,17 @@ export async function updateOrder(req: Request, res: Response): Promise<void> {
     }
 
     if (req.body?.downPaymentAmount !== undefined) {
-      setPatch.downPaymentAmount = parseNonNegativeNumber(req.body.downPaymentAmount);
+      setPatch.downPaymentAmount = parseNonNegativeInt(req.body.downPaymentAmount);
     }
     if (req.body?.additionalPayment !== undefined) {
-      setPatch.additionalPayment = parseNonNegativeNumber(req.body.additionalPayment);
+      setPatch.additionalPayment = parseNonNegativeInt(req.body.additionalPayment);
     }
     if (req.body?.deliveryPrice !== undefined) {
-      setPatch.deliveryPrice = parseNonNegativeNumber(req.body.deliveryPrice);
+      setPatch.deliveryPrice = parseNonNegativeInt(req.body.deliveryPrice);
     }
 
     if (req.body?.bouquetPrice !== undefined) {
-      setPatch.bouquetPrice = parseNonNegativeNumber(req.body.bouquetPrice);
+      setPatch.bouquetPrice = parseNonNegativeInt(req.body.bouquetPrice);
     }
 
     const hasDeliveryAt = req.body?.deliveryAt !== undefined;
@@ -266,7 +254,7 @@ export async function updateOrder(req: Request, res: Response): Promise<void> {
         return;
       }
 
-      const deliveryAtRaw = normalize(req.body.deliveryAt, 40);
+      const deliveryAtRaw = normalizeString(req.body.deliveryAt, "", 40);
       if (!deliveryAtRaw) {
         unsetPatch.deliveryAt = 1;
       } else {
@@ -282,7 +270,7 @@ export async function updateOrder(req: Request, res: Response): Promise<void> {
     const nextBouquetId = (setPatch.bouquetId ?? existing.bouquetId) as string;
 
     let nextBouquetName = (setPatch.bouquetName ?? existing.bouquetName ?? "") as string;
-    let nextBouquetPrice = parseNonNegativeNumber(
+    let nextBouquetPrice = parseNonNegativeInt(
       setPatch.bouquetPrice !== undefined ? setPatch.bouquetPrice : (existing as any).bouquetPrice
     );
 
@@ -296,21 +284,21 @@ export async function updateOrder(req: Request, res: Response): Promise<void> {
       setPatch.bouquetPrice = snap.bouquetPrice;
     }
 
-    const nextDownPayment = parseNonNegativeNumber(
+    const nextDownPayment = parseNonNegativeInt(
       setPatch.downPaymentAmount !== undefined
         ? setPatch.downPaymentAmount
         : (existing as any).downPaymentAmount
     );
-    const nextAdditional = parseNonNegativeNumber(
+    const nextAdditional = parseNonNegativeInt(
       setPatch.additionalPayment !== undefined
         ? setPatch.additionalPayment
         : (existing as any).additionalPayment
     );
-    const nextDelivery = parseNonNegativeNumber(
+    const nextDelivery = parseNonNegativeInt(
       setPatch.deliveryPrice !== undefined ? setPatch.deliveryPrice : (existing as any).deliveryPrice
     );
 
-    const nextTotalAmount = parseNonNegativeNumber(nextBouquetPrice + nextDelivery);
+    const nextTotalAmount = parseNonNegativeInt(nextBouquetPrice + nextDelivery);
     setPatch.totalAmount = nextTotalAmount;
     setPatch.paymentStatus = derivePaymentStatus(nextTotalAmount, nextDownPayment, nextAdditional);
 
@@ -430,7 +418,7 @@ export async function getOrders(req: Request, res: Response): Promise<void> {
 
 export async function deleteOrder(req: Request, res: Response): Promise<void> {
   try {
-    const id = normalize(req.params?.id, 64);
+    const id = normalizeString(req.params?.id, "", 64);
     if (!id) {
       res.status(400).json({ message: "Missing id" });
       return;

@@ -399,9 +399,12 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  color: transparent;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  cursor: default;
+  user-select: none;
 }
 
 .bdSectionTitle::before {
@@ -415,6 +418,7 @@
   );
   border-radius: 999px;
   opacity: 0.8;
+  flex-shrink: 0;
 }
 
 .bdSectionTitle svg {
@@ -428,6 +432,7 @@
   grid-template-columns: 140px 1fr;
   gap: 0.55rem 0.9rem;
   margin: 0;
+  width: 100%;
 }
 
 .bdDl dt {
@@ -1233,18 +1238,22 @@
 
   .bdDl {
     grid-template-columns: 1fr;
-    gap: 0.4rem 0;
+    gap: 0.5rem 0;
   }
 
   .bdDl dt {
     font-size: 0.85rem;
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.25rem;
     font-weight: 900;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
   }
 
   .bdDl dd {
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.75rem;
     font-size: 0.9rem;
+    padding-left: 0;
   }
 
   .bdBtn {

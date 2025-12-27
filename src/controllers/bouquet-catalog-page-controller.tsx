@@ -5,6 +5,8 @@ import BouquetCatalogView from "../view/bouquet-catalog-page";
 import { API_BASE } from "../config/api";
 import { getBouquetSizeFilterOptions } from "../constants/bouquet-constants";
 import { trackSearch } from "../services/analytics.service";
+import { normalizeBouquets } from "../utils/bouquet-normalizer";
+import { isNonEmptyString } from "../utils/validation";
 
 type Range = [number, number];
 
@@ -27,10 +29,7 @@ interface State {
 
   loading: boolean;
   error: string | null;
-} // adjust path depending on folder depth
-
-const isNonEmptyString = (v: unknown): v is string =>
-  typeof v === "string" && v.trim().length > 0;
+}
 
 class BouquetCatalogController extends Component<
   { locationSearch?: string; navigate?: NavigateFn },
@@ -246,37 +245,7 @@ class BouquetCatalogController extends Component<
     );
   }
 
-  /** Must match your domain Bouquet type (including required fields) */
-  private normalizeBouquet = (b: any): Bouquet => ({
-    _id: String(b?._id ?? ""),
-    name: isNonEmptyString(b?.name) ? b.name : "",
-    description: isNonEmptyString(b?.description) ? b.description : "",
-
-    price: Number(b?.price ?? 0),
-
-    type: isNonEmptyString(b?.type) ? b.type : "",
-    size: isNonEmptyString(b?.size) ? b.size : "",
-
-    image: isNonEmptyString(b?.image) ? b.image : "",
-    status: b?.status === "preorder" ? "preorder" : "ready",
-    collectionName: isNonEmptyString(b?.collectionName) ? b.collectionName : "",
-
-    occasions: Array.isArray(b?.occasions) ? b.occasions : [],
-    flowers: Array.isArray(b?.flowers) ? b.flowers : [],
-    isNewEdition: Boolean(b?.isNewEdition),
-    isFeatured: Boolean(b?.isFeatured),
-
-    // ✅ FIX: quantity must not be blank
-    quantity: typeof b?.quantity === "number" ? b.quantity : 0,
-
-    customPenanda: Array.isArray(b?.customPenanda) ? b.customPenanda : [],
-
-    careInstructions: isNonEmptyString(b?.careInstructions)
-      ? b.careInstructions
-      : undefined,
-    createdAt: isNonEmptyString(b?.createdAt) ? b.createdAt : undefined,
-    updatedAt: isNonEmptyString(b?.updatedAt) ? b.updatedAt : undefined,
-  });
+  // Using centralized normalizer from utils
 
   private loadBouquets = async () => {
     // cancel previous request if any
@@ -297,13 +266,19 @@ class BouquetCatalogController extends Component<
         throw new Error(`Failed to fetch bouquets (${res.status}): ${text}`);
       }
 
-      const data = await res.json();
+      let data: unknown;
+      try {
+        const text = await res.text();
+        data = text.trim() ? JSON.parse(text) : [];
+      } catch (parseErr) {
+        throw new Error(`Failed to parse response: ${parseErr instanceof Error ? parseErr.message : "Invalid JSON"}`);
+      }
 
       if (!Array.isArray(data)) {
         throw new Error("API returned unexpected format (expected an array).");
       }
 
-      const bouquets = data.map(this.normalizeBouquet);
+      const bouquets = normalizeBouquets(data);
 
       this.setState({ bouquets, loading: false, error: null });
     } catch (err: unknown) {
@@ -485,7 +460,7 @@ class BouquetCatalogController extends Component<
       new Set(
         this.state.bouquets
           .map((b) => b.collectionName)
-          .filter(isNonEmptyString)
+          .filter((c): c is string => typeof c === "string" && c.trim().length > 0)
           .map((v) => v.trim())
           .filter(Boolean)
       )

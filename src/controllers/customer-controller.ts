@@ -1,12 +1,6 @@
 import type { Request, Response } from "express";
 import { CustomerModel } from "../models/customer-model";
-
-const escapeRegex = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-const normalize = (v: unknown, maxLen: number): string => {
-  if (typeof v !== "string") return "";
-  return v.trim().slice(0, maxLen);
-};
+import { escapeRegex, normalizeString } from "../utils/validation";
 
 export async function getCustomers(req: Request, res: Response): Promise<void> {
   try {
@@ -38,9 +32,9 @@ export async function getCustomers(req: Request, res: Response): Promise<void> {
 
 export async function createCustomer(req: Request, res: Response): Promise<void> {
   try {
-    const buyerName = normalize(req.body?.buyerName, 120);
-    const phoneNumber = normalize(req.body?.phoneNumber, 40);
-    const address = normalize(req.body?.address, 500);
+    const buyerName = normalizeString(req.body?.buyerName, "", 120);
+    const phoneNumber = normalizeString(req.body?.phoneNumber, "", 40);
+    const address = normalizeString(req.body?.address, "", 500);
 
     if (!buyerName || !phoneNumber || !address) {
       res.status(400).json({ message: "Missing required fields" });
@@ -71,7 +65,7 @@ export async function createCustomer(req: Request, res: Response): Promise<void>
 
 export async function getCustomerById(req: Request, res: Response): Promise<void> {
   try {
-    const id = normalize(req.params?.id, 64);
+    const id = normalizeString(req.params?.id, "", 64);
     if (!id) {
       res.status(400).json({ message: "Missing id" });
       return;

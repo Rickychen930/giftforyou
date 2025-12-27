@@ -1,50 +1,19 @@
 import type { Request, Response } from "express";
 import { BouquetModel } from "../models/bouquet-model";
 import { CollectionModel } from "../models/collection-model";
-import { saveUploadedImage } from "../middleware/upload"; // ✅ IMPORTANT
+import { saveUploadedImage } from "../middleware/upload";
+import {
+  normalizeString,
+  parsePrice,
+  parseBoolean,
+  parseNonNegativeInt,
+  parseCsvList,
+} from "../utils/validation";
 
 type BouquetStatus = "ready" | "preorder";
 
 const isValidStatus = (status: unknown): status is BouquetStatus =>
   status === "ready" || status === "preorder";
-
-const normalizeString = (value: unknown, fallback = ""): string =>
-  typeof value === "string" ? value.trim() : fallback;
-
-const parsePrice = (value: unknown): number => {
-  const n = typeof value === "number" ? value : Number(value);
-  return Number.isFinite(n) ? n : NaN;
-};
-
-const parseBoolean = (value: unknown): boolean => {
-  if (typeof value === "boolean") return value;
-  if (typeof value === "number") return value === 1;
-  if (typeof value !== "string") return false;
-  const v = value.trim().toLowerCase();
-  return v === "true" || v === "1" || v === "yes" || v === "on";
-};
-
-const parseNonNegativeInt = (value: unknown): number => {
-  const n = typeof value === "number" ? value : Number(value);
-  if (!Number.isFinite(n)) return 0;
-  return Math.max(0, Math.trunc(n));
-};
-
-const parseCsvList = (value: unknown): string[] => {
-  if (Array.isArray(value)) {
-    return value
-      .map((v) => (typeof v === "string" ? v.trim() : ""))
-      .filter(Boolean);
-  }
-
-  if (typeof value !== "string") return [];
-
-  // Support both comma-separated and newline-separated input.
-  return value
-    .split(/[\n,]/g)
-    .map((v) => v.trim())
-    .filter(Boolean);
-};
 
 const normalizeSize = (value: unknown): string => {
   const raw = normalizeString(value);

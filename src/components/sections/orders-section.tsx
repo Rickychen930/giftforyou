@@ -245,7 +245,13 @@ export default function OrdersSection({ bouquets }: Props) {
         throw new Error(`Gagal memuat customer (${res.status}): ${t}`);
       }
 
-      const data = (await res.json()) as unknown;
+      let data: unknown;
+      try {
+        const text = await res.text();
+        data = text.trim() ? JSON.parse(text) : [];
+      } catch (parseErr) {
+        throw new Error(`Failed to parse customers response: ${parseErr instanceof Error ? parseErr.message : "Invalid JSON"}`);
+      }
       setCustomers(Array.isArray(data) ? (data as Customer[]) : []);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Gagal memuat customer.");
@@ -269,7 +275,13 @@ export default function OrdersSection({ bouquets }: Props) {
         throw new Error(`Gagal memuat order (${res.status}): ${t}`);
       }
 
-      const data = (await res.json()) as unknown;
+      let data: unknown;
+      try {
+        const text = await res.text();
+        data = text.trim() ? JSON.parse(text) : [];
+      } catch (parseErr) {
+        throw new Error(`Failed to parse orders response: ${parseErr instanceof Error ? parseErr.message : "Invalid JSON"}`);
+      }
       setOrders(Array.isArray(data) ? (data as Order[]) : []);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Gagal memuat order.");
@@ -314,7 +326,13 @@ export default function OrdersSection({ bouquets }: Props) {
         return;
       }
 
-      const data = (await res.json()) as unknown;
+      let data: unknown;
+      try {
+        const text = await res.text();
+        data = text.trim() ? JSON.parse(text) : null;
+      } catch {
+        return; // Silently fail for customer lookup
+      }
       if (!data || typeof data !== "object") return;
       const c = data as Customer;
       const cid = (c._id ?? "").toString();
@@ -522,7 +540,13 @@ export default function OrdersSection({ bouquets }: Props) {
         throw new Error(`Gagal menyimpan user (${res.status}): ${t}`);
       }
 
-      const created = (await res.json()) as unknown;
+      let created: unknown;
+      try {
+        const text = await res.text();
+        created = text.trim() ? JSON.parse(text) : null;
+      } catch (parseErr) {
+        throw new Error(`Failed to parse customer creation response: ${parseErr instanceof Error ? parseErr.message : "Invalid JSON"}`);
+      }
       const id = created && typeof created === "object" ? ((created as any)._id ?? "").toString() : "";
 
       // Ensure the newly created/updated customer is present in the dropdown.
@@ -595,7 +619,13 @@ export default function OrdersSection({ bouquets }: Props) {
         throw new Error(`Gagal update cepat (${res.status}): ${t}`);
       }
 
-      const updated = (await res.json()) as unknown;
+      let updated: unknown;
+      try {
+        const text = await res.text();
+        updated = text.trim() ? JSON.parse(text) : null;
+      } catch (parseErr) {
+        throw new Error(`Failed to parse order update response: ${parseErr instanceof Error ? parseErr.message : "Invalid JSON"}`);
+      }
       if (updated && typeof updated === "object") {
         const u = updated as Order;
         if (u._id) {

@@ -4,6 +4,7 @@ import FilterPanel from "../filter-panel-component";
 import "../../styles/BouquetEditor.css";
 import BouquetEditor from "../bouquet-card-edit-component";
 import { getBouquetSizeFilterOptions } from "../../constants/bouquet-constants";
+import { isNonEmptyString } from "../../utils/validation";
 
 type Range = [number, number];
 type SortBy = "" | "price-asc" | "price-desc" | "name-asc" | "name-desc";
@@ -29,8 +30,7 @@ interface State {
 
 const DEFAULT_PRICE: Range = [0, 1_000_000];
 
-const isNonEmptyString = (v: unknown): v is string =>
-  typeof v === "string" && v.trim().length > 0;
+// Using centralized isNonEmptyString from utils/validation
 
 const uniq = (arr: string[]) => Array.from(new Set(arr));
 
@@ -253,7 +253,7 @@ export default class BouquetEditorSection extends Component<Props, State> {
       this.props.collections?.length > 0
         ? this.props.collections
         : uniq(
-            bouquets.map((b) => b.collectionName).filter(isNonEmptyString)
+            bouquets.map((b) => b.collectionName).filter((c): c is string => typeof c === "string" && c.trim().length > 0)
           ).sort();
 
     const filtered = filterBouquets(

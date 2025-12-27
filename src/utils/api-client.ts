@@ -74,10 +74,24 @@ export async function apiRequest<T = unknown>(
             clearAuth();
             throw new Error("Authentication failed");
           }
-          throw new Error(`API request failed: ${retryResponse.statusText}`);
+          let errorText = "";
+          try {
+            errorText = await retryResponse.text();
+          } catch {
+            errorText = retryResponse.statusText || "Unknown error";
+          }
+          throw new Error(`API request failed: ${errorText}`);
         }
 
-        return await retryResponse.json();
+        try {
+          const text = await retryResponse.text();
+          if (!text.trim()) {
+            throw new Error("Empty response body");
+          }
+          return JSON.parse(text) as T;
+        } catch (parseErr) {
+          throw new Error(`Failed to parse response: ${parseErr instanceof Error ? parseErr.message : "Invalid JSON"}`);
+        }
       } else {
         clearAuth();
         throw new Error("Authentication required");
@@ -85,13 +99,27 @@ export async function apiRequest<T = unknown>(
     }
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({
-        error: response.statusText,
-      }));
+      let errorData: { error?: string } = { error: response.statusText };
+      try {
+        const text = await response.text();
+        if (text.trim()) {
+          errorData = JSON.parse(text);
+        }
+      } catch {
+        // Use default errorData
+      }
       throw new Error(errorData.error || `API request failed: ${response.statusText}`);
     }
 
-    return await response.json();
+    try {
+      const text = await response.text();
+      if (!text.trim()) {
+        throw new Error("Empty response body");
+      }
+      return JSON.parse(text) as T;
+    } catch (parseErr) {
+      throw new Error(`Failed to parse response: ${parseErr instanceof Error ? parseErr.message : "Invalid JSON"}`);
+    }
   } catch (err) {
     if (err instanceof Error) {
       throw err;

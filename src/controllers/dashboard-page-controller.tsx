@@ -3,6 +3,7 @@ import DashboardView from "../view/dashboard-page";
 import type { Bouquet } from "../models/domain/bouquet";
 
 import { API_BASE } from "../config/api";
+import { normalizeBouquets } from "../utils/bouquet-normalizer";
 
 type MetricsResponse = {
   visitorsCount?: number;
@@ -32,10 +33,7 @@ interface State {
 
   loading: boolean;
   errorMessage?: string;
-} // adjust path depending on folder depth
-
-const isNonEmptyString = (v: unknown): v is string =>
-  typeof v === "string" && v.trim().length > 0;
+}
 
 class DashboardController extends Component<{}, State> {
   private abortController: AbortController | null = null;
@@ -76,32 +74,7 @@ class DashboardController extends Component<{}, State> {
     return getAuthHeaders();
   }
 
-  private normalizeBouquet = (b: any): Bouquet => ({
-    _id: String(b?._id ?? ""),
-    name: isNonEmptyString(b?.name) ? b.name : "",
-    description: isNonEmptyString(b?.description) ? b.description : "",
-    price: Number(b?.price ?? 0),
-
-    type: isNonEmptyString(b?.type) ? b.type : "",
-    size: isNonEmptyString(b?.size) ? b.size : "",
-
-    image: isNonEmptyString(b?.image) ? b.image : "",
-    status: b?.status === "preorder" ? "preorder" : "ready",
-    collectionName: isNonEmptyString(b?.collectionName) ? b.collectionName : "",
-
-    occasions: Array.isArray(b?.occasions) ? b.occasions : [],
-    flowers: Array.isArray(b?.flowers) ? b.flowers : [],
-    isNewEdition: Boolean(b?.isNewEdition),
-    isFeatured: Boolean(b?.isFeatured),
-
-    quantity: typeof b?.quantity === "number" ? b.quantity : 0,
-    customPenanda: Array.isArray(b?.customPenanda) ? b.customPenanda : [],
-    careInstructions: isNonEmptyString(b?.careInstructions)
-      ? b.careInstructions
-      : undefined,
-    createdAt: isNonEmptyString(b?.createdAt) ? b.createdAt : undefined,
-    updatedAt: isNonEmptyString(b?.updatedAt) ? b.updatedAt : undefined,
-  });
+  // Using centralized normalizer from utils
 
   private loadDashboard = async (): Promise<void> => {
     this.abortController?.abort();
@@ -156,35 +129,58 @@ class DashboardController extends Component<{}, State> {
         );
       }
 
-      const metricsJson = (await metricsRes.json()) as MetricsResponse;
-      const bouquetsJson = (await bouquetsRes.json()) as any;
+      let metricsJson: MetricsResponse;
+      let bouquetsJson: unknown;
+      
+      try {
+        const metricsText = await metricsRes.text();
+        metricsJson = metricsText.trim() ? JSON.parse(metricsText) : {};
+      } catch (e) {
+        throw new Error(`Failed to parse metrics response: ${e instanceof Error ? e.message : "Invalid JSON"}`);
+      }
+
+      try {
+        const bouquetsText = await bouquetsRes.text();
+        bouquetsJson = bouquetsText.trim() ? JSON.parse(bouquetsText) : [];
+      } catch (e) {
+        throw new Error(`Failed to parse bouquets response: ${e instanceof Error ? e.message : "Invalid JSON"}`);
+      }
 
       let insights: InsightsResponse | undefined;
       let insightsError: string | undefined;
       try {
         if (insightsRes.ok) {
-          insights = (await insightsRes.json()) as InsightsResponse;
+          try {
+            const insightsText = await insightsRes.text();
+            if (insightsText.trim()) {
+              insights = JSON.parse(insightsText) as InsightsResponse;
+            } else {
+              insights = undefined;
+            }
+          } catch (parseErr) {
+            insightsError = `Failed to parse insights: ${parseErr instanceof Error ? parseErr.message : "Invalid JSON"}`;
+          }
         } else {
           const t = await insightsRes.text();
-          insightsError = `Failed to load insights (${insightsRes.status}): ${t}`;
+          insightsError = `Failed to load insights (${insightsRes.status}): ${t || insightsRes.statusText}`;
         }
       } catch (e: unknown) {
         insightsError = e instanceof Error ? e.message : "Failed to load insights.";
       }
 
       const bouquets: Bouquet[] = Array.isArray(bouquetsJson)
-        ? bouquetsJson.map(this.normalizeBouquet)
+        ? normalizeBouquets(bouquetsJson)
         : [];
 
       const collectionsFromMetrics =
         Array.isArray(metricsJson.collections) &&
         metricsJson.collections.length > 0
-          ? metricsJson.collections.filter(isNonEmptyString)
+          ? metricsJson.collections.filter((c): c is string => typeof c === "string" && c.trim().length > 0)
           : [];
 
       // fallback collections list derived from bouquets
       const collectionsFallback = Array.from(
-        new Set(bouquets.map((b) => b.collectionName).filter(isNonEmptyString))
+        new Set(bouquets.map((b) => b.collectionName).filter((name): name is string => typeof name === "string" && name.trim().length > 0))
       );
 
       this.setState({
@@ -239,20 +235,26 @@ class DashboardController extends Component<{}, State> {
         throw new Error(`Failed to load metrics (${metricsRes.status}): ${t}`);
       }
 
-      const metricsJson = (await metricsRes.json()) as MetricsResponse;
+      let metricsJson: MetricsResponse;
+      try {
+        const text = await metricsRes.text();
+        metricsJson = text.trim() ? JSON.parse(text) : {};
+      } catch (parseErr) {
+        throw new Error(`Failed to parse metrics response: ${parseErr instanceof Error ? parseErr.message : "Invalid JSON"}`);
+      }
 
       this.setState((prev) => {
         const collectionsFromMetrics =
           Array.isArray(metricsJson.collections) &&
           metricsJson.collections.length > 0
-            ? metricsJson.collections.filter(isNonEmptyString)
+            ? metricsJson.collections.filter((c): c is string => typeof c === "string" && c.trim().length > 0)
             : [];
 
         const collectionsFallback = Array.from(
           new Set(
             (prev.bouquets ?? [])
               .map((b) => b.collectionName)
-              .filter(isNonEmptyString)
+              .filter((c): c is string => typeof c === "string" && c.trim().length > 0)
           )
         );
 
