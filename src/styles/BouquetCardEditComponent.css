@@ -2,6 +2,8 @@
 
 /* Root card */
 .becCard {
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--bec-card-border);
   border-radius: 18px;
   overflow: hidden;
