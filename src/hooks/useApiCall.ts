@@ -94,7 +94,8 @@ export function useApiCall<T = unknown>(
         setLoading(false);
       }
     },
-    [options.skipAuth, options.onSuccess, options.onError]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [options]
   );
 
   const reset = useCallback(() => {

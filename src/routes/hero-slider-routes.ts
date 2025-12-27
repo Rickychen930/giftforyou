@@ -11,6 +11,7 @@ import {
   upsertHomeHeroSlider,
 } from "../controllers/hero-slider-controller";
 import { mockHeroSlider } from "../mock-data/collections";
+import { authenticate, requireAdmin } from "../middleware/auth-middleware";
 
 const router = Router();
 
@@ -79,8 +80,6 @@ router.get("/home", async (req, res) => {
     res.status(200).json(mockHeroSlider);
   }
 });
-
-import { authenticate, requireAdmin } from "../middleware/auth-middleware";
 
 router.put("/home", authenticate, requireAdmin, upsertHomeHeroSlider);
 

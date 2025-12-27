@@ -2,7 +2,7 @@
  * Custom hook for image loading with error handling
  */
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 
 interface UseImageLoaderResult {
   imageLoaded: boolean;

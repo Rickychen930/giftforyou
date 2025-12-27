@@ -56,7 +56,7 @@ export function isStrongPassword(password: string): {
   if (!/[0-9]/.test(password)) {
     errors.push("Password must contain at least one number");
   }
-  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+  if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
     errors.push("Password must contain at least one special character");
   }
 

@@ -59,7 +59,7 @@ describe("BouquetUploader QA smoke", () => {
   });
 
   test("rejects non-image file selection", async () => {
-    const user = userEvent.setup();
+    userEvent.setup();
     const onUpload = jest.fn<Promise<boolean>, [FormData]>(async () => true);
 
     render(<BouquetUploader onUpload={onUpload} />);

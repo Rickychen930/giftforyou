@@ -59,11 +59,13 @@ export const NAV_LINKS = {
   public: [
     { label: "Beranda", path: "/" },
     { label: "Koleksi", path: "/collection" },
+    { label: "FAQ", path: "/faq" },
     { label: "Login", path: "/login" },
   ],
   authenticated: [
     { label: "Beranda", path: "/" },
     { label: "Koleksi", path: "/collection" },
+    { label: "FAQ", path: "/faq" },
     { label: "Dashboard", path: "/dashboard" },
   ],
 } as const;
@@ -72,6 +74,8 @@ export const QUICK_LINKS = [
   { label: "Beranda", href: "/" },
   { label: "Katalog Bouquet", href: "/collection" },
   { label: "Koleksi", href: "/#collections" },
+  { label: "FAQ", href: "/faq" },
+  { label: "Kontak", href: "/contact" },
   { label: "Tentang Kami", href: "/#about" },
 ] as const;
 

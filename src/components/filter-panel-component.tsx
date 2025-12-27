@@ -3,6 +3,7 @@ import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 import "../styles/FilterComponentPanelComponent.css";
 import { BOUQUET_SIZES } from "../constants/bouquet-constants";
+import { formatBouquetType, formatBouquetSize, formatCollectionName, formatTag } from "../utils/text-formatter";
 
 type Range = [number, number];
 
@@ -371,7 +372,15 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                     disabled={Boolean(disabled)}
                     aria-pressed={isSelected}
                   >
-                    <span className="fpOption__label">{opt}</span>
+                    <span className="fpOption__label">
+                      {k === "selectedTypes" 
+                        ? formatBouquetType(opt)
+                        : k === "selectedSizes"
+                        ? formatBouquetSize(opt)
+                        : k === "selectedCollections"
+                        ? formatCollectionName(opt)
+                        : formatTag(opt)}
+                    </span>
                     {isSelected && (
                       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" className="fpOption__check">
                         <path d="M11.5 3.5L5 10L2.5 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

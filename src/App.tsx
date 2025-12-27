@@ -17,6 +17,8 @@ import BouquetCatalogRoute from "./view/bouquet-catalog-route";
 import LoginController from "./controllers/login-page-controller";
 import DashboardController from "./controllers/dashboard-page-controller";
 import BouquetDetailController from "./controllers/bouquet-detail-controller";
+import FAQPage from "./view/faq-page";
+import ContactPage from "./view/contact-page";
 import ErrorBoundary from "./components/error-boundary";
 import ScrollToTop from "./components/scroll-to-top";
 import { trackPageview } from "./services/analytics.service";
@@ -74,6 +76,8 @@ const AppLayout: React.FC = () => {
         <Route path="/bouquet/:id" element={<BouquetDetailController />} />
         <Route path="/search" element={<SearchRedirect />} />
         <Route path="/cart" element={<Navigate to="/collection" replace />} />
+        <Route path="/faq" element={<FAQPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/login" element={<LoginController />} />
         <Route
           path="/dashboard"

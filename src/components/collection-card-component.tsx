@@ -5,7 +5,7 @@ import "../styles/CollectionCardComponent.css";
 import { API_BASE } from "../config/api";
 import { formatIDR } from "../utils/money";
 import { buildWhatsAppLinkEncoded } from "../utils/whatsapp";
-import { formatBouquetName, formatBouquetType, formatBouquetSize } from "../utils/text-formatter";
+import { formatBouquetName, formatBouquetSize } from "../utils/text-formatter";
 
 export interface BouquetCardProps {
   _id: string;
