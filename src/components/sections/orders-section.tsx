@@ -3,6 +3,7 @@ import "../../styles/OrdersSection.css";
 
 import { API_BASE } from "../../config/api";
 import type { Bouquet } from "../../models/domain/bouquet";
+import InvoiceComponent from "../InvoiceComponent";
 
 type Order = {
   _id?: string;
@@ -139,6 +140,8 @@ export default function OrdersSection({ bouquets }: Props) {
 
   type OrdersMode = "list" | "add_order" | "update_order" | "add_user";
   const [mode, setMode] = useState<OrdersMode>("list");
+  const [showInvoice, setShowInvoice] = useState(false);
+  const [invoiceOrder, setInvoiceOrder] = useState<Order | null>(null);
 
   const bouquetOptions = useMemo(() => {
     return (bouquets ?? [])
@@ -240,15 +243,35 @@ export default function OrdersSection({ bouquets }: Props) {
         },
       });
 
+      // Read response text once
+      const responseText = await res.text();
+
       if (!res.ok) {
-        const t = await res.text();
-        throw new Error(`Gagal memuat customer (${res.status}): ${t}`);
+        let errorMessage = `Gagal memuat customer (${res.status})`;
+        try {
+          // Check if response is HTML (404 page)
+          if (responseText.includes("<!DOCTYPE html>") || responseText.includes("<html")) {
+            errorMessage = "Endpoint /api/customers tidak tersedia. Pastikan server berjalan dan route dikonfigurasi dengan benar.";
+          } else {
+            // Try to parse as JSON
+            try {
+              const json = JSON.parse(responseText);
+              errorMessage = json.message || json.error || errorMessage;
+            } catch {
+              // If not JSON, use the text (but limit length)
+              errorMessage = responseText.length > 200 ? `${errorMessage}: ${responseText.substring(0, 200)}...` : `${errorMessage}: ${responseText}`;
+            }
+          }
+        } catch {
+          // If we can't parse, use default message
+        }
+        throw new Error(errorMessage);
       }
 
+      // Parse successful response
       let data: unknown;
       try {
-        const text = await res.text();
-        data = text.trim() ? JSON.parse(text) : [];
+        data = responseText.trim() ? JSON.parse(responseText) : [];
       } catch (parseErr) {
         throw new Error(`Failed to parse customers response: ${parseErr instanceof Error ? parseErr.message : "Invalid JSON"}`);
       }
@@ -535,15 +558,34 @@ export default function OrdersSection({ bouquets }: Props) {
         body: JSON.stringify({ buyerName: bn, phoneNumber: ph, address: ad }),
       });
 
+      // Read response text once
+      const responseText = await res.text();
+
       if (!res.ok) {
-        const t = await res.text();
-        throw new Error(`Gagal menyimpan user (${res.status}): ${t}`);
+        let errorMessage = `Gagal menyimpan customer (${res.status})`;
+        try {
+          // Check if response is HTML (404 page)
+          if (responseText.includes("<!DOCTYPE html>") || responseText.includes("<html")) {
+            errorMessage = "Endpoint /api/customers tidak tersedia. Pastikan server berjalan dan route dikonfigurasi dengan benar.";
+          } else {
+            // Try to parse as JSON
+            try {
+              const json = JSON.parse(responseText);
+              errorMessage = json.message || json.error || errorMessage;
+            } catch {
+              errorMessage = responseText.length > 200 ? `${errorMessage}: ${responseText.substring(0, 200)}...` : `${errorMessage}: ${responseText}`;
+            }
+          }
+        } catch {
+          // If we can't parse, use default message
+        }
+        throw new Error(errorMessage);
       }
 
+      // Parse successful response
       let created: unknown;
       try {
-        const text = await res.text();
-        created = text.trim() ? JSON.parse(text) : null;
+        created = responseText.trim() ? JSON.parse(responseText) : null;
       } catch (parseErr) {
         throw new Error(`Failed to parse customer creation response: ${parseErr instanceof Error ? parseErr.message : "Invalid JSON"}`);
       }
@@ -1528,6 +1570,24 @@ export default function OrdersSection({ bouquets }: Props) {
                       )}
                       <button
                         type="button"
+                        className="ordersBtn ordersBtn--sm"
+                        onClick={(ev) => {
+                          ev.stopPropagation();
+                          setInvoiceOrder(o);
+                          setShowInvoice(true);
+                        }}
+                        disabled={submitting}
+                        aria-label={`Lihat invoice untuk order ${o.buyerName}`}
+                        title="Lihat invoice"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <span>Invoice</span>
+                      </button>
+                      <button
+                        type="button"
                         className="ordersBtn ordersBtn--sm ordersBtn--danger"
                         onClick={(ev) => {
                           ev.stopPropagation();
@@ -1549,6 +1609,17 @@ export default function OrdersSection({ bouquets }: Props) {
           )}
         </aside>
       </div>
+
+      {/* Invoice Modal */}
+      {showInvoice && invoiceOrder && (
+        <InvoiceComponent
+          order={invoiceOrder}
+          onClose={() => {
+            setShowInvoice(false);
+            setInvoiceOrder(null);
+          }}
+        />
+      )}
 
       {isFormOpen && (
         <div
@@ -2181,6 +2252,17 @@ export default function OrdersSection({ bouquets }: Props) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Invoice Modal */}
+      {showInvoice && invoiceOrder && (
+        <InvoiceComponent
+          order={invoiceOrder}
+          onClose={() => {
+            setShowInvoice(false);
+            setInvoiceOrder(null);
+          }}
+        />
       )}
     </section>
   );

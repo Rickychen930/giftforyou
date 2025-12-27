@@ -117,7 +117,12 @@ app.use("/api/hero-slider", heroSliderRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/customers", customerRoutes);
 
-// 404 handler
+// 404 handler for API routes
+app.use("/api/*", (_req, res) => {
+  res.status(404).json({ message: "API endpoint not found" });
+});
+
+// 404 handler for other routes
 app.use((_req, res) => {
   res.status(404).json({ message: "Not found" });
 });
