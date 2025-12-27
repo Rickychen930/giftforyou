@@ -11,6 +11,7 @@ import StoreLocationSection from "../components/sections/store-location-section"
 import { API_BASE } from "../config/api";
 // import { STORE_PROFILE } from "../config/store-profile"; FIXED ME
 import { setSeo } from "../utils/seo";
+import { observeFadeIn, revealOnScroll, lazyLoadImages } from "../utils/luxury-enhancements";
 
 type LoadState = "idle" | "loading" | "success" | "error";
 
@@ -86,6 +87,19 @@ const HomePage: React.FC = () => {
     load();
     return () => controller.abort();
   }, []);
+
+  useEffect(() => {
+    // Initialize luxury enhancements
+    const fadeObserver = observeFadeIn(".fade-in");
+    const revealObserver = revealOnScroll();
+    const imageObserver = lazyLoadImages();
+
+    return () => {
+      fadeObserver?.disconnect();
+      revealObserver?.disconnect();
+      imageObserver?.disconnect();
+    };
+  }, [collections, state]);
 
   return (
     <main className="Home-page-container">

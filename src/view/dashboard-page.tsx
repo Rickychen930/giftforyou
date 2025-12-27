@@ -5,6 +5,14 @@ import { setSeo } from "../utils/seo";
 import { formatIDR } from "../utils/money";
 import { getPerformanceMetrics, getPerformanceScore, formatBytes, formatMs, observeCoreWebVitals } from "../utils/performance-monitor";
 import { analyzeSeo } from "../utils/seo-analyzer";
+import { savePerformanceHistory, saveSeoHistory } from "../utils/analytics-storage";
+import { checkPerformanceAlerts, checkSeoAlerts, checkTrendAlerts, getUnacknowledgedAlerts } from "../utils/analytics-alerts";
+import { analyzePerformanceTrends, analyzeSeoTrends } from "../utils/trends-analyzer";
+import { getHistoricalData } from "../utils/analytics-storage";
+import { getBenchmarks } from "../utils/benchmarks";
+import { exportAnalytics } from "../utils/analytics-export";
+import { getGAConfig, initGoogleAnalytics, sendPerformanceToGA, sendSEOToGA } from "../utils/google-analytics";
+import { getActiveABTests, assignToVariant, trackABTestVisit } from "../utils/ab-testing";
 
 import BouquetUploader from "../components/sections/dashboard-uploader-section";
 import BouquetEditorSection from "../components/sections/Bouquet-editor-section";
@@ -73,11 +81,20 @@ interface PerformanceState {
   metrics: ReturnType<typeof getPerformanceMetrics>;
   score: ReturnType<typeof getPerformanceScore>;
   loading: boolean;
+  trends?: ReturnType<typeof analyzePerformanceTrends>;
+  benchmarks?: ReturnType<typeof getBenchmarks>;
 }
 
 interface SeoState {
   analysis: ReturnType<typeof analyzeSeo>;
   loading: boolean;
+  trends?: ReturnType<typeof analyzeSeoTrends>;
+  benchmarks?: ReturnType<typeof getBenchmarks>;
+}
+
+interface AlertsState {
+  alerts: ReturnType<typeof getUnacknowledgedAlerts>;
+  showAlerts: boolean;
 }
 
 const readTabFromLocation = (): ActiveTab | null => {
@@ -110,6 +127,9 @@ interface State {
   overviewCopyStatus: "" | "copied" | "failed";
   performance: PerformanceState;
   seo: SeoState;
+  alerts: AlertsState;
+  showTrends: boolean;
+  showBenchmarks: boolean;
 }
 
 class DashboardView extends Component<Props, State> {
@@ -128,6 +148,12 @@ class DashboardView extends Component<Props, State> {
       analysis: { score: 0, grade: "poor", checks: [], recommendations: [] },
       loading: true,
     },
+    alerts: {
+      alerts: [],
+      showAlerts: false,
+    },
+    showTrends: false,
+    showBenchmarks: false,
   };
 
   componentDidMount(): void {
@@ -147,6 +173,11 @@ class DashboardView extends Component<Props, State> {
     this.applySeo();
     this.loadPerformanceMetrics();
     this.loadSeoAnalysis();
+    this.loadAlerts();
+    this.loadTrends();
+    this.loadBenchmarks();
+    this.initGoogleAnalytics();
+    this.initABTests();
 
     window.addEventListener("hashchange", this.handleHashChange);
     window.addEventListener("keydown", this.handleKeyDown);
@@ -165,6 +196,27 @@ class DashboardView extends Component<Props, State> {
     const metrics = getPerformanceMetrics();
     const score = getPerformanceScore(metrics);
     
+    // Save to history
+    savePerformanceHistory(metrics, score.score, score.grade);
+    
+    // Check alerts
+    checkPerformanceAlerts(metrics, score.score);
+    
+    // Send to Google Analytics
+    const gaConfig = getGAConfig();
+    if (gaConfig.enabled) {
+      sendPerformanceToGA(
+        {
+          lcp: metrics.lcp || 0,
+          fid: metrics.fid || 0,
+          cls: metrics.cls || 0,
+          fcp: metrics.fcp || 0,
+          ttfb: metrics.ttfb || 0,
+        },
+        score.score
+      );
+    }
+    
     this.setState({
       performance: {
         metrics,
@@ -178,6 +230,13 @@ class DashboardView extends Component<Props, State> {
       this.setState((prevState) => {
         const newMetrics = { ...prevState.performance.metrics, [name]: value };
         const newScore = getPerformanceScore(newMetrics);
+        
+        // Save to history
+        savePerformanceHistory(newMetrics, newScore.score, newScore.grade);
+        
+        // Check alerts
+        checkPerformanceAlerts(newMetrics, newScore.score);
+        
         return {
           performance: {
             metrics: newMetrics,
@@ -193,6 +252,19 @@ class DashboardView extends Component<Props, State> {
     // Small delay to ensure DOM is ready
     setTimeout(() => {
       const analysis = analyzeSeo();
+      
+      // Save to history
+      saveSeoHistory(analysis);
+      
+      // Check alerts
+      checkSeoAlerts(analysis);
+      
+      // Send to Google Analytics
+      const gaConfig = getGAConfig();
+      if (gaConfig.enabled) {
+        sendSEOToGA(analysis.score, analysis.checks);
+      }
+      
       this.setState({
         seo: {
           analysis,
@@ -200,6 +272,85 @@ class DashboardView extends Component<Props, State> {
         },
       });
     }, 100);
+  };
+
+  private loadAlerts = (): void => {
+    // Check trend alerts
+    checkTrendAlerts(7);
+    
+    // Get unacknowledged alerts
+    const alerts = getUnacknowledgedAlerts();
+    this.setState({
+      alerts: {
+        alerts,
+        showAlerts: alerts.length > 0,
+      },
+    });
+  };
+
+  private loadTrends = (): void => {
+    const history = getHistoricalData();
+    
+    // Analyze performance trends
+    const perfTrends = analyzePerformanceTrends(history.performance, 30);
+    if (perfTrends) {
+      this.setState((prevState) => ({
+        performance: {
+          ...prevState.performance,
+          trends: perfTrends,
+        },
+      }));
+    }
+    
+    // Analyze SEO trends
+    const seoTrends = analyzeSeoTrends(history.seo, 30);
+    if (seoTrends) {
+      this.setState((prevState) => ({
+        seo: {
+          ...prevState.seo,
+          trends: seoTrends,
+        },
+      }));
+    }
+  };
+
+  private loadBenchmarks = (): void => {
+    const perfBenchmarks = getBenchmarks("performance");
+    const seoBenchmarks = getBenchmarks("seo");
+    
+    this.setState((prevState) => ({
+      performance: {
+        ...prevState.performance,
+        benchmarks: perfBenchmarks,
+      },
+      seo: {
+        ...prevState.seo,
+        benchmarks: seoBenchmarks,
+      },
+    }));
+  };
+
+  private initGoogleAnalytics = (): void => {
+    const config = getGAConfig();
+    if (config.enabled && config.measurementId) {
+      initGoogleAnalytics(config.measurementId);
+    }
+  };
+
+  private initABTests = (): void => {
+    const activeTests = getActiveABTests();
+    activeTests.forEach((test) => {
+      const variant = assignToVariant(test.id);
+      trackABTestVisit(test.id, variant);
+    });
+  };
+
+  private handleExport = (format: "csv" | "json" | "pdf"): void => {
+    exportAnalytics({
+      format,
+      includePerformance: true,
+      includeSeo: true,
+    });
   };
 
   componentDidUpdate(prevProps: Props, prevState: State): void {
@@ -1162,8 +1313,87 @@ class DashboardView extends Component<Props, State> {
                       </ul>
                     </div>
                   )}
+
+                  {/* SEO Trends Section */}
+                  {this.state.seo.trends && (
+                    <div style={{ marginTop: "1.5rem", paddingTop: "1rem", borderTop: "1px solid rgba(0,0,0,0.1)" }}>
+                      <p style={{ fontWeight: 800, marginBottom: "0.75rem", fontSize: "0.9rem" }}>Trends (30 days):</p>
+                      {this.state.seo.trends.score && (
+                        <div style={{ marginBottom: "0.5rem", fontSize: "0.85rem" }}>
+                          <span style={{ fontWeight: 700 }}>Score: </span>
+                          <span className={this.state.seo.trends.score.trend === "up" ? "overviewKeyValue__val--good" : ""}>
+                            {this.state.seo.trends.score.changePercent.toFixed(1)}% {this.state.seo.trends.score.trend === "up" ? "↑" : this.state.seo.trends.score.trend === "down" ? "↓" : "→"}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </>
               )}
+            </div>
+
+            {/* Alerts Section */}
+            {this.state.alerts.showAlerts && this.state.alerts.alerts.length > 0 && (
+              <div className="overviewCard overviewCard--alerts" aria-label="Alerts">
+                <p className="overviewCard__title">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ marginRight: "0.5rem", opacity: 0.8 }}>
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 9v4M12 17h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Alerts ({this.state.alerts.alerts.length})
+                </p>
+                <div className="overviewAlerts" style={{ marginTop: "1rem" }}>
+                  {this.state.alerts.alerts.slice(0, 5).map((alert) => (
+                    <div key={alert.id} className={`overviewAlert overviewAlert--${alert.severity}`}>
+                      <div className="overviewAlert__content">
+                        <span className="overviewAlert__title">{alert.title}</span>
+                        <span className="overviewAlert__message">{alert.message}</span>
+                      </div>
+                    </div>
+                  ))}
+                  {this.state.alerts.alerts.length > 5 && (
+                    <p style={{ fontSize: "0.85rem", color: "var(--ink-550)", marginTop: "0.5rem" }}>
+                      +{this.state.alerts.alerts.length - 5} more alerts
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Export Section */}
+            <div className="overviewCard" aria-label="Export analytics">
+              <p className="overviewCard__title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ marginRight: "0.5rem", opacity: 0.8 }}>
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Export Analytics
+              </p>
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "1rem" }}>
+                <button
+                  type="button"
+                  className="btn-luxury"
+                  onClick={() => this.handleExport("csv")}
+                  style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}
+                >
+                  Export CSV
+                </button>
+                <button
+                  type="button"
+                  className="btn-luxury"
+                  onClick={() => this.handleExport("json")}
+                  style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}
+                >
+                  Export JSON
+                </button>
+                <button
+                  type="button"
+                  className="btn-luxury"
+                  onClick={() => this.handleExport("pdf")}
+                  style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}
+                >
+                  Export PDF
+                </button>
+              </div>
             </div>
           </aside>
         </div>

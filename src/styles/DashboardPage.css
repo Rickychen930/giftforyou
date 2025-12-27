@@ -1676,3 +1676,60 @@
     padding: 0.4rem;
   }
 }
+
+/* =========================================================
+   Alerts Styles
+   ========================================================= */
+.overviewAlerts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.overviewAlert {
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1.5px solid;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.overviewAlert:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.overviewAlert--critical {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+}
+
+.overviewAlert--warning {
+  border-color: rgba(249, 115, 22, 0.4);
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(249, 115, 22, 0.05) 100%);
+}
+
+.overviewAlert--info {
+  border-color: rgba(59, 130, 246, 0.4);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+}
+
+.overviewAlert__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.overviewAlert__title {
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--ink-900);
+}
+
+.overviewAlert__message {
+  font-size: 0.85rem;
+  color: var(--ink-700);
+  line-height: 1.5;
+}

@@ -87,7 +87,7 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
 
   return (
     <article
-      className="bouquet-card"
+      className="bouquet-card fade-in hover-lift"
       aria-label={`Bouquet ${name}, harga ${formatPrice(price)}`}
       tabIndex={0}
       onClick={handleCardClick}

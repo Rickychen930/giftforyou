@@ -27,6 +27,7 @@
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   transform: translateZ(0);
   will-change: transform, box-shadow;
+  overflow: hidden;
 }
 
 .bouquet-card:focus-visible {

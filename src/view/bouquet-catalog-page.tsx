@@ -6,6 +6,7 @@ import FilterPanel from "../components/filter-panel-component";
 import BouquetCard from "../components/bouquet-card-component";
 import { setSeo } from "../utils/seo";
 import { formatIDR } from "../utils/money";
+import { observeFadeIn, revealOnScroll, staggerFadeIn } from "../utils/luxury-enhancements";
 
 type Range = [number, number];
 
@@ -68,6 +69,16 @@ class BouquetCatalogView extends Component<Props> {
 
   componentDidMount(): void {
     this.applySeo();
+    
+    // Initialize luxury enhancements
+    setTimeout(() => {
+      observeFadeIn(".fade-in");
+      revealOnScroll();
+      const cards = document.querySelectorAll(".bouquet-card");
+      if (cards.length > 0) {
+        staggerFadeIn(cards as NodeListOf<HTMLElement>, 50, 400);
+      }
+    }, 100);
   }
 
   componentDidUpdate(prevProps: Props): void {
