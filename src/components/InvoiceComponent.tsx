@@ -96,8 +96,28 @@ const getPaymentMethodLabel = (method?: string): string => {
   return labels[method || ""] || method || "—";
 };
 
+// Generate professional invoice number
+const generateInvoiceNumber = (orderId?: string, createdAt?: string): string => {
+  if (!orderId) return "N/A";
+  
+  const date = createdAt ? new Date(createdAt) : new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const shortId = orderId.slice(-6).toUpperCase();
+  
+  return `INV-${year}${month}-${shortId}`;
+};
+
+// Generate order reference
+const generateOrderReference = (orderId?: string): string => {
+  if (!orderId) return "N/A";
+  return `ORD-${orderId.slice(-8).toUpperCase()}`;
+};
+
 const InvoiceComponent: React.FC<InvoiceComponentProps> = ({ order, onClose }) => {
   const invoiceRef = useRef<HTMLDivElement>(null);
+  const invoiceNumber = generateInvoiceNumber(order._id, order.createdAt);
+  const orderReference = generateOrderReference(order._id);
 
   const handlePrint = () => {
     if (!invoiceRef.current) return;
@@ -197,17 +217,31 @@ const InvoiceComponent: React.FC<InvoiceComponentProps> = ({ order, onClose }) =
 
         {/* Invoice Content */}
         <div className="invoice-content">
+          {/* Watermark */}
+          <div className="invoice-watermark">INVOICE</div>
+
           {/* Invoice Title */}
           <div className="invoice-title-section">
-            <h2 className="invoice-title">INVOICE</h2>
+            <div className="invoice-title-wrapper">
+              <h2 className="invoice-title">INVOICE</h2>
+              <p className="invoice-subtitle">Official Invoice Document</p>
+            </div>
             <div className="invoice-meta">
               <div className="invoice-meta__item">
                 <span className="invoice-meta__label">Invoice No.</span>
-                <span className="invoice-meta__value">#{order._id?.slice(-8).toUpperCase() || "N/A"}</span>
+                <span className="invoice-meta__value">{invoiceNumber}</span>
+              </div>
+              <div className="invoice-meta__item">
+                <span className="invoice-meta__label">Order Ref.</span>
+                <span className="invoice-meta__value">{orderReference}</span>
               </div>
               <div className="invoice-meta__item">
                 <span className="invoice-meta__label">Tanggal</span>
                 <span className="invoice-meta__value">{formatDate(order.createdAt)}</span>
+              </div>
+              <div className="invoice-meta__item">
+                <span className="invoice-meta__label">Due Date</span>
+                <span className="invoice-meta__value">{formatDate(order.deliveryAt || order.createdAt)}</span>
               </div>
             </div>
           </div>
@@ -320,19 +354,95 @@ const InvoiceComponent: React.FC<InvoiceComponentProps> = ({ order, onClose }) =
                   Method: {getPaymentMethodLabel(order.paymentMethod)}
                 </p>
               )}
+              {downPayment > 0 && (
+                <p className="invoice-status-card__detail">
+                  DP: {formatIDR(downPayment)}
+                </p>
+              )}
+              {additionalPayment > 0 && (
+                <p className="invoice-status-card__detail">
+                  Additional: {formatIDR(additionalPayment)}
+                </p>
+              )}
             </div>
             <div className="invoice-status-card">
               <h4 className="invoice-status-card__title">Order Status</h4>
               <div className="invoice-status-badge invoice-status-badge--order">
                 {getStatusLabel(order.orderStatus)}
               </div>
+              {order.deliveryAt && (
+                <p className="invoice-status-card__detail">
+                  Delivery: {formatDate(order.deliveryAt)}
+                </p>
+              )}
             </div>
-            {order.deliveryAt && (
-              <div className="invoice-status-card">
-                <h4 className="invoice-status-card__title">Delivery Date</h4>
-                <p className="invoice-status-card__detail">{formatDateTime(order.deliveryAt)}</p>
+            <div className="invoice-status-card">
+              <h4 className="invoice-status-card__title">Payment Summary</h4>
+              <div className="invoice-payment-summary">
+                <div className="invoice-payment-summary__row">
+                  <span>Total Amount</span>
+                  <span className="invoice-payment-summary__value">{formatIDR(totalAmount)}</span>
+                </div>
+                {(downPayment > 0 || additionalPayment > 0) && (
+                  <div className="invoice-payment-summary__row">
+                    <span>Paid</span>
+                    <span className="invoice-payment-summary__value invoice-payment-summary__value--paid">
+                      {formatIDR(downPayment + additionalPayment)}
+                    </span>
+                  </div>
+                )}
+                {remainingAmount > 0 && (
+                  <div className="invoice-payment-summary__row invoice-payment-summary__row--remaining">
+                    <span>Remaining</span>
+                    <span className="invoice-payment-summary__value invoice-payment-summary__value--remaining">
+                      {formatIDR(remainingAmount)}
+                    </span>
+                  </div>
+                )}
+                {remainingAmount <= 0 && (
+                  <div className="invoice-payment-summary__row invoice-payment-summary__row--paid">
+                    <span>Status</span>
+                    <span className="invoice-payment-summary__value invoice-payment-summary__value--paid">
+                      Fully Paid
+                    </span>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
+          </div>
+
+          {/* Payment Instructions */}
+          {remainingAmount > 0 && (
+            <div className="invoice-payment-instructions">
+              <h4 className="invoice-payment-instructions__title">Payment Instructions</h4>
+              <div className="invoice-payment-instructions__content">
+                <p>Please complete your payment of <strong>{formatIDR(remainingAmount)}</strong> to confirm your order.</p>
+                <p>Payment can be made via:</p>
+                <ul>
+                  <li>Bank Transfer: {STORE_PROFILE.contact.phoneDisplay}</li>
+                  <li>E-Wallet / QRIS: Contact us for payment details</li>
+                  <li>Cash on Delivery: Available for local deliveries</li>
+                </ul>
+                <p className="invoice-payment-instructions__note">
+                  <strong>Note:</strong> Please include invoice number <strong>{invoiceNumber}</strong> in your payment reference.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Terms & Conditions */}
+          <div className="invoice-terms">
+            <h4 className="invoice-terms__title">Terms & Conditions</h4>
+            <div className="invoice-terms__content">
+              <ul>
+                <li>All prices are in Indonesian Rupiah (IDR) and include applicable taxes.</li>
+                <li>Payment must be completed before delivery unless otherwise agreed.</li>
+                <li>Orders are subject to product availability. We reserve the right to substitute items of equal or greater value.</li>
+                <li>Delivery dates are estimates and may vary based on location and availability.</li>
+                <li>For cancellations, please contact us at least 24 hours before the scheduled delivery date.</li>
+                <li>This invoice is valid for 30 days from the date of issue.</li>
+              </ul>
+            </div>
           </div>
 
           {/* Footer */}

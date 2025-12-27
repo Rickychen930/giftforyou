@@ -108,7 +108,7 @@ app.use((req, res, next) => {
   return next();
 });
 
-// Routes
+// Routes - Register all API routes before 404 handler
 app.use("/api/metrics", metricsRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/bouquets", bouquetRoutes);
@@ -117,9 +117,9 @@ app.use("/api/hero-slider", heroSliderRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/customers", customerRoutes);
 
-// 404 handler for API routes
-app.use("/api/*", (_req, res) => {
-  res.status(404).json({ message: "API endpoint not found" });
+// 404 handler for API routes (must come after all route registrations)
+app.use("/api", (_req, res) => {
+  res.status(404).json({ message: "API endpoint not found", path: _req.path });
 });
 
 // 404 handler for other routes
