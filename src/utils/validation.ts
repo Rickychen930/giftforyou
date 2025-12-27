@@ -97,7 +97,8 @@ export function isValidEmail(email: string): boolean {
  * Validate phone number (basic validation)
  */
 export function isValidPhone(phone: string): boolean {
-  const phoneRegex = /^[\d\s\-\+\(\)]+$/;
+  // eslint-disable-next-line no-useless-escape
+  const phoneRegex = /^[\d\s\-+()]+$/;
   return phoneRegex.test(phone) && phone.replace(/\D/g, "").length >= 8;
 }
 
