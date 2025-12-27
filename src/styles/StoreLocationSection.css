@@ -497,13 +497,6 @@
     box-shadow: 0 12px 24px rgba(225, 48, 108, 0.28);
   }
 
-  .storeLocation__socialLink--facebook:hover {
-    background: #1877f2;
-    color: var(--neutral-0);
-    border-color: transparent;
-    box-shadow: 0 12px 24px rgba(24, 119, 242, 0.25);
-  }
-
   .storeLocation__socialLink--tiktok:hover {
     background: #000000;
     color: var(--neutral-0);

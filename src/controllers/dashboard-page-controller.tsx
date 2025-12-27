@@ -217,7 +217,10 @@ class DashboardController extends Component<{}, State> {
         if (ordersRes.ok) {
           try {
             const ordersText = await ordersRes.text();
-            if (ordersText.trim()) {
+            // Check if response is HTML (error page)
+            if (ordersText.trim().startsWith("<!DOCTYPE") || ordersText.trim().startsWith("<html")) {
+              salesError = "Orders API returned HTML instead of JSON. Please check server configuration.";
+            } else if (ordersText.trim()) {
               const ordersData = JSON.parse(ordersText) as Array<{
                 _id?: string;
                 totalAmount?: number;

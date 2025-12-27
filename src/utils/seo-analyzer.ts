@@ -179,25 +179,6 @@ export function analyzeSeo(): SeoAnalysis {
     warningCount++;
   }
 
-  // Twitter Card check
-  const twitterCard = document.querySelector('meta[name="twitter:card"]')?.getAttribute("content") || "";
-  if (twitterCard) {
-    checks.push({
-      name: "Twitter Card",
-      status: "pass",
-      message: "Twitter Card is configured",
-    });
-    passCount++;
-  } else {
-    checks.push({
-      name: "Twitter Card",
-      status: "warning",
-      message: "Twitter Card is missing",
-      recommendation: "Add Twitter Card meta tags",
-    });
-    warningCount++;
-  }
-
   // Structured Data (JSON-LD) check
   const jsonLd = document.querySelector('script[type="application/ld+json"]');
   if (jsonLd) {

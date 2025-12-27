@@ -368,11 +368,6 @@
   box-shadow: 0 6px 16px rgba(37, 211, 102, 0.15);
 }
 
-.footer__socialIcon--facebook:hover {
-  border-color: rgba(24, 119, 242, 0.4);
-  box-shadow: 0 6px 16px rgba(24, 119, 242, 0.15);
-}
-
 .footer__socialIcon--tiktok:hover {
   border-color: rgba(0, 0, 0, 0.4);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);

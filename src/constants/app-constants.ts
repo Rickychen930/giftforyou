@@ -31,11 +31,6 @@ export const SOCIAL_MEDIA = [
     label: "Chat lewat WhatsApp",
   },
   {
-    name: "Facebook" as const,
-    url: STORE_PROFILE.social.facebook,
-    label: "Ikuti kami di Facebook",
-  },
-  {
     name: "TikTok" as const,
     url: STORE_PROFILE.social.tiktok,
     label: "Ikuti kami di TikTok",

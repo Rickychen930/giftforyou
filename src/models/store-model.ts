@@ -10,7 +10,6 @@ export interface StoreHours {
 
 export interface StoreSocialLinks {
   instagram?: string;
-  facebook?: string;
   tiktok?: string;
   whatsapp?: string; // e.g. https://wa.me/6285...
 }
@@ -52,7 +51,6 @@ export const storeData: StoreData = {
 
   social: {
     instagram: STORE_PROFILE.social.instagram,
-    facebook: STORE_PROFILE.social.facebook,
     tiktok: STORE_PROFILE.social.tiktok,
     whatsapp: STORE_PROFILE.whatsapp.url,
   },

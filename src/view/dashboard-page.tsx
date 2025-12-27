@@ -377,7 +377,7 @@ class DashboardView extends Component<Props, State> {
 
     setSeo({
       title: `${titleByTab[this.state.activeTab]} | Giftforyou.idn Admin`,
-      description: "Giftforyou.idn admin dashboard.",
+      description: "Dashboard admin Giftforyou.idn - Kelola bouquet, pesanan, koleksi, dan analitik performa website florist terbaik di Cirebon, Jawa Barat.",
       path: "/dashboard",
       noIndex: true,
     });
@@ -923,9 +923,19 @@ class DashboardView extends Component<Props, State> {
 
             {/* Sales Metrics Section */}
             {salesError ? (
-              <div className="overviewCard" aria-label="Sales metrics">
-                <p className="overviewCard__title">Penjualan</p>
-                <p className="overviewCard__empty">{salesError}</p>
+              <div className="overviewCard overviewCard--error" aria-label="Sales metrics">
+                <p className="overviewCard__title">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ marginRight: "0.5rem", opacity: 0.8 }}>
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 9v4M12 17h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Penjualan
+                </p>
+                <p className="overviewCard__empty" style={{ color: "var(--error-text)", fontSize: "0.9rem", textAlign: "left" }}>
+                  {salesError.includes("HTML") || salesError.includes("404") 
+                    ? "Orders API tidak tersedia. Pastikan endpoint /api/orders dikonfigurasi dengan benar di server."
+                    : salesError}
+                </p>
               </div>
             ) : salesMetrics ? (
               <>

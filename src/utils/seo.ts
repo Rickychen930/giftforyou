@@ -93,7 +93,7 @@ export function setSeo(input: SeoInput): void {
   const canonical = input.path ? new URL(input.path, origin).toString() : origin;
   setCanonical(canonical);
 
-  // OpenGraph + Twitter
+  // OpenGraph (for social sharing - Facebook, LinkedIn, etc.)
   ensureMetaByProperty("og:title").setAttribute(
     "content",
     title || `${STORE_PROFILE.brand.name} | ${STORE_PROFILE.brand.tagline}`
@@ -104,7 +104,7 @@ export function setSeo(input: SeoInput): void {
   );
   ensureMetaByProperty("og:site_name").setAttribute(
     "content",
-    STORE_PROFILE.brand.name
+    STORE_PROFILE.brand.displayName
   );
   ensureMetaByProperty("og:locale").setAttribute("content", "id_ID");
   ensureMetaByProperty("og:url").setAttribute("content", canonical);
@@ -114,17 +114,6 @@ export function setSeo(input: SeoInput): void {
     ? new URL(input.ogImagePath, origin).toString()
     : new URL(STORE_PROFILE.brand.logoPath, origin).toString();
   ensureMetaByProperty("og:image").setAttribute("content", ogImage);
-
-  ensureMetaByName("twitter:card").setAttribute("content", "summary_large_image");
-  ensureMetaByName("twitter:title").setAttribute(
-    "content",
-    title || `${STORE_PROFILE.brand.name} | ${STORE_PROFILE.brand.tagline}`
-  );
-  ensureMetaByName("twitter:description").setAttribute(
-    "content",
-    description || STORE_PROFILE.brand.description
-  );
-  ensureMetaByName("twitter:image").setAttribute("content", ogImage);
 
   // JSON-LD (runtime; best-effort on SPA)
   // Includes WebSite + LocalBusiness to help local SEO.
