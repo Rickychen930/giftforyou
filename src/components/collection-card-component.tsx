@@ -5,6 +5,7 @@ import "../styles/CollectionCardComponent.css";
 import { API_BASE } from "../config/api";
 import { formatIDR } from "../utils/money";
 import { buildWhatsAppLinkEncoded } from "../utils/whatsapp";
+import { formatBouquetName, formatBouquetType, formatBouquetSize } from "../utils/text-formatter";
 
 export interface BouquetCardProps {
   _id: string;
@@ -16,6 +17,8 @@ export interface BouquetCardProps {
   image?: string;
   status: "ready" | "preorder";
   collectionName?: string;
+  isNewEdition?: boolean;
+  isFeatured?: boolean;
 }
 
 export interface CollectionCardProps {
@@ -51,8 +54,8 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
   const renderBouquetCard = (b: BouquetCardProps, cardIndex: number) => {
     const detailHref = `/bouquet/${b._id}`;
     const waMessage = encodeURIComponent(
-      `Halo, saya ingin pesan bouquet "${b.name}" (${formatPrice(b.price)})${
-        b.size ? ` ukuran ${b.size}` : ""
+      `Halo, saya ingin pesan bouquet "${formatBouquetName(b.name)}" (${formatPrice(b.price)})${
+        b.size ? ` ukuran ${formatBouquetSize(b.size)}` : ""
       }.`
     );
     const waLink = buildWhatsAppLinkEncoded(waMessage);
@@ -75,7 +78,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
           >
             <img
               src={imageUrl}
-              alt={b.name}
+              alt={formatBouquetName(b.name)}
               loading="lazy"
               decoding="async"
               onError={(e) => {
@@ -108,9 +111,9 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
             <Link
               to={detailHref}
               className="bouquetCard__nameLink"
-              aria-label={`Buka detail ${b.name}`}
+              aria-label={`Buka detail ${formatBouquetName(b.name)}`}
             >
-              {b.name}
+              {formatBouquetName(b.name)}
             </Link>
           </h3>
 
@@ -153,7 +156,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
             target="_blank"
             rel="noopener noreferrer"
             className="bouquetCard__btn"
-            aria-label={`Chat untuk pesan ${b.name} lewat WhatsApp`}
+            aria-label={`Chat untuk pesan ${formatBouquetName(b.name)} lewat WhatsApp`}
             title="Chat lewat WhatsApp"
           >
             <svg

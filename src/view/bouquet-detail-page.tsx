@@ -7,6 +7,7 @@ import { STORE_PROFILE } from "../config/store-profile";
 import { formatIDR } from "../utils/money";
 import { buildWhatsAppLink } from "../utils/whatsapp";
 import { observeFadeIn, revealOnScroll, createRipple } from "../utils/luxury-enhancements";
+import { formatBouquetName, formatBouquetType, formatBouquetSize, formatCollectionName, formatOccasion, formatFlowerName, formatDescription, formatTag } from "../utils/text-formatter";
 
 import { API_BASE } from "../config/api"; // adjust path depending on folder depth
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
@@ -34,11 +35,11 @@ const buildCustomerOrderMessage = (
   const lines = [
     `Halo ${STORE_PROFILE.brand.displayName}, saya ingin pesan bouquet berikut:`,
     ``,
-    `Nama: ${b.name}`,
+    `Nama: ${formatBouquetName(b.name)}`,
     `Harga: ${formatPrice(b.price)}`,
     b.status ? `Status: ${b.status === "ready" ? "Siap" : "Preorder"}` : "",
-    b.size ? `Ukuran: ${b.size}` : "",
-    b.type ? `Tipe: ${b.type}` : "",
+    b.size ? `Ukuran: ${formatBouquetSize(b.size)}` : "",
+    b.type ? `Tipe: ${formatBouquetType(b.type)}` : "",
     `Jumlah: ${formData.quantity}`,
     ``,
     `📦 Pengiriman: ${formData.deliveryType === "pickup" ? "Ambil di toko" : "Diantar"}`,
@@ -167,21 +168,21 @@ class BouquetDetailPage extends Component<Props> {
       return;
     }
 
-    const details = [bouquet.type, bouquet.size].filter(Boolean).join(" • ");
+    const details = [formatBouquetType(bouquet.type), formatBouquetSize(bouquet.size)].filter(Boolean).join(" • ");
     const price = Number.isFinite(bouquet.price)
       ? formatPrice(bouquet.price)
       : undefined;
-    const titleParts = [bouquet.name, details].filter(Boolean).join(" — ");
+    const titleParts = [formatBouquetName(bouquet.name), details].filter(Boolean).join(" — ");
 
     const locationKeywords = "Cirebon, Jawa Barat";
     setSeo({
       title: `${titleParts} | Giftforyou.idn - Florist Cirebon`,
       description:
-        `${bouquet.name}${details ? ` (${details})` : ""}` +
+        `${formatBouquetName(bouquet.name)}${details ? ` (${details})` : ""}` +
         (price ? ` — ${price}.` : ".") +
         ` Tersedia di Cirebon, Jawa Barat. Pesan mudah lewat WhatsApp dengan pengiriman cepat ke seluruh Cirebon dan sekitarnya.`,
       keywords:
-        `${bouquet.name.toLowerCase()}, bouquet cirebon, gift box cirebon, stand acrylic cirebon, florist cirebon, toko bunga cirebon, hadiah cirebon, kado cirebon, florist jawa barat, ${locationKeywords}`,
+        `${formatBouquetName(bouquet.name).toLowerCase()}, bouquet cirebon, gift box cirebon, stand acrylic cirebon, florist cirebon, toko bunga cirebon, hadiah cirebon, kado cirebon, florist jawa barat, ${locationKeywords}`,
       path: window.location.pathname,
       ogImagePath: bouquet.image ? buildImageUrl(bouquet.image) : undefined,
       structuredData: {
@@ -325,20 +326,20 @@ class BouquetDetailPage extends Component<Props> {
 
             <div className="bdInfo reveal-on-scroll">
               <h1 id="bd-title" className="bdTitle gradient-text">
-                {bouquet.name}
+                {formatBouquetName(bouquet.name)}
               </h1>
 
               <p className="bdPrice">{formatPrice(bouquet.price)}</p>
 
               {bouquet.description && (
-                <p className="bdDesc">{bouquet.description}</p>
+                <p className="bdDesc">{formatDescription(bouquet.description)}</p>
               )}
 
               <div className="bdMeta" aria-label="Ringkasan bouquet">
-                {bouquet.size && <span className="bdChip">Ukuran: {bouquet.size}</span>}
-                {bouquet.type && <span className="bdChip">Tipe: {bouquet.type}</span>}
+                {bouquet.size && <span className="bdChip">Ukuran: {formatBouquetSize(bouquet.size)}</span>}
+                {bouquet.type && <span className="bdChip">Tipe: {formatBouquetType(bouquet.type)}</span>}
                 {bouquet.collectionName && (
-                  <span className="bdChip">Koleksi: {bouquet.collectionName}</span>
+                  <span className="bdChip">Koleksi: {formatCollectionName(bouquet.collectionName)}</span>
                 )}
                 {bouquet.isNewEdition && (
                   <span className="bdChip bdChip--new">Edisi Baru</span>
@@ -370,7 +371,7 @@ class BouquetDetailPage extends Component<Props> {
                   <div className="bdPenandaCompact" aria-label="Tag kustom">
                     {(bouquet as any).customPenanda.map((tag: string, idx: number) => (
                       <span key={idx} className="bdPenandaCompact__tag">
-                        {tag}
+                        {formatTag(tag)}
                       </span>
                     ))}
                   </div>
@@ -395,7 +396,7 @@ class BouquetDetailPage extends Component<Props> {
                           </svg>
                           Acara
                         </dt>
-                        <dd>{(bouquet as any).occasions.join(", ")}</dd>
+                        <dd>{(bouquet as any).occasions.map(formatOccasion).join(", ")}</dd>
                       </>
                     )}
 
@@ -408,7 +409,7 @@ class BouquetDetailPage extends Component<Props> {
                           </svg>
                           Bunga
                         </dt>
-                        <dd>{(bouquet as any).flowers.join(", ")}</dd>
+                        <dd>{(bouquet as any).flowers.map(formatFlowerName).join(", ")}</dd>
                       </>
                     )}
                 </dl>

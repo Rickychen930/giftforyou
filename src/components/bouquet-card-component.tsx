@@ -4,6 +4,7 @@ import "../styles/BouquetCardComponent.css";
 
 import { API_BASE } from "../config/api"; // adjust path depending on folder depth
 import { formatIDR } from "../utils/money";
+import { formatBouquetName, formatBouquetType, formatBouquetSize, formatCollectionName, formatTag } from "../utils/text-formatter";
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
 
 // Plain props untuk komponen UI
@@ -18,6 +19,8 @@ export interface BouquetCardProps {
   status: "ready" | "preorder";
   collectionName?: string;
   customPenanda?: string[];
+  isNewEdition?: boolean;
+  isFeatured?: boolean;
 }
 
 const BouquetCard: React.FC<BouquetCardProps> = ({
@@ -31,6 +34,8 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
   status,
   collectionName,
   customPenanda = [],
+  isNewEdition = false,
+  isFeatured = false,
 }) => {
   const navigate = useNavigate();
   const formatPrice = formatIDR;
@@ -100,7 +105,11 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
     }
   }, [imageUrl]);
 
-  const tags = [collectionName, type, size].filter(Boolean) as string[];
+  const tags = [
+    formatCollectionName(collectionName),
+    formatBouquetType(type),
+    formatBouquetSize(size)
+  ].filter(Boolean) as string[];
 
   return (
     <article
@@ -138,6 +147,27 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
           onError={handleImageError}
         />
         <div className="bouquet-image-overlay">
+          {/* Top Left - Featured/New Badges */}
+          <div className="bouquet-badge-top-left">
+            {isFeatured && (
+              <span className="bouquet-badge bouquet-badge--featured" aria-label="Bouquet featured">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/>
+                </svg>
+                Featured
+              </span>
+            )}
+            {isNewEdition && !isFeatured && (
+              <span className="bouquet-badge bouquet-badge--new" aria-label="Bouquet baru">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Baru
+              </span>
+            )}
+          </div>
+
+          {/* Top Right - Status Badge */}
           <span className={`bouquet-status-badge ${status === "ready" ? "is-ready" : "is-preorder"}`}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               {status === "ready" ? (
@@ -148,6 +178,12 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
             </svg>
             {status === "ready" ? "Siap" : "Preorder"}
           </span>
+
+          {/* Bottom Right - Price Badge */}
+          <div className="bouquet-price-badge">
+            <span className="bouquet-price-badge__label">Mulai dari</span>
+            <span className="bouquet-price-badge__amount">{formatPrice(price)}</span>
+          </div>
         </div>
         {isHovered && (
           <div className="bouquet-image-hover-overlay" aria-hidden="true">
@@ -163,12 +199,12 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
           <div className="bouquet-tags" aria-label="Kategori bouquet">
             {tags.slice(0, 2).map((t) => (
               <span key={t} className="bouquet-tag" title={t}>
-                {t}
+                {formatTag(t)}
               </span>
             ))}
             {customPenanda.slice(0, Math.max(0, 2 - tags.length)).map((p, idx) => (
               <span key={`penanda-${idx}-${p}`} className="bouquet-tag bouquet-tag--penanda" title={p}>
-                {p}
+                {formatTag(p)}
               </span>
             ))}
             {(tags.length + customPenanda.length) > 2 && (
@@ -180,8 +216,8 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
         )}
 
         <h4 className="bouquet-title">
-          <Link to={detailHref} aria-label={`Lihat detail bouquet ${name}`}>
-            {name}
+          <Link to={detailHref} aria-label={`Lihat detail bouquet ${formatBouquetName(name)}`}>
+            {formatBouquetName(name)}
           </Link>
         </h4>
 

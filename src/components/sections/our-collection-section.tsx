@@ -58,6 +58,8 @@ const normalizeBouquet = (
         ? "preorder"
         : statusCandidate,
     collectionName: data.collectionName ?? collectionName,
+    isNewEdition: typeof data.isNewEdition === "boolean" ? data.isNewEdition : false,
+    isFeatured: typeof data.isFeatured === "boolean" ? data.isFeatured : false,
   };
 };
 
