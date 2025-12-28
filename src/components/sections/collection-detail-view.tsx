@@ -116,14 +116,17 @@ const DownloadPDFButton: React.FC<{
             top: "100%",
             left: 0,
             marginTop: "0.5rem",
-            background: "white",
-            border: "1px solid rgba(212, 140, 156, 0.3)",
-            borderRadius: "8px",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-            zIndex: 100,
+            background: "linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%)",
+            border: "2px solid rgba(212, 140, 156, 0.3)",
+            borderRadius: "12px",
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08)",
+            zIndex: 10000,
             display: "flex",
             flexDirection: "column",
-            minWidth: "180px",
+            minWidth: "200px",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            overflow: "hidden",
           }}
         >
           <button
@@ -131,45 +134,63 @@ const DownloadPDFButton: React.FC<{
             onClick={() => handleDownload(false)}
             disabled={isGenerating}
             style={{
-              padding: "0.75rem 1rem",
+              padding: "0.85rem 1.25rem",
               border: "none",
               background: "transparent",
               textAlign: "left",
               cursor: "pointer",
-              fontSize: "0.9rem",
+              fontSize: "0.95rem",
+              fontWeight: 600,
               color: "var(--ink-800)",
+              transition: "all 0.2s ease",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(212, 140, 156, 0.1)";
+              e.currentTarget.style.background = "linear-gradient(135deg, rgba(212, 140, 156, 0.12) 0%, rgba(168, 213, 186, 0.08) 100%)";
+              e.currentTarget.style.color = "var(--brand-rose-700)";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = "transparent";
+              e.currentTarget.style.color = "var(--ink-800)";
             }}
           >
-            Tanpa Watermark
+            <span style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Tanpa Watermark
+            </span>
           </button>
           <button
             type="button"
             onClick={() => handleDownload(true)}
             disabled={isGenerating}
             style={{
-              padding: "0.75rem 1rem",
+              padding: "0.85rem 1.25rem",
               border: "none",
               background: "transparent",
               textAlign: "left",
               cursor: "pointer",
-              fontSize: "0.9rem",
+              fontSize: "0.95rem",
+              fontWeight: 600,
               color: "var(--ink-800)",
-              borderTop: "1px solid rgba(212, 140, 156, 0.2)",
+              borderTop: "1px solid rgba(212, 140, 156, 0.15)",
+              transition: "all 0.2s ease",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(212, 140, 156, 0.1)";
+              e.currentTarget.style.background = "linear-gradient(135deg, rgba(212, 140, 156, 0.12) 0%, rgba(168, 213, 186, 0.08) 100%)";
+              e.currentTarget.style.color = "var(--brand-rose-700)";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = "transparent";
+              e.currentTarget.style.color = "var(--ink-800)";
             }}
           >
-            Dengan Watermark
+            <span style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Dengan Watermark
+            </span>
           </button>
         </div>
       )}

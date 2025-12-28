@@ -101,28 +101,23 @@ const CollectionListView: React.FC<Props> = ({
 
   const handleDeleteClick = (e: React.MouseEvent, collectionId: string): void => {
     e.stopPropagation();
+    e.preventDefault();
     setDeleteConfirmId(collectionId);
   };
 
   const handleDeleteConfirm = async (collectionId: string): Promise<void> => {
-    if (!onCollectionDelete) return;
+    if (!onCollectionDelete) {
+      setDeleteConfirmId(null);
+      return;
+    }
 
     const collection = collections.find((c) => c._id === collectionId);
-    const count = collection ? bouquetCount(collection) : 0;
-
-    if (count > 0) {
-      const confirmMessage = `Koleksi "${collection?.name}" memiliki ${count} bouquet. Semua bouquet akan kehilangan nama koleksi. Yakin ingin menghapus?`;
-      if (!window.confirm(confirmMessage)) {
-        setDeleteConfirmId(null);
-        return;
-      }
-    } else {
-      const confirmMessage = `Yakin ingin menghapus koleksi "${collection?.name}"?`;
-      if (!window.confirm(confirmMessage)) {
-        setDeleteConfirmId(null);
-        return;
-      }
+    if (!collection) {
+      setDeleteConfirmId(null);
+      return;
     }
+
+    const count = bouquetCount(collection);
 
     setDeletingId(collectionId);
     setDeleteConfirmId(null);
@@ -134,13 +129,15 @@ const CollectionListView: React.FC<Props> = ({
         setDeletingId(null);
       } else {
         // Success - deletingId will be cleared by parent component state update
-        // But ensure it's cleared here too
         setDeletingId(null);
       }
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Failed to delete collection:", err);
-      alert("Terjadi kesalahan saat menghapus koleksi. Silakan coba lagi.");
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : "Terjadi kesalahan saat menghapus koleksi. Silakan coba lagi.";
+      alert(errorMessage);
       setDeletingId(null);
     }
   };
@@ -374,7 +371,14 @@ const CollectionListView: React.FC<Props> = ({
                   {deleteConfirmId === collection._id && (
                     <div
                       className="collectionListView__deleteConfirm"
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                      }}
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                      }}
                     >
                       <p>Yakin ingin menghapus koleksi ini?</p>
                       {count > 0 && (
@@ -386,15 +390,23 @@ const CollectionListView: React.FC<Props> = ({
                         <button
                           type="button"
                           className="collectionListView__deleteConfirmBtn collectionListView__deleteConfirmBtn--confirm"
-                          onClick={() => handleDeleteConfirm(collection._id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            void handleDeleteConfirm(collection._id);
+                          }}
                           disabled={deletingId === collection._id}
                         >
-                          Hapus
+                          {deletingId === collection._id ? "Menghapus..." : "Hapus"}
                         </button>
                         <button
                           type="button"
                           className="collectionListView__deleteConfirmBtn collectionListView__deleteConfirmBtn--cancel"
-                          onClick={handleDeleteCancel}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            handleDeleteCancel();
+                          }}
                           disabled={deletingId === collection._id}
                         >
                           Batal
