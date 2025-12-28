@@ -513,9 +513,6 @@ export default class BouquetEditorSection extends Component<Props, State> {
             const oldCollection = prev.collections.find((c) =>
               (c.bouquets as Bouquet[]).some((b) => b._id === bouquetId)
             );
-            const newCollection = prev.collections.find(
-              (c) => c.name === collectionName
-            );
 
             const updatedCollections = prev.collections.map((c) => {
               // Remove from old collection if moved
