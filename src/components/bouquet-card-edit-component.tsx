@@ -129,6 +129,42 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
   const [isDuplicating, setIsDuplicating] = useState(false);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const quickActionsRef = useRef<HTMLDivElement>(null);
+  
+  // Database-synced options
+  const [collectionOptions, setCollectionOptions] = useState<string[]>(DEFAULT_COLLECTIONS);
+  const [typeOptions, setTypeOptions] = useState<string[]>(DEFAULT_TYPES);
+  const [occasionOptions, setOccasionOptions] = useState<string[]>([]);
+  const [flowerOptions, setFlowerOptions] = useState<string[]>([]);
+  const [stockLevelOptions, setStockLevelOptions] = useState<string[]>(DEFAULT_STOCK_LEVELS);
+  
+  // Load dropdown options from database
+  useEffect(() => {
+    let cancelled = false;
+    const ac = new AbortController();
+    
+    (async () => {
+      try {
+        const options = await getDropdownOptions(ac.signal);
+        if (!cancelled) {
+          setCollectionOptions(options.collections);
+          setTypeOptions(options.types);
+          setOccasionOptions(options.occasions);
+          setFlowerOptions(options.flowers);
+          setStockLevelOptions(options.stockLevels);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error("Failed to load dropdown options:", err);
+          // Keep defaults
+        }
+      }
+    })();
+    
+    return () => {
+      cancelled = true;
+      ac.abort();
+    };
+  }, []);
 
   const [form, setForm] = useState<FormState>({
     _id: bouquet._id,
