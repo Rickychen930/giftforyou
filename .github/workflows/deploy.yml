@@ -24,8 +24,8 @@ jobs:
       - name: Setup SSH
         run: |
           # Validate required secrets
-          if [ -z "${{ secrets.FRONTEND_TARGET_DIR }}" ]; then
-            echo "❌ ERROR: FRONTEND_TARGET_DIR secret is not set!"
+          if [ -z "${{ secrets.TARGET_DIR }}" ]; then
+            echo "❌ ERROR: TARGET_DIR secret is not set!"
             exit 1
           fi
           if [ -z "${{ secrets.BACKEND_TARGET_DIR }}" ]; then
@@ -66,7 +66,7 @@ jobs:
           use_insecure_cipher: false
           script: |
             set -e
-            FRONTEND_TARGET="${{ secrets.FRONTEND_TARGET_DIR }}"
+            FRONTEND_TARGET="${{ secrets.TARGET_DIR }}"
             BACKEND_TARGET="${{ secrets.BACKEND_TARGET_DIR }}"
             RELEASES="$FRONTEND_TARGET/_releases"
             TS="$(date +%Y%m%d-%H%M%S)"
@@ -126,7 +126,7 @@ jobs:
           command_timeout: 20m
           use_insecure_cipher: false
           source: "build/**"
-          target: "${{ secrets.FRONTEND_TARGET_DIR }}/_incoming"
+          target: "${{ secrets.TARGET_DIR }}/_incoming"
           overwrite: true
 
       # ✅ Ensure backend directories exist before upload
@@ -229,7 +229,7 @@ jobs:
           use_insecure_cipher: false
           script: |
             set -e
-            FRONTEND_TARGET="${{ secrets.FRONTEND_TARGET_DIR }}"
+            FRONTEND_TARGET="${{ secrets.TARGET_DIR }}"
             RELEASES="$FRONTEND_TARGET/_releases"
             INCOMING="$FRONTEND_TARGET/_incoming/build"
             TS="$(date +%Y%m%d-%H%M%S)"
@@ -410,9 +410,9 @@ jobs:
 
             # Check frontend
             echo -e "\nFrontend Check:"
-            if [ -L "${{ secrets.FRONTEND_TARGET_DIR }}/current" ]; then
+            if [ -L "${{ secrets.TARGET_DIR }}/current" ]; then
               echo "✅ Frontend symlink exists"
-              ls -la "${{ secrets.FRONTEND_TARGET_DIR }}/current" | head -5
+              ls -la "${{ secrets.TARGET_DIR }}/current" | head -5
             else
               echo "⚠️ Frontend symlink not found"
             fi
