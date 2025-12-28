@@ -3,6 +3,7 @@ import "../../styles/DashboardUploaderSection.css";
 import { BOUQUET_SIZE_OPTIONS } from "../../constants/bouquet-constants";
 import DropdownWithModal from "../DropdownWithModal";
 import TagInput from "../TagInput";
+import { getDropdownOptions } from "../../services/dropdown-options.service";
 
 interface Props {
   onUpload: (formData: FormData) => Promise<boolean>;
@@ -137,6 +138,13 @@ class BouquetUploader extends Component<Props, State> {
       isSavingDraft: false,
       showValidationSummary: false,
       imageDimensions: null,
+      
+      // Database-synced options
+      collectionOptions: DEFAULT_COLLECTIONS,
+      typeOptions: DEFAULT_TYPES,
+      occasionOptions: [],
+      flowerOptions: [],
+      stockLevelOptions: DEFAULT_STOCK_LEVELS,
     };
   }
 
@@ -1369,7 +1377,7 @@ class BouquetUploader extends Component<Props, State> {
                   <DropdownWithModal
                     label="Koleksi"
                     value={this.state.collectionName}
-                    options={DEFAULT_COLLECTIONS}
+                    options={this.state.collectionOptions}
                     onChange={(value) => {
                       this.setState({ collectionName: value });
                       const newTouchedFields = new Set(this.state.touchedFields);
@@ -1402,7 +1410,7 @@ class BouquetUploader extends Component<Props, State> {
                   <DropdownWithModal
                     label="Tipe"
                     value={this.state.type}
-                    options={DEFAULT_TYPES}
+                    options={this.state.typeOptions}
                     onChange={(value) => {
                       this.setState({ type: value });
                     }}
@@ -1447,7 +1455,7 @@ class BouquetUploader extends Component<Props, State> {
                   <DropdownWithModal
                     label="Stok"
                     value={this.state.quantity > 0 ? String(this.state.quantity) : ""}
-                    options={DEFAULT_STOCK_LEVELS}
+                    options={this.state.stockLevelOptions}
                     onChange={(value) => {
                       const num = parseInt(value, 10);
                       if (!isNaN(num) && num >= 0) {
@@ -1733,6 +1741,7 @@ class BouquetUploader extends Component<Props, State> {
                     maxLength={50}
                     error={touchedFields.has("flowersText") && fieldErrors.flowersText ? fieldErrors.flowersText : undefined}
                     storageKey="uploader_flowers"
+                    suggestions={this.state.flowerOptions}
                   />
                   <div className="uploader__fieldHint" style={{ marginTop: "0.5rem" }}>
                     Ketik dan tekan Enter/koma untuk menambahkan tag. Klik "Tambah Baru" untuk tag baru. Maksimal 20 jenis bunga.

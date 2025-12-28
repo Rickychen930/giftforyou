@@ -5,6 +5,12 @@
 /.pnp
 .pnp.js
 
+# Security: Admin role fix scripts (should never be committed)
+fix-admin*.js
+fix-admin*.sh
+**/fix-admin*.js
+**/fix-admin*.sh
+
 # testing
 /coverage
 

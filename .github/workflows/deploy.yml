@@ -156,7 +156,7 @@ jobs:
             chmod -R 755 "$BACKEND_TARGET" || true
             echo "✅ Backend directories ready"
 
-      # ✅ Upload Backend dist (using SCP like the working workflow)
+      # ✅ Upload Backend dist and source files (needed for rebuild on server)
       - name: Upload backend dist to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -168,6 +168,31 @@ jobs:
           command_timeout: 20m
           use_insecure_cipher: false
           source: "dist/**"
+          target: "${{ secrets.BACKEND_TARGET_DIR }}/_incoming_backend"
+          overwrite: true
+
+      # ✅ Upload backend source files (needed for rebuild)
+      - name: Upload backend source files to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          timeout: 180s
+          command_timeout: 20m
+          use_insecure_cipher: false
+          source: |
+            src/server/**
+            src/controllers/**
+            src/routes/**
+            src/models/**
+            src/middleware/**
+            src/seed/**
+            src/utils/**
+            tsconfig.server.json
+            package.json
+            package-lock.json
           target: "${{ secrets.BACKEND_TARGET_DIR }}/_incoming_backend"
           overwrite: true
 
@@ -318,6 +343,19 @@ jobs:
             rm -rf "$DIST_DIR"
             mkdir -p "$DIST_DIR"
             cp -a "$INCOMING_BACKEND"/. "$DIST_DIR"/
+
+            # Copy source files if they exist (for rebuild capability)
+            if [ -d "$BACKEND_TARGET/_incoming_backend/src" ]; then
+              echo "Copying source files for rebuild capability..."
+              mkdir -p "$BACKEND_TARGET/src"
+              cp -a "$BACKEND_TARGET/_incoming_backend/src"/* "$BACKEND_TARGET/src/" || true
+            fi
+            if [ -f "$BACKEND_TARGET/_incoming_backend/tsconfig.server.json" ]; then
+              cp "$BACKEND_TARGET/_incoming_backend/tsconfig.server.json" "$BACKEND_TARGET/" || true
+            fi
+            if [ -f "$BACKEND_TARGET/_incoming_backend/package.json" ]; then
+              cp "$BACKEND_TARGET/_incoming_backend/package.json" "$BACKEND_TARGET/" || true
+            fi
 
             # Ensure .env file exists (create from secrets if needed, or keep existing)
             if [ ! -f "$ENV_FILE" ] && [ -f "$ENV_PROD_FILE" ]; then

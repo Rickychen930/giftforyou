@@ -11,6 +11,7 @@ interface TagInputProps {
   maxLength?: number;
   error?: string;
   storageKey?: string; // For persisting custom tags
+  suggestions?: string[]; // Database-synced suggestions
 }
 
 const TagInput: React.FC<TagInputProps> = ({

@@ -10,6 +10,7 @@ import {
 } from "../constants/bouquet-constants";
 import DropdownWithModal from "./DropdownWithModal";
 import TagInput from "./TagInput";
+import { getDropdownOptions } from "../services/dropdown-options.service";
 
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
 
@@ -1070,7 +1071,7 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
                 <DropdownWithModal
                   label=""
                   value={form.quantity > 0 ? String(form.quantity) : ""}
-                  options={DEFAULT_STOCK_LEVELS}
+                  options={stockLevelOptions}
                   onChange={(value) => {
                     const num = parseInt(value, 10);
                     if (!isNaN(num) && num >= 0) {
@@ -1123,7 +1124,7 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
           <DropdownWithModal
             label="Tipe"
             value={form.type}
-            options={DEFAULT_TYPES}
+            options={typeOptions}
             onChange={(value) => {
               setForm((prev) => ({ ...prev, type: value }));
               const newTouchedFields = new Set(touchedFields);
@@ -1163,7 +1164,7 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
           <DropdownWithModal
             label="Koleksi"
             value={form.collectionName}
-            options={[...DEFAULT_COLLECTIONS, ...collections.filter((c) => !DEFAULT_COLLECTIONS.includes(c))]}
+            options={[...collectionOptions, ...collections.filter((c) => !collectionOptions.includes(c))]}
             onChange={(value) => {
               setForm((prev) => ({ ...prev, collectionName: value }));
               const newTouchedFields = new Set(touchedFields);
@@ -1334,6 +1335,7 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
             maxLength={50}
             error={touchedFields.has("occasionsText") && fieldErrors.occasionsText ? fieldErrors.occasionsText : undefined}
             storageKey="uploader_occasions"
+            suggestions={occasionOptions}
           />
 
           <TagInput
@@ -1367,6 +1369,7 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
             maxLength={50}
             error={touchedFields.has("flowersText") && fieldErrors.flowersText ? fieldErrors.flowersText : undefined}
             storageKey="uploader_flowers"
+            suggestions={flowerOptions}
           />
 
           <label className="becField becField--full">
