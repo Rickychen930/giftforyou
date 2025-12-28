@@ -51,6 +51,13 @@ interface State {
   isSavingDraft: boolean;
   showValidationSummary: boolean;
   imageDimensions: { width: number; height: number } | null;
+  
+  // Database-synced options
+  collectionOptions: string[];
+  typeOptions: string[];
+  occasionOptions: string[];
+  flowerOptions: string[];
+  stockLevelOptions: string[];
 }
 
 const DRAFT_STORAGE_KEY = "bouquet_uploader_draft";
