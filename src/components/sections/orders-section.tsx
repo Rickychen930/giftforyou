@@ -183,6 +183,11 @@ export default function OrdersSection({ bouquets }: Props) {
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>("");
   const [showInlineAddUser, setShowInlineAddUser] = useState<boolean>(false);
 
+  // Bulk operations state
+  const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set());
+  const [bulkActionMode, setBulkActionMode] = useState<"none" | "status" | "export" | "delete">("none");
+  const [bulkStatusValue, setBulkStatusValue] = useState<Order["orderStatus"]>("bertanya");
+
   // Copy feedback state
   const [copyFeedback, setCopyFeedback] = useState<string>("");
 
@@ -1375,6 +1380,143 @@ export default function OrdersSection({ bouquets }: Props) {
           </div>
 
           <div className="ordersList__actions ordersActions" aria-label="Aksi cepat">
+            {selectedOrders.size > 0 && (
+              <div className="ordersBulkActions">
+                <span className="ordersBulkActions__count">
+                  {selectedOrders.size} order dipilih
+                </span>
+                <div className="ordersBulkActions__buttons">
+                  <select
+                    value={bulkActionMode}
+                    onChange={(e) => {
+                      const mode = e.target.value as typeof bulkActionMode;
+                      setBulkActionMode(mode);
+                      if (mode === "status") {
+                        setBulkStatusValue("bertanya");
+                      }
+                    }}
+                    className="ordersBulkActions__select"
+                  >
+                    <option value="none">Pilih Aksi...</option>
+                    <option value="status">Update Status</option>
+                    <option value="export">Export Selected</option>
+                    <option value="delete">Hapus Selected</option>
+                  </select>
+                  {bulkActionMode === "status" && (
+                    <select
+                      value={bulkStatusValue}
+                      onChange={(e) => setBulkStatusValue(e.target.value as Order["orderStatus"])}
+                      className="ordersBulkActions__select"
+                    >
+                      <option value="bertanya">Bertanya</option>
+                      <option value="memesan">Memesan</option>
+                      <option value="sedang_diproses">Sedang Diproses</option>
+                      <option value="menunggu_driver">Menunggu Driver</option>
+                      <option value="pengantaran">Pengantaran</option>
+                      <option value="terkirim">Terkirim</option>
+                    </select>
+                  )}
+                  {bulkActionMode !== "none" && (
+                    <button
+                      type="button"
+                      className="ordersBulkActions__apply"
+                      onClick={async () => {
+                        if (bulkActionMode === "status") {
+                          // Bulk update status
+                          setSubmitting(true);
+                          try {
+                            const updates = Array.from(selectedOrders).map(async (orderId) => {
+                              const res = await fetch(`${API_BASE}/api/orders/${orderId}`, {
+                                method: "PATCH",
+                                headers: {
+                                  "Content-Type": "application/json",
+                                  ...getAuthHeaders(),
+                                },
+                                body: JSON.stringify({ orderStatus: bulkStatusValue }),
+                              });
+                              return res.ok;
+                            });
+                            await Promise.all(updates);
+                            setSuccess(`Status ${selectedOrders.size} order berhasil diupdate`);
+                            setSelectedOrders(new Set());
+                            setBulkActionMode("none");
+                            await loadOrders();
+                          } catch (err) {
+                            setError("Gagal update status");
+                          } finally {
+                            setSubmitting(false);
+                          }
+                        } else if (bulkActionMode === "export") {
+                          // Export selected orders
+                          const selected = orders.filter((o) => o._id && selectedOrders.has(o._id));
+                          const csv = [
+                            ["ID", "Nama", "Telepon", "Bouquet", "Status", "Payment", "Total", "Tanggal"],
+                            ...selected.map((o) => [
+                              o._id || "",
+                              o.buyerName,
+                              o.phoneNumber,
+                              o.bouquetName,
+                              o.orderStatus || "",
+                              o.paymentStatus || "",
+                              (o.totalAmount || 0).toString(),
+                              formatDateTime(o.createdAt),
+                            ]),
+                          ]
+                            .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+                            .join("\n");
+                          const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                          const link = document.createElement("a");
+                          const url = URL.createObjectURL(blob);
+                          link.setAttribute("href", url);
+                          link.setAttribute("download", `orders_${new Date().toISOString().split("T")[0]}.csv`);
+                          link.style.visibility = "hidden";
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                          setSuccess(`${selectedOrders.size} order berhasil diexport`);
+                          setSelectedOrders(new Set());
+                          setBulkActionMode("none");
+                        } else if (bulkActionMode === "delete") {
+                          if (window.confirm(`Apakah Anda yakin ingin menghapus ${selectedOrders.size} order?`)) {
+                            setSubmitting(true);
+                            try {
+                              const deletes = Array.from(selectedOrders).map(async (orderId) => {
+                                const res = await fetch(`${API_BASE}/api/orders/${orderId}`, {
+                                  method: "DELETE",
+                                  headers: getAuthHeaders(),
+                                });
+                                return res.ok;
+                              });
+                              await Promise.all(deletes);
+                              setSuccess(`${selectedOrders.size} order berhasil dihapus`);
+                              setSelectedOrders(new Set());
+                              setBulkActionMode("none");
+                              await loadOrders();
+                            } catch (err) {
+                              setError("Gagal menghapus order");
+                            } finally {
+                              setSubmitting(false);
+                            }
+                          }
+                        }
+                      }}
+                    >
+                      Terapkan
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="ordersBulkActions__cancel"
+                    onClick={() => {
+                      setSelectedOrders(new Set());
+                      setBulkActionMode("none");
+                    }}
+                  >
+                    Batal
+                  </button>
+                </div>
+              </div>
+            )}
             <button
               type="button"
               className="overviewActionBtn overviewActionBtn--primary"
@@ -1475,7 +1617,7 @@ export default function OrdersSection({ bouquets }: Props) {
                 const os = (o.orderStatus ?? "bertanya") as NonNullable<Order["orderStatus"]>;
                 const ps = (o.paymentStatus ?? "belum_bayar") as NonNullable<Order["paymentStatus"]>;
                 const d = safeDate(o.deliveryAt);
-                const isOverdue = Boolean(d && os !== "terkirim" && d.getTime() < Date.now());
+                const isOverdue: boolean = Boolean(d && os !== "terkirim" && d.getTime() < Date.now());
 
                 const legacyBouquetPrice = typeof o.bouquetPrice === "number" ? o.bouquetPrice : 0;
                 const legacyDelivery = typeof o.deliveryPrice === "number" ? o.deliveryPrice : 0;
@@ -1494,13 +1636,21 @@ export default function OrdersSection({ bouquets }: Props) {
                       ? "ordersBadge--danger"
                       : "ordersBadge--warning";
 
+                const orderId = o._id || "";
+                const isBulkSelected = orderId && selectedOrders.has(orderId);
+
                 return (
                   <div
                     key={o._id ?? `${o.buyerName}-${o.createdAt}`}
-                    className={`ordersCard ${isSelected ? "is-selected" : ""} ${isOverdue ? "is-danger" : ""}`}
+                    className={`ordersCard ${isSelected ? "is-selected" : ""} ${isOverdue ? "is-danger" : ""} ${isBulkSelected ? "is-bulk-selected" : ""}`}
                     role="listitem"
                     tabIndex={0}
-                    onClick={() => selectOrderForEdit(o)}
+                    onClick={(e) => {
+                      if ((e.target as HTMLElement).closest(".ordersCard__checkbox")) {
+                        return; // Don't trigger edit when clicking checkbox
+                      }
+                      selectOrderForEdit(o);
+                    }}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
@@ -1508,6 +1658,27 @@ export default function OrdersSection({ bouquets }: Props) {
                       }
                     }}
                   >
+                    {selectedOrders.size > 0 && (
+                      <div className="ordersCard__checkboxWrapper">
+                        <input
+                          type="checkbox"
+                          className="ordersCard__checkbox"
+                          checked={Boolean(isBulkSelected)}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            const newSelected = new Set(selectedOrders);
+                            if (e.target.checked && orderId) {
+                              newSelected.add(orderId);
+                            } else {
+                              newSelected.delete(orderId);
+                            }
+                            setSelectedOrders(newSelected);
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          aria-label={`Select order ${o.buyerName}`}
+                        />
+                      </div>
+                    )}
                     <div className="ordersCard__top">
                       <div className="ordersCard__buyer">
                         <div className="ordersCard__buyerName">{o.buyerName}</div>

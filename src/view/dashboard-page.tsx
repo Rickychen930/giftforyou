@@ -18,6 +18,10 @@ import BouquetUploader from "../components/sections/dashboard-uploader-section";
 import BouquetEditorSection from "../components/sections/Bouquet-editor-section";
 import HeroSliderEditorSection from "../components/sections/HeroSliderEditorSection";
 import OrdersSection from "../components/sections/orders-section";
+import CustomersSection from "../components/sections/customers-section";
+import NotificationsCenter from "../components/NotificationsCenter";
+import InventoryManager from "../components/InventoryManager";
+import AnalyticsDashboard from "../components/AnalyticsDashboard";
 
 interface Props {
   bouquets: Bouquet[];
@@ -69,13 +73,14 @@ interface Props {
   onDeleteCollection?: (collectionId: string) => Promise<boolean>;
 }
 
-type ActiveTab = "overview" | "orders" | "upload" | "edit" | "hero";
+type ActiveTab = "overview" | "orders" | "customers" | "upload" | "edit" | "hero";
 
 const DASHBOARD_TAB_STORAGE_KEY = "dashboard.activeTab";
 
 const isActiveTab = (v: string): v is ActiveTab =>
   v === "overview" ||
   v === "orders" ||
+  v === "customers" ||
   v === "upload" ||
   v === "edit" ||
   v === "hero";
@@ -133,6 +138,9 @@ interface State {
   alerts: AlertsState;
   showTrends: boolean;
   showBenchmarks: boolean;
+  showNotifications: boolean;
+  showInventory: boolean;
+  showAnalytics: boolean;
 }
 
 class DashboardView extends Component<Props, State> {
@@ -156,7 +164,10 @@ class DashboardView extends Component<Props, State> {
       showAlerts: false,
     },
     showTrends: false,
+    showNotifications: false,
     showBenchmarks: false,
+    showInventory: false,
+    showAnalytics: false,
   };
 
   componentDidMount(): void {
@@ -373,6 +384,7 @@ class DashboardView extends Component<Props, State> {
     const titleByTab: Record<ActiveTab, string> = {
       overview: "Ringkasan Dashboard",
       orders: "Record Order",
+      customers: "Customer Management",
       upload: "Upload Bouquet",
       edit: "Edit Bouquet",
       hero: "Hero Slider",
@@ -480,12 +492,76 @@ class DashboardView extends Component<Props, State> {
   };
 
   private renderSidebar(): React.ReactNode {
-    const tabs: { key: ActiveTab; label: string }[] = [
-      { key: "overview", label: "Ringkasan" },
-      { key: "orders", label: "Record order" },
-      { key: "upload", label: "Upload Bouquet" },
-      { key: "edit", label: "Edit Bouquet" },
-      { key: "hero", label: "Hero Slider" },
+    const mainTabs: Array<{ key: ActiveTab; label: string; icon: React.ReactNode; shortcut?: string }> = [
+      { 
+        key: "overview", 
+        label: "Overview", 
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        ),
+        shortcut: "Alt+1"
+      },
+      { 
+        key: "orders", 
+        label: "Orders", 
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 8 0 4 4 0 0 0-8 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M22 11l-4-4m0 0l-4 4m4-4v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        ),
+        shortcut: "Alt+2"
+      },
+      { 
+        key: "customers", 
+        label: "Customers", 
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M13 7a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        ),
+        shortcut: "Alt+3"
+      },
+    ];
+
+    const contentTabs: Array<{ key: ActiveTab; label: string; icon: React.ReactNode; shortcut?: string }> = [
+      { 
+        key: "upload", 
+        label: "Upload", 
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        ),
+        shortcut: "Alt+4"
+      },
+      { 
+        key: "edit", 
+        label: "Edit Bouquet", 
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        ),
+        shortcut: "Alt+5"
+      },
+      { 
+        key: "hero", 
+        label: "Hero Slider", 
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="2"/>
+            <line x1="9" y1="3" x2="9" y2="21" stroke="currentColor" strokeWidth="2"/>
+          </svg>
+        ),
+        shortcut: "Alt+6"
+      },
     ];
 
     return (
@@ -495,55 +571,98 @@ class DashboardView extends Component<Props, State> {
         </a>
 
         <div className="dashboardBrand">
-          <img
-            src="/images/logo.png"
-            alt="Giftforyou.idn logo"
-            className="dashboardBrand__logo"
-            loading="lazy"
-          />
-          <div>
+          <div className="dashboardBrand__logoWrapper">
+            <img
+              src="/images/logo.png"
+              alt="Giftforyou.idn logo"
+              className="dashboardBrand__logo"
+              loading="lazy"
+            />
+            <div className="dashboardBrand__logoGlow"></div>
+          </div>
+          <div className="dashboardBrand__info">
             <div className="dashboardBrand__title">Giftforyou.idn</div>
-            <div className="dashboardBrand__subtitle">Dashboard Admin</div>
+            <div className="dashboardBrand__subtitle">Admin Dashboard</div>
           </div>
         </div>
 
         <nav className="dashboardNav" aria-label="Tab dashboard">
-          {tabs.map((t) => {
-            const isActive = this.state.activeTab === t.key;
-            return (
-              <button
-                key={t.key}
-                type="button"
-                className={`dashboardNav__btn ${isActive ? "is-active" : ""}`}
-                aria-current={isActive ? "page" : undefined} // ✅ FIXED
-                aria-keyshortcuts={
-                  t.key === "overview"
-                    ? "Alt+1"
-                    : t.key === "orders"
-                      ? "Alt+2"
-                      : t.key === "upload"
-                        ? "Alt+3"
-                        : t.key === "edit"
-                          ? "Alt+4"
-                          : t.key === "hero"
-                            ? "Alt+5"
-                            : undefined
-                }
-                onClick={() => this.setActiveTab(t.key)}
-              >
-                {t.label}
-              </button>
-            );
-          })}
+          <div className="dashboardNav__group">
+            <div className="dashboardNav__groupLabel">Main</div>
+            {mainTabs.map((t) => {
+              const isActive = this.state.activeTab === t.key;
+              return (
+                <button
+                  key={t.key}
+                  type="button"
+                  className={`dashboardNav__btn ${isActive ? "is-active" : ""}`}
+                  aria-current={isActive ? "page" : undefined}
+                  aria-keyshortcuts={t.shortcut}
+                  onClick={() => this.setActiveTab(t.key)}
+                >
+                  <span className="dashboardNav__btnIcon">{t.icon}</span>
+                  <span className="dashboardNav__btnLabel">{t.label}</span>
+                  {t.shortcut && (
+                    <span className="dashboardNav__btnShortcut" aria-label={t.shortcut}>
+                      {t.shortcut.replace("Alt+", "")}
+                    </span>
+                  )}
+                  {isActive && <div className="dashboardNav__btnIndicator"></div>}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="dashboardNav__group">
+            <div className="dashboardNav__groupLabel">Content</div>
+            {contentTabs.map((t) => {
+              const isActive = this.state.activeTab === t.key;
+              return (
+                <button
+                  key={t.key}
+                  type="button"
+                  className={`dashboardNav__btn ${isActive ? "is-active" : ""}`}
+                  aria-current={isActive ? "page" : undefined}
+                  aria-keyshortcuts={t.shortcut}
+                  onClick={() => this.setActiveTab(t.key)}
+                >
+                  <span className="dashboardNav__btnIcon">{t.icon}</span>
+                  <span className="dashboardNav__btnLabel">{t.label}</span>
+                  {t.shortcut && (
+                    <span className="dashboardNav__btnShortcut" aria-label={t.shortcut}>
+                      {t.shortcut.replace("Alt+", "")}
+                    </span>
+                  )}
+                  {isActive && <div className="dashboardNav__btnIndicator"></div>}
+                </button>
+              );
+            })}
+          </div>
         </nav>
 
-        <button
-          type="button"
-          className="dashboardLogout"
-          onClick={this.props.onLogout}
-        >
-          Keluar
-        </button>
+        <div className="dashboardSidebar__footer">
+          <button
+            type="button"
+            className="dashboardNotificationsBtn"
+            onClick={() => this.setState({ showNotifications: !this.state.showNotifications })}
+            title="Notifications"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span>Notifications</span>
+          </button>
+          <button
+            type="button"
+            className="dashboardLogout"
+            onClick={this.props.onLogout}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span>Keluar</span>
+          </button>
+        </div>
       </aside>
     );
   }
@@ -1046,12 +1165,56 @@ class DashboardView extends Component<Props, State> {
                 </div>
 
                 <div className="overviewCard" aria-label="Customers">
-                  <p className="overviewCard__title">Pelanggan</p>
+                  <p className="overviewCard__title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ marginRight: "0.5rem", opacity: 0.8 }}>
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M13 7a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Pelanggan
+                  </p>
                   <div className="overviewKeyValue">
                     <div className="overviewKeyValue__row">
                       <span className="overviewKeyValue__key">Total Pelanggan</span>
                       <span className="overviewKeyValue__val">{salesMetrics.totalCustomers}</span>
                     </div>
+                  </div>
+                  <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid rgba(0,0,0,0.1)" }}>
+                    <button
+                      type="button"
+                      className="overviewActionBtn"
+                      onClick={() => this.setActiveTab("customers")}
+                      style={{ width: "100%", justifyContent: "center" }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      Kelola Customers
+                    </button>
+                    <button
+                      type="button"
+                      className="overviewActionBtn"
+                      onClick={() => {
+                        this.setState({ showInventory: true });
+                      }}
+                      style={{ width: "100%", justifyContent: "center" }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: "0.5rem" }}>
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      Inventory
+                    </button>
+                    <button
+                      type="button"
+                      className="overviewActionBtn overviewActionBtn--primary"
+                      onClick={() => {
+                        this.setState({ showAnalytics: true });
+                      }}
+                      style={{ width: "100%", justifyContent: "center" }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: "0.5rem" }}>
+                        <path d="M3 3v18h18M7 16l4-4 4 4 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      Analytics
+                    </button>
                   </div>
                 </div>
               </>
@@ -1424,6 +1587,17 @@ class DashboardView extends Component<Props, State> {
       case "orders":
         return <OrdersSection bouquets={bouquets} />;
 
+      case "customers":
+        return (
+          <CustomersSection
+            onSelectCustomer={(customerId) => {
+              // Switch to orders tab when customer is selected
+              // The "View Orders" button in customer detail already handles navigation
+              this.setState({ activeTab: "orders" });
+            }}
+          />
+        );
+
       case "upload":
         return <BouquetUploader onUpload={this.props.onUpload} />;
 
@@ -1468,6 +1642,10 @@ class DashboardView extends Component<Props, State> {
       orders: {
         title: "Record order",
         subtitle: "Catat pembeli, bouquet, dan waktu pengantaran.",
+      },
+      customers: {
+        title: "Customer Management",
+        subtitle: "Kelola data customer, alamat, dan riwayat pesanan.",
       },
       upload: {
         title: "Upload Bouquet",
@@ -1562,6 +1740,33 @@ class DashboardView extends Component<Props, State> {
             {!loading && this.renderMainContent()}
           </div>
         </main>
+
+        {/* Notifications Center */}
+        <NotificationsCenter
+          isOpen={this.state.showNotifications}
+          onClose={() => this.setState({ showNotifications: false })}
+          onNotificationClick={(notification) => {
+            if (notification.actionUrl) {
+              window.location.href = notification.actionUrl;
+            }
+          }}
+        />
+
+        {/* Inventory Manager */}
+        <InventoryManager
+          isOpen={this.state.showInventory}
+          onClose={() => this.setState({ showInventory: false })}
+          onBouquetClick={(bouquetId) => {
+            this.setState({ activeTab: "edit", showInventory: false });
+          }}
+        />
+
+        {/* Analytics Dashboard */}
+        <AnalyticsDashboard
+          isOpen={this.state.showAnalytics}
+          onClose={() => this.setState({ showAnalytics: false })}
+          period="30d"
+        />
       </div>
     );
   }
