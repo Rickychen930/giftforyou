@@ -169,7 +169,26 @@ class BouquetUploader extends Component<Props, State> {
     
     // Set up keyboard shortcuts
     window.addEventListener("keydown", this.handleKeyboardShortcuts);
+    
+    // Load dropdown options from database
+    this.loadDropdownOptions();
   }
+  
+  private loadDropdownOptions = async (): Promise<void> => {
+    try {
+      const options = await getDropdownOptions();
+      this.setState({
+        collectionOptions: options.collections,
+        typeOptions: options.types,
+        occasionOptions: options.occasions,
+        flowerOptions: options.flowers,
+        stockLevelOptions: options.stockLevels,
+      });
+    } catch (err) {
+      console.error("Failed to load dropdown options:", err);
+      // Keep defaults
+    }
+  };
   
   private loadDraftSilently(): void {
     try {
