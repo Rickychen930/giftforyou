@@ -39,16 +39,8 @@ class BouquetEditForm extends Component<Props, State> {
     // Update collection name in form data
     formData.set("collectionName", this.state.collectionName);
     const success = await this.props.onSave(formData);
-    if (success) {
-      // Update local bouquet state
-      this.setState((prev) => ({
-        ...prev,
-        bouquet: {
-          ...prev.bouquet,
-          collectionName: this.state.collectionName,
-        },
-      }));
-    }
+    // State will be updated by parent component (BouquetEditorSection)
+    // No need to update local state here as parent handles it
     return success;
   };
 

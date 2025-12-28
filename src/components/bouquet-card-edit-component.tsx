@@ -730,25 +730,15 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
           // Clear file after successful save
           setFile(null);
           setImageDimensions(null);
-          // Scroll to success message
-          setTimeout(() => {
-            const messageEl = document.querySelector(".becSaveNote.is-show");
-            if (messageEl) {
-              messageEl.scrollIntoView({ behavior: "smooth", block: "center" });
-            }
-          }, 100);
+          // Show success message briefly, then let parent handle navigation
+          setSaveStatus("success");
+          setSaveMessage("Perubahan tersimpan.");
         }
       } else {
         setSaveStatus("success");
         setSaveMessage("Perubahan tersimpan.");
         setFile(null);
         setImageDimensions(null);
-        setTimeout(() => {
-          const messageEl = document.querySelector(".becSaveNote.is-show");
-          if (messageEl) {
-            messageEl.scrollIntoView({ behavior: "smooth", block: "center" });
-          }
-        }, 100);
       }
     } catch (err) {
       console.error("Save error:", err);

@@ -453,27 +453,97 @@ export default class BouquetEditorSection extends Component<Props, State> {
     try {
       const success = await this.props.onSave(formData);
       if (success) {
-        // Update local state with saved data
+        // Extract all fields from formData to update state completely
         const bouquetId = String(formData.get("_id") ?? "");
-        const updatedBouquet = this.state.bouquets.find(
+        const existingBouquet = this.state.bouquets.find(
           (b) => b._id === bouquetId
         );
-        if (updatedBouquet) {
-          // Update from form data
-          const name = String(formData.get("name") ?? "");
-          const collectionName = String(formData.get("collectionName") ?? "");
-          const updated = {
-            ...updatedBouquet,
+        
+        if (existingBouquet) {
+          // Extract all fields from formData
+          const name = String(formData.get("name") ?? existingBouquet.name ?? "");
+          const description = String(formData.get("description") ?? existingBouquet.description ?? "");
+          const price = Number(formData.get("price")) || existingBouquet.price || 0;
+          const type = String(formData.get("type") ?? existingBouquet.type ?? "");
+          const size = String(formData.get("size") ?? existingBouquet.size ?? "Medium");
+          const status = String(formData.get("status") ?? existingBouquet.status ?? "ready");
+          const collectionName = String(formData.get("collectionName") ?? existingBouquet.collectionName ?? "");
+          const quantity = Number(formData.get("quantity")) || existingBouquet.quantity || 0;
+          const occasionsText = String(formData.get("occasions") ?? "");
+          const flowersText = String(formData.get("flowers") ?? "");
+          const isNewEdition = String(formData.get("isNewEdition") ?? "false") === "true";
+          const isFeatured = String(formData.get("isFeatured") ?? "false") === "true";
+          const customPenandaText = String(formData.get("customPenanda") ?? "");
+          const careInstructions = String(formData.get("careInstructions") ?? existingBouquet.careInstructions ?? "");
+
+          // Parse arrays from comma-separated strings
+          const occasions = occasionsText ? occasionsText.split(",").map(s => s.trim()).filter(Boolean) : (existingBouquet.occasions || []);
+          const flowers = flowersText ? flowersText.split(",").map(s => s.trim()).filter(Boolean) : (existingBouquet.flowers || []);
+          const customPenanda = customPenandaText ? customPenandaText.split(",").map(s => s.trim()).filter(Boolean) : (existingBouquet.customPenanda || []);
+
+          // Get image URL - if new image was uploaded, it will be in the response or we keep existing
+          const image = existingBouquet.image ?? "";
+
+          const updated: Bouquet = {
+            ...existingBouquet,
             name,
+            description,
+            price,
+            type,
+            size: size as Bouquet["size"],
+            status: status as Bouquet["status"],
             collectionName,
+            quantity,
+            occasions,
+            flowers,
+            isNewEdition,
+            isFeatured,
+            customPenanda,
+            careInstructions,
+            image, // Keep existing image URL unless updated by server
           };
-          this.setState((prev) => ({
-            ...prev,
-            bouquets: prev.bouquets.map((b) =>
+
+          // Update state
+          this.setState((prev) => {
+            const updatedBouquets = prev.bouquets.map((b) =>
               b._id === bouquetId ? updated : b
-            ),
-            collections: prev.collections.map((c) => {
-              // Update bouquet in collection if it exists
+            );
+
+            // Update collections - handle bouquet movement between collections
+            const oldCollection = prev.collections.find((c) =>
+              (c.bouquets as Bouquet[]).some((b) => b._id === bouquetId)
+            );
+            const newCollection = prev.collections.find(
+              (c) => c.name === collectionName
+            );
+
+            const updatedCollections = prev.collections.map((c) => {
+              // Remove from old collection if moved
+              if (oldCollection && c._id === oldCollection._id && oldCollection.name !== collectionName) {
+                return {
+                  ...c,
+                  bouquets: (c.bouquets as Bouquet[]).filter((b) => b._id !== bouquetId),
+                };
+              }
+              // Add/update in new collection
+              if (c.name === collectionName) {
+                const existingIndex = (c.bouquets as Bouquet[]).findIndex(
+                  (b) => b._id === bouquetId
+                );
+                if (existingIndex >= 0) {
+                  // Update existing
+                  const updatedBouquets = [...(c.bouquets as Bouquet[])];
+                  updatedBouquets[existingIndex] = updated;
+                  return { ...c, bouquets: updatedBouquets };
+                } else {
+                  // Add to collection
+                  return {
+                    ...c,
+                    bouquets: [...(c.bouquets as Bouquet[]), updated],
+                  };
+                }
+              }
+              // Update bouquet in collection if it exists there
               const bouquetIndex = (c.bouquets as Bouquet[]).findIndex(
                 (b) => b._id === bouquetId
               );
@@ -483,13 +553,23 @@ export default class BouquetEditorSection extends Component<Props, State> {
                 return { ...c, bouquets: updatedBouquets };
               }
               return c;
-            }),
-          }));
-        }
-        // Go back to collection detail after successful save
-        setTimeout(() => {
+            });
+
+            return {
+              ...prev,
+              bouquets: updatedBouquets,
+              collections: updatedCollections,
+              // Update selected bouquet if it's the one being edited
+              selectedBouquet: prev.selectedBouquet?._id === bouquetId ? updated : prev.selectedBouquet,
+            };
+          });
+
+          // Navigate back immediately after state update (no delay for better UX)
           this.handleBackToCollectionDetail();
-        }, 500); // Small delay to show success message
+        } else {
+          // If bouquet not found, still navigate back
+          this.handleBackToCollectionDetail();
+        }
       }
       return success;
     } catch (err) {
