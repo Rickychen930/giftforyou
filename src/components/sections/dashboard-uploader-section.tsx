@@ -1255,6 +1255,7 @@ class BouquetUploader extends Component<Props, State> {
       } else {
         // Error message should already be set by the controller
         // But provide a fallback if not available
+        // IMPORTANT: Always reset submitting state to allow retry
         this.setState({
           submitting: false,
           message: "Unggah gagal. Silakan periksa koneksi internet dan coba lagi. Pastikan semua field wajib sudah diisi dengan benar.",
@@ -1306,6 +1307,7 @@ class BouquetUploader extends Component<Props, State> {
         }
       }
       
+      // IMPORTANT: Always reset submitting state to allow retry
       this.setState({
         submitting: false,
         message: errorMessage,

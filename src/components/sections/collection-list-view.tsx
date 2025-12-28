@@ -131,11 +131,16 @@ const CollectionListView: React.FC<Props> = ({
       const success = await onCollectionDelete(collectionId);
       if (!success) {
         alert("Gagal menghapus koleksi. Silakan coba lagi.");
+        setDeletingId(null);
+      } else {
+        // Success - deletingId will be cleared by parent component state update
+        // But ensure it's cleared here too
+        setDeletingId(null);
       }
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error("Failed to delete collection:", err);
       alert("Terjadi kesalahan saat menghapus koleksi. Silakan coba lagi.");
-    } finally {
       setDeletingId(null);
     }
   };

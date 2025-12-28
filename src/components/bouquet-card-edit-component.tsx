@@ -722,10 +722,6 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
       const fd = buildFormData();
       const result = await onSave(fd);
       if (typeof result === "boolean") {
-        setSaveStatus(result ? "success" : "error");
-        setSaveMessage(
-          result ? "Perubahan tersimpan." : "Gagal menyimpan. Coba lagi."
-        );
         if (result) {
           // Clear file after successful save
           setFile(null);
@@ -733,6 +729,11 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
           // Show success message briefly, then let parent handle navigation
           setSaveStatus("success");
           setSaveMessage("Perubahan tersimpan.");
+        } else {
+          // IMPORTANT: Reset saving state on failure to allow retry
+          setSaving(false);
+          setSaveStatus("error");
+          setSaveMessage("Gagal menyimpan. Coba lagi.");
         }
       } else {
         setSaveStatus("success");
@@ -741,10 +742,13 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
         setImageDimensions(null);
       }
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error("Save error:", err);
       const errorMessage = err instanceof Error 
         ? err.message 
         : "Gagal menyimpan. Silakan coba lagi.";
+      // IMPORTANT: Always reset saving state to allow retry
+      setSaving(false);
       setSaveStatus("error");
       setSaveMessage(errorMessage);
       // Scroll to error message
@@ -754,8 +758,6 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
           messageEl.scrollIntoView({ behavior: "smooth", block: "center" });
         }
       }, 100);
-    } finally {
-      setSaving(false);
     }
   }, [validationError, isDirty, buildFormData, onSave, fieldErrors]);
 

@@ -8,6 +8,7 @@ import { formatIDR } from "../utils/money";
 import { buildWhatsAppLink } from "../utils/whatsapp";
 import { observeFadeIn, revealOnScroll, createRipple } from "../utils/luxury-enhancements";
 import { formatBouquetName, formatBouquetType, formatBouquetSize, formatCollectionName, formatOccasion, formatFlowerName, formatDescription, formatTag } from "../utils/text-formatter";
+import { generateBouquetPDF } from "../utils/pdf-generator";
 
 import { API_BASE } from "../config/api"; // adjust path depending on folder depth
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
@@ -85,6 +86,149 @@ const buildQuickOrderMessage = (
   return lines.join("\n");
 };
 
+// Download PDF Button Component for Bouquet
+const BouquetDownloadPDFButton: React.FC<{ bouquet: Bouquet }> = ({ bouquet }) => {
+  const [isGenerating, setIsGenerating] = React.useState(false);
+  const [showOptions, setShowOptions] = React.useState(false);
+
+  const handleDownload = async (withWatermark: boolean) => {
+    setIsGenerating(true);
+    setShowOptions(false);
+
+    try {
+      await generateBouquetPDF(
+        {
+          _id: bouquet._id,
+          name: bouquet.name,
+          price: bouquet.price,
+          image: bouquet.image,
+          description: bouquet.description,
+          type: bouquet.type,
+          size: bouquet.size,
+          status: bouquet.status,
+          isFeatured: bouquet.isFeatured,
+          isNewEdition: bouquet.isNewEdition,
+          occasions: Array.isArray(bouquet.occasions) ? bouquet.occasions : [],
+          flowers: Array.isArray(bouquet.flowers) ? bouquet.flowers : [],
+        },
+        { withWatermark }
+      );
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Failed to generate PDF:", err);
+      alert("Gagal menghasilkan PDF. Silakan coba lagi.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  return (
+    <div style={{ position: "relative" }}>
+      <button
+        type="button"
+        onClick={() => setShowOptions(!showOptions)}
+        disabled={isGenerating}
+        aria-label="Download PDF"
+        style={{
+          padding: "0.5rem 1rem",
+          borderRadius: "8px",
+          border: "1px solid rgba(212, 140, 156, 0.3)",
+          background: "linear-gradient(135deg, rgba(212, 140, 156, 0.1) 0%, rgba(168, 213, 186, 0.1) 100%)",
+          color: "var(--ink-800)",
+          fontWeight: 600,
+          fontSize: "0.9rem",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem",
+        }}
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <path
+            d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        {isGenerating ? "Generating..." : "Download PDF"}
+      </button>
+
+      {showOptions && (
+        <div
+          style={{
+            position: "absolute",
+            top: "100%",
+            right: 0,
+            marginTop: "0.5rem",
+            background: "white",
+            border: "1px solid rgba(212, 140, 156, 0.3)",
+            borderRadius: "8px",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+            zIndex: 100,
+            display: "flex",
+            flexDirection: "column",
+            minWidth: "180px",
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => handleDownload(false)}
+            disabled={isGenerating}
+            style={{
+              padding: "0.75rem 1rem",
+              border: "none",
+              background: "transparent",
+              textAlign: "left",
+              cursor: "pointer",
+              fontSize: "0.9rem",
+              color: "var(--ink-800)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(212, 140, 156, 0.1)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+            }}
+          >
+            Tanpa Watermark
+          </button>
+          <button
+            type="button"
+            onClick={() => handleDownload(true)}
+            disabled={isGenerating}
+            style={{
+              padding: "0.75rem 1rem",
+              border: "none",
+              background: "transparent",
+              textAlign: "left",
+              cursor: "pointer",
+              fontSize: "0.9rem",
+              color: "var(--ink-800)",
+              borderTop: "1px solid rgba(212, 140, 156, 0.2)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(212, 140, 156, 0.1)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+            }}
+          >
+            Dengan Watermark
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 interface Props {
   bouquet: Bouquet | null;
@@ -333,11 +477,17 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
             </div>
 
             <div className="bdInfo reveal-on-scroll">
-              <h1 id="bd-title" className="bdTitle gradient-text">
-                {formatBouquetName(bouquet.name)}
-              </h1>
-
-              <p className="bdPrice">{formatPrice(bouquet.price)}</p>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
+                <div style={{ flex: 1, minWidth: "200px" }}>
+                  <h1 id="bd-title" className="bdTitle gradient-text">
+                    {formatBouquetName(bouquet.name)}
+                  </h1>
+                  <p className="bdPrice">{formatPrice(bouquet.price)}</p>
+                </div>
+                {isAdmin && (
+                  <BouquetDownloadPDFButton bouquet={bouquet} />
+                )}
+              </div>
 
               {bouquet.description && (
                 <p className="bdDesc">{formatDescription(bouquet.description)}</p>

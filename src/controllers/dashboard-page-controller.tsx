@@ -787,8 +787,12 @@ class DashboardController extends Component<{}, State> {
       await this.loadDashboard();
       return true;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("Failed to delete collection:", error);
-      this.setState({ errorMessage: `Gagal menghapus koleksi: ${error instanceof Error ? error.message : String(error)}` });
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : "Gagal menghapus koleksi. Silakan coba lagi.";
+      this.setState({ errorMessage: `Gagal menghapus koleksi: ${errorMessage}` });
       return false;
     }
   };

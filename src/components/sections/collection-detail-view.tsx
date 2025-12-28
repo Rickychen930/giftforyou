@@ -6,6 +6,7 @@ import "../../styles/CollectionDetailView.css";
 import { API_BASE } from "../../config/api";
 import { formatIDR } from "../../utils/money";
 import { formatBouquetName, formatBouquetType, formatBouquetSize, formatCollectionName } from "../../utils/text-formatter";
+import { generateCollectionPDF } from "../../utils/pdf-generator";
 
 interface Props {
   collection: Collection;
@@ -17,6 +18,154 @@ interface Props {
   onBouquetDelete: (bouquetId: string) => Promise<void>;
   onBouquetDuplicate: (bouquetId: string) => Promise<void>;
 }
+
+// Download PDF Button Component
+const DownloadPDFButton: React.FC<{
+  collectionName: string;
+  bouquets: Bouquet[];
+}> = ({ collectionName, bouquets }) => {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
+
+  const handleDownload = async (withWatermark: boolean) => {
+    if (bouquets.length === 0) {
+      alert("Tidak ada bouquet untuk diunduh.");
+      return;
+    }
+
+    setIsGenerating(true);
+    setShowOptions(false);
+
+    try {
+      await generateCollectionPDF(
+        collectionName,
+        bouquets.map((b) => ({
+          _id: b._id,
+          name: b.name,
+          price: b.price,
+          image: b.image,
+          isFeatured: b.isFeatured,
+          isNewEdition: b.isNewEdition,
+        })),
+        { withWatermark }
+      );
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Failed to generate PDF:", err);
+      alert("Gagal menghasilkan PDF. Silakan coba lagi.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  return (
+    <div className="collectionDetailView__downloadWrapper" style={{ position: "relative", marginTop: "1rem" }}>
+      <button
+        type="button"
+        className="collectionDetailView__downloadBtn"
+        onClick={() => setShowOptions(!showOptions)}
+        disabled={isGenerating || bouquets.length === 0}
+        aria-label="Download PDF"
+        style={{
+          padding: "0.5rem 1rem",
+          borderRadius: "8px",
+          border: "1px solid rgba(212, 140, 156, 0.3)",
+          background: "linear-gradient(135deg, rgba(212, 140, 156, 0.1) 0%, rgba(168, 213, 186, 0.1) 100%)",
+          color: "var(--ink-800)",
+          fontWeight: 600,
+          fontSize: "0.9rem",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem",
+        }}
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <path
+            d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        {isGenerating ? "Generating..." : "Download PDF"}
+      </button>
+
+      {showOptions && (
+        <div
+          style={{
+            position: "absolute",
+            top: "100%",
+            left: 0,
+            marginTop: "0.5rem",
+            background: "white",
+            border: "1px solid rgba(212, 140, 156, 0.3)",
+            borderRadius: "8px",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+            zIndex: 100,
+            display: "flex",
+            flexDirection: "column",
+            minWidth: "180px",
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => handleDownload(false)}
+            disabled={isGenerating}
+            style={{
+              padding: "0.75rem 1rem",
+              border: "none",
+              background: "transparent",
+              textAlign: "left",
+              cursor: "pointer",
+              fontSize: "0.9rem",
+              color: "var(--ink-800)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(212, 140, 156, 0.1)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+            }}
+          >
+            Tanpa Watermark
+          </button>
+          <button
+            type="button"
+            onClick={() => handleDownload(true)}
+            disabled={isGenerating}
+            style={{
+              padding: "0.75rem 1rem",
+              border: "none",
+              background: "transparent",
+              textAlign: "left",
+              cursor: "pointer",
+              fontSize: "0.9rem",
+              color: "var(--ink-800)",
+              borderTop: "1px solid rgba(212, 140, 156, 0.2)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(212, 140, 156, 0.1)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+            }}
+          >
+            Dengan Watermark
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const CollectionDetailView: React.FC<Props> = ({
   collection,
@@ -121,6 +270,12 @@ const CollectionDetailView: React.FC<Props> = ({
             <span>
               {bouquets.length} {bouquets.length === 1 ? "bouquet" : "bouquets"}
             </span>
+          </div>
+          <div className="collectionDetailView__actions">
+            <DownloadPDFButton
+              collectionName={collection.name}
+              bouquets={bouquets}
+            />
           </div>
         </div>
       </header>
