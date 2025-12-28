@@ -117,8 +117,6 @@ const CollectionListView: React.FC<Props> = ({
       return;
     }
 
-    const count = bouquetCount(collection);
-
     setDeletingId(collectionId);
     setDeleteConfirmId(null);
 
