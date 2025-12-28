@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import "../../styles/CustomersSection.css";
 import { API_BASE } from "../../config/api";
 import { formatIDR } from "../../utils/money";
@@ -47,18 +47,6 @@ type Props = {
   onSelectCustomer?: (customerId: string) => void;
 };
 
-const formatDateTime = (v?: string): string => {
-  if (!v) return "—";
-  const t = Date.parse(v);
-  if (!Number.isFinite(t)) return "—";
-  return new Date(t).toLocaleString("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
 
 const formatDate = (v?: string): string => {
   if (!v) return "—";

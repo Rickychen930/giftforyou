@@ -8,7 +8,6 @@ import { formatIDR } from "../utils/money";
 import { buildWhatsAppLink } from "../utils/whatsapp";
 import { observeFadeIn, revealOnScroll, createRipple } from "../utils/luxury-enhancements";
 import { formatBouquetName, formatBouquetType, formatBouquetSize, formatCollectionName, formatOccasion, formatFlowerName, formatDescription, formatTag } from "../utils/text-formatter";
-import { generateBouquetPDF } from "../utils/pdf-generator";
 import AddressAutocomplete from "../components/AddressAutocomplete";
 import SocialProof from "../components/SocialProof";
 import UrgencyIndicator from "../components/UrgencyIndicator";
@@ -104,208 +103,6 @@ const buildQuickOrderMessage = (
   ].filter(Boolean);
 
   return lines.join("\n");
-};
-
-// Download PDF Button Component for Bouquet
-const BouquetDownloadPDFButton: React.FC<{ bouquet: Bouquet }> = ({ bouquet }) => {
-  const [isGenerating, setIsGenerating] = React.useState(false);
-  const [showOptions, setShowOptions] = React.useState(false);
-
-  const handleDownload = async (withWatermark: boolean) => {
-    setIsGenerating(true);
-    setShowOptions(false);
-
-    try {
-      // Add timeout protection (30 seconds for single bouquet PDF)
-      const pdfPromise = generateBouquetPDF(
-        {
-          _id: bouquet._id,
-          name: bouquet.name,
-          price: bouquet.price,
-          image: bouquet.image,
-          description: bouquet.description,
-          type: bouquet.type,
-          size: bouquet.size,
-          status: bouquet.status,
-          isFeatured: bouquet.isFeatured,
-          isNewEdition: bouquet.isNewEdition,
-          occasions: Array.isArray(bouquet.occasions) ? bouquet.occasions : [],
-          flowers: Array.isArray(bouquet.flowers) ? bouquet.flowers : [],
-        },
-        { withWatermark }
-      );
-      
-      const timeoutPromise = new Promise<void>((_, reject) => {
-        setTimeout(() => reject(new Error("PDF generation timeout. Silakan coba lagi.")), 30000);
-      });
-
-      await Promise.race([pdfPromise, timeoutPromise]);
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error("Failed to generate PDF:", err);
-      const errorMessage = err instanceof Error 
-        ? err.message 
-        : "Gagal menghasilkan PDF. Silakan coba lagi.";
-      alert(errorMessage);
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  return (
-    <div style={{ position: "relative" }}>
-      <button
-        type="button"
-        onClick={() => setShowOptions(!showOptions)}
-        disabled={isGenerating}
-        aria-label="Download PDF"
-        style={{
-          padding: "0.5rem 1rem",
-          borderRadius: "8px",
-          border: "1px solid rgba(212, 140, 156, 0.3)",
-          background: "linear-gradient(135deg, rgba(212, 140, 156, 0.1) 0%, rgba(168, 213, 186, 0.1) 100%)",
-          color: "var(--ink-800)",
-          fontWeight: 600,
-          fontSize: "0.9rem",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          gap: "0.5rem",
-        }}
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <path
-            d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        {isGenerating ? "Generating..." : "Download PDF"}
-      </button>
-
-      {showOptions && (
-        <>
-          {/* Backdrop overlay */}
-          <div
-            style={{
-              position: "fixed",
-              inset: 0,
-              zIndex: 10000,
-              background: "rgba(0, 0, 0, 0.3)",
-              backdropFilter: "blur(2px)",
-              WebkitBackdropFilter: "blur(2px)",
-            }}
-            onClick={() => setShowOptions(false)}
-          />
-          {/* Modal content */}
-          <div
-            style={{
-              position: "fixed",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              background: "linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%)",
-              border: "2px solid rgba(212, 140, 156, 0.3)",
-              borderRadius: "16px",
-              boxShadow: "0 24px 64px rgba(0, 0, 0, 0.25), 0 12px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.9) inset",
-              zIndex: 10001,
-              display: "flex",
-              flexDirection: "column",
-              minWidth: "240px",
-              maxWidth: "90vw",
-              backdropFilter: "blur(20px) saturate(180%)",
-              WebkitBackdropFilter: "blur(20px) saturate(180%)",
-              overflow: "hidden",
-              isolation: "isolate",
-            }}
-            onClick={(e) => e.stopPropagation()}
-            onMouseDown={(e) => e.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={() => {
-                handleDownload(false);
-                setShowOptions(false);
-              }}
-              disabled={isGenerating}
-              style={{
-                padding: "0.85rem 1.25rem",
-                border: "none",
-                background: "transparent",
-                textAlign: "left",
-                cursor: "pointer",
-                fontSize: "0.95rem",
-                fontWeight: 600,
-                color: "var(--ink-800)",
-                transition: "all 0.2s ease",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "linear-gradient(135deg, rgba(212, 140, 156, 0.12) 0%, rgba(168, 213, 186, 0.08) 100%)";
-                e.currentTarget.style.color = "var(--brand-rose-700)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "transparent";
-                e.currentTarget.style.color = "var(--ink-800)";
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Tanpa Watermark
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                handleDownload(true);
-                setShowOptions(false);
-              }}
-              disabled={isGenerating}
-              style={{
-                padding: "0.85rem 1.25rem",
-                border: "none",
-                background: "transparent",
-                textAlign: "left",
-                cursor: "pointer",
-                fontSize: "0.95rem",
-                fontWeight: 600,
-                color: "var(--ink-800)",
-                borderTop: "1px solid rgba(212, 140, 156, 0.15)",
-                transition: "all 0.2s ease",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "linear-gradient(135deg, rgba(212, 140, 156, 0.12) 0%, rgba(168, 213, 186, 0.08) 100%)";
-                e.currentTarget.style.color = "var(--brand-rose-700)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "transparent";
-                e.currentTarget.style.color = "var(--ink-800)";
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Dengan Watermark
-            </button>
-          </div>
-        </>
-      )}
-    </div>
-  );
 };
 
 interface Props {
@@ -852,9 +649,9 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
       );
     }
 
+    const imageUrl = toAbsoluteUrl(buildImageUrl(bouquet.image));
     const { isAuthenticated } = require("../utils/auth-utils");
     const isAdmin = isAuthenticated();
-    const imageUrl = toAbsoluteUrl(buildImageUrl(bouquet.image));
 
     const waCustomer = buildWhatsAppLink(
       buildCustomerOrderMessage(bouquet, this.props.detailUrl, this.state)
@@ -912,47 +709,82 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
             </div>
 
             <div className="bdInfo reveal-on-scroll">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
-                <div style={{ flex: 1, minWidth: "200px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap", marginBottom: "0.5rem" }}>
-                    <h1 id="bd-title" className="bdTitle gradient-text" style={{ margin: 0, flex: 1 }}>
-                      {formatBouquetName(bouquet.name)}
-                    </h1>
-                    <button
-                      type="button"
-                      onClick={this.handleFavoriteToggle}
-                      className={`bdFavoriteBtn ${this.state.isFavorite ? "bdFavoriteBtn--active" : ""}`}
-                      aria-label={this.state.isFavorite ? "Hapus dari favorit" : "Tambahkan ke favorit"}
-                      title={this.state.isFavorite ? "Hapus dari favorit" : "Tambahkan ke favorit"}
-                    >
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill={this.state.isFavorite ? "currentColor" : "none"} xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
-                  </div>
-                  <p className="bdPrice">{formatPrice(bouquet.price)}</p>
-                  <div style={{ marginTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                    <SocialProof bouquetId={bouquet._id} />
-                    {bouquet.quantity !== undefined && bouquet.quantity > 0 && bouquet.quantity <= 5 && (
-                      <UrgencyIndicator type="limited-stock" stockCount={bouquet.quantity} />
-                    )}
-                    {this.state.deliveryDate && (() => {
-                      const selectedDate = new Date(this.state.deliveryDate);
-                      const today = new Date();
-                      const diffDays = Math.ceil((selectedDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                      if (diffDays === 1) {
-                        return <UrgencyIndicator type="same-day" deadlineTime="14:00" />;
-                      }
-                      return null;
-                    })()}
-                    {bouquet.status === "preorder" && (
-                      <UrgencyIndicator type="preorder" />
-                    )}
-                  </div>
+              {/* Header Section - Clear & Informative */}
+              <div className="bdInfo__header">
+                <div className="bdInfo__titleRow">
+                  <h1 id="bd-title" className="bdTitle gradient-text">
+                    {formatBouquetName(bouquet.name)}
+                  </h1>
+                  <button
+                    type="button"
+                    onClick={this.handleFavoriteToggle}
+                    className={`bdFavoriteBtn ${this.state.isFavorite ? "bdFavoriteBtn--active" : ""}`}
+                    aria-label={this.state.isFavorite ? "Hapus dari favorit" : "Tambahkan ke favorit"}
+                    title={this.state.isFavorite ? "Hapus dari favorit" : "Tambahkan ke favorit"}
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill={this.state.isFavorite ? "currentColor" : "none"} xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
                 </div>
-                {isAdmin && (
-                  <BouquetDownloadPDFButton bouquet={bouquet} />
-                )}
+                
+                {/* Price & Key Info */}
+                <div className="bdInfo__priceRow">
+                  <p className="bdPrice">{formatPrice(bouquet.price)}</p>
+                  {bouquet.status && (
+                    <span className={`bdStatusBadge bdStatusBadge--${bouquet.status}`}>
+                      {bouquet.status === "ready" ? "✓ Siap Kirim" : "📅 Preorder"}
+                    </span>
+                  )}
+                </div>
+
+                {/* Quick Info Chips */}
+                <div className="bdInfo__quickInfo">
+                  {bouquet.size && (
+                    <span className="bdInfoChip">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      {formatBouquetSize(bouquet.size)}
+                    </span>
+                  )}
+                  {bouquet.type && (
+                    <span className="bdInfoChip">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      {formatBouquetType(bouquet.type)}
+                    </span>
+                  )}
+                  {typeof (bouquet as any).quantity === "number" && (bouquet as any).quantity > 0 && (
+                    <span className="bdInfoChip bdInfoChip--stock">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      {(bouquet as any).quantity} tersedia
+                    </span>
+                  )}
+                </div>
+
+                {/* Social Proof & Urgency Indicators */}
+                <div className="bdInfo__indicators">
+                  <SocialProof bouquetId={bouquet._id} />
+                  {bouquet.quantity !== undefined && bouquet.quantity > 0 && bouquet.quantity <= 5 && (
+                    <UrgencyIndicator type="limited-stock" stockCount={bouquet.quantity} />
+                  )}
+                  {this.state.deliveryDate && (() => {
+                    const selectedDate = new Date(this.state.deliveryDate);
+                    const today = new Date();
+                    const diffDays = Math.ceil((selectedDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                    if (diffDays === 1) {
+                      return <UrgencyIndicator type="same-day" deadlineTime="14:00" />;
+                    }
+                    return null;
+                  })()}
+                  {bouquet.status === "preorder" && (
+                    <UrgencyIndicator type="preorder" />
+                  )}
+                </div>
               </div>
 
               {bouquet.description && (
