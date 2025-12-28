@@ -133,32 +133,33 @@ const DownloadPDFButton: React.FC<{
           <div
             style={{
               position: "fixed",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              zIndex: 10002,
-              background: "transparent",
+              inset: 0,
+              zIndex: 10000,
+              background: "rgba(0, 0, 0, 0.3)",
+              backdropFilter: "blur(2px)",
+              WebkitBackdropFilter: "blur(2px)",
             }}
             onClick={() => setShowOptions(false)}
           />
           <div
             style={{
-              position: "absolute",
-              top: "100%",
-              left: 0,
-              marginTop: "0.5rem",
+              position: "fixed",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
               background: "linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%)",
               border: "2px solid rgba(212, 140, 156, 0.3)",
-              borderRadius: "12px",
-              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08)",
-              zIndex: 10003,
+              borderRadius: "16px",
+              boxShadow: "0 24px 64px rgba(0, 0, 0, 0.25), 0 12px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.9) inset",
+              zIndex: 10001,
               display: "flex",
               flexDirection: "column",
-              minWidth: "200px",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
+              minWidth: "240px",
+              maxWidth: "90vw",
+              backdropFilter: "blur(20px) saturate(180%)",
+              WebkitBackdropFilter: "blur(20px) saturate(180%)",
               overflow: "hidden",
+              isolation: "isolate",
             }}
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}

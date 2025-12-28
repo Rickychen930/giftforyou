@@ -527,12 +527,13 @@
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  z-index: 2000;
+  z-index: 10000;
   display: flex;
   align-items: flex-start;
   justify-content: center;
   padding-top: 10vh;
   animation: overlayFade 0.3s ease;
+  isolation: isolate;
 }
 
 /* Hide search button when overlay is active */

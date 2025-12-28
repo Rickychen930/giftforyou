@@ -19,6 +19,9 @@ import DashboardController from "./controllers/dashboard-page-controller";
 import BouquetDetailController from "./controllers/bouquet-detail-controller";
 import FAQPage from "./view/faq-page";
 import ContactPage from "./view/contact-page";
+import OrderConfirmationPage from "./view/order-confirmation-page";
+import OrderHistoryPage from "./view/order-history-page";
+import FavoritesPage from "./view/favorites-page";
 import ErrorBoundary from "./components/error-boundary";
 import ScrollToTop from "./components/scroll-to-top";
 import { trackPageview } from "./services/analytics.service";
@@ -52,6 +55,37 @@ const SearchRedirect: React.FC = () => {
   return <Navigate to={`/collection${location.search ?? ""}`} replace />;
 };
 
+// Page Transition Wrapper for smooth transitions
+const PageTransition: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const location = useLocation();
+  const [displayLocation, setDisplayLocation] = React.useState(location);
+  const [transitionStage, setTransitionStage] = React.useState<"entering" | "entered">("entered");
+
+  React.useEffect(() => {
+    if (location !== displayLocation) {
+      setTransitionStage("entering");
+      const timer = setTimeout(() => {
+        setDisplayLocation(location);
+        setTransitionStage("entered");
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [location, displayLocation]);
+
+  return (
+    <div
+      className={`page-transition page-transition--${transitionStage}`}
+      style={{
+        opacity: transitionStage === "entering" ? 0 : 1,
+        transform: transitionStage === "entering" ? "translateY(10px)" : "translateY(0)",
+        transition: "opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
 const AppLayout: React.FC = () => {
   const loggedIn = isLoggedIn();
   const navLinks = loggedIn
@@ -70,25 +104,30 @@ const AppLayout: React.FC = () => {
     <>
       <Header navLinks={navLinks} />
 
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/collection" element={<BouquetCatalogRoute />} />
-        <Route path="/bouquet/:id" element={<BouquetDetailController />} />
-        <Route path="/search" element={<SearchRedirect />} />
-        <Route path="/cart" element={<Navigate to="/collection" replace />} />
-        <Route path="/faq" element={<FAQPage />} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/login" element={<LoginController />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardController />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <PageTransition>
+        <Routes location={location}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/collection" element={<BouquetCatalogRoute />} />
+          <Route path="/bouquet/:id" element={<BouquetDetailController />} />
+          <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
+          <Route path="/order-history" element={<OrderHistoryPage />} />
+          <Route path="/favorites" element={<FavoritesPage />} />
+          <Route path="/search" element={<SearchRedirect />} />
+          <Route path="/cart" element={<Navigate to="/collection" replace />} />
+          <Route path="/faq" element={<FAQPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/login" element={<LoginController />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardController />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </PageTransition>
 
       <Footer />
     </>

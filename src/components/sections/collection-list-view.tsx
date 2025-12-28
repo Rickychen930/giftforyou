@@ -374,51 +374,66 @@ const CollectionListView: React.FC<Props> = ({
                       )}
                     </div>
                   {deleteConfirmId === collection._id && (
-                    <div
-                      className="collectionListView__deleteConfirm"
-                      style={{ zIndex: 10001 }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                      }}
-                      onMouseDown={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                      }}
-                    >
-                      <p>Yakin ingin menghapus koleksi ini?</p>
-                      {count > 0 && (
-                        <p style={{ fontSize: "0.875rem", color: "var(--ink-620)", marginTop: "0.25rem" }}>
-                          {count} bouquet akan kehilangan nama koleksi
-                        </p>
-                      )}
-                      <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
-                        <button
-                          type="button"
-                          className="collectionListView__deleteConfirmBtn collectionListView__deleteConfirmBtn--confirm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            void handleDeleteConfirm(collection._id);
-                          }}
-                          disabled={deletingId === collection._id}
-                        >
-                          {deletingId === collection._id ? "Menghapus..." : "Hapus"}
-                        </button>
-                        <button
-                          type="button"
-                          className="collectionListView__deleteConfirmBtn collectionListView__deleteConfirmBtn--cancel"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            handleDeleteCancel();
-                          }}
-                          disabled={deletingId === collection._id}
-                        >
-                          Batal
-                        </button>
+                    <>
+                      {/* Backdrop overlay */}
+                      <div
+                        className="collectionListView__deleteBackdrop"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          handleDeleteCancel();
+                        }}
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                        }}
+                      />
+                      {/* Modal content */}
+                      <div
+                        className="collectionListView__deleteConfirm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                        }}
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                        }}
+                      >
+                        <p>Yakin ingin menghapus koleksi ini?</p>
+                        {count > 0 && (
+                          <p style={{ fontSize: "0.875rem", color: "var(--ink-620)", marginTop: "0.25rem" }}>
+                            {count} bouquet akan kehilangan nama koleksi
+                          </p>
+                        )}
+                        <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
+                          <button
+                            type="button"
+                            className="collectionListView__deleteConfirmBtn collectionListView__deleteConfirmBtn--confirm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              void handleDeleteConfirm(collection._id);
+                            }}
+                            disabled={deletingId === collection._id}
+                          >
+                            {deletingId === collection._id ? "Menghapus..." : "Hapus"}
+                          </button>
+                          <button
+                            type="button"
+                            className="collectionListView__deleteConfirmBtn collectionListView__deleteConfirmBtn--cancel"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              handleDeleteCancel();
+                            }}
+                            disabled={deletingId === collection._id}
+                          >
+                            Batal
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    </>
                   )}
                   </>
                   )}
