@@ -14,7 +14,6 @@ import Footer from "./view/footer";
 
 import HomePage from "./view/home-page";
 import BouquetCatalogRoute from "./view/bouquet-catalog-route";
-import LoginController from "./controllers/login-page-controller";
 import DashboardController from "./controllers/dashboard-page-controller";
 import BouquetDetailController from "./controllers/bouquet-detail-controller";
 import FAQPage from "./view/faq-page";
@@ -216,8 +215,7 @@ const AppLayout: React.FC = () => {
             }
           />
           
-          {/* Admin Dashboard */}
-          <Route path="/login" element={<LoginController />} />
+          {/* Admin Dashboard - Login via /customer/login with admin role */}
           <Route
             path="/dashboard"
             element={

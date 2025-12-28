@@ -202,10 +202,11 @@
 
 .dashboardBrand__subtitle {
   font-size: 0.8rem;
-  color: var(--ink-500);
-  font-weight: 500;
+  color: var(--brand-rose-600);
+  font-weight: 700;
   letter-spacing: 0.3px;
   text-transform: uppercase;
+  transition: color 0.3s ease;
 }
 
 /* Nav */
@@ -532,8 +533,85 @@
   margin: 0 auto;
 }
 
-.dashboardHeader {
-  margin: 0 0 1.25rem;
+/* Compact Top Bar - Replaces redundant header */
+.dashboardTopBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 245, 248, 0.9) 100%);
+  border: 1.5px solid rgba(212, 140, 156, 0.15);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(212, 140, 156, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dashboardTopBar__actions {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.dashboardActionBtn--compact {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  font-size: 0.875rem;
+}
+
+.dashboardActionBtn__label {
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .dashboardActionBtn__label {
+    display: none;
+  }
+  
+  .dashboardActionBtn--compact {
+    padding: 0.6rem;
+    min-width: 44px;
+    justify-content: center;
+  }
+}
+
+.dashboardTopBar__status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  animation: slideInStatus 0.3s ease;
+}
+
+@keyframes slideInStatus {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.dashboardTopBar__status--copied {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: rgba(5, 150, 105, 0.95);
+}
+
+.dashboardTopBar__status--failed {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: rgba(220, 38, 38, 0.95);
 }
 
 .dashboardHeader__top {

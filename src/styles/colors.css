@@ -10,6 +10,11 @@
   --brand-wine-700: #a04c5c;     /* deep accent text/link */
   --brand-sage-500: #8fc4a3;     /* medium sage for gradients */
   --brand-sage-400: #a8d5ba;     /* secondary accent */
+  
+  /* Brand Green (for success states, confirmations, etc.) */
+  --brand-green-500: #10b981;     /* main green */
+  --brand-green-600: #059669;     /* darker green */
+  --brand-green-700: #047857;     /* darkest green */
 
   /* =========================================================
      2) Neutrals (clean, premium)

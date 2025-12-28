@@ -73,7 +73,7 @@ interface Props {
   onDeleteCollection?: (collectionId: string) => Promise<boolean>;
 }
 
-type ActiveTab = "overview" | "orders" | "customers" | "upload" | "edit" | "hero";
+type ActiveTab = "overview" | "orders" | "customers" | "upload" | "edit" | "hero" | "analytics";
 
 const DASHBOARD_TAB_STORAGE_KEY = "dashboard.activeTab";
 
@@ -83,7 +83,8 @@ const isActiveTab = (v: string): v is ActiveTab =>
   v === "customers" ||
   v === "upload" ||
   v === "edit" ||
-  v === "hero";
+  v === "hero" ||
+  v === "analytics";
 
 interface PerformanceState {
   metrics: ReturnType<typeof getPerformanceMetrics>;
@@ -390,6 +391,7 @@ class DashboardView extends Component<Props, State> {
       upload: "Upload Bouquet",
       edit: "Edit Bouquet",
       hero: "Hero Slider",
+      analytics: "Analytics Dashboard",
     };
 
     setSeo({
@@ -584,7 +586,20 @@ class DashboardView extends Component<Props, State> {
           </div>
           <div className="dashboardBrand__info">
             <div className="dashboardBrand__title">Giftforyou.idn</div>
-            <div className="dashboardBrand__subtitle">Admin Dashboard</div>
+            <div className="dashboardBrand__subtitle">
+              {(() => {
+                const tabMeta: Record<ActiveTab, { title: string; subtitle: string }> = {
+                  overview: { title: "Overview", subtitle: "Dashboard Admin" },
+                  orders: { title: "Orders", subtitle: "Kelola pesanan" },
+                  customers: { title: "Customers", subtitle: "Kelola pelanggan" },
+                  upload: { title: "Upload", subtitle: "Unggah bouquet baru" },
+                  edit: { title: "Edit Bouquet", subtitle: "Edit bouquet" },
+                  hero: { title: "Hero Slider", subtitle: "Kelola slider" },
+                  analytics: { title: "Analytics", subtitle: "Analisis data" },
+                };
+                return tabMeta[this.state.activeTab]?.title || "Admin Dashboard";
+              })()}
+            </div>
           </div>
         </div>
 
@@ -1635,35 +1650,6 @@ class DashboardView extends Component<Props, State> {
     const { loading } = this.props;
     const errorMessage = (this.props.errorMessage ?? "").trim();
 
-    const activeTab = this.state.activeTab;
-    const tabMeta: Record<ActiveTab, { title: string; subtitle: string }> = {
-      overview: {
-        title: "Ringkasan",
-        subtitle: "Metrik utama toko dan aktivitas secara singkat.",
-      },
-      orders: {
-        title: "Record order",
-        subtitle: "Catat pembeli, bouquet, dan waktu pengantaran.",
-      },
-      customers: {
-        title: "Customer Management",
-        subtitle: "Kelola data customer, alamat, dan riwayat pesanan.",
-      },
-      upload: {
-        title: "Upload Bouquet",
-        subtitle: "Tambahkan bouquet baru ke katalog dengan detail lengkap.",
-      },
-      edit: {
-        title: "Edit Bouquet",
-        subtitle: "Cari, filter, dan perbarui bouquet di database.",
-      },
-      hero: {
-        title: "Hero Slider",
-        subtitle: "Kelola slide hero di beranda dan tautan koleksi.",
-      },
-    };
-
-    const { title, subtitle } = tabMeta[activeTab];
     const copyStatus = this.state.copyStatus;
 
     return (
@@ -1690,54 +1676,59 @@ class DashboardView extends Component<Props, State> {
             />
           )}
           <div className="dashboardContainer">
-            <header className="dashboardHeader">
-              <div className="dashboardHeader__top">
-                <div className="dashboardHeader__text">
-                  <p className="dashboardHeader__kicker">Dashboard Admin</p>
-                  <h1 className="dashboardHeader__title">{title}</h1>
-                  <p className="dashboardHeader__crumbs" aria-label="Lokasi halaman">
-                    <span className="dashboardHeader__crumb">Dashboard</span>
-                    <span className="dashboardHeader__crumbSep" aria-hidden="true">
-                      /
-                    </span>
-                    <span className="dashboardHeader__crumb is-current" aria-current="page">
-                      {title}
-                    </span>
-                  </p>
-                </div>
-
-                <div className="dashboardHeader__actions" aria-label="Aksi cepat">
-                  <button
-                    type="button"
-                    className="dashboardActionBtn"
-                    onClick={this.copyCurrentLink}
-                    disabled={loading}
-                  >
-                    Salin link tab
-                  </button>
-                  <button
-                    type="button"
-                    className="dashboardActionBtn dashboardActionBtn--primary"
-                    onClick={this.reloadDashboard}
-                  >
-                    Muat ulang
-                  </button>
-                </div>
+            {/* Compact Top Bar - Replaces redundant header */}
+            <div className="dashboardTopBar">
+              <div className="dashboardTopBar__actions" aria-label="Aksi cepat">
+                <button
+                  type="button"
+                  className="dashboardActionBtn dashboardActionBtn--compact"
+                  onClick={this.copyCurrentLink}
+                  disabled={loading}
+                  title="Salin link tab"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M8 17V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M4 19h9a2 2 0 0 0 2-2V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span className="dashboardActionBtn__label">Salin link</span>
+                </button>
+                <button
+                  type="button"
+                  className="dashboardActionBtn dashboardActionBtn--primary dashboardActionBtn--compact"
+                  onClick={this.reloadDashboard}
+                  title="Muat ulang dashboard"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8M21 8v5M21 8h-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16M3 16v-5M3 16h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span className="dashboardActionBtn__label">Muat ulang</span>
+                </button>
               </div>
-
-              <p className="dashboardHeader__subtitle">{subtitle}</p>
               {copyStatus && (
-                <p
-                  className="dashboardHeader__hint"
+                <div
+                  className={`dashboardTopBar__status dashboardTopBar__status--${copyStatus}`}
                   role={copyStatus === "failed" ? "alert" : "status"}
                   aria-live="polite"
                 >
-                  {copyStatus === "copied"
-                    ? "Link tab tersalin."
-                    : "Gagal menyalin link. Silakan coba lagi."}
-                </p>
+                  {copyStatus === "copied" ? (
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      <span>Link tersalin</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      <span>Gagal menyalin</span>
+                    </>
+                  )}
+                </div>
               )}
-            </header>
+            </div>
 
             {loading && (
               <div className="dashboardState" aria-live="polite">
