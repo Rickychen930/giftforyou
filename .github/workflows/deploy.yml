@@ -112,27 +112,20 @@ jobs:
             echo "✅ Backend target: $BACKEND_TARGET"
             echo "✅ All directories created"
 
-      # ✅ Upload Frontend build via rsync (reliable method)
+      # ✅ Upload Frontend build (using SCP like the working workflow)
       - name: Upload frontend build to VPS
-        run: |
-          FRONTEND_TARGET="${{ secrets.FRONTEND_TARGET_DIR }}"
-          if [ -z "$FRONTEND_TARGET" ]; then
-            echo "❌ ERROR: FRONTEND_TARGET_DIR secret is not set!"
-            exit 1
-          fi
-          
-          echo "Frontend target: $FRONTEND_TARGET"
-          
-          # Ensure target directory exists on server
-          ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no \
-            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
-            "mkdir -p ${FRONTEND_TARGET}/_incoming && chmod -R 755 ${FRONTEND_TARGET}/_incoming"
-          
-          # Upload files
-          rsync -avz --delete \
-            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no" \
-            build/ \
-            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${FRONTEND_TARGET}/_incoming/
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          timeout: 180s
+          command_timeout: 20m
+          use_insecure_cipher: false
+          source: "build/**"
+          target: "${{ secrets.FRONTEND_TARGET_DIR }}/_incoming"
+          overwrite: true
 
       # ✅ Ensure backend directories exist before upload
       - name: Ensure backend upload directories exist
@@ -161,27 +154,20 @@ jobs:
             chmod -R 755 "$BACKEND_TARGET" || true
             echo "✅ Backend directories ready"
 
-      # ✅ Upload Backend dist via rsync
+      # ✅ Upload Backend dist (using SCP like the working workflow)
       - name: Upload backend dist to VPS
-        run: |
-          BACKEND_TARGET="${{ secrets.BACKEND_TARGET_DIR }}"
-          if [ -z "$BACKEND_TARGET" ]; then
-            echo "❌ ERROR: BACKEND_TARGET_DIR secret is not set!"
-            exit 1
-          fi
-          
-          echo "Backend target: $BACKEND_TARGET"
-          
-          # Ensure target directory exists on server
-          ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no \
-            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
-            "mkdir -p ${BACKEND_TARGET}/_incoming_backend && chmod -R 755 ${BACKEND_TARGET}/_incoming_backend"
-          
-          # Upload files
-          rsync -avz --delete \
-            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no" \
-            dist/ \
-            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${BACKEND_TARGET}/_incoming_backend/
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          timeout: 180s
+          command_timeout: 20m
+          use_insecure_cipher: false
+          source: "dist/**"
+          target: "${{ secrets.BACKEND_TARGET_DIR }}/_incoming_backend"
+          overwrite: true
 
       - name: Upload ecosystem.config.js via SSH
         uses: appleboy/ssh-action@v1.0.3
