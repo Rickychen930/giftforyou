@@ -13,6 +13,7 @@ interface DropdownWithModalProps {
   error?: string;
   maxLength?: number;
   storageKey?: string; // For persisting custom options
+  allowAddNew?: boolean; // Allow adding new options via modal
 }
 
 const DropdownWithModal: React.FC<DropdownWithModalProps> = ({
@@ -27,6 +28,7 @@ const DropdownWithModal: React.FC<DropdownWithModalProps> = ({
   error,
   maxLength = 100,
   storageKey,
+  allowAddNew = true,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -228,29 +230,31 @@ const DropdownWithModal: React.FC<DropdownWithModalProps> = ({
             ) : (
               <div className="dropdownWithModal__empty">Tidak ada opsi</div>
             )}
-            <button
-              type="button"
-              className="dropdownWithModal__addNew"
-              onClick={handleAddNewClick}
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
+            {allowAddNew && (
+              <button
+                type="button"
+                className="dropdownWithModal__addNew"
+                onClick={handleAddNewClick}
               >
-                <path
-                  d="M12 5v14M5 12h14"
-                  stroke="currentColor"
-                  strokeWidth="2"
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M12 5v14M5 12h14"
+                    stroke="currentColor"
+                    strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
               </svg>
               Tambah Baru
             </button>
+            )}
           </div>
         )}
 

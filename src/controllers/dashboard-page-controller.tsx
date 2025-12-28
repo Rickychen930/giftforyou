@@ -475,15 +475,58 @@ class DashboardController extends Component<{}, State> {
       });
 
       if (!res.ok) {
-        const t = await res.text();
-        throw new Error(`Upload failed (${res.status}): ${t}`);
+        let errorMessage = `Upload gagal (${res.status})`;
+        
+        // Try to parse error message from response
+        try {
+          const text = await res.text();
+          if (text) {
+            // Check if it's HTML (404 page, etc.)
+            if (text.trim().startsWith("<!DOCTYPE") || text.trim().startsWith("<html")) {
+              errorMessage = `Server error: Endpoint tidak tersedia atau server bermasalah. Status: ${res.status}`;
+            } else {
+              // Try to parse as JSON
+              try {
+                const json = JSON.parse(text);
+                if (json.error || json.message) {
+                  errorMessage = json.error || json.message || errorMessage;
+                } else {
+                  errorMessage = text.length > 200 ? `${text.substring(0, 200)}...` : text;
+                }
+              } catch {
+                // Not JSON, use text as is (truncated if too long)
+                errorMessage = text.length > 200 ? `${text.substring(0, 200)}...` : text;
+              }
+            }
+          }
+        } catch (parseErr) {
+          console.error("Error parsing error response:", parseErr);
+          errorMessage = `Upload gagal dengan status ${res.status}. Silakan coba lagi.`;
+        }
+        
+        throw new Error(errorMessage);
+      }
+
+      // Parse success response
+      try {
+        const data = await res.json();
+        if (data.message) {
+          console.log("Upload success:", data.message);
+        }
+      } catch {
+        // Response might not be JSON, that's okay
       }
 
       await this.loadDashboard();
       return true;
     } catch (e) {
+      const errorMessage = e instanceof Error 
+        ? e.message 
+        : "Upload gagal. Silakan periksa koneksi internet dan coba lagi.";
+      
+      console.error("Upload error:", e);
       this.setState({
-        errorMessage: e instanceof Error ? e.message : "Upload failed.",
+        errorMessage,
       });
       return false;
     }

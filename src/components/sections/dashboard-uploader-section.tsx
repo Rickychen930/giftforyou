@@ -58,6 +58,8 @@ interface State {
   occasionOptions: string[];
   flowerOptions: string[];
   stockLevelOptions: string[];
+  sizeOptions: string[];
+  statusOptions: string[];
 }
 
 const DRAFT_STORAGE_KEY = "bouquet_uploader_draft";
@@ -152,6 +154,8 @@ class BouquetUploader extends Component<Props, State> {
       occasionOptions: [],
       flowerOptions: [],
       stockLevelOptions: DEFAULT_STOCK_LEVELS,
+      sizeOptions: BOUQUET_SIZE_OPTIONS.map((opt) => opt.value),
+      statusOptions: ["ready", "preorder"],
     };
   }
 
@@ -1100,6 +1104,13 @@ class BouquetUploader extends Component<Props, State> {
     });
 
     try {
+      // Show loading message
+      this.setState({
+        submitting: true,
+        message: "Mengunggah bouquet...",
+        messageType: "",
+      });
+
       const ok = await this.props.onUpload(this.buildFormData());
 
       if (ok) {
@@ -1137,9 +1148,11 @@ class BouquetUploader extends Component<Props, State> {
           }
         }, 100);
       } else {
+        // Error message should already be set by the controller
+        // But provide a fallback if not available
         this.setState({
           submitting: false,
-          message: "Unggah gagal. Silakan periksa koneksi internet dan coba lagi.",
+          message: "Unggah gagal. Silakan periksa koneksi internet dan coba lagi. Pastikan semua field wajib sudah diisi dengan benar.",
           messageType: "error",
         });
         // Scroll to error message
@@ -1152,9 +1165,24 @@ class BouquetUploader extends Component<Props, State> {
       }
     } catch (err) {
       console.error("Upload error:", err);
-      const errorMessage = err instanceof Error 
-        ? err.message 
-        : "Terjadi kesalahan server. Silakan coba lagi.";
+      let errorMessage = "Terjadi kesalahan server. Silakan coba lagi.";
+      
+      if (err instanceof Error) {
+        errorMessage = err.message;
+        
+        // Provide more user-friendly messages for common errors
+        if (errorMessage.includes("NetworkError") || errorMessage.includes("Failed to fetch")) {
+          errorMessage = "Gagal terhubung ke server. Periksa koneksi internet Anda dan coba lagi.";
+        } else if (errorMessage.includes("400")) {
+          errorMessage = "Data yang diinput tidak valid. Pastikan semua field wajib sudah diisi dengan benar.";
+        } else if (errorMessage.includes("401") || errorMessage.includes("403")) {
+          errorMessage = "Sesi Anda telah berakhir. Silakan login kembali.";
+        } else if (errorMessage.includes("413") || errorMessage.includes("too large")) {
+          errorMessage = "File gambar terlalu besar. Maksimal 8MB. Silakan pilih file yang lebih kecil.";
+        } else if (errorMessage.includes("500")) {
+          errorMessage = "Terjadi kesalahan pada server. Silakan coba lagi dalam beberapa saat.";
+        }
+      }
       
       this.setState({
         submitting: false,
@@ -1384,16 +1412,22 @@ class BouquetUploader extends Component<Props, State> {
 
                 <label className="uploader__field">
                   <span className="uploader__fieldLabel">Status</span>
-                  <select
-                    name="status"
-                    value={this.state.status}
-                    onChange={this.handleChange}
+                  <DropdownWithModal
+                    label="Status"
+                    value={this.state.status === "ready" ? "Siap" : "Preorder"}
+                    options={["Siap", "Preorder"]}
+                    onChange={(value) => {
+                      const statusValue = value === "Siap" ? "ready" : "preorder";
+                      this.setState({ status: statusValue as "ready" | "preorder" });
+                    }}
+                    onAddNew={() => {
+                      // Status tidak bisa ditambah baru, hanya pilihan tetap
+                    }}
+                    placeholder="Pilih status..."
                     disabled={submitting}
-                    aria-label="Status bouquet"
-                  >
-                    <option value="ready">Siap</option>
-                    <option value="preorder">Preorder</option>
-                  </select>
+                    storageKey=""
+                    allowAddNew={false}
+                  />
                 </label>
 
                 <label className="uploader__field">
@@ -1420,8 +1454,8 @@ class BouquetUploader extends Component<Props, State> {
                         this.setState({ fieldErrors: newFieldErrors });
                       }
                     }}
-                    onAddNew={(newValue) => {
-                      // Option added, already set in onChange
+                    onAddNew={(_newValue) => {
+                      // Option added, already set in onChange by DropdownWithModal
                     }}
                     placeholder="Pilih atau tambahkan koleksi baru..."
                     disabled={submitting}
@@ -1440,8 +1474,8 @@ class BouquetUploader extends Component<Props, State> {
                     onChange={(value) => {
                       this.setState({ type: value });
                     }}
-                    onAddNew={(newValue) => {
-                      // Option added, already set in onChange
+                    onAddNew={(_newValue) => {
+                      // Option added, already set in onChange by DropdownWithModal
                     }}
                     placeholder="Pilih atau tambahkan tipe baru..."
                     disabled={submitting}
@@ -1453,27 +1487,37 @@ class BouquetUploader extends Component<Props, State> {
                   <span className="uploader__fieldLabel">
                     Ukuran <span className="uploader__required" aria-label="wajib diisi">*</span>
                   </span>
-                  <select
-                    name="size"
+                  <DropdownWithModal
+                    label="Ukuran"
                     value={this.state.size}
-                    onChange={this.handleChange}
+                    options={this.state.sizeOptions}
+                    onChange={(value) => {
+                      this.setState({ size: value });
+                      const newTouchedFields = new Set(this.state.touchedFields);
+                      newTouchedFields.add("size");
+                      this.setState({ touchedFields: newTouchedFields });
+                      const error = this.validateField("size", value);
+                      if (error !== null) {
+                        const newFieldErrors = { ...this.state.fieldErrors };
+                        if (error) {
+                          newFieldErrors.size = error;
+                        } else {
+                          delete newFieldErrors.size;
+                        }
+                        this.setState({ fieldErrors: newFieldErrors });
+                      }
+                    }}
+                    onAddNew={(newValue) => {
+                      // Add new size option
+                      const newSizeOptions = [...this.state.sizeOptions, newValue];
+                      this.setState({ sizeOptions: newSizeOptions, size: newValue });
+                    }}
+                    placeholder="Pilih atau tambahkan ukuran baru..."
                     disabled={submitting}
-                    required
-                    aria-required="true"
-                    aria-invalid={touchedFields.has("size") && fieldErrors.size ? "true" : "false"}
-                    aria-describedby={touchedFields.has("size") && fieldErrors.size ? "size-error" : undefined}
-                  >
-                    {BOUQUET_SIZE_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                  {touchedFields.has("size") && fieldErrors.size && (
-                    <span id="size-error" className="uploader__fieldError" role="alert" aria-live="polite">
-                      {fieldErrors.size}
-                    </span>
-                  )}
+                    error={touchedFields.has("size") && fieldErrors.size ? fieldErrors.size : undefined}
+                    maxLength={50}
+                    storageKey="uploader_sizes"
+                  />
                 </label>
 
                 <label className="uploader__field">
