@@ -110,8 +110,18 @@ export async function generateCollectionPDF(
         img.crossOrigin = "anonymous";
 
         await new Promise<void>((resolve, reject) => {
-          img.onload = () => resolve();
-          img.onerror = () => reject(new Error("Failed to load image"));
+          const timeout = setTimeout(() => {
+            reject(new Error("Image load timeout"));
+          }, 10000); // 10 second timeout for image loading
+          
+          img.onload = () => {
+            clearTimeout(timeout);
+            resolve();
+          };
+          img.onerror = () => {
+            clearTimeout(timeout);
+            reject(new Error("Failed to load image"));
+          };
           img.src = imageUrl;
         });
 
@@ -150,6 +160,12 @@ export async function generateCollectionPDF(
             doc.setFont("helvetica", "bold");
             const watermarkText = "giftforyou.idn";
             doc.text(watermarkText, margin + 2, yPos + imgHeight - 2);
+            
+            // Add price watermark
+            doc.setFontSize(9);
+            const priceText = formatIDR(bouquet.price);
+            const priceWidth = doc.getTextWidth(priceText);
+            doc.text(priceText, margin + imgWidth - priceWidth - 2, yPos + imgHeight - 2);
           }
 
           yPos += imgHeight + 5;
@@ -257,8 +273,18 @@ export async function generateBouquetPDF(
       img.crossOrigin = "anonymous";
 
       await new Promise<void>((resolve, reject) => {
-        img.onload = () => resolve();
-        img.onerror = () => reject(new Error("Failed to load image"));
+        const timeout = setTimeout(() => {
+          reject(new Error("Image load timeout"));
+        }, 10000); // 10 second timeout for image loading
+        
+        img.onload = () => {
+          clearTimeout(timeout);
+          resolve();
+        };
+        img.onerror = () => {
+          clearTimeout(timeout);
+          reject(new Error("Failed to load image"));
+        };
         img.src = imageUrl;
       });
 

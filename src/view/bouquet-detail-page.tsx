@@ -96,7 +96,8 @@ const BouquetDownloadPDFButton: React.FC<{ bouquet: Bouquet }> = ({ bouquet }) =
     setShowOptions(false);
 
     try {
-      await generateBouquetPDF(
+      // Add timeout protection (30 seconds for single bouquet PDF)
+      const pdfPromise = generateBouquetPDF(
         {
           _id: bouquet._id,
           name: bouquet.name,
@@ -113,10 +114,19 @@ const BouquetDownloadPDFButton: React.FC<{ bouquet: Bouquet }> = ({ bouquet }) =
         },
         { withWatermark }
       );
+      
+      const timeoutPromise = new Promise<void>((_, reject) => {
+        setTimeout(() => reject(new Error("PDF generation timeout. Silakan coba lagi.")), 30000);
+      });
+
+      await Promise.race([pdfPromise, timeoutPromise]);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Failed to generate PDF:", err);
-      alert("Gagal menghasilkan PDF. Silakan coba lagi.");
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : "Gagal menghasilkan PDF. Silakan coba lagi.";
+      alert(errorMessage);
     } finally {
       setIsGenerating(false);
     }

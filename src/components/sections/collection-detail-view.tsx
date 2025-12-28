@@ -37,7 +37,8 @@ const DownloadPDFButton: React.FC<{
     setShowOptions(false);
 
     try {
-      await generateCollectionPDF(
+      // Add timeout protection (60 seconds for collection PDF)
+      const pdfPromise = generateCollectionPDF(
         collectionName,
         bouquets.map((b) => ({
           _id: b._id,
@@ -49,10 +50,19 @@ const DownloadPDFButton: React.FC<{
         })),
         { withWatermark }
       );
+      
+      const timeoutPromise = new Promise<void>((_, reject) => {
+        setTimeout(() => reject(new Error("PDF generation timeout. Silakan coba lagi.")), 60000);
+      });
+
+      await Promise.race([pdfPromise, timeoutPromise]);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Failed to generate PDF:", err);
-      alert("Gagal menghasilkan PDF. Silakan coba lagi.");
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : "Gagal menghasilkan PDF. Silakan coba lagi.";
+      alert(errorMessage);
     } finally {
       setIsGenerating(false);
     }

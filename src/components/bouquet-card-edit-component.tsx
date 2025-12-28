@@ -452,8 +452,8 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
     setForm((prev) => ({ ...prev, [name]: checked } as FormState));
   };
 
-  // Image compression function
-  const compressImage = async (file: File, maxWidth: number = 1920, quality: number = 0.85): Promise<File> => {
+  // Image compression function - wrapped in useCallback to prevent dependency issues
+  const compressImage = useCallback(async (file: File, maxWidth: number = 1920, quality: number = 0.85): Promise<File> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -504,9 +504,9 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
       reader.onerror = () => reject(new Error("Failed to read file"));
       reader.readAsDataURL(file);
     });
-  };
+  }, []);
 
-  const isAcceptableImage = (file: File): boolean => {
+  const isAcceptableImage = useCallback((file: File): boolean => {
     const name = (file.name ?? "").toLowerCase();
     const type = (file.type ?? "").toLowerCase();
     
@@ -517,7 +517,7 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
     
     const validExtensions = [".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"];
     return validExtensions.some(ext => name.endsWith(ext));
-  };
+  }, []);
 
   const formatBytes = (bytes: number): string => {
     if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
@@ -571,11 +571,6 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
     setSaveMessage("");
 
     try {
-      // Cleanup old preview blob URL if exists
-      if (preview && preview.startsWith("blob:")) {
-        URL.revokeObjectURL(preview);
-      }
-
       // Compress image if it's large
       let processedFile = selectedFile;
       if (selectedFile.size > 2 * 1024 * 1024) {
@@ -619,7 +614,7 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
     } finally {
       setIsImageLoading(false);
     }
-  }, [isImageLoading, saving, preview, compressImage, isAcceptableImage]);
+  }, [isImageLoading, saving, compressImage, isAcceptableImage]);
 
   const handleImageChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     // Prevent double processing
@@ -641,7 +636,7 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
     }
 
     await processImageFile(selectedFile);
-  }, [isImageLoading, saving, preview, bouquet.image, processImageFile]);
+  }, [isImageLoading, saving, bouquet.image, processImageFile]);
 
   const resetImage = () => {
     if (previewRef.current && previewRef.current.startsWith("blob:")) {
@@ -824,7 +819,7 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
         }
       }, 100);
     }
-  }, [validationError, isDirty, buildFormData, onSave, fieldErrors]);
+  }, [validationError, isDirty, saving, buildFormData, onSave, fieldErrors]);
 
   const resetForm = useCallback(() => {
     setForm({
