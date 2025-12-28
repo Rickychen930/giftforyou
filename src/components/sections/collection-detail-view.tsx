@@ -69,7 +69,7 @@ const DownloadPDFButton: React.FC<{
   };
 
   return (
-    <div className="collectionDetailView__downloadWrapper" style={{ position: "relative", marginTop: "1rem" }}>
+    <div className="collectionDetailView__downloadWrapper" style={{ position: "relative", marginTop: "1rem", zIndex: 1000 }}>
       <button
         type="button"
         className="collectionDetailView__downloadBtn"
@@ -77,17 +77,35 @@ const DownloadPDFButton: React.FC<{
         disabled={isGenerating || bouquets.length === 0}
         aria-label="Download PDF"
         style={{
-          padding: "0.5rem 1rem",
-          borderRadius: "8px",
-          border: "1px solid rgba(212, 140, 156, 0.3)",
-          background: "linear-gradient(135deg, rgba(212, 140, 156, 0.1) 0%, rgba(168, 213, 186, 0.1) 100%)",
-          color: "var(--ink-800)",
-          fontWeight: 600,
-          fontSize: "0.9rem",
+          padding: "0.65rem 1.25rem",
+          borderRadius: "12px",
+          border: "2px solid rgba(212, 140, 156, 0.3)",
+          background: "linear-gradient(135deg, rgba(212, 140, 156, 0.12) 0%, rgba(168, 213, 186, 0.12) 100%)",
+          color: "var(--brand-rose-700)",
+          fontWeight: 800,
+          fontSize: "0.95rem",
           cursor: "pointer",
           display: "flex",
           alignItems: "center",
-          gap: "0.5rem",
+          gap: "0.6rem",
+          transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
+          position: "relative",
+          zIndex: 1001,
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "linear-gradient(135deg, rgba(212, 140, 156, 0.2) 0%, rgba(168, 213, 186, 0.2) 100%)";
+          e.currentTarget.style.borderColor = "rgba(212, 140, 156, 0.5)";
+          e.currentTarget.style.transform = "translateY(-2px)";
+          e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.1)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "linear-gradient(135deg, rgba(212, 140, 156, 0.12) 0%, rgba(168, 213, 186, 0.12) 100%)";
+          e.currentTarget.style.borderColor = "rgba(212, 140, 156, 0.3)";
+          e.currentTarget.style.transform = "translateY(0)";
+          e.currentTarget.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.05)";
         }}
       >
         <svg
@@ -110,25 +128,40 @@ const DownloadPDFButton: React.FC<{
       </button>
 
       {showOptions && (
-        <div
-          style={{
-            position: "absolute",
-            top: "100%",
-            left: 0,
-            marginTop: "0.5rem",
-            background: "linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%)",
-            border: "2px solid rgba(212, 140, 156, 0.3)",
-            borderRadius: "12px",
-            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08)",
-            zIndex: 10000,
-            display: "flex",
-            flexDirection: "column",
-            minWidth: "200px",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            overflow: "hidden",
-          }}
-        >
+        <>
+          {/* Backdrop to close popup when clicking outside */}
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 9999,
+              background: "transparent",
+            }}
+            onClick={() => setShowOptions(false)}
+          />
+          <div
+            style={{
+              position: "absolute",
+              top: "100%",
+              left: 0,
+              marginTop: "0.5rem",
+              background: "linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%)",
+              border: "2px solid rgba(212, 140, 156, 0.3)",
+              borderRadius: "12px",
+              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08)",
+              zIndex: 10001,
+              display: "flex",
+              flexDirection: "column",
+              minWidth: "200px",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              overflow: "hidden",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
           <button
             type="button"
             onClick={() => handleDownload(false)}
@@ -192,7 +225,8 @@ const DownloadPDFButton: React.FC<{
               Dengan Watermark
             </span>
           </button>
-        </div>
+          </div>
+        </>
       )}
     </div>
   );
