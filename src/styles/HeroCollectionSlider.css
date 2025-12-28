@@ -19,6 +19,7 @@
   isolation: isolate;
   scroll-margin-top: 0;
   contain: layout style paint;
+  z-index: 2;
 }
 
 /* Smooth scroll behavior */

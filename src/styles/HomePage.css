@@ -14,9 +14,160 @@ section {
   }
 }
 
+/* =========================================================
+   HOME PAGE CONTAINER - Luxury & Elegant Design
+   - Smooth section transitions
+   - Enhanced visual hierarchy
+   - Professional spacing
+   - Responsive layout
+========================================================= */
+
 .Home-page-container {
   width: 100%;
-  display: block;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 250, 248, 0.98) 25%,
+    rgba(252, 248, 255, 0.98) 50%,
+    rgba(248, 255, 252, 0.98) 75%,
+    rgba(255, 255, 255, 1) 100%
+  );
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Smooth section spacing with visual separation */
+.Home-page-container > section {
+  position: relative;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+/* Elegant section dividers */
+.Home-page-container > section:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(90%, 1200px);
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(212, 140, 156, 0.15) 20%,
+    rgba(212, 140, 156, 0.25) 50%,
+    rgba(168, 213, 186, 0.25) 50%,
+    rgba(168, 213, 186, 0.15) 80%,
+    transparent 100%
+  );
+  opacity: 0.8;
+  z-index: 1;
+}
+
+/* Enhanced spacing between sections */
+.Home-page-container > section + section {
+  margin-top: 0;
+}
+
+/* Luxury background pattern overlay (subtle) */
+.Home-page-container::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(212, 140, 156, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(168, 213, 186, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.02) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  animation: subtleFloat 20s ease-in-out infinite;
+}
+
+@keyframes subtleFloat {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-10px, -10px) scale(1.02);
+    opacity: 0.95;
+  }
+}
+
+/* Smooth fade-in for sections */
+.Home-page-container > section {
+  animation: fadeInSection 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.Home-page-container > section:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.Home-page-container > section:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.Home-page-container > section:nth-child(3) {
+  animation-delay: 0.5s;
+}
+
+.Home-page-container > section:nth-child(4) {
+  animation-delay: 0.7s;
+}
+
+@keyframes fadeInSection {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Enhanced scroll behavior */
+@media (prefers-reduced-motion: reduce) {
+  .Home-page-container > section {
+    animation: none;
+    opacity: 1;
+  }
+  
+  .Home-page-container::before {
+    animation: none;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .Home-page-container {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(255, 250, 248, 0.99) 30%,
+      rgba(252, 248, 255, 0.99) 60%,
+      rgba(255, 255, 255, 1) 100%
+    );
+  }
+}
+
+@media (max-width: 768px) {
+  .Home-page-container {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(255, 250, 248, 0.98) 50%,
+      rgba(255, 255, 255, 1) 100%
+    );
+  }
+  
+  .Home-page-container > section:not(:first-child)::before {
+    width: 95%;
+  }
 }
 
 /* Legacy state blocks (kept for older controller usage) */

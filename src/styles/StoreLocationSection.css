@@ -8,13 +8,14 @@
   width: 100%;
   min-height: auto;
   --sl-gutter: clamp(1rem, 3vw, 1.5rem);
-  padding: clamp(2.5rem, 5vw, 3.75rem) 0;
+  padding: clamp(3rem, 6vw, 4.5rem) 0;
   background:
     radial-gradient(900px 460px at 14% 8%, var(--sl-bg-1), transparent 62%),
     radial-gradient(900px 520px at 92% 16%, var(--sl-bg-2), transparent 62%),
     linear-gradient(135deg, var(--sl-bg-3) 0%, var(--sl-bg-4) 100%);
   border-top: 1px solid var(--sl-section-top-border);
   overflow: hidden;
+  z-index: 1;
 }
 
 /* Animated gradient overlay */
