@@ -625,17 +625,19 @@ class BouquetUploader extends Component<Props, State> {
       ...prev,
       [name]:
         name === "price"
-            ? value === "" ? 0 : (() => {
+            ? value === "" || value === null || value === undefined ? 0 : (() => {
                 const num = Number(value);
-                // Handle NaN and Infinity
-                if (!Number.isFinite(num) || num < 0) return 0;
-                return num;
+                // Handle NaN and Infinity - return 0 for invalid values
+                if (!Number.isFinite(num) || isNaN(num)) return 0;
+                // Allow negative during typing, but will be validated on submit
+                return num < 0 ? 0 : num;
               })()
           : name === "quantity"
-            ? value === "" ? 0 : (() => {
+            ? value === "" || value === null || value === undefined ? 0 : (() => {
                 const num = Number(value);
-                // Handle NaN and Infinity
-                if (!Number.isFinite(num) || num < 0) return 0;
+                // Handle NaN and Infinity - return 0 for invalid values
+                if (!Number.isFinite(num) || isNaN(num)) return 0;
+                // Always return non-negative integer
                 return Math.max(0, Math.trunc(num));
               })()
           : value,
@@ -977,36 +979,53 @@ class BouquetUploader extends Component<Props, State> {
     // VALIDATE ALL REQUIRED FIELDS - COMPREHENSIVE CHECKS
     // ============================================================
     
-    // 1. Name (REQUIRED)
-    const nameError = this.validateField("name", this.state.name);
-    if (nameError) {
-      errors.name = nameError;
-    } else if (!this.state.name || this.state.name.trim().length === 0) {
+    // 1. Name (REQUIRED) - Check raw value first, then validate
+    const nameValue = this.state.name;
+    if (!nameValue || (typeof nameValue === "string" && nameValue.trim().length === 0)) {
       errors.name = "Nama bouquet wajib diisi.";
+    } else {
+      const nameError = this.validateField("name", nameValue);
+      if (nameError) {
+        errors.name = nameError;
+      }
     }
 
-    // 2. Price (REQUIRED)
-    const priceError = this.validateField("price", this.state.price);
-    if (priceError) {
-      errors.price = priceError;
-    } else if (!this.state.price || this.state.price <= 0) {
+    // 2. Price (REQUIRED) - Check if value exists and is valid number
+    const priceValue = this.state.price;
+    if (priceValue === null || priceValue === undefined || priceValue === 0 || !Number.isFinite(priceValue)) {
       errors.price = "Harga wajib diisi dan harus lebih dari 0.";
+    } else {
+      const priceNum = Number(priceValue);
+      if (!Number.isFinite(priceNum) || isNaN(priceNum) || priceNum <= 0) {
+        errors.price = "Harga harus lebih dari 0.";
+      } else {
+        const priceError = this.validateField("price", priceNum);
+        if (priceError) {
+          errors.price = priceError;
+        }
+      }
     }
 
-    // 3. Size (REQUIRED)
-    const sizeError = this.validateField("size", this.state.size);
-    if (sizeError) {
-      errors.size = sizeError;
-    } else if (!this.state.size || this.state.size.trim() === "") {
+    // 3. Size (REQUIRED) - Check if value exists and is not empty
+    const sizeValue = this.state.size;
+    if (!sizeValue || (typeof sizeValue === "string" && sizeValue.trim() === "")) {
       errors.size = "Ukuran wajib dipilih.";
+    } else {
+      const sizeError = this.validateField("size", sizeValue);
+      if (sizeError) {
+        errors.size = sizeError;
+      }
     }
 
-    // 4. Collection Name (REQUIRED)
-    const collError = this.validateField("collectionName", this.state.collectionName);
-    if (collError) {
-      errors.collectionName = collError;
-    } else if (!this.state.collectionName || this.state.collectionName.trim().length === 0) {
+    // 4. Collection Name (REQUIRED) - Check if value exists and is not empty
+    const collValue = this.state.collectionName;
+    if (!collValue || (typeof collValue === "string" && collValue.trim().length === 0)) {
       errors.collectionName = "Koleksi wajib dipilih atau diisi.";
+    } else {
+      const collError = this.validateField("collectionName", collValue);
+      if (collError) {
+        errors.collectionName = collError;
+      }
     }
 
     // ============================================================
@@ -1042,74 +1061,92 @@ class BouquetUploader extends Component<Props, State> {
     }
 
     // ============================================================
-    // VALIDATE ARRAYS (occasions and flowers)
+    // VALIDATE ARRAYS (occasions and flowers) - Only validate if array has items
     // ============================================================
     
-    // Occasions array validation
-    if (this.state.occasions && Array.isArray(this.state.occasions)) {
+    // Occasions array validation - Only validate if array exists and has items
+    if (this.state.occasions && Array.isArray(this.state.occasions) && this.state.occasions.length > 0) {
       if (this.state.occasions.length > 10) {
         errors.occasions = "Maksimal 10 acara.";
-      }
-      // Validate each occasion
-      for (let i = 0; i < this.state.occasions.length; i++) {
-        const occasion = this.state.occasions[i];
-        if (typeof occasion !== "string" || occasion.trim().length === 0) {
-          errors.occasions = "Setiap acara tidak boleh kosong.";
-          break;
+      } else {
+        // Validate each occasion only if array is not empty
+        for (let i = 0; i < this.state.occasions.length; i++) {
+          const occasion = this.state.occasions[i];
+          if (typeof occasion !== "string") {
+            errors.occasions = "Setiap acara harus berupa teks.";
+            break;
+          }
+          const trimmedOccasion = occasion.trim();
+          if (trimmedOccasion.length === 0) {
+            errors.occasions = "Setiap acara tidak boleh kosong.";
+            break;
+          }
+          if (trimmedOccasion.length < 2) {
+            errors.occasions = "Setiap acara minimal 2 karakter.";
+            break;
+          }
+          if (trimmedOccasion.length > 50) {
+            errors.occasions = "Setiap acara maksimal 50 karakter.";
+            break;
+          }
         }
-        if (occasion.trim().length < 2) {
-          errors.occasions = "Setiap acara minimal 2 karakter.";
-          break;
+        // Check for duplicates only if no other errors
+        if (!errors.occasions) {
+          const lowerOccasions = this.state.occasions.map(o => o.trim().toLowerCase()).filter(Boolean);
+          const uniqueOccasions = new Set(lowerOccasions);
+          if (lowerOccasions.length !== uniqueOccasions.size) {
+            errors.occasions = "Terdapat acara duplikat.";
+          }
         }
-        if (occasion.trim().length > 50) {
-          errors.occasions = "Setiap acara maksimal 50 karakter.";
-          break;
-        }
-      }
-      // Check for duplicates
-      const lowerOccasions = this.state.occasions.map(o => o.trim().toLowerCase());
-      const uniqueOccasions = new Set(lowerOccasions);
-      if (lowerOccasions.length !== uniqueOccasions.size) {
-        errors.occasions = "Terdapat acara duplikat.";
       }
     } else if (this.state.occasionsText && this.state.occasionsText.trim()) {
-      // Fallback to occasionsText validation
+      // Fallback to occasionsText validation only if text exists
       const occError = this.validateField("occasionsText", this.state.occasionsText);
       if (occError) errors.occasions = occError;
     }
+    // If both arrays and text are empty, that's OK (optional field)
 
-    // Flowers array validation
-    if (this.state.flowers && Array.isArray(this.state.flowers)) {
+    // Flowers array validation - Only validate if array exists and has items
+    if (this.state.flowers && Array.isArray(this.state.flowers) && this.state.flowers.length > 0) {
       if (this.state.flowers.length > 20) {
         errors.flowers = "Maksimal 20 jenis bunga.";
-      }
-      // Validate each flower
-      for (let i = 0; i < this.state.flowers.length; i++) {
-        const flower = this.state.flowers[i];
-        if (typeof flower !== "string" || flower.trim().length === 0) {
-          errors.flowers = "Setiap jenis bunga tidak boleh kosong.";
-          break;
+      } else {
+        // Validate each flower only if array is not empty
+        for (let i = 0; i < this.state.flowers.length; i++) {
+          const flower = this.state.flowers[i];
+          if (typeof flower !== "string") {
+            errors.flowers = "Setiap jenis bunga harus berupa teks.";
+            break;
+          }
+          const trimmedFlower = flower.trim();
+          if (trimmedFlower.length === 0) {
+            errors.flowers = "Setiap jenis bunga tidak boleh kosong.";
+            break;
+          }
+          if (trimmedFlower.length < 2) {
+            errors.flowers = "Setiap jenis bunga minimal 2 karakter.";
+            break;
+          }
+          if (trimmedFlower.length > 50) {
+            errors.flowers = "Setiap jenis bunga maksimal 50 karakter.";
+            break;
+          }
         }
-        if (flower.trim().length < 2) {
-          errors.flowers = "Setiap jenis bunga minimal 2 karakter.";
-          break;
+        // Check for duplicates only if no other errors
+        if (!errors.flowers) {
+          const lowerFlowers = this.state.flowers.map(f => f.trim().toLowerCase()).filter(Boolean);
+          const uniqueFlowers = new Set(lowerFlowers);
+          if (lowerFlowers.length !== uniqueFlowers.size) {
+            errors.flowers = "Terdapat jenis bunga duplikat.";
+          }
         }
-        if (flower.trim().length > 50) {
-          errors.flowers = "Setiap jenis bunga maksimal 50 karakter.";
-          break;
-        }
-      }
-      // Check for duplicates
-      const lowerFlowers = this.state.flowers.map(f => f.trim().toLowerCase());
-      const uniqueFlowers = new Set(lowerFlowers);
-      if (lowerFlowers.length !== uniqueFlowers.size) {
-        errors.flowers = "Terdapat jenis bunga duplikat.";
       }
     } else if (this.state.flowersText && this.state.flowersText.trim()) {
-      // Fallback to flowersText validation
+      // Fallback to flowersText validation only if text exists
       const flowError = this.validateField("flowersText", this.state.flowersText);
       if (flowError) errors.flowers = flowError;
     }
+    // If both arrays and text are empty, that's OK (optional field)
 
     // Quantity
     if (this.state.quantity > 0) {
@@ -1167,31 +1204,59 @@ class BouquetUploader extends Component<Props, State> {
       fd.append("image", this.state.file);
     }
 
-    // Required fields with validation
-    const name = this.state.name.trim();
-    if (!name || name.length < 2) {
+    // Required fields with validation - Use raw values and validate properly
+    const nameValue = this.state.name;
+    if (!nameValue || typeof nameValue !== "string") {
+      throw new Error("Nama bouquet wajib diisi.");
+    }
+    const name = nameValue.trim();
+    if (name.length < 2) {
       throw new Error("Nama bouquet harus minimal 2 karakter.");
+    }
+    if (name.length > 100) {
+      throw new Error("Nama bouquet maksimal 100 karakter.");
     }
     fd.append("name", name);
 
-    const price = Number(this.state.price);
-    if (!Number.isFinite(price) || price <= 0) {
+    const priceValue = this.state.price;
+    if (priceValue === null || priceValue === undefined || priceValue === 0) {
+      throw new Error("Harga wajib diisi dan harus lebih besar dari 0.");
+    }
+    const price = Number(priceValue);
+    if (!Number.isFinite(price) || isNaN(price)) {
+      throw new Error("Harga harus berupa angka yang valid.");
+    }
+    if (price <= 0) {
       throw new Error("Harga harus lebih besar dari 0.");
+    }
+    if (price > 1000000000) {
+      throw new Error("Harga terlalu besar (maksimal 1 miliar).");
     }
     fd.append("price", String(price));
 
-    const size = this.state.size || "Medium";
-    if (!size || size.trim() === "") {
-      throw new Error("Ukuran harus dipilih.");
+    const sizeValue = this.state.size;
+    if (!sizeValue || typeof sizeValue !== "string") {
+      throw new Error("Ukuran wajib dipilih.");
+    }
+    const size = sizeValue.trim();
+    if (size.length === 0) {
+      throw new Error("Ukuran wajib dipilih.");
     }
     fd.append("size", size);
 
     const status = this.state.status || "ready";
     fd.append("status", status);
 
-    const collectionName = this.state.collectionName.trim();
-    if (!collectionName || collectionName.length < 2) {
-      throw new Error("Koleksi harus dipilih atau minimal 2 karakter.");
+    const collectionNameValue = this.state.collectionName;
+    if (!collectionNameValue || typeof collectionNameValue !== "string") {
+      throw new Error("Koleksi wajib dipilih atau diisi.");
+    }
+    const collectionName = collectionNameValue.trim();
+    if (collectionName.length < 2) {
+      throw new Error("Koleksi harus minimal 2 karakter.");
+    }
+    if (collectionName.length > 100) {
+      throw new Error("Nama koleksi maksimal 100 karakter.");
     }
     fd.append("collectionName", collectionName);
 
@@ -1202,47 +1267,71 @@ class BouquetUploader extends Component<Props, State> {
     fd.append("careInstructions", (this.state.careInstructions || "").trim());
 
     // Arrays - use array if available, otherwise fallback to text
-    // Validate arrays before appending
-    if (this.state.occasions && Array.isArray(this.state.occasions) && this.state.occasions.length > 0) {
-      // Validate each occasion
-      for (const occasion of this.state.occasions) {
-        if (typeof occasion !== "string" || occasion.trim().length === 0) {
-          throw new Error("Setiap acara tidak boleh kosong.");
-        }
-        if (occasion.trim().length < 2) {
-          throw new Error("Setiap acara minimal 2 karakter.");
-        }
-        if (occasion.trim().length > 50) {
-          throw new Error("Setiap acara maksimal 50 karakter.");
-        }
-      }
+    // Only validate if arrays have items (empty arrays are OK)
+    if (this.state.occasions && Array.isArray(this.state.occasions)) {
       if (this.state.occasions.length > 10) {
         throw new Error("Maksimal 10 acara.");
       }
-      fd.append("occasions", this.state.occasions.join(","));
+      if (this.state.occasions.length > 0) {
+        // Validate each occasion only if array has items
+        const validOccasions = this.state.occasions
+          .map(occasion => {
+            if (typeof occasion !== "string") {
+              throw new Error("Setiap acara harus berupa teks.");
+            }
+            const trimmed = occasion.trim();
+            if (trimmed.length === 0) {
+              throw new Error("Setiap acara tidak boleh kosong.");
+            }
+            if (trimmed.length < 2) {
+              throw new Error("Setiap acara minimal 2 karakter.");
+            }
+            if (trimmed.length > 50) {
+              throw new Error("Setiap acara maksimal 50 karakter.");
+            }
+            return trimmed;
+          });
+        fd.append("occasions", validOccasions.join(","));
+      } else {
+        // Empty array is OK
+        fd.append("occasions", "");
+      }
     } else {
+      // Fallback to text
       const occasionsValue = (this.state.occasionsText || "").trim();
       fd.append("occasions", occasionsValue);
     }
     
-    if (this.state.flowers && Array.isArray(this.state.flowers) && this.state.flowers.length > 0) {
-      // Validate each flower
-      for (const flower of this.state.flowers) {
-        if (typeof flower !== "string" || flower.trim().length === 0) {
-          throw new Error("Setiap jenis bunga tidak boleh kosong.");
-        }
-        if (flower.trim().length < 2) {
-          throw new Error("Setiap jenis bunga minimal 2 karakter.");
-        }
-        if (flower.trim().length > 50) {
-          throw new Error("Setiap jenis bunga maksimal 50 karakter.");
-        }
-      }
+    if (this.state.flowers && Array.isArray(this.state.flowers)) {
       if (this.state.flowers.length > 20) {
         throw new Error("Maksimal 20 jenis bunga.");
       }
-      fd.append("flowers", this.state.flowers.join(","));
+      if (this.state.flowers.length > 0) {
+        // Validate each flower only if array has items
+        const validFlowers = this.state.flowers
+          .map(flower => {
+            if (typeof flower !== "string") {
+              throw new Error("Setiap jenis bunga harus berupa teks.");
+            }
+            const trimmed = flower.trim();
+            if (trimmed.length === 0) {
+              throw new Error("Setiap jenis bunga tidak boleh kosong.");
+            }
+            if (trimmed.length < 2) {
+              throw new Error("Setiap jenis bunga minimal 2 karakter.");
+            }
+            if (trimmed.length > 50) {
+              throw new Error("Setiap jenis bunga maksimal 50 karakter.");
+            }
+            return trimmed;
+          });
+        fd.append("flowers", validFlowers.join(","));
+      } else {
+        // Empty array is OK
+        fd.append("flowers", "");
+      }
     } else {
+      // Fallback to text
       const flowersValue = (this.state.flowersText || "").trim();
       fd.append("flowers", flowersValue);
     }
