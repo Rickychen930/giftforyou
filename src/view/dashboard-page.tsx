@@ -66,6 +66,7 @@ interface Props {
   onLogout: () => void;
   onUpdateCollectionName?: (collectionId: string, newName: string) => Promise<boolean>;
   onMoveBouquet?: (bouquetId: string, targetCollectionId: string) => Promise<boolean>;
+  onDeleteCollection?: (collectionId: string) => Promise<boolean>;
 }
 
 type ActiveTab = "overview" | "orders" | "upload" | "edit" | "hero";
@@ -1436,6 +1437,7 @@ class DashboardView extends Component<Props, State> {
             collections={collections}
             onUpdateCollection={this.props.onUpdateCollectionName}
             onMoveBouquet={this.props.onMoveBouquet}
+            onDeleteCollection={this.props.onDeleteCollection}
           />
         );
 

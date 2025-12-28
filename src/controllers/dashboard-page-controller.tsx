@@ -677,6 +677,62 @@ class DashboardController extends Component<{}, State> {
     }
   };
 
+  private onDeleteCollection = async (collectionId: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`${API_BASE}/api/collections/${collectionId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          ...this.getAuthHeaders(),
+        },
+      });
+
+      // Read response text first to check if it's HTML
+      const responseText = await res.text();
+
+      if (!res.ok) {
+        let errorMessage = `Failed to delete collection (${res.status})`;
+        
+        // Check if response is HTML (404 page or error page)
+        if (responseText.includes("<!DOCTYPE html>") || responseText.includes("<html")) {
+          errorMessage = "Endpoint /api/collections tidak tersedia. Pastikan server berjalan dan route dikonfigurasi dengan benar.";
+        } else {
+          // Try to parse as JSON
+          try {
+            const errorData = JSON.parse(responseText);
+            errorMessage = errorData?.error || errorData?.message || errorMessage;
+          } catch {
+            // If not JSON, use the response text if it's short
+            if (responseText.length < 200) {
+              errorMessage = responseText;
+            }
+          }
+        }
+
+        this.setState({ errorMessage: `Gagal menghapus koleksi: ${errorMessage}` });
+        return false;
+      }
+
+      // Parse JSON response
+      try {
+        const data = JSON.parse(responseText);
+        if (data?.message) {
+          console.log("Collection deleted:", data.message);
+        }
+      } catch (parseErr) {
+        console.warn("Failed to parse delete collection response:", parseErr);
+      }
+
+      // Refresh collections after delete
+      await this.loadDashboard();
+      return true;
+    } catch (error) {
+      console.error("Failed to delete collection:", error);
+      this.setState({ errorMessage: `Gagal menghapus koleksi: ${error instanceof Error ? error.message : String(error)}` });
+      return false;
+    }
+  };
+
   private onMoveBouquet = async (
     bouquetId: string,
     targetCollectionId: string
@@ -784,6 +840,7 @@ class DashboardController extends Component<{}, State> {
         onLogout={this.onLogout}
         onUpdateCollectionName={this.onUpdateCollectionName}
         onMoveBouquet={this.onMoveBouquet}
+        onDeleteCollection={this.onDeleteCollection}
       />
     );
   }

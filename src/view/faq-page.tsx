@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { setSeo } from "../utils/seo";
 import { setFaqSeo } from "../utils/seo";
 import "../styles/FAQPage.css";
+import { STORE_PROFILE } from "../config/store-profile";
 
 interface FAQItem {
   question: string;
@@ -264,7 +265,7 @@ const FAQPage: React.FC = () => {
             </p>
             <div className="faq-contact-buttons">
               <a
-                href="https://wa.me/6281234567890"
+                href={STORE_PROFILE.whatsapp.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="faq-contact-btn faq-contact-btn--primary"

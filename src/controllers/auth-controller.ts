@@ -188,7 +188,7 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
     const accessToken = jwt.sign(
       { id: String(user._id), username: user.username, role: user.role },
       JWT_SECRET,
-      { expiresIn: "15m" } // Increased from 5m to 15m
+      { expiresIn: "2h" } // Token expires in 2 hours
     );
 
     // Generate refresh token (long-lived)
@@ -261,7 +261,7 @@ export async function refreshToken(req: Request, res: Response): Promise<void> {
       const accessToken = jwt.sign(
         { id: String(user._id), username: user.username, role: user.role },
         JWT_SECRET,
-        { expiresIn: "15m" }
+        { expiresIn: "4h" } // Token expires in 4 hours
       );
 
       res.status(200).json({ token: accessToken });

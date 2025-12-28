@@ -15,6 +15,7 @@ interface Props {
   onDelete?: (bouquetId: string) => Promise<void>;
   onUpdateCollection?: (collectionId: string, name: string) => Promise<boolean>;
   onMoveBouquet?: (bouquetId: string, targetCollectionId: string) => Promise<boolean>;
+  onDeleteCollection?: (collectionId: string) => Promise<boolean>;
 }
 
 type ViewState = "collections" | "collection-detail" | "bouquet-edit";
@@ -210,6 +211,26 @@ export default class BouquetEditorSection extends Component<Props, State> {
       console.error("Failed to update collection:", err);
       return false;
     }
+  };
+
+  private handleCollectionDelete = async (
+    collectionId: string
+  ): Promise<boolean> => {
+    if (this.props.onDeleteCollection) {
+      const success = await this.props.onDeleteCollection(collectionId);
+      if (success) {
+        // Update local state - remove deleted collection
+        this.setState((prev) => ({
+          ...prev,
+          collections: prev.collections.filter((c) => c._id !== collectionId),
+          // If deleted collection was selected, go back to collections view
+          selectedCollectionId: prev.selectedCollectionId === collectionId ? null : prev.selectedCollectionId,
+          currentView: prev.selectedCollectionId === collectionId ? "collections" : prev.currentView,
+        }));
+      }
+      return success;
+    }
+    return false;
   };
 
   private handleBouquetMove = async (
@@ -492,6 +513,7 @@ export default class BouquetEditorSection extends Component<Props, State> {
             collections={collections}
             onCollectionSelect={this.handleCollectionSelect}
             onCollectionUpdate={this.handleCollectionUpdate}
+            onCollectionDelete={this.handleCollectionDelete}
           />
         );
 

@@ -6,16 +6,20 @@ interface Props {
   collections: Collection[];
   onCollectionSelect: (collectionId: string) => void;
   onCollectionUpdate: (collectionId: string, newName: string) => Promise<boolean>;
+  onCollectionDelete?: (collectionId: string) => Promise<boolean>;
 }
 
 const CollectionListView: React.FC<Props> = ({
   collections,
   onCollectionSelect,
   onCollectionUpdate,
+  onCollectionDelete,
 }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -93,6 +97,51 @@ const CollectionListView: React.FC<Props> = ({
     return Array.isArray(collection.bouquets)
       ? collection.bouquets.length
       : 0;
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, collectionId: string): void => {
+    e.stopPropagation();
+    setDeleteConfirmId(collectionId);
+  };
+
+  const handleDeleteConfirm = async (collectionId: string): Promise<void> => {
+    if (!onCollectionDelete) return;
+
+    const collection = collections.find((c) => c._id === collectionId);
+    const count = collection ? bouquetCount(collection) : 0;
+
+    if (count > 0) {
+      const confirmMessage = `Koleksi "${collection?.name}" memiliki ${count} bouquet. Semua bouquet akan kehilangan nama koleksi. Yakin ingin menghapus?`;
+      if (!window.confirm(confirmMessage)) {
+        setDeleteConfirmId(null);
+        return;
+      }
+    } else {
+      const confirmMessage = `Yakin ingin menghapus koleksi "${collection?.name}"?`;
+      if (!window.confirm(confirmMessage)) {
+        setDeleteConfirmId(null);
+        return;
+      }
+    }
+
+    setDeletingId(collectionId);
+    setDeleteConfirmId(null);
+
+    try {
+      const success = await onCollectionDelete(collectionId);
+      if (!success) {
+        alert("Gagal menghapus koleksi. Silakan coba lagi.");
+      }
+    } catch (err) {
+      console.error("Failed to delete collection:", err);
+      alert("Terjadi kesalahan saat menghapus koleksi. Silakan coba lagi.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleDeleteCancel = (): void => {
+    setDeleteConfirmId(null);
   };
 
   return (
@@ -220,10 +269,11 @@ const CollectionListView: React.FC<Props> = ({
                       </div>
                     </div>
                   ) : (
-                    <>
-                      <h3 className="collectionListView__cardTitle">
-                        {collection.name}
-                      </h3>
+                  <>
+                    <h3 className="collectionListView__cardTitle">
+                      {collection.name}
+                    </h3>
+                    <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
                       <button
                         type="button"
                         className="collectionListView__editIconBtn"
@@ -258,7 +308,96 @@ const CollectionListView: React.FC<Props> = ({
                           />
                         </svg>
                       </button>
-                    </>
+                      {onCollectionDelete && (
+                        <button
+                          type="button"
+                          className="collectionListView__deleteIconBtn"
+                          onClick={(e) => handleDeleteClick(e, collection._id)}
+                          disabled={deletingId === collection._id}
+                          aria-label={`Hapus koleksi ${collection.name}`}
+                          title="Hapus koleksi"
+                        >
+                          {deletingId === collection._id ? (
+                            <svg
+                              width="18"
+                              height="18"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                              aria-hidden="true"
+                              style={{ animation: "spin 1s linear infinite" }}
+                            >
+                              <circle
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeDasharray="32"
+                                strokeDashoffset="32"
+                              />
+                            </svg>
+                          ) : (
+                            <svg
+                              width="18"
+                              height="18"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                              aria-hidden="true"
+                            >
+                              <path
+                                d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <path
+                                d="M10 11v6M14 11v6"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  {deleteConfirmId === collection._id && (
+                    <div
+                      className="collectionListView__deleteConfirm"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <p>Yakin ingin menghapus koleksi ini?</p>
+                      {count > 0 && (
+                        <p style={{ fontSize: "0.875rem", color: "var(--ink-620)", marginTop: "0.25rem" }}>
+                          {count} bouquet akan kehilangan nama koleksi
+                        </p>
+                      )}
+                      <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
+                        <button
+                          type="button"
+                          className="collectionListView__deleteConfirmBtn collectionListView__deleteConfirmBtn--confirm"
+                          onClick={() => handleDeleteConfirm(collection._id)}
+                          disabled={deletingId === collection._id}
+                        >
+                          Hapus
+                        </button>
+                        <button
+                          type="button"
+                          className="collectionListView__deleteConfirmBtn collectionListView__deleteConfirmBtn--cancel"
+                          onClick={handleDeleteCancel}
+                          disabled={deletingId === collection._id}
+                        >
+                          Batal
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  </>
                   )}
                 </div>
 
