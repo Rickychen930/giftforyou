@@ -786,9 +786,12 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
           // Clear file after successful save
           setFile(null);
           setImageDimensions(null);
-          // Show success message briefly, then let parent handle navigation
+          // Show success message - STAY IN EDIT VIEW (don't auto-navigate)
           setSaveStatus("success");
-          setSaveMessage("Perubahan tersimpan.");
+          setSaveMessage("Perubahan tersimpan. Anda dapat melanjutkan editing atau kembali ke detail koleksi.");
+          setSaving(false);
+          // Update form to reflect saved state
+          setForm(prev => ({ ...prev, ...prev }));
         } else {
           // IMPORTANT: Reset saving state on failure to allow retry
           setSaving(false);
@@ -797,6 +800,7 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
         }
       } else {
         setSaveStatus("success");
+        setSaving(false);
         setSaveMessage("Perubahan tersimpan.");
         setFile(null);
         setImageDimensions(null);
@@ -804,9 +808,25 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Save error:", err);
-      const errorMessage = err instanceof Error 
+      let errorMessage = err instanceof Error 
         ? err.message 
         : "Gagal menyimpan. Silakan coba lagi.";
+      
+      // Provide user-friendly error messages for common errors
+      if (errorMessage.includes("EACCES") || errorMessage.includes("EPERM") || errorMessage.includes("PERMISSION_DENIED") || errorMessage.includes("izin")) {
+        errorMessage = "Tidak memiliki izin untuk menyimpan file. Silakan hubungi administrator untuk memperbaiki izin direktori uploads.";
+      } else if (errorMessage.includes("ENOSPC") || errorMessage.includes("INSUFFICIENT_STORAGE") || errorMessage.includes("penuh")) {
+        errorMessage = "Ruang penyimpanan penuh. Silakan hapus file lama atau hubungi administrator.";
+      } else if (errorMessage.includes("timeout") || errorMessage.includes("Timeout")) {
+        errorMessage = "Save timeout. Silakan coba lagi.";
+      } else if (errorMessage.includes("NetworkError") || errorMessage.includes("Failed to fetch")) {
+        errorMessage = "Gagal terhubung ke server. Periksa koneksi internet Anda dan coba lagi.";
+      } else if (errorMessage.includes("413") || errorMessage.includes("too large")) {
+        errorMessage = "File gambar terlalu besar. Maksimal 8MB. Silakan pilih file yang lebih kecil.";
+      } else if (errorMessage.includes("415") || errorMessage.includes("Unsupported Media Type")) {
+        errorMessage = "Format file tidak didukung. Silakan gunakan JPG, PNG, WEBP, atau HEIC.";
+      }
+      
       // IMPORTANT: Always reset saving state to allow retry
       setSaving(false);
       setSaveStatus("error");

@@ -124,7 +124,20 @@ export const createBouquet = async (
       } catch (imageErr) {
         const imageErrorMsg = imageErr instanceof Error ? imageErr.message : "Failed to process image";
         console.error("❌ Image upload failed:", imageErrorMsg);
-        res.status(400).json({ error: `Image upload failed: ${imageErrorMsg}` });
+        
+        // Provide user-friendly error messages
+        let userMessage = imageErrorMsg;
+        if (imageErrorMsg.includes("EACCES") || imageErrorMsg.includes("EPERM") || imageErrorMsg.includes("permission")) {
+          userMessage = "Tidak memiliki izin untuk menyimpan file. Silakan hubungi administrator untuk memperbaiki izin direktori uploads.";
+        } else if (imageErrorMsg.includes("ENOSPC")) {
+          userMessage = "Ruang penyimpanan penuh. Silakan hapus file lama atau hubungi administrator.";
+        } else if (imageErrorMsg.includes("terlalu besar") || imageErrorMsg.includes("too large")) {
+          userMessage = imageErrorMsg; // Already user-friendly
+        } else if (imageErrorMsg.includes("Empty") || imageErrorMsg.includes("kosong")) {
+          userMessage = imageErrorMsg; // Already user-friendly
+        }
+        
+        res.status(400).json({ error: userMessage });
         return;
       }
     }
@@ -304,7 +317,27 @@ export const updateBouquet = async (
 
     // ✅ FIX: saveUploadedImage instead of req.file.filename
     if (req.file) {
-      updates.image = await saveUploadedImage(req.file);
+      try {
+        updates.image = await saveUploadedImage(req.file);
+      } catch (imageErr) {
+        const imageErrorMsg = imageErr instanceof Error ? imageErr.message : "Failed to process image";
+        console.error("❌ Image upload failed during update:", imageErrorMsg);
+        
+        // Provide user-friendly error messages
+        let userMessage = imageErrorMsg;
+        if (imageErrorMsg.includes("EACCES") || imageErrorMsg.includes("EPERM") || imageErrorMsg.includes("permission")) {
+          userMessage = "Tidak memiliki izin untuk menyimpan file. Silakan hubungi administrator untuk memperbaiki izin direktori uploads.";
+        } else if (imageErrorMsg.includes("ENOSPC")) {
+          userMessage = "Ruang penyimpanan penuh. Silakan hapus file lama atau hubungi administrator.";
+        } else if (imageErrorMsg.includes("terlalu besar") || imageErrorMsg.includes("too large")) {
+          userMessage = imageErrorMsg; // Already user-friendly
+        } else if (imageErrorMsg.includes("Empty") || imageErrorMsg.includes("kosong")) {
+          userMessage = imageErrorMsg; // Already user-friendly
+        }
+        
+        res.status(400).json({ error: userMessage });
+        return;
+      }
     }
 
     Object.assign(bouquet, updates);

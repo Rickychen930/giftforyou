@@ -45,8 +45,55 @@ export default class BouquetEditorSection extends Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: Props): void {
-    if (prevProps.collections !== this.props.collections || prevProps.bouquets !== this.props.bouquets) {
-      this.loadCollections();
+    // Only reload if collections structure actually changed (not just data updates)
+    // This prevents unnecessary reloads that reset the view
+    const prevCollectionsLength = Array.isArray(prevProps.collections) ? prevProps.collections.length : 0;
+    const currentCollectionsLength = Array.isArray(this.props.collections) ? this.props.collections.length : 0;
+    
+    // Only reload if:
+    // 1. Collections count changed (new collection added/deleted)
+    // 2. Collections structure changed (from string[] to Collection[] or vice versa)
+    // 3. Initial load (collections was empty before)
+    const collectionsStructureChanged = 
+      (prevCollectionsLength === 0 && currentCollectionsLength > 0) ||
+      (prevCollectionsLength !== currentCollectionsLength) ||
+      (prevProps.collections.length > 0 && this.props.collections.length > 0 && 
+       typeof prevProps.collections[0] !== typeof this.props.collections[0]);
+    
+    if (collectionsStructureChanged) {
+      // Preserve current view state when reloading
+      const currentView = this.state.currentView;
+      const selectedCollectionId = this.state.selectedCollectionId;
+      const selectedBouquet = this.state.selectedBouquet;
+      
+      this.loadCollections().then(() => {
+        // Restore view state after reload
+        if (currentView !== "collections") {
+          this.setState({
+            currentView,
+            selectedCollectionId,
+            selectedBouquet,
+          });
+        }
+      });
+    } else {
+      // Just update local state with new props without reloading
+      // This preserves the current view
+      if (this.props.bouquets !== prevProps.bouquets) {
+        this.setState((prev) => ({
+          bouquets: this.props.bouquets ?? [],
+          // Update bouquets in collections without reloading
+          collections: prev.collections.map((c) => {
+            const updatedBouquets = (this.props.bouquets ?? []).filter(
+              (b) => b.collectionName === c.name
+            );
+            return {
+              ...c,
+              bouquets: updatedBouquets,
+            };
+          }),
+        }));
+      }
     }
   }
 
@@ -221,15 +268,19 @@ export default class BouquetEditorSection extends Component<Props, State> {
       const success = await this.props.onDeleteCollection(collectionId);
       if (success) {
         // Update local state - remove deleted collection
-        this.setState((prev) => ({
-          ...prev,
-          collections: prev.collections.filter((c) => c._id !== collectionId),
-          // If deleted collection was selected, go back to collections view
-          selectedCollectionId: prev.selectedCollectionId === collectionId ? null : prev.selectedCollectionId,
-          currentView: prev.selectedCollectionId === collectionId ? "collections" : prev.currentView,
-        }));
-        // Reload collections to ensure sync
-        await this.loadCollections();
+        this.setState((prev) => {
+          const wasSelected = prev.selectedCollectionId === collectionId;
+          return {
+            ...prev,
+            collections: prev.collections.filter((c) => c._id !== collectionId),
+            // If deleted collection was selected, go back to collections view
+            selectedCollectionId: wasSelected ? null : prev.selectedCollectionId,
+            currentView: wasSelected ? "collections" : prev.currentView,
+            // If we were editing a bouquet from deleted collection, go back to collections
+            selectedBouquet: wasSelected ? null : prev.selectedBouquet,
+          };
+        });
+        // No need to reload - state is already updated
       }
       return success;
     }
@@ -409,28 +460,52 @@ export default class BouquetEditorSection extends Component<Props, State> {
       try {
         await this.props.onDelete(bouquetId);
         // Update local state
-        this.setState((prev) => ({
-          ...prev,
-          bouquets: prev.bouquets.filter((b) => b._id !== bouquetId),
-          collections: prev.collections.map((c) => ({
+        this.setState((prev) => {
+          const updatedBouquets = prev.bouquets.filter((b) => b._id !== bouquetId);
+          const updatedCollections = prev.collections.map((c) => ({
             ...c,
             bouquets: (c.bouquets as Bouquet[]).filter(
               (b) => b._id !== bouquetId
             ),
-          })),
-        }));
-        // If we're in collection detail view and the collection is now empty, go back
-        if (this.state.currentView === "collection-detail") {
-          const collection = this.state.collections.find(
-            (c) => c._id === this.state.selectedCollectionId
-          );
-          if (collection && (collection.bouquets as Bouquet[]).length === 0) {
-            setTimeout(() => {
-              this.handleBackToCollections();
-            }, 500);
+          }));
+          
+          // If we're in bouquet-edit view and deleted the current bouquet, go back
+          if (prev.currentView === "bouquet-edit" && prev.selectedBouquet?._id === bouquetId) {
+            return {
+              ...prev,
+              bouquets: updatedBouquets,
+              collections: updatedCollections,
+              currentView: "collection-detail",
+              selectedBouquet: null,
+            };
           }
-        }
+          
+          // If we're in collection detail view and the collection is now empty, go back
+          if (prev.currentView === "collection-detail") {
+            const collection = updatedCollections.find(
+              (c) => c._id === prev.selectedCollectionId
+            );
+            if (collection && (collection.bouquets as Bouquet[]).length === 0) {
+              return {
+                ...prev,
+                bouquets: updatedBouquets,
+                collections: updatedCollections,
+                currentView: "collections",
+                selectedCollectionId: null,
+                selectedBouquet: null,
+              };
+            }
+          }
+          
+          // Otherwise, just update state and stay in current view
+          return {
+            ...prev,
+            bouquets: updatedBouquets,
+            collections: updatedCollections,
+          };
+        });
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.error("Failed to delete bouquet:", err);
         // Error handling is done in the delete handler
       }
@@ -441,9 +516,23 @@ export default class BouquetEditorSection extends Component<Props, State> {
     if (this.props.onDuplicate) {
       try {
         await this.props.onDuplicate(bouquetId);
-        // Reload collections to get the new duplicated bouquet
-        await this.loadCollections();
+        // Update local state with new props instead of reloading
+        // This preserves the current view
+        this.setState((prev) => ({
+          bouquets: this.props.bouquets ?? prev.bouquets,
+          // Update collections with new bouquets without full reload
+          collections: prev.collections.map((c) => {
+            const updatedBouquets = (this.props.bouquets ?? []).filter(
+              (b) => b.collectionName === c.name
+            );
+            return {
+              ...c,
+              bouquets: updatedBouquets,
+            };
+          }),
+        }));
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.error("Failed to duplicate bouquet:", err);
         // Error handling is done in the duplicate handler
       }
@@ -506,7 +595,7 @@ export default class BouquetEditorSection extends Component<Props, State> {
             image, // Keep existing image URL unless updated by server
           };
 
-          // Update state
+          // Update state WITHOUT navigating back - stay in edit view for better UX
           this.setState((prev) => {
             const updatedBouquets = prev.bouquets.map((b) =>
               b._id === bouquetId ? updated : b
@@ -559,20 +648,19 @@ export default class BouquetEditorSection extends Component<Props, State> {
               ...prev,
               bouquets: updatedBouquets,
               collections: updatedCollections,
-              // Update selected bouquet if it's the one being edited
+              // Update selected bouquet to reflect changes - STAY IN EDIT VIEW
               selectedBouquet: prev.selectedBouquet?._id === bouquetId ? updated : prev.selectedBouquet,
+              // DO NOT navigate back - let user continue editing or manually go back
             };
           });
 
-          // Navigate back immediately after state update (no delay for better UX)
-          this.handleBackToCollectionDetail();
-        } else {
-          // If bouquet not found, still navigate back
-          this.handleBackToCollectionDetail();
+          // DO NOT auto-navigate back - let user decide when to go back
+          // This provides better UX and prevents accidental navigation
         }
       }
       return success;
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error("Failed to save bouquet:", err);
       return false;
     }

@@ -3,7 +3,7 @@ import DashboardView from "../view/dashboard-page";
 import type { Bouquet } from "../models/domain/bouquet";
 
 import { API_BASE } from "../config/api";
-import { normalizeBouquets } from "../utils/bouquet-normalizer";
+import { normalizeBouquets, normalizeBouquet } from "../utils/bouquet-normalizer";
 
 type MetricsResponse = {
   visitorsCount?: number;
@@ -534,13 +534,31 @@ class DashboardController extends Component<{}, State> {
         // Response might not be JSON, that's okay
       }
 
-      await this.loadDashboard();
+      // Update local state instead of full reload for better performance
+      // Only reload bouquets, not full dashboard
+      try {
+        const bouquetsRes = await fetch(`${API_BASE}/api/bouquets`, {
+          headers: {
+            ...this.getAuthHeaders(),
+          },
+        });
+        if (bouquetsRes.ok) {
+          const bouquets = await bouquetsRes.json();
+          this.setState((prev) => ({
+            bouquets: normalizeBouquets(bouquets),
+          }));
+        }
+      } catch {
+        // If fetch fails, silently continue - upload was successful
+      }
+      
       return true;
     } catch (e) {
       const errorMessage = e instanceof Error 
         ? e.message 
         : "Upload gagal. Silakan periksa koneksi internet dan coba lagi.";
       
+      // eslint-disable-next-line no-console
       console.error("Upload error:", e);
       this.setState({
         errorMessage,
@@ -567,7 +585,59 @@ class DashboardController extends Component<{}, State> {
         throw new Error(`Update failed (${res.status}): ${t}`);
       }
 
-      await this.loadDashboard();
+      // Fetch updated bouquet from server to ensure data is in sync
+      // This ensures we have the latest data from database (including image URL if changed)
+      try {
+        const updatedBouquetRes = await fetch(`${API_BASE}/api/bouquets/${id}`, {
+          headers: {
+            ...this.getAuthHeaders(),
+          },
+        });
+        
+        if (updatedBouquetRes.ok) {
+          const updatedBouquet = await updatedBouquetRes.json();
+          // Update local state with fresh data from server
+          const normalized = normalizeBouquet(updatedBouquet);
+          if (normalized) {
+            this.setState((prev) => ({
+              bouquets: prev.bouquets.map((b) =>
+                b._id === id ? normalized : b
+              ),
+            }));
+          }
+        } else {
+          // If fetch fails, try to parse response from update
+          const updateResponse = await res.json().catch(() => null);
+          if (updateResponse?.bouquet) {
+            const normalized = normalizeBouquet(updateResponse.bouquet);
+            if (normalized) {
+              this.setState((prev) => ({
+                bouquets: prev.bouquets.map((b) =>
+                  b._id === id ? normalized : b
+                ),
+              }));
+            }
+          }
+        }
+      } catch (fetchErr) {
+        // If fetch fails, try to parse response from update
+        try {
+          const updateResponse = await res.json().catch(() => null);
+          if (updateResponse?.bouquet) {
+            const normalized = normalizeBouquet(updateResponse.bouquet);
+            if (normalized) {
+              this.setState((prev) => ({
+                bouquets: prev.bouquets.map((b) =>
+                  b._id === id ? normalized : b
+                ),
+              }));
+            }
+          }
+        } catch {
+          // If all fails, silently continue - update was successful
+        }
+      }
+      
       return true;
     } catch (e) {
       this.setState({
@@ -680,7 +750,11 @@ class DashboardController extends Component<{}, State> {
         throw new Error(`Delete failed (${res.status}): ${t}`);
       }
 
-      await this.loadDashboard();
+      // Update local state instead of full reload for better performance
+      // This prevents unnecessary refreshes that reset the editor view
+      this.setState((prev) => ({
+        bouquets: prev.bouquets.filter((b) => b._id !== bouquetId),
+      }));
     } catch (e) {
       this.setState({
         errorMessage: e instanceof Error ? e.message : "Delete failed.",
@@ -727,10 +801,12 @@ class DashboardController extends Component<{}, State> {
         throw new Error(errorMessage);
       }
 
-      // Refresh collections after update
-      await this.loadDashboard();
+      // Update local state instead of full reload
+      // Collections will be updated by the editor component
+      // No need to reload full dashboard
       return true;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("Failed to update collection name:", error);
       this.setState({ errorMessage: `Gagal memperbarui nama koleksi: ${error instanceof Error ? error.message : String(error)}` });
       return false;
@@ -783,8 +859,9 @@ class DashboardController extends Component<{}, State> {
         console.warn("Failed to parse delete collection response:", parseErr);
       }
 
-      // Refresh collections after delete
-      await this.loadDashboard();
+      // Update local state instead of full reload
+      // Collections will be updated by the editor component
+      // No need to reload full dashboard
       return true;
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -862,12 +939,14 @@ class DashboardController extends Component<{}, State> {
         });
 
         if (!updateRes.ok) {
+          // eslint-disable-next-line no-console
           console.warn("Failed to update bouquet's collection name, but bouquet was moved.");
         }
       }
 
-      // Refresh dashboard after move
-      await this.loadDashboard();
+      // Update local state instead of full reload
+      // Bouquets and collections will be updated by the editor component
+      // No need to reload full dashboard
       return true;
     } catch (error) {
       console.error("Failed to move bouquet:", error);

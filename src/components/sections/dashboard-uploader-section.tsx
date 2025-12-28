@@ -1583,8 +1583,12 @@ class BouquetUploader extends Component<Props, State> {
           errorMessage = "Upload dibatalkan. Silakan coba lagi.";
         } else if (errorMessage.includes("400") || errorMessage.includes("Bad Request") || errorMessage.includes("must be at least") || errorMessage.includes("must be greater") || errorMessage.includes("invalid") || errorMessage.includes("Invalid")) {
           errorMessage = "Data yang diinput tidak valid. Pastikan semua field wajib sudah diisi dengan benar dan format data sesuai.";
-        } else if (errorMessage.includes("401") || errorMessage.includes("Unauthorized") || errorMessage.includes("403") || errorMessage.includes("Forbidden") || errorMessage.includes("Authentication") || errorMessage.includes("Insufficient permissions") || errorMessage.includes("permission")) {
-          errorMessage = "Sesi Anda telah berakhir atau tidak memiliki izin. Silakan login kembali.";
+        } else if (errorMessage.includes("401") || errorMessage.includes("Unauthorized") || errorMessage.includes("403") || errorMessage.includes("Forbidden") || errorMessage.includes("Authentication") || errorMessage.includes("Insufficient permissions") || errorMessage.includes("permission") || errorMessage.includes("PERMISSION_DENIED") || errorMessage.includes("EACCES") || errorMessage.includes("EPERM") || errorMessage.includes("izin")) {
+          if (errorMessage.includes("EACCES") || errorMessage.includes("EPERM") || errorMessage.includes("PERMISSION_DENIED") || errorMessage.includes("izin")) {
+            errorMessage = "Tidak memiliki izin untuk menyimpan file. Silakan hubungi administrator untuk memperbaiki izin direktori uploads.";
+          } else {
+            errorMessage = "Sesi Anda telah berakhir atau tidak memiliki izin. Silakan login kembali.";
+          }
         } else if (errorMessage.includes("413") || errorMessage.includes("too large") || errorMessage.includes("LIMIT_FILE_SIZE") || errorMessage.includes("Payload too large") || errorMessage.includes("Request Entity Too Large")) {
           errorMessage = "File gambar terlalu besar. Maksimal 8MB. Silakan pilih file yang lebih kecil atau kompres gambar terlebih dahulu.";
         } else if (errorMessage.includes("415") || errorMessage.includes("Unsupported Media Type") || errorMessage.includes("image format") || errorMessage.includes("file type")) {
@@ -1604,6 +1608,8 @@ class BouquetUploader extends Component<Props, State> {
           errorMessage = "Server tidak merespons. Silakan coba lagi dalam beberapa saat.";
         } else if (errorMessage.includes("ENOENT") || errorMessage.includes("ENOTFOUND") || errorMessage.includes("ECONNREFUSED")) {
           errorMessage = "Tidak dapat terhubung ke server. Pastikan server sedang berjalan dan koneksi internet stabil.";
+        } else if (errorMessage.includes("ENOSPC") || errorMessage.includes("INSUFFICIENT_STORAGE") || errorMessage.includes("penuh")) {
+          errorMessage = "Ruang penyimpanan penuh. Silakan hapus file lama atau hubungi administrator.";
         } else if (errorMessage.includes("duplicate") || errorMessage.includes("already exists") || errorMessage.includes("unique")) {
           errorMessage = "Bouquet dengan nama atau data yang sama sudah ada. Silakan gunakan nama yang berbeda.";
         } else if (errorMessage.includes("validation") || errorMessage.includes("ValidationError")) {
