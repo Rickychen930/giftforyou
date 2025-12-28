@@ -4,13 +4,13 @@
   "private": true,
   "proxy": "http://localhost:4000",
   "scripts": {
-    "start": "NODE_OPTIONS='--max-http-header-size=16384' react-scripts start",
+    "start": "NODE_OPTIONS='--max-http-header-size=16384 --no-deprecation' react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev:server": "DOTENV_CONFIG_PATH=.env.development node --max-http-header-size=16384 -r ts-node/register/transpile-only -r dotenv/config ./node_modules/.bin/ts-node-dev --respawn --transpile-only src/server/server.ts",
+    "dev:server": "DOTENV_CONFIG_PATH=.env.development node --max-http-header-size=16384 --no-deprecation -r ts-node/register/transpile-only -r dotenv/config ./node_modules/.bin/ts-node-dev --respawn --transpile-only src/server/server.ts",
     "build:server": "tsc -p tsconfig.server.json",
-    "start:server": "node --max-http-header-size=16384 dist/server/server.js",
+    "start:server": "node --max-http-header-size=16384 --no-deprecation dist/server/server.js",
     "seed": "ts-node src/seed/seed.ts",
     "dev": "concurrently -n WEB,API -c cyan,magenta \"npm start\" \"npm run dev:server\""
   },

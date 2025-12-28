@@ -1,6 +1,6 @@
 // src/routes/auth-routes.ts
 import { Router } from "express";
-import { loginUser, createUser, refreshToken } from "../controllers/auth-controller";
+import { loginUser, createUser, refreshToken, googleLogin } from "../controllers/auth-controller";
 import { loginRateLimit } from "../middleware/rate-limit-middleware";
 
 const router = Router();
@@ -26,5 +26,8 @@ router.post("/refresh", refreshToken);
 // ✅ register (optional). Disabled in production by default.
 // Set ALLOW_PUBLIC_REGISTRATION=true in .env to enable in production
 router.post("/register", createUser);
+
+// ✅ Google OAuth login
+router.post("/google", googleLogin);
 
 export default router;

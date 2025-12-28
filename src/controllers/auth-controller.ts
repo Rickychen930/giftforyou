@@ -244,6 +244,106 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
 /**
  * Refresh token endpoint
  */
+export async function googleLogin(req: Request, res: Response): Promise<void> {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      res.status(400).json({ error: "Google credential is required" });
+      return;
+    }
+
+    // Verify Google token (in production, verify with Google API)
+    // For now, we'll decode the JWT token from Google
+    try {
+      const payload = JSON.parse(Buffer.from(credential.split(".")[1], "base64").toString());
+      
+      const email = payload.email?.toLowerCase();
+      const name = payload.name || "";
+      const googleId = payload.sub;
+
+      if (!email) {
+        res.status(400).json({ error: "Email not found in Google credential" });
+        return;
+      }
+
+      // Find or create user
+      let user = await UserModel.findOne({ email }).exec();
+
+      if (!user) {
+        // Create new user from Google account
+        const username = email.split("@")[0] + "_" + googleId.slice(0, 8);
+        
+        // Ensure username is unique
+        let uniqueUsername = username;
+        let counter = 1;
+        while (await UserModel.findOne({ username: uniqueUsername }).exec()) {
+          uniqueUsername = `${username}_${counter}`;
+          counter++;
+        }
+
+        user = await UserModel.create({
+          username: uniqueUsername,
+          email,
+          password: "", // No password for OAuth users
+          role: "customer",
+          isActive: true,
+        });
+
+        // Create customer profile
+        try {
+          const { CustomerModel } = await import("../models/customer-model");
+          await CustomerModel.create({
+            buyerName: name,
+            phoneNumber: "", // Can be filled later
+            address: "",
+            userId: user._id.toString(),
+          });
+        } catch (err) {
+          console.warn("Failed to create customer profile for Google user:", err);
+        }
+      } else if (!user.isActive) {
+        res.status(403).json({ error: "Account is inactive" });
+        return;
+      }
+
+      // Generate tokens
+      if (!JWT_SECRET) {
+        res.status(500).json({ error: "Server configuration error" });
+        return;
+      }
+
+      const accessToken = jwt.sign(
+        { id: String(user._id), username: user.username, role: user.role },
+        JWT_SECRET,
+        { expiresIn: "15m" }
+      );
+
+      const refreshToken = jwt.sign(
+        { id: String(user._id), type: "refresh" },
+        JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      res.status(200).json({
+        token: accessToken,
+        refreshToken,
+        user: {
+          id: String(user._id),
+          username: user.username,
+          role: user.role,
+        },
+      });
+    } catch (decodeError) {
+      console.error("Failed to decode Google credential:", decodeError);
+      res.status(400).json({ error: "Invalid Google credential" });
+    }
+  } catch (err) {
+    console.error("Google login failed:", err);
+    res.status(500).json({ error: "Google login failed" });
+  }
+}
+
 export async function refreshToken(req: Request, res: Response): Promise<void> {
   try {
     const { refreshToken: token } = req.body;
