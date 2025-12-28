@@ -91,6 +91,7 @@ export const createBouquet = async (
   res: Response
 ): Promise<void> => {
   try {
+    // Validate required fields first
     const name = normalizeString(req.body.name);
     const description = normalizeString(req.body.description);
     const type = normalizeString(req.body.type) || "bouquet";
@@ -102,15 +103,33 @@ export const createBouquet = async (
       : "ready";
     const price = parsePrice(req.body.price);
 
+    // Validate required fields
     const error = validateBouquetInput(name, price, status);
     if (error) {
       res.status(400).json({ error });
       return;
     }
 
-    // ✅ FIX: memoryStorage => use saveUploadedImage (not req.file.filename)
-    const image = req.file ? await saveUploadedImage(req.file) : "";
+    // Validate collection name if provided
+    if (collectionName && collectionName.trim().length < 2) {
+      res.status(400).json({ error: "Collection name must be at least 2 characters." });
+      return;
+    }
 
+    // Handle image upload if provided
+    let image = "";
+    if (req.file) {
+      try {
+        image = await saveUploadedImage(req.file);
+      } catch (imageErr) {
+        const imageErrorMsg = imageErr instanceof Error ? imageErr.message : "Failed to process image";
+        console.error("❌ Image upload failed:", imageErrorMsg);
+        res.status(400).json({ error: `Image upload failed: ${imageErrorMsg}` });
+        return;
+      }
+    }
+
+    // Parse optional fields
     const occasions = parseCsvList(req.body.occasions);
     const flowers = parseCsvList(req.body.flowers);
     const isNewEdition = parseBoolean(req.body.isNewEdition);
@@ -119,6 +138,7 @@ export const createBouquet = async (
     const quantity = parseNonNegativeInt(req.body.quantity);
     const careInstructions = normalizeString(req.body.careInstructions);
 
+    // Create bouquet (create() automatically saves to database)
     const bouquet = await BouquetModel.create({
       name,
       description,
@@ -127,7 +147,7 @@ export const createBouquet = async (
       size,
       image,
       status,
-      collectionName,
+      collectionName: collectionName || undefined,
       occasions,
       flowers,
       isNewEdition,
@@ -137,14 +157,51 @@ export const createBouquet = async (
       careInstructions,
     });
 
-    // ✅ FIX: removed broken ", ,"
-    await syncBouquetCollection(String(bouquet._id), undefined, collectionName);
+    // Sync with collection (non-blocking - don't fail if this fails)
+    if (collectionName) {
+      try {
+        await syncBouquetCollection(String(bouquet._id), undefined, collectionName);
+      } catch (syncErr) {
+        console.error("❌ Failed to sync collection (non-fatal):", syncErr);
+        // Don't fail the request if collection sync fails - bouquet is already created
+      }
+    }
 
     res.status(201).json({ message: "Bouquet created successfully", bouquet });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
-    console.error("❌ Failed to create bouquet:", message);
-    res.status(500).json({ error: "Failed to create bouquet" });
+    const stack = err instanceof Error ? err.stack : undefined;
+    
+    // Log full error details for debugging
+    console.error("❌ Failed to create bouquet:", {
+      message,
+      stack,
+      body: req.body,
+      hasFile: !!req.file,
+      fileSize: req.file?.size,
+      fileName: req.file?.originalname,
+    });
+    
+    // Check for specific MongoDB errors
+    let errorMessage = message;
+    if (message.includes("E11000") || message.includes("duplicate key")) {
+      errorMessage = "Bouquet dengan nama ini sudah ada. Silakan gunakan nama yang berbeda.";
+    } else if (message.includes("validation failed") || message.includes("CastError")) {
+      errorMessage = "Data yang diinput tidak valid. Pastikan semua field sudah diisi dengan benar.";
+    }
+    
+    // Provide more informative error message in development, generic in production
+    const isDevelopment = process.env.NODE_ENV !== "production";
+    const finalErrorMessage = isDevelopment 
+      ? `Failed to create bouquet: ${errorMessage}`
+      : errorMessage.includes("sudah ada") || errorMessage.includes("tidak valid")
+        ? errorMessage
+        : "Failed to create bouquet. Please check all required fields are filled correctly.";
+    
+    res.status(500).json({ 
+      error: finalErrorMessage,
+      ...(isDevelopment && { details: message })
+    });
   }
 };
 

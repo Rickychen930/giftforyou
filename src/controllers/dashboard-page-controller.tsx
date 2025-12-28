@@ -476,6 +476,7 @@ class DashboardController extends Component<{}, State> {
 
       if (!res.ok) {
         let errorMessage = `Upload gagal (${res.status})`;
+        let errorDetails: string | undefined;
         
         // Try to parse error message from response
         try {
@@ -490,6 +491,10 @@ class DashboardController extends Component<{}, State> {
                 const json = JSON.parse(text);
                 if (json.error || json.message) {
                   errorMessage = json.error || json.message || errorMessage;
+                  // Include details if available (for debugging)
+                  if (json.details) {
+                    errorDetails = json.details;
+                  }
                 } else {
                   errorMessage = text.length > 200 ? `${text.substring(0, 200)}...` : text;
                 }
@@ -504,7 +509,19 @@ class DashboardController extends Component<{}, State> {
           errorMessage = `Upload gagal dengan status ${res.status}. Silakan coba lagi.`;
         }
         
-        throw new Error(errorMessage);
+        // Log error details for debugging
+        console.error("Upload failed:", {
+          status: res.status,
+          errorMessage,
+          errorDetails,
+        });
+        
+        // Create error with details
+        const error = new Error(errorMessage);
+        if (errorDetails) {
+          (error as any).details = errorDetails;
+        }
+        throw error;
       }
 
       // Parse success response

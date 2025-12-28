@@ -189,7 +189,11 @@ class BouquetUploader extends Component<Props, State> {
         stockLevelOptions: options.stockLevels,
       });
     } catch (err) {
-      console.error("Failed to load dropdown options:", err);
+      // Failed to load dropdown options - log in development only
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.error("Failed to load dropdown options:", err);
+      }
       // Keep defaults
     }
   };
@@ -229,7 +233,11 @@ class BouquetUploader extends Component<Props, State> {
         this.setState({ hasDraft: false });
       }
     } catch (err) {
-      console.error("Error loading draft:", err);
+      // Error loading draft - log in development only
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.error("Error loading draft:", err);
+      }
       localStorage.removeItem(DRAFT_STORAGE_KEY);
       this.setState({ hasDraft: false });
     }
@@ -333,7 +341,11 @@ class BouquetUploader extends Component<Props, State> {
         this.setMessage("Draft sudah kedaluwarsa (lebih dari 7 hari) dan telah dihapus.", "error");
       }
     } catch (err) {
-      console.error("Error loading draft:", err);
+      // Error loading draft - log in development only
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.error("Error loading draft:", err);
+      }
       localStorage.removeItem(DRAFT_STORAGE_KEY);
       this.setState({ hasDraft: false });
       this.setMessage("Gagal memuat draft. Data mungkin rusak.", "error");
@@ -365,7 +377,11 @@ class BouquetUploader extends Component<Props, State> {
       localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
       this.setState({ hasDraft: true, isSavingDraft: false });
     } catch (err) {
-      console.error("Error saving draft:", err);
+      // Error saving draft - log in development only
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.error("Error saving draft:", err);
+      }
       this.setState({ isSavingDraft: false });
     }
   };
@@ -376,7 +392,11 @@ class BouquetUploader extends Component<Props, State> {
       this.setState({ hasDraft: false });
       this.setMessage("Draft dihapus.", "success");
     } catch (err) {
-      console.error("Error clearing draft:", err);
+      // Error clearing draft - log in development only
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.error("Error clearing draft:", err);
+      }
     }
   };
 
@@ -532,6 +552,7 @@ class BouquetUploader extends Component<Props, State> {
       }
       case "collectionName": {
         const str = String(value).trim();
+        if (!str || str.length < 2) return "Koleksi wajib diisi (minimal 2 karakter).";
         if (str.length > 100) return "Nama koleksi maksimal 100 karakter.";
         return null;
       }
@@ -741,7 +762,11 @@ class BouquetUploader extends Component<Props, State> {
           try {
             processedFile = await this.compressImage(file);
           } catch (compressError) {
-            console.warn("Image compression failed, using original:", compressError);
+            // Image compression failed, using original file
+            if (process.env.NODE_ENV === "development") {
+              // eslint-disable-next-line no-console
+              console.warn("Image compression failed, using original:", compressError);
+            }
             // Continue with original file if compression fails
           }
         }
@@ -754,7 +779,11 @@ class BouquetUploader extends Component<Props, State> {
         });
         // Note: Dimensions will be set by the preview image's onLoad handler in render
       } catch (err) {
-        console.error("Error creating preview:", err);
+        // Error creating preview - log in development only
+        if (process.env.NODE_ENV === "development") {
+          // eslint-disable-next-line no-console
+          console.error("Error creating preview:", err);
+        }
         this.setMessage("Gagal memuat preview gambar. Silakan coba file lain.", "error");
         this.setState({ file: null, previewUrl: "", isImageLoading: false, imageDimensions: null });
       }
@@ -869,7 +898,11 @@ class BouquetUploader extends Component<Props, State> {
           try {
             processedFile = await this.compressImage(file);
           } catch (compressError) {
-            console.warn("Image compression failed, using original:", compressError);
+            // Image compression failed, using original file
+            if (process.env.NODE_ENV === "development") {
+              // eslint-disable-next-line no-console
+              console.warn("Image compression failed, using original:", compressError);
+            }
           }
         }
 
@@ -881,7 +914,11 @@ class BouquetUploader extends Component<Props, State> {
         });
         // Note: Dimensions will be set by the preview image's onLoad handler in render
       } catch (err) {
-        console.error("Error creating preview:", err);
+        // Error creating preview - log in development only
+        if (process.env.NODE_ENV === "development") {
+          // eslint-disable-next-line no-console
+          console.error("Error creating preview:", err);
+        }
         this.setMessage("Gagal memuat preview gambar. Silakan coba file lain.", "error");
         this.setState({ file: null, previewUrl: "", isImageLoading: false, imageDimensions: null });
       }
@@ -912,7 +949,7 @@ class BouquetUploader extends Component<Props, State> {
   private validate(): { isValid: boolean; errors: Record<string, string> } {
     const errors: Record<string, string> = {};
 
-    // Validate all required fields
+    // Validate all required fields with comprehensive checks
     const nameError = this.validateField("name", this.state.name);
     if (nameError) errors.name = nameError;
 
@@ -925,6 +962,21 @@ class BouquetUploader extends Component<Props, State> {
     // Validate required collection field
     const collError = this.validateField("collectionName", this.state.collectionName);
     if (collError) errors.collectionName = collError;
+
+    // Additional pre-flight validations
+    // Check if file is valid (if provided)
+    if (this.state.file) {
+      // Double-check file size
+      const maxSize = 8 * 1024 * 1024;
+      if (this.state.file.size > maxSize) {
+        errors.image = "Ukuran file maksimal 8MB. Silakan pilih file yang lebih kecil.";
+      }
+      
+      // Double-check file type
+      if (!this.isAcceptableImage(this.state.file)) {
+        errors.image = "File harus berupa gambar (JPG/PNG/WEBP/HEIC).";
+      }
+    }
 
     // Validate optional fields if they have values
     if (this.state.description.trim()) {
@@ -985,22 +1037,51 @@ class BouquetUploader extends Component<Props, State> {
   private buildFormData(): FormData {
     const fd = new FormData();
     
-    // Image (only if new file is selected)
+    // Image (only if new file is selected and valid)
     if (this.state.file) {
+      // Final validation before appending
+      const maxSize = 8 * 1024 * 1024;
+      if (this.state.file.size > maxSize) {
+        throw new Error("Ukuran file maksimal 8MB. Silakan pilih file yang lebih kecil.");
+      }
+      if (!this.isAcceptableImage(this.state.file)) {
+        throw new Error("File harus berupa gambar (JPG/PNG/WEBP/HEIC).");
+      }
       fd.append("image", this.state.file);
     }
 
-    // Required fields
-    fd.append("name", this.state.name.trim());
-    fd.append("price", String(this.state.price));
-    fd.append("size", this.state.size || "Medium");
-    fd.append("status", this.state.status);
-    fd.append("collectionName", this.state.collectionName.trim());
+    // Required fields with validation
+    const name = this.state.name.trim();
+    if (!name || name.length < 2) {
+      throw new Error("Nama bouquet harus minimal 2 karakter.");
+    }
+    fd.append("name", name);
 
-    // Optional fields
+    const price = Number(this.state.price);
+    if (!Number.isFinite(price) || price <= 0) {
+      throw new Error("Harga harus lebih besar dari 0.");
+    }
+    fd.append("price", String(price));
+
+    const size = this.state.size || "Medium";
+    if (!size || size.trim() === "") {
+      throw new Error("Ukuran harus dipilih.");
+    }
+    fd.append("size", size);
+
+    const status = this.state.status || "ready";
+    fd.append("status", status);
+
+    const collectionName = this.state.collectionName.trim();
+    if (!collectionName || collectionName.length < 2) {
+      throw new Error("Koleksi harus dipilih atau minimal 2 karakter.");
+    }
+    fd.append("collectionName", collectionName);
+
+    // Optional fields with safe defaults
     fd.append("description", (this.state.description || "").trim());
     fd.append("type", (this.state.type || "bouquet").trim());
-    fd.append("quantity", String(this.state.quantity || 0));
+    fd.append("quantity", String(Math.max(0, this.state.quantity || 0)));
     fd.append("careInstructions", (this.state.careInstructions || "").trim());
 
     // Arrays - use array if available, otherwise fallback to text
@@ -1104,6 +1185,30 @@ class BouquetUploader extends Component<Props, State> {
     });
 
     try {
+      // Pre-flight validation: Build FormData and validate before upload
+      let formData: FormData;
+      try {
+        formData = this.buildFormData();
+      } catch (buildError) {
+        // If FormData building fails, show error immediately
+        const buildErrorMessage = buildError instanceof Error 
+          ? buildError.message 
+          : "Data tidak valid. Silakan periksa semua field.";
+        this.setState({
+          submitting: false,
+          message: buildErrorMessage,
+          messageType: "error",
+        });
+        // Scroll to error message
+        setTimeout(() => {
+          const messageEl = document.querySelector(".uploader__message");
+          if (messageEl) {
+            messageEl.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }, 100);
+        return;
+      }
+
       // Show loading message
       this.setState({
         submitting: true,
@@ -1111,7 +1216,7 @@ class BouquetUploader extends Component<Props, State> {
         messageType: "",
       });
 
-      const ok = await this.props.onUpload(this.buildFormData());
+      const ok = await this.props.onUpload(formData);
 
       if (ok) {
         // Clear draft on success
@@ -1164,23 +1269,40 @@ class BouquetUploader extends Component<Props, State> {
         }, 100);
       }
     } catch (err) {
+      // Upload error - always log for debugging
+      // eslint-disable-next-line no-console
       console.error("Upload error:", err);
       let errorMessage = "Terjadi kesalahan server. Silakan coba lagi.";
       
       if (err instanceof Error) {
         errorMessage = err.message;
         
+        // Check for error details (from backend)
+        const errorDetails = (err as any).details;
+        if (errorDetails && process.env.NODE_ENV === "development") {
+          // Error details - log in development only
+          // eslint-disable-next-line no-console
+          console.error("Error details:", errorDetails);
+        }
+        
         // Provide more user-friendly messages for common errors
         if (errorMessage.includes("NetworkError") || errorMessage.includes("Failed to fetch")) {
           errorMessage = "Gagal terhubung ke server. Periksa koneksi internet Anda dan coba lagi.";
-        } else if (errorMessage.includes("400")) {
+        } else if (errorMessage.includes("400") || errorMessage.includes("must be at least") || errorMessage.includes("must be greater")) {
           errorMessage = "Data yang diinput tidak valid. Pastikan semua field wajib sudah diisi dengan benar.";
-        } else if (errorMessage.includes("401") || errorMessage.includes("403")) {
-          errorMessage = "Sesi Anda telah berakhir. Silakan login kembali.";
-        } else if (errorMessage.includes("413") || errorMessage.includes("too large")) {
+        } else if (errorMessage.includes("401") || errorMessage.includes("403") || errorMessage.includes("Authentication") || errorMessage.includes("Insufficient permissions")) {
+          errorMessage = "Sesi Anda telah berakhir atau tidak memiliki izin. Silakan login kembali.";
+        } else if (errorMessage.includes("413") || errorMessage.includes("too large") || errorMessage.includes("LIMIT_FILE_SIZE")) {
           errorMessage = "File gambar terlalu besar. Maksimal 8MB. Silakan pilih file yang lebih kecil.";
-        } else if (errorMessage.includes("500")) {
-          errorMessage = "Terjadi kesalahan pada server. Silakan coba lagi dalam beberapa saat.";
+        } else if (errorMessage.includes("500") || errorMessage.includes("Failed to create bouquet")) {
+          // More specific error message for 500 errors
+          if (errorMessage.includes("Failed to create bouquet:")) {
+            // Extract the actual error from the message
+            const actualError = errorMessage.replace("Failed to create bouquet:", "").trim();
+            errorMessage = `Gagal membuat bouquet: ${actualError || "Terjadi kesalahan pada server. Silakan periksa semua field dan coba lagi."}`;
+          } else {
+            errorMessage = "Terjadi kesalahan pada server. Silakan periksa semua field wajib sudah diisi dengan benar dan coba lagi.";
+          }
         }
       }
       
