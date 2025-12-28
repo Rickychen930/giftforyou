@@ -177,7 +177,7 @@ const CollectionListView: React.FC<Props> = ({
           <p>Belum ada koleksi yang dibuat.</p>
         </div>
       ) : (
-        <div className="collectionListView__grid">
+        <div className="collectionListView__grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.5rem" }}>
           {collections.map((collection) => {
             const isEditing = editingId === collection._id;
             const count = bouquetCount(collection);
@@ -196,7 +196,7 @@ const CollectionListView: React.FC<Props> = ({
                   }
                 }}
               >
-                <div className="collectionListView__cardHeader">
+                <div className="collectionListView__cardHeader" style={{ position: "relative" }}>
                   {isEditing ? (
                     <div className="collectionListView__editForm">
                       <input
@@ -217,7 +217,8 @@ const CollectionListView: React.FC<Props> = ({
                           className="collectionListView__editBtn collectionListView__editBtn--save"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleEditSave(collection._id);
+                            e.preventDefault();
+                            void handleEditSave(collection._id);
                           }}
                           disabled={saving}
                           aria-label="Simpan"
@@ -244,6 +245,7 @@ const CollectionListView: React.FC<Props> = ({
                           className="collectionListView__editBtn collectionListView__editBtn--cancel"
                           onClick={(e) => {
                             e.stopPropagation();
+                            e.preventDefault();
                             handleEditCancel();
                           }}
                           disabled={saving}
@@ -273,12 +275,13 @@ const CollectionListView: React.FC<Props> = ({
                     <h3 className="collectionListView__cardTitle">
                       {collection.name}
                     </h3>
-                    <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                    <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", position: "relative", zIndex: 1 }}>
                       <button
                         type="button"
                         className="collectionListView__editIconBtn"
                         onClick={(e) => {
                           e.stopPropagation();
+                          e.preventDefault();
                           handleEditStart(collection);
                         }}
                         aria-label={`Edit nama koleksi ${collection.name}`}
@@ -312,7 +315,11 @@ const CollectionListView: React.FC<Props> = ({
                         <button
                           type="button"
                           className="collectionListView__deleteIconBtn"
-                          onClick={(e) => handleDeleteClick(e, collection._id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            handleDeleteClick(e, collection._id);
+                          }}
                           disabled={deletingId === collection._id}
                           aria-label={`Hapus koleksi ${collection.name}`}
                           title="Hapus koleksi"
@@ -369,6 +376,7 @@ const CollectionListView: React.FC<Props> = ({
                   {deleteConfirmId === collection._id && (
                     <div
                       className="collectionListView__deleteConfirm"
+                      style={{ zIndex: 10001 }}
                       onClick={(e) => {
                         e.stopPropagation();
                         e.preventDefault();

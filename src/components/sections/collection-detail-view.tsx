@@ -69,7 +69,7 @@ const DownloadPDFButton: React.FC<{
   };
 
   return (
-    <div className="collectionDetailView__downloadWrapper" style={{ position: "relative", marginTop: "1rem", zIndex: 1000 }}>
+    <div className="collectionDetailView__downloadWrapper" style={{ position: "relative", marginTop: "1rem", zIndex: 10000, isolation: "isolate" }}>
       <button
         type="button"
         className="collectionDetailView__downloadBtn"
@@ -93,7 +93,7 @@ const DownloadPDFButton: React.FC<{
           WebkitBackdropFilter: "blur(8px)",
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
           position: "relative",
-          zIndex: 1001,
+          zIndex: 10001,
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.background = "linear-gradient(135deg, rgba(212, 140, 156, 0.2) 0%, rgba(168, 213, 186, 0.2) 100%)";
@@ -137,7 +137,7 @@ const DownloadPDFButton: React.FC<{
               left: 0,
               right: 0,
               bottom: 0,
-              zIndex: 9999,
+              zIndex: 10002,
               background: "transparent",
             }}
             onClick={() => setShowOptions(false)}
@@ -152,7 +152,7 @@ const DownloadPDFButton: React.FC<{
               border: "2px solid rgba(212, 140, 156, 0.3)",
               borderRadius: "12px",
               boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08)",
-              zIndex: 10001,
+              zIndex: 10003,
               display: "flex",
               flexDirection: "column",
               minWidth: "200px",
@@ -161,6 +161,7 @@ const DownloadPDFButton: React.FC<{
               overflow: "hidden",
             }}
             onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
           >
           <button
             type="button"

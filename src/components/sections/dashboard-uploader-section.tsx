@@ -973,22 +973,45 @@ class BouquetUploader extends Component<Props, State> {
   private validate(): { isValid: boolean; errors: Record<string, string> } {
     const errors: Record<string, string> = {};
 
-    // Validate all required fields with comprehensive checks
+    // ============================================================
+    // VALIDATE ALL REQUIRED FIELDS - COMPREHENSIVE CHECKS
+    // ============================================================
+    
+    // 1. Name (REQUIRED)
     const nameError = this.validateField("name", this.state.name);
-    if (nameError) errors.name = nameError;
+    if (nameError) {
+      errors.name = nameError;
+    } else if (!this.state.name || this.state.name.trim().length === 0) {
+      errors.name = "Nama bouquet wajib diisi.";
+    }
 
+    // 2. Price (REQUIRED)
     const priceError = this.validateField("price", this.state.price);
-    if (priceError) errors.price = priceError;
+    if (priceError) {
+      errors.price = priceError;
+    } else if (!this.state.price || this.state.price <= 0) {
+      errors.price = "Harga wajib diisi dan harus lebih dari 0.";
+    }
 
+    // 3. Size (REQUIRED)
     const sizeError = this.validateField("size", this.state.size);
-    if (sizeError) errors.size = sizeError;
+    if (sizeError) {
+      errors.size = sizeError;
+    } else if (!this.state.size || this.state.size.trim() === "") {
+      errors.size = "Ukuran wajib dipilih.";
+    }
 
-    // Validate required collection field
+    // 4. Collection Name (REQUIRED)
     const collError = this.validateField("collectionName", this.state.collectionName);
-    if (collError) errors.collectionName = collError;
+    if (collError) {
+      errors.collectionName = collError;
+    } else if (!this.state.collectionName || this.state.collectionName.trim().length === 0) {
+      errors.collectionName = "Koleksi wajib dipilih atau diisi.";
+    }
 
-    // Additional pre-flight validations
-    // Check if file is valid (if provided)
+    // ============================================================
+    // VALIDATE IMAGE (if provided)
+    // ============================================================
     if (this.state.file) {
       // Double-check file size
       const maxSize = 8 * 1024 * 1024;
@@ -1002,33 +1025,103 @@ class BouquetUploader extends Component<Props, State> {
       }
     }
 
-    // Validate optional fields if they have values
+    // ============================================================
+    // VALIDATE OPTIONAL FIELDS (if they have values)
+    // ============================================================
+    
+    // Description
     if (this.state.description.trim()) {
       const descError = this.validateField("description", this.state.description);
       if (descError) errors.description = descError;
     }
 
+    // Care Instructions
     if (this.state.careInstructions.trim()) {
       const careError = this.validateField("careInstructions", this.state.careInstructions);
       if (careError) errors.careInstructions = careError;
     }
 
-    if (this.state.occasionsText.trim()) {
+    // ============================================================
+    // VALIDATE ARRAYS (occasions and flowers)
+    // ============================================================
+    
+    // Occasions array validation
+    if (this.state.occasions && Array.isArray(this.state.occasions)) {
+      if (this.state.occasions.length > 10) {
+        errors.occasions = "Maksimal 10 acara.";
+      }
+      // Validate each occasion
+      for (let i = 0; i < this.state.occasions.length; i++) {
+        const occasion = this.state.occasions[i];
+        if (typeof occasion !== "string" || occasion.trim().length === 0) {
+          errors.occasions = "Setiap acara tidak boleh kosong.";
+          break;
+        }
+        if (occasion.trim().length < 2) {
+          errors.occasions = "Setiap acara minimal 2 karakter.";
+          break;
+        }
+        if (occasion.trim().length > 50) {
+          errors.occasions = "Setiap acara maksimal 50 karakter.";
+          break;
+        }
+      }
+      // Check for duplicates
+      const lowerOccasions = this.state.occasions.map(o => o.trim().toLowerCase());
+      const uniqueOccasions = new Set(lowerOccasions);
+      if (lowerOccasions.length !== uniqueOccasions.size) {
+        errors.occasions = "Terdapat acara duplikat.";
+      }
+    } else if (this.state.occasionsText && this.state.occasionsText.trim()) {
+      // Fallback to occasionsText validation
       const occError = this.validateField("occasionsText", this.state.occasionsText);
-      if (occError) errors.occasionsText = occError;
+      if (occError) errors.occasions = occError;
     }
 
-    if (this.state.flowersText.trim()) {
+    // Flowers array validation
+    if (this.state.flowers && Array.isArray(this.state.flowers)) {
+      if (this.state.flowers.length > 20) {
+        errors.flowers = "Maksimal 20 jenis bunga.";
+      }
+      // Validate each flower
+      for (let i = 0; i < this.state.flowers.length; i++) {
+        const flower = this.state.flowers[i];
+        if (typeof flower !== "string" || flower.trim().length === 0) {
+          errors.flowers = "Setiap jenis bunga tidak boleh kosong.";
+          break;
+        }
+        if (flower.trim().length < 2) {
+          errors.flowers = "Setiap jenis bunga minimal 2 karakter.";
+          break;
+        }
+        if (flower.trim().length > 50) {
+          errors.flowers = "Setiap jenis bunga maksimal 50 karakter.";
+          break;
+        }
+      }
+      // Check for duplicates
+      const lowerFlowers = this.state.flowers.map(f => f.trim().toLowerCase());
+      const uniqueFlowers = new Set(lowerFlowers);
+      if (lowerFlowers.length !== uniqueFlowers.size) {
+        errors.flowers = "Terdapat jenis bunga duplikat.";
+      }
+    } else if (this.state.flowersText && this.state.flowersText.trim()) {
+      // Fallback to flowersText validation
       const flowError = this.validateField("flowersText", this.state.flowersText);
-      if (flowError) errors.flowersText = flowError;
+      if (flowError) errors.flowers = flowError;
     }
 
+    // Quantity
     if (this.state.quantity > 0) {
       const qtyError = this.validateField("quantity", this.state.quantity);
       if (qtyError) errors.quantity = qtyError;
+    } else if (this.state.quantity < 0) {
+      errors.quantity = "Stok tidak boleh negatif.";
     }
 
-    // Validate custom penanda
+    // ============================================================
+    // VALIDATE CUSTOM PENANDA
+    // ============================================================
     if (this.state.customPenanda.length > 10) {
       errors.customPenanda = "Maksimal 10 penanda kustom.";
     }
@@ -1109,14 +1202,50 @@ class BouquetUploader extends Component<Props, State> {
     fd.append("careInstructions", (this.state.careInstructions || "").trim());
 
     // Arrays - use array if available, otherwise fallback to text
-    const occasionsValue = this.state.occasions.length > 0 
-      ? this.state.occasions.join(",")
-      : (this.state.occasionsText || "").trim();
-    const flowersValue = this.state.flowers.length > 0
-      ? this.state.flowers.join(",")
-      : (this.state.flowersText || "").trim();
-    fd.append("occasions", occasionsValue);
-    fd.append("flowers", flowersValue);
+    // Validate arrays before appending
+    if (this.state.occasions && Array.isArray(this.state.occasions) && this.state.occasions.length > 0) {
+      // Validate each occasion
+      for (const occasion of this.state.occasions) {
+        if (typeof occasion !== "string" || occasion.trim().length === 0) {
+          throw new Error("Setiap acara tidak boleh kosong.");
+        }
+        if (occasion.trim().length < 2) {
+          throw new Error("Setiap acara minimal 2 karakter.");
+        }
+        if (occasion.trim().length > 50) {
+          throw new Error("Setiap acara maksimal 50 karakter.");
+        }
+      }
+      if (this.state.occasions.length > 10) {
+        throw new Error("Maksimal 10 acara.");
+      }
+      fd.append("occasions", this.state.occasions.join(","));
+    } else {
+      const occasionsValue = (this.state.occasionsText || "").trim();
+      fd.append("occasions", occasionsValue);
+    }
+    
+    if (this.state.flowers && Array.isArray(this.state.flowers) && this.state.flowers.length > 0) {
+      // Validate each flower
+      for (const flower of this.state.flowers) {
+        if (typeof flower !== "string" || flower.trim().length === 0) {
+          throw new Error("Setiap jenis bunga tidak boleh kosong.");
+        }
+        if (flower.trim().length < 2) {
+          throw new Error("Setiap jenis bunga minimal 2 karakter.");
+        }
+        if (flower.trim().length > 50) {
+          throw new Error("Setiap jenis bunga maksimal 50 karakter.");
+        }
+      }
+      if (this.state.flowers.length > 20) {
+        throw new Error("Maksimal 20 jenis bunga.");
+      }
+      fd.append("flowers", this.state.flowers.join(","));
+    } else {
+      const flowersValue = (this.state.flowersText || "").trim();
+      fd.append("flowers", flowersValue);
+    }
 
     // Boolean flags
     fd.append("isNewEdition", String(Boolean(this.state.isNewEdition)));
@@ -1143,7 +1272,7 @@ class BouquetUploader extends Component<Props, State> {
     }
 
     // Mark all required fields as touched (for better error display)
-    const allFields = new Set([
+    const allRequiredFields = new Set([
       "name",
       "price",
       "size",
@@ -1151,21 +1280,43 @@ class BouquetUploader extends Component<Props, State> {
     ]);
 
     this.setState((prev) => ({
-      touchedFields: new Set([...prev.touchedFields, ...allFields]),
+      touchedFields: new Set([...prev.touchedFields, ...allRequiredFields]),
       showValidationSummary: true,
     }));
 
-    // Validate with fresh state
+    // Validate with fresh state - COMPREHENSIVE VALIDATION
     const validation = this.validate();
     
     if (!validation.isValid) {
       // Update field errors
       this.setState({ fieldErrors: validation.errors });
       
-      // Show first error message
-      const firstError = Object.values(validation.errors)[0];
-      if (firstError) {
-        this.setMessage(firstError, "error");
+      // Show comprehensive error message with all missing fields
+      const errorKeys = Object.keys(validation.errors);
+      const requiredFieldErrors = errorKeys.filter(key => 
+        ["name", "price", "size", "collectionName"].includes(key)
+      );
+      
+      let errorMessage = "";
+      if (requiredFieldErrors.length > 0) {
+        const fieldNames: Record<string, string> = {
+          name: "Nama bouquet",
+          price: "Harga",
+          size: "Ukuran",
+          collectionName: "Koleksi",
+        };
+        const missingFields = requiredFieldErrors.map(key => fieldNames[key] || key).join(", ");
+        errorMessage = `Field wajib belum diisi: ${missingFields}. Silakan lengkapi semua field wajib terlebih dahulu.`;
+      } else {
+        // Show first error message for non-required fields
+        const firstError = Object.values(validation.errors)[0];
+        if (firstError) {
+          errorMessage = firstError;
+        }
+      }
+      
+      if (errorMessage) {
+        this.setMessage(errorMessage, "error");
       }
 
       // Scroll to first error field
@@ -1245,13 +1396,23 @@ class BouquetUploader extends Component<Props, State> {
         messageType: "",
       });
 
-      // Add timeout protection for upload (30 seconds)
+      // Add timeout protection for upload (60 seconds for large files)
+      const uploadTimeout = 60000; // 60 seconds
       const uploadPromise = this.props.onUpload(formData);
       const timeoutPromise = new Promise<boolean>((_, reject) => {
-        setTimeout(() => reject(new Error("Upload timeout. Silakan coba lagi.")), 30000);
+        setTimeout(() => reject(new Error("Upload timeout. File mungkin terlalu besar atau koneksi lambat. Silakan coba lagi dengan file yang lebih kecil.")), uploadTimeout);
       });
 
-      const ok = await Promise.race([uploadPromise, timeoutPromise]);
+      let ok: boolean;
+      try {
+        ok = await Promise.race([uploadPromise, timeoutPromise]);
+      } catch (timeoutErr) {
+        // Timeout error - provide specific message
+        if (timeoutErr instanceof Error && timeoutErr.message.includes("timeout")) {
+          throw new Error(timeoutErr.message);
+        }
+        throw timeoutErr;
+      }
 
       if (ok) {
         // Clear draft on success
@@ -1266,6 +1427,9 @@ class BouquetUploader extends Component<Props, State> {
         if (this.state.previewUrl && this.state.previewUrl.startsWith("blob:")) {
           URL.revokeObjectURL(this.state.previewUrl);
         }
+
+        // Reload dropdown options to sync with database (including new collection)
+        this.loadDropdownOptions();
 
         this.resetForm();
         this.setState({
@@ -1321,24 +1485,40 @@ class BouquetUploader extends Component<Props, State> {
           console.error("Error details:", errorDetails);
         }
         
-        // Provide more user-friendly messages for common errors
-        if (errorMessage.includes("NetworkError") || errorMessage.includes("Failed to fetch")) {
-          errorMessage = "Gagal terhubung ke server. Periksa koneksi internet Anda dan coba lagi.";
-        } else if (errorMessage.includes("400") || errorMessage.includes("must be at least") || errorMessage.includes("must be greater")) {
-          errorMessage = "Data yang diinput tidak valid. Pastikan semua field wajib sudah diisi dengan benar.";
-        } else if (errorMessage.includes("401") || errorMessage.includes("403") || errorMessage.includes("Authentication") || errorMessage.includes("Insufficient permissions")) {
+        // Provide more user-friendly messages for common errors - COMPREHENSIVE ERROR HANDLING
+        if (errorMessage.includes("timeout") || errorMessage.includes("Timeout")) {
+          errorMessage = "Upload timeout. File mungkin terlalu besar atau koneksi lambat. Silakan coba lagi dengan file yang lebih kecil atau periksa koneksi internet Anda.";
+        } else if (errorMessage.includes("NetworkError") || errorMessage.includes("Failed to fetch") || errorMessage.includes("Network request failed")) {
+          errorMessage = "Gagal terhubung ke server. Periksa koneksi internet Anda dan coba lagi. Pastikan server sedang berjalan.";
+        } else if (errorMessage.includes("AbortError") || errorMessage.includes("aborted")) {
+          errorMessage = "Upload dibatalkan. Silakan coba lagi.";
+        } else if (errorMessage.includes("400") || errorMessage.includes("Bad Request") || errorMessage.includes("must be at least") || errorMessage.includes("must be greater") || errorMessage.includes("invalid") || errorMessage.includes("Invalid")) {
+          errorMessage = "Data yang diinput tidak valid. Pastikan semua field wajib sudah diisi dengan benar dan format data sesuai.";
+        } else if (errorMessage.includes("401") || errorMessage.includes("Unauthorized") || errorMessage.includes("403") || errorMessage.includes("Forbidden") || errorMessage.includes("Authentication") || errorMessage.includes("Insufficient permissions") || errorMessage.includes("permission")) {
           errorMessage = "Sesi Anda telah berakhir atau tidak memiliki izin. Silakan login kembali.";
-        } else if (errorMessage.includes("413") || errorMessage.includes("too large") || errorMessage.includes("LIMIT_FILE_SIZE")) {
-          errorMessage = "File gambar terlalu besar. Maksimal 8MB. Silakan pilih file yang lebih kecil.";
-        } else if (errorMessage.includes("500") || errorMessage.includes("Failed to create bouquet")) {
+        } else if (errorMessage.includes("413") || errorMessage.includes("too large") || errorMessage.includes("LIMIT_FILE_SIZE") || errorMessage.includes("Payload too large") || errorMessage.includes("Request Entity Too Large")) {
+          errorMessage = "File gambar terlalu besar. Maksimal 8MB. Silakan pilih file yang lebih kecil atau kompres gambar terlebih dahulu.";
+        } else if (errorMessage.includes("415") || errorMessage.includes("Unsupported Media Type") || errorMessage.includes("image format") || errorMessage.includes("file type")) {
+          errorMessage = "Format file tidak didukung. Silakan gunakan JPG, PNG, WEBP, atau HEIC.";
+        } else if (errorMessage.includes("500") || errorMessage.includes("Internal Server Error") || errorMessage.includes("Failed to create bouquet") || errorMessage.includes("server error")) {
           // More specific error message for 500 errors
           if (errorMessage.includes("Failed to create bouquet:")) {
             // Extract the actual error from the message
             const actualError = errorMessage.replace("Failed to create bouquet:", "").trim();
             errorMessage = `Gagal membuat bouquet: ${actualError || "Terjadi kesalahan pada server. Silakan periksa semua field dan coba lagi."}`;
           } else {
-            errorMessage = "Terjadi kesalahan pada server. Silakan periksa semua field wajib sudah diisi dengan benar dan coba lagi.";
+            errorMessage = "Terjadi kesalahan pada server. Silakan periksa semua field wajib sudah diisi dengan benar dan coba lagi. Jika masalah berlanjut, hubungi administrator.";
           }
+        } else if (errorMessage.includes("503") || errorMessage.includes("Service Unavailable")) {
+          errorMessage = "Server sedang sibuk atau dalam maintenance. Silakan coba lagi dalam beberapa saat.";
+        } else if (errorMessage.includes("504") || errorMessage.includes("Gateway Timeout")) {
+          errorMessage = "Server tidak merespons. Silakan coba lagi dalam beberapa saat.";
+        } else if (errorMessage.includes("ENOENT") || errorMessage.includes("ENOTFOUND") || errorMessage.includes("ECONNREFUSED")) {
+          errorMessage = "Tidak dapat terhubung ke server. Pastikan server sedang berjalan dan koneksi internet stabil.";
+        } else if (errorMessage.includes("duplicate") || errorMessage.includes("already exists") || errorMessage.includes("unique")) {
+          errorMessage = "Bouquet dengan nama atau data yang sama sudah ada. Silakan gunakan nama yang berbeda.";
+        } else if (errorMessage.includes("validation") || errorMessage.includes("ValidationError")) {
+          errorMessage = "Data tidak valid. Pastikan semua field wajib sudah diisi dengan benar dan format data sesuai.";
         }
       }
       

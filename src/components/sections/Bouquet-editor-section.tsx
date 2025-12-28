@@ -207,10 +207,11 @@ export default class BouquetEditorSection extends Component<Props, State> {
         return true;
       }
       return false;
-    } catch (err) {
-      console.error("Failed to update collection:", err);
-      return false;
-    }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error("Failed to update collection:", err);
+        return false;
+      }
   };
 
   private handleCollectionDelete = async (
@@ -227,6 +228,8 @@ export default class BouquetEditorSection extends Component<Props, State> {
           selectedCollectionId: prev.selectedCollectionId === collectionId ? null : prev.selectedCollectionId,
           currentView: prev.selectedCollectionId === collectionId ? "collections" : prev.currentView,
         }));
+        // Reload collections to ensure sync
+        await this.loadCollections();
       }
       return success;
     }
