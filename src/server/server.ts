@@ -111,6 +111,7 @@ app.use("/api/collections", collectionRoutes);
 app.use("/api/hero-slider", heroSliderRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/customers", customerRoutes);
+app.use("/api/customer", customerRoutes); // Alias for customer profile routes
 app.use("/api/instagram", instagramRoutes);
 
 // Log registered routes (always log)

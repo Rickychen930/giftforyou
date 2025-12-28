@@ -60,7 +60,14 @@ export const NAV_LINKS = {
     { label: "Beranda", path: "/" },
     { label: "Koleksi", path: "/collection" },
     { label: "FAQ", path: "/faq" },
-    { label: "Login", path: "/login" },
+    { label: "Masuk", path: "/customer/login" },
+  ],
+  customer: [
+    { label: "Beranda", path: "/" },
+    { label: "Koleksi", path: "/collection" },
+    { label: "Favorit", path: "/favorites" },
+    { label: "Pesanan", path: "/order-history" },
+    { label: "Dashboard", path: "/customer/dashboard" },
   ],
   authenticated: [
     { label: "Beranda", path: "/" },

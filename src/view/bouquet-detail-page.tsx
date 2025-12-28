@@ -15,8 +15,12 @@ import UrgencyIndicator from "../components/UrgencyIndicator";
 import { calculateDeliveryPrice, type DeliveryPriceResult } from "../utils/delivery-calculator";
 import { calculateBulkDiscount, getBulkDiscountMessage } from "../utils/bulk-discount";
 import { isFavorite, toggleFavorite } from "../utils/favorites";
+import { addToRecentlyViewed } from "../utils/recently-viewed";
+import { toast } from "../utils/toast";
+import DeliveryTimeSlot from "../components/DeliveryTimeSlot";
 
 import { API_BASE } from "../config/api"; // adjust path depending on folder depth
+import { getAccessToken } from "../utils/auth-utils";
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
 
 const formatPrice = formatIDR;
@@ -32,6 +36,16 @@ const toAbsoluteUrl = (urlOrPath: string): string => {
   if (!v) return "";
   if (/^https?:\/\//i.test(v)) return v;
   return new URL(v.startsWith("/") ? v : `/${v}`, window.location.origin).toString();
+};
+
+const getTimeSlotLabel = (slotId?: string): string => {
+  if (!slotId) return "";
+  const labels: Record<string, string> = {
+    morning: "Pagi (09:00-12:00)",
+    afternoon: "Siang (12:00-15:00)",
+    evening: "Sore (15:00-18:00)",
+  };
+  return labels[slotId] || slotId;
 };
 
 const buildCustomerOrderMessage = (
@@ -51,9 +65,9 @@ const buildCustomerOrderMessage = (
     ``,
     `📦 Pengiriman: ${formData.deliveryType === "pickup" ? "Ambil di toko" : "Diantar"}`,
     formData.deliveryType === "delivery" && formData.deliveryDate
-      ? `📅 Tanggal pengiriman: ${formData.deliveryDate}`
+      ? `📅 Tanggal pengiriman: ${formData.deliveryDate}${formData.deliveryTimeSlot ? `\n⏰ Waktu pengiriman: ${getTimeSlotLabel(formData.deliveryTimeSlot)}` : ""}`
       : formData.deliveryType === "pickup" && formData.deliveryDate
-        ? `📅 Tanggal pengambilan: ${formData.deliveryDate}`
+        ? `📅 Tanggal pengambilan: ${formData.deliveryDate}${formData.deliveryTimeSlot ? `\n⏰ Waktu pengambilan: ${getTimeSlotLabel(formData.deliveryTimeSlot)}` : ""}`
         : "",
     formData.deliveryType === "delivery" && formData.address
       ? `📍 Alamat: ${formData.address}`
@@ -305,6 +319,7 @@ interface Props {
 interface OrderFormState {
   deliveryType: "pickup" | "delivery";
   deliveryDate: string;
+  deliveryTimeSlot?: string;
   address: string;
   greetingCard: string;
   quantity: number;
@@ -326,6 +341,7 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
   state: BouquetDetailState = {
     deliveryType: "delivery",
     deliveryDate: this.getDefaultDate(),
+    deliveryTimeSlot: undefined,
     address: "",
     greetingCard: "",
     quantity: 1,
@@ -351,22 +367,56 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
           this.setState({
             deliveryType: data.deliveryType || "delivery",
             deliveryDate: data.deliveryDate || this.getDefaultDate(),
+            deliveryTimeSlot: data.deliveryTimeSlot || undefined,
             address: data.address || "",
             greetingCard: data.greetingCard || "",
             quantity: data.quantity || 1,
           });
         }
       }
+
+      // Auto-load saved address if user is authenticated
+      setTimeout(() => {
+        this.loadSavedAddress();
+      }, 500);
     } catch {
       // Ignore errors
     }
   }
+
+  private loadSavedAddress = async (): Promise<void> => {
+    try {
+      const token = getAccessToken();
+      if (!token || this.state.address) return; // Skip if already has address
+
+      const response = await fetch(`${API_BASE}/api/customers/addresses`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const addresses = await response.json();
+        const defaultAddress = addresses.find((addr: any) => addr.isDefault);
+        if (defaultAddress && defaultAddress.fullAddress) {
+          this.setState({ address: defaultAddress.fullAddress });
+          toast.info("Alamat default dimuat");
+        }
+      }
+    } catch (error) {
+      // Silently fail - not critical
+      if (process.env.NODE_ENV === "development") {
+        console.error("Failed to load saved address:", error);
+      }
+    }
+  };
 
   private saveFormData(): void {
     try {
       const data = {
         deliveryType: this.state.deliveryType,
         deliveryDate: this.state.deliveryDate,
+        deliveryTimeSlot: this.state.deliveryTimeSlot,
         address: this.state.address,
         greetingCard: this.state.greetingCard,
         quantity: this.state.quantity,
@@ -569,10 +619,17 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
     this.applySeo();
     this.loadSavedFormData();
     
-    // Check favorite status
+    // Check favorite status and track recently viewed
     const { bouquet } = this.props;
     if (bouquet) {
       this.setState({ isFavorite: isFavorite(bouquet._id) });
+      // Track recently viewed
+      addToRecentlyViewed(
+        bouquet._id,
+        bouquet.name,
+        bouquet.price,
+        bouquet.image
+      );
     }
     
     // Validate form after loading saved data
@@ -1400,6 +1457,25 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                   </div>
                 </div>
 
+                {this.state.deliveryDate && (
+                  <div className="bdFormGroup">
+                    <label className="bdFormLabel">
+                      {this.state.deliveryType === "delivery"
+                        ? "Waktu Pengiriman"
+                        : "Waktu Pengambilan"}
+                      <span className="bdFormLabel__optional">(Opsional)</span>
+                    </label>
+                    <DeliveryTimeSlot
+                      selectedDate={this.state.deliveryDate}
+                      selectedSlot={this.state.deliveryTimeSlot}
+                      onSelect={(slotId) => this.handleFormChange("deliveryTimeSlot", slotId)}
+                    />
+                    <span className="bdFormHint">
+                      Pilih slot waktu yang nyaman untuk {this.state.deliveryType === "delivery" ? "pengiriman" : "pengambilan"}
+                    </span>
+                  </div>
+                )}
+
                 {this.state.deliveryType === "delivery" && (
                   <div className="bdFormGroup">
                     <label className="bdFormLabel">
@@ -1409,11 +1485,25 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                     <AddressAutocomplete
                       value={this.state.address}
                       onChange={this.handleAddressChange}
-                      placeholder="Masukkan alamat lengkap (contoh: Jl. Contoh No. 123, RT/RW 01/02, Kelurahan, Kecamatan, Kota Cirebon)"
+                      placeholder="Masukkan alamat lengkap atau pilih dari alamat tersimpan"
                       required
                       error={this.state.formErrors.address}
                       onLocationChange={this.handleLocationChange}
                     />
+                    {getAccessToken() && (
+                      <button
+                        type="button"
+                        onClick={this.loadSavedAddress}
+                        className="bdFormAddressHelper"
+                        aria-label="Gunakan alamat default"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeWidth="2"/>
+                          <circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="2"/>
+                        </svg>
+                        Gunakan Alamat Tersimpan
+                      </button>
+                    )}
                     {this.state.deliveryPriceResult && (
                       <div className="bdDeliveryPrice">
                         <div className="bdDeliveryPrice__info">
@@ -1534,6 +1624,7 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                         quantity: this.state.quantity,
                         deliveryType: this.state.deliveryType,
                         deliveryDate: this.state.deliveryDate,
+                        deliveryTimeSlot: this.state.deliveryTimeSlot,
                         address: this.state.address,
                         greetingCard: this.state.greetingCard,
                         totalPrice: bouquet.price * this.state.quantity,

@@ -185,6 +185,23 @@
   transform: translateX(4px);
 }
 
+.orderConfirmationPage__summaryItem--nested {
+  padding-left: 1.5rem;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  border-left: 2px solid rgba(212, 140, 156, 0.2);
+}
+
+.orderConfirmationPage__summaryItem--nested .orderConfirmationPage__summaryLabel {
+  font-weight: 500;
+  color: var(--ink-700);
+}
+
+.orderConfirmationPage__summaryItem--nested .orderConfirmationPage__summaryValue {
+  font-weight: 600;
+  color: var(--ink-800);
+}
+
 .orderConfirmationPage__summaryItem--total {
   background: linear-gradient(
     135deg,

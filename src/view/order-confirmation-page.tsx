@@ -5,13 +5,22 @@ import { STORE_PROFILE } from "../config/store-profile";
 import { buildWhatsAppLink } from "../utils/whatsapp";
 import { formatIDR } from "../utils/money";
 
+interface OrderItem {
+  name: string;
+  price: number;
+  quantity: number;
+}
+
 interface OrderConfirmationProps {
   bouquetName?: string;
   quantity?: number;
+  items?: string; // JSON string of items array for multi-item orders
   deliveryType?: string;
   deliveryDate?: string;
+  deliveryTimeSlot?: string;
   address?: string;
   greetingCard?: string;
+  orderNotes?: string;
   totalPrice?: number;
 }
 
@@ -25,23 +34,77 @@ class OrderConfirmationPage extends Component<OrderConfirmationProps> {
     const {
       bouquetName = "Bouquet Pilihan",
       quantity = 1,
+      items: itemsJson,
       deliveryType = "delivery",
       deliveryDate = "",
+      deliveryTimeSlot = "",
       address = "",
       greetingCard = "",
+      orderNotes = "",
       totalPrice = 0,
     } = this.props;
 
-    const whatsAppMessage = buildWhatsAppLink(
-      `Halo ${STORE_PROFILE.brand.displayName}, saya sudah mengisi form pemesanan:\n\n` +
-      `✨ ${bouquetName}\n` +
-      `📦 Jumlah: ${quantity}\n` +
-      `🚚 Pengiriman: ${deliveryType === "delivery" ? "Diantar" : "Ambil di Toko"}\n` +
-      (deliveryDate ? `📅 Tanggal: ${deliveryDate}\n` : "") +
-      (address ? `📍 Alamat: ${address}\n` : "") +
-      (greetingCard ? `💌 Kartu Ucapan: ${greetingCard}\n` : "") +
-      (totalPrice > 0 ? `💰 Total: ${formatIDR(totalPrice)}` : "")
-    );
+    // Parse items if available (for multi-item orders from checkout)
+    let orderItems: OrderItem[] = [];
+    if (itemsJson) {
+      try {
+        orderItems = JSON.parse(decodeURIComponent(itemsJson));
+      } catch {
+        // If parsing fails, use single item format
+        orderItems = [];
+      }
+    }
+
+    const isMultiItem = orderItems.length > 0;
+
+    // Helper to get time slot label
+    const getTimeSlotLabel = (slotId: string): string => {
+      switch (slotId) {
+        case "morning":
+          return "Pagi (09:00-12:00)";
+        case "afternoon":
+          return "Siang (12:00-15:00)";
+        case "evening":
+          return "Sore (15:00-18:00)";
+        default:
+          return slotId;
+      }
+    };
+
+    const buildWhatsAppMessage = (): string => {
+      if (isMultiItem) {
+        const lines = [
+          `Halo ${STORE_PROFILE.brand.displayName}, saya sudah mengisi form pemesanan:\n\n`,
+          ...orderItems.map((item, index) => 
+            `${index + 1}. ${item.name}\n   Harga: ${formatIDR(item.price)} x ${item.quantity} = ${formatIDR(item.price * item.quantity)}`
+          ),
+          ``,
+          `🚚 Pengiriman: ${deliveryType === "delivery" ? "Diantar" : "Ambil di Toko"}\n` +
+          (deliveryDate ? `📅 Tanggal: ${deliveryDate}\n` : "") +
+          (deliveryTimeSlot ? `⏰ Waktu: ${getTimeSlotLabel(deliveryTimeSlot)}\n` : "") +
+          (address ? `📍 Alamat: ${address}\n` : "") +
+          (greetingCard ? `💌 Kartu Ucapan: ${greetingCard}\n` : "") +
+          (orderNotes ? `📝 Catatan Pesanan: ${orderNotes}\n` : "") +
+          (totalPrice > 0 ? `💰 Total: ${formatIDR(totalPrice)}` : ""),
+        ];
+        return lines.join("\n");
+      } else {
+        return (
+          `Halo ${STORE_PROFILE.brand.displayName}, saya sudah mengisi form pemesanan:\n\n` +
+          `✨ ${bouquetName}\n` +
+          `📦 Jumlah: ${quantity}\n` +
+          `🚚 Pengiriman: ${deliveryType === "delivery" ? "Diantar" : "Ambil di Toko"}\n` +
+          (deliveryDate ? `📅 Tanggal: ${deliveryDate}\n` : "") +
+          (deliveryTimeSlot ? `⏰ Waktu: ${getTimeSlotLabel(deliveryTimeSlot)}\n` : "") +
+          (address ? `📍 Alamat: ${address}\n` : "") +
+          (greetingCard ? `💌 Kartu Ucapan: ${greetingCard}\n` : "") +
+          (orderNotes ? `📝 Catatan Pesanan: ${orderNotes}\n` : "") +
+          (totalPrice > 0 ? `💰 Total: ${formatIDR(totalPrice)}` : "")
+        );
+      }
+    };
+
+    const whatsAppMessage = buildWhatsAppLink(buildWhatsAppMessage());
 
     return (
       <div className="orderConfirmationPage">
@@ -72,15 +135,38 @@ class OrderConfirmationPage extends Component<OrderConfirmationProps> {
             </h2>
             
             <div className="orderConfirmationPage__summaryContent">
-              <div className="orderConfirmationPage__summaryItem">
-                <span className="orderConfirmationPage__summaryLabel">Bouquet</span>
-                <span className="orderConfirmationPage__summaryValue">{bouquetName}</span>
-              </div>
-              
-              <div className="orderConfirmationPage__summaryItem">
-                <span className="orderConfirmationPage__summaryLabel">Jumlah</span>
-                <span className="orderConfirmationPage__summaryValue">{quantity} pcs</span>
-              </div>
+              {isMultiItem ? (
+                <>
+                  <div className="orderConfirmationPage__summaryItem">
+                    <span className="orderConfirmationPage__summaryLabel">Items</span>
+                    <span className="orderConfirmationPage__summaryValue">
+                      {orderItems.length} {orderItems.length === 1 ? "item" : "items"}
+                    </span>
+                  </div>
+                  {orderItems.map((item, index) => (
+                    <div key={index} className="orderConfirmationPage__summaryItem orderConfirmationPage__summaryItem--nested">
+                      <span className="orderConfirmationPage__summaryLabel">
+                        {index + 1}. {item.name}
+                      </span>
+                      <span className="orderConfirmationPage__summaryValue">
+                        {item.quantity} x {formatIDR(item.price)} = {formatIDR(item.price * item.quantity)}
+                      </span>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <>
+                  <div className="orderConfirmationPage__summaryItem">
+                    <span className="orderConfirmationPage__summaryLabel">Bouquet</span>
+                    <span className="orderConfirmationPage__summaryValue">{bouquetName}</span>
+                  </div>
+                  
+                  <div className="orderConfirmationPage__summaryItem">
+                    <span className="orderConfirmationPage__summaryLabel">Jumlah</span>
+                    <span className="orderConfirmationPage__summaryValue">{quantity} pcs</span>
+                  </div>
+                </>
+              )}
               
               <div className="orderConfirmationPage__summaryItem">
                 <span className="orderConfirmationPage__summaryLabel">Tipe Pengiriman</span>
@@ -96,6 +182,13 @@ class OrderConfirmationPage extends Component<OrderConfirmationProps> {
                 </div>
               )}
               
+              {deliveryTimeSlot && (
+                <div className="orderConfirmationPage__summaryItem">
+                  <span className="orderConfirmationPage__summaryLabel">Waktu</span>
+                  <span className="orderConfirmationPage__summaryValue">{getTimeSlotLabel(deliveryTimeSlot)}</span>
+                </div>
+              )}
+              
               {address && (
                 <div className="orderConfirmationPage__summaryItem">
                   <span className="orderConfirmationPage__summaryLabel">Alamat</span>
@@ -107,6 +200,13 @@ class OrderConfirmationPage extends Component<OrderConfirmationProps> {
                 <div className="orderConfirmationPage__summaryItem">
                   <span className="orderConfirmationPage__summaryLabel">Kartu Ucapan</span>
                   <span className="orderConfirmationPage__summaryValue">{greetingCard}</span>
+                </div>
+              )}
+              
+              {orderNotes && (
+                <div className="orderConfirmationPage__summaryItem">
+                  <span className="orderConfirmationPage__summaryLabel">Catatan Pesanan</span>
+                  <span className="orderConfirmationPage__summaryValue">{orderNotes}</span>
                 </div>
               )}
               
@@ -172,10 +272,13 @@ const OrderConfirmationPageWrapper: React.FC = () => {
     <OrderConfirmationPage
       bouquetName={searchParams.get("bouquetName") || undefined}
       quantity={parseInt(searchParams.get("quantity") || "1")}
+      items={searchParams.get("items") || undefined}
       deliveryType={searchParams.get("deliveryType") || undefined}
       deliveryDate={searchParams.get("deliveryDate") || undefined}
+      deliveryTimeSlot={searchParams.get("deliveryTimeSlot") || undefined}
       address={searchParams.get("address") || undefined}
       greetingCard={searchParams.get("greetingCard") || undefined}
+      orderNotes={searchParams.get("orderNotes") || undefined}
       totalPrice={parseFloat(searchParams.get("totalPrice") || "0")}
     />
   );

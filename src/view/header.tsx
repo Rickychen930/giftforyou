@@ -4,6 +4,8 @@ import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { BRAND_INFO, COLLECTION_SUGGESTIONS } from "../constants/app-constants";
 import { getCollections } from "../services/collection.service";
 import { API_BASE } from "../config/api";
+import { getCartCount } from "../utils/cart";
+import { getAccessToken } from "../utils/auth-utils";
 import {
   SearchIcon,
   CloseIcon,
@@ -35,6 +37,7 @@ const Header: React.FC<HeaderProps> = ({
   const [scrolled, setScrolled] = useState(false);
   const [collectionNames, setCollectionNames] = useState<string[]>([]);
   const [typeNames, setTypeNames] = useState<string[]>([]);
+  const [cartCount, setCartCount] = useState<number>(0);
   const searchRef = useRef<HTMLInputElement | null>(null);
   const searchModalRef = useRef<HTMLDivElement | null>(null);
   const searchButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -88,6 +91,22 @@ const Header: React.FC<HeaderProps> = ({
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Update cart count
+  useEffect(() => {
+    const updateCartCount = () => {
+      const isAuthenticated = !!getAccessToken();
+      if (isAuthenticated) {
+        setCartCount(getCartCount());
+      } else {
+        setCartCount(0);
+      }
+    };
+
+    updateCartCount();
+    window.addEventListener("cartUpdated", updateCartCount);
+    return () => window.removeEventListener("cartUpdated", updateCartCount);
   }, []);
 
   useEffect(() => {
@@ -589,6 +608,31 @@ const Header: React.FC<HeaderProps> = ({
           >
             <SearchIcon />
           </button>
+
+          {/* Cart */}
+          {getAccessToken() && (
+            <Link
+              to="/cart"
+              className="icon-btn cart-btn"
+              aria-label={`Keranjang (${cartCount} item)`}
+              title="Keranjang Belanja"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M9 2L7 6H2v2h1l1 10h12l1-10h1V6h-5L15 2H9z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              {cartCount > 0 && (
+                <span className="cart-badge" aria-label={`${cartCount} item di keranjang`}>
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              )}
+            </Link>
+          )}
 
           {/* Mobile Menu Toggle */}
           <button

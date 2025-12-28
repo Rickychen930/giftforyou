@@ -99,13 +99,32 @@ export async function createUser(req: Request, res: Response): Promise<void> {
     // Hash password with higher cost factor for better security
     const hashed = await bcrypt.hash(password, 12);
 
-    await UserModel.create({
+    const user = await UserModel.create({
       username,
       email,
       password: hashed,
       role: "customer", // Default to customer, admin should be created via seed
       isActive: true,
     });
+
+    // Create customer profile if fullName and phoneNumber provided
+    const fullName = sanitizeString(req.body.fullName || "");
+    const phoneNumber = sanitizeString(req.body.phoneNumber || "");
+    
+    if (fullName && phoneNumber) {
+      try {
+        const { CustomerModel } = await import("../models/customer-model");
+        await CustomerModel.create({
+          buyerName: fullName,
+          phoneNumber: phoneNumber,
+          address: "", // Can be filled later
+          userId: user._id.toString(), // Link to user
+        });
+      } catch (err) {
+        // Customer creation is optional, don't fail registration if it fails
+        console.warn("Failed to create customer profile:", err);
+      }
+    }
 
     res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
