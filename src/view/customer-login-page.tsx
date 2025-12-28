@@ -49,15 +49,20 @@ class CustomerLoginPage extends Component<{}, LoginState> {
       this.setState({ username: savedUsername, rememberMe: true });
     }
 
-    // Initialize Google Sign-In
-    initializeGoogleSignIn(
-      (credential) => {
-        this.handleGoogleLogin(credential);
-      },
-      (error) => {
-        console.error("Google Sign-In initialization error:", error);
-      }
-    );
+    // Initialize Google Sign-In (only if configured)
+    if (process.env.REACT_APP_GOOGLE_CLIENT_ID) {
+      initializeGoogleSignIn(
+        (credential) => {
+          this.handleGoogleLogin(credential);
+        },
+        (error) => {
+          // Silently fail if not configured - don't show error to user
+          if (process.env.NODE_ENV === "development") {
+            console.warn("Google Sign-In not available:", error.message);
+          }
+        }
+      );
+    }
   }
 
   private handleChange = (field: keyof LoginState, value: string | boolean): void => {

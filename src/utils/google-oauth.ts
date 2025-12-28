@@ -66,9 +66,8 @@ export function initializeGoogleSignIn(
   onSuccess: (credential: string) => void,
   onError?: (error: Error) => void
 ): void {
-  if (!GOOGLE_CLIENT_ID) {
-    // eslint-disable-next-line no-console
-    console.warn("Google Client ID not configured");
+  if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.trim() === "") {
+    // Silently fail if not configured - don't show error to user
     if (onError) {
       onError(new Error("Google OAuth not configured"));
     }

@@ -47,6 +47,60 @@
   top: 0;
   height: 100vh;
   overflow-y: auto;
+  z-index: 100;
+}
+
+/* Responsive Sidebar */
+@media (max-width: 1024px) {
+  .dashboardSidebar {
+    width: 260px;
+    padding: 1.25rem 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboardSidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 280px;
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+  }
+
+  .dashboardSidebar.dashboardSidebar--open {
+    transform: translateX(0);
+  }
+
+  /* Overlay for mobile */
+  .dashboardSidebar::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 280px;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+  }
+
+  .dashboardSidebar.dashboardSidebar--open::before {
+    opacity: 1;
+    pointer-events: all;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboardSidebar {
+    width: 100%;
+    max-width: 320px;
+  }
 }
 
 .dashboardSidebar::-webkit-scrollbar {
@@ -439,6 +493,38 @@
   flex: 1;
   padding: 2rem;
   min-width: 0;
+  position: relative;
+}
+
+/* Mobile Menu Button */
+.dashboardMobileMenuBtn {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1001;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 245, 248, 0.95) 100%);
+  border: 2px solid rgba(212, 140, 156, 0.2);
+  box-shadow: 0 4px 16px rgba(212, 140, 156, 0.2);
+  color: var(--brand-rose-700);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashboardMobileMenuBtn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(212, 140, 156, 0.3);
+  border-color: rgba(212, 140, 156, 0.3);
+}
+
+/* Mobile Sidebar Overlay */
+.dashboardSidebarOverlay {
+  display: none;
 }
 
 .dashboardContainer {

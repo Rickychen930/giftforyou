@@ -35,6 +35,9 @@ class KeyboardShortcutsManager {
   handleKeyDown(event: KeyboardEvent): void {
     if (!this.enabled) return;
 
+    // Handle undefined key
+    if (!event.key) return;
+
     const key = event.key.toLowerCase();
     const ctrl = event.ctrlKey || event.metaKey;
     const shift = event.shiftKey;

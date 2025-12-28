@@ -134,6 +134,7 @@ interface State {
   copyStatus: "" | "copied" | "failed";
   overviewCopyStatus: "" | "copied" | "failed";
   performance: PerformanceState;
+  sidebarOpen: boolean;
   seo: SeoState;
   alerts: AlertsState;
   showTrends: boolean;
@@ -168,6 +169,7 @@ class DashboardView extends Component<Props, State> {
     showBenchmarks: false,
     showInventory: false,
     showAnalytics: false,
+    sidebarOpen: false,
   };
 
   componentDidMount(): void {
@@ -565,7 +567,7 @@ class DashboardView extends Component<Props, State> {
     ];
 
     return (
-      <aside className="dashboardSidebar" aria-label="Navigasi dashboard">
+      <aside className={`dashboardSidebar ${this.state.sidebarOpen ? "dashboardSidebar--open" : ""}`} aria-label="Navigasi dashboard">
         <a className="dashboardSkipLink" href="#dashboard-main">
           Lewati ke konten
         </a>
@@ -1669,6 +1671,24 @@ class DashboardView extends Component<Props, State> {
         {this.renderSidebar()}
 
         <main id="dashboard-main" className="dashboardMain">
+          <button
+            type="button"
+            className="dashboardMobileMenuBtn"
+            onClick={() => this.setState({ sidebarOpen: !this.state.sidebarOpen })}
+            aria-label="Toggle sidebar"
+            aria-expanded={this.state.sidebarOpen}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          {this.state.sidebarOpen && (
+            <div 
+              className="dashboardSidebarOverlay"
+              onClick={() => this.setState({ sidebarOpen: false })}
+              aria-hidden="true"
+            />
+          )}
           <div className="dashboardContainer">
             <header className="dashboardHeader">
               <div className="dashboardHeader__top">

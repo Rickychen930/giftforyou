@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import "../../styles/CustomersSection.css";
 import { API_BASE } from "../../config/api";
 import { formatIDR } from "../../utils/money";
+import { getAccessToken } from "../../utils/auth-utils";
 
 type Customer = {
   _id?: string;
@@ -85,10 +86,15 @@ export default function CustomersSection({ onSelectCustomer }: Props) {
     setError(null);
     try {
       const query = debouncedSearchQuery ? `?q=${encodeURIComponent(debouncedSearchQuery)}` : "";
+      const token = getAccessToken();
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
       const res = await fetch(`${API_BASE}/api/customers${query}`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
       });
 
       if (!res.ok) {
@@ -103,12 +109,17 @@ export default function CustomersSection({ onSelectCustomer }: Props) {
         customersList.map(async (customer) => {
           try {
             // Get orders for this customer
+            const ordersToken = getAccessToken();
+            const ordersHeaders: HeadersInit = {
+              "Content-Type": "application/json",
+            };
+            if (ordersToken) {
+              ordersHeaders["Authorization"] = `Bearer ${ordersToken}`;
+            }
             const ordersRes = await fetch(
               `${API_BASE}/api/orders?customerId=${customer._id}&limit=1000`,
               {
-                headers: {
-                  "Content-Type": "application/json",
-                },
+                headers: ordersHeaders,
               }
             );
 
