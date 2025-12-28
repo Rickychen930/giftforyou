@@ -116,6 +116,7 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
   const [saving, setSaving] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>(bouquet.image ?? "");
+  const previewRef = useRef<string>(bouquet.image ?? "");
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [saveMessage, setSaveMessage] = useState<string>("");
   const [isDraggingImage, setIsDraggingImage] = useState(false);
@@ -233,8 +234,14 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
       careInstructions: bouquet.careInstructions ?? "",
     });
 
+    // Cleanup blob URL if exists
+    if (previewRef.current && previewRef.current.startsWith("blob:")) {
+      URL.revokeObjectURL(previewRef.current);
+    }
     setFile(null);
-    setPreview(bouquet.image ?? "");
+    const newPreview = bouquet.image ?? "";
+    previewRef.current = newPreview;
+    setPreview(newPreview);
     setSaveStatus("idle");
     setSaveMessage("");
     setFieldErrors({});
@@ -251,14 +258,14 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
     return () => window.clearTimeout(t);
   }, [saveStatus]);
 
-  // Cleanup blob URL on unmount or file change
+  // Cleanup blob URL on unmount
   useEffect(() => {
     return () => {
-      if (preview && preview.startsWith("blob:")) {
-        URL.revokeObjectURL(preview);
+      if (previewRef.current && previewRef.current.startsWith("blob:")) {
+        URL.revokeObjectURL(previewRef.current);
       }
     };
-  }, [preview]);
+  }, []);
 
   // Auto-focus first field when component mounts
   useEffect(() => {
@@ -539,7 +546,12 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
     return "";
   };
 
-  const processImageFile = async (selectedFile: File): Promise<void> => {
+  const processImageFile = useCallback(async (selectedFile: File): Promise<void> => {
+    // Prevent processing if already loading or saving
+    if (isImageLoading || saving) {
+      return;
+    }
+
     // Check file size (8MB limit)
     const maxSize = 8 * 1024 * 1024;
     if (selectedFile.size > maxSize) {
@@ -559,45 +571,86 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
     setSaveMessage("");
 
     try {
+      // Cleanup old preview blob URL if exists
+      if (preview && preview.startsWith("blob:")) {
+        URL.revokeObjectURL(preview);
+      }
+
       // Compress image if it's large
       let processedFile = selectedFile;
       if (selectedFile.size > 2 * 1024 * 1024) {
         try {
           processedFile = await compressImage(selectedFile);
         } catch (compressError) {
-          console.warn("Image compression failed, using original:", compressError);
+          // Image compression failed, using original file
+          if (process.env.NODE_ENV === "development") {
+            // eslint-disable-next-line no-console
+            console.warn("Image compression failed, using original:", compressError);
+          }
+          // Continue with original file if compression fails
         }
       }
 
-      setFile(processedFile);
+      // Create new blob URL
       const objectUrl = URL.createObjectURL(processedFile);
+      
+      // Cleanup old preview blob URL if exists
+      if (previewRef.current && previewRef.current.startsWith("blob:")) {
+        URL.revokeObjectURL(previewRef.current);
+      }
+      
+      // Set file and preview atomically
+      setFile(processedFile);
+      previewRef.current = objectUrl;
       setPreview(objectUrl);
     } catch (err) {
-      console.error("Error processing image:", err);
+      // Error processing image - log in development only
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.error("Error processing image:", err);
+      }
       setSaveStatus("error");
       setSaveMessage("Gagal memproses gambar. Silakan coba file lain.");
       setFile(null);
+      // Cleanup any blob URL that might have been created
+      if (previewRef.current && previewRef.current.startsWith("blob:")) {
+        URL.revokeObjectURL(previewRef.current);
+      }
     } finally {
       setIsImageLoading(false);
     }
-  };
+  }, [isImageLoading, saving, preview, compressImage, isAcceptableImage]);
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Prevent double processing
+    if (isImageLoading || saving) {
+      return;
+    }
+
     const selectedFile = e.target.files?.[0] ?? null;
     if (!selectedFile) {
+      // Cleanup blob URL if clearing file
+      if (previewRef.current && previewRef.current.startsWith("blob:")) {
+        URL.revokeObjectURL(previewRef.current);
+      }
       setFile(null);
+      const newPreview = bouquet.image ?? "";
+      previewRef.current = newPreview;
+      setPreview(newPreview);
       return;
     }
 
     await processImageFile(selectedFile);
-  };
+  }, [isImageLoading, saving, preview, bouquet.image, processImageFile]);
 
   const resetImage = () => {
-    if (preview && preview.startsWith("blob:")) {
-      URL.revokeObjectURL(preview);
+    if (previewRef.current && previewRef.current.startsWith("blob:")) {
+      URL.revokeObjectURL(previewRef.current);
     }
     setFile(null);
-    setPreview(bouquet.image ?? "");
+    const newPreview = bouquet.image ?? "";
+    previewRef.current = newPreview;
+    setPreview(newPreview);
     setSaveStatus("idle");
     setSaveMessage("");
     setImageDimensions(null);
@@ -703,6 +756,11 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
   }, [form, file]);
 
   const handleSave = useCallback(async () => {
+    // Prevent double submission
+    if (saving) {
+      return;
+    }
+
     if (validationError) {
       // Scroll to first error
       const firstErrorField = Object.keys(fieldErrors)[0];
@@ -720,7 +778,14 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
     try {
       setSaving(true);
       const fd = buildFormData();
-      const result = await onSave(fd);
+      
+      // Add timeout protection for save (30 seconds)
+      const savePromise = onSave(fd);
+      const timeoutPromise = new Promise<boolean>((_, reject) => {
+        setTimeout(() => reject(new Error("Save timeout. Silakan coba lagi.")), 30000);
+      });
+
+      const result = await Promise.race([savePromise, timeoutPromise]);
       if (typeof result === "boolean") {
         if (result) {
           // Clear file after successful save
@@ -782,11 +847,18 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
       newPenandaInput: "",
       careInstructions: bouquet.careInstructions ?? "",
     });
+    // Cleanup blob URL if exists
+    if (previewRef.current && previewRef.current.startsWith("blob:")) {
+      URL.revokeObjectURL(previewRef.current);
+    }
     setFile(null);
-    setPreview(bouquet.image ?? "");
+    const newPreview = bouquet.image ?? "";
+    previewRef.current = newPreview;
+    setPreview(newPreview);
     setFieldErrors({});
     setTouchedFields(new Set());
     setImageDimensions(null);
+    setIsImageLoading(false);
     setSaveStatus("idle");
     setSaveMessage("");
   }, [bouquet]);
@@ -801,6 +873,7 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
       setSaveMessage("Bouquet berhasil diduplikasi!");
       setShowQuickActions(false);
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error("Duplicate error:", err);
       setSaveStatus("error");
       setSaveMessage("Gagal menduplikasi bouquet.");
@@ -845,7 +918,7 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [canSave, isDirty, handleSave, resetForm]);
+  }, [canSave, isDirty, saving, handleSave, resetForm]);
 
   return (
     <article className="becCard" aria-label={`Edit bouquet ${form.name}`}>

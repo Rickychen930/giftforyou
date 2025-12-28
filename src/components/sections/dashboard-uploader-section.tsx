@@ -754,7 +754,17 @@ class BouquetUploader extends Component<Props, State> {
     this.setState({ isImageLoading: true, file });
 
     // Create preview with timeout for large files
+    // Clear any existing timeout to prevent race conditions
+    if (this.imageLoadTimeout) {
+      clearTimeout(this.imageLoadTimeout);
+    }
+    
     this.imageLoadTimeout = setTimeout(async () => {
+      // Check if component is still mounted
+      if (!this.componentMounted) {
+        return;
+      }
+
       try {
         // Compress image if it's large
         let processedFile = file;
@@ -771,6 +781,16 @@ class BouquetUploader extends Component<Props, State> {
           }
         }
 
+        // Double-check component is still mounted before setting state
+        if (!this.componentMounted) {
+          // Cleanup blob URL if component unmounted
+          if (processedFile !== file) {
+            const tempUrl = URL.createObjectURL(processedFile);
+            URL.revokeObjectURL(tempUrl);
+          }
+          return;
+        }
+
         const previewUrl = URL.createObjectURL(processedFile);
         this.setState({ 
           previewUrl, 
@@ -784,8 +804,12 @@ class BouquetUploader extends Component<Props, State> {
           // eslint-disable-next-line no-console
           console.error("Error creating preview:", err);
         }
-        this.setMessage("Gagal memuat preview gambar. Silakan coba file lain.", "error");
-        this.setState({ file: null, previewUrl: "", isImageLoading: false, imageDimensions: null });
+        
+        // Only update state if component is still mounted
+        if (this.componentMounted) {
+          this.setMessage("Gagal memuat preview gambar. Silakan coba file lain.", "error");
+          this.setState({ file: null, previewUrl: "", isImageLoading: false, imageDimensions: null });
+        }
       }
     }, 100);
   };
@@ -1107,6 +1131,11 @@ class BouquetUploader extends Component<Props, State> {
   private handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Prevent double submission
+    if (this.state.submitting) {
+      return;
+    }
+
     // Don't submit if image is still loading
     if (this.state.isImageLoading) {
       this.setMessage("Tunggu hingga gambar selesai dimuat.", "error");
@@ -1216,7 +1245,13 @@ class BouquetUploader extends Component<Props, State> {
         messageType: "",
       });
 
-      const ok = await this.props.onUpload(formData);
+      // Add timeout protection for upload (30 seconds)
+      const uploadPromise = this.props.onUpload(formData);
+      const timeoutPromise = new Promise<boolean>((_, reject) => {
+        setTimeout(() => reject(new Error("Upload timeout. Silakan coba lagi.")), 30000);
+      });
+
+      const ok = await Promise.race([uploadPromise, timeoutPromise]);
 
       if (ok) {
         // Clear draft on success
