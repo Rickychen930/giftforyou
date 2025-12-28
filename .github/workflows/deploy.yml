@@ -185,13 +185,13 @@ jobs:
             set -e
             BACKEND_TARGET="${{ secrets.BACKEND_TARGET_DIR }}"
             mkdir -p "$BACKEND_TARGET"
-            cat > "$BACKEND_TARGET/ecosystem.config.js" << 'ECOSYSTEM_EOF'
+            cat > "$BACKEND_TARGET/ecosystem.config.js" << EOF
             module.exports = {
               apps: [
                 {
                   name: "giftforyou-api",
                   script: "dist/server/server.js",
-                  cwd: "$BACKEND_TARGET",
+                  cwd: "${BACKEND_TARGET}",
                   instances: 1,
                   exec_mode: "fork",
                   env_file: "server/.env",
@@ -212,9 +212,9 @@ jobs:
                 },
               ],
             };
-            ECOSYSTEM_EOF
+            EOF
             chmod 644 "$BACKEND_TARGET/ecosystem.config.js"
-            echo "✅ ecosystem.config.js uploaded"
+            echo "✅ ecosystem.config.js uploaded with cwd: ${BACKEND_TARGET}"
 
       # ✅ Activate Frontend Release
       - name: Activate frontend release (atomic)
