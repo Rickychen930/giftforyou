@@ -108,10 +108,34 @@ export function initializeGoogleSignIn(
  * Trigger Google Sign-In prompt
  */
 export function triggerGoogleSignIn(): void {
+  if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.trim() === "") {
+    console.warn("Google Client ID not configured");
+    return;
+  }
+
   const win = window as GoogleWindow;
   const googleAccounts = win.google?.accounts;
   if (googleAccounts?.id) {
     googleAccounts.id.prompt();
+  } else {
+    // If not initialized yet, try to initialize first
+    loadGoogleOAuthScript()
+      .then(() => {
+        const winAfter = window as GoogleWindow;
+        const accounts = winAfter.google?.accounts;
+        if (accounts?.id) {
+          accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: () => {
+              // This will be handled by the main initialization
+            },
+          });
+          accounts.id.prompt();
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load Google OAuth script:", error);
+      });
   }
 }
 

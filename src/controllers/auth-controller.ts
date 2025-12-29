@@ -48,8 +48,14 @@ function getClientId(req: Request): string {
 
 export async function createUser(req: Request, res: Response): Promise<void> {
   try {
-    // In production, disable public registration or protect with admin-only access
-    if (process.env.NODE_ENV === "production" && process.env.ALLOW_PUBLIC_REGISTRATION !== "true") {
+    // Check if public registration is allowed
+    // Allow registration if:
+    // 1. Not in production mode, OR
+    // 2. In production but ALLOW_PUBLIC_REGISTRATION is explicitly set to "true"
+    const isProduction = process.env.NODE_ENV === "production";
+    const allowRegistration = process.env.ALLOW_PUBLIC_REGISTRATION === "true";
+    
+    if (isProduction && !allowRegistration) {
       res.status(403).json({ error: "Registration is disabled" });
       return;
     }

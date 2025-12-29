@@ -50,19 +50,19 @@ class CustomerLoginPage extends Component<{}, LoginState> {
     }
 
     // Initialize Google Sign-In (only if configured)
-    if (process.env.REACT_APP_GOOGLE_CLIENT_ID) {
-      initializeGoogleSignIn(
-        (credential) => {
-          this.handleGoogleLogin(credential);
-        },
-        (error) => {
-          // Silently fail if not configured - don't show error to user
-          if (process.env.NODE_ENV === "development") {
-            console.warn("Google Sign-In not available:", error.message);
-          }
+    // Always try to initialize - the function will handle missing config gracefully
+    initializeGoogleSignIn(
+      (credential) => {
+        this.handleGoogleLogin(credential);
+      },
+      (error) => {
+        // Only log in development, don't show error to user
+        if (process.env.NODE_ENV === "development") {
+          console.warn("Google Sign-In initialization:", error.message);
         }
-      );
-    }
+        // Don't set error state - just silently fail
+      }
+    );
   }
 
   private handleChange = (field: keyof LoginState, value: string | boolean): void => {

@@ -512,6 +512,7 @@
   box-shadow: 0 4px 16px rgba(212, 140, 156, 0.2);
   color: var(--brand-rose-700);
   cursor: pointer;
+  display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -523,9 +524,36 @@
   border-color: rgba(212, 140, 156, 0.3);
 }
 
+@media (max-width: 768px) {
+  .dashboardMobileMenuBtn {
+    display: flex;
+  }
+}
+
 /* Mobile Sidebar Overlay */
 .dashboardSidebarOverlay {
   display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .dashboardSidebarOverlay {
+    display: block;
+  }
+  
+  .dashboardSidebarOverlay[aria-hidden="false"] {
+    opacity: 1;
+  }
 }
 
 .dashboardContainer {

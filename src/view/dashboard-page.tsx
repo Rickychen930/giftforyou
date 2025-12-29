@@ -1672,7 +1672,7 @@ class DashboardView extends Component<Props, State> {
             <div 
               className="dashboardSidebarOverlay"
               onClick={() => this.setState({ sidebarOpen: false })}
-              aria-hidden="true"
+              aria-hidden="false"
             />
           )}
           <div className="dashboardContainer">
