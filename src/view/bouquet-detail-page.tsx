@@ -15,6 +15,7 @@ import { addToRecentlyViewed } from "../utils/recently-viewed";
 import { toast } from "../utils/toast";
 import { API_BASE } from "../config/api";
 import { getAccessToken } from "../utils/auth-utils";
+import { buildImageUrl } from "../utils/image-utils";
 
 // Reusable Components
 import ProductImageGallery from "../components/bouquet-detail/ProductImageGallery";
@@ -27,12 +28,6 @@ import Breadcrumb from "../components/bouquet-detail/Breadcrumb";
 
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
 const formatPrice = formatIDR;
-
-const buildImageUrl = (image?: string) => {
-  if (!image) return FALLBACK_IMAGE;
-  if (image.startsWith("http://") || image.startsWith("https://")) return image;
-  return `${API_BASE}${image}`;
-};
 
 const buildCustomerOrderMessage = (
   b: Bouquet,
@@ -82,8 +77,6 @@ interface BouquetDetailState {
   isFormValid: boolean;
   isFavorite: boolean;
   showOrderModal: boolean;
-  priceBreakdownCache: { subtotal: number; delivery: number; discount: number; total: number } | null;
-  priceBreakdownCacheKey: string;
 }
 
 class BouquetDetailPage extends Component<Props, BouquetDetailState> {
@@ -104,8 +97,6 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
     isFormValid: false,
     isFavorite: false,
     showOrderModal: false,
-    priceBreakdownCache: null,
-    priceBreakdownCacheKey: "",
   };
 
   private getDefaultDate(): string {
@@ -144,7 +135,7 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
   private loadSavedAddress = async (): Promise<void> => {
     try {
       const token = getAccessToken();
-      if (!token || this.state.formData.address) return;
+      if (!token || this.state.formData.address.trim()) return;
 
       const response = await fetch(`${API_BASE}/api/customers/addresses`, {
         headers: {
@@ -156,9 +147,9 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
         const addresses = await response.json();
         const defaultAddress = addresses.find((addr: any) => addr.isDefault);
         if (defaultAddress && defaultAddress.fullAddress) {
-          this.setState({
-            formData: { ...this.state.formData, address: defaultAddress.fullAddress },
-          });
+          this.setState((prevState) => ({
+            formData: { ...prevState.formData, address: defaultAddress.fullAddress },
+          }));
           toast.info("Alamat default dimuat");
         }
       }
@@ -332,10 +323,6 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
       prevProps.error !== this.props.error
     ) {
       this.applySeo();
-      this.setState({
-        priceBreakdownCache: null,
-        priceBreakdownCacheKey: "",
-      });
 
       if (typeof window !== "undefined" && "requestIdleCallback" in window) {
         window.requestIdleCallback(() => {

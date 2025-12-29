@@ -1,26 +1,18 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import "../../styles/bouquet-detail/Breadcrumb.css";
+import BreadcrumbComponent, { BreadcrumbItem } from "../common/Breadcrumb";
 
 interface BreadcrumbProps {
   currentPage: string;
 }
 
 const Breadcrumb: React.FC<BreadcrumbProps> = ({ currentPage }) => {
-  return (
-    <nav className="breadcrumb" aria-label="Breadcrumb">
-      <Link to="/" className="breadcrumb__link">
-        Beranda
-      </Link>
-      <span className="breadcrumb__separator">/</span>
-      <Link to="/collection" className="breadcrumb__link">
-        Katalog
-      </Link>
-      <span className="breadcrumb__separator">/</span>
-      <span className="breadcrumb__current">{currentPage}</span>
-    </nav>
-  );
+  const items: BreadcrumbItem[] = [
+    { label: "Beranda", path: "/" },
+    { label: "Katalog", path: "/collection" },
+    { label: currentPage, isCurrent: true },
+  ];
+
+  return <BreadcrumbComponent items={items} />;
 };
 
 export default Breadcrumb;
-

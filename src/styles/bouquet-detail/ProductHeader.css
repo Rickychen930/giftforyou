@@ -99,27 +99,7 @@
 }
 
 .product-header__status {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  border-radius: 12px;
-  font-size: 0.875rem;
-  font-weight: 800;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.product-header__status--ready {
-  background: linear-gradient(135deg, rgba(168, 213, 186, 0.2), rgba(168, 213, 186, 0.15));
-  color: var(--brand-green-700);
-  border: 1.5px solid rgba(168, 213, 186, 0.3);
-}
-
-.product-header__status--preorder {
-  background: linear-gradient(135deg, rgba(212, 140, 156, 0.2), rgba(212, 140, 156, 0.15));
-  color: var(--brand-rose-700);
-  border: 1.5px solid rgba(212, 140, 156, 0.3);
+  /* StatusBadge component handles its own styling */
 }
 
 @media (max-width: 767px) {
@@ -136,4 +116,3 @@
     height: 44px;
   }
 }
-

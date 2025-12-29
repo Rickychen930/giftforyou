@@ -2,18 +2,13 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "../../styles/bouquet-detail/SimilarProducts.css";
 import { formatIDR } from "../../utils/money";
-import { API_BASE } from "../../config/api";
 import type { Bouquet } from "../../models/domain/bouquet";
+import ProductImage from "../common/ProductImage";
+import StatusBadge from "../common/StatusBadge";
 
 interface SimilarProductsProps {
   bouquets: Bouquet[];
 }
-
-const buildImageUrl = (image?: string) => {
-  if (!image) return "/images/placeholder-bouquet.jpg";
-  if (image.startsWith("http://") || image.startsWith("https://")) return image;
-  return `${API_BASE}${image}`;
-};
 
 const SimilarProducts: React.FC<SimilarProductsProps> = ({ bouquets }) => {
   if (bouquets.length === 0) return null;
@@ -30,23 +25,19 @@ const SimilarProducts: React.FC<SimilarProductsProps> = ({ bouquets }) => {
             aria-label={`Lihat detail ${bouquet.name}`}
           >
             <div className="similar-products__image-wrapper">
-              <img
-                src={buildImageUrl(bouquet.image)}
+              <ProductImage
+                image={bouquet.image}
                 alt={bouquet.name}
-                className="similar-products__image"
+                aspectRatio="4 / 5"
+                showLightbox={false}
                 loading="lazy"
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = "/images/placeholder-bouquet.jpg";
-                }}
+                className="similar-products__image"
               />
-              <span
-                className={`similar-products__badge ${
-                  bouquet.status === "ready" ? "similar-products__badge--ready" : "similar-products__badge--preorder"
-                }`}
-              >
-                {bouquet.status === "ready" ? "Siap" : "Preorder"}
-              </span>
+              <StatusBadge
+                type={bouquet.status === "ready" ? "ready" : "preorder"}
+                size="sm"
+                className="similar-products__badge"
+              />
             </div>
             <div className="similar-products__body">
               <h3 className="similar-products__name">{bouquet.name}</h3>
@@ -60,4 +51,3 @@ const SimilarProducts: React.FC<SimilarProductsProps> = ({ bouquets }) => {
 };
 
 export default SimilarProducts;
-

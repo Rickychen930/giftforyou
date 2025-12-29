@@ -48,15 +48,17 @@
 
 @media (min-width: 1024px) {
   .bouquet-detail-page__layout {
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: clamp(3rem, 6vw, 5rem);
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: clamp(3rem, 5vw, 4rem);
+    align-items: start;
   }
 }
 
 .bouquet-detail-page__main {
   display: flex;
   flex-direction: column;
-  gap: clamp(1.5rem, 3vw, 2rem);
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  min-width: 0; /* Prevent overflow */
 }
 
 .bouquet-detail-page__sidebar {
@@ -65,6 +67,25 @@
   align-self: start;
   max-height: calc(100vh - clamp(4rem, 8vw, 6rem));
   overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.bouquet-detail-page__sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.bouquet-detail-page__sidebar::-webkit-scrollbar-track {
+  background: rgba(212, 140, 156, 0.05);
+  border-radius: 3px;
+}
+
+.bouquet-detail-page__sidebar::-webkit-scrollbar-thumb {
+  background: rgba(212, 140, 156, 0.3);
+  border-radius: 3px;
+}
+
+.bouquet-detail-page__sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 140, 156, 0.5);
 }
 
 .bouquet-detail-page__order-card {
@@ -78,6 +99,8 @@
     0 0 0 1px rgba(255, 255, 255, 0.8) inset;
   padding: clamp(1.5rem, 3vw, 2rem);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 0; /* Prevent overflow */
+  width: 100%;
 }
 
 .bouquet-detail-page__order-card:hover {
@@ -241,7 +264,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10000;
+  z-index: 9999; /* Below ImageLightbox (10001) */
   animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 1rem;
   overflow-y: auto;
@@ -413,11 +436,17 @@
 @media (max-width: 1023px) {
   .bouquet-detail-page__layout {
     grid-template-columns: 1fr;
+    gap: clamp(2rem, 4vw, 3rem);
   }
 
   .bouquet-detail-page__sidebar {
     position: static;
     max-height: none;
+    overflow: visible;
+  }
+
+  .bouquet-detail-page__order-card {
+    width: 100%;
   }
 }
 
