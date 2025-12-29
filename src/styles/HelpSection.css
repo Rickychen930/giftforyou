@@ -1,0 +1,53 @@
+/**
+ * Help Section Styles
+ * Luxury and responsive help section styling
+ */
+
+.helpSection {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(139, 92, 246, 0.1);
+  margin-top: 2rem;
+}
+
+.helpSection__title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem 0;
+  color: #1f2937;
+}
+
+.helpSection__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8b5cf6;
+}
+
+.helpSection__text {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.6;
+  font-size: 0.9375rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .helpSection {
+    padding: 1.25rem;
+    margin-top: 1.5rem;
+  }
+
+  .helpSection__title {
+    font-size: 1rem;
+  }
+
+  .helpSection__text {
+    font-size: 0.875rem;
+  }
+}
+

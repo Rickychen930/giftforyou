@@ -1,0 +1,93 @@
+/**
+ * Key Value List Styles
+ * Luxury and responsive key-value list styling
+ */
+
+.keyValueList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.keyValueList__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.keyValueList__row:last-child {
+  border-bottom: none;
+}
+
+.keyValueList__key {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #6b7280;
+  flex: 1;
+  min-width: 0;
+}
+
+.keyValueList__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.keyValueList__value {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1f2937;
+  text-align: right;
+  flex-shrink: 0;
+  word-break: break-word;
+}
+
+/* Variants */
+.keyValueList--compact {
+  gap: 0.5rem;
+}
+
+.keyValueList--compact .keyValueList__row {
+  padding: 0.5rem 0;
+}
+
+.keyValueList--compact .keyValueList__key,
+.keyValueList--compact .keyValueList__value {
+  font-size: 0.875rem;
+}
+
+.keyValueList--spacious {
+  gap: 1rem;
+}
+
+.keyValueList--spacious .keyValueList__row {
+  padding: 1rem 0;
+}
+
+.keyValueList--spacious .keyValueList__key,
+.keyValueList--spacious .keyValueList__value {
+  font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .keyValueList__row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .keyValueList__value {
+    text-align: left;
+    width: 100%;
+  }
+}
+

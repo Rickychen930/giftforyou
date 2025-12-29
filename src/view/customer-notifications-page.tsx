@@ -4,9 +4,11 @@
  */
 
 import React from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import "../styles/CustomerNotificationsPage.css";
 import type { NotificationSettings } from "../models/customer-notifications-page-model";
+import BackLink from "../components/common/BackLink";
+import AlertMessage from "../components/common/AlertMessage";
 
 interface CustomerNotificationsPageViewProps {
   settings: NotificationSettings;
@@ -47,12 +49,9 @@ const CustomerNotificationsPageView: React.FC<CustomerNotificationsPageViewProps
     <section className="customerNotifications" aria-labelledby="notifications-title">
       <div className="customerNotifications__container">
         <div className="customerNotifications__header">
-          <Link to="/customer/dashboard" className="customerNotifications__back">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span>Kembali ke Dashboard</span>
-          </Link>
+          <BackLink to="/customer/dashboard" className="customerNotifications__back">
+            Kembali ke Dashboard
+          </BackLink>
           <h1 id="notifications-title" className="customerNotifications__title">Pengaturan Notifikasi</h1>
           <p className="customerNotifications__subtitle">
             Kelola bagaimana Anda ingin menerima notifikasi
@@ -60,13 +59,11 @@ const CustomerNotificationsPageView: React.FC<CustomerNotificationsPageViewProps
         </div>
 
         {showSuccess && (
-          <div className="customerNotifications__success" role="alert">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-            </svg>
-            <span>Pengaturan berhasil disimpan!</span>
-          </div>
+          <AlertMessage
+            variant="success"
+            message="Pengaturan berhasil disimpan!"
+            className="customerNotifications__success"
+          />
         )}
 
         <div className="customerNotifications__card">

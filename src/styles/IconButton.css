@@ -1,0 +1,168 @@
+/**
+ * Icon Button Styles
+ * Luxury and responsive icon button styling
+ */
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.iconBtn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  border-radius: inherit;
+}
+
+.iconBtn:hover::before {
+  opacity: 0.1;
+}
+
+.iconBtn:active::before {
+  opacity: 0.15;
+}
+
+.iconBtn__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.2s ease;
+}
+
+.iconBtn:hover .iconBtn__icon {
+  transform: scale(1.1);
+}
+
+.iconBtn:active .iconBtn__icon {
+  transform: scale(0.95);
+}
+
+/* Variants */
+.iconBtn--default {
+  color: #374151;
+}
+
+.iconBtn--default:hover {
+  color: #1f2937;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.iconBtn--primary {
+  color: #8b5cf6;
+}
+
+.iconBtn--primary:hover {
+  color: #7c3aed;
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.iconBtn--secondary {
+  color: #6366f1;
+}
+
+.iconBtn--secondary:hover {
+  color: #4f46e5;
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.iconBtn--ghost {
+  color: #6b7280;
+}
+
+.iconBtn--ghost:hover {
+  color: #374151;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.iconBtn--danger {
+  color: #ef4444;
+}
+
+.iconBtn--danger:hover {
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Sizes */
+.iconBtn--sm {
+  width: 2rem;
+  height: 2rem;
+  padding: 0.375rem;
+}
+
+.iconBtn--sm .iconBtn__icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.iconBtn--md {
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.5rem;
+}
+
+.iconBtn--md .iconBtn__icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.iconBtn--lg {
+  width: 3rem;
+  height: 3rem;
+  padding: 0.625rem;
+}
+
+.iconBtn--lg .iconBtn__icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Disabled state */
+.iconBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.iconBtn:disabled:hover {
+  transform: none;
+}
+
+.iconBtn:disabled .iconBtn__icon {
+  transform: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .iconBtn--sm {
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0.25rem;
+  }
+
+  .iconBtn--md {
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0.375rem;
+  }
+
+  .iconBtn--lg {
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0.5rem;
+  }
+}
+

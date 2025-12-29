@@ -1,0 +1,85 @@
+/**
+ * Tab Navigation Styles
+ * Luxury and responsive tab navigation styling
+ */
+
+.tabNavigation {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tabNavigation::-webkit-scrollbar {
+  display: none;
+}
+
+.tabNavigation__tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.25rem;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  position: relative;
+}
+
+.tabNavigation__tab:hover {
+  color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.05);
+}
+
+.tabNavigation__tab--active {
+  color: #8b5cf6;
+  border-bottom-color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.05);
+}
+
+.tabNavigation__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.tabNavigation__label {
+  flex: 1;
+}
+
+.tabNavigation__shortcut {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  padding: 0.125rem 0.375rem;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 0.25rem;
+  font-family: monospace;
+}
+
+.tabNavigation__tab--active .tabNavigation__shortcut {
+  color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tabNavigation__tab {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .tabNavigation__shortcut {
+    display: none;
+  }
+}
+

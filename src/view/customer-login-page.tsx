@@ -8,6 +8,10 @@ import { Link } from "react-router-dom";
 import "../styles/CustomerAuthPage.css";
 import { STORE_PROFILE } from "../config/store-profile";
 import type { LoginFormData } from "../models/customer-login-page-model";
+import PasswordInput from "../components/common/PasswordInput";
+import FormField from "../components/common/FormField";
+import AlertMessage from "../components/common/AlertMessage";
+import LuxuryButton from "../components/LuxuryButton";
 
 interface CustomerLoginPageViewProps {
   formData: LoginFormData;
@@ -59,32 +63,31 @@ const CustomerLoginPageView: React.FC<CustomerLoginPageViewProps> = ({
           </div>
 
           {registered && (
-            <div className="customerAuthCard__success" role="alert">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-              </svg>
-              <span>Registrasi berhasil! Silakan masuk dengan akun Anda.</span>
-            </div>
+            <AlertMessage
+              variant="success"
+              message="Registrasi berhasil! Silakan masuk dengan akun Anda."
+              className="customerAuthCard__success"
+            />
           )}
 
           {error && (
-            <div className="customerAuthCard__error" role="alert">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <span>{error}</span>
-            </div>
+            <AlertMessage
+              variant="error"
+              message={error}
+              className="customerAuthCard__error"
+            />
           )}
 
           <form className="customerAuthForm" onSubmit={onFormSubmit} noValidate>
-            <div className="customerAuthForm__group">
-              <label className="customerAuthForm__label">
-                Username atau Email
-                <span className="customerAuthForm__required">*</span>
-              </label>
+            <FormField
+              label="Username atau Email"
+              required
+              htmlFor="login-username"
+              className="customerAuthForm__group"
+            >
               <input
                 type="text"
+                id="login-username"
                 name="username"
                 className="customerAuthForm__input"
                 value={formData.username}
@@ -93,44 +96,25 @@ const CustomerLoginPageView: React.FC<CustomerLoginPageViewProps> = ({
                 autoComplete="username"
                 autoFocus
               />
-            </div>
+            </FormField>
 
-            <div className="customerAuthForm__group">
-              <label className="customerAuthForm__label">
-                Password
-                <span className="customerAuthForm__required">*</span>
-              </label>
-              <div className="customerAuthForm__passwordWrapper">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  className="customerAuthForm__input"
-                  value={formData.password}
-                  onChange={(e) => onFormChange("password", e.target.value)}
-                  placeholder="Masukkan password"
-                  autoComplete="current-password"
-                />
-                <button
-                  type="button"
-                  className="customerAuthForm__passwordToggle"
-                  onClick={() => onFormChange("showPassword", !showPassword)}
-                  aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    {showPassword ? (
-                      <>
-                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </>
-                    ) : (
-                      <>
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2"/>
-                        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
-                      </>
-                    )}
-                  </svg>
-                </button>
-              </div>
+            <FormField
+              label="Password"
+              required
+              htmlFor="login-password"
+              className="customerAuthForm__group"
+            >
+              <PasswordInput
+                id="login-password"
+                name="password"
+                className="customerAuthForm__input"
+                value={formData.password}
+                onChange={(e) => onFormChange("password", e.target.value)}
+                placeholder="Masukkan password"
+                autoComplete="current-password"
+                showPassword={showPassword}
+                onToggleVisibility={() => onFormChange("showPassword", !showPassword)}
+              />
               <div className="customerAuthForm__actions">
                 <label className="customerAuthForm__checkbox">
                   <input
@@ -144,33 +128,24 @@ const CustomerLoginPageView: React.FC<CustomerLoginPageViewProps> = ({
                   Lupa password?
                 </Link>
               </div>
-            </div>
+            </FormField>
 
-            <button
+            <LuxuryButton
               type="submit"
-              className={`customerAuthForm__submit btn-luxury ${isLoading ? "customerAuthForm__submit--loading" : ""}`}
+              variant="primary"
+              size="md"
+              isLoading={isLoading}
+              className={`customerAuthForm__submit ${isLoading ? "customerAuthForm__submit--loading" : ""}`}
               disabled={isLoading}
-              aria-busy={isLoading}
+              icon={
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              }
+              iconPosition="left"
             >
-              {isLoading ? (
-                <>
-                  <svg className="customerAuthForm__spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeDasharray="31.416" strokeDashoffset="31.416" opacity="0.3">
-                      <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416;0 31.416" repeatCount="indefinite"/>
-                      <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416;-31.416" repeatCount="indefinite"/>
-                    </circle>
-                  </svg>
-                  <span>Memproses...</span>
-                </>
-              ) : (
-                <>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span>Masuk</span>
-                </>
-              )}
-            </button>
+              {isLoading ? "Memproses..." : "Masuk"}
+            </LuxuryButton>
           </form>
 
           <div className="customerAuthCard__divider">

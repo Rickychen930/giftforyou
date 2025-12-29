@@ -1,0 +1,95 @@
+/**
+ * Quick Action Button Styles
+ * Luxury and responsive quick action button styling
+ */
+
+.quickActionBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1rem;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  color: #1f2937;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+  min-width: 120px;
+}
+
+.quickActionBtn:hover {
+  border-color: #8b5cf6;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 15px rgba(139, 92, 246, 0.1);
+}
+
+.quickActionBtn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.quickActionBtn--primary {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: #ffffff;
+  border-color: #8b5cf6;
+}
+
+.quickActionBtn--primary:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 15px rgba(139, 92, 246, 0.3);
+}
+
+.quickActionBtn__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+  transition: all 0.2s ease;
+}
+
+.quickActionBtn--primary .quickActionBtn__icon {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.quickActionBtn:hover .quickActionBtn__icon {
+  transform: scale(1.1);
+  background: rgba(139, 92, 246, 0.2);
+}
+
+.quickActionBtn--primary:hover .quickActionBtn__icon {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.quickActionBtn__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .quickActionBtn {
+    padding: 1rem 0.75rem;
+    min-width: 100px;
+    gap: 0.5rem;
+  }
+
+  .quickActionBtn__icon {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .quickActionBtn__label {
+    font-size: 0.8125rem;
+  }
+}
+

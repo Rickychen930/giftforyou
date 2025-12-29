@@ -1,0 +1,127 @@
+/**
+ * Order History Card Styles
+ * Luxury and responsive order history card styling
+ */
+
+.orderHistoryCard {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.orderHistoryCard:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.05);
+  transform: translateY(-4px);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.orderHistoryCard__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.orderHistoryCard__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.orderHistoryCard__title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.4;
+}
+
+.orderHistoryCard__date {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.orderHistoryCard__price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #8b5cf6;
+  flex-shrink: 0;
+  margin-left: 1rem;
+}
+
+.orderHistoryCard__details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.orderHistoryCard__detail {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.9375rem;
+}
+
+.orderHistoryCard__label {
+  font-weight: 600;
+  color: #6b7280;
+  min-width: 6rem;
+  flex-shrink: 0;
+}
+
+.orderHistoryCard__value {
+  color: #1f2937;
+  flex: 1;
+  word-break: break-word;
+}
+
+.orderHistoryCard__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.orderHistoryCard__btn {
+  width: 100%;
+}
+
+.orderHistoryCard__actionGroup {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.orderHistoryCard__btn--secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .orderHistoryCard {
+    padding: 1.25rem;
+  }
+
+  .orderHistoryCard__header {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .orderHistoryCard__price {
+    margin-left: 0;
+    align-self: flex-start;
+  }
+
+  .orderHistoryCard__label {
+    min-width: 5rem;
+  }
+}
+

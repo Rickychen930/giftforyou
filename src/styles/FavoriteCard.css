@@ -1,0 +1,151 @@
+/**
+ * Favorite Card Styles
+ * Luxury and responsive favorite card styling
+ */
+
+.favoriteCard {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.favoriteCard:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.05);
+  transform: translateY(-4px);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.favoriteCard__link {
+  display: block;
+  position: relative;
+  width: 100%;
+  padding-top: 75%; /* 4:3 aspect ratio */
+  overflow: hidden;
+  background: #f3f4f6;
+}
+
+.favoriteCard__imageWrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.favoriteCard__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.favoriteCard__link:hover .favoriteCard__image {
+  transform: scale(1.1);
+}
+
+.favoriteCard__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.6) 100%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.favoriteCard__link:hover .favoriteCard__overlay {
+  opacity: 1;
+}
+
+.favoriteCard__view {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.favoriteCard__content {
+  padding: 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.favoriteCard__title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.favoriteCard__price {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #8b5cf6;
+  margin: 0;
+}
+
+.favoriteCard__date {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.favoriteCard__actions {
+  padding: 0 1rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.favoriteCard__btn {
+  width: 100%;
+}
+
+.favoriteCard__actionGroup {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.favoriteCard__btn--view {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.favoriteCard__btn--view:hover {
+  background: rgba(139, 92, 246, 0.2);
+  transform: scale(1.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .favoriteCard__content {
+    padding: 0.875rem;
+  }
+
+  .favoriteCard__actions {
+    padding: 0 0.875rem 0.875rem 0.875rem;
+  }
+}
+

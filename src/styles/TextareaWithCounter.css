@@ -1,0 +1,100 @@
+/**
+ * Textarea With Counter Styles
+ * Luxury and responsive textarea with counter styling
+ */
+
+.textareaWithCounter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.textareaWithCounter__textarea {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  font-family: inherit;
+  background: #ffffff;
+  color: #1f2937;
+  resize: vertical;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  line-height: 1.6;
+}
+
+.textareaWithCounter__textarea:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.textareaWithCounter__textarea--error {
+  border-color: #ef4444;
+}
+
+.textareaWithCounter__textarea--error:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.textareaWithCounter__textarea::placeholder {
+  color: #9ca3af;
+}
+
+.textareaWithCounter__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.textareaWithCounter__hint {
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.textareaWithCounter__counter {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.textareaWithCounter__counter--near {
+  color: #f59e0b;
+}
+
+.textareaWithCounter__counter--limit {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.textareaWithCounter__error {
+  font-size: 0.875rem;
+  color: #ef4444;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .textareaWithCounter__textarea {
+    padding: 0.75rem 0.875rem;
+    font-size: 0.9375rem;
+  }
+
+  .textareaWithCounter__footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .textareaWithCounter__counter {
+    font-size: 0.8125rem;
+  }
+}
+

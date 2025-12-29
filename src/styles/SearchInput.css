@@ -1,0 +1,57 @@
+/**
+ * Search Input Styles
+ * Luxury and responsive search input styling
+ */
+
+.searchInput {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchInput__input {
+  width: 100%;
+  padding: 0.875rem 3rem 0.875rem 1rem;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  background: #ffffff;
+  color: #1f2937;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.searchInput__input:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.searchInput__input::placeholder {
+  color: #9ca3af;
+}
+
+.searchInput__icon {
+  position: absolute;
+  right: 1rem;
+  color: #6b7280;
+  pointer-events: none;
+}
+
+.searchInput__input:focus + .searchInput__icon {
+  color: #8b5cf6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .searchInput__input {
+    padding: 0.75rem 2.75rem 0.75rem 0.875rem;
+    font-size: 0.9375rem;
+  }
+
+  .searchInput__icon {
+    right: 0.875rem;
+    width: 18px;
+    height: 18px;
+  }
+}
+

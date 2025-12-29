@@ -7,8 +7,12 @@ import React from "react";
 import { Link, Navigate } from "react-router-dom";
 import "../styles/CustomerDashboardPage.css";
 import { formatIDR } from "../utils/money";
-import LuxuryTooltip from "../components/LuxuryTooltip";
 import EmptyState from "../components/EmptyState";
+import StatCard from "../components/common/StatCard";
+import TabNavigation, { TabItem } from "../components/common/TabNavigation";
+import BackLink from "../components/common/BackLink";
+import IconButton from "../components/common/IconButton";
+import LuxuryButton from "../components/LuxuryButton";
 import type {
   DashboardUser,
   DashboardStats,
@@ -74,160 +78,140 @@ const CustomerDashboardPageView: React.FC<CustomerDashboardPageViewProps> = ({
               Selamat datang kembali, {user.fullName || user.username}!
             </p>
           </div>
-          <button
+          <LuxuryButton
             type="button"
+            variant="outline"
+            size="md"
             onClick={onLogout}
             className="customerDashboard__logoutBtn"
-            aria-label="Keluar"
+            icon={
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            }
+            iconPosition="left"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span>Keluar</span>
-          </button>
+            Keluar
+          </LuxuryButton>
         </div>
 
         {/* Stats Cards */}
         <div className="customerDashboard__stats">
-          <LuxuryTooltip content="Total semua pesanan yang pernah Anda buat" position="top">
-            <div className="customerDashboard__statCard">
-              <div className="customerDashboard__statIcon customerDashboard__statIcon--orders">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <div className="customerDashboard__statContent">
-                <p className="customerDashboard__statLabel">Total Pesanan</p>
-                <p className="customerDashboard__statValue">{stats.totalOrders}</p>
-              </div>
-            </div>
-          </LuxuryTooltip>
-
-          <LuxuryTooltip content="Pesanan yang sedang dalam proses" position="top">
-            <div className="customerDashboard__statCard">
-              <div className="customerDashboard__statIcon customerDashboard__statIcon--pending">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-              </div>
-              <div className="customerDashboard__statContent">
-                <p className="customerDashboard__statLabel">Pesanan Pending</p>
-                <p className="customerDashboard__statValue">{stats.pendingOrders}</p>
-              </div>
-            </div>
-          </LuxuryTooltip>
-
-          <LuxuryTooltip content="Pesanan yang sudah selesai dan terkirim" position="top">
-            <div className="customerDashboard__statCard">
-              <div className="customerDashboard__statIcon customerDashboard__statIcon--completed">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                </svg>
-              </div>
-              <div className="customerDashboard__statContent">
-                <p className="customerDashboard__statLabel">Pesanan Selesai</p>
-                <p className="customerDashboard__statValue">{stats.completedOrders}</p>
-              </div>
-            </div>
-          </LuxuryTooltip>
-
-          <LuxuryTooltip content="Bouquet yang Anda simpan sebagai favorit" position="top">
-            <div className="customerDashboard__statCard">
-              <div className="customerDashboard__statIcon customerDashboard__statIcon--favorites">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <div className="customerDashboard__statContent">
-                <p className="customerDashboard__statLabel">Favorit</p>
-                <p className="customerDashboard__statValue">{stats.favoritesCount}</p>
-              </div>
-            </div>
-          </LuxuryTooltip>
+          <StatCard
+            icon={
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            }
+            label="Total Pesanan"
+            value={stats.totalOrders}
+            tooltip="Total semua pesanan yang pernah Anda buat"
+            iconVariant="orders"
+          />
+          <StatCard
+            icon={
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            }
+            label="Pesanan Pending"
+            value={stats.pendingOrders}
+            tooltip="Pesanan yang sedang dalam proses"
+            iconVariant="pending"
+          />
+          <StatCard
+            icon={
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+              </svg>
+            }
+            label="Pesanan Selesai"
+            value={stats.completedOrders}
+            tooltip="Pesanan yang sudah selesai dan terkirim"
+            iconVariant="completed"
+          />
+          <StatCard
+            icon={
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            }
+            label="Favorit"
+            value={stats.favoritesCount}
+            tooltip="Bouquet yang Anda simpan sebagai favorit"
+            iconVariant="favorites"
+          />
         </div>
 
         {/* Navigation Tabs */}
-        <div className="customerDashboard__tabs" role="tablist">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "overview"}
-            className={`customerDashboard__tab ${activeTab === "overview" ? "customerDashboard__tab--active" : ""}`}
-            onClick={() => onTabChange("overview")}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <rect x="14" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <rect x="14" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <rect x="3" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span>Overview</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "orders"}
-            className={`customerDashboard__tab ${activeTab === "orders" ? "customerDashboard__tab--active" : ""}`}
-            onClick={() => onTabChange("orders")}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span>Pesanan</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "favorites"}
-            className={`customerDashboard__tab ${activeTab === "favorites" ? "customerDashboard__tab--active" : ""}`}
-            onClick={() => onTabChange("favorites")}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span>Favorit</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "profile"}
-            className={`customerDashboard__tab ${activeTab === "profile" ? "customerDashboard__tab--active" : ""}`}
-            onClick={() => onTabChange("profile")}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span>Profil</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "addresses"}
-            className={`customerDashboard__tab ${activeTab === "addresses" ? "customerDashboard__tab--active" : ""}`}
-            onClick={() => onTabChange("addresses")}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeWidth="2"/>
-              <circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="2"/>
-            </svg>
-            <span>Alamat</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "settings"}
-            className={`customerDashboard__tab ${activeTab === "settings" ? "customerDashboard__tab--active" : ""}`}
-            onClick={() => onTabChange("settings")}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
-              <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-            <span>Pengaturan</span>
-          </button>
-        </div>
+        <TabNavigation
+          tabs={[
+            {
+              key: "overview",
+              label: "Overview",
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <rect x="14" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <rect x="14" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <rect x="3" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              ),
+            },
+            {
+              key: "orders",
+              label: "Pesanan",
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              ),
+            },
+            {
+              key: "favorites",
+              label: "Favorit",
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              ),
+            },
+            {
+              key: "profile",
+              label: "Profil",
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              ),
+            },
+            {
+              key: "addresses",
+              label: "Alamat",
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeWidth="2"/>
+                  <circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="2"/>
+                </svg>
+              ),
+            },
+            {
+              key: "settings",
+              label: "Pengaturan",
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              ),
+            },
+          ]}
+          activeTab={activeTab}
+          onTabChange={(key) => onTabChange(key as ActiveTab)}
+          className="customerDashboard__tabs"
+        />
 
         {/* Tab Content */}
         <div className="customerDashboard__content">
@@ -368,8 +352,11 @@ const CustomerDashboardPageView: React.FC<CustomerDashboardPageViewProps> = ({
                     </div>
                   )}
                 </div>
-                <Link to="/customer/profile" className="customerDashboard__editBtn btn-luxury">
-                  Edit Profil
+                <Link
+                  to="/customer/profile"
+                  className="luxuryBtn luxuryBtn--primary luxuryBtn--md customerDashboard__editBtn"
+                >
+                  <span className="luxuryBtn__content">Edit Profil</span>
                 </Link>
               </div>
             </div>
@@ -382,8 +369,11 @@ const CustomerDashboardPageView: React.FC<CustomerDashboardPageViewProps> = ({
                 <p className="customerDashboard__sectionSubtitle">
                   Kelola alamat pengiriman Anda
                 </p>
-                <Link to="/customer/addresses" className="customerDashboard__viewAllLink btn-luxury">
-                  Kelola Alamat →
+                <Link
+                  to="/customer/addresses"
+                  className="luxuryBtn luxuryBtn--primary luxuryBtn--md customerDashboard__viewAllLink"
+                >
+                  <span className="luxuryBtn__content">Kelola Alamat →</span>
                 </Link>
               </div>
             </div>

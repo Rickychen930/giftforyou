@@ -18,6 +18,7 @@ import CatalogPagination from "../components/catalog/CatalogPagination";
 import CatalogEmpty from "../components/catalog/CatalogEmpty";
 import CatalogSkeleton from "../components/catalog/CatalogSkeleton";
 import CatalogActiveFilters from "../components/catalog/CatalogActiveFilters";
+import CatalogResetButton from "../components/catalog/CatalogResetButton";
 
 type Range = [number, number];
 
@@ -145,16 +146,10 @@ const BouquetCatalogPageView: React.FC<BouquetCatalogPageViewProps> = ({
         />
         {hasActiveFilters && !loading && (
           <div className="catalog-page__summary-actions">
-            <button
-              className="catalog-page__clear-btn"
-              onClick={onClearAll}
-              aria-label="Hapus semua filter dan reset pencarian"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <span>Reset Filter</span>
-            </button>
+            <CatalogResetButton
+              onClearAll={onClearAll}
+              disabled={loading}
+            />
           </div>
         )}
       </div>

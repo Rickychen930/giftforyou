@@ -32,7 +32,7 @@ const HomePageView: React.FC<HomePageViewProps> = ({
   return (
     <main className="Home-page-container">
       {/* Hero slider section */}
-      <HeroCollectionSlider content={heroContent ?? undefined} />
+      <HeroCollectionSlider content={heroContent ?? undefined} loading={loading} />
 
       {/* Collections section */}
       <OurCollectionSection

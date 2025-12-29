@@ -9,6 +9,10 @@ import "../styles/CustomerProfilePage.css";
 import AddressAutocomplete from "../components/AddressAutocomplete";
 import AutoSaveIndicator from "../components/AutoSaveIndicator";
 import ConfettiEffect from "../components/ConfettiEffect";
+import BackLink from "../components/common/BackLink";
+import AlertMessage from "../components/common/AlertMessage";
+import FormField from "../components/common/FormField";
+import LuxuryButton from "../components/LuxuryButton";
 import type {
   ProfileUser,
   ProfileFormData,
@@ -69,12 +73,9 @@ const CustomerProfilePageView: React.FC<CustomerProfilePageViewProps> = ({
       <AutoSaveIndicator isSaving={isSaving} lastSaved={lastSaved} />
       <div className="customerProfile__container">
         <div className="customerProfile__header">
-          <Link to="/customer/dashboard" className="customerProfile__back">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span>Kembali ke Dashboard</span>
-          </Link>
+          <BackLink to="/customer/dashboard" className="customerProfile__back">
+            Kembali ke Dashboard
+          </BackLink>
           <h1 id="profile-title" className="customerProfile__title">Edit Profil</h1>
           <p className="customerProfile__subtitle">
             Kelola informasi profil dan preferensi Anda
@@ -82,22 +83,19 @@ const CustomerProfilePageView: React.FC<CustomerProfilePageViewProps> = ({
         </div>
 
         {showSuccess && (
-          <div className="customerProfile__success" role="alert">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-            </svg>
-            <span>Profil berhasil diperbarui!</span>
-          </div>
+          <AlertMessage
+            variant="success"
+            message="Profil berhasil diperbarui!"
+            className="customerProfile__success"
+          />
         )}
 
         {errors.general && (
-          <div className="customerProfile__error" role="alert">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span>{errors.general}</span>
-          </div>
+          <AlertMessage
+            variant="error"
+            message={errors.general}
+            className="customerProfile__error"
+          />
         )}
 
         <div className="customerProfile__card">
@@ -119,65 +117,53 @@ const CustomerProfilePageView: React.FC<CustomerProfilePageViewProps> = ({
             <div className="customerProfile__section">
               <h2 className="customerProfile__sectionTitle">Informasi Pribadi</h2>
 
-              <div className="customerProfile__formGroup">
-                <label className="customerProfile__label">
-                  Nama Lengkap
-                  <span className="customerProfile__required">*</span>
-                </label>
+              <FormField
+                label="Nama Lengkap"
+                required
+                htmlFor="profile-full-name"
+                error={errors.fullName}
+                className="customerProfile__formGroup"
+              >
                 <input
                   type="text"
+                  id="profile-full-name"
                   className={`customerProfile__input ${errors.fullName ? "customerProfile__input--error" : ""}`}
                   value={formData.fullName}
                   onChange={(e) => onFormChange("fullName", e.target.value)}
                   placeholder="Masukkan nama lengkap"
-                  aria-invalid={!!errors.fullName}
-                  aria-describedby={errors.fullName ? "fullName-error" : undefined}
                 />
-                {errors.fullName && (
-                  <span className="customerProfile__errorText" id="fullName-error" role="alert">
-                    {errors.fullName}
-                  </span>
-                )}
-              </div>
+              </FormField>
 
-              <div className="customerProfile__formGroup">
-                <label className="customerProfile__label">
-                  Nomor Telepon
-                  <span className="customerProfile__required">*</span>
-                </label>
+              <FormField
+                label="Nomor Telepon"
+                required
+                htmlFor="profile-phone"
+                error={errors.phoneNumber}
+                className="customerProfile__formGroup"
+              >
                 <input
                   type="tel"
+                  id="profile-phone"
                   className={`customerProfile__input ${errors.phoneNumber ? "customerProfile__input--error" : ""}`}
                   value={formData.phoneNumber}
                   onChange={(e) => onFormChange("phoneNumber", e.target.value)}
                   placeholder="081234567890"
-                  aria-invalid={!!errors.phoneNumber}
-                  aria-describedby={errors.phoneNumber ? "phoneNumber-error" : undefined}
                 />
-                {errors.phoneNumber && (
-                  <span className="customerProfile__errorText" id="phoneNumber-error" role="alert">
-                    {errors.phoneNumber}
-                  </span>
-                )}
-              </div>
+              </FormField>
 
-              <div className="customerProfile__formGroup">
-                <label className="customerProfile__label">
-                  Alamat
-                  <span className="customerProfile__optional">(Opsional)</span>
-                </label>
+              <FormField
+                label="Alamat"
+                htmlFor="profile-address"
+                error={errors.address}
+                className="customerProfile__formGroup"
+              >
                 <AddressAutocomplete
                   value={formData.address}
                   onChange={onAddressChange}
                   placeholder="Masukkan alamat lengkap"
                   error={errors.address}
                 />
-                {errors.address && (
-                  <span className="customerProfile__errorText" role="alert">
-                    {errors.address}
-                  </span>
-                )}
-              </div>
+              </FormField>
             </div>
 
             <div className="customerProfile__actions">
@@ -187,32 +173,23 @@ const CustomerProfilePageView: React.FC<CustomerProfilePageViewProps> = ({
               >
                 Batal
               </Link>
-              <button
+              <LuxuryButton
                 type="submit"
-                className={`customerProfile__saveBtn btn-luxury ${isSaving ? "customerProfile__saveBtn--loading" : ""}`}
+                variant="primary"
+                size="md"
+                isLoading={isSaving}
+                className={`customerProfile__saveBtn ${isSaving ? "customerProfile__saveBtn--loading" : ""}`}
                 disabled={isSaving}
-                aria-busy={isSaving}
+                icon={
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                  </svg>
+                }
+                iconPosition="left"
               >
-                {isSaving ? (
-                  <>
-                    <svg className="customerProfile__spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeDasharray="31.416" strokeDashoffset="31.416" opacity="0.3">
-                        <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416;0 31.416" repeatCount="indefinite"/>
-                        <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416;-31.416" repeatCount="indefinite"/>
-                      </circle>
-                    </svg>
-                    <span>Menyimpan...</span>
-                  </>
-                ) : (
-                  <>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                    </svg>
-                    <span>Simpan Perubahan</span>
-                  </>
-                )}
-              </button>
+                {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
+              </LuxuryButton>
             </div>
           </form>
         </div>

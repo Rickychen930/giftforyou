@@ -4,11 +4,16 @@
  */
 
 import React from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import "../styles/CustomerAddressesPage.css";
 import AddressAutocomplete from "../components/AddressAutocomplete";
 import ConfettiEffect from "../components/ConfettiEffect";
 import EmptyState from "../components/EmptyState";
+import BackLink from "../components/common/BackLink";
+import AlertMessage from "../components/common/AlertMessage";
+import FormField from "../components/common/FormField";
+import IconButton from "../components/common/IconButton";
+import LuxuryButton from "../components/LuxuryButton";
 import type {
   Address,
   AddressFormData,
@@ -90,12 +95,9 @@ const CustomerAddressesPageView: React.FC<CustomerAddressesPageViewProps> = ({
       <ConfettiEffect trigger={showConfetti} />
       <div className="customerAddresses__container">
         <div className="customerAddresses__header">
-          <Link to="/customer/dashboard" className="customerAddresses__back">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span>Kembali ke Dashboard</span>
-          </Link>
+          <BackLink to="/customer/dashboard" className="customerAddresses__back">
+            Kembali ke Dashboard
+          </BackLink>
           <div className="customerAddresses__titleSection">
             <h1 id="addresses-title" className="customerAddresses__title">Buku Alamat</h1>
             <p className="customerAddresses__subtitle">
@@ -103,36 +105,38 @@ const CustomerAddressesPageView: React.FC<CustomerAddressesPageViewProps> = ({
             </p>
           </div>
           {!showForm && (
-            <button
+            <LuxuryButton
               type="button"
+              variant="primary"
+              size="md"
               onClick={onShowForm}
-              className="customerAddresses__addBtn btn-luxury"
+              className="customerAddresses__addBtn"
+              icon={
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              }
+              iconPosition="left"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <span>Tambah Alamat</span>
-            </button>
+              Tambah Alamat
+            </LuxuryButton>
           )}
         </div>
 
         {showSuccess && (
-          <div className="customerAddresses__success" role="alert">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-            </svg>
-            <span>{successMessage}</span>
-          </div>
+          <AlertMessage
+            variant="success"
+            message={successMessage}
+            className="customerAddresses__success"
+          />
         )}
 
         {errors.general && (
-          <div className="customerAddresses__error" role="alert">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span>{errors.general}</span>
-          </div>
+          <AlertMessage
+            variant="error"
+            message={errors.general}
+            className="customerAddresses__error"
+          />
         )}
 
         {showForm && (
@@ -141,44 +145,36 @@ const CustomerAddressesPageView: React.FC<CustomerAddressesPageViewProps> = ({
               {editingId ? "Edit Alamat" : "Tambah Alamat Baru"}
             </h2>
             <form className="customerAddresses__form" onSubmit={onFormSubmit}>
-              <div className="customerAddresses__formGroup">
-                <label className="customerAddresses__label">
-                  Label Alamat
-                  <span className="customerAddresses__required">*</span>
-                </label>
+              <FormField
+                label="Label Alamat"
+                required
+                htmlFor="address-label"
+                error={errors.label}
+                className="customerAddresses__formGroup"
+              >
                 <input
                   type="text"
+                  id="address-label"
                   className={`customerAddresses__input ${errors.label ? "customerAddresses__input--error" : ""}`}
                   value={formData.label}
                   onChange={(e) => onFormChange("label", e.target.value)}
                   placeholder="Contoh: Rumah, Kantor, Alamat Utama"
-                  aria-invalid={!!errors.label}
-                  aria-describedby={errors.label ? "label-error" : undefined}
                 />
-                {errors.label && (
-                  <span className="customerAddresses__errorText" id="label-error" role="alert">
-                    {errors.label}
-                  </span>
-                )}
-              </div>
+              </FormField>
 
-              <div className="customerAddresses__formGroup">
-                <label className="customerAddresses__label">
-                  Alamat Lengkap
-                  <span className="customerAddresses__required">*</span>
-                </label>
+              <FormField
+                label="Alamat Lengkap"
+                required
+                error={errors.address}
+                className="customerAddresses__formGroup"
+              >
                 <AddressAutocomplete
                   value={formData.address}
                   onChange={onAddressChange}
                   placeholder="Masukkan alamat lengkap"
                   error={errors.address}
                 />
-                {errors.address && (
-                  <span className="customerAddresses__errorText" role="alert">
-                    {errors.address}
-                  </span>
-                )}
-              </div>
+              </FormField>
 
               <div className="customerAddresses__formGroup">
                 <label className="customerAddresses__checkbox">
@@ -199,32 +195,23 @@ const CustomerAddressesPageView: React.FC<CustomerAddressesPageViewProps> = ({
                 >
                   Batal
                 </button>
-                <button
+                <LuxuryButton
                   type="submit"
-                  className={`customerAddresses__saveBtn btn-luxury ${isSaving ? "customerAddresses__saveBtn--loading" : ""}`}
+                  variant="primary"
+                  size="md"
+                  isLoading={isSaving}
+                  className={`customerAddresses__saveBtn ${isSaving ? "customerAddresses__saveBtn--loading" : ""}`}
                   disabled={isSaving}
-                  aria-busy={isSaving}
+                  icon={
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                    </svg>
+                  }
+                  iconPosition="left"
                 >
-                  {isSaving ? (
-                    <>
-                      <svg className="customerAddresses__spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeDasharray="31.416" strokeDashoffset="31.416" opacity="0.3">
-                          <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416;0 31.416" repeatCount="indefinite"/>
-                          <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416;-31.416" repeatCount="indefinite"/>
-                        </circle>
-                      </svg>
-                      <span>Menyimpan...</span>
-                    </>
-                  ) : (
-                    <>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                      </svg>
-                      <span>Simpan</span>
-                    </>
-                  )}
-                </button>
+                  {isSaving ? "Menyimpan..." : "Simpan"}
+                </LuxuryButton>
               </div>
             </form>
           </div>
@@ -256,39 +243,48 @@ const CustomerAddressesPageView: React.FC<CustomerAddressesPageViewProps> = ({
                   </div>
                   <div className="customerAddresses__cardActions">
                     {!address.isDefault && (
-                      <button
-                        type="button"
+                      <IconButton
+                        variant="secondary"
+                        size="md"
                         onClick={() => onSetDefault(address._id!)}
+                        icon={
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                          </svg>
+                        }
+                        ariaLabel="Jadikan default"
+                        tooltip="Jadikan default"
                         className="customerAddresses__actionBtn"
-                        title="Jadikan default"
-                      >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                          <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                        </svg>
-                      </button>
+                      />
                     )}
-                    <button
-                      type="button"
+                    <IconButton
+                      variant="secondary"
+                      size="md"
                       onClick={() => onEdit(address)}
+                      icon={
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      }
+                      ariaLabel="Edit"
+                      tooltip="Edit"
                       className="customerAddresses__actionBtn"
-                      title="Edit"
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
+                    />
+                    <IconButton
+                      variant="danger"
+                      size="md"
                       onClick={() => onDelete(address._id!)}
+                      icon={
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      }
+                      ariaLabel="Hapus"
+                      tooltip="Hapus"
                       className="customerAddresses__actionBtn customerAddresses__actionBtn--danger"
-                      title="Hapus"
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
+                    />
                   </div>
                 </div>
                 <p className="customerAddresses__cardAddress">{address.address}</p>

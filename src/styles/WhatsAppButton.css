@@ -1,0 +1,20 @@
+/**
+ * WhatsApp Button Styles
+ * Luxury and responsive WhatsApp button styling
+ */
+
+.whatsappBtn {
+  display: inline-block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.whatsappBtn--fullWidth {
+  display: block;
+  width: 100%;
+}
+
+.whatsappBtn__button {
+  width: 100%;
+}
+

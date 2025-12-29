@@ -1,8 +1,9 @@
-// src/view/header.tsx - Refactored Header with Reusable Components
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { useLocation } from "react-router-dom";
-import { getCollections } from "../services/collection.service";
-import { API_BASE } from "../config/api";
+/**
+ * Header View
+ * Pure presentation component - no business logic
+ */
+
+import React, { useEffect } from "react";
 import "../styles/Header.css";
 
 // Reusable Header Components
@@ -11,188 +12,61 @@ import HeaderNavigation, { NavItem } from "../components/header/HeaderNavigation
 import HeaderSearch from "../components/header/HeaderSearch";
 import HeaderActions from "../components/header/HeaderActions";
 
-interface HeaderProps {
+interface HeaderViewProps {
   navLinks: NavItem[];
   logoSrc?: string;
+  mobileOpen: boolean;
+  searchOpen: boolean;
+  collectionsOpen: boolean;
+  collectionsAnimate: boolean;
+  scrolled: boolean;
+  collectionNames: string[];
+  typeNames: string[];
+  searchButtonRef: React.RefObject<HTMLButtonElement>;
+  hamburgerButtonRef: React.RefObject<HTMLButtonElement>;
+  collectionsItemRef: React.RefObject<HTMLLIElement>;
+  onToggleMobile: () => void;
+  onCloseMobile: (opts?: { returnFocus?: boolean }) => void;
+  onToggleSearch: () => void;
+  onCloseSearch: (opts?: { returnFocus?: boolean }) => void;
+  onCollectionsToggle: () => void;
+  onCollectionsOpen: () => void;
+  onCollectionsClose: () => void;
+  onNavigate: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ navLinks, logoSrc }) => {
-  const location = useLocation();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [collectionsOpen, setCollectionsOpen] = useState(false);
-  const [collectionsAnimate, setCollectionsAnimate] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [collectionNames, setCollectionNames] = useState<string[]>([]);
-  const [typeNames, setTypeNames] = useState<string[]>([]);
-  const searchButtonRef = useRef<HTMLButtonElement | null>(null);
-  const hamburgerButtonRef = useRef<HTMLButtonElement | null>(null);
-  const collectionsItemRef = useRef<HTMLLIElement | null>(null);
-  const collectionsCloseTimerRef = useRef<number | null>(null);
-  const collectionsAnimateTimerRef = useRef<number | null>(null);
-
-  const cancelCollectionsClose = () => {
-    if (collectionsCloseTimerRef.current) {
-      window.clearTimeout(collectionsCloseTimerRef.current);
-      collectionsCloseTimerRef.current = null;
-    }
-  };
-
-  const cancelCollectionsAnimate = () => {
-    if (collectionsAnimateTimerRef.current) {
-      window.clearTimeout(collectionsAnimateTimerRef.current);
-      collectionsAnimateTimerRef.current = null;
-    }
-  };
-
-  const pulseCollectionsAnimate = (ms = 260) => {
-    cancelCollectionsAnimate();
-    setCollectionsAnimate(true);
-    collectionsAnimateTimerRef.current = window.setTimeout(() => {
-      setCollectionsAnimate(false);
-      collectionsAnimateTimerRef.current = null;
-    }, ms);
-  };
-
-  const scheduleCollectionsClose = (delayMs = 180) => {
-    cancelCollectionsClose();
-    collectionsCloseTimerRef.current = window.setTimeout(() => {
-      setCollectionsOpen(false);
-      collectionsCloseTimerRef.current = null;
-    }, delayMs);
-  };
-
-  useEffect(() => {
-    let ticking = false;
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          setScrolled(window.scrollY > 20);
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    const ac = new AbortController();
-
-    (async () => {
-      try {
-        const [collections, bouquets] = await Promise.all([
-          getCollections(ac.signal),
-          fetch(`${API_BASE}/api/bouquets`, { signal: ac.signal })
-            .then(async (r) => {
-              if (!r.ok) return [];
-              const j = await r.json().catch(() => []);
-              return Array.isArray(j) ? j : [];
-            })
-            .catch(() => []),
-        ]);
-        if (cancelled) return;
-
-        const names = Array.from(
-          new Set(
-            (collections ?? [])
-              .map((c) => (typeof c?.name === "string" ? c.name.trim() : ""))
-              .filter(Boolean)
-          )
-        ).sort((a, b) => a.localeCompare(b));
-
-        setCollectionNames(names);
-
-        const types = Array.from(
-          new Set(
-            (bouquets ?? [])
-              .map((b: any) => (typeof b?.type === "string" ? b.type.trim() : ""))
-              .filter(Boolean)
-          )
-        ).sort((a, b) => a.localeCompare(b));
-
-        setTypeNames(types);
-      } catch (e) {
-        if (cancelled) return;
-        setCollectionNames([]);
-        setTypeNames([]);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-      ac.abort();
-    };
-  }, []);
-
-  const closeMobile = (opts?: { returnFocus?: boolean }) => {
-    setMobileOpen(false);
-    setCollectionsOpen(false);
-    if (opts?.returnFocus) {
-      setTimeout(() => hamburgerButtonRef.current?.focus(), 0);
-    }
-  };
-
-  const onToggleMobile = () => setMobileOpen((s) => !s);
-
-  const closeSearch = (opts?: { returnFocus?: boolean }) => {
-    setSearchOpen(false);
-    if (opts?.returnFocus) {
-      setTimeout(() => searchButtonRef.current?.focus(), 0);
-    }
-  };
-
-  const toggleSearch = useCallback(() => {
-    setSearchOpen((prev) => {
-      const next = !prev;
-      if (next) {
-        closeMobile();
-      }
-      return next;
-    });
-  }, []);
-
-  useEffect(() => {
-    closeMobile();
-    closeSearch();
-    setCollectionsOpen(false);
-    cancelCollectionsClose();
-    cancelCollectionsAnimate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname, location.search]);
-
-  useEffect(() => {
-    return () => {
-      cancelCollectionsClose();
-      cancelCollectionsAnimate();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (!collectionsOpen || mobileOpen) return;
-    const onPointerDown = (e: MouseEvent | TouchEvent) => {
-      const root = collectionsItemRef.current;
-      if (!root) return;
-      const target = e.target as Node;
-      if (root.contains(target)) return;
-      setTimeout(() => {
-        setCollectionsOpen(false);
-      }, 100);
-    };
-    document.addEventListener("mousedown", onPointerDown);
-    document.addEventListener("touchstart", onPointerDown, { passive: true });
-    return () => {
-      document.removeEventListener("mousedown", onPointerDown);
-      document.removeEventListener("touchstart", onPointerDown);
-    };
-  }, [collectionsOpen, mobileOpen]);
-
+/**
+ * Header View Component
+ * Pure presentation - receives all data and handlers via props
+ */
+const HeaderView: React.FC<HeaderViewProps> = ({
+  navLinks,
+  logoSrc,
+  mobileOpen,
+  searchOpen,
+  collectionsOpen,
+  collectionsAnimate,
+  scrolled,
+  collectionNames,
+  typeNames,
+  searchButtonRef,
+  hamburgerButtonRef,
+  collectionsItemRef,
+  onToggleMobile,
+  onCloseMobile,
+  onToggleSearch,
+  onCloseSearch,
+  onCollectionsToggle,
+  onCollectionsOpen,
+  onCollectionsClose,
+  onNavigate,
+}) => {
+  // Handle body scroll lock when mobile menu or search is open
   useEffect(() => {
     if (!mobileOpen && !searchOpen) {
       document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
       return;
     }
     const prev = document.body.style.overflow;
@@ -206,14 +80,35 @@ const Header: React.FC<HeaderProps> = ({ navLinks, logoSrc }) => {
     };
   }, [mobileOpen, searchOpen]);
 
+  // Handle click outside collections dropdown
+  useEffect(() => {
+    if (!collectionsOpen || mobileOpen) return;
+    const onPointerDown = (e: MouseEvent | TouchEvent) => {
+      const root = collectionsItemRef.current;
+      if (!root) return;
+      const target = e.target as Node;
+      if (root.contains(target)) return;
+      setTimeout(() => {
+        onCollectionsClose();
+      }, 100);
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("touchstart", onPointerDown, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("touchstart", onPointerDown);
+    };
+  }, [collectionsOpen, mobileOpen, collectionsItemRef, onCollectionsClose]);
+
+  // Handle keyboard shortcuts
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         if (searchOpen) {
-          closeSearch({ returnFocus: true });
+          onCloseSearch({ returnFocus: true });
         }
         if (mobileOpen) {
-          closeMobile({ returnFocus: true });
+          onCloseMobile({ returnFocus: true });
         }
         return;
       }
@@ -229,57 +124,30 @@ const Header: React.FC<HeaderProps> = ({ navLinks, logoSrc }) => {
         }
         e.preventDefault();
         if (!searchOpen) {
-          toggleSearch();
+          onToggleSearch();
         }
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [searchOpen, mobileOpen, toggleSearch]);
-
-  const handleCollectionsToggle = () => {
-    if (!collectionsOpen) {
-      setCollectionsOpen(true);
-      pulseCollectionsAnimate(220);
-    } else {
-      setCollectionsOpen(false);
-    }
-  };
-
-  const handleCollectionsOpen = () => {
-    cancelCollectionsClose();
-    setCollectionsOpen(true);
-  };
-
-  const handleCollectionsClose = () => {
-    if (mobileOpen) return;
-    scheduleCollectionsClose(180);
-  };
-
-  const handleNavigate = () => {
-    closeMobile();
-    closeSearch();
-    setCollectionsOpen(false);
-  };
+  }, [searchOpen, mobileOpen, onToggleSearch, onCloseSearch, onCloseMobile]);
 
   const collectionSuggestions =
-    collectionNames.length > 0
-      ? collectionNames
-      : [];
+    collectionNames.length > 0 ? collectionNames : [];
 
   return (
     <header className={`header ${scrolled ? "header--scrolled" : ""}`}>
       {mobileOpen && (
         <div
           className="header__mobile-backdrop"
-          onClick={() => closeMobile({ returnFocus: true })}
+          onClick={() => onCloseMobile({ returnFocus: true })}
           aria-hidden="true"
         />
       )}
       <div className="header__container">
         {/* Logo & Brand */}
         <div className="header__left">
-          <HeaderBrand logoSrc={logoSrc} onNavigate={handleNavigate} />
+          <HeaderBrand logoSrc={logoSrc} onNavigate={onNavigate} />
         </div>
 
         {/* Center Navigation */}
@@ -288,13 +156,13 @@ const Header: React.FC<HeaderProps> = ({ navLinks, logoSrc }) => {
             navLinks={navLinks}
             isMobile={mobileOpen}
             collectionsOpen={collectionsOpen}
-            onCollectionsToggle={handleCollectionsToggle}
-            onCollectionsOpen={handleCollectionsOpen}
-            onCollectionsClose={handleCollectionsClose}
+            onCollectionsToggle={onCollectionsToggle}
+            onCollectionsOpen={onCollectionsOpen}
+            onCollectionsClose={onCollectionsClose}
             collectionsAnimate={collectionsAnimate}
             collectionNames={collectionNames}
             typeNames={typeNames}
-            onNavigate={handleNavigate}
+            onNavigate={onNavigate}
             collectionsItemRef={collectionsItemRef}
           />
         </div>
@@ -302,7 +170,7 @@ const Header: React.FC<HeaderProps> = ({ navLinks, logoSrc }) => {
         {/* Right Actions */}
         <div className="header__right">
           <HeaderActions
-            onSearchToggle={toggleSearch}
+            onSearchToggle={onToggleSearch}
             searchOpen={searchOpen}
             searchButtonRef={searchButtonRef}
             hamburgerButtonRef={hamburgerButtonRef}
@@ -315,7 +183,7 @@ const Header: React.FC<HeaderProps> = ({ navLinks, logoSrc }) => {
       {/* Search Overlay */}
       <HeaderSearch
         isOpen={searchOpen}
-        onClose={closeSearch}
+        onClose={onCloseSearch}
         searchButtonRef={searchButtonRef}
         collectionSuggestions={collectionSuggestions}
       />
@@ -323,4 +191,4 @@ const Header: React.FC<HeaderProps> = ({ navLinks, logoSrc }) => {
   );
 };
 
-export default Header;
+export default HeaderView;

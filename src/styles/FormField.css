@@ -1,0 +1,50 @@
+/**
+ * Form Field Styles
+ * Luxury and responsive form field styling
+ */
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formField__label {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.formField__required {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.formField__hint {
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.formField__error {
+  font-size: 0.875rem;
+  color: #ef4444;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .formField__label {
+    font-size: 0.875rem;
+  }
+
+  .formField__hint,
+  .formField__error {
+    font-size: 0.8125rem;
+  }
+}
+

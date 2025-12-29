@@ -9,11 +9,11 @@ import {
 } from "react-router-dom";
 
 import { NAV_LINKS } from "./constants/app-constants";
-import Header from "./view/header";
+import HeaderControllerWrapper from "./controllers/header-controller";
 import Footer from "./view/footer";
 
 import HomePageController from "./controllers/home-page-controller";
-import BouquetCatalogRoute from "./view/bouquet-catalog-route";
+import BouquetCatalogRoute from "./routes/bouquet-catalog-route";
 import DashboardController from "./controllers/dashboard-page-controller";
 import BouquetDetailPageController from "./controllers/bouquet-detail-page-controller";
 import FAQPageController from "./controllers/faq-page-controller";
@@ -153,7 +153,7 @@ const AppLayout: React.FC = () => {
 
   return (
     <>
-      <Header navLinks={navLinks} />
+      <HeaderControllerWrapper navLinks={navLinks} />
 
       <PageTransition>
         <Routes location={location}>

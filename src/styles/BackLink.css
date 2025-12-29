@@ -1,0 +1,30 @@
+/**
+ * Back Link Styles
+ * Luxury and responsive back link styling
+ */
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  transition: all 0.2s ease;
+  padding: 0.5rem 0;
+}
+
+.backLink:hover {
+  color: #8b5cf6;
+  transform: translateX(-2px);
+}
+
+.backLink svg {
+  transition: transform 0.2s ease;
+}
+
+.backLink:hover svg {
+  transform: translateX(-2px);
+}
+

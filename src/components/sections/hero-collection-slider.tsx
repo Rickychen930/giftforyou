@@ -1,49 +1,27 @@
-import React, { useState, useEffect } from "react";
+/**
+ * Hero Collection Slider Component
+ * Pure presentation component - receives all data via props
+ * Luxury and responsive design
+ */
+
+import React from "react";
 import HeroSlider, { HeroSliderContent } from "../hero/HeroSlider";
-import { API_BASE } from "../../config/api";
 
 interface HeroCollectionSliderProps {
   content?: HeroSliderContent;
   loading?: boolean;
 }
 
+/**
+ * Hero Collection Slider Component
+ * Pure presentation - receives all data and loading state via props
+ * No business logic or data fetching
+ */
 const HeroCollectionSlider: React.FC<HeroCollectionSliderProps> = ({
   content,
   loading = false,
 }) => {
-  const [heroContent, setHeroContent] = useState<HeroSliderContent | null>(null);
-  const [isLoading, setIsLoading] = useState(loading);
-
-  useEffect(() => {
-    if (content) {
-      setHeroContent(content);
-      setIsLoading(false);
-      return;
-    }
-
-    // Fetch from API if no content provided
-    const fetchHeroContent = async () => {
-      try {
-        setIsLoading(true);
-        const res = await fetch(`${API_BASE}/api/hero-slider/home`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.slides && Array.isArray(data.slides)) {
-            setHeroContent(data);
-          }
-        }
-      } catch (err) {
-        console.error("Failed to fetch hero slider:", err);
-        // Fallback to default content
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchHeroContent();
-  }, [content]);
-
-  return <HeroSlider content={heroContent ?? undefined} loading={isLoading} />;
+  return <HeroSlider content={content} loading={loading} />;
 };
 
 export default HeroCollectionSlider;

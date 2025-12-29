@@ -7,11 +7,11 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "../styles/CartPage.css";
 import { formatIDR } from "../utils/money";
-import { buildImageUrl } from "../utils/image-utils";
-import { calculateBulkDiscount } from "../utils/bulk-discount";
 import type { CartItem } from "../utils/cart";
 import LuxuryButton from "../components/LuxuryButton";
 import EmptyState from "../components/EmptyState";
+import CartItemCard from "../components/common/CartItemCard";
+import SummaryCard from "../components/common/SummaryCard";
 
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
 
@@ -85,146 +85,66 @@ const CartPageView: React.FC<CartPageViewProps> = ({
       <div className="cartPage__container">
         <div className="cartPage__header">
           <h1 className="cartPage__title">Keranjang Belanja</h1>
-          <button
-            type="button"
+          <LuxuryButton
+            variant="outline"
+            size="sm"
             onClick={onClearCart}
             className="cartPage__clearBtn"
+            icon={
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            }
+            iconPosition="left"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
             Kosongkan
-          </button>
+          </LuxuryButton>
         </div>
 
         <div className="cartPage__content">
           <div className="cartPage__items">
             {items.map((item) => {
               const itemTotal = calculateItemTotal(item);
-              const discount = calculateBulkDiscount(item.bouquetPrice, item.quantity);
-              const hasDiscount = discount.discountAmount > 0;
-
               return (
-                <div key={item.bouquetId} className="cartItem">
-                  <Link to={`/bouquet/${item.bouquetId}`} className="cartItem__image">
-                    <img
-                      src={item.image ? buildImageUrl(item.image) : FALLBACK_IMAGE}
-                      alt={item.bouquetName}
-                      loading="lazy"
-                    />
-                  </Link>
-
-                  <div className="cartItem__details">
-                    <Link to={`/bouquet/${item.bouquetId}`} className="cartItem__name">
-                      {item.bouquetName}
-                    </Link>
-                    <div className="cartItem__price">
-                      {formatIDR(item.bouquetPrice)} {hasDiscount && <span className="cartItem__discount">per item</span>}
-                    </div>
-                    {hasDiscount && (
-                      <div className="cartItem__bulkDiscount">
-                        Diskon {discount.discountPercentage}% untuk {item.quantity} item
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="cartItem__quantity">
-                    <button
-                      type="button"
-                      onClick={() => onQuantityChange(item.bouquetId, item.quantity - 1)}
-                      className="cartItem__qtyBtn"
-                      aria-label="Kurangi jumlah"
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </button>
-                    <span className="cartItem__qtyValue">{item.quantity}</span>
-                    <button
-                      type="button"
-                      onClick={() => onQuantityChange(item.bouquetId, item.quantity + 1)}
-                      className="cartItem__qtyBtn"
-                      aria-label="Tambah jumlah"
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                          d="M12 5v14M5 12h14"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-
-                  <div className="cartItem__total">
-                    <div className="cartItem__totalLabel">Subtotal</div>
-                    <div className="cartItem__totalValue">{formatIDR(itemTotal)}</div>
-                    {hasDiscount && (
-                      <div className="cartItem__originalPrice">
-                        {formatIDR(item.bouquetPrice * item.quantity)}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="cartItem__actions">
-                    <button
-                      type="button"
-                      onClick={() => onSaveForLater(item)}
-                      className="cartItem__saveForLater"
-                      aria-label="Simpan untuk nanti"
-                      title="Simpan untuk nanti"
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                          d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onRemove(item.bouquetId)}
-                      className="cartItem__remove"
-                      aria-label="Hapus item"
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                          d="M18 6L6 18M6 6l12 12"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
+                <CartItemCard
+                  key={item.bouquetId}
+                  bouquetId={item.bouquetId}
+                  bouquetName={item.bouquetName}
+                  bouquetPrice={item.bouquetPrice}
+                  quantity={item.quantity}
+                  image={item.image}
+                  itemTotal={itemTotal}
+                  fallbackImage={FALLBACK_IMAGE}
+                  onQuantityChange={(newQuantity) => onQuantityChange(item.bouquetId, newQuantity)}
+                  onSaveForLater={() => onSaveForLater(item)}
+                  onRemove={() => onRemove(item.bouquetId)}
+                />
               );
             })}
           </div>
 
           <div className="cartPage__summary">
             <div className="cartSummary">
-              <h2 className="cartSummary__title">Ringkasan Pesanan</h2>
-              <div className="cartSummary__row">
-                <span className="cartSummary__label">Total Item</span>
-                <span className="cartSummary__value">{items.reduce((sum, item) => sum + item.quantity, 0)} item</span>
-              </div>
-              <div className="cartSummary__row cartSummary__row--total">
-                <span className="cartSummary__label">Total Harga</span>
-                <span className="cartSummary__value">{formatIDR(grandTotal)}</span>
-              </div>
+              <SummaryCard
+                title="Ringkasan Pesanan"
+                items={[
+                  {
+                    label: "Total Item",
+                    value: `${items.reduce((sum, item) => sum + item.quantity, 0)} item`,
+                  },
+                  {
+                    label: "Total Harga",
+                    value: formatIDR(grandTotal),
+                    isTotal: true,
+                  },
+                ]}
+              />
               <div className="cartSummary__note">
                 * Belum termasuk ongkos kirim. Ongkir akan dihitung saat checkout.
               </div>

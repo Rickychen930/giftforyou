@@ -4,7 +4,6 @@
  */
 
 import React from "react";
-import { Link } from "react-router-dom";
 import "../styles/BouquetDetailPage.css";
 import type { Bouquet } from "../models/domain/bouquet";
 import { isAuthenticated } from "../utils/auth-utils";
@@ -21,6 +20,10 @@ import SimilarProducts from "../components/bouquet-detail/SimilarProducts";
 import Breadcrumb from "../components/bouquet-detail/Breadcrumb";
 import SocialProof from "../components/SocialProof";
 import UrgencyIndicator from "../components/UrgencyIndicator";
+import EmptyState from "../components/EmptyState";
+import IconButton from "../components/common/IconButton";
+import AlertMessage from "../components/common/AlertMessage";
+import LuxuryButton from "../components/LuxuryButton";
 
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
 
@@ -86,19 +89,18 @@ const BouquetDetailPageView: React.FC<BouquetDetailPageViewProps> = ({
     return (
       <section className="bouquet-detail-page">
         <div className="bouquet-detail-page__container">
-          <div className="bouquet-detail-page__error">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 8V12M12 16H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5"/>
-            </svg>
-            <h2>{error ?? "Bouquet tidak ditemukan."}</h2>
-            <p>Coba kembali ke katalog atau periksa tautan yang Anda gunakan.</p>
-            <Link to="/collection" className="bouquet-detail-page__back-link">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <EmptyState
+            title={error ?? "Bouquet tidak ditemukan."}
+            description="Coba kembali ke katalog atau periksa tautan yang Anda gunakan."
+            actionLabel="Kembali ke Katalog"
+            actionPath="/collection"
+            icon={
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 8V12M12 16H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5"/>
               </svg>
-              <span>Kembali ke Katalog</span>
-            </Link>
-          </div>
+            }
+            className="bouquet-detail-page__error"
+          />
         </div>
       </section>
     );
@@ -158,16 +160,20 @@ const BouquetDetailPageView: React.FC<BouquetDetailPageViewProps> = ({
                 formProgress={formProgress}
               />
 
-              <button
-                type="button"
-                className="bouquet-detail-page__order-btn"
+              <LuxuryButton
+                variant="primary"
+                size="lg"
                 onClick={onShowOrderModal}
+                className="bouquet-detail-page__order-btn"
+                icon={
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" fill="currentColor"/>
+                  </svg>
+                }
+                iconPosition="left"
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" fill="currentColor"/>
-                </svg>
-                <span>Pesan Sekarang</span>
-              </button>
+                Pesan Sekarang
+              </LuxuryButton>
             </div>
           </div>
         </div>
@@ -182,19 +188,22 @@ const BouquetDetailPageView: React.FC<BouquetDetailPageViewProps> = ({
         {/* Admin Links */}
         {isAdmin && (
           <div className="bouquet-detail-page__admin">
-            <button
-              type="button"
-              className="bouquet-detail-page__admin-link"
+            <IconButton
+              variant="ghost"
+              size="sm"
               onClick={() => {
                 navigator.clipboard?.writeText(detailUrl);
                 toast.success("Tautan disalin");
               }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 17V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <span>Salin Tautan</span>
-            </button>
+              icon={
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 17V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              }
+              ariaLabel="Salin Tautan"
+              tooltip="Salin Tautan"
+              className="bouquet-detail-page__admin-link"
+            />
           </div>
         )}
 
@@ -211,16 +220,18 @@ const BouquetDetailPageView: React.FC<BouquetDetailPageViewProps> = ({
             <div className="bouquet-detail-page__modal">
               <div className="bouquet-detail-page__modal-header">
                 <h2>Form Pemesanan</h2>
-                <button
-                  type="button"
-                  className="bouquet-detail-page__modal-close"
+                <IconButton
+                  variant="ghost"
+                  size="md"
                   onClick={onCloseOrderModal}
-                  aria-label="Tutup"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
+                  ariaLabel="Tutup"
+                  className="bouquet-detail-page__modal-close"
+                  icon={
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  }
+                />
               </div>
 
               <div className="bouquet-detail-page__modal-content">
@@ -235,32 +246,38 @@ const BouquetDetailPageView: React.FC<BouquetDetailPageViewProps> = ({
 
               <div className="bouquet-detail-page__modal-footer">
                 {!isFormValid && (
-                  <div className="bouquet-detail-page__modal-warning">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 9v4M12 17h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <span>Lengkapi semua field yang wajib untuk melanjutkan</span>
-                  </div>
+                  <AlertMessage
+                    variant="warning"
+                    message="Lengkapi semua field yang wajib untuk melanjutkan"
+                    className="bouquet-detail-page__modal-warning"
+                  />
                 )}
                 <div className="bouquet-detail-page__modal-actions">
-                  <button
+                  <LuxuryButton
                     type="button"
-                    className="bouquet-detail-page__modal-btn bouquet-detail-page__modal-btn--secondary"
+                    variant="secondary"
+                    size="md"
                     onClick={onCloseOrderModal}
+                    className="bouquet-detail-page__modal-btn bouquet-detail-page__modal-btn--secondary"
                   >
                     Batal
-                  </button>
-                  <button
+                  </LuxuryButton>
+                  <LuxuryButton
                     type="button"
-                    className={`bouquet-detail-page__modal-btn bouquet-detail-page__modal-btn--primary ${!isFormValid ? "bouquet-detail-page__modal-btn--disabled" : ""}`}
+                    variant="primary"
+                    size="md"
                     onClick={onOrderSubmit}
                     disabled={!isFormValid}
+                    className={`bouquet-detail-page__modal-btn bouquet-detail-page__modal-btn--primary ${!isFormValid ? "bouquet-detail-page__modal-btn--disabled" : ""}`}
+                    icon={
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" fill="currentColor"/>
+                      </svg>
+                    }
+                    iconPosition="left"
                   >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" fill="currentColor"/>
-                    </svg>
                     Kirim ke WhatsApp
-                  </button>
+                  </LuxuryButton>
                 </div>
               </div>
             </div>

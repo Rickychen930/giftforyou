@@ -6,7 +6,6 @@
 import React from "react";
 import "../styles/CheckoutPage.css";
 import { formatIDR } from "../utils/money";
-import { buildImageUrl } from "../utils/image-utils";
 import { calculateBulkDiscount } from "../utils/bulk-discount";
 import type { CartItem } from "../utils/cart";
 import type { DeliveryPriceResult } from "../utils/delivery-calculator";
@@ -16,6 +15,11 @@ import DeliveryTimeSlot from "../components/DeliveryTimeSlot";
 import LuxuryButton from "../components/LuxuryButton";
 import SkeletonLoader from "../components/SkeletonLoader";
 import OrderSummaryModal from "../components/OrderSummaryModal";
+import CheckoutItem from "../components/common/CheckoutItem";
+import FormField from "../components/common/FormField";
+import RadioGroup from "../components/common/RadioGroup";
+import TextareaWithCounter from "../components/common/TextareaWithCounter";
+import SummaryCard from "../components/common/SummaryCard";
 
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
 
@@ -122,33 +126,18 @@ const CheckoutPageView: React.FC<CheckoutPageViewProps> = ({
               {items.map((item) => {
                 const itemTotal = calculateItemTotal(item);
                 const discount = calculateBulkDiscount(item.bouquetPrice, item.quantity);
-                const hasDiscount = discount.discountAmount > 0;
-
                 return (
-                  <div key={item.bouquetId} className="checkoutItem">
-                    <img
-                      src={item.image ? buildImageUrl(item.image) : FALLBACK_IMAGE}
-                      alt={item.bouquetName}
-                      className="checkoutItem__image"
-                      loading="lazy"
-                    />
-                    <div className="checkoutItem__details">
-                      <h3 className="checkoutItem__name">{item.bouquetName}</h3>
-                      <div className="checkoutItem__meta">
-                        <span className="checkoutItem__price">
-                          {formatIDR(item.bouquetPrice)} x {item.quantity}
-                        </span>
-                        {hasDiscount && (
-                          <span className="checkoutItem__discount">
-                            Diskon {discount.discountPercentage}%
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="checkoutItem__total">
-                      {formatIDR(itemTotal)}
-                    </div>
-                  </div>
+                  <CheckoutItem
+                    key={item.bouquetId}
+                    bouquetId={item.bouquetId}
+                    bouquetName={item.bouquetName}
+                    bouquetPrice={item.bouquetPrice}
+                    quantity={item.quantity}
+                    image={item.image}
+                    itemTotal={itemTotal}
+                    discountPercentage={discount.discountPercentage}
+                    fallbackImage={FALLBACK_IMAGE}
+                  />
                 );
               })}
             </div>
@@ -158,87 +147,79 @@ const CheckoutPageView: React.FC<CheckoutPageViewProps> = ({
           <div className="checkoutPage__form">
             <h2 className="checkoutPage__sectionTitle">Informasi Pengiriman</h2>
             <div className="checkoutForm">
-              <div className="checkoutForm__group">
-                <label className="checkoutForm__label">
-                  Metode Pengiriman
-                  <span className="checkoutForm__required">*</span>
-                </label>
-                <div className="checkoutForm__radioGroup">
-                  <label className={`checkoutForm__radio ${deliveryType === "delivery" ? "checkoutForm__radio--active" : ""}`}>
-                    <input
-                      type="radio"
-                      name="deliveryType"
-                      value="delivery"
-                      checked={deliveryType === "delivery"}
-                      onChange={(e) => onFormChange("deliveryType", e.target.value)}
-                    />
-                    <span>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      Diantar
-                    </span>
-                  </label>
-                  <label className={`checkoutForm__radio ${deliveryType === "pickup" ? "checkoutForm__radio--active" : ""}`}>
-                    <input
-                      type="radio"
-                      name="deliveryType"
-                      value="pickup"
-                      checked={deliveryType === "pickup"}
-                      onChange={(e) => onFormChange("deliveryType", e.target.value)}
-                    />
-                    <span>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeWidth="2"/>
-                        <circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="2"/>
-                      </svg>
-                      Ambil di Toko
-                    </span>
-                  </label>
-                </div>
-              </div>
+              <FormField
+                label="Metode Pengiriman"
+                required
+                className="checkoutForm__group"
+              >
+                <RadioGroup
+                  name="deliveryType"
+                  options={[
+                    {
+                      value: "delivery",
+                      label: "Diantar",
+                      icon: (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      ),
+                    },
+                    {
+                      value: "pickup",
+                      label: "Ambil di Toko",
+                      icon: (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeWidth="2"/>
+                          <circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="2"/>
+                        </svg>
+                      ),
+                    },
+                  ]}
+                  value={deliveryType}
+                  onChange={(value) => onFormChange("deliveryType", value)}
+                  className="checkoutForm__radioGroup"
+                />
+              </FormField>
 
-              <div className="checkoutForm__group">
-                <label className="checkoutForm__label">
-                  {deliveryType === "delivery" ? "Tanggal Pengiriman" : "Tanggal Pengambilan"}
-                  <span className="checkoutForm__required">*</span>
-                </label>
+              <FormField
+                label={deliveryType === "delivery" ? "Tanggal Pengiriman" : "Tanggal Pengambilan"}
+                required
+                htmlFor="checkout-delivery-date"
+                error={formErrors.deliveryDate}
+                className="checkoutForm__group"
+              >
                 <input
                   type="date"
+                  id="checkout-delivery-date"
                   className={`checkoutForm__input ${formErrors.deliveryDate ? "checkoutForm__input--error" : ""}`}
                   min={minDate}
                   value={deliveryDate}
                   onChange={(e) => onFormChange("deliveryDate", e.target.value)}
-                  aria-invalid={!!formErrors.deliveryDate}
-                  aria-describedby={formErrors.deliveryDate ? "deliveryDate-error" : undefined}
                 />
-                {formErrors.deliveryDate && (
-                  <span className="checkoutForm__error" id="deliveryDate-error" role="alert">
-                    {formErrors.deliveryDate}
-                  </span>
-                )}
-              </div>
+              </FormField>
 
               {deliveryDate && (
-                <div className="checkoutForm__group">
-                  <label className="checkoutForm__label">
-                    {deliveryType === "delivery" ? "Waktu Pengiriman" : "Waktu Pengambilan"}
-                    <span className="checkoutForm__optional">(Opsional)</span>
-                  </label>
+                <FormField
+                  label={deliveryType === "delivery" ? "Waktu Pengiriman" : "Waktu Pengambilan"}
+                  htmlFor="checkout-delivery-time"
+                  className="checkoutForm__group"
+                >
                   <DeliveryTimeSlot
                     selectedDate={deliveryDate}
                     selectedSlot={deliveryTimeSlot}
                     onSelect={(slotId) => onFormChange("deliveryTimeSlot", slotId)}
                   />
-                </div>
+                </FormField>
               )}
 
               {deliveryType === "delivery" && (
-                <div className="checkoutForm__group">
-                  <label className="checkoutForm__label">
-                    Alamat Pengiriman
-                    <span className="checkoutForm__required">*</span>
-                  </label>
+                <FormField
+                  label="Alamat Pengiriman"
+                  required
+                  htmlFor="checkout-address"
+                  error={formErrors.address}
+                  className="checkoutForm__group"
+                >
                   {loadingAddresses ? (
                     <SkeletonLoader variant="text" lines={2} />
                   ) : (
@@ -246,10 +227,11 @@ const CheckoutPageView: React.FC<CheckoutPageViewProps> = ({
                       {savedAddresses.length > 0 && (
                         <div className="checkoutForm__savedAddresses">
                           {savedAddresses.map((addr) => (
-                            <button
+                            <LuxuryButton
                               key={addr._id}
                               type="button"
-                              className={`checkoutForm__savedAddress ${addr.isDefault ? "checkoutForm__savedAddress--default" : ""}`}
+                              variant={addr.isDefault ? "primary" : "outline"}
+                              size="sm"
                               onClick={() => {
                                 onAddressChange(addr.fullAddress, {
                                   geometry: {
@@ -260,14 +242,18 @@ const CheckoutPageView: React.FC<CheckoutPageViewProps> = ({
                                   },
                                 });
                               }}
+                              className={`checkoutForm__savedAddress ${addr.isDefault ? "checkoutForm__savedAddress--default" : ""}`}
+                              icon={
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeWidth="2"/>
+                                  <circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="2"/>
+                                </svg>
+                              }
+                              iconPosition="left"
                             >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeWidth="2"/>
-                                <circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="2"/>
-                              </svg>
                               {addr.fullAddress}
                               {addr.isDefault && <span className="checkoutForm__defaultBadge">Default</span>}
-                            </button>
+                            </LuxuryButton>
                           ))}
                         </div>
                       )}
@@ -290,96 +276,78 @@ const CheckoutPageView: React.FC<CheckoutPageViewProps> = ({
                           </span>
                         </div>
                       )}
-                      {formErrors.address && (
-                        <span className="checkoutForm__error" id="address-error" role="alert">
-                          {formErrors.address}
-                        </span>
-                      )}
                     </>
                   )}
-                </div>
+                </FormField>
               )}
 
-              <div className="checkoutForm__group">
-                <label className="checkoutForm__label">
-                  Kartu Ucapan
-                  <span className="checkoutForm__optional">(Opsional)</span>
-                </label>
-                <textarea
+              <FormField
+                label="Kartu Ucapan"
+                htmlFor="checkout-greeting-card"
+                error={formErrors.greetingCard}
+                className="checkoutForm__group"
+              >
+                <TextareaWithCounter
+                  id="checkout-greeting-card"
                   className={`checkoutForm__textarea ${formErrors.greetingCard ? "checkoutForm__textarea--error" : ""}`}
                   rows={3}
                   placeholder="Tulis pesan untuk kartu ucapan..."
                   value={greetingCard}
                   onChange={(e) => onFormChange("greetingCard", e.target.value)}
                   maxLength={200}
-                  aria-invalid={!!formErrors.greetingCard}
-                  aria-describedby={formErrors.greetingCard ? "greetingCard-error" : undefined}
+                  currentLength={greetingCard.length}
+                  error={formErrors.greetingCard}
                 />
-                <div className="checkoutForm__charCount">
-                  {greetingCard.length} / 200 karakter
-                </div>
-                {formErrors.greetingCard && (
-                  <span className="checkoutForm__error" id="greetingCard-error" role="alert">
-                    {formErrors.greetingCard}
-                  </span>
-                )}
-              </div>
+              </FormField>
 
-              <div className="checkoutForm__group">
-                <label className="checkoutForm__label">
-                  Catatan Pesanan
-                  <span className="checkoutForm__optional">(Opsional)</span>
-                </label>
-                <textarea
+              <FormField
+                label="Catatan Pesanan"
+                htmlFor="checkout-order-notes"
+                error={formErrors.orderNotes}
+                hint="💡 Contoh: Tolong diletakkan di depan pintu, Hindari jam 12-14 siang, Ada anjing di halaman"
+                className="checkoutForm__group"
+              >
+                <TextareaWithCounter
+                  id="checkout-order-notes"
                   className={`checkoutForm__textarea ${formErrors.orderNotes ? "checkoutForm__textarea--error" : ""}`}
                   rows={3}
                   placeholder="Instruksi khusus untuk pengiriman, permintaan khusus, dll..."
                   value={orderNotes}
                   onChange={(e) => onFormChange("orderNotes", e.target.value)}
                   maxLength={500}
-                  aria-invalid={!!formErrors.orderNotes}
-                  aria-describedby={formErrors.orderNotes ? "orderNotes-error" : undefined}
+                  currentLength={orderNotes.length}
+                  error={formErrors.orderNotes}
+                  hint="💡 Contoh: Tolong diletakkan di depan pintu, Hindari jam 12-14 siang, Ada anjing di halaman"
                 />
-                <div className="checkoutForm__charCount">
-                  {orderNotes.length} / 500 karakter
-                </div>
-                {formErrors.orderNotes && (
-                  <span className="checkoutForm__error" id="orderNotes-error" role="alert">
-                    {formErrors.orderNotes}
-                  </span>
-                )}
-                <span className="checkoutForm__hint">
-                  💡 Contoh: "Tolong diletakkan di depan pintu", "Hindari jam 12-14 siang", "Ada anjing di halaman"
-                </span>
-              </div>
+              </FormField>
             </div>
           </div>
 
           {/* Order Summary */}
           <div className="checkoutPage__summary">
             <div className="checkoutSummary">
-              <h2 className="checkoutSummary__title">Ringkasan Pesanan</h2>
-              <div className="checkoutSummary__content">
-                <div className="checkoutSummary__row">
-                  <span className="checkoutSummary__label">Subtotal</span>
-                  <span className="checkoutSummary__value">
-                    {formatIDR(items.reduce((sum, item) => sum + calculateItemTotal(item), 0))}
-                  </span>
-                </div>
-                {deliveryType === "delivery" && deliveryPriceResult && (
-                  <div className="checkoutSummary__row">
-                    <span className="checkoutSummary__label">Ongkir</span>
-                    <span className="checkoutSummary__value">
-                      {formatIDR(deliveryPriceResult.price)}
-                    </span>
-                  </div>
-                )}
-                <div className="checkoutSummary__separator"></div>
-                <div className="checkoutSummary__row checkoutSummary__row--total">
-                  <span className="checkoutSummary__label">Total</span>
-                  <span className="checkoutSummary__value">{formatIDR(grandTotal)}</span>
-                </div>
-              </div>
+              <SummaryCard
+                title="Ringkasan Pesanan"
+                items={[
+                  {
+                    label: "Subtotal",
+                    value: formatIDR(items.reduce((sum, item) => sum + calculateItemTotal(item), 0)),
+                  },
+                  ...(deliveryType === "delivery" && deliveryPriceResult
+                    ? [
+                        {
+                          label: "Ongkir",
+                          value: formatIDR(deliveryPriceResult.price),
+                        },
+                      ]
+                    : []),
+                  {
+                    label: "Total",
+                    value: formatIDR(grandTotal),
+                    isTotal: true,
+                  },
+                ]}
+              />
 
               {canUseExpressCheckout && (
                 <div className="checkoutSummary__expressCheckout">

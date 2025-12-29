@@ -1,0 +1,51 @@
+/**
+ * Success Icon Styles
+ * Luxury animated success checkmark
+ */
+
+.successIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #10b981;
+  animation: successIconPulse 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.successIcon__circle {
+  stroke-dasharray: 62.83;
+  stroke-dashoffset: 62.83;
+  animation: successIconCircle 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.successIcon__check {
+  stroke-dasharray: 8;
+  stroke-dashoffset: 8;
+  animation: successIconCheck 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
+}
+
+@keyframes successIconPulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes successIconCircle {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes successIconCheck {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
