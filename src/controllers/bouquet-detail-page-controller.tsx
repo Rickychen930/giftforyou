@@ -24,7 +24,6 @@ import type { OrderFormData } from "../components/bouquet-detail/OrderForm";
 import {
   type BouquetDetailPageState,
   INITIAL_BOUQUET_DETAIL_PAGE_STATE,
-  INITIAL_ORDER_FORM_DATA,
   getDefaultDate,
   FORM_STORAGE_KEY,
 } from "../models/bouquet-detail-page-model";

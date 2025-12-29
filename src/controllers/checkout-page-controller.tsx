@@ -8,9 +8,8 @@ import { Navigate } from "react-router-dom";
 import { setSeo } from "../utils/seo";
 import { formatIDR } from "../utils/money";
 import { getCartItems, clearCart, type CartItem } from "../utils/cart";
-import { buildImageUrl } from "../utils/image-utils";
 import { calculateBulkDiscount } from "../utils/bulk-discount";
-import { calculateDeliveryPrice, type DeliveryPriceResult } from "../utils/delivery-calculator";
+import { calculateDeliveryPrice } from "../utils/delivery-calculator";
 import { getAccessToken } from "../utils/auth-utils";
 import { toast } from "../utils/toast";
 import { STORE_PROFILE } from "../config/store-profile";
@@ -19,7 +18,6 @@ import { API_BASE } from "../config/api";
 import {
   type CheckoutPageState,
   type CheckoutFormState,
-  type SavedAddress,
   INITIAL_CHECKOUT_PAGE_STATE,
   getDefaultDate,
   DEFAULT_CHECKOUT_PAGE_SEO,

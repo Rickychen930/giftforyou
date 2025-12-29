@@ -9,9 +9,7 @@ import "../styles/CustomerDashboardPage.css";
 import { formatIDR } from "../utils/money";
 import EmptyState from "../components/EmptyState";
 import StatCard from "../components/common/StatCard";
-import TabNavigation, { TabItem } from "../components/common/TabNavigation";
-import BackLink from "../components/common/BackLink";
-import IconButton from "../components/common/IconButton";
+import TabNavigation from "../components/common/TabNavigation";
 import LuxuryButton from "../components/LuxuryButton";
 import type {
   DashboardUser,
@@ -19,7 +17,6 @@ import type {
   RecentOrder,
   ActiveTab,
 } from "../models/customer-dashboard-page-model";
-import { getStatusBadge } from "../models/customer-dashboard-page-model";
 
 interface CustomerDashboardPageViewProps {
   user: DashboardUser | null;

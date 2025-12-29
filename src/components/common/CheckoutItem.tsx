@@ -7,7 +7,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { formatIDR } from "../../utils/money";
 import { buildImageUrl } from "../../utils/image-utils";
-import { calculateBulkDiscount } from "../../utils/bulk-discount";
 import "../../styles/CheckoutItem.css";
 
 interface CheckoutItemProps {

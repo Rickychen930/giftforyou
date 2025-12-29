@@ -11,8 +11,6 @@ import { keyboardShortcuts } from "../utils/keyboard-shortcuts";
 import { setSeo } from "../utils/seo";
 import {
   type DashboardPageState,
-  type DashboardUser,
-  type RecentOrder,
   INITIAL_DASHBOARD_PAGE_STATE,
   DEFAULT_DASHBOARD_PAGE_SEO,
   getStatusBadge,

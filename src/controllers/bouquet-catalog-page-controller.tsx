@@ -9,7 +9,6 @@ import { normalizeBouquets } from "../utils/bouquet-normalizer";
 import { isNonEmptyString } from "../utils/validation";
 import { setSeo } from "../utils/seo";
 import { formatIDR } from "../utils/money";
-import { observeFadeIn, revealOnScroll, staggerFadeIn } from "../utils/luxury-enhancements";
 import type { FilterChip } from "../components/catalog/CatalogActiveFilters";
 import {
   type BouquetCatalogPageState,

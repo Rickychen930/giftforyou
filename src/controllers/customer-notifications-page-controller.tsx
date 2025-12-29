@@ -10,7 +10,6 @@ import {
   type NotificationsPageState,
   type NotificationSettings,
   INITIAL_NOTIFICATIONS_PAGE_STATE,
-  INITIAL_NOTIFICATION_SETTINGS,
   DEFAULT_NOTIFICATIONS_PAGE_SEO,
 } from "../models/customer-notifications-page-model";
 import CustomerNotificationsPageView from "../view/customer-notifications-page";

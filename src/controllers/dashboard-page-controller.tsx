@@ -6,7 +6,7 @@ import { API_BASE } from "../config/api";
 import { normalizeBouquets, normalizeBouquet } from "../utils/bouquet-normalizer";
 import { setSeo } from "../utils/seo";
 import { formatIDR } from "../utils/money";
-import { getPerformanceMetrics, getPerformanceScore, formatBytes, formatMs, observeCoreWebVitals } from "../utils/performance-monitor";
+import { getPerformanceMetrics, getPerformanceScore, observeCoreWebVitals } from "../utils/performance-monitor";
 import { analyzeSeo } from "../utils/seo-analyzer";
 import { savePerformanceHistory, saveSeoHistory } from "../utils/analytics-storage";
 import { checkPerformanceAlerts, checkSeoAlerts, checkTrendAlerts, getUnacknowledgedAlerts } from "../utils/analytics-alerts";
@@ -19,16 +19,10 @@ import { getActiveABTests, assignToVariant, trackABTestVisit } from "../utils/ab
 import {
   type ActiveTab,
   type DashboardPageViewState,
-  type PerformanceState,
-  type SeoState,
-  type AlertsState,
   type InsightsResponse,
   type SalesMetrics,
   type MetricsResponse,
   INITIAL_DASHBOARD_PAGE_VIEW_STATE,
-  INITIAL_PERFORMANCE_STATE,
-  INITIAL_SEO_STATE,
-  INITIAL_ALERTS_STATE,
   DASHBOARD_TAB_STORAGE_KEY,
   isActiveTab,
   readTabFromLocation,
@@ -1448,8 +1442,6 @@ class DashboardController extends Component<{}, State> {
     const bouquets = this.state.bouquets ?? [];
     const visitorsCount = this.state.visitorsCount ?? 0;
     const collectionsCount = this.state.collectionsCount ?? 0;
-    const salesMetrics = this.state.salesMetrics;
-
     const insights = this.state.insights;
     const insightsError = (this.state.insightsError ?? "").trim();
     const insightsDays = Number(insights?.days ?? 30);
