@@ -55,15 +55,14 @@ export async function createUser(req: Request, res: Response): Promise<void> {
     const isProduction = process.env.NODE_ENV === "production";
     const allowRegistration = process.env.ALLOW_PUBLIC_REGISTRATION === "true";
     
-    // Debug logging in development
-    if (process.env.NODE_ENV === "development") {
-      console.log("[Auth] Registration check:", {
-        isProduction,
-        allowRegistration,
-        ALLOW_PUBLIC_REGISTRATION: process.env.ALLOW_PUBLIC_REGISTRATION,
-        NODE_ENV: process.env.NODE_ENV,
-      });
-    }
+    // Debug logging (both development and production for troubleshooting)
+    console.log("[Auth] Registration check:", {
+      isProduction,
+      allowRegistration,
+      ALLOW_PUBLIC_REGISTRATION: process.env.ALLOW_PUBLIC_REGISTRATION,
+      NODE_ENV: process.env.NODE_ENV,
+      timestamp: new Date().toISOString(),
+    });
     
     if (isProduction && !allowRegistration) {
       res.status(403).json({ error: "Registration is disabled" });

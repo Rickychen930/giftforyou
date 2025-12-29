@@ -1254,16 +1254,34 @@ const BouquetEditor: React.FC<Props> = ({ bouquet, collections, onSave, onDuplic
             storageKey="uploader_types"
           />
 
-          <label className="becField">
-            <span className="becLabel">Ukuran</span>
-            <select name="size" value={form.size} onChange={handleSelectChange}>
-              {BOUQUET_SIZE_OPTIONS.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <DropdownWithModal
+            label="Ukuran"
+            value={form.size}
+            options={BOUQUET_SIZE_OPTIONS.map((s) => s.value)}
+            onChange={(value) => {
+              setForm((prev) => ({ ...prev, size: value as BouquetSize }));
+              const newTouchedFields = new Set(touchedFields);
+              newTouchedFields.add("size");
+              setTouchedFields(newTouchedFields);
+              const error = validateField("size", value);
+              if (error !== null) {
+                setFieldErrors((prev) => {
+                  const newErrors = { ...prev };
+                  if (error) {
+                    newErrors.size = error;
+                  } else {
+                    delete newErrors.size;
+                  }
+                  return newErrors;
+                });
+              }
+            }}
+            onAddNew={() => {}}
+            placeholder="Pilih ukuran"
+            disabled={saving}
+            error={touchedFields.has("size") && fieldErrors.size ? fieldErrors.size : undefined}
+            storageKey="uploader_sizes"
+          />
 
           <label className="becField">
             <span className="becLabel">Status</span>
