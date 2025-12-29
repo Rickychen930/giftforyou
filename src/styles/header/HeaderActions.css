@@ -1,0 +1,189 @@
+@import "../colors.css";
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.header-actions__btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ffffff 0%, #fef5f7 100%);
+  border: 1.5px solid rgba(212, 140, 156, 0.18);
+  color: var(--ink-900);
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+  text-decoration: none;
+}
+
+.header-actions__btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--brand-rose-500), #e89aaa);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.header-actions__btn svg {
+  position: relative;
+  z-index: 1;
+  transition: transform 0.3s ease;
+}
+
+.header-actions__btn:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 10px 30px rgba(212, 140, 156, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+  border-color: var(--brand-rose-500);
+}
+
+.header-actions__btn:hover::before {
+  opacity: 1;
+}
+
+.header-actions__btn:hover svg {
+  color: white;
+  transform: scale(1.1);
+}
+
+.header-actions__cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--brand-rose-500), #e89aaa);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(212, 140, 156, 0.4);
+  animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+.header-actions__hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  border: 1px solid rgba(212, 140, 156, 0.15);
+  background: linear-gradient(135deg, #ffffff, #fef5f7);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+  gap: 5px;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .header-actions__hamburger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(212, 140, 156, 0.15);
+    background: linear-gradient(135deg, #fef5f7, #ffffff);
+  }
+}
+
+.header-actions__hamburger span {
+  display: block;
+  width: 24px;
+  height: 2.5px;
+  background: var(--brand-wine-700);
+  border-radius: 999px;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.header-actions__hamburger.is-open span:nth-child(1) {
+  transform: translateY(7.5px) rotate(45deg);
+  background: var(--brand-rose-500);
+}
+
+.header-actions__hamburger.is-open span:nth-child(2) {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.header-actions__hamburger.is-open span:nth-child(3) {
+  transform: translateY(-7.5px) rotate(-45deg);
+  background: var(--brand-rose-500);
+}
+
+.header-actions__btn:focus-visible,
+.header-actions__hamburger:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(212, 140, 156, 0.18);
+  border-radius: 12px;
+}
+
+.header-actions__btn,
+.header-actions__hamburger {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+@media (max-width: 980px) {
+  .header-actions__hamburger {
+    display: flex;
+    position: relative;
+    z-index: 1600;
+  }
+}
+
+@media (max-width: 640px) {
+  .header-actions__btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .header-actions__hamburger {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 400px) {
+  .header-actions__btn,
+  .header-actions__hamburger {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header-actions__hamburger span {
+    transition: none !important;
+  }
+}
+

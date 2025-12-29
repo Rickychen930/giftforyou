@@ -7,16 +7,19 @@ import path from "path";
 import multer from "multer";
 import fs from "fs";
 
-import metricsRoutes from "../routes/metrics-routes";
-import authRoutes from "../routes/auth-routes";
-import bouquetRoutes from "../routes/bouquet-routes";
-import collectionRoutes from "../routes/collection-routes";
-import heroSliderRoutes from "../routes/hero-slider-routes";
-import orderRoutes from "../routes/order-routes";
-import customerRoutes from "../routes/customer-routes";
-import instagramRoutes from "../routes/instagram-routes";
-import { securityHeaders } from "../middleware/security-headers";
-import { apiRateLimit } from "../middleware/rate-limit-middleware";
+// API Routes (Backend)
+import metricsRoutes from "../api/routes/metrics-routes";
+import authRoutes from "../api/routes/auth-routes";
+import bouquetRoutes from "../api/routes/bouquet-routes";
+import collectionRoutes from "../api/routes/collection-routes";
+import heroSliderRoutes from "../api/routes/hero-slider-routes";
+import orderRoutes from "../api/routes/order-routes";
+import customerRoutes from "../api/routes/customer-routes";
+import instagramRoutes from "../api/routes/instagram-routes";
+
+// API Middleware (Backend)
+import { securityHeaders } from "../api/middleware/security-headers";
+import { apiRateLimit } from "../api/middleware/rate-limit-middleware";
 
 /**
  * Read a required env var (crash early if missing)

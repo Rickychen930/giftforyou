@@ -1,0 +1,82 @@
+@import "../colors.css";
+
+.copy-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border-radius: 10px;
+  border: 1.5px solid rgba(212, 140, 156, 0.25);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+  color: var(--ink-700);
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.copy-button:hover {
+  border-color: var(--brand-rose-500);
+  color: var(--brand-rose-600);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(212, 140, 156, 0.2);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.95));
+}
+
+.copy-button--copied {
+  background: linear-gradient(135deg, rgba(168, 213, 186, 0.2), rgba(168, 213, 186, 0.15));
+  border-color: rgba(168, 213, 186, 0.4);
+  color: var(--brand-green-700);
+}
+
+.copy-button--copied:hover {
+  background: linear-gradient(135deg, rgba(168, 213, 186, 0.25), rgba(168, 213, 186, 0.2));
+  border-color: rgba(168, 213, 186, 0.5);
+}
+
+.copy-button svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.copy-button__text {
+  white-space: nowrap;
+}
+
+.copy-button--sm {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.copy-button--sm svg {
+  width: 14px;
+  height: 14px;
+}
+
+.copy-button--lg {
+  padding: 0.75rem 1.25rem;
+  font-size: 0.9rem;
+}
+
+.copy-button--lg svg {
+  width: 18px;
+  height: 18px;
+}
+
+.copy-button:focus-visible {
+  outline: 3px solid rgba(212, 140, 156, 0.5);
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .copy-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+}
+
