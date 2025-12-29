@@ -674,7 +674,6 @@ class DashboardView extends Component<Props, State> {
     const pageviews30d = Number(insights?.pageviews30d ?? 0);
     const topSearchTerms = (insights?.topSearchTerms ?? []).slice(0, 10);
     const topBouquetsDays = (insights?.topBouquetsDays ?? []).slice(0, 5);
-    const topBouquets7d = (insights?.topBouquets7d ?? []).slice(0, 3);
     const visitHours = (insights?.visitHours ?? []).slice(0, 8);
     const uniqueVisitors30d = Number(insights?.uniqueVisitors30d ?? 0);
     const uniqueVisitorsAvailable = Boolean(insights?.uniqueVisitorsAvailable);
