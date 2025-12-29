@@ -1,0 +1,519 @@
+@import "../colors.css";
+
+/* =========================================================
+   HERO SLIDE - Luxury & Elegant Design
+   - Individual slide component
+   - Ken Burns effect
+   - Glass morphism panel
+   - Responsive design
+========================================================= */
+
+.hero-slide {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+  display: grid;
+  align-items: end;
+  isolation: isolate;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Image wrapper with Ken Burns effect */
+.hero-slide__media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.hero-slide__img-wrapper {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hero-slide__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1.05);
+  transition: transform 8s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.6s ease;
+  opacity: 0;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  image-rendering: auto;
+}
+
+.hero-slide__img-wrapper--loaded .hero-slide__img {
+  opacity: 1;
+}
+
+.hero-slide__img-placeholder {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(212, 140, 156, 0.1), rgba(168, 213, 186, 0.1));
+  animation: shimmerPlaceholder 2s infinite;
+  z-index: 0;
+}
+
+@keyframes shimmerPlaceholder {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Ken Burns zoom effect on active slide */
+.swiper-slide-active .hero-slide__img {
+  transform: scale(1.12);
+  animation: kenBurns 20s ease-in-out infinite;
+}
+
+@keyframes kenBurns {
+  0%, 100% {
+    transform: scale(1.12) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.15) translate(-2%, -1%);
+  }
+}
+
+/* Overlays for better text readability */
+.hero-slide__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(1000px 600px at 24% 20%, rgba(0, 0, 0, 0.32), transparent 65%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.28) 58%, rgba(0, 0, 0, 0.12) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.58) 100%);
+  transition: opacity 0.5s ease;
+}
+
+.hero-slide__glow {
+  position: absolute;
+  inset: -25%;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(700px 500px at 18% 25%, rgba(212, 140, 156, 0.32), transparent 70%),
+    radial-gradient(700px 500px at 42% 12%, rgba(168, 213, 186, 0.22), transparent 72%),
+    radial-gradient(500px 400px at 75% 60%, rgba(212, 140, 156, 0.15), transparent 65%);
+  mix-blend-mode: screen;
+  opacity: 0.75;
+  transition: opacity 0.6s ease;
+}
+
+.swiper-slide-active .hero-slide__glow {
+  opacity: 0.9;
+  animation: glowPulseLuxury 12s ease-in-out infinite;
+}
+
+@keyframes glowPulseLuxury {
+  0%, 100% { 
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
+}
+
+.hero-slide__grain {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.25'/%3E%3C/svg%3E");
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* Content wrapper */
+.hero-slide__content {
+  position: relative;
+  z-index: 4;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 3.5rem);
+  padding-bottom: clamp(3rem, 8vh, 6rem);
+  padding-left: clamp(1.5rem, 4vw, 3.5rem);
+  padding-right: clamp(1.5rem, 4vw, 3.5rem);
+  color: var(--hero-text);
+  box-sizing: border-box;
+}
+
+/* Glass panel - luxury glass morphism */
+.hero-slide__panel {
+  display: block;
+  width: min(58%, 750px);
+  max-width: calc(100% - clamp(20px, 6vw, 80px) * 2);
+  margin-left: clamp(20px, 6vw, 80px);
+  margin-right: clamp(20px, 6vw, 80px);
+  border-radius: 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.06) 100%
+  );
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  box-shadow: 
+    0 24px 64px rgba(0, 0, 0, 0.4),
+    0 8px 24px rgba(0, 0, 0, 0.28),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+    inset 0 1px 2px rgba(255, 255, 255, 0.15);
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.5s ease;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.hero-slide__panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.08) 0%,
+    transparent 50%,
+    rgba(168, 213, 186, 0.06) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.swiper-slide-active .hero-slide__panel::before {
+  opacity: 1;
+}
+
+.swiper-slide-active .hero-slide__panel {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 28px 72px rgba(0, 0, 0, 0.45),
+    0 10px 28px rgba(0, 0, 0, 0.32),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+    inset 0 1px 2px rgba(255, 255, 255, 0.2);
+}
+
+.hero-slide__panel-inner {
+  padding: clamp(1.25rem, 3.5vw, 2.5rem);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* Badge - luxury design */
+.hero-slide__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.16) 100%
+  );
+  border: 1.5px solid rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  font-weight: 950;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 
+    0 6px 16px rgba(0, 0, 0, 0.18),
+    0 2px 6px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  color: rgba(255, 255, 255, 0.98);
+}
+
+.swiper-slide-active .hero-slide__badge {
+  transform: scale(1.02);
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.22),
+    0 3px 8px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* Heading with flower icon */
+.hero-slide__heading {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.hero-slide__floral-icon {
+  color: rgba(255, 255, 255, 0.95);
+  flex: 0 0 auto;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.hero-slide__flower-petals {
+  transform-origin: center;
+}
+
+.hero-slide__flower-center {
+  /* animation is applied only on the active slide for a calmer, luxury feel */
+}
+
+.swiper-slide-active .hero-slide__flower-center {
+  animation: centerPulse 3.6s ease-in-out infinite;
+}
+
+@keyframes centerPulse {
+  0%, 100% { opacity: 0.9; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+/* Title - luxury typography */
+.hero-slide__title {
+  margin: 0;
+  max-width: 28ch;
+  font-size: clamp(2.4rem, 5.5vw, 4.5rem);
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+  text-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.6),
+    0 3px 8px rgba(0, 0, 0, 0.4),
+    0 1px 2px rgba(0, 0, 0, 0.3);
+  font-weight: 800;
+  font-family: 'Playfair Display', Georgia, serif;
+  color: #fff;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0.98) 50%,
+    rgba(255, 255, 255, 0.95) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.swiper-slide-active .hero-slide__title {
+  transform: translateY(-2px);
+}
+
+@supports (text-wrap: balance) {
+  .hero-slide__title {
+    text-wrap: balance;
+  }
+}
+
+.hero-slide__subtitle {
+  margin: 0 0 1.75rem;
+  max-width: 58ch;
+  font-size: clamp(1.05rem, 1.7vw, 1.2rem);
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.96);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  font-weight: 450;
+  letter-spacing: 0.01em;
+  text-shadow: 
+    0 3px 10px rgba(0, 0, 0, 0.45),
+    0 1px 3px rgba(0, 0, 0, 0.3);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+@supports (text-wrap: pretty) {
+  .hero-slide__subtitle {
+    text-wrap: pretty;
+  }
+}
+
+/* Entrance animations for active slide */
+.hero-slide__badge,
+.hero-slide__heading,
+.hero-slide__subtitle,
+.hero-slide__actions {
+  opacity: 0;
+  transform: translateY(24px) scale(0.96);
+  will-change: transform, opacity;
+}
+
+.swiper-slide-active .hero-slide__badge {
+  animation: revealUpLuxury 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+
+.swiper-slide-active .hero-slide__heading {
+  animation: revealUpLuxury 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+
+.swiper-slide-active .hero-slide__subtitle {
+  animation: revealUpLuxury 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both;
+}
+
+.swiper-slide-active .hero-slide__actions {
+  animation: revealUpLuxury 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
+}
+
+@keyframes revealUpLuxury {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.95);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* Actions */
+.hero-slide__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+}
+
+.hero-slide__cta-link {
+  text-decoration: none;
+  display: inline-block;
+}
+
+.hero-slide__cta {
+  min-width: 180px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .hero-slide__panel {
+    width: min(70%, 680px);
+    max-width: calc(100% - clamp(16px, 4vw, 40px) * 2);
+    margin-left: clamp(16px, 4vw, 40px);
+    margin-right: clamp(16px, 4vw, 40px);
+  }
+
+  .hero-slide__title {
+    font-size: clamp(1.8rem, 4.5vw, 3rem);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-slide__content {
+    padding-bottom: clamp(2rem, 5vh, 4rem);
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .hero-slide__panel {
+    width: calc(100% - 24px);
+    max-width: calc(100% - 24px);
+    margin-left: 12px;
+    margin-right: 12px;
+    border-radius: 14px;
+  }
+
+  .hero-slide__panel-inner {
+    padding: 1.25rem;
+  }
+
+  .hero-slide__heading {
+    gap: 0.7rem;
+  }
+
+  .hero-slide__floral-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .hero-slide__title {
+    font-size: clamp(1.5rem, 6vw, 2.2rem);
+    max-width: 100%;
+  }
+
+  .hero-slide__subtitle {
+    font-size: 0.95rem;
+    line-height: 1.55;
+    margin-bottom: 1.25rem;
+  }
+
+  .hero-slide__actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .hero-slide__cta {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-slide__panel {
+    margin-left: 10px;
+    margin-right: 10px;
+    width: calc(100% - 20px);
+    max-width: calc(100% - 20px);
+  }
+
+  .hero-slide__panel-inner {
+    padding: 1rem;
+  }
+
+  .hero-slide__title {
+    font-size: clamp(1.35rem, 5.5vw, 1.9rem);
+  }
+
+  .hero-slide__subtitle {
+    font-size: 0.9rem;
+  }
+
+  .hero-slide__badge {
+    font-size: 0.68rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-slide__img,
+  .hero-slide__glow,
+  .hero-slide__flower-petals,
+  .hero-slide__flower-center,
+  .hero-slide__badge,
+  .hero-slide__panel {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .swiper-slide-active .hero-slide__img {
+    transform: scale(1.05) !important;
+    animation: none !important;
+  }
+
+  .swiper-slide-active .hero-slide__badge,
+  .swiper-slide-active .hero-slide__heading,
+  .swiper-slide-active .hero-slide__subtitle,
+  .swiper-slide-active .hero-slide__actions {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}
+

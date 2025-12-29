@@ -1,0 +1,131 @@
+@import "../colors.css";
+
+/* =========================================================
+   HERO SKELETON - Loading State
+   - Shimmer animation
+   - Responsive design
+========================================================= */
+
+.hero-skeleton {
+  position: relative;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  margin-bottom: 0;
+  isolation: isolate;
+  scroll-margin-top: 0;
+  background: linear-gradient(135deg, var(--neutral-100), #fce4ec);
+}
+
+.hero-skeleton__container {
+  position: relative;
+  width: 100%;
+  height: clamp(600px, 85vh, 900px);
+  height: clamp(600px, 85svh, 900px);
+  overflow: hidden;
+}
+
+.hero-skeleton__image {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.05) 0%,
+    rgba(0, 0, 0, 0.08) 50%,
+    rgba(0, 0, 0, 0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+.hero-skeleton__content {
+  position: absolute;
+  bottom: clamp(3rem, 8vh, 6rem);
+  left: clamp(20px, 6vw, 80px);
+  width: min(58%, 750px);
+  padding: clamp(1.25rem, 3.5vw, 2.5rem);
+}
+
+.hero-skeleton__badge,
+.hero-skeleton__title,
+.hero-skeleton__subtitle,
+.hero-skeleton__button {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  animation: shimmer 2s infinite;
+  background-size: 200% 100%;
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0.2) 100%
+  );
+}
+
+.hero-skeleton__badge {
+  width: 120px;
+  height: 28px;
+  border-radius: 999px;
+  margin-bottom: 1.1rem;
+}
+
+.hero-skeleton__title {
+  width: 80%;
+  height: 60px;
+  margin-bottom: 1rem;
+}
+
+.hero-skeleton__subtitle {
+  width: 90%;
+  height: 40px;
+  margin-bottom: 1.5rem;
+}
+
+.hero-skeleton__buttons {
+  display: flex;
+  gap: 0.85rem;
+}
+
+.hero-skeleton__button {
+  width: 180px;
+  height: 48px;
+  border-radius: 999px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .hero-skeleton__content {
+    left: 12px;
+    width: calc(100% - 24px);
+    padding: 1.25rem;
+  }
+
+  .hero-skeleton__buttons {
+    flex-direction: column;
+  }
+
+  .hero-skeleton__button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-skeleton__image,
+  .hero-skeleton__badge,
+  .hero-skeleton__title,
+  .hero-skeleton__subtitle,
+  .hero-skeleton__button {
+    animation: none !important;
+  }
+}
+
