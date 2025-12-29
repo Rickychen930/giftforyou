@@ -12,7 +12,7 @@ import { NAV_LINKS } from "./constants/app-constants";
 import Header from "./view/header";
 import Footer from "./view/footer";
 
-import HomePage from "./view/home-page";
+import HomePageController from "./controllers/home-page-controller";
 import BouquetCatalogRoute from "./view/bouquet-catalog-route";
 import DashboardController from "./controllers/dashboard-page-controller";
 import BouquetDetailController from "./controllers/bouquet-detail-controller";
@@ -157,7 +157,7 @@ const AppLayout: React.FC = () => {
 
       <PageTransition>
         <Routes location={location}>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<HomePageController />} />
           <Route path="/collection" element={<BouquetCatalogRoute />} />
           <Route path="/bouquet/:id" element={<BouquetDetailController />} />
           <Route path="/order-confirmation" element={<OrderConfirmationPage />} />

@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "../../styles/hero/HeroSlide.css";
 import LuxuryButton from "../LuxuryButton";
-import { buildImageUrl } from "../../utils/image-utils";
 import { ArrowRightIcon } from "../icons/UIIcons";
 import { API_BASE } from "../../config/api";
 

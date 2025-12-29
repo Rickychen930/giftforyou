@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import HeroSlider, { HeroSliderContent } from "../hero/HeroSlider";
 import { API_BASE } from "../../config/api";
-import { STORE_PROFILE } from "../../config/store-profile";
 
 interface HeroCollectionSliderProps {
   content?: HeroSliderContent;
