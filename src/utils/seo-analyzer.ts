@@ -297,7 +297,7 @@ export function analyzeSeo(): SeoAnalysis {
 
   // Image alt text check
   const images = document.querySelectorAll("img");
-  const imagesWithoutAlt = Array.from(images).filter((img) => !img.alt);
+  const imagesWithoutAlt = Array.from(images).filter((img: any) => !img.alt);
   if (imagesWithoutAlt.length > 0) {
     checks.push({
       name: "Image Alt Text",

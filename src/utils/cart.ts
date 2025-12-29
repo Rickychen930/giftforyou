@@ -85,6 +85,7 @@ export function updateCartItemQuantity(bouquetId: string, quantity: number): voi
   }
 
   try {
+    if (typeof localStorage === "undefined" || typeof window === "undefined") return;
     const items = getCartItems();
     const item = items.find((i) => i.bouquetId === bouquetId);
     if (item) {
