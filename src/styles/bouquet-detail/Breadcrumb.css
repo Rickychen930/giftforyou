@@ -1,0 +1,59 @@
+@import "../colors.css";
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: clamp(1.5rem, 3vw, 2rem);
+  font-size: clamp(0.85rem, 1.2vw, 0.95rem);
+  flex-wrap: wrap;
+}
+
+.breadcrumb__link {
+  color: var(--ink-600);
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
+  position: relative;
+}
+
+.breadcrumb__link::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--brand-rose-500), var(--brand-rose-600));
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.breadcrumb__link:hover {
+  color: var(--brand-rose-600);
+}
+
+.breadcrumb__link:hover::after {
+  width: 100%;
+}
+
+.breadcrumb__separator {
+  color: var(--ink-400);
+  user-select: none;
+  opacity: 0.6;
+}
+
+.breadcrumb__current {
+  color: var(--ink-900);
+  font-weight: 700;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (max-width: 767px) {
+  .breadcrumb {
+    font-size: 0.8rem;
+  }
+}
+
