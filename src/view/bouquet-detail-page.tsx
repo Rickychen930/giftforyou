@@ -88,7 +88,6 @@ interface OrderFormState {
 
 interface BouquetDetailState extends OrderFormState {
   formErrors: Partial<Record<keyof OrderFormState, string>>;
-  showPreview: boolean;
   isFormValid: boolean;
   isFavorite: boolean;
   showDetails: boolean; // For collapsible details section
@@ -116,7 +115,6 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
     greetingCard: "",
     quantity: 1,
     formErrors: {},
-    showPreview: false,
     isFormValid: false,
     isFavorite: false,
     showDetails: false, // Details collapsed by default for efficiency
@@ -368,34 +366,6 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
     return result;
   }
 
-  private getSmartSuggestions(): string[] {
-    const suggestions: string[] = [];
-    
-    if (this.state.deliveryType === "delivery" && !this.state.address) {
-      suggestions.push("💡 Masukkan alamat lengkap untuk memudahkan pengiriman");
-    }
-    
-    if (this.state.quantity > 5) {
-      suggestions.push("💡 Order banyak? Hubungi kami untuk diskon khusus!");
-    }
-    
-    if (this.state.deliveryDate) {
-      const selectedDate = new Date(this.state.deliveryDate);
-      const today = new Date();
-      const diffDays = Math.ceil((selectedDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-      
-      if (diffDays === 1) {
-      } else if (diffDays > 7) {
-        suggestions.push("📅 Pre-order memungkinkan customisasi lebih detail");
-      }
-    }
-    
-    if (!this.state.greetingCard) {
-      suggestions.push("💌 Tambahkan kartu ucapan untuk membuat hadiah lebih personal");
-    }
-    
-    return suggestions;
-  }
 
   private copyOrderDetails = (): void => {
     const { bouquet, detailUrl } = this.props;
