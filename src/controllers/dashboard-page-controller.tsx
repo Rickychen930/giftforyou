@@ -4,6 +4,33 @@ import type { Bouquet } from "../models/domain/bouquet";
 
 import { API_BASE } from "../config/api";
 import { normalizeBouquets, normalizeBouquet } from "../utils/bouquet-normalizer";
+import { setSeo } from "../utils/seo";
+import { formatIDR } from "../utils/money";
+import { getPerformanceMetrics, getPerformanceScore, formatBytes, formatMs, observeCoreWebVitals } from "../utils/performance-monitor";
+import { analyzeSeo } from "../utils/seo-analyzer";
+import { savePerformanceHistory, saveSeoHistory } from "../utils/analytics-storage";
+import { checkPerformanceAlerts, checkSeoAlerts, checkTrendAlerts, getUnacknowledgedAlerts } from "../utils/analytics-alerts";
+import { analyzePerformanceTrends, analyzeSeoTrends } from "../utils/trends-analyzer";
+import { getHistoricalData } from "../utils/analytics-storage";
+import { getBenchmarks } from "../utils/benchmarks";
+import { exportAnalytics } from "../utils/analytics-export";
+import { getGAConfig, initGoogleAnalytics, sendPerformanceToGA, sendSEOToGA } from "../utils/google-analytics";
+import { getActiveABTests, assignToVariant, trackABTestVisit } from "../utils/ab-testing";
+import {
+  type ActiveTab,
+  type DashboardPageViewState,
+  type PerformanceState,
+  type SeoState,
+  type AlertsState,
+  INITIAL_DASHBOARD_PAGE_VIEW_STATE,
+  INITIAL_PERFORMANCE_STATE,
+  INITIAL_SEO_STATE,
+  INITIAL_ALERTS_STATE,
+  DASHBOARD_TAB_STORAGE_KEY,
+  isActiveTab,
+  readTabFromLocation,
+  writeTabToLocation,
+} from "../models/dashboard-page-model";
 
 type MetricsResponse = {
   visitorsCount?: number;
@@ -53,12 +80,18 @@ interface State {
 
   loading: boolean;
   errorMessage?: string;
+
+  // Dashboard view state
+  viewState: DashboardPageViewState;
 }
 
 class DashboardController extends Component<{}, State> {
   private abortController: AbortController | null = null;
   private metricsAbortController: AbortController | null = null;
   private metricsIntervalId: number | null = null;
+
+  private performanceCleanup: (() => void) | null = null;
+  private copyTimeoutId: NodeJS.Timeout | null = null;
 
   constructor(props: {}) {
     super(props);
@@ -71,11 +104,63 @@ class DashboardController extends Component<{}, State> {
       insightsError: undefined,
       loading: true,
       errorMessage: undefined,
+      viewState: INITIAL_DASHBOARD_PAGE_VIEW_STATE,
     };
   }
 
   componentDidMount(): void {
+    // Initialize tab from location or localStorage
+    const initial =
+      readTabFromLocation() ||
+      (() => {
+        const saved = (localStorage.getItem(DASHBOARD_TAB_STORAGE_KEY) ?? "").trim();
+        return isActiveTab(saved) ? saved : null;
+      })();
+
+    if (initial && initial !== this.state.viewState.activeTab) {
+      this.setState((prevState) => ({
+        viewState: { ...prevState.viewState, activeTab: initial },
+      }));
+    } else {
+      writeTabToLocation(this.state.viewState.activeTab);
+    }
+
+    // Critical: Apply SEO immediately
+    this.applySeo();
+
+    // Critical: Load essential data immediately
+    this.loadAlerts();
+
+    // Load dashboard data
     this.loadDashboard();
+
+    // Non-critical: Load in background with requestIdleCallback or setTimeout
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      window.requestIdleCallback(() => {
+        this.loadPerformanceMetrics();
+        this.loadSeoAnalysis();
+        this.loadTrends();
+        this.loadBenchmarks();
+      }, { timeout: 2000 });
+    } else {
+      // Fallback for browsers without requestIdleCallback
+      setTimeout(() => {
+        this.loadPerformanceMetrics();
+        this.loadSeoAnalysis();
+        this.loadTrends();
+        this.loadBenchmarks();
+      }, 100);
+    }
+
+    // Analytics: Load after initial render
+    setTimeout(() => {
+      this.initGoogleAnalytics();
+      this.initABTests();
+    }, 500);
+
+    // Event listeners with proper cleanup
+    window.addEventListener("hashchange", this.handleHashChange);
+    window.addEventListener("keydown", this.handleKeyDown);
 
     // Keep visitor + collections metrics fresh without reloading the whole dashboard UI.
     this.metricsIntervalId = window.setInterval(() => {
@@ -83,7 +168,35 @@ class DashboardController extends Component<{}, State> {
     }, 60_000);
   }
 
+  componentDidUpdate(prevProps: {}, prevState: State): void {
+    if (prevState.viewState.activeTab !== this.state.viewState.activeTab) {
+      this.applySeo();
+      writeTabToLocation(this.state.viewState.activeTab);
+      try {
+        localStorage.setItem(DASHBOARD_TAB_STORAGE_KEY, this.state.viewState.activeTab);
+      } catch {
+        // ignore
+      }
+    }
+  }
+
   componentWillUnmount(): void {
+    // Cleanup event listeners
+    window.removeEventListener("hashchange", this.handleHashChange);
+    window.removeEventListener("keydown", this.handleKeyDown);
+
+    // Cleanup performance observer
+    if (this.performanceCleanup) {
+      this.performanceCleanup();
+      this.performanceCleanup = null;
+    }
+
+    // Cleanup any pending timeouts
+    if (this.copyTimeoutId) {
+      clearTimeout(this.copyTimeoutId);
+      this.copyTimeoutId = null;
+    }
+
     this.abortController?.abort();
     this.metricsAbortController?.abort();
     if (this.metricsIntervalId) window.clearInterval(this.metricsIntervalId);
@@ -962,7 +1075,621 @@ class DashboardController extends Component<{}, State> {
     window.location.href = "/login";
   };
 
+  /**
+   * Apply SEO
+   */
+  private applySeo = (): void => {
+    const titleByTab: Record<ActiveTab, string> = {
+      overview: "Ringkasan Dashboard",
+      orders: "Record Order",
+      customers: "Customer Management",
+      upload: "Upload Bouquet",
+      edit: "Edit Bouquet",
+      hero: "Hero Slider",
+      analytics: "Analytics Dashboard",
+    };
+
+    setSeo({
+      title: `${titleByTab[this.state.viewState.activeTab]} | Giftforyou.idn Admin`,
+      description: "Dashboard admin Giftforyou.idn - Kelola bouquet, pesanan, koleksi, dan analitik performa website florist terbaik di Cirebon, Jawa Barat.",
+      path: "/dashboard",
+      noIndex: true,
+    });
+  };
+
+  /**
+   * Set active tab
+   */
+  handleSetActiveTab = (tab: ActiveTab): void => {
+    this.setState((prevState) => ({
+      viewState: { ...prevState.viewState, activeTab: tab },
+    }));
+  };
+
+  /**
+   * Copy current link
+   */
+  handleCopyCurrentLink = async (): Promise<void> => {
+    const url = window.location.href;
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const el = document.createElement("textarea");
+        el.value = url;
+        el.setAttribute("readonly", "true");
+        el.style.position = "fixed";
+        el.style.left = "-9999px";
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand("copy");
+        document.body.removeChild(el);
+      }
+    } catch {
+      // Copy failed
+    }
+  };
+
+  /**
+   * Reload dashboard
+   */
+  handleReloadDashboard = (): void => {
+    window.location.reload();
+  };
+
+  /**
+   * Copy overview
+   */
+  handleCopyOverview = async (text: string): Promise<void> => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const el = document.createElement("textarea");
+        el.value = text;
+        el.setAttribute("readonly", "true");
+        el.style.position = "fixed";
+        el.style.left = "-9999px";
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand("copy");
+        document.body.removeChild(el);
+      }
+
+      this.setState((prevState) => ({
+        viewState: { ...prevState.viewState, overviewCopyStatus: "copied" },
+      }));
+
+      if (this.copyTimeoutId) {
+        clearTimeout(this.copyTimeoutId);
+      }
+      this.copyTimeoutId = setTimeout(() => {
+        this.setState((prevState) => ({
+          viewState: { ...prevState.viewState, overviewCopyStatus: "" },
+        }));
+      }, 1800);
+    } catch {
+      this.setState((prevState) => ({
+        viewState: { ...prevState.viewState, overviewCopyStatus: "failed" },
+      }));
+
+      if (this.copyTimeoutId) {
+        clearTimeout(this.copyTimeoutId);
+      }
+      this.copyTimeoutId = setTimeout(() => {
+        this.setState((prevState) => ({
+          viewState: { ...prevState.viewState, overviewCopyStatus: "" },
+        }));
+      }, 2200);
+    }
+  };
+
+  /**
+   * Handle hash change
+   */
+  private handleHashChange = (): void => {
+    const next = readTabFromLocation();
+    if (next && next !== this.state.viewState.activeTab) {
+      this.handleSetActiveTab(next);
+    }
+  };
+
+  /**
+   * Handle key down
+   */
+  private handleKeyDown = (e: KeyboardEvent): void => {
+    const target = e.target as HTMLElement | null;
+    const tag = (target?.tagName ?? "").toLowerCase();
+    const isTypingTarget =
+      tag === "input" ||
+      tag === "textarea" ||
+      tag === "select" ||
+      (target?.isContentEditable ?? false);
+    if (isTypingTarget) return;
+
+    // Fix: Check Alt key correctly (Alt+number shortcuts)
+    if (!e.altKey || e.metaKey || e.ctrlKey) return;
+
+    const key = e.key;
+    const map: Record<string, ActiveTab> = {
+      "1": "overview",
+      "2": "orders",
+      "3": "customers",
+      "4": "upload",
+      "5": "edit",
+      "6": "hero",
+      "7": "analytics",
+    };
+
+    const next = map[key];
+    if (!next || next === this.state.viewState.activeTab) return;
+
+    e.preventDefault();
+    this.handleSetActiveTab(next);
+  };
+
+  /**
+   * Load performance metrics
+   */
+  private loadPerformanceMetrics = (): void => {
+    // Get initial metrics
+    const metrics = getPerformanceMetrics();
+    const score = getPerformanceScore(metrics);
+
+    // Save to history
+    savePerformanceHistory(metrics, score.score, score.grade);
+
+    // Check alerts
+    checkPerformanceAlerts(metrics, score.score);
+
+    // Send to Google Analytics
+    const gaConfig = getGAConfig();
+    if (gaConfig.enabled) {
+      sendPerformanceToGA(
+        {
+          lcp: metrics.lcp || 0,
+          fid: metrics.fid || 0,
+          cls: metrics.cls || 0,
+          fcp: metrics.fcp || 0,
+          ttfb: metrics.ttfb || 0,
+        },
+        score.score
+      );
+    }
+
+    this.setState((prevState) => ({
+      viewState: {
+        ...prevState.viewState,
+        performance: {
+          metrics,
+          score,
+          loading: false,
+        },
+      },
+    }));
+
+    // Observe Core Web Vitals
+    this.performanceCleanup = observeCoreWebVitals((name, value) => {
+      this.setState((prevState) => {
+        const newMetrics = { ...prevState.viewState.performance.metrics, [name]: value };
+        const newScore = getPerformanceScore(newMetrics);
+
+        // Save to history
+        savePerformanceHistory(newMetrics, newScore.score, newScore.grade);
+
+        // Check alerts
+        checkPerformanceAlerts(newMetrics, newScore.score);
+
+        return {
+          viewState: {
+            ...prevState.viewState,
+            performance: {
+              metrics: newMetrics,
+              score: newScore,
+              loading: false,
+            },
+          },
+        };
+      });
+    });
+  };
+
+  /**
+   * Load SEO analysis
+   */
+  private loadSeoAnalysis = (): void => {
+    // Use requestAnimationFrame for better performance
+    const analyze = () => {
+      try {
+        const analysis = analyzeSeo();
+
+        // Batch operations
+        saveSeoHistory(analysis);
+        checkSeoAlerts(analysis);
+
+        // Send to Google Analytics (non-blocking)
+        const gaConfig = getGAConfig();
+        if (gaConfig.enabled) {
+          // Use setTimeout to avoid blocking
+          setTimeout(() => {
+            sendSEOToGA(analysis.score, analysis.checks);
+          }, 0);
+        }
+
+        this.setState((prevState) => ({
+          viewState: {
+            ...prevState.viewState,
+            seo: {
+              analysis,
+              loading: false,
+            },
+          },
+        }));
+      } catch (error) {
+        // Only log in development
+        if (process.env.NODE_ENV === "development") {
+          console.error("SEO analysis error:", error);
+        }
+        this.setState((prevState) => ({
+          viewState: {
+            ...prevState.viewState,
+            seo: {
+              analysis: { score: 0, grade: "poor", checks: [], recommendations: [] },
+              loading: false,
+            },
+          },
+        }));
+      }
+    };
+
+    // Use requestAnimationFrame for DOM readiness
+    if (typeof window !== "undefined" && "requestAnimationFrame" in window) {
+      requestAnimationFrame(analyze);
+    } else {
+      analyze();
+    }
+  };
+
+  /**
+   * Load alerts
+   */
+  private loadAlerts = (): void => {
+    // Check trend alerts
+    checkTrendAlerts(7);
+
+    // Get unacknowledged alerts
+    const alerts = getUnacknowledgedAlerts();
+    this.setState((prevState) => ({
+      viewState: {
+        ...prevState.viewState,
+        alerts: {
+          alerts,
+          showAlerts: alerts.length > 0,
+        },
+      },
+    }));
+  };
+
+  /**
+   * Load trends
+   */
+  private loadTrends = (): void => {
+    const history = getHistoricalData();
+
+    // Analyze performance trends
+    const perfTrends = analyzePerformanceTrends(history.performance, 30);
+    if (perfTrends) {
+      this.setState((prevState) => ({
+        viewState: {
+          ...prevState.viewState,
+          performance: {
+            ...prevState.viewState.performance,
+            trends: perfTrends,
+          },
+        },
+      }));
+    }
+
+    // Analyze SEO trends
+    const seoTrends = analyzeSeoTrends(history.seo, 30);
+    if (seoTrends) {
+      this.setState((prevState) => ({
+        viewState: {
+          ...prevState.viewState,
+          seo: {
+            ...prevState.viewState.seo,
+            trends: seoTrends,
+          },
+        },
+      }));
+    }
+  };
+
+  /**
+   * Load benchmarks
+   */
+  private loadBenchmarks = (): void => {
+    const perfBenchmarks = getBenchmarks("performance");
+    const seoBenchmarks = getBenchmarks("seo");
+
+    this.setState((prevState) => ({
+      viewState: {
+        ...prevState.viewState,
+        performance: {
+          ...prevState.viewState.performance,
+          benchmarks: perfBenchmarks,
+        },
+        seo: {
+          ...prevState.viewState.seo,
+          benchmarks: seoBenchmarks,
+        },
+      },
+    }));
+  };
+
+  /**
+   * Initialize Google Analytics
+   */
+  private initGoogleAnalytics = (): void => {
+    const config = getGAConfig();
+    if (config.enabled && config.measurementId) {
+      initGoogleAnalytics(config.measurementId);
+    }
+  };
+
+  /**
+   * Initialize AB tests
+   */
+  private initABTests = (): void => {
+    const activeTests = getActiveABTests();
+    activeTests.forEach((test) => {
+      const variant = assignToVariant(test.id);
+      trackABTestVisit(test.id, variant);
+    });
+  };
+
+  /**
+   * Handle export
+   */
+  handleExport = (format: "csv" | "json" | "pdf"): void => {
+    exportAnalytics({
+      format,
+      includePerformance: true,
+      includeSeo: true,
+    });
+  };
+
+  /**
+   * Toggle show state
+   */
+  handleToggleShow = (key: keyof Pick<DashboardPageViewState, "showTrends" | "showBenchmarks" | "showNotifications" | "showInventory" | "showAnalytics" | "showQuickActions" | "showSearch" | "showActivityLog" | "showSystemStatus">): void => {
+    this.setState((prevState) => ({
+      viewState: {
+        ...prevState.viewState,
+        [key]: !prevState.viewState[key],
+      },
+    }));
+  };
+
+  /**
+   * Build overview text
+   */
+  private buildOverviewText = (): string => {
+    const bouquets = this.state.bouquets ?? [];
+    const visitorsCount = this.state.visitorsCount ?? 0;
+    const collectionsCount = this.state.collectionsCount ?? 0;
+    const salesMetrics = this.state.salesMetrics;
+
+    const insights = this.state.insights;
+    const insightsError = (this.state.insightsError ?? "").trim();
+    const insightsDays = Number(insights?.days ?? 30);
+    const pageviews30d = Number(insights?.pageviews30d ?? 0);
+    const topSearchTerms = (insights?.topSearchTerms ?? []).slice(0, 10);
+    const topBouquetsDays = (insights?.topBouquetsDays ?? []).slice(0, 5);
+    const visitHours = (insights?.visitHours ?? []).slice(0, 8);
+    const uniqueVisitors30d = Number(insights?.uniqueVisitors30d ?? 0);
+    const uniqueVisitorsAvailable = Boolean(insights?.uniqueVisitorsAvailable);
+
+    const bouquetNameById = new Map<string, string>();
+    for (const b of bouquets) {
+      const id = (b._id ?? "").toString();
+      const name = (b.name ?? "").toString().trim();
+      if (id && name) bouquetNameById.set(id, name);
+    }
+
+    const formatHour = (h: number) => `${String(h).padStart(2, "0")}.00`;
+    const labelBouquet = (id: string) =>
+      bouquetNameById.get(id) ?? (id ? `ID ${id.slice(0, 10)}` : "—");
+
+    const readyCount = bouquets.filter((b) => b.status === "ready").length;
+    const preorderCount = bouquets.filter((b) => b.status === "preorder").length;
+    const featuredCount = bouquets.filter((b) => Boolean(b.isFeatured)).length;
+    const newEditionCount = bouquets.filter((b) => Boolean(b.isNewEdition)).length;
+
+    const missingImageCount = bouquets.filter((b) => !(b.image ?? "").trim()).length;
+    const missingCollectionCount = bouquets.filter(
+      (b) => !(b.collectionName ?? "").trim()
+    ).length;
+    const zeroQtyReadyCount = bouquets.filter(
+      (b) => b.status === "ready" && (typeof b.quantity === "number" ? b.quantity : 0) === 0
+    ).length;
+
+    const totalReadyUnits = bouquets
+      .filter((b) => b.status === "ready")
+      .reduce((sum, b) => sum + (typeof b.quantity === "number" ? b.quantity : 0), 0);
+
+    const priced = bouquets
+      .map((b) => (typeof b.price === "number" ? b.price : Number(b.price)))
+      .filter((n) => Number.isFinite(n) && n > 0);
+    const priceMin = priced.length ? Math.min(...priced) : 0;
+    const priceMax = priced.length ? Math.max(...priced) : 0;
+    const priceAvg = priced.length
+      ? Math.round(priced.reduce((a, b) => a + b, 0) / priced.length)
+      : 0;
+
+    const collectionCounts = new Map<string, number>();
+    for (const b of bouquets) {
+      const key = (b.collectionName ?? "").trim() || "Tanpa koleksi";
+      collectionCounts.set(key, (collectionCounts.get(key) ?? 0) + 1);
+    }
+    const topCollections = Array.from(collectionCounts.entries())
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .slice(0, 6);
+
+    const overviewLines: string[] = [
+      `GIFT foryou.idn — Ringkasan Dashboard (${new Date().toLocaleString("id-ID")})`,
+      ``,
+      `Kunjungan (${insightsDays} hari): ${insightsError ? visitorsCount : pageviews30d || visitorsCount}`,
+      `Koleksi: ${collectionsCount}`,
+      `Total bouquet: ${bouquets.length}`,
+      `Siap: ${readyCount} (unit siap: ${totalReadyUnits})`,
+      `Preorder: ${preorderCount}`,
+      `Featured: ${featuredCount}`,
+      `New edition: ${newEditionCount}`,
+      ``,
+      `Kualitas data:`,
+      `- Tanpa gambar: ${missingImageCount}`,
+      `- Tanpa koleksi: ${missingCollectionCount}`,
+      `- Ready qty 0: ${zeroQtyReadyCount}`,
+      ``,
+      `Harga (bouquet dengan harga valid):`,
+      `- Min: ${priced.length ? formatIDR(priceMin) : "—"}`,
+      `- Rata-rata: ${priced.length ? formatIDR(priceAvg) : "—"}`,
+      `- Max: ${priced.length ? formatIDR(priceMax) : "—"}`,
+      ``,
+      `Top koleksi:`,
+      ...topCollections.map(([name, count]) => `- ${name}: ${count}`),
+    ];
+
+    if (insights && !insightsError) {
+      overviewLines.push("", "Analytics (estimasi)");
+
+      if (uniqueVisitorsAvailable) {
+        overviewLines.push(`Pengunjung unik (30 hari): ${uniqueVisitors30d}`);
+      }
+
+      if (topSearchTerms.length) {
+        overviewLines.push("Pencarian teratas:");
+        overviewLines.push(
+          ...topSearchTerms.slice(0, 5).map((t) => `- ${t.term}: ${t.count}`)
+        );
+      }
+
+      if (topBouquetsDays.length) {
+        overviewLines.push("Top 5 bouquet (30 hari):");
+        overviewLines.push(
+          ...topBouquetsDays.map((b) => `- ${labelBouquet(b.bouquetId)}: ${b.count}`)
+        );
+      }
+
+      if (visitHours.length) {
+        overviewLines.push("Jam kunjungan terpadat (WIB):");
+        overviewLines.push(
+          ...visitHours.slice(0, 3).map((h) => `- ${formatHour(h.hour)}: ${h.count}`)
+        );
+      }
+    }
+
+    return overviewLines.join("\n");
+  };
+
+  /**
+   * Calculate metrics for overview
+   */
+  private calculateOverviewMetrics = () => {
+    const bouquets = this.state.bouquets ?? [];
+    const visitorsCount = this.state.visitorsCount ?? 0;
+    const collectionsCount = this.state.collectionsCount ?? 0;
+    const insights = this.state.insights;
+    const insightsError = (this.state.insightsError ?? "").trim();
+    const insightsDays = Number(insights?.days ?? 30);
+    const pageviews30d = Number(insights?.pageviews30d ?? 0);
+    const topSearchTerms = (insights?.topSearchTerms ?? []).slice(0, 10);
+    const topBouquetsDays = (insights?.topBouquetsDays ?? []).slice(0, 5);
+    const visitHours = (insights?.visitHours ?? []).slice(0, 8);
+    const uniqueVisitors30d = Number(insights?.uniqueVisitors30d ?? 0);
+    const uniqueVisitorsAvailable = Boolean(insights?.uniqueVisitorsAvailable);
+
+    const bouquetNameById = new Map<string, string>();
+    for (const b of bouquets) {
+      const id = (b._id ?? "").toString();
+      const name = (b.name ?? "").toString().trim();
+      if (id && name) bouquetNameById.set(id, name);
+    }
+
+    const formatHour = (h: number) => `${String(h).padStart(2, "0")}.00`;
+    const labelBouquet = (id: string) =>
+      bouquetNameById.get(id) ?? (id ? `ID ${id.slice(0, 10)}` : "—");
+
+    const readyCount = bouquets.filter((b) => b.status === "ready").length;
+    const preorderCount = bouquets.filter((b) => b.status === "preorder").length;
+    const featuredCount = bouquets.filter((b) => Boolean(b.isFeatured)).length;
+    const newEditionCount = bouquets.filter((b) => Boolean(b.isNewEdition)).length;
+
+    const missingImageCount = bouquets.filter((b) => !(b.image ?? "").trim()).length;
+    const missingCollectionCount = bouquets.filter(
+      (b) => !(b.collectionName ?? "").trim()
+    ).length;
+    const zeroQtyReadyCount = bouquets.filter(
+      (b) => b.status === "ready" && (typeof b.quantity === "number" ? b.quantity : 0) === 0
+    ).length;
+
+    const totalReadyUnits = bouquets
+      .filter((b) => b.status === "ready")
+      .reduce((sum, b) => sum + (typeof b.quantity === "number" ? b.quantity : 0), 0);
+
+    const priced = bouquets
+      .map((b) => (typeof b.price === "number" ? b.price : Number(b.price)))
+      .filter((n) => Number.isFinite(n) && n > 0);
+    const priceMin = priced.length ? Math.min(...priced) : 0;
+    const priceMax = priced.length ? Math.max(...priced) : 0;
+    const priceAvg = priced.length
+      ? Math.round(priced.reduce((a, b) => a + b, 0) / priced.length)
+      : 0;
+
+    const collectionCounts = new Map<string, number>();
+    for (const b of bouquets) {
+      const key = (b.collectionName ?? "").trim() || "Tanpa koleksi";
+      collectionCounts.set(key, (collectionCounts.get(key) ?? 0) + 1);
+    }
+    const topCollections = Array.from(collectionCounts.entries())
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .slice(0, 6);
+
+    return {
+      readyCount,
+      preorderCount,
+      featuredCount,
+      newEditionCount,
+      missingImageCount,
+      missingCollectionCount,
+      zeroQtyReadyCount,
+      totalReadyUnits,
+      priceMin,
+      priceMax,
+      priceAvg,
+      topCollections,
+      bouquetNameById,
+      formatHour,
+      labelBouquet,
+      insightsDays,
+      pageviews30d,
+      topSearchTerms,
+      topBouquetsDays,
+      visitHours,
+      uniqueVisitors30d,
+      uniqueVisitorsAvailable,
+      insightsError,
+      visitorsCount,
+      collectionsCount,
+    };
+  };
+
   render(): React.ReactNode {
+    const overviewMetrics = this.calculateOverviewMetrics();
+    const overviewText = this.buildOverviewText();
+
     return (
       <DashboardView
         bouquets={this.state.bouquets}
@@ -975,6 +1702,9 @@ class DashboardController extends Component<{}, State> {
         salesError={this.state.salesError}
         loading={this.state.loading}
         errorMessage={this.state.errorMessage}
+        viewState={this.state.viewState}
+        overviewMetrics={overviewMetrics}
+        overviewText={overviewText}
         onUpload={this.onUpload}
         onUpdate={this.onUpdate}
         onDuplicate={this.onDuplicate}
@@ -984,6 +1714,12 @@ class DashboardController extends Component<{}, State> {
         onUpdateCollectionName={this.onUpdateCollectionName}
         onMoveBouquet={this.onMoveBouquet}
         onDeleteCollection={this.onDeleteCollection}
+        onSetActiveTab={this.handleSetActiveTab}
+        onCopyCurrentLink={this.handleCopyCurrentLink}
+        onReloadDashboard={this.handleReloadDashboard}
+        onCopyOverview={this.handleCopyOverview}
+        onExport={this.handleExport}
+        onToggleShow={this.handleToggleShow}
       />
     );
   }

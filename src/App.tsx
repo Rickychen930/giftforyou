@@ -15,21 +15,21 @@ import Footer from "./view/footer";
 import HomePageController from "./controllers/home-page-controller";
 import BouquetCatalogRoute from "./view/bouquet-catalog-route";
 import DashboardController from "./controllers/dashboard-page-controller";
-import BouquetDetailController from "./controllers/bouquet-detail-controller";
-import FAQPage from "./view/faq-page";
-import ContactPage from "./view/contact-page";
-import OrderConfirmationPage from "./view/order-confirmation-page";
-import OrderHistoryPage from "./view/order-history-page";
-import FavoritesPage from "./view/favorites-page";
-import CartPage from "./view/cart-page";
-import CheckoutPage from "./view/checkout-page";
-import CustomerRegisterPage from "./view/customer-register-page";
-import CustomerLoginPage from "./view/customer-login-page";
-import CustomerDashboardPage from "./view/customer-dashboard-page";
-import CustomerProfilePage from "./view/customer-profile-page";
-import CustomerAddressesPage from "./view/customer-addresses-page";
-import CustomerChangePasswordPage from "./view/customer-change-password-page";
-import CustomerNotificationsPage from "./view/customer-notifications-page";
+import BouquetDetailPageController from "./controllers/bouquet-detail-page-controller";
+import FAQPageController from "./controllers/faq-page-controller";
+import ContactPageController from "./controllers/contact-page-controller";
+import OrderConfirmationPageController from "./controllers/order-confirmation-page-controller";
+import OrderHistoryPageController from "./controllers/order-history-page-controller";
+import FavoritesPageController from "./controllers/favorites-page-controller";
+import CartPageController from "./controllers/cart-page-controller";
+import CheckoutPageController from "./controllers/checkout-page-controller";
+import CustomerRegisterPageController from "./controllers/customer-register-page-controller";
+import CustomerLoginPageController from "./controllers/customer-login-page-controller";
+import CustomerDashboardPageController from "./controllers/customer-dashboard-page-controller";
+import CustomerProfilePageController from "./controllers/customer-profile-page-controller";
+import CustomerAddressesPageController from "./controllers/customer-addresses-page-controller";
+import CustomerChangePasswordPageController from "./controllers/customer-change-password-page-controller";
+import CustomerNotificationsPageController from "./controllers/customer-notifications-page-controller";
 import ErrorBoundary from "./components/error-boundary";
 import ScrollToTop from "./components/scroll-to-top";
 import LuxuryToastContainer from "./components/LuxuryToastContainer";
@@ -159,26 +159,26 @@ const AppLayout: React.FC = () => {
         <Routes location={location}>
           <Route path="/" element={<HomePageController />} />
           <Route path="/collection" element={<BouquetCatalogRoute />} />
-          <Route path="/bouquet/:id" element={<BouquetDetailController />} />
-          <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
-                <Route path="/order-history" element={<OrderHistoryPage />} />
-                <Route path="/favorites" element={<FavoritesPage />} />
-                <Route path="/cart" element={<CartPage />} />
-                <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/bouquet/:id" element={<BouquetDetailPageController />} />
+          <Route path="/order-confirmation" element={<OrderConfirmationPageController />} />
+                <Route path="/order-history" element={<OrderHistoryPageController />} />
+                <Route path="/favorites" element={<FavoritesPageController />} />
+                <Route path="/cart" element={<CartPageController />} />
+                <Route path="/checkout" element={<CheckoutPageController />} />
                 <Route path="/search" element={<SearchRedirect />} />
-          <Route path="/faq" element={<FAQPage />} />
-          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/faq" element={<FAQPageController />} />
+          <Route path="/contact" element={<ContactPageController />} />
           
           {/* Customer Authentication */}
-          <Route path="/customer/register" element={<CustomerRegisterPage />} />
-          <Route path="/customer/login" element={<CustomerLoginPage />} />
+          <Route path="/customer/register" element={<CustomerRegisterPageController />} />
+          <Route path="/customer/login" element={<CustomerLoginPageController />} />
           
           {/* Customer Dashboard & Profile */}
           <Route
             path="/customer/dashboard"
             element={
               <CustomerProtectedRoute>
-                <CustomerDashboardPage />
+                <CustomerDashboardPageController />
               </CustomerProtectedRoute>
             }
           />
@@ -186,7 +186,7 @@ const AppLayout: React.FC = () => {
             path="/customer/profile"
             element={
               <CustomerProtectedRoute>
-                <CustomerProfilePage />
+                <CustomerProfilePageController />
               </CustomerProtectedRoute>
             }
           />
@@ -194,7 +194,7 @@ const AppLayout: React.FC = () => {
             path="/customer/addresses"
             element={
               <CustomerProtectedRoute>
-                <CustomerAddressesPage />
+                <CustomerAddressesPageController />
               </CustomerProtectedRoute>
             }
           />
@@ -202,7 +202,7 @@ const AppLayout: React.FC = () => {
             path="/customer/change-password"
             element={
               <CustomerProtectedRoute>
-                <CustomerChangePasswordPage />
+                <CustomerChangePasswordPageController />
               </CustomerProtectedRoute>
             }
           />
@@ -210,7 +210,7 @@ const AppLayout: React.FC = () => {
             path="/customer/notifications"
             element={
               <CustomerProtectedRoute>
-                <CustomerNotificationsPage />
+                <CustomerNotificationsPageController />
               </CustomerProtectedRoute>
             }
           />

@@ -1,18 +1,14 @@
-import React, { Component } from "react";
+/**
+ * Dashboard Page View
+ * Pure presentation component - no business logic
+ */
+
+import React from "react";
 import type { Bouquet } from "../models/domain/bouquet";
 import "../styles/DashboardPage.css";
-import { setSeo } from "../utils/seo";
 import { formatIDR } from "../utils/money";
-import { getPerformanceMetrics, getPerformanceScore, formatBytes, formatMs, observeCoreWebVitals } from "../utils/performance-monitor";
-import { analyzeSeo } from "../utils/seo-analyzer";
-import { savePerformanceHistory, saveSeoHistory } from "../utils/analytics-storage";
-import { checkPerformanceAlerts, checkSeoAlerts, checkTrendAlerts, getUnacknowledgedAlerts } from "../utils/analytics-alerts";
-import { analyzePerformanceTrends, analyzeSeoTrends } from "../utils/trends-analyzer";
-import { getHistoricalData } from "../utils/analytics-storage";
-import { getBenchmarks } from "../utils/benchmarks";
-import { exportAnalytics } from "../utils/analytics-export";
-import { getGAConfig, initGoogleAnalytics, sendPerformanceToGA, sendSEOToGA } from "../utils/google-analytics";
-import { getActiveABTests, assignToVariant, trackABTestVisit } from "../utils/ab-testing";
+import { formatMs, formatBytes } from "../utils/performance-monitor";
+import type { DashboardPageViewState, ActiveTab } from "../models/dashboard-page-model";
 
 import BouquetUploader from "../components/sections/dashboard-uploader-section";
 import BouquetEditorSection from "../components/sections/Bouquet-editor-section";
@@ -27,7 +23,35 @@ import DashboardSearch from "../components/DashboardSearch";
 import ActivityLog from "../components/ActivityLog";
 import SystemStatus from "../components/SystemStatus";
 
-interface Props {
+interface OverviewMetrics {
+  readyCount: number;
+  preorderCount: number;
+  featuredCount: number;
+  newEditionCount: number;
+  missingImageCount: number;
+  missingCollectionCount: number;
+  zeroQtyReadyCount: number;
+  totalReadyUnits: number;
+  priceMin: number;
+  priceMax: number;
+  priceAvg: number;
+  topCollections: Array<[string, number]>;
+  bouquetNameById: Map<string, string>;
+  formatHour: (h: number) => string;
+  labelBouquet: (id: string) => string;
+  insightsDays: number;
+  pageviews30d: number;
+  topSearchTerms: Array<{ term: string; count: number }>;
+  topBouquetsDays: Array<{ bouquetId: string; count: number }>;
+  visitHours: Array<{ hour: number; count: number }>;
+  uniqueVisitors30d: number;
+  uniqueVisitorsAvailable: boolean;
+  insightsError: string;
+  visitorsCount: number;
+  collectionsCount: number;
+}
+
+interface DashboardPageViewProps {
   bouquets: Bouquet[];
   collectionsCount: number;
   visitorsCount: number;
@@ -65,6 +89,9 @@ interface Props {
 
   loading: boolean;
   errorMessage?: string;
+  viewState: DashboardPageViewState;
+  overviewMetrics: OverviewMetrics;
+  overviewText: string;
 
   onUpdate: (formData: FormData) => Promise<boolean>;
   onUpload: (formData: FormData) => Promise<boolean>;
@@ -75,489 +102,53 @@ interface Props {
   onUpdateCollectionName?: (collectionId: string, newName: string) => Promise<boolean>;
   onMoveBouquet?: (bouquetId: string, targetCollectionId: string) => Promise<boolean>;
   onDeleteCollection?: (collectionId: string) => Promise<boolean>;
+  onSetActiveTab: (tab: ActiveTab) => void;
+  onCopyCurrentLink: () => Promise<void>;
+  onReloadDashboard: () => void;
+  onCopyOverview: (text: string) => Promise<void>;
+  onExport: (format: "csv" | "json" | "pdf") => void;
+  onToggleShow: (key: keyof Pick<DashboardPageViewState, "showTrends" | "showBenchmarks" | "showNotifications" | "showInventory" | "showAnalytics" | "showQuickActions" | "showSearch" | "showActivityLog" | "showSystemStatus">) => void;
 }
 
-type ActiveTab = "overview" | "orders" | "customers" | "upload" | "edit" | "hero" | "analytics";
+/**
+ * Dashboard Page View Component
+ * Pure presentation - receives all data and handlers via props
+ */
+const DashboardPageView: React.FC<DashboardPageViewProps> = ({
+  bouquets,
+  collectionsCount,
+  visitorsCount,
+  collections,
+  insights,
+  insightsError,
+  salesMetrics,
+  salesError,
+  loading,
+  errorMessage,
+  viewState,
+  overviewMetrics,
+  overviewText,
+  onUpdate,
+  onUpload,
+  onDuplicate,
+  onDelete,
+  onHeroSaved,
+  onLogout,
+  onUpdateCollectionName,
+  onMoveBouquet,
+  onDeleteCollection,
+  onSetActiveTab,
+  onCopyCurrentLink,
+  onReloadDashboard,
+  onCopyOverview,
+  onExport,
+  onToggleShow,
+}) => {
 
-const DASHBOARD_TAB_STORAGE_KEY = "dashboard.activeTab";
-
-const isActiveTab = (v: string): v is ActiveTab =>
-  v === "overview" ||
-  v === "orders" ||
-  v === "customers" ||
-  v === "upload" ||
-  v === "edit" ||
-  v === "hero" ||
-  v === "analytics";
-
-interface PerformanceState {
-  metrics: ReturnType<typeof getPerformanceMetrics>;
-  score: ReturnType<typeof getPerformanceScore>;
-  loading: boolean;
-  trends?: ReturnType<typeof analyzePerformanceTrends>;
-  benchmarks?: ReturnType<typeof getBenchmarks>;
-}
-
-interface SeoState {
-  analysis: ReturnType<typeof analyzeSeo>;
-  loading: boolean;
-  trends?: ReturnType<typeof analyzeSeoTrends>;
-  benchmarks?: ReturnType<typeof getBenchmarks>;
-}
-
-interface AlertsState {
-  alerts: ReturnType<typeof getUnacknowledgedAlerts>;
-  showAlerts: boolean;
-}
-
-const readTabFromLocation = (): ActiveTab | null => {
-  try {
-    const params = new URLSearchParams(window.location.search);
-    const qp = (params.get("tab") ?? "").trim();
-    if (qp && isActiveTab(qp)) return qp;
-
-    const hash = (window.location.hash ?? "").replace(/^#/, "").trim();
-    if (hash && isActiveTab(hash)) return hash;
-
-    return null;
-  } catch {
-    return null;
-  }
-};
-
-const writeTabToLocation = (tab: ActiveTab) => {
-  try {
-    const nextUrl = `${window.location.pathname}${window.location.search}#${tab}`;
-    window.history.replaceState(null, "", nextUrl);
-  } catch {
-    // ignore
-  }
-};
-
-interface State {
-  activeTab: ActiveTab;
-  overviewCopyStatus: "" | "copied" | "failed";
-  performance: PerformanceState;
-  seo: SeoState;
-  alerts: AlertsState;
-  showTrends: boolean;
-  showBenchmarks: boolean;
-  showNotifications: boolean;
-  showInventory: boolean;
-  showAnalytics: boolean;
-  showQuickActions: boolean;
-  showSearch: boolean;
-  showActivityLog: boolean;
-  showSystemStatus: boolean;
-}
-
-class DashboardView extends Component<Props, State> {
-  private performanceCleanup: (() => void) | null = null;
-
-  state: State = {
-    activeTab: "overview",
-    overviewCopyStatus: "",
-    performance: {
-      metrics: {},
-      score: { score: 0, grade: "poor", details: {} },
-      loading: true,
-    },
-    seo: {
-      analysis: { score: 0, grade: "poor", checks: [], recommendations: [] },
-      loading: true,
-    },
-    alerts: {
-      alerts: [],
-      showAlerts: false,
-    },
-    showTrends: false,
-    showNotifications: false,
-    showBenchmarks: false,
-    showInventory: false,
-    showAnalytics: false,
-    showQuickActions: false,
-    showSearch: false,
-    showActivityLog: false,
-    showSystemStatus: false,
-  };
-
-  componentDidMount(): void {
-    const initial =
-      readTabFromLocation() ||
-      (() => {
-        const saved = (localStorage.getItem(DASHBOARD_TAB_STORAGE_KEY) ?? "").trim();
-        return isActiveTab(saved) ? saved : null;
-      })();
-
-    if (initial && initial !== this.state.activeTab) {
-      this.setState({ activeTab: initial });
-    } else {
-      writeTabToLocation(this.state.activeTab);
-    }
-
-    // Critical: Apply SEO immediately
-    this.applySeo();
-
-    // Critical: Load essential data immediately
-    this.loadAlerts();
-
-    // Non-critical: Load in background with requestIdleCallback or setTimeout
-    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      window.requestIdleCallback(() => {
-        this.loadPerformanceMetrics();
-        this.loadSeoAnalysis();
-        this.loadTrends();
-        this.loadBenchmarks();
-      }, { timeout: 2000 });
-    } else {
-      // Fallback for browsers without requestIdleCallback
-      setTimeout(() => {
-        this.loadPerformanceMetrics();
-        this.loadSeoAnalysis();
-        this.loadTrends();
-        this.loadBenchmarks();
-      }, 100);
-    }
-
-    // Analytics: Load after initial render
-    setTimeout(() => {
-      this.initGoogleAnalytics();
-      this.initABTests();
-    }, 500);
-
-    // Event listeners with proper cleanup
-    window.addEventListener("hashchange", this.handleHashChange);
-    window.addEventListener("keydown", this.handleKeyDown);
-  }
-
-  componentWillUnmount(): void {
-    // Cleanup event listeners
-    window.removeEventListener("hashchange", this.handleHashChange);
-    window.removeEventListener("keydown", this.handleKeyDown);
-    
-    // Cleanup performance observer
-    if (this.performanceCleanup) {
-      this.performanceCleanup();
-      this.performanceCleanup = null;
-    }
-    
-    // Cleanup any pending timeouts
-    if ((this as any)._copyTimeoutId) {
-      clearTimeout((this as any)._copyTimeoutId);
-      (this as any)._copyTimeoutId = null;
-    }
-  }
-
-  private loadPerformanceMetrics = (): void => {
-    // Get initial metrics
-    const metrics = getPerformanceMetrics();
-    const score = getPerformanceScore(metrics);
-    
-    // Save to history
-    savePerformanceHistory(metrics, score.score, score.grade);
-    
-    // Check alerts
-    checkPerformanceAlerts(metrics, score.score);
-    
-    // Send to Google Analytics
-    const gaConfig = getGAConfig();
-    if (gaConfig.enabled) {
-      sendPerformanceToGA(
-        {
-          lcp: metrics.lcp || 0,
-          fid: metrics.fid || 0,
-          cls: metrics.cls || 0,
-          fcp: metrics.fcp || 0,
-          ttfb: metrics.ttfb || 0,
-        },
-        score.score
-      );
-    }
-    
-    this.setState({
-      performance: {
-        metrics,
-        score,
-        loading: false,
-      },
-    });
-
-    // Observe Core Web Vitals
-    this.performanceCleanup = observeCoreWebVitals((name, value) => {
-      this.setState((prevState) => {
-        const newMetrics = { ...prevState.performance.metrics, [name]: value };
-        const newScore = getPerformanceScore(newMetrics);
-        
-        // Save to history
-        savePerformanceHistory(newMetrics, newScore.score, newScore.grade);
-        
-        // Check alerts
-        checkPerformanceAlerts(newMetrics, newScore.score);
-        
-        return {
-          performance: {
-            metrics: newMetrics,
-            score: newScore,
-            loading: false,
-          },
-        };
-      });
-    });
-  };
-
-  private loadSeoAnalysis = (): void => {
-    // Use requestAnimationFrame for better performance
-    const analyze = () => {
-      try {
-        const analysis = analyzeSeo();
-        
-        // Batch operations
-        saveSeoHistory(analysis);
-        checkSeoAlerts(analysis);
-        
-        // Send to Google Analytics (non-blocking)
-        const gaConfig = getGAConfig();
-        if (gaConfig.enabled) {
-          // Use setTimeout to avoid blocking
-          setTimeout(() => {
-            sendSEOToGA(analysis.score, analysis.checks);
-          }, 0);
-        }
-        
-        this.setState({
-          seo: {
-            analysis,
-            loading: false,
-          },
-        });
-      } catch (error) {
-        // Only log in development
-        if (process.env.NODE_ENV === "development") {
-          console.error("SEO analysis error:", error);
-        }
-        this.setState({
-          seo: {
-            analysis: { score: 0, grade: "poor", checks: [], recommendations: [] },
-            loading: false,
-          },
-        });
-      }
-    };
-
-    // Use requestAnimationFrame for DOM readiness
-    if (typeof window !== "undefined" && "requestAnimationFrame" in window) {
-      requestAnimationFrame(analyze);
-    } else {
-      analyze();
-    }
-  };
-
-  private loadAlerts = (): void => {
-    // Check trend alerts
-    checkTrendAlerts(7);
-    
-    // Get unacknowledged alerts
-    const alerts = getUnacknowledgedAlerts();
-    this.setState({
-      alerts: {
-        alerts,
-        showAlerts: alerts.length > 0,
-      },
-    });
-  };
-
-  private loadTrends = (): void => {
-    const history = getHistoricalData();
-    
-    // Analyze performance trends
-    const perfTrends = analyzePerformanceTrends(history.performance, 30);
-    if (perfTrends) {
-      this.setState((prevState) => ({
-        performance: {
-          ...prevState.performance,
-          trends: perfTrends,
-        },
-      }));
-    }
-    
-    // Analyze SEO trends
-    const seoTrends = analyzeSeoTrends(history.seo, 30);
-    if (seoTrends) {
-      this.setState((prevState) => ({
-        seo: {
-          ...prevState.seo,
-          trends: seoTrends,
-        },
-      }));
-    }
-  };
-
-  private loadBenchmarks = (): void => {
-    const perfBenchmarks = getBenchmarks("performance");
-    const seoBenchmarks = getBenchmarks("seo");
-    
-    this.setState((prevState) => ({
-      performance: {
-        ...prevState.performance,
-        benchmarks: perfBenchmarks,
-      },
-      seo: {
-        ...prevState.seo,
-        benchmarks: seoBenchmarks,
-      },
-    }));
-  };
-
-  private initGoogleAnalytics = (): void => {
-    const config = getGAConfig();
-    if (config.enabled && config.measurementId) {
-      initGoogleAnalytics(config.measurementId);
-    }
-  };
-
-  private initABTests = (): void => {
-    const activeTests = getActiveABTests();
-    activeTests.forEach((test) => {
-      const variant = assignToVariant(test.id);
-      trackABTestVisit(test.id, variant);
-    });
-  };
-
-  private handleExport = (format: "csv" | "json" | "pdf"): void => {
-    exportAnalytics({
-      format,
-      includePerformance: true,
-      includeSeo: true,
-    });
-  };
-
-  componentDidUpdate(prevProps: Props, prevState: State): void {
-    if (prevState.activeTab !== this.state.activeTab) {
-      this.applySeo();
-
-      writeTabToLocation(this.state.activeTab);
-      try {
-        localStorage.setItem(DASHBOARD_TAB_STORAGE_KEY, this.state.activeTab);
-      } catch {
-        // ignore
-      }
-    }
-  }
-
-  private applySeo(): void {
-    const titleByTab: Record<ActiveTab, string> = {
-      overview: "Ringkasan Dashboard",
-      orders: "Record Order",
-      customers: "Customer Management",
-      upload: "Upload Bouquet",
-      edit: "Edit Bouquet",
-      hero: "Hero Slider",
-      analytics: "Analytics Dashboard",
-    };
-
-    setSeo({
-      title: `${titleByTab[this.state.activeTab]} | Giftforyou.idn Admin`,
-      description: "Dashboard admin Giftforyou.idn - Kelola bouquet, pesanan, koleksi, dan analitik performa website florist terbaik di Cirebon, Jawa Barat.",
-      path: "/dashboard",
-      noIndex: true,
-    });
-  }
-
-  private setActiveTab = (tab: ActiveTab) => {
-    this.setState({ activeTab: tab });
-  };
-
-  private copyCurrentLink = async () => {
-    const url = window.location.href;
-
-    try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(url);
-      } else {
-        const el = document.createElement("textarea");
-        el.value = url;
-        el.setAttribute("readonly", "true");
-        el.style.position = "fixed";
-        el.style.left = "-9999px";
-        document.body.appendChild(el);
-        el.select();
-        document.execCommand("copy");
-        document.body.removeChild(el);
-      }
-
-      // Copy successful - could show toast notification here
-    } catch {
-      // Copy failed - could show error notification here
-    }
-  };
-
-  private reloadDashboard = () => {
-    window.location.reload();
-  };
-
-  private copyOverview = async (text: string) => {
-    try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(text);
-      } else {
-        const el = document.createElement("textarea");
-        el.value = text;
-        el.setAttribute("readonly", "true");
-        el.style.position = "fixed";
-        el.style.left = "-9999px";
-        document.body.appendChild(el);
-        el.select();
-        document.execCommand("copy");
-        document.body.removeChild(el);
-      }
-
-      this.setState({ overviewCopyStatus: "copied" });
-      window.setTimeout(() => this.setState({ overviewCopyStatus: "" }), 1800);
-    } catch {
-      this.setState({ overviewCopyStatus: "failed" });
-      window.setTimeout(() => this.setState({ overviewCopyStatus: "" }), 2200);
-    }
-  };
-
-  private handleHashChange = (): void => {
-    const next = readTabFromLocation();
-    if (next && next !== this.state.activeTab) {
-      this.setActiveTab(next);
-    }
-  };
-
-  private handleKeyDown = (e: KeyboardEvent): void => {
-    const target = e.target as HTMLElement | null;
-    const tag = (target?.tagName ?? "").toLowerCase();
-    const isTypingTarget =
-      tag === "input" ||
-      tag === "textarea" ||
-      tag === "select" ||
-      (target?.isContentEditable ?? false);
-    if (isTypingTarget) return;
-
-    // Fix: Check Alt key correctly (Alt+number shortcuts)
-    if (!e.altKey || e.metaKey || e.ctrlKey) return;
-
-    const key = e.key;
-    const map: Record<string, ActiveTab> = {
-      "1": "overview",
-      "2": "orders",
-      "3": "customers",
-      "4": "upload",
-      "5": "edit",
-      "6": "hero",
-      "7": "analytics",
-    };
-
-    const next = map[key];
-    if (!next || next === this.state.activeTab) return;
-
-    e.preventDefault();
-    this.setActiveTab(next);
-  };
-
-  private renderTabBar(): React.ReactNode {
+  /**
+   * Render tab bar
+   */
+  const renderTabBar = (): React.ReactNode => {
     const allTabs: Array<{ key: ActiveTab; label: string; icon: React.ReactNode; shortcut?: string }> = [
       { 
         key: "overview", 
@@ -641,7 +232,7 @@ class DashboardView extends Component<Props, State> {
     return (
       <nav className="adminDashboard__tabs" role="tablist" aria-label="Dashboard navigation">
         {allTabs.map((t) => {
-          const isActive = this.state.activeTab === t.key;
+          const isActive = viewState.activeTab === t.key;
           return (
             <button
               key={t.key}
@@ -650,7 +241,7 @@ class DashboardView extends Component<Props, State> {
               aria-selected={isActive}
               aria-keyshortcuts={t.shortcut}
               className={`adminDashboard__tab ${isActive ? "adminDashboard__tab--active" : ""}`}
-              onClick={() => this.setActiveTab(t.key)}
+              onClick={() => onSetActiveTab(t.key)}
             >
               <span className="adminDashboard__tabIcon">{t.icon}</span>
               <span className="adminDashboard__tabLabel">{t.label}</span>
@@ -660,138 +251,30 @@ class DashboardView extends Component<Props, State> {
         })}
       </nav>
     );
-  }
+  };
 
-  private renderMetrics(): React.ReactNode {
-    const bouquets = this.props.bouquets ?? [];
-    const visitorsCount = this.props.visitorsCount ?? 0;
-    const collectionsCount = this.props.collectionsCount ?? 0;
-    const salesMetrics = this.props.salesMetrics;
-
-    const insights = this.props.insights;
-    const insightsError = (this.props.insightsError ?? "").trim();
-    const insightsDays = Number(insights?.days ?? 30);
-    const pageviews30d = Number(insights?.pageviews30d ?? 0);
-    const topSearchTerms = (insights?.topSearchTerms ?? []).slice(0, 10);
-    const topBouquetsDays = (insights?.topBouquetsDays ?? []).slice(0, 5);
-    const visitHours = (insights?.visitHours ?? []).slice(0, 8);
-    const uniqueVisitors30d = Number(insights?.uniqueVisitors30d ?? 0);
-    const uniqueVisitorsAvailable = Boolean(insights?.uniqueVisitorsAvailable);
-
-    const bouquetNameById = new Map<string, string>();
-    for (const b of bouquets) {
-      const id = (b._id ?? "").toString();
-      const name = (b.name ?? "").toString().trim();
-      if (id && name) bouquetNameById.set(id, name);
-    }
-
-    const formatHour = (h: number) => `${String(h).padStart(2, "0")}.00`;
-    const labelBouquet = (id: string) =>
-      bouquetNameById.get(id) ?? (id ? `ID ${id.slice(0, 10)}` : "—");
-
-    const readyCount = bouquets.filter((b) => b.status === "ready").length;
-    const preorderCount = bouquets.filter((b) => b.status === "preorder").length;
-    const featuredCount = bouquets.filter((b) => Boolean(b.isFeatured)).length;
-    const newEditionCount = bouquets.filter((b) => Boolean(b.isNewEdition)).length;
-
-    const missingImageCount = bouquets.filter((b) => !(b.image ?? "").trim()).length;
-    const missingCollectionCount = bouquets.filter(
-      (b) => !(b.collectionName ?? "").trim()
-    ).length;
-    const zeroQtyReadyCount = bouquets.filter(
-      (b) => b.status === "ready" && (typeof b.quantity === "number" ? b.quantity : 0) === 0
-    ).length;
-
-    const totalReadyUnits = bouquets
-      .filter((b) => b.status === "ready")
-      .reduce((sum, b) => sum + (typeof b.quantity === "number" ? b.quantity : 0), 0);
-
-    const priced = bouquets
-      .map((b) => (typeof b.price === "number" ? b.price : Number(b.price)))
-      .filter((n) => Number.isFinite(n) && n > 0);
-    const priceMin = priced.length ? Math.min(...priced) : 0;
-    const priceMax = priced.length ? Math.max(...priced) : 0;
-    const priceAvg = priced.length
-      ? Math.round(priced.reduce((a, b) => a + b, 0) / priced.length)
-      : 0;
-
-    const lastUpdatedMs = bouquets.reduce((max, b) => {
-      const candidate = (b.updatedAt ?? b.createdAt ?? "").toString();
-      const t = Date.parse(candidate);
-      return Number.isFinite(t) ? Math.max(max, t) : max;
-    }, 0);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _lastUpdatedLabel = lastUpdatedMs
-      ? new Date(lastUpdatedMs).toLocaleString("id-ID")
-      : "—";
-
-    const collectionCounts = new Map<string, number>();
-    for (const b of bouquets) {
-      const key = (b.collectionName ?? "").trim() || "Tanpa koleksi";
-      collectionCounts.set(key, (collectionCounts.get(key) ?? 0) + 1);
-    }
-    const topCollections = Array.from(collectionCounts.entries())
-      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-      .slice(0, 6);
-
-    const overviewLines: string[] = [
-      `GIFT foryou.idn — Ringkasan Dashboard (${new Date().toLocaleString("id-ID")})`,
-      ``,
-      `Kunjungan (${insightsDays} hari): ${insightsError ? visitorsCount : pageviews30d || visitorsCount}`,
-      `Koleksi: ${collectionsCount}`,
-      `Total bouquet: ${bouquets.length}`,
-      `Siap: ${readyCount} (unit siap: ${totalReadyUnits})`,
-      `Preorder: ${preorderCount}`,
-      `Featured: ${featuredCount}`,
-      `New edition: ${newEditionCount}`,
-      ``,
-      `Kualitas data:`,
-      `- Tanpa gambar: ${missingImageCount}`,
-      `- Tanpa koleksi: ${missingCollectionCount}`,
-      `- Ready qty 0: ${zeroQtyReadyCount}`,
-      ``,
-      `Harga (bouquet dengan harga valid):`,
-      `- Min: ${priced.length ? formatIDR(priceMin) : "—"}`,
-      `- Rata-rata: ${priced.length ? formatIDR(priceAvg) : "—"}`,
-      `- Max: ${priced.length ? formatIDR(priceMax) : "—"}`,
-      ``,
-      `Top koleksi:`,
-      ...topCollections.map(([name, count]) => `- ${name}: ${count}`),
-    ];
-
-    if (insights && !insightsError) {
-      overviewLines.push("", "Analytics (estimasi)");
-
-      if (uniqueVisitorsAvailable) {
-        overviewLines.push(`Pengunjung unik (30 hari): ${uniqueVisitors30d}`);
-      }
-
-      if (topSearchTerms.length) {
-        overviewLines.push("Pencarian teratas:");
-        overviewLines.push(
-          ...topSearchTerms.slice(0, 5).map((t) => `- ${t.term}: ${t.count}`)
-        );
-      }
-
-      if (topBouquetsDays.length) {
-        overviewLines.push("Top 5 bouquet (30 hari):");
-        overviewLines.push(
-          ...topBouquetsDays.map((b) => `- ${labelBouquet(b.bouquetId)}: ${b.count}`)
-        );
-      }
-
-      if (visitHours.length) {
-        overviewLines.push("Jam kunjungan terpadat (WIB):");
-        overviewLines.push(
-          ...visitHours.slice(0, 3).map((h) => `- ${formatHour(h.hour)}: ${h.count}`)
-        );
-      }
-    }
-
-    const overviewText = overviewLines.join("\n");
-
-    // Store overview text for keyboard shortcut access
-    (this as any)._overviewText = overviewText;
+  /**
+   * Render metrics overview
+   */
+  const renderMetrics = (): React.ReactNode => {
+    const {
+      readyCount,
+      preorderCount,
+      featuredCount,
+      newEditionCount,
+      missingImageCount,
+      missingCollectionCount,
+      zeroQtyReadyCount,
+      totalReadyUnits,
+      priceMin,
+      priceMax,
+      priceAvg,
+      topCollections,
+      pageviews30d,
+      uniqueVisitors30d,
+      uniqueVisitorsAvailable,
+      insightsError,
+    } = overviewMetrics;
 
     return (
       <div className="adminOverview">
@@ -913,7 +396,7 @@ class DashboardView extends Component<Props, State> {
             <button
               type="button"
               className="adminQuickAction"
-              onClick={() => this.setActiveTab("upload")}
+              onClick={() => onSetActiveTab("upload")}
               aria-label="Upload Bouquet"
               title="Upload Bouquet baru"
             >
@@ -927,7 +410,7 @@ class DashboardView extends Component<Props, State> {
             <button
               type="button"
               className="adminQuickAction"
-              onClick={() => this.setActiveTab("edit")}
+              onClick={() => onSetActiveTab("edit")}
             >
               <div className="adminQuickAction__icon">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -940,7 +423,7 @@ class DashboardView extends Component<Props, State> {
             <button
               type="button"
               className="adminQuickAction"
-              onClick={() => this.setActiveTab("orders")}
+              onClick={() => onSetActiveTab("orders")}
             >
               <div className="adminQuickAction__icon">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -953,7 +436,7 @@ class DashboardView extends Component<Props, State> {
             <button
               type="button"
               className="adminQuickAction"
-              onClick={() => this.setActiveTab("customers")}
+              onClick={() => onSetActiveTab("customers")}
             >
               <div className="adminQuickAction__icon">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -965,7 +448,7 @@ class DashboardView extends Component<Props, State> {
             <button
               type="button"
               className="adminQuickAction"
-              onClick={() => this.setActiveTab("hero")}
+              onClick={() => onSetActiveTab("hero")}
             >
               <div className="adminQuickAction__icon">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -978,7 +461,7 @@ class DashboardView extends Component<Props, State> {
             <button
               type="button"
               className="adminQuickAction"
-              onClick={() => this.setActiveTab("analytics")}
+              onClick={() => onSetActiveTab("analytics")}
             >
               <div className="adminQuickAction__icon">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -1031,15 +514,15 @@ class DashboardView extends Component<Props, State> {
               <div className="adminOverview__priceInfo">
                 <div className="adminOverview__priceItem">
                   <span className="adminOverview__priceLabel">Minimum</span>
-                  <span className="adminOverview__priceValue">{priced.length ? formatIDR(priceMin) : "—"}</span>
+                  <span className="adminOverview__priceValue">{priceMin > 0 ? formatIDR(priceMin) : "—"}</span>
                 </div>
                 <div className="adminOverview__priceItem">
                   <span className="adminOverview__priceLabel">Average</span>
-                  <span className="adminOverview__priceValue">{priced.length ? formatIDR(priceAvg) : "—"}</span>
+                  <span className="adminOverview__priceValue">{priceAvg > 0 ? formatIDR(priceAvg) : "—"}</span>
                 </div>
                 <div className="adminOverview__priceItem">
                   <span className="adminOverview__priceLabel">Maximum</span>
-                  <span className="adminOverview__priceValue">{priced.length ? formatIDR(priceMax) : "—"}</span>
+                  <span className="adminOverview__priceValue">{priceMax > 0 ? formatIDR(priceMax) : "—"}</span>
                 </div>
               </div>
             </div>
@@ -1130,19 +613,10 @@ class DashboardView extends Component<Props, State> {
         </div>
       </div>
     );
-  }
+  };
 
-  // Removed renderMetricsLegacy - not used anymore, replaced by renderMetrics
-  // Keeping this comment for reference
-  private _renderMetricsLegacyUnused(): React.ReactNode {
-    const bouquets = this.props.bouquets ?? [];
-    const visitorsCount = this.props.visitorsCount ?? 0;
-    const collectionsCount = this.props.collectionsCount ?? 0;
-    const salesMetrics = this.props.salesMetrics;
-    const salesError = this.props.salesError;
-
-    const insights = this.props.insights;
-    const insightsError = (this.props.insightsError ?? "").trim();
+  // Legacy renderMetrics function - using overviewMetrics from props
+  const renderMetricsLegacy = (): React.ReactNode => {
     const insightsDays = Number(insights?.days ?? 30);
     const pageviews30d = Number(insights?.pageviews30d ?? 0);
     const topSearchTerms = (insights?.topSearchTerms ?? []).slice(0, 10);
@@ -1264,10 +738,9 @@ class DashboardView extends Component<Props, State> {
 
     const overviewText = overviewLines.join("\n");
 
-    // Store overview text for keyboard shortcut access
-    (this as any)._overviewText = overviewText;
+    // Overview text is passed via props
 
-    const copyStatus = this.state.overviewCopyStatus;
+    const copyStatus = viewState.overviewCopyStatus;
 
     return (
       <section className="dashboardSurface dashboardSurface--metrics" aria-label="Ringkasan">
@@ -1283,7 +756,7 @@ class DashboardView extends Component<Props, State> {
             <button
               type="button"
               className="overviewActionBtn"
-              onClick={() => this.setActiveTab("upload")}
+              onClick={() => onSetActiveTab("upload")}
               aria-label="Tambah bouquet baru"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -1295,7 +768,7 @@ class DashboardView extends Component<Props, State> {
             <button
               type="button"
               className="overviewActionBtn"
-              onClick={() => this.setActiveTab("edit")}
+              onClick={() => onSetActiveTab("edit")}
               aria-label="Buka editor bouquet"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -1307,7 +780,7 @@ class DashboardView extends Component<Props, State> {
             <button
               type="button"
               className="overviewActionBtn"
-              onClick={() => this.setActiveTab("hero")}
+              onClick={() => onSetActiveTab("hero")}
               aria-label="Atur hero slider"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -1319,7 +792,7 @@ class DashboardView extends Component<Props, State> {
             <button
               type="button"
               className="overviewActionBtn overviewActionBtn--primary"
-              onClick={() => this.copyOverview(overviewText)}
+              onClick={() => onCopyOverview(overviewText)}
               aria-label="Salin ringkasan ke clipboard"
               title="Ctrl/Cmd + C untuk copy"
             >
@@ -1332,7 +805,7 @@ class DashboardView extends Component<Props, State> {
             <button
               type="button"
               className="overviewActionBtn"
-              onClick={this.reloadDashboard}
+              onClick={onReloadDashboard}
               aria-label="Muat ulang dashboard"
               title="Refresh data (Ctrl/Cmd + R)"
             >
@@ -1483,7 +956,7 @@ class DashboardView extends Component<Props, State> {
                     Min
                   </span>
                   <span className="overviewKeyValue__val">
-                    {priced.length ? formatIDR(priceMin) : "—"}
+                    {priceMin > 0 ? formatIDR(priceMin) : "—"}
                   </span>
                 </div>
                 <div className="overviewKeyValue__row">
@@ -1494,7 +967,7 @@ class DashboardView extends Component<Props, State> {
                     Rata-rata
                   </span>
                   <span className="overviewKeyValue__val">
-                    {priced.length ? formatIDR(priceAvg) : "—"}
+                    {priceAvg > 0 ? formatIDR(priceAvg) : "—"}
                   </span>
                 </div>
                 <div className="overviewKeyValue__row">
@@ -1505,7 +978,7 @@ class DashboardView extends Component<Props, State> {
                     Max
                   </span>
                   <span className="overviewKeyValue__val">
-                    {priced.length ? formatIDR(priceMax) : "—"}
+                    {priceMax > 0 ? formatIDR(priceMax) : "—"}
                   </span>
                 </div>
               </div>
@@ -1649,7 +1122,7 @@ class DashboardView extends Component<Props, State> {
                     <button
                       type="button"
                       className="overviewActionBtn"
-                      onClick={() => this.setActiveTab("customers")}
+                      onClick={() => onSetActiveTab("customers")}
                       style={{ width: "100%", justifyContent: "center" }}
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1661,7 +1134,7 @@ class DashboardView extends Component<Props, State> {
                       type="button"
                       className="overviewActionBtn"
                       onClick={() => {
-                        this.setState({ showInventory: true });
+                        onToggleShow("showInventory");
                       }}
                       style={{ width: "100%", justifyContent: "center" }}
                     >
@@ -1674,7 +1147,7 @@ class DashboardView extends Component<Props, State> {
                       type="button"
                       className="overviewActionBtn overviewActionBtn--primary"
                       onClick={() => {
-                        this.setState({ showAnalytics: true });
+                        onToggleShow("showAnalytics");
                       }}
                       style={{ width: "100%", justifyContent: "center" }}
                     >
@@ -1830,71 +1303,71 @@ class DashboardView extends Component<Props, State> {
                 </svg>
                 Performance
               </p>
-              {this.state.performance.loading ? (
+              {viewState.performance.loading ? (
                 <p className="overviewCard__empty">Memuat metrik performa...</p>
               ) : (
                 <>
                   <div className="overviewPerformanceScore">
-                    <div className={`overviewPerformanceScore__badge overviewPerformanceScore__badge--${this.state.performance.score.grade}`}>
-                      <span className="overviewPerformanceScore__value">{this.state.performance.score.score}</span>
+                    <div className={`overviewPerformanceScore__badge overviewPerformanceScore__badge--${viewState.performance.score.grade}`}>
+                      <span className="overviewPerformanceScore__value">{viewState.performance.score.score}</span>
                       <span className="overviewPerformanceScore__label">/ 100</span>
                     </div>
                     <div className="overviewPerformanceScore__grade">
-                      {this.state.performance.score.grade === "excellent" && "Excellent"}
-                      {this.state.performance.score.grade === "good" && "Good"}
-                      {this.state.performance.score.grade === "needs-improvement" && "Needs Improvement"}
-                      {this.state.performance.score.grade === "poor" && "Poor"}
+                      {viewState.performance.score.grade === "excellent" && "Excellent"}
+                      {viewState.performance.score.grade === "good" && "Good"}
+                      {viewState.performance.score.grade === "needs-improvement" && "Needs Improvement"}
+                      {viewState.performance.score.grade === "poor" && "Poor"}
                     </div>
                   </div>
                   
                   <div className="overviewKeyValue" style={{ marginTop: "1rem" }}>
-                    {this.state.performance.metrics.fcp !== undefined && (
+                    {viewState.performance.metrics.fcp !== undefined && (
                       <div className="overviewKeyValue__row">
                         <span className="overviewKeyValue__key">First Contentful Paint</span>
-                        <span className="overviewKeyValue__val">{formatMs(this.state.performance.metrics.fcp)}</span>
+                        <span className="overviewKeyValue__val">{formatMs(viewState.performance.metrics.fcp)}</span>
                       </div>
                     )}
-                    {this.state.performance.metrics.lcp !== undefined && (
+                    {viewState.performance.metrics.lcp !== undefined && (
                       <div className="overviewKeyValue__row">
                         <span className="overviewKeyValue__key">Largest Contentful Paint</span>
-                        <span className={`overviewKeyValue__val ${this.state.performance.score.details.lcp?.status === "excellent" ? "overviewKeyValue__val--good" : ""}`}>
-                          {formatMs(this.state.performance.metrics.lcp)}
+                        <span className={`overviewKeyValue__val ${viewState.performance.score.details.lcp?.status === "excellent" ? "overviewKeyValue__val--good" : ""}`}>
+                          {formatMs(viewState.performance.metrics.lcp)}
                         </span>
                       </div>
                     )}
-                    {this.state.performance.metrics.fid !== undefined && (
+                    {viewState.performance.metrics.fid !== undefined && (
                       <div className="overviewKeyValue__row">
                         <span className="overviewKeyValue__key">First Input Delay</span>
-                        <span className={`overviewKeyValue__val ${this.state.performance.score.details.fid?.status === "excellent" ? "overviewKeyValue__val--good" : ""}`}>
-                          {formatMs(this.state.performance.metrics.fid)}
+                        <span className={`overviewKeyValue__val ${viewState.performance.score.details.fid?.status === "excellent" ? "overviewKeyValue__val--good" : ""}`}>
+                          {formatMs(viewState.performance.metrics.fid)}
                         </span>
                       </div>
                     )}
-                    {this.state.performance.metrics.cls !== undefined && (
+                    {viewState.performance.metrics.cls !== undefined && (
                       <div className="overviewKeyValue__row">
                         <span className="overviewKeyValue__key">Cumulative Layout Shift</span>
-                        <span className={`overviewKeyValue__val ${this.state.performance.score.details.cls?.status === "excellent" ? "overviewKeyValue__val--good" : ""}`}>
-                          {this.state.performance.metrics.cls.toFixed(3)}
+                        <span className={`overviewKeyValue__val ${viewState.performance.score.details.cls?.status === "excellent" ? "overviewKeyValue__val--good" : ""}`}>
+                          {viewState.performance.metrics.cls.toFixed(3)}
                         </span>
                       </div>
                     )}
-                    {this.state.performance.metrics.ttfb !== undefined && (
+                    {viewState.performance.metrics.ttfb !== undefined && (
                       <div className="overviewKeyValue__row">
                         <span className="overviewKeyValue__key">Time to First Byte</span>
-                        <span className="overviewKeyValue__val">{formatMs(this.state.performance.metrics.ttfb)}</span>
+                        <span className="overviewKeyValue__val">{formatMs(viewState.performance.metrics.ttfb)}</span>
                       </div>
                     )}
-                    {this.state.performance.metrics.loadComplete !== undefined && (
+                    {viewState.performance.metrics.loadComplete !== undefined && (
                       <div className="overviewKeyValue__row">
                         <span className="overviewKeyValue__key">Load Complete</span>
-                        <span className="overviewKeyValue__val">{formatMs(this.state.performance.metrics.loadComplete)}</span>
+                        <span className="overviewKeyValue__val">{formatMs(viewState.performance.metrics.loadComplete)}</span>
                       </div>
                     )}
-                    {this.state.performance.metrics.totalSize !== undefined && (
+                    {viewState.performance.metrics.totalSize !== undefined && (
                       <div className="overviewKeyValue__row">
                         <span className="overviewKeyValue__key">Total Resources</span>
                         <span className="overviewKeyValue__val">
-                          {this.state.performance.metrics.totalResources} ({formatBytes(this.state.performance.metrics.totalSize)})
+                          {viewState.performance.metrics.totalResources} ({formatBytes(viewState.performance.metrics.totalSize)})
                         </span>
                       </div>
                     )}
@@ -1912,25 +1385,25 @@ class DashboardView extends Component<Props, State> {
                 </svg>
                 SEO Analysis
               </p>
-              {this.state.seo.loading ? (
+              {viewState.seo.loading ? (
                 <p className="overviewCard__empty">Menganalisis SEO...</p>
               ) : (
                 <>
                   <div className="overviewSeoScore">
-                    <div className={`overviewSeoScore__badge overviewSeoScore__badge--${this.state.seo.analysis.grade}`}>
-                      <span className="overviewSeoScore__value">{this.state.seo.analysis.score}</span>
+                    <div className={`overviewSeoScore__badge overviewSeoScore__badge--${viewState.seo.analysis.grade}`}>
+                      <span className="overviewSeoScore__value">{viewState.seo.analysis.score}</span>
                       <span className="overviewSeoScore__label">/ 100</span>
                     </div>
                     <div className="overviewSeoScore__grade">
-                      {this.state.seo.analysis.grade === "excellent" && "Excellent"}
-                      {this.state.seo.analysis.grade === "good" && "Good"}
-                      {this.state.seo.analysis.grade === "needs-improvement" && "Needs Improvement"}
-                      {this.state.seo.analysis.grade === "poor" && "Poor"}
+                      {viewState.seo.analysis.grade === "excellent" && "Excellent"}
+                      {viewState.seo.analysis.grade === "good" && "Good"}
+                      {viewState.seo.analysis.grade === "needs-improvement" && "Needs Improvement"}
+                      {viewState.seo.analysis.grade === "poor" && "Poor"}
                     </div>
                   </div>
 
                   <div className="overviewSeoChecks" style={{ marginTop: "1rem" }}>
-                    {this.state.seo.analysis.checks.slice(0, 6).map((check, idx) => (
+                    {viewState.seo.analysis.checks.slice(0, 6).map((check, idx) => (
                       <div key={idx} className={`overviewSeoCheck overviewSeoCheck--${check.status}`}>
                         <span className="overviewSeoCheck__icon">
                           {check.status === "pass" && "✓"}
@@ -1945,11 +1418,11 @@ class DashboardView extends Component<Props, State> {
                     ))}
                   </div>
 
-                  {this.state.seo.analysis.recommendations.length > 0 && (
+                  {viewState.seo.analysis.recommendations.length > 0 && (
                     <div className="overviewSeoRecommendations" style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid rgba(0,0,0,0.1)" }}>
                       <p style={{ fontWeight: 800, marginBottom: "0.5rem", fontSize: "0.9rem" }}>Rekomendasi:</p>
                       <ul style={{ margin: 0, paddingLeft: "1.25rem", fontSize: "0.85rem", lineHeight: "1.6" }}>
-                        {this.state.seo.analysis.recommendations.slice(0, 3).map((rec, idx) => (
+                        {viewState.seo.analysis.recommendations.slice(0, 3).map((rec, idx) => (
                           <li key={idx} style={{ marginBottom: "0.4rem" }}>{rec}</li>
                         ))}
                       </ul>
@@ -1957,14 +1430,14 @@ class DashboardView extends Component<Props, State> {
                   )}
 
                   {/* SEO Trends Section */}
-                  {this.state.seo.trends && (
+                  {viewState.seo.trends && (
                     <div style={{ marginTop: "1.5rem", paddingTop: "1rem", borderTop: "1px solid rgba(0,0,0,0.1)" }}>
                       <p style={{ fontWeight: 800, marginBottom: "0.75rem", fontSize: "0.9rem" }}>Trends (30 days):</p>
-                      {this.state.seo.trends.score && (
+                      {viewState.seo.trends.score && (
                         <div style={{ marginBottom: "0.5rem", fontSize: "0.85rem" }}>
                           <span style={{ fontWeight: 700 }}>Score: </span>
-                          <span className={this.state.seo.trends.score.trend === "up" ? "overviewKeyValue__val--good" : ""}>
-                            {this.state.seo.trends.score.changePercent.toFixed(1)}% {this.state.seo.trends.score.trend === "up" ? "↑" : this.state.seo.trends.score.trend === "down" ? "↓" : "→"}
+                          <span className={viewState.seo.trends.score.trend === "up" ? "overviewKeyValue__val--good" : ""}>
+                            {viewState.seo.trends.score.changePercent.toFixed(1)}% {viewState.seo.trends.score.trend === "up" ? "↑" : viewState.seo.trends.score.trend === "down" ? "↓" : "→"}
                           </span>
                         </div>
                       )}
@@ -1975,17 +1448,17 @@ class DashboardView extends Component<Props, State> {
             </div>
 
             {/* Alerts Section */}
-            {this.state.alerts.showAlerts && this.state.alerts.alerts.length > 0 && (
+            {viewState.alerts.showAlerts && viewState.alerts.alerts.length > 0 && (
               <div className="overviewCard overviewCard--alerts" aria-label="Alerts">
                 <p className="overviewCard__title">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ marginRight: "0.5rem", opacity: 0.8 }}>
                     <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     <path d="M12 9v4M12 17h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                  Alerts ({this.state.alerts.alerts.length})
+                  Alerts ({viewState.alerts.alerts.length})
                 </p>
                 <div className="overviewAlerts" style={{ marginTop: "1rem" }}>
-                  {this.state.alerts.alerts.slice(0, 5).map((alert) => (
+                  {viewState.alerts.alerts.slice(0, 5).map((alert) => (
                     <div key={alert.id} className={`overviewAlert overviewAlert--${alert.severity}`}>
                       <div className="overviewAlert__content">
                         <span className="overviewAlert__title">{alert.title}</span>
@@ -1993,9 +1466,9 @@ class DashboardView extends Component<Props, State> {
                       </div>
                     </div>
                   ))}
-                  {this.state.alerts.alerts.length > 5 && (
+                  {viewState.alerts.alerts.length > 5 && (
                     <p style={{ fontSize: "0.85rem", color: "var(--ink-550)", marginTop: "0.5rem" }}>
-                      +{this.state.alerts.alerts.length - 5} more alerts
+                      +{viewState.alerts.alerts.length - 5} more alerts
                     </p>
                   )}
                 </div>
@@ -2014,7 +1487,7 @@ class DashboardView extends Component<Props, State> {
                 <button
                   type="button"
                   className="btn-luxury"
-                  onClick={() => this.handleExport("csv")}
+                  onClick={() => onExport("csv")}
                   style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}
                 >
                   Export CSV
@@ -2022,7 +1495,7 @@ class DashboardView extends Component<Props, State> {
                 <button
                   type="button"
                   className="btn-luxury"
-                  onClick={() => this.handleExport("json")}
+                  onClick={() => onExport("json")}
                   style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}
                 >
                   Export JSON
@@ -2030,7 +1503,7 @@ class DashboardView extends Component<Props, State> {
                 <button
                   type="button"
                   className="btn-luxury"
-                  onClick={() => this.handleExport("pdf")}
+                  onClick={() => onExport("pdf")}
                   style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}
                 >
                   Export PDF
@@ -2041,16 +1514,17 @@ class DashboardView extends Component<Props, State> {
         </div>
       </section>
     );
-  }
+  };
 
-  private renderMainContent(): React.ReactNode {
-    const { activeTab } = this.state;
-    const bouquets = this.props.bouquets ?? [];
-    const collections = this.props.collections ?? [];
+  /**
+   * Render main content based on active tab
+   */
+  const renderMainContent = (): React.ReactNode => {
+    const { activeTab } = viewState;
 
     switch (activeTab) {
       case "overview":
-        return this.renderMetrics();
+        return renderMetrics();
 
       case "orders":
         return <OrdersSection bouquets={bouquets} />;
@@ -2060,35 +1534,33 @@ class DashboardView extends Component<Props, State> {
           <CustomersSection
             onSelectCustomer={(customerId) => {
               // Switch to orders tab when customer is selected
-              // The "View Orders" button in customer detail already handles navigation
-              this.setState({ activeTab: "orders" });
+              onSetActiveTab("orders");
             }}
           />
         );
 
       case "upload":
-        return <BouquetUploader onUpload={this.props.onUpload} />;
+        return <BouquetUploader onUpload={onUpload} />;
 
       case "edit":
         return (
           <BouquetEditorSection
             bouquets={bouquets}
-            onSave={this.props.onUpdate}
-            onDuplicate={this.props.onDuplicate}
-            onDelete={this.props.onDelete}
+            onSave={onUpdate}
+            onDuplicate={onDuplicate}
+            onDelete={onDelete}
             collections={collections}
-            onUpdateCollection={this.props.onUpdateCollectionName}
-            onMoveBouquet={this.props.onMoveBouquet}
-            onDeleteCollection={this.props.onDeleteCollection}
+            onUpdateCollection={onUpdateCollectionName}
+            onMoveBouquet={onMoveBouquet}
+            onDeleteCollection={onDeleteCollection}
           />
         );
 
       case "hero":
-        // ✅ pass collections so the editor can link slides to existing collections
         return (
           <HeroSliderEditorSection
             collections={collections}
-            onSaved={this.props.onHeroSaved}
+            onSaved={onHeroSaved}
           />
         );
 
@@ -2097,8 +1569,7 @@ class DashboardView extends Component<Props, State> {
           <AnalyticsDashboard
             isOpen={true}
             onClose={() => {
-              // When closing from tab, switch to overview tab
-              this.setActiveTab("overview");
+              onSetActiveTab("overview");
             }}
             period="30d"
             inline={true}
@@ -2108,223 +1579,219 @@ class DashboardView extends Component<Props, State> {
       default:
         return null;
     }
-  }
+  };
 
-  render(): React.ReactNode {
-    const { loading } = this.props;
-    const errorMessage = (this.props.errorMessage ?? "").trim();
-
-    return (
-      <section className="adminDashboard" aria-labelledby="admin-dashboard-title">
-        <div className="adminDashboard__container">
-          {/* Header */}
-          <div className="adminDashboard__header">
-            <div>
-              <h1 id="admin-dashboard-title" className="adminDashboard__title">
-                Admin Dashboard
-              </h1>
-              <p className="adminDashboard__subtitle">
-                Kelola website, pesanan, dan pelanggan Anda
-              </p>
-            </div>
-            <div className="adminDashboard__headerActions">
-              <button
-                type="button"
-                className="adminDashboard__actionBtn"
-                onClick={() => this.setState({ showNotifications: !this.state.showNotifications })}
-                title="Notifications"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-              <button
-                type="button"
-                className="adminDashboard__actionBtn adminDashboard__actionBtn--logout"
-                onClick={this.props.onLogout}
-                title="Keluar"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            </div>
+  return (
+    <section className="adminDashboard" aria-labelledby="admin-dashboard-title">
+      <div className="adminDashboard__container">
+        {/* Header */}
+        <div className="adminDashboard__header">
+          <div>
+            <h1 id="admin-dashboard-title" className="adminDashboard__title">
+              Admin Dashboard
+            </h1>
+            <p className="adminDashboard__subtitle">
+              Kelola website, pesanan, dan pelanggan Anda
+            </p>
           </div>
-
-          {/* Tab Bar */}
-          {this.renderTabBar()}
-
-          {/* Content */}
-          <div className="adminDashboard__content">
-            {loading && (
-              <div className="adminDashboard__loading" aria-live="polite">
-                <div className="adminDashboard__spinner"></div>
-                <p>Memuat data dashboard...</p>
-              </div>
-            )}
-
-            {!loading && errorMessage && (
-              <div
-                className="adminDashboard__error"
-                role="alert"
-              >
-                <p className="adminDashboard__errorTitle">
-                  Failed to load dashboard data
-                </p>
-                <p className="adminDashboard__errorText">{errorMessage}</p>
-              </div>
-            )}
-
-            {!loading && !errorMessage && (
-              <div className="adminDashboard__tabPanel" role="tabpanel">
-                {this.renderMainContent()}
-              </div>
-            )}
-
-            {loading && this.state.activeTab === "overview" && (
-              <div className="adminOverview adminOverview--loading">
-                <div className="adminOverview__stats">
-                  {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div key={i} className="adminStatCard adminStatCard--skeleton">
-                      <div className="adminStatCard__icon adminStatCard__icon--skeleton"></div>
-                      <div className="adminStatCard__content">
-                        <div className="adminStatCard__label adminStatCard__label--skeleton"></div>
-                        <div className="adminStatCard__value adminStatCard__value--skeleton"></div>
-                        <div className="adminStatCard__change adminStatCard__change--skeleton"></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="adminOverview__quickActions">
-                  <div className="adminOverview__sectionTitle adminOverview__sectionTitle--skeleton"></div>
-                  <div className="adminOverview__actionGrid">
-                    {[1, 2, 3, 4, 5, 6].map((i) => (
-                      <div key={i} className="adminQuickAction adminQuickAction--skeleton">
-                        <div className="adminQuickAction__icon adminQuickAction__icon--skeleton"></div>
-                        <div className="adminQuickAction__label adminQuickAction__label--skeleton"></div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
+          <div className="adminDashboard__headerActions">
+            <button
+              type="button"
+              className="adminDashboard__actionBtn"
+              onClick={() => onToggleShow("showNotifications")}
+              title="Notifications"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            <button
+              type="button"
+              className="adminDashboard__actionBtn adminDashboard__actionBtn--logout"
+              onClick={onLogout}
+              title="Keluar"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
           </div>
         </div>
 
-        {/* Notifications Center */}
-        <NotificationsCenter
-          isOpen={this.state.showNotifications}
-          onClose={() => this.setState({ showNotifications: false })}
-          onNotificationClick={(notification) => {
-            if (notification.actionUrl) {
-              window.location.href = notification.actionUrl;
-            }
-          }}
-        />
+        {/* Tab Bar */}
+        {renderTabBar()}
 
-        {/* Inventory Manager */}
-        <InventoryManager
-          isOpen={this.state.showInventory}
-          onClose={() => this.setState({ showInventory: false })}
-          onBouquetClick={(bouquetId) => {
-            this.setState({ activeTab: "edit", showInventory: false });
-          }}
-        />
+        {/* Content */}
+        <div className="adminDashboard__content">
+          {loading && (
+            <div className="adminDashboard__loading" aria-live="polite">
+              <div className="adminDashboard__spinner"></div>
+              <p>Memuat data dashboard...</p>
+            </div>
+          )}
 
-        {/* Analytics Dashboard Modal - Only show when not in analytics tab */}
-        {this.state.showAnalytics && this.state.activeTab !== "analytics" && (
-          <AnalyticsDashboard
-            isOpen={this.state.showAnalytics}
-            onClose={() => this.setState({ showAnalytics: false })}
-            period="30d"
-            inline={false}
-          />
-        )}
-        
-        {/* Admin Support Features */}
-        <QuickActionsPanel
-          isOpen={this.state.showQuickActions}
-          onClose={() => this.setState({ showQuickActions: false })}
-          actions={[
-            {
-              id: "new-order",
-              label: "Order Baru",
-              icon: "📦",
-              onClick: () => this.setActiveTab("orders"),
-              variant: "primary",
-            },
-            {
-              id: "new-bouquet",
-              label: "Tambah Bouquet",
-              icon: "🌸",
-              onClick: () => this.setActiveTab("upload"),
-              variant: "primary",
-            },
-            {
-              id: "view-customers",
-              label: "Lihat Customers",
-              icon: "👤",
-              onClick: () => this.setActiveTab("customers"),
-            },
-            {
-              id: "edit-bouquet",
-              label: "Edit Bouquet",
-              icon: "✏️",
-              onClick: () => this.setActiveTab("edit"),
-            },
-            {
-              id: "analytics",
-              label: "Analytics",
-              icon: "📊",
-              onClick: () => this.setActiveTab("analytics"),
-            },
-            {
-              id: "notifications",
-              label: "Notifications",
-              icon: "🔔",
-              onClick: () => this.setState({ showNotifications: true }),
-            },
-            {
-              id: "inventory",
-              label: "Inventory",
-              icon: "📦",
-              onClick: () => this.setState({ showInventory: true }),
-            },
-            {
-              id: "system-status",
-              label: "System Status",
-              icon: "⚙️",
-              onClick: () => this.setState({ showSystemStatus: true }),
-            },
-          ]}
-        />
-        
-        <DashboardSearch
-          isOpen={this.state.showSearch}
-          onClose={() => this.setState({ showSearch: false })}
-          onResultClick={(result) => {
-            if (result.type === "order") {
-              this.setActiveTab("orders");
-            } else if (result.type === "customer") {
-              this.setActiveTab("customers");
-            } else if (result.type === "bouquet") {
-              this.setActiveTab("edit");
-            }
-          }}
-        />
-        
-        <ActivityLog
-          isOpen={this.state.showActivityLog}
-          onClose={() => this.setState({ showActivityLog: false })}
-        />
-        
-        <SystemStatus
-          isOpen={this.state.showSystemStatus}
-          onClose={() => this.setState({ showSystemStatus: false })}
-        />
-      </section>
-    );
-  }
-}
+          {!loading && errorMessage && (
+            <div
+              className="adminDashboard__error"
+              role="alert"
+            >
+              <p className="adminDashboard__errorTitle">
+                Failed to load dashboard data
+              </p>
+              <p className="adminDashboard__errorText">{errorMessage}</p>
+            </div>
+          )}
 
-export default DashboardView;
+          {!loading && !errorMessage && (
+            <div className="adminDashboard__tabPanel" role="tabpanel">
+              {renderMainContent()}
+            </div>
+          )}
+
+          {loading && viewState.activeTab === "overview" && (
+            <div className="adminOverview adminOverview--loading">
+              <div className="adminOverview__stats">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="adminStatCard adminStatCard--skeleton">
+                    <div className="adminStatCard__icon adminStatCard__icon--skeleton"></div>
+                    <div className="adminStatCard__content">
+                      <div className="adminStatCard__label adminStatCard__label--skeleton"></div>
+                      <div className="adminStatCard__value adminStatCard__value--skeleton"></div>
+                      <div className="adminStatCard__change adminStatCard__change--skeleton"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="adminOverview__quickActions">
+                <div className="adminOverview__sectionTitle adminOverview__sectionTitle--skeleton"></div>
+                <div className="adminOverview__actionGrid">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="adminQuickAction adminQuickAction--skeleton">
+                      <div className="adminQuickAction__icon adminQuickAction__icon--skeleton"></div>
+                      <div className="adminQuickAction__label adminQuickAction__label--skeleton"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Notifications Center */}
+      <NotificationsCenter
+        isOpen={viewState.showNotifications}
+        onClose={() => onToggleShow("showNotifications")}
+        onNotificationClick={(notification) => {
+          if (notification.actionUrl) {
+            window.location.href = notification.actionUrl;
+          }
+        }}
+      />
+
+      {/* Inventory Manager */}
+      <InventoryManager
+        isOpen={viewState.showInventory}
+        onClose={() => onToggleShow("showInventory")}
+        onBouquetClick={(bouquetId) => {
+          onSetActiveTab("edit");
+          onToggleShow("showInventory");
+        }}
+      />
+
+      {/* Analytics Dashboard Modal - Only show when not in analytics tab */}
+      {viewState.showAnalytics && viewState.activeTab !== "analytics" && (
+        <AnalyticsDashboard
+          isOpen={viewState.showAnalytics}
+          onClose={() => onToggleShow("showAnalytics")}
+          period="30d"
+          inline={false}
+        />
+      )}
+      
+      {/* Admin Support Features */}
+      <QuickActionsPanel
+        isOpen={viewState.showQuickActions}
+        onClose={() => onToggleShow("showQuickActions")}
+        actions={[
+          {
+            id: "new-order",
+            label: "Order Baru",
+            icon: "📦",
+            onClick: () => onSetActiveTab("orders"),
+            variant: "primary",
+          },
+          {
+            id: "new-bouquet",
+            label: "Tambah Bouquet",
+            icon: "🌸",
+            onClick: () => onSetActiveTab("upload"),
+            variant: "primary",
+          },
+          {
+            id: "view-customers",
+            label: "Lihat Customers",
+            icon: "👤",
+            onClick: () => onSetActiveTab("customers"),
+          },
+          {
+            id: "edit-bouquet",
+            label: "Edit Bouquet",
+            icon: "✏️",
+            onClick: () => onSetActiveTab("edit"),
+          },
+          {
+            id: "analytics",
+            label: "Analytics",
+            icon: "📊",
+            onClick: () => onSetActiveTab("analytics"),
+          },
+          {
+            id: "notifications",
+            label: "Notifications",
+            icon: "🔔",
+            onClick: () => onToggleShow("showNotifications"),
+          },
+          {
+            id: "inventory",
+            label: "Inventory",
+            icon: "📦",
+            onClick: () => onToggleShow("showInventory"),
+          },
+          {
+            id: "system-status",
+            label: "System Status",
+            icon: "⚙️",
+            onClick: () => onToggleShow("showSystemStatus"),
+          },
+        ]}
+      />
+      
+      <DashboardSearch
+        isOpen={viewState.showSearch}
+        onClose={() => onToggleShow("showSearch")}
+        onResultClick={(result) => {
+          if (result.type === "order") {
+            onSetActiveTab("orders");
+          } else if (result.type === "customer") {
+            onSetActiveTab("customers");
+          } else if (result.type === "bouquet") {
+            onSetActiveTab("edit");
+          }
+        }}
+      />
+      
+      <ActivityLog
+        isOpen={viewState.showActivityLog}
+        onClose={() => onToggleShow("showActivityLog")}
+      />
+      
+      <SystemStatus
+        isOpen={viewState.showSystemStatus}
+        onClose={() => onToggleShow("showSystemStatus")}
+      />
+    </section>
+  );
+};
+
+export default DashboardPageView;

@@ -1,107 +1,37 @@
-import React, { useState, useEffect } from "react";
-import { setSeo } from "../utils/seo";
+/**
+ * Contact Page View
+ * Pure presentation component - no business logic
+ */
+
+import React from "react";
+import "../styles/ContactPage.css";
+import type { ContactFormData, ContactFormStatus } from "../models/contact-page-model";
 import { STORE_PROFILE } from "../config/store-profile";
 import { CONTACT_INFO, SOCIAL_MEDIA, BUSINESS_HOURS } from "../constants/app-constants";
 import { SocialIcon } from "../components/icons/SocialIcons";
-import {
-  PhoneIcon,
-  EmailIcon,
-  ClockIcon,
-} from "../components/icons/UIIcons";
-import "../styles/ContactPage.css";
+import { PhoneIcon, EmailIcon, ClockIcon } from "../components/icons/UIIcons";
 
-interface FormData {
-  name: string;
-  email: string;
-  phone: string;
-  subject: string;
-  message: string;
+interface ContactPageViewProps {
+  formData: ContactFormData;
+  status: ContactFormStatus;
+  errorMessage: string;
+  onFormChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => void;
+  onFormSubmit: (e: React.FormEvent) => void;
 }
 
-const ContactPage: React.FC = () => {
-  const [formData, setFormData] = useState<FormData>({
-    name: "",
-    email: "",
-    phone: "",
-    subject: "",
-    message: "",
-  });
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [errorMessage, setErrorMessage] = useState<string>("");
-
-  useEffect(() => {
-    setSeo({
-      title: "Kontak Kami - Hubungi Giftforyou.idn | Florist Cirebon",
-      description:
-        "Hubungi Giftforyou.idn untuk pemesanan bouquet, gift box, dan stand acrylic. Kami siap membantu Anda dengan berbagai kebutuhan hadiah dan dekorasi. Lokasi: Cirebon, Jawa Barat.",
-      keywords:
-        "kontak giftforyou, hubungi florist cirebon, alamat toko bunga cirebon, telepon florist cirebon",
-      path: "/contact",
-    });
-  }, []);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus("loading");
-    setErrorMessage("");
-
-    // Validate form
-    if (!formData.name || !formData.email || !formData.message) {
-      setErrorMessage("Mohon lengkapi semua field yang wajib diisi");
-      setStatus("error");
-      return;
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setErrorMessage("Format email tidak valid");
-      setStatus("error");
-      return;
-    }
-
-    try {
-      // Create WhatsApp message
-      const whatsappMessage = encodeURIComponent(
-        `Halo ${STORE_PROFILE.brand.displayName},\n\n` +
-        `Saya ingin menghubungi Anda melalui form kontak:\n\n` +
-        `Nama: ${formData.name}\n` +
-        `Email: ${formData.email}\n` +
-        `Telepon: ${formData.phone || "-"}\n` +
-        `Subjek: ${formData.subject || "Pertanyaan Umum"}\n\n` +
-        `Pesan:\n${formData.message}`
-      );
-
-      // Open WhatsApp
-      window.open(
-        `https://wa.me/${STORE_PROFILE.contact.phoneE164.replace(/\D/g, "")}?text=${whatsappMessage}`,
-        "_blank"
-      );
-
-      // Reset form
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        subject: "",
-        message: "",
-      });
-
-      setStatus("success");
-      setTimeout(() => setStatus("idle"), 3000);
-    } catch (error) {
-      setErrorMessage("Terjadi kesalahan. Silakan coba lagi.");
-      setStatus("error");
-    }
-  };
-
+/**
+ * Contact Page View Component
+ * Pure presentation - receives all data and handlers via props
+ */
+const ContactPageView: React.FC<ContactPageViewProps> = ({
+  formData,
+  status,
+  errorMessage,
+  onFormChange,
+  onFormSubmit,
+}) => {
   return (
     <main className="contact-page">
       <div className="contact-container">
@@ -219,7 +149,7 @@ const ContactPage: React.FC = () => {
                 Isi form di bawah ini atau hubungi kami langsung via WhatsApp
               </p>
 
-              <form onSubmit={handleSubmit} className="contact-form">
+              <form onSubmit={onFormSubmit} className="contact-form">
                 <div className="contact-form-row">
                   <div className="contact-form-group">
                     <label htmlFor="contact-name" className="contact-form-label">
@@ -230,7 +160,7 @@ const ContactPage: React.FC = () => {
                       id="contact-name"
                       name="name"
                       value={formData.name}
-                      onChange={handleChange}
+                      onChange={onFormChange}
                       className="contact-form-input"
                       required
                       placeholder="Masukkan nama Anda"
@@ -246,7 +176,7 @@ const ContactPage: React.FC = () => {
                       id="contact-email"
                       name="email"
                       value={formData.email}
-                      onChange={handleChange}
+                      onChange={onFormChange}
                       className="contact-form-input"
                       required
                       placeholder="nama@email.com"
@@ -264,7 +194,7 @@ const ContactPage: React.FC = () => {
                       id="contact-phone"
                       name="phone"
                       value={formData.phone}
-                      onChange={handleChange}
+                      onChange={onFormChange}
                       className="contact-form-input"
                       placeholder="08xxxxxxxxxx"
                     />
@@ -278,7 +208,7 @@ const ContactPage: React.FC = () => {
                       id="contact-subject"
                       name="subject"
                       value={formData.subject}
-                      onChange={handleChange}
+                      onChange={onFormChange}
                       className="contact-form-input"
                     >
                       <option value="">Pilih Subjek</option>
@@ -299,7 +229,7 @@ const ContactPage: React.FC = () => {
                     id="contact-message"
                     name="message"
                     value={formData.message}
-                    onChange={handleChange}
+                    onChange={onFormChange}
                     className="contact-form-textarea"
                     required
                     rows={6}
@@ -415,5 +345,4 @@ const ContactPage: React.FC = () => {
   );
 };
 
-export default ContactPage;
-
+export default ContactPageView;

@@ -7,52 +7,29 @@ import { getBouquetSizeFilterOptions } from "../constants/bouquet-constants";
 import { trackSearch } from "../services/analytics.service";
 import { normalizeBouquets } from "../utils/bouquet-normalizer";
 import { isNonEmptyString } from "../utils/validation";
+import { setSeo } from "../utils/seo";
+import { formatIDR } from "../utils/money";
+import { observeFadeIn, revealOnScroll, staggerFadeIn } from "../utils/luxury-enhancements";
+import type { FilterChip } from "../components/catalog/CatalogActiveFilters";
+import {
+  type BouquetCatalogPageState,
+  type PriceRange,
+  type NavigateFn,
+  INITIAL_BOUQUET_CATALOG_PAGE_STATE,
+  DEFAULT_PRICE_RANGE,
+} from "../models/bouquet-catalog-page-model";
 
-type Range = [number, number];
-
-type NavigateFn = (to: any, options?: any) => void;
-
-interface State {
-  bouquets: Bouquet[];
-
-  priceRange: Range;
-  selectedTypes: string[];
-  selectedSizes: string[];
-  selectedCollections: string[];
-  sortBy: string;
-
-  currentPage: number;
-  itemsPerPage: number;
-
-  collectionNameFilter: string;
-  searchQuery: string;
-
-  loading: boolean;
-  error: string | null;
-}
+// Removed duplicate type definitions - now using types from model file
 
 class BouquetCatalogController extends Component<
   { locationSearch?: string; navigate?: NavigateFn },
-  State
+  BouquetCatalogPageState
 > {
   private abortController: AbortController | null = null;
 
   constructor(props: {}) {
     super(props);
-    this.state = {
-      bouquets: [],
-      priceRange: [0, 1_000_000],
-      selectedTypes: [],
-      selectedSizes: [],
-      selectedCollections: [],
-      sortBy: "",
-      currentPage: 1,
-      itemsPerPage: 9,
-      collectionNameFilter: "",
-      searchQuery: "",
-      loading: true,
-      error: null,
-    };
+    this.state = { ...INITIAL_BOUQUET_CATALOG_PAGE_STATE };
   }
 
   componentDidMount(): void {
@@ -62,7 +39,7 @@ class BouquetCatalogController extends Component<
 
   componentDidUpdate(
     prevProps: Readonly<{ locationSearch?: string }>,
-    prevState: Readonly<State>
+    prevState: Readonly<BouquetCatalogPageState>
   ): void {
     if ((prevProps.locationSearch ?? "") !== (this.props.locationSearch ?? "")) {
       this.applyLocationSearch(this.props.locationSearch);
@@ -73,6 +50,18 @@ class BouquetCatalogController extends Component<
       if (term.length >= 2) {
         trackSearch(term, "/collection", this.props.locationSearch ?? "");
       }
+    }
+
+    // Apply SEO when filters change
+    if (
+      prevState.selectedTypes !== this.state.selectedTypes ||
+      prevState.selectedSizes !== this.state.selectedSizes ||
+      prevState.priceRange !== this.state.priceRange ||
+      prevState.sortBy !== this.state.sortBy ||
+      prevState.searchQuery !== this.state.searchQuery ||
+      prevState.collectionNameFilter !== this.state.collectionNameFilter
+    ) {
+      this.applySeo();
     }
 
     // Keep URL in sync with current filters/sort/page so the state is shareable.
@@ -101,7 +90,7 @@ class BouquetCatalogController extends Component<
           searchQuery: "",
           sortBy: "",
           currentPage: 1,
-          priceRange: [0, 1_000_000],
+          priceRange: DEFAULT_PRICE_RANGE,
         });
       }
       return;
@@ -124,10 +113,9 @@ class BouquetCatalogController extends Component<
     const minParsed = Number.parseInt(minRaw, 10);
     const maxParsed = Number.parseInt(maxRaw, 10);
 
-    const DEFAULT_PRICE: Range = [0, 1_000_000];
-    const min = Number.isFinite(minParsed) ? Math.max(0, minParsed) : DEFAULT_PRICE[0];
-    const max = Number.isFinite(maxParsed) ? Math.max(min, maxParsed) : DEFAULT_PRICE[1];
-    const priceRange: Range = [min, max];
+    const min = Number.isFinite(minParsed) ? Math.max(0, minParsed) : DEFAULT_PRICE_RANGE[0];
+    const max = Number.isFinite(maxParsed) ? Math.max(min, maxParsed) : DEFAULT_PRICE_RANGE[1];
+    const priceRange: PriceRange = [min, max];
 
     const splitCsv = (v: string) =>
       v
@@ -212,8 +200,7 @@ class BouquetCatalogController extends Component<
     const sort = (sortBy ?? "").trim();
     if (sort) params.set("sort", sort);
 
-    const DEFAULT_PRICE: Range = [0, 1_000_000];
-    if (priceRange[0] !== DEFAULT_PRICE[0] || priceRange[1] !== DEFAULT_PRICE[1]) {
+    if (priceRange[0] !== DEFAULT_PRICE_RANGE[0] || priceRange[1] !== DEFAULT_PRICE_RANGE[1]) {
       params.set("min", String(priceRange[0]));
       params.set("max", String(priceRange[1]));
     }
@@ -303,7 +290,10 @@ class BouquetCatalogController extends Component<
         console.warn("[Catalog] Sample raw data:", JSON.stringify(data.slice(0, 1), null, 2));
       }
 
-      this.setState({ bouquets, loading: false, error: null });
+      this.setState({ bouquets, loading: false, error: null }, () => {
+        // Apply SEO after bouquets are loaded
+        this.applySeo();
+      });
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === "AbortError") return;
 
@@ -369,7 +359,7 @@ class BouquetCatalogController extends Component<
 
   private clearAll = () => {
     this.setState({
-      priceRange: [0, 1_000_000],
+      priceRange: DEFAULT_PRICE_RANGE,
       selectedTypes: [],
       selectedSizes: [],
       selectedCollections: [],
@@ -396,7 +386,7 @@ class BouquetCatalogController extends Component<
     this.setState({ sortBy: value, currentPage: 1 });
   };
 
-  private handlePriceRangeChange = (range: Range) => {
+  private handlePriceRangeChange = (range: PriceRange) => {
     this.setState({ priceRange: range, currentPage: 1 });
   };
 
@@ -467,6 +457,150 @@ class BouquetCatalogController extends Component<
     });
   }
 
+  /**
+   * Apply SEO
+   */
+  private applySeo = (): void => {
+    const { selectedTypes, selectedSizes, selectedCollections, searchQuery, collectionNameFilter, sortBy, priceRange } = this.state;
+
+    const filters: string[] = [];
+    if (selectedTypes.length) filters.push(selectedTypes.join(", "));
+    if (selectedSizes.length) filters.push(selectedSizes.join(", "));
+    if (selectedCollections.length) filters.push(selectedCollections.join(", "));
+    if (!selectedCollections.length && collectionNameFilter) filters.push(collectionNameFilter);
+    if (searchQuery) filters.push(`"${searchQuery}"`);
+    if (sortBy) filters.push(sortBy);
+    if (priceRange?.length === 2) {
+      if (priceRange[0] !== DEFAULT_PRICE_RANGE[0] || priceRange[1] !== DEFAULT_PRICE_RANGE[1]) {
+        filters.push(`${formatIDR(priceRange[0])} – ${formatIDR(priceRange[1])}`);
+      }
+    }
+
+    const suffix = filters.length ? ` (${filters.join(" • ")})` : "";
+    setSeo({
+      title: `Katalog Bouquet Cirebon${suffix} | Giftforyou.idn - Florist Terbaik di Jawa Barat`,
+      description:
+        `Katalog lengkap bouquet di Cirebon, Jawa Barat. Tersedia berbagai pilihan bouquet bunga segar, gift box, stand acrylic, dan artificial bouquet. Filter berdasarkan tipe, ukuran, dan harga. Pesan mudah via WhatsApp dengan pengiriman cepat ke seluruh Cirebon.`,
+      keywords:
+        "katalog bouquet cirebon, bouquet cirebon murah, gift box cirebon, stand acrylic cirebon, florist cirebon online, toko bunga cirebon, artificial bouquet cirebon, hadiah cirebon, kado cirebon, florist jawa barat",
+      path: "/collection",
+    });
+  };
+
+  /**
+   * Build filter chips
+   */
+  private buildFilterChips = (): FilterChip[] => {
+    const { searchQuery, collectionNameFilter, selectedCollections, selectedTypes, selectedSizes, priceRange, sortBy } = this.state;
+
+    const chips: FilterChip[] = [];
+    const searchQueryTrimmed = (searchQuery ?? "").trim();
+    const collectionNameFilterTrimmed = (collectionNameFilter ?? "").trim();
+
+    if (searchQueryTrimmed) {
+      chips.push({
+        key: `q:${searchQueryTrimmed}`,
+        label: `Pencarian: "${searchQueryTrimmed}"`,
+        onRemove: this.clearSearchQuery,
+        ariaLabel: `Hapus pencarian ${searchQueryTrimmed}`,
+      });
+    }
+
+    if (collectionNameFilterTrimmed && (selectedCollections?.length ?? 0) === 0) {
+      chips.push({
+        key: `collectionName:${collectionNameFilterTrimmed}`,
+        label: `Koleksi: ${collectionNameFilterTrimmed}`,
+        onRemove: this.clearCollectionNameFilter,
+        ariaLabel: `Hapus filter koleksi ${collectionNameFilterTrimmed}`,
+      });
+    }
+
+    (selectedCollections ?? []).forEach((v) => {
+      chips.push({
+        key: `collection:${v}`,
+        label: `Koleksi: ${v}`,
+        onRemove: () => this.toggleFilter("selectedCollections", v),
+        ariaLabel: `Hapus filter koleksi ${v}`,
+      });
+    });
+
+    (selectedTypes ?? []).forEach((v) => {
+      chips.push({
+        key: `type:${v}`,
+        label: `Tipe: ${v}`,
+        onRemove: () => this.toggleFilter("selectedTypes", v),
+        ariaLabel: `Hapus filter tipe ${v}`,
+      });
+    });
+
+    (selectedSizes ?? []).forEach((v) => {
+      chips.push({
+        key: `size:${v}`,
+        label: `Ukuran: ${v}`,
+        onRemove: () => this.toggleFilter("selectedSizes", v),
+        ariaLabel: `Hapus filter ukuran ${v}`,
+      });
+    });
+
+    if (priceRange[0] !== DEFAULT_PRICE_RANGE[0] || priceRange[1] !== DEFAULT_PRICE_RANGE[1]) {
+      chips.push({
+        key: `price:${priceRange[0]}-${priceRange[1]}`,
+        label: `Harga: ${formatIDR(priceRange[0])} – ${formatIDR(priceRange[1])}`,
+        onRemove: () => this.handlePriceRangeChange(DEFAULT_PRICE_RANGE),
+        ariaLabel: "Hapus filter harga",
+      });
+    }
+
+    const sortLabel = (() => {
+      switch (sortBy) {
+        case "price-asc":
+          return "Harga: Termurah";
+        case "price-desc":
+          return "Harga: Termahal";
+        case "name-asc":
+          return "Nama: A–Z";
+        case "name-desc":
+          return "Nama: Z–A";
+        default:
+          return "";
+      }
+    })();
+
+    if (sortLabel) {
+      chips.push({
+        key: `sort:${sortBy}`,
+        label: `Urutkan: ${sortLabel}`,
+        onRemove: () => this.setSortBy(""),
+        ariaLabel: "Hapus urutan",
+      });
+    }
+
+    return chips;
+  };
+
+  /**
+   * Check if prefers reduced motion
+   */
+  private prefersReducedMotion = (): boolean => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return false;
+    }
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  };
+
+  /**
+   * Scroll to results
+   */
+  private scrollToResults = (resultsRef: React.RefObject<HTMLElement>): void => {
+    const behavior: ScrollBehavior = this.prefersReducedMotion() ? "auto" : "smooth";
+    const el = resultsRef.current;
+    if (el) {
+      el.scrollIntoView({ behavior, block: "start" });
+    } else {
+      window.scrollTo({ top: 0, behavior });
+    }
+  };
+
   render(): React.ReactNode {
     const filtered = this.getFilteredBouquets();
     const sorted = this.getSortedBouquets(filtered);
@@ -489,9 +623,26 @@ class BouquetCatalogController extends Component<
       )
     );
 
+    // Calculate derived values
+    const total = sorted.length;
+    const startIndex = (this.state.currentPage - 1) * this.state.itemsPerPage;
+    const pageItems = sorted.slice(startIndex, startIndex + this.state.itemsPerPage);
+    const hasActiveFilters =
+      (this.state.selectedTypes?.length ?? 0) > 0 ||
+      (this.state.selectedSizes?.length ?? 0) > 0 ||
+      (this.state.selectedCollections?.length ?? 0) > 0 ||
+      Boolean(this.state.collectionNameFilter) ||
+      Boolean(this.state.searchQuery) ||
+      Boolean(this.state.sortBy) ||
+      this.state.priceRange[0] !== DEFAULT_PRICE_RANGE[0] ||
+      this.state.priceRange[1] !== DEFAULT_PRICE_RANGE[1];
+    const chips = this.buildFilterChips();
+    const minPrice = sorted.length > 0 ? Math.min(...sorted.map((b) => b.price)) : undefined;
+
     return (
       <BouquetCatalogView
-        bouquets={sorted}
+        bouquets={pageItems}
+        total={total}
         allTypes={allTypes.length ? allTypes : ["Orchid", "Mixed"]}
         allSizes={allSizes}
         allCollections={allCollections}
@@ -504,6 +655,9 @@ class BouquetCatalogController extends Component<
         sortBy={this.state.sortBy}
         currentPage={this.state.currentPage}
         itemsPerPage={this.state.itemsPerPage}
+        minPrice={minPrice}
+        hasActiveFilters={hasActiveFilters}
+        filterChips={chips}
         onPriceChange={this.handlePriceRangeChange}
         onToggleFilter={this.toggleFilter}
         onClearFilter={this.clearFilter}
@@ -513,6 +667,7 @@ class BouquetCatalogController extends Component<
         onClearCollectionNameFilter={this.clearCollectionNameFilter}
         onSearchChange={this.setSearchQuery}
         onPageChange={(page) => this.setState({ currentPage: page })}
+        onScrollToResults={this.scrollToResults}
         loading={this.state.loading}
         error={this.state.error}
       />
