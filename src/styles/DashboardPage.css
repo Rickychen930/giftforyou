@@ -497,9 +497,9 @@
   position: relative;
 }
 
-/* Luxury Mobile Menu Button */
+/* Luxury Mobile Menu Button - HIDDEN on desktop, visible only on mobile */
 .dashboardMobileMenuBtn {
-  display: none;
+  display: none; /* Hidden by default */
   position: fixed;
   top: 1.25rem;
   left: 1.25rem;
@@ -514,7 +514,6 @@
     0 4px 16px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
   cursor: pointer;
-  display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -626,9 +625,17 @@
   }
 }
 
+/* Only show on mobile devices (max-width: 768px) */
 @media (max-width: 768px) {
   .dashboardMobileMenuBtn {
-    display: flex;
+    display: flex !important; /* Force display on mobile */
+  }
+}
+
+/* Hide on desktop (min-width: 769px) */
+@media (min-width: 769px) {
+  .dashboardMobileMenuBtn {
+    display: none !important; /* Force hide on desktop */
   }
 }
 
