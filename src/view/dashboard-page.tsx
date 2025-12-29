@@ -22,6 +22,10 @@ import CustomersSection from "../components/sections/customers-section";
 import NotificationsCenter from "../components/NotificationsCenter";
 import InventoryManager from "../components/InventoryManager";
 import AnalyticsDashboard from "../components/AnalyticsDashboard";
+import QuickActionsPanel from "../components/QuickActionsPanel";
+import DashboardSearch from "../components/DashboardSearch";
+import ActivityLog from "../components/ActivityLog";
+import SystemStatus from "../components/SystemStatus";
 
 interface Props {
   bouquets: Bouquet[];
@@ -143,6 +147,10 @@ interface State {
   showNotifications: boolean;
   showInventory: boolean;
   showAnalytics: boolean;
+  showQuickActions: boolean;
+  showSearch: boolean;
+  showActivityLog: boolean;
+  showSystemStatus: boolean;
 }
 
 class DashboardView extends Component<Props, State> {
@@ -171,6 +179,10 @@ class DashboardView extends Component<Props, State> {
     showInventory: false,
     showAnalytics: false,
     sidebarOpen: false,
+    showQuickActions: false,
+    showSearch: false,
+    showActivityLog: false,
+    showSystemStatus: false,
   };
 
   componentDidMount(): void {
@@ -1657,16 +1669,20 @@ class DashboardView extends Component<Props, State> {
         {this.renderSidebar()}
 
         <main id="dashboard-main" className="dashboardMain">
+          {/* Luxury Mobile Menu Button */}
           <button
             type="button"
-            className="dashboardMobileMenuBtn"
+            className={`dashboardMobileMenuBtn ${this.state.sidebarOpen ? "dashboardMobileMenuBtn--active" : ""}`}
             onClick={() => this.setState({ sidebarOpen: !this.state.sidebarOpen })}
             aria-label="Toggle sidebar"
             aria-expanded={this.state.sidebarOpen}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <div className="dashboardMobileMenuBtn__icon">
+              <span className="dashboardMobileMenuBtn__line dashboardMobileMenuBtn__line--1"></span>
+              <span className="dashboardMobileMenuBtn__line dashboardMobileMenuBtn__line--2"></span>
+              <span className="dashboardMobileMenuBtn__line dashboardMobileMenuBtn__line--3"></span>
+            </div>
+            <div className="dashboardMobileMenuBtn__glow"></div>
           </button>
           {this.state.sidebarOpen && (
             <div 
@@ -1682,6 +1698,52 @@ class DashboardView extends Component<Props, State> {
                 <button
                   type="button"
                   className="dashboardActionBtn dashboardActionBtn--compact"
+                  onClick={() => this.setState({ showSearch: true })}
+                  title="Cari (Ctrl+K)"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M21 21l-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span className="dashboardActionBtn__label">Cari</span>
+                </button>
+                <button
+                  type="button"
+                  className="dashboardActionBtn dashboardActionBtn--compact"
+                  onClick={() => this.setState({ showQuickActions: true })}
+                  title="Quick Actions"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span className="dashboardActionBtn__label">Quick</span>
+                </button>
+                <button
+                  type="button"
+                  className="dashboardActionBtn dashboardActionBtn--compact"
+                  onClick={() => this.setState({ showActivityLog: true })}
+                  title="Activity Log"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span className="dashboardActionBtn__label">Log</span>
+                </button>
+                <button
+                  type="button"
+                  className="dashboardActionBtn dashboardActionBtn--compact"
+                  onClick={() => this.setState({ showSystemStatus: true })}
+                  title="System Status"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span className="dashboardActionBtn__label">Status</span>
+                </button>
+                <button
+                  type="button"
+                  className="dashboardActionBtn dashboardActionBtn--compact"
                   onClick={this.copyCurrentLink}
                   disabled={loading}
                   title="Salin link tab"
@@ -1690,7 +1752,7 @@ class DashboardView extends Component<Props, State> {
                     <path d="M8 17V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     <path d="M4 19h9a2 2 0 0 0 2-2V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                  <span className="dashboardActionBtn__label">Salin link</span>
+                  <span className="dashboardActionBtn__label">Salin</span>
                 </button>
                 <button
                   type="button"
@@ -1702,7 +1764,7 @@ class DashboardView extends Component<Props, State> {
                     <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8M21 8v5M21 8h-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16M3 16v-5M3 16h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                  <span className="dashboardActionBtn__label">Muat ulang</span>
+                  <span className="dashboardActionBtn__label">Reload</span>
                 </button>
               </div>
               {copyStatus && (
@@ -1777,6 +1839,88 @@ class DashboardView extends Component<Props, State> {
           isOpen={this.state.showAnalytics}
           onClose={() => this.setState({ showAnalytics: false })}
           period="30d"
+        />
+        
+        {/* Admin Support Features */}
+        <QuickActionsPanel
+          isOpen={this.state.showQuickActions}
+          onClose={() => this.setState({ showQuickActions: false })}
+          actions={[
+            {
+              id: "new-order",
+              label: "Order Baru",
+              icon: "📦",
+              onClick: () => this.setActiveTab("orders"),
+              variant: "primary",
+            },
+            {
+              id: "new-bouquet",
+              label: "Tambah Bouquet",
+              icon: "🌸",
+              onClick: () => this.setActiveTab("upload"),
+              variant: "primary",
+            },
+            {
+              id: "view-customers",
+              label: "Lihat Customers",
+              icon: "👤",
+              onClick: () => this.setActiveTab("customers"),
+            },
+            {
+              id: "edit-bouquet",
+              label: "Edit Bouquet",
+              icon: "✏️",
+              onClick: () => this.setActiveTab("edit"),
+            },
+            {
+              id: "analytics",
+              label: "Analytics",
+              icon: "📊",
+              onClick: () => this.setActiveTab("analytics"),
+            },
+            {
+              id: "notifications",
+              label: "Notifications",
+              icon: "🔔",
+              onClick: () => this.setState({ showNotifications: true }),
+            },
+            {
+              id: "inventory",
+              label: "Inventory",
+              icon: "📦",
+              onClick: () => this.setState({ showInventory: true }),
+            },
+            {
+              id: "system-status",
+              label: "System Status",
+              icon: "⚙️",
+              onClick: () => this.setState({ showSystemStatus: true }),
+            },
+          ]}
+        />
+        
+        <DashboardSearch
+          isOpen={this.state.showSearch}
+          onClose={() => this.setState({ showSearch: false })}
+          onResultClick={(result) => {
+            if (result.type === "order") {
+              this.setActiveTab("orders");
+            } else if (result.type === "customer") {
+              this.setActiveTab("customers");
+            } else if (result.type === "bouquet") {
+              this.setActiveTab("edit");
+            }
+          }}
+        />
+        
+        <ActivityLog
+          isOpen={this.state.showActivityLog}
+          onClose={() => this.setState({ showActivityLog: false })}
+        />
+        
+        <SystemStatus
+          isOpen={this.state.showSystemStatus}
+          onClose={() => this.setState({ showSystemStatus: false })}
         />
       </div>
     );

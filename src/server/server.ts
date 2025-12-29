@@ -176,6 +176,13 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 async function start() {
+  // Log environment configuration on startup
+  console.log("📋 Environment Configuration:");
+  console.log(`   NODE_ENV: ${process.env.NODE_ENV || "not set"}`);
+  console.log(`   ALLOW_PUBLIC_REGISTRATION: ${process.env.ALLOW_PUBLIC_REGISTRATION || "not set"}`);
+  console.log(`   PORT: ${PORT}`);
+  console.log(`   Using .env file: ${process.env.DOTENV_CONFIG_PATH || ".env"}`);
+  
   const server = app.listen(PORT, "0.0.0.0", () => {
     console.log(`🚀 Server running on port ${PORT}`);
   });

@@ -109,7 +109,10 @@ export function initializeGoogleSignIn(
  */
 export function triggerGoogleSignIn(): void {
   if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.trim() === "") {
-    console.warn("Google Client ID not configured");
+    // Only warn in development to avoid console noise in production
+    if (process.env.NODE_ENV === "development") {
+      console.warn("Google Client ID not configured. Google Sign-In will not be available.");
+    }
     return;
   }
 

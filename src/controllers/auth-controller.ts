@@ -55,7 +55,23 @@ export async function createUser(req: Request, res: Response): Promise<void> {
     const isProduction = process.env.NODE_ENV === "production";
     const allowRegistration = process.env.ALLOW_PUBLIC_REGISTRATION === "true";
     
+    // Debug logging in development
+    if (process.env.NODE_ENV === "development") {
+      console.log("[Auth] Registration check:", {
+        isProduction,
+        allowRegistration,
+        ALLOW_PUBLIC_REGISTRATION: process.env.ALLOW_PUBLIC_REGISTRATION,
+        NODE_ENV: process.env.NODE_ENV,
+      });
+    }
+    
     if (isProduction && !allowRegistration) {
+      res.status(403).json({ error: "Registration is disabled" });
+      return;
+    }
+    
+    // Also check if explicitly disabled in development
+    if (!isProduction && process.env.ALLOW_PUBLIC_REGISTRATION === "false") {
       res.status(403).json({ error: "Registration is disabled" });
       return;
     }
@@ -209,11 +225,11 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    // Generate access token (short-lived)
+    // Generate access token (short-lived for security)
     const accessToken = jwt.sign(
       { id: String(user._id), username: user.username, role: user.role },
       JWT_SECRET,
-      { expiresIn: "4h" } // Token expires in 4 hours
+      { expiresIn: "15m" } // Token expires in 15 minutes (for security)
     );
 
     // Generate refresh token (long-lived)
@@ -259,10 +275,18 @@ export async function googleLogin(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    // Verify Google token (in production, verify with Google API)
-    // For now, we'll decode the JWT token from Google
+    // Decode Google JWT token
+    // Note: In production, you should verify the token with Google's API
+    // For now, we decode it (client-side already verified it with Google)
     try {
-      const payload = JSON.parse(Buffer.from(credential.split(".")[1], "base64").toString());
+      // Validate JWT structure
+      const parts = credential.split(".");
+      if (parts.length !== 3) {
+        res.status(400).json({ error: "Invalid Google credential format" });
+        return;
+      }
+      
+      const payload = JSON.parse(Buffer.from(parts[1], "base64").toString());
       
       const email = payload.email?.toLowerCase();
       const name = payload.name || "";
@@ -386,7 +410,7 @@ export async function refreshToken(req: Request, res: Response): Promise<void> {
       const accessToken = jwt.sign(
         { id: String(user._id), username: user.username, role: user.role },
         JWT_SECRET,
-        { expiresIn: "4h" } // Token expires in 4 hours
+        { expiresIn: "15m" } // Token expires in 15 minutes (for security)
       );
 
       res.status(200).json({ token: accessToken });
