@@ -4,7 +4,7 @@
  * Get API base URL
  * Priority:
  * 1. REACT_APP_API_URL from environment
- * 2. Auto-detect from window.location in production
+ * 2. Auto-detect from window.location in production (client-side only)
  * 3. Empty string (same origin) for development
  */
 function getApiBase(): string {
@@ -15,15 +15,20 @@ function getApiBase(): string {
     return envUrl;
   }
   
-  // For production, auto-detect API URL from current domain
-  if (typeof window !== "undefined") {
-    const { hostname } = window.location;
-    
-    // In production, construct API URL from current domain
-    // If on https://giftforyou-idn.cloud, API should be at same origin or api subdomain
-    if (hostname.includes("giftforyou-idn.cloud") || hostname.includes("giftforyou.idn")) {
-      // Use same origin (empty string) - API is on same server
-      return "";
+  // For production, auto-detect API URL from current domain (client-side only)
+  // Check if we're in a browser environment
+  // Use type assertion to avoid TypeScript errors in server build
+  if (typeof globalThis !== "undefined") {
+    const globalWindow = (globalThis as { window?: { location?: { hostname?: string } } }).window;
+    if (globalWindow?.location?.hostname) {
+      const hostname = globalWindow.location.hostname;
+      
+      // In production, construct API URL from current domain
+      // If on https://giftforyou-idn.cloud, API should be at same origin or api subdomain
+      if (hostname.includes("giftforyou-idn.cloud") || hostname.includes("giftforyou.idn")) {
+        // Use same origin (empty string) - API is on same server
+        return "";
+      }
     }
   }
   
