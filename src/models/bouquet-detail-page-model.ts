@@ -3,7 +3,15 @@
  * Defines data structures and types for the bouquet detail page
  */
 
-import type { OrderFormData } from "../components/bouquet-detail/OrderForm";
+// Define OrderFormData locally to avoid JSX import issues
+export interface OrderFormData {
+  deliveryType: "pickup" | "delivery";
+  deliveryDate: string;
+  deliveryTimeSlot?: string;
+  address: string;
+  greetingCard: string;
+  quantity: number;
+}
 
 /**
  * Bouquet Detail Page State

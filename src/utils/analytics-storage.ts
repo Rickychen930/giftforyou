@@ -34,6 +34,13 @@ const RETENTION_DAYS = 90; // Keep data for 90 days
  * Get historical data from storage
  */
 export function getHistoricalData(): HistoricalData {
+  if (typeof localStorage === "undefined") {
+    return {
+      performance: [],
+      seo: [],
+      lastUpdated: Date.now(),
+    };
+  }
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) {
@@ -80,6 +87,7 @@ export function savePerformanceHistory(
   url?: string
 ): void {
   try {
+    if (typeof window === "undefined" || typeof localStorage === "undefined") return;
     const data = getHistoricalData();
     const entry: HistoricalPerformance = {
       timestamp: Date.now(),
@@ -112,6 +120,7 @@ export function saveSeoHistory(
   url?: string
 ): void {
   try {
+    if (typeof window === "undefined" || typeof localStorage === "undefined") return;
     const data = getHistoricalData();
     const entry: HistoricalSeo = {
       timestamp: Date.now(),
@@ -138,6 +147,7 @@ export function saveSeoHistory(
  * Clear historical data
  */
 export function clearHistoricalData(): void {
+  if (typeof localStorage === "undefined") return;
   try {
     localStorage.removeItem(STORAGE_KEY);
   } catch (error) {

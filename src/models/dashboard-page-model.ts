@@ -172,6 +172,7 @@ export const INITIAL_DASHBOARD_PAGE_VIEW_STATE: DashboardPageViewState = {
  * Read tab from location
  */
 export const readTabFromLocation = (): ActiveTab | null => {
+  if (typeof window === "undefined") return null;
   try {
     const params = new URLSearchParams(window.location.search);
     const qp = (params.get("tab") ?? "").trim();
@@ -190,6 +191,7 @@ export const readTabFromLocation = (): ActiveTab | null => {
  * Write tab to location
  */
 export const writeTabToLocation = (tab: ActiveTab): void => {
+  if (typeof window === "undefined") return;
   try {
     const nextUrl = `${window.location.pathname}${window.location.search}#${tab}`;
     window.history.replaceState(null, "", nextUrl);

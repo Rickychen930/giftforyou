@@ -4,7 +4,27 @@
  */
 
 import type { Collection } from "./domain/collection";
-import type { HeroSliderContent } from "../components/hero/HeroSlider";
+
+// Define HeroSliderContent locally to avoid JSX import issues
+export interface HeroSliderContent {
+  key?: string;
+  heading?: string;
+  slides: Array<{
+    id: string;
+    badge?: string;
+    title: string;
+    subtitle?: string;
+    image: string;
+    primaryCta: {
+      label: string;
+      href: string;
+    };
+    secondaryCta?: {
+      label: string;
+      href: string;
+    };
+  }>;
+}
 
 /**
  * Home Page State

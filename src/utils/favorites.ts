@@ -16,6 +16,7 @@ export interface FavoriteItem {
  * Get all favorites
  */
 export function getFavorites(): FavoriteItem[] {
+  if (typeof localStorage === "undefined") return [];
   try {
     const stored = localStorage.getItem(FAVORITES_STORAGE_KEY);
     if (!stored) return [];
@@ -59,6 +60,7 @@ export function addToFavorites(
       addedAt: Date.now(),
     });
 
+    if (typeof localStorage === "undefined" || typeof window === "undefined") return;
     localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
     
     // Dispatch custom event for other components to listen
@@ -75,6 +77,7 @@ export function removeFromFavorites(bouquetId: string): void {
   try {
     const favorites = getFavorites();
     const filtered = favorites.filter((fav) => fav.bouquetId !== bouquetId);
+    if (typeof localStorage === "undefined" || typeof window === "undefined") return;
     localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(filtered));
     
     // Dispatch custom event
@@ -106,6 +109,7 @@ export function toggleFavorite(
  * Clear all favorites
  */
 export function clearFavorites(): void {
+  if (typeof localStorage === "undefined" || typeof window === "undefined") return;
   try {
     localStorage.removeItem(FAVORITES_STORAGE_KEY);
     window.dispatchEvent(new CustomEvent("favoritesUpdated"));

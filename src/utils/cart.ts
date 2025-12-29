@@ -15,6 +15,7 @@ const CART_STORAGE_KEY = "customer_cart";
  * Get all items in cart
  */
 export function getCartItems(): CartItem[] {
+  if (typeof localStorage === "undefined") return [];
   try {
     const saved = localStorage.getItem(CART_STORAGE_KEY);
     if (saved) {
@@ -48,6 +49,7 @@ export function addToCart(item: Omit<CartItem, "addedAt">): void {
       });
     }
 
+    if (typeof localStorage === "undefined" || typeof window === "undefined") return;
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
     window.dispatchEvent(new CustomEvent("cartUpdated"));
   } catch (error) {
@@ -63,6 +65,7 @@ export function addToCart(item: Omit<CartItem, "addedAt">): void {
 export function removeFromCart(bouquetId: string): void {
   try {
     const items = getCartItems().filter((item) => item.bouquetId !== bouquetId);
+    if (typeof localStorage === "undefined" || typeof window === "undefined") return;
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
     window.dispatchEvent(new CustomEvent("cartUpdated"));
   } catch (error) {
@@ -100,6 +103,7 @@ export function updateCartItemQuantity(bouquetId: string, quantity: number): voi
  * Clear all items from cart
  */
 export function clearCart(): void {
+  if (typeof localStorage === "undefined" || typeof window === "undefined") return;
   try {
     localStorage.removeItem(CART_STORAGE_KEY);
     window.dispatchEvent(new CustomEvent("cartUpdated"));

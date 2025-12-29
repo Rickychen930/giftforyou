@@ -46,7 +46,7 @@ export function getPerformanceMetrics(): PerformanceMetrics {
 
   const metrics: PerformanceMetrics = {};
   const perf = window.performance;
-  const nav = perf.getEntriesByType("navigation")[0] as PerformanceNavigationTiming;
+  const nav = perf.getEntriesByType("navigation")[0] as any;
 
   if (nav) {
     // Navigation timing
@@ -66,7 +66,7 @@ export function getPerformanceMetrics(): PerformanceMetrics {
   }
 
   // Paint timing
-  const paintEntries = perf.getEntriesByType("paint") as PerformancePaintTiming[];
+  const paintEntries = perf.getEntriesByType("paint") as any[];
   paintEntries.forEach((entry) => {
     if (entry.name === "first-contentful-paint") {
       metrics.fcp = Math.round(entry.startTime);
@@ -74,7 +74,7 @@ export function getPerformanceMetrics(): PerformanceMetrics {
   });
 
   // Resource timing
-  const resourceEntries = perf.getEntriesByType("resource") as PerformanceResourceTiming[];
+  const resourceEntries = perf.getEntriesByType("resource") as any[];
   metrics.totalResources = resourceEntries.length;
   metrics.totalSize = resourceEntries.reduce((sum, entry) => {
     return sum + (entry.transferSize || 0);
@@ -97,7 +97,7 @@ export function observeCoreWebVitals(
     return () => {};
   }
 
-  const observers: PerformanceObserver[] = [];
+  const observers: Array<{ disconnect: () => void }> = [];
 
   // LCP (Largest Contentful Paint)
   try {
@@ -110,7 +110,7 @@ export function observeCoreWebVitals(
         observers.splice(observers.indexOf(lcpObserver), 1);
       }
     });
-    lcpObserver.observe({ entryTypes: ["largest-contentful-paint"] });
+    lcpObserver.observe({ entryTypes: ["largest-contentful-paint"] as any });
     observers.push(lcpObserver);
   } catch (e) {
     // LCP not supported
@@ -129,7 +129,7 @@ export function observeCoreWebVitals(
         }
       });
     });
-    fidObserver.observe({ entryTypes: ["first-input"] });
+    fidObserver.observe({ entryTypes: ["first-input"] as any });
     observers.push(fidObserver);
   } catch (e) {
     // FID not supported
@@ -146,19 +146,21 @@ export function observeCoreWebVitals(
         }
       });
     });
-    clsObserver.observe({ entryTypes: ["layout-shift"] });
+    clsObserver.observe({ entryTypes: ["layout-shift"] as any });
     observers.push(clsObserver);
 
     // Report CLS on page unload
-    const reportCLS = () => {
-      onMetric("cls", Math.round(clsValue * 1000) / 1000);
-    };
-    window.addEventListener("beforeunload", reportCLS);
-    window.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "hidden") {
-        reportCLS();
-      }
-    });
+    if (typeof window !== "undefined" && typeof document !== "undefined") {
+      const reportCLS = () => {
+        onMetric("cls", Math.round(clsValue * 1000) / 1000);
+      };
+      window.addEventListener("beforeunload", reportCLS);
+      window.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden") {
+          reportCLS();
+        }
+      });
+    }
   } catch (e) {
     // CLS not supported
   }
