@@ -18,7 +18,8 @@ export interface FavoriteItem {
 export function getFavorites(): FavoriteItem[] {
   if (typeof localStorage === "undefined") return [];
   try {
-    const stored = localStorage.getItem(FAVORITES_STORAGE_KEY);
+    const storage = localStorage as Storage;
+    const stored = storage.getItem(FAVORITES_STORAGE_KEY);
     if (!stored) return [];
     const favorites = JSON.parse(stored);
     return Array.isArray(favorites) ? favorites : [];
@@ -61,10 +62,12 @@ export function addToFavorites(
     });
 
     if (typeof localStorage === "undefined" || typeof window === "undefined") return;
-    localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
+    const storage = localStorage as Storage;
+    const win = window as Window;
+    storage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
     
     // Dispatch custom event for other components to listen
-    window.dispatchEvent(new CustomEvent("favoritesUpdated"));
+    win.dispatchEvent(new CustomEvent("favoritesUpdated"));
   } catch (error) {
     console.error("Failed to add to favorites:", error);
   }
@@ -111,8 +114,10 @@ export function toggleFavorite(
 export function clearFavorites(): void {
   if (typeof localStorage === "undefined" || typeof window === "undefined") return;
   try {
-    localStorage.removeItem(FAVORITES_STORAGE_KEY);
-    window.dispatchEvent(new CustomEvent("favoritesUpdated"));
+    const storage = localStorage as Storage;
+    const win = window as Window;
+    storage.removeItem(FAVORITES_STORAGE_KEY);
+    win.dispatchEvent(new CustomEvent("favoritesUpdated"));
   } catch (error) {
     console.error("Failed to clear favorites:", error);
   }

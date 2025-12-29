@@ -174,11 +174,12 @@ export const INITIAL_DASHBOARD_PAGE_VIEW_STATE: DashboardPageViewState = {
 export const readTabFromLocation = (): ActiveTab | null => {
   if (typeof window === "undefined") return null;
   try {
-    const params = new URLSearchParams(window.location.search);
+    const win = window as Window;
+    const params = new URLSearchParams(win.location.search);
     const qp = (params.get("tab") ?? "").trim();
     if (qp && isActiveTab(qp)) return qp;
 
-    const hash = (window.location.hash ?? "").replace(/^#/, "").trim();
+    const hash = (win.location.hash ?? "").replace(/^#/, "").trim();
     if (hash && isActiveTab(hash)) return hash;
 
     return null;
@@ -193,8 +194,9 @@ export const readTabFromLocation = (): ActiveTab | null => {
 export const writeTabToLocation = (tab: ActiveTab): void => {
   if (typeof window === "undefined") return;
   try {
-    const nextUrl = `${window.location.pathname}${window.location.search}#${tab}`;
-    window.history.replaceState(null, "", nextUrl);
+    const win = window as Window;
+    const nextUrl = `${win.location.pathname}${win.location.search}#${tab}`;
+    win.history.replaceState(null, "", nextUrl);
   } catch {
     // ignore
   }

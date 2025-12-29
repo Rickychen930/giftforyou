@@ -31,13 +31,14 @@ export function analyzeSeo(): SeoAnalysis {
     };
   }
 
+  const doc = document as Document;
   const checks: SeoCheck[] = [];
   let passCount = 0;
   let warningCount = 0;
   let failCount = 0;
 
   // Title check
-  const title = document.title || "";
+  const title = doc.title || "";
   if (title.length === 0) {
     checks.push({
       name: "Title Tag",
@@ -75,7 +76,7 @@ export function analyzeSeo(): SeoAnalysis {
   }
 
   // Meta description check
-  const metaDesc = document.querySelector('meta[name="description"]')?.getAttribute("content") || "";
+  const metaDesc = doc.querySelector('meta[name="description"]')?.getAttribute("content") || "";
   if (metaDesc.length === 0) {
     checks.push({
       name: "Meta Description",
@@ -113,7 +114,7 @@ export function analyzeSeo(): SeoAnalysis {
   }
 
   // Keywords check
-  const keywords = document.querySelector('meta[name="keywords"]')?.getAttribute("content") || "";
+  const keywords = doc.querySelector('meta[name="keywords"]')?.getAttribute("content") || "";
   if (keywords.length === 0) {
     checks.push({
       name: "Keywords",
@@ -134,7 +135,7 @@ export function analyzeSeo(): SeoAnalysis {
   }
 
   // Canonical URL check
-  const canonical = document.querySelector('link[rel="canonical"]')?.getAttribute("href") || "";
+  const canonical = doc.querySelector('link[rel="canonical"]')?.getAttribute("href") || "";
   if (canonical.length === 0) {
     checks.push({
       name: "Canonical URL",
@@ -154,9 +155,9 @@ export function analyzeSeo(): SeoAnalysis {
   }
 
   // Open Graph check
-  const ogTitle = document.querySelector('meta[property="og:title"]')?.getAttribute("content") || "";
-  const ogDesc = document.querySelector('meta[property="og:description"]')?.getAttribute("content") || "";
-  const ogImage = document.querySelector('meta[property="og:image"]')?.getAttribute("content") || "";
+  const ogTitle = doc.querySelector('meta[property="og:title"]')?.getAttribute("content") || "";
+  const ogDesc = doc.querySelector('meta[property="og:description"]')?.getAttribute("content") || "";
+  const ogImage = doc.querySelector('meta[property="og:image"]')?.getAttribute("content") || "";
   
   if (ogTitle && ogDesc && ogImage) {
     checks.push({
@@ -180,7 +181,7 @@ export function analyzeSeo(): SeoAnalysis {
   }
 
   // Structured Data (JSON-LD) check
-  const jsonLd = document.querySelector('script[type="application/ld+json"]');
+  const jsonLd = doc.querySelector('script[type="application/ld+json"]');
   if (jsonLd) {
     try {
       const data = JSON.parse(jsonLd.textContent || "{}");
@@ -220,7 +221,7 @@ export function analyzeSeo(): SeoAnalysis {
   }
 
   // Robots meta check
-  const robots = document.querySelector('meta[name="robots"]')?.getAttribute("content") || "";
+  const robots = doc.querySelector('meta[name="robots"]')?.getAttribute("content") || "";
   if (robots.includes("noindex")) {
     checks.push({
       name: "Robots Meta",
@@ -248,8 +249,8 @@ export function analyzeSeo(): SeoAnalysis {
   }
 
   // Geo-location tags check
-  const geoRegion = document.querySelector('meta[name="geo.region"]')?.getAttribute("content") || "";
-  const geoPlacename = document.querySelector('meta[name="geo.placename"]')?.getAttribute("content") || "";
+  const geoRegion = doc.querySelector('meta[name="geo.region"]')?.getAttribute("content") || "";
+  const geoPlacename = doc.querySelector('meta[name="geo.placename"]')?.getAttribute("content") || "";
   if (geoRegion && geoPlacename) {
     checks.push({
       name: "Geo-location Tags",
@@ -269,7 +270,7 @@ export function analyzeSeo(): SeoAnalysis {
   }
 
   // H1 check
-  const h1Count = document.querySelectorAll("h1").length;
+  const h1Count = doc.querySelectorAll("h1").length;
   if (h1Count === 0) {
     checks.push({
       name: "H1 Tag",
@@ -296,7 +297,7 @@ export function analyzeSeo(): SeoAnalysis {
   }
 
   // Image alt text check
-  const images = document.querySelectorAll("img");
+  const images = doc.querySelectorAll("img");
   const imagesWithoutAlt = Array.from(images).filter((img: any) => !img.alt);
   if (imagesWithoutAlt.length > 0) {
     checks.push({

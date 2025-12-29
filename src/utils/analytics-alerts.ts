@@ -97,7 +97,8 @@ const DEFAULT_ALERT_RULES: AlertRule[] = [
 export function getAlertRules(): AlertRule[] {
   if (typeof localStorage === "undefined") return DEFAULT_ALERT_RULES;
   try {
-    const stored = localStorage.getItem(ALERT_RULES_STORAGE_KEY);
+    const storage = localStorage as Storage;
+    const stored = storage.getItem(ALERT_RULES_STORAGE_KEY);
     if (stored) {
       return JSON.parse(stored) as AlertRule[];
     }
@@ -113,7 +114,8 @@ export function getAlertRules(): AlertRule[] {
 export function saveAlertRules(rules: AlertRule[]): void {
   if (typeof localStorage === "undefined") return;
   try {
-    localStorage.setItem(ALERT_RULES_STORAGE_KEY, JSON.stringify(rules));
+    const storage = localStorage as Storage;
+    storage.setItem(ALERT_RULES_STORAGE_KEY, JSON.stringify(rules));
   } catch (error) {
     console.error("Failed to save alert rules:", error);
   }
@@ -125,7 +127,8 @@ export function saveAlertRules(rules: AlertRule[]): void {
 export function getAlerts(): Alert[] {
   if (typeof localStorage === "undefined") return [];
   try {
-    const stored = localStorage.getItem(ALERTS_STORAGE_KEY);
+    const storage = localStorage as Storage;
+    const stored = storage.getItem(ALERTS_STORAGE_KEY);
     if (stored) {
       return JSON.parse(stored) as Alert[];
     }
@@ -143,7 +146,8 @@ function saveAlerts(alerts: Alert[]): void {
   try {
     // Keep only last 100 alerts
     const limited = alerts.slice(-100);
-    localStorage.setItem(ALERTS_STORAGE_KEY, JSON.stringify(limited));
+    const storage = localStorage as Storage;
+    storage.setItem(ALERTS_STORAGE_KEY, JSON.stringify(limited));
   } catch (error) {
     console.error("Failed to save alerts:", error);
   }

@@ -17,7 +17,8 @@ const CART_STORAGE_KEY = "customer_cart";
 export function getCartItems(): CartItem[] {
   if (typeof localStorage === "undefined") return [];
   try {
-    const saved = localStorage.getItem(CART_STORAGE_KEY);
+    const storage = localStorage as Storage;
+    const saved = storage.getItem(CART_STORAGE_KEY);
     if (saved) {
       const items = JSON.parse(saved);
       return Array.isArray(items) ? items : [];
@@ -50,8 +51,10 @@ export function addToCart(item: Omit<CartItem, "addedAt">): void {
     }
 
     if (typeof localStorage === "undefined" || typeof window === "undefined") return;
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
-    window.dispatchEvent(new CustomEvent("cartUpdated"));
+    const storage = localStorage as Storage;
+    const win = window as Window;
+    storage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+    win.dispatchEvent(new CustomEvent("cartUpdated"));
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       console.error("Failed to add to cart:", error);
@@ -66,8 +69,10 @@ export function removeFromCart(bouquetId: string): void {
   try {
     const items = getCartItems().filter((item) => item.bouquetId !== bouquetId);
     if (typeof localStorage === "undefined" || typeof window === "undefined") return;
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
-    window.dispatchEvent(new CustomEvent("cartUpdated"));
+    const storage = localStorage as Storage;
+    const win = window as Window;
+    storage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+    win.dispatchEvent(new CustomEvent("cartUpdated"));
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       console.error("Failed to remove from cart:", error);
@@ -86,12 +91,14 @@ export function updateCartItemQuantity(bouquetId: string, quantity: number): voi
 
   try {
     if (typeof localStorage === "undefined" || typeof window === "undefined") return;
+    const storage = localStorage as Storage;
+    const win = window as Window;
     const items = getCartItems();
     const item = items.find((i) => i.bouquetId === bouquetId);
     if (item) {
       item.quantity = quantity;
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
-      window.dispatchEvent(new CustomEvent("cartUpdated"));
+      storage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+      win.dispatchEvent(new CustomEvent("cartUpdated"));
     }
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
@@ -106,8 +113,10 @@ export function updateCartItemQuantity(bouquetId: string, quantity: number): voi
 export function clearCart(): void {
   if (typeof localStorage === "undefined" || typeof window === "undefined") return;
   try {
-    localStorage.removeItem(CART_STORAGE_KEY);
-    window.dispatchEvent(new CustomEvent("cartUpdated"));
+    const storage = localStorage as Storage;
+    const win = window as Window;
+    storage.removeItem(CART_STORAGE_KEY);
+    win.dispatchEvent(new CustomEvent("cartUpdated"));
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       console.error("Failed to clear cart:", error);

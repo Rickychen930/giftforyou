@@ -40,12 +40,16 @@ export interface PagePerformance {
  * Get performance metrics from Performance API
  */
 export function getPerformanceMetrics(): PerformanceMetrics {
-  if (typeof window === "undefined" || !window.performance) {
+  if (typeof window === "undefined") {
+    return {};
+  }
+  const win = window as Window & { performance?: Performance };
+  if (!win.performance) {
     return {};
   }
 
   const metrics: PerformanceMetrics = {};
-  const perf = window.performance;
+  const perf = win.performance;
   const nav = perf.getEntriesByType("navigation")[0] as any;
 
   if (nav) {
@@ -93,7 +97,11 @@ export function getPerformanceMetrics(): PerformanceMetrics {
 export function observeCoreWebVitals(
   onMetric: (name: string, value: number) => void
 ): () => void {
-  if (typeof window === "undefined" || !window.PerformanceObserver) {
+  if (typeof window === "undefined") {
+    return () => {};
+  }
+  const win = window as Window & { PerformanceObserver?: any };
+  if (!win.PerformanceObserver) {
     return () => {};
   }
 
@@ -151,12 +159,14 @@ export function observeCoreWebVitals(
 
     // Report CLS on page unload
     if (typeof window !== "undefined" && typeof document !== "undefined") {
+      const win = window as Window;
+      const doc = document as Document;
       const reportCLS = () => {
         onMetric("cls", Math.round(clsValue * 1000) / 1000);
       };
-      window.addEventListener("beforeunload", reportCLS);
-      window.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "hidden") {
+      win.addEventListener("beforeunload", reportCLS);
+      win.addEventListener("visibilitychange", () => {
+        if (doc.visibilityState === "hidden") {
           reportCLS();
         }
       });

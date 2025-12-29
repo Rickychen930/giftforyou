@@ -42,7 +42,8 @@ export function getHistoricalData(): HistoricalData {
     };
   }
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const storage = localStorage as Storage;
+    const stored = storage.getItem(STORAGE_KEY);
     if (!stored) {
       return {
         performance: [],
@@ -88,10 +89,12 @@ export function savePerformanceHistory(
 ): void {
   try {
     if (typeof window === "undefined" || typeof localStorage === "undefined") return;
+    const win = window as Window;
+    const storage = localStorage as Storage;
     const data = getHistoricalData();
     const entry: HistoricalPerformance = {
       timestamp: Date.now(),
-      url: url || window.location.href,
+      url: url || win.location.href,
       metrics,
       score,
       grade,
@@ -106,7 +109,7 @@ export function savePerformanceHistory(
       .filter((p) => p.timestamp >= cutoff)
       .slice(-MAX_ENTRIES);
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    storage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (error) {
     console.error("Failed to save performance history:", error);
   }
@@ -121,10 +124,12 @@ export function saveSeoHistory(
 ): void {
   try {
     if (typeof window === "undefined" || typeof localStorage === "undefined") return;
+    const win = window as Window;
+    const storage = localStorage as Storage;
     const data = getHistoricalData();
     const entry: HistoricalSeo = {
       timestamp: Date.now(),
-      url: url || window.location.href,
+      url: url || win.location.href,
       analysis,
     };
 
@@ -137,7 +142,7 @@ export function saveSeoHistory(
       .filter((s) => s.timestamp >= cutoff)
       .slice(-MAX_ENTRIES);
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    storage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (error) {
     console.error("Failed to save SEO history:", error);
   }
@@ -149,7 +154,8 @@ export function saveSeoHistory(
 export function clearHistoricalData(): void {
   if (typeof localStorage === "undefined") return;
   try {
-    localStorage.removeItem(STORAGE_KEY);
+    const storage = localStorage as Storage;
+    storage.removeItem(STORAGE_KEY);
   } catch (error) {
     console.error("Failed to clear historical data:", error);
   }
