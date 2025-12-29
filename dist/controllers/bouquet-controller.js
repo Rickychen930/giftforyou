@@ -62,6 +62,7 @@ exports.getBouquetById = getBouquetById;
 // ✅ Create bouquet
 const createBouquet = async (req, res) => {
     try {
+        // Validate required fields first
         const name = (0, validation_1.normalizeString)(req.body.name);
         const description = (0, validation_1.normalizeString)(req.body.description);
         const type = (0, validation_1.normalizeString)(req.body.type) || "bouquet";
@@ -71,13 +72,45 @@ const createBouquet = async (req, res) => {
             ? req.body.status
             : "ready";
         const price = (0, validation_1.parsePrice)(req.body.price);
+        // Validate required fields
         const error = validateBouquetInput(name, price, status);
         if (error) {
             res.status(400).json({ error });
             return;
         }
-        // ✅ FIX: memoryStorage => use saveUploadedImage (not req.file.filename)
-        const image = req.file ? await (0, upload_1.saveUploadedImage)(req.file) : "";
+        // Validate collection name if provided
+        if (collectionName && collectionName.trim().length < 2) {
+            res.status(400).json({ error: "Collection name must be at least 2 characters." });
+            return;
+        }
+        // Handle image upload if provided
+        let image = "";
+        if (req.file) {
+            try {
+                image = await (0, upload_1.saveUploadedImage)(req.file);
+            }
+            catch (imageErr) {
+                const imageErrorMsg = imageErr instanceof Error ? imageErr.message : "Failed to process image";
+                console.error("❌ Image upload failed:", imageErrorMsg);
+                // Provide user-friendly error messages
+                let userMessage = imageErrorMsg;
+                if (imageErrorMsg.includes("EACCES") || imageErrorMsg.includes("EPERM") || imageErrorMsg.includes("permission")) {
+                    userMessage = "Tidak memiliki izin untuk menyimpan file. Silakan hubungi administrator untuk memperbaiki izin direktori uploads.";
+                }
+                else if (imageErrorMsg.includes("ENOSPC")) {
+                    userMessage = "Ruang penyimpanan penuh. Silakan hapus file lama atau hubungi administrator.";
+                }
+                else if (imageErrorMsg.includes("terlalu besar") || imageErrorMsg.includes("too large")) {
+                    userMessage = imageErrorMsg; // Already user-friendly
+                }
+                else if (imageErrorMsg.includes("Empty") || imageErrorMsg.includes("kosong")) {
+                    userMessage = imageErrorMsg; // Already user-friendly
+                }
+                res.status(400).json({ error: userMessage });
+                return;
+            }
+        }
+        // Parse optional fields
         const occasions = (0, validation_1.parseCsvList)(req.body.occasions);
         const flowers = (0, validation_1.parseCsvList)(req.body.flowers);
         const isNewEdition = (0, validation_1.parseBoolean)(req.body.isNewEdition);
@@ -85,6 +118,7 @@ const createBouquet = async (req, res) => {
         const customPenanda = (0, validation_1.parseCsvList)(req.body.customPenanda);
         const quantity = (0, validation_1.parseNonNegativeInt)(req.body.quantity);
         const careInstructions = (0, validation_1.normalizeString)(req.body.careInstructions);
+        // Create bouquet (create() automatically saves to database)
         const bouquet = await bouquet_model_1.BouquetModel.create({
             name,
             description,
@@ -93,7 +127,7 @@ const createBouquet = async (req, res) => {
             size,
             image,
             status,
-            collectionName,
+            collectionName: collectionName || undefined,
             occasions,
             flowers,
             isNewEdition,
@@ -102,14 +136,49 @@ const createBouquet = async (req, res) => {
             quantity,
             careInstructions,
         });
-        // ✅ FIX: removed broken ", ,"
-        await syncBouquetCollection(String(bouquet._id), undefined, collectionName);
+        // Sync with collection (non-blocking - don't fail if this fails)
+        if (collectionName) {
+            try {
+                await syncBouquetCollection(String(bouquet._id), undefined, collectionName);
+            }
+            catch (syncErr) {
+                console.error("❌ Failed to sync collection (non-fatal):", syncErr);
+                // Don't fail the request if collection sync fails - bouquet is already created
+            }
+        }
         res.status(201).json({ message: "Bouquet created successfully", bouquet });
     }
     catch (err) {
         const message = err instanceof Error ? err.message : "Unknown error";
-        console.error("❌ Failed to create bouquet:", message);
-        res.status(500).json({ error: "Failed to create bouquet" });
+        const stack = err instanceof Error ? err.stack : undefined;
+        // Log full error details for debugging
+        console.error("❌ Failed to create bouquet:", {
+            message,
+            stack,
+            body: req.body,
+            hasFile: !!req.file,
+            fileSize: req.file?.size,
+            fileName: req.file?.originalname,
+        });
+        // Check for specific MongoDB errors
+        let errorMessage = message;
+        if (message.includes("E11000") || message.includes("duplicate key")) {
+            errorMessage = "Bouquet dengan nama ini sudah ada. Silakan gunakan nama yang berbeda.";
+        }
+        else if (message.includes("validation failed") || message.includes("CastError")) {
+            errorMessage = "Data yang diinput tidak valid. Pastikan semua field sudah diisi dengan benar.";
+        }
+        // Provide more informative error message in development, generic in production
+        const isDevelopment = process.env.NODE_ENV !== "production";
+        const finalErrorMessage = isDevelopment
+            ? `Failed to create bouquet: ${errorMessage}`
+            : errorMessage.includes("sudah ada") || errorMessage.includes("tidak valid")
+                ? errorMessage
+                : "Failed to create bouquet. Please check all required fields are filled correctly.";
+        res.status(500).json({
+            error: finalErrorMessage,
+            ...(isDevelopment && { details: message })
+        });
     }
 };
 exports.createBouquet = createBouquet;
@@ -194,7 +263,29 @@ const updateBouquet = async (req, res) => {
         }
         // ✅ FIX: saveUploadedImage instead of req.file.filename
         if (req.file) {
-            updates.image = await (0, upload_1.saveUploadedImage)(req.file);
+            try {
+                updates.image = await (0, upload_1.saveUploadedImage)(req.file);
+            }
+            catch (imageErr) {
+                const imageErrorMsg = imageErr instanceof Error ? imageErr.message : "Failed to process image";
+                console.error("❌ Image upload failed during update:", imageErrorMsg);
+                // Provide user-friendly error messages
+                let userMessage = imageErrorMsg;
+                if (imageErrorMsg.includes("EACCES") || imageErrorMsg.includes("EPERM") || imageErrorMsg.includes("permission")) {
+                    userMessage = "Tidak memiliki izin untuk menyimpan file. Silakan hubungi administrator untuk memperbaiki izin direktori uploads.";
+                }
+                else if (imageErrorMsg.includes("ENOSPC")) {
+                    userMessage = "Ruang penyimpanan penuh. Silakan hapus file lama atau hubungi administrator.";
+                }
+                else if (imageErrorMsg.includes("terlalu besar") || imageErrorMsg.includes("too large")) {
+                    userMessage = imageErrorMsg; // Already user-friendly
+                }
+                else if (imageErrorMsg.includes("Empty") || imageErrorMsg.includes("kosong")) {
+                    userMessage = imageErrorMsg; // Already user-friendly
+                }
+                res.status(400).json({ error: userMessage });
+                return;
+            }
         }
         Object.assign(bouquet, updates);
         await bouquet.save();

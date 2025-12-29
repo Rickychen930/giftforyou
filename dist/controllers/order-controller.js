@@ -322,9 +322,33 @@ async function getOrders(req, res) {
         const qRaw = typeof req.query.q === "string" ? req.query.q.trim() : "";
         const q = qRaw.slice(0, 120);
         const filter = {};
-        if (q) {
-            const re = new RegExp((0, validation_1.escapeRegex)(q), "i");
-            filter.$or = [{ buyerName: re }, { phoneNumber: re }];
+        // If user is authenticated, check if they're a customer
+        const userId = req.user?.id;
+        const userRole = req.user?.role;
+        if (userId && userRole === "customer") {
+            // Customer can only see their own orders
+            // Find customer by userId
+            const customer = await customer_model_1.CustomerModel.findOne({ userId }).lean().exec();
+            if (customer && customer._id) {
+                filter.customerId = String(customer._id);
+            }
+            else {
+                // If no customer profile exists, return empty array
+                res.status(200).json([]);
+                return;
+            }
+        }
+        else if (userId && userRole === "admin") {
+            // Admin can see all orders, optionally filter by search query
+            if (q) {
+                const re = new RegExp((0, validation_1.escapeRegex)(q), "i");
+                filter.$or = [{ buyerName: re }, { phoneNumber: re }];
+            }
+        }
+        else {
+            // Unauthenticated or unknown role - return empty
+            res.status(200).json([]);
+            return;
         }
         const orders = await order_model_1.OrderModel.find(filter)
             .sort({ createdAt: -1 })

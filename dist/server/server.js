@@ -98,6 +98,7 @@ app.use("/api/collections", collection_routes_1.default);
 app.use("/api/hero-slider", hero_slider_routes_1.default);
 app.use("/api/orders", order_routes_1.default);
 app.use("/api/customers", customer_routes_1.default);
+app.use("/api/customer", customer_routes_1.default); // Alias for customer profile routes
 app.use("/api/instagram", instagram_routes_1.default);
 // Log registered routes (always log)
 console.log("✅ Registered API routes:");

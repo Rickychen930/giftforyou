@@ -25,12 +25,24 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CustomerModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+const AddressSchema = new mongoose_1.Schema({
+    label: { type: String, required: true, trim: true, maxlength: 50 },
+    address: { type: String, required: true, trim: true, maxlength: 500 },
+    isDefault: { type: Boolean, default: false },
+    coordinates: {
+        lat: { type: Number },
+        lng: { type: Number },
+    },
+}, { _id: false });
 const CustomerSchema = new mongoose_1.Schema({
     buyerName: { type: String, required: true, trim: true, maxlength: 120, index: true },
     phoneNumber: { type: String, required: true, trim: true, maxlength: 40, unique: true, index: true },
     address: { type: String, required: true, trim: true, maxlength: 500 },
+    addresses: { type: [AddressSchema], default: [] },
+    userId: { type: String, index: true }, // Link to User model
 }, { timestamps: true });
 CustomerSchema.index({ createdAt: -1 });
 CustomerSchema.index({ buyerName: 1, createdAt: -1 });
+CustomerSchema.index({ userId: 1 });
 exports.CustomerModel = mongoose_1.default.models.Customer || (0, mongoose_1.model)("Customer", CustomerSchema);
 //# sourceMappingURL=customer-model.js.map

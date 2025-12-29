@@ -207,5 +207,36 @@ router.put("/:id", auth_middleware_1.authenticate, auth_middleware_1.requireAdmi
         res.status(500).json({ error: "Failed to update collection" });
     }
 });
+/**
+ * DELETE /api/collections/:id
+ * Deletes a collection and updates bouquets to remove collectionName
+ * Protected: Admin only
+ */
+router.delete("/:id", auth_middleware_1.authenticate, auth_middleware_1.requireAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!mongoose_1.Types.ObjectId.isValid(id)) {
+            res.status(400).json({ error: "Invalid collection id." });
+            return;
+        }
+        const collection = await collection_model_1.CollectionModel.findById(id).exec();
+        if (!collection) {
+            res.status(404).json({ error: "Collection not found" });
+            return;
+        }
+        const collectionName = collection.name;
+        // Update all bouquets with this collection name to remove it
+        await bouquet_model_1.BouquetModel.updateMany({ collectionName }, { $unset: { collectionName: "" } }).exec();
+        // Delete the collection
+        await collection_model_1.CollectionModel.findByIdAndDelete(id).exec();
+        res.status(200).json({
+            message: "Collection deleted successfully",
+        });
+    }
+    catch (err) {
+        console.error("Failed to delete collection:", err);
+        res.status(500).json({ error: "Failed to delete collection" });
+    }
+});
 exports.default = router;
 //# sourceMappingURL=collection-routes.js.map

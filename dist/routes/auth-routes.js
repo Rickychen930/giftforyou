@@ -23,5 +23,7 @@ router.post("/refresh", auth_controller_1.refreshToken);
 // ✅ register (optional). Disabled in production by default.
 // Set ALLOW_PUBLIC_REGISTRATION=true in .env to enable in production
 router.post("/register", auth_controller_1.createUser);
+// ✅ Google OAuth login
+router.post("/google", auth_controller_1.googleLogin);
 exports.default = router;
 //# sourceMappingURL=auth-routes.js.map

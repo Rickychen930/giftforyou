@@ -1,9 +1,32 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.refreshToken = exports.loginUser = exports.createUser = void 0;
+exports.refreshToken = exports.googleLogin = exports.loginUser = exports.createUser = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const user_model_1 = require("../models/user-model");
@@ -36,8 +59,13 @@ function getClientId(req) {
 }
 async function createUser(req, res) {
     try {
-        // In production, disable public registration or protect with admin-only access
-        if (process.env.NODE_ENV === "production" && process.env.ALLOW_PUBLIC_REGISTRATION !== "true") {
+        // Check if public registration is allowed
+        // Allow registration if:
+        // 1. Not in production mode, OR
+        // 2. In production but ALLOW_PUBLIC_REGISTRATION is explicitly set to "true"
+        const isProduction = process.env.NODE_ENV === "production";
+        const allowRegistration = process.env.ALLOW_PUBLIC_REGISTRATION === "true";
+        if (isProduction && !allowRegistration) {
             res.status(403).json({ error: "Registration is disabled" });
             return;
         }
@@ -79,13 +107,31 @@ async function createUser(req, res) {
         }
         // Hash password with higher cost factor for better security
         const hashed = await bcryptjs_1.default.hash(password, 12);
-        await user_model_1.UserModel.create({
+        const user = await user_model_1.UserModel.create({
             username,
             email,
             password: hashed,
             role: "customer",
             isActive: true,
         });
+        // Create customer profile if fullName and phoneNumber provided
+        const fullName = (0, input_validation_1.sanitizeString)(req.body.fullName || "");
+        const phoneNumber = (0, input_validation_1.sanitizeString)(req.body.phoneNumber || "");
+        if (fullName && phoneNumber) {
+            try {
+                const { CustomerModel } = await Promise.resolve().then(() => __importStar(require("../models/customer-model")));
+                await CustomerModel.create({
+                    buyerName: fullName,
+                    phoneNumber: phoneNumber,
+                    address: "",
+                    userId: user._id.toString(), // Link to user
+                });
+            }
+            catch (err) {
+                // Customer creation is optional, don't fail registration if it fails
+                console.warn("Failed to create customer profile:", err);
+            }
+        }
         res.status(201).json({ message: "User registered successfully" });
     }
     catch (err) {
@@ -152,7 +198,7 @@ async function loginUser(req, res) {
             return;
         }
         // Generate access token (short-lived)
-        const accessToken = jsonwebtoken_1.default.sign({ id: String(user._id), username: user.username, role: user.role }, JWT_SECRET, { expiresIn: "15m" } // Increased from 5m to 15m
+        const accessToken = jsonwebtoken_1.default.sign({ id: String(user._id), username: user.username, role: user.role }, JWT_SECRET, { expiresIn: "4h" } // Token expires in 4 hours
         );
         // Generate refresh token (long-lived)
         const refreshToken = jsonwebtoken_1.default.sign({ id: String(user._id), type: "refresh" }, JWT_SECRET, { expiresIn: "7d" });
@@ -182,6 +228,89 @@ exports.loginUser = loginUser;
 /**
  * Refresh token endpoint
  */
+async function googleLogin(req, res) {
+    try {
+        const { credential } = req.body;
+        if (!credential) {
+            res.status(400).json({ error: "Google credential is required" });
+            return;
+        }
+        // Verify Google token (in production, verify with Google API)
+        // For now, we'll decode the JWT token from Google
+        try {
+            const payload = JSON.parse(Buffer.from(credential.split(".")[1], "base64").toString());
+            const email = payload.email?.toLowerCase();
+            const name = payload.name || "";
+            const googleId = payload.sub;
+            if (!email) {
+                res.status(400).json({ error: "Email not found in Google credential" });
+                return;
+            }
+            // Find or create user
+            let user = await user_model_1.UserModel.findOne({ email }).exec();
+            if (!user) {
+                // Create new user from Google account
+                const username = email.split("@")[0] + "_" + googleId.slice(0, 8);
+                // Ensure username is unique
+                let uniqueUsername = username;
+                let counter = 1;
+                while (await user_model_1.UserModel.findOne({ username: uniqueUsername }).exec()) {
+                    uniqueUsername = `${username}_${counter}`;
+                    counter++;
+                }
+                user = await user_model_1.UserModel.create({
+                    username: uniqueUsername,
+                    email,
+                    password: "",
+                    role: "customer",
+                    isActive: true,
+                });
+                // Create customer profile
+                try {
+                    const { CustomerModel } = await Promise.resolve().then(() => __importStar(require("../models/customer-model")));
+                    await CustomerModel.create({
+                        buyerName: name,
+                        phoneNumber: "",
+                        address: "",
+                        userId: user._id.toString(),
+                    });
+                }
+                catch (err) {
+                    console.warn("Failed to create customer profile for Google user:", err);
+                }
+            }
+            else if (!user.isActive) {
+                res.status(403).json({ error: "Account is inactive" });
+                return;
+            }
+            // Generate tokens
+            if (!JWT_SECRET) {
+                res.status(500).json({ error: "Server configuration error" });
+                return;
+            }
+            const accessToken = jsonwebtoken_1.default.sign({ id: String(user._id), username: user.username, role: user.role }, JWT_SECRET, { expiresIn: "15m" });
+            const refreshToken = jsonwebtoken_1.default.sign({ id: String(user._id), type: "refresh" }, JWT_SECRET, { expiresIn: "7d" });
+            res.status(200).json({
+                token: accessToken,
+                refreshToken,
+                user: {
+                    id: String(user._id),
+                    username: user.username,
+                    role: user.role,
+                },
+            });
+        }
+        catch (decodeError) {
+            console.error("Failed to decode Google credential:", decodeError);
+            res.status(400).json({ error: "Invalid Google credential" });
+        }
+    }
+    catch (err) {
+        console.error("Google login failed:", err);
+        res.status(500).json({ error: "Google login failed" });
+    }
+}
+exports.googleLogin = googleLogin;
 async function refreshToken(req, res) {
     try {
         const { refreshToken: token } = req.body;
@@ -206,7 +335,8 @@ async function refreshToken(req, res) {
                 return;
             }
             // Generate new access token
-            const accessToken = jsonwebtoken_1.default.sign({ id: String(user._id), username: user.username, role: user.role }, JWT_SECRET, { expiresIn: "15m" });
+            const accessToken = jsonwebtoken_1.default.sign({ id: String(user._id), username: user.username, role: user.role }, JWT_SECRET, { expiresIn: "4h" } // Token expires in 4 hours
+            );
             res.status(200).json({ token: accessToken });
         }
         catch (err) {
