@@ -17,7 +17,7 @@ function getApiBase(): string {
   
   // For production, auto-detect API URL from current domain
   if (typeof window !== "undefined") {
-    const { protocol, hostname } = window.location;
+    const { hostname } = window.location;
     
     // In production, construct API URL from current domain
     // If on https://giftforyou-idn.cloud, API should be at same origin or api subdomain

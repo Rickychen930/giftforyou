@@ -136,10 +136,8 @@ const writeTabToLocation = (tab: ActiveTab) => {
 
 interface State {
   activeTab: ActiveTab;
-  copyStatus: "" | "copied" | "failed";
   overviewCopyStatus: "" | "copied" | "failed";
   performance: PerformanceState;
-  sidebarOpen: boolean;
   seo: SeoState;
   alerts: AlertsState;
   showTrends: boolean;
@@ -158,7 +156,6 @@ class DashboardView extends Component<Props, State> {
 
   state: State = {
     activeTab: "overview",
-    copyStatus: "",
     overviewCopyStatus: "",
     performance: {
       metrics: {},
@@ -178,7 +175,6 @@ class DashboardView extends Component<Props, State> {
     showBenchmarks: false,
     showInventory: false,
     showAnalytics: false,
-    sidebarOpen: false,
     showQuickActions: false,
     showSearch: false,
     showActivityLog: false,
@@ -436,11 +432,9 @@ class DashboardView extends Component<Props, State> {
         document.body.removeChild(el);
       }
 
-      this.setState({ copyStatus: "copied" });
-      window.setTimeout(() => this.setState({ copyStatus: "" }), 1800);
+      // Copy successful - could show toast notification here
     } catch {
-      this.setState({ copyStatus: "failed" });
-      window.setTimeout(() => this.setState({ copyStatus: "" }), 2200);
+      // Copy failed - could show error notification here
     }
   };
 
@@ -507,13 +501,13 @@ class DashboardView extends Component<Props, State> {
     this.setActiveTab(next);
   };
 
-  private renderSidebar(): React.ReactNode {
-    const mainTabs: Array<{ key: ActiveTab; label: string; icon: React.ReactNode; shortcut?: string }> = [
+  private renderTabBar(): React.ReactNode {
+    const allTabs: Array<{ key: ActiveTab; label: string; icon: React.ReactNode; shortcut?: string }> = [
       { 
         key: "overview", 
         label: "Overview", 
         icon: (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -526,7 +520,7 @@ class DashboardView extends Component<Props, State> {
         key: "orders", 
         label: "Orders", 
         icon: (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 8 0 4 4 0 0 0-8 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M22 11l-4-4m0 0l-4 4m4-4v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -537,20 +531,17 @@ class DashboardView extends Component<Props, State> {
         key: "customers", 
         label: "Customers", 
         icon: (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M13 7a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         ),
         shortcut: "Alt+3"
       },
-    ];
-
-    const contentTabs: Array<{ key: ActiveTab; label: string; icon: React.ReactNode; shortcut?: string }> = [
       { 
         key: "upload", 
         label: "Upload", 
         icon: (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         ),
@@ -558,9 +549,9 @@ class DashboardView extends Component<Props, State> {
       },
       { 
         key: "edit", 
-        label: "Edit Bouquet", 
+        label: "Edit", 
         icon: (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -569,134 +560,523 @@ class DashboardView extends Component<Props, State> {
       },
       { 
         key: "hero", 
-        label: "Hero Slider", 
+        label: "Hero", 
         icon: (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="2"/>
             <line x1="9" y1="3" x2="9" y2="21" stroke="currentColor" strokeWidth="2"/>
           </svg>
         ),
         shortcut: "Alt+6"
       },
+      { 
+        key: "analytics", 
+        label: "Analytics", 
+        icon: (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 3v18h18M7 16l4-4 4 4 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M17 8h4v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        ),
+        shortcut: "Alt+7"
+      },
     ];
 
     return (
-      <aside className={`dashboardSidebar ${this.state.sidebarOpen ? "dashboardSidebar--open" : ""}`} aria-label="Navigasi dashboard">
-        <a className="dashboardSkipLink" href="#dashboard-main">
-          Lewati ke konten
-        </a>
-
-        <div className="dashboardBrand">
-          <div className="dashboardBrand__logoWrapper">
-            <img
-              src="/images/logo.png"
-              alt="Giftforyou.idn logo"
-              className="dashboardBrand__logo"
-              loading="lazy"
-            />
-            <div className="dashboardBrand__logoGlow"></div>
-          </div>
-          <div className="dashboardBrand__info">
-            <div className="dashboardBrand__title">Giftforyou.idn</div>
-            <div className="dashboardBrand__subtitle">
-              {(() => {
-                const tabMeta: Record<ActiveTab, { title: string; subtitle: string }> = {
-                  overview: { title: "Overview", subtitle: "Dashboard Admin" },
-                  orders: { title: "Orders", subtitle: "Kelola pesanan" },
-                  customers: { title: "Customers", subtitle: "Kelola pelanggan" },
-                  upload: { title: "Upload", subtitle: "Unggah bouquet baru" },
-                  edit: { title: "Edit Bouquet", subtitle: "Edit bouquet" },
-                  hero: { title: "Hero Slider", subtitle: "Kelola slider" },
-                  analytics: { title: "Analytics", subtitle: "Analisis data" },
-                };
-                return tabMeta[this.state.activeTab]?.title || "Admin Dashboard";
-              })()}
-            </div>
-          </div>
-        </div>
-
-        <nav className="dashboardNav" aria-label="Tab dashboard">
-          <div className="dashboardNav__group">
-            <div className="dashboardNav__groupLabel">Main</div>
-            {mainTabs.map((t) => {
-              const isActive = this.state.activeTab === t.key;
-              return (
-                <button
-                  key={t.key}
-                  type="button"
-                  className={`dashboardNav__btn ${isActive ? "is-active" : ""}`}
-                  aria-current={isActive ? "page" : undefined}
-                  aria-keyshortcuts={t.shortcut}
-                  onClick={() => this.setActiveTab(t.key)}
-                >
-                  <span className="dashboardNav__btnIcon">{t.icon}</span>
-                  <span className="dashboardNav__btnLabel">{t.label}</span>
-                  {t.shortcut && (
-                    <span className="dashboardNav__btnShortcut" aria-label={t.shortcut}>
-                      {t.shortcut.replace("Alt+", "")}
-                    </span>
-                  )}
-                  {isActive && <div className="dashboardNav__btnIndicator"></div>}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="dashboardNav__group">
-            <div className="dashboardNav__groupLabel">Content</div>
-            {contentTabs.map((t) => {
-              const isActive = this.state.activeTab === t.key;
-              return (
-                <button
-                  key={t.key}
-                  type="button"
-                  className={`dashboardNav__btn ${isActive ? "is-active" : ""}`}
-                  aria-current={isActive ? "page" : undefined}
-                  aria-keyshortcuts={t.shortcut}
-                  onClick={() => this.setActiveTab(t.key)}
-                >
-                  <span className="dashboardNav__btnIcon">{t.icon}</span>
-                  <span className="dashboardNav__btnLabel">{t.label}</span>
-                  {t.shortcut && (
-                    <span className="dashboardNav__btnShortcut" aria-label={t.shortcut}>
-                      {t.shortcut.replace("Alt+", "")}
-                    </span>
-                  )}
-                  {isActive && <div className="dashboardNav__btnIndicator"></div>}
-                </button>
-              );
-            })}
-          </div>
-        </nav>
-
-        <div className="dashboardSidebar__footer">
-          <button
-            type="button"
-            className="dashboardNotificationsBtn"
-            onClick={() => this.setState({ showNotifications: !this.state.showNotifications })}
-            title="Notifications"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span>Notifications</span>
-          </button>
-          <button
-            type="button"
-            className="dashboardLogout"
-            onClick={this.props.onLogout}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span>Keluar</span>
-          </button>
-        </div>
-      </aside>
+      <nav className="adminDashboard__tabs" role="tablist" aria-label="Dashboard navigation">
+        {allTabs.map((t) => {
+          const isActive = this.state.activeTab === t.key;
+          return (
+            <button
+              key={t.key}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              aria-keyshortcuts={t.shortcut}
+              className={`adminDashboard__tab ${isActive ? "adminDashboard__tab--active" : ""}`}
+              onClick={() => this.setActiveTab(t.key)}
+            >
+              <span className="adminDashboard__tabIcon">{t.icon}</span>
+              <span className="adminDashboard__tabLabel">{t.label}</span>
+              {isActive && <div className="adminDashboard__tabIndicator"></div>}
+            </button>
+          );
+        })}
+      </nav>
     );
   }
 
   private renderMetrics(): React.ReactNode {
+    const bouquets = this.props.bouquets ?? [];
+    const visitorsCount = this.props.visitorsCount ?? 0;
+    const collectionsCount = this.props.collectionsCount ?? 0;
+    const salesMetrics = this.props.salesMetrics;
+
+    const insights = this.props.insights;
+    const insightsError = (this.props.insightsError ?? "").trim();
+    const insightsDays = Number(insights?.days ?? 30);
+    const pageviews30d = Number(insights?.pageviews30d ?? 0);
+    const topSearchTerms = (insights?.topSearchTerms ?? []).slice(0, 10);
+    const topBouquetsDays = (insights?.topBouquetsDays ?? []).slice(0, 5);
+    const visitHours = (insights?.visitHours ?? []).slice(0, 8);
+    const uniqueVisitors30d = Number(insights?.uniqueVisitors30d ?? 0);
+    const uniqueVisitorsAvailable = Boolean(insights?.uniqueVisitorsAvailable);
+
+    const bouquetNameById = new Map<string, string>();
+    for (const b of bouquets) {
+      const id = (b._id ?? "").toString();
+      const name = (b.name ?? "").toString().trim();
+      if (id && name) bouquetNameById.set(id, name);
+    }
+
+    const formatHour = (h: number) => `${String(h).padStart(2, "0")}.00`;
+    const labelBouquet = (id: string) =>
+      bouquetNameById.get(id) ?? (id ? `ID ${id.slice(0, 10)}` : "—");
+
+    const readyCount = bouquets.filter((b) => b.status === "ready").length;
+    const preorderCount = bouquets.filter((b) => b.status === "preorder").length;
+    const featuredCount = bouquets.filter((b) => Boolean(b.isFeatured)).length;
+    const newEditionCount = bouquets.filter((b) => Boolean(b.isNewEdition)).length;
+
+    const missingImageCount = bouquets.filter((b) => !(b.image ?? "").trim()).length;
+    const missingCollectionCount = bouquets.filter(
+      (b) => !(b.collectionName ?? "").trim()
+    ).length;
+    const zeroQtyReadyCount = bouquets.filter(
+      (b) => b.status === "ready" && (typeof b.quantity === "number" ? b.quantity : 0) === 0
+    ).length;
+
+    const totalReadyUnits = bouquets
+      .filter((b) => b.status === "ready")
+      .reduce((sum, b) => sum + (typeof b.quantity === "number" ? b.quantity : 0), 0);
+
+    const priced = bouquets
+      .map((b) => (typeof b.price === "number" ? b.price : Number(b.price)))
+      .filter((n) => Number.isFinite(n) && n > 0);
+    const priceMin = priced.length ? Math.min(...priced) : 0;
+    const priceMax = priced.length ? Math.max(...priced) : 0;
+    const priceAvg = priced.length
+      ? Math.round(priced.reduce((a, b) => a + b, 0) / priced.length)
+      : 0;
+
+    const lastUpdatedMs = bouquets.reduce((max, b) => {
+      const candidate = (b.updatedAt ?? b.createdAt ?? "").toString();
+      const t = Date.parse(candidate);
+      return Number.isFinite(t) ? Math.max(max, t) : max;
+    }, 0);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _lastUpdatedLabel = lastUpdatedMs
+      ? new Date(lastUpdatedMs).toLocaleString("id-ID")
+      : "—";
+
+    const collectionCounts = new Map<string, number>();
+    for (const b of bouquets) {
+      const key = (b.collectionName ?? "").trim() || "Tanpa koleksi";
+      collectionCounts.set(key, (collectionCounts.get(key) ?? 0) + 1);
+    }
+    const topCollections = Array.from(collectionCounts.entries())
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .slice(0, 6);
+
+    const overviewLines: string[] = [
+      `GIFT foryou.idn — Ringkasan Dashboard (${new Date().toLocaleString("id-ID")})`,
+      ``,
+      `Kunjungan (${insightsDays} hari): ${insightsError ? visitorsCount : pageviews30d || visitorsCount}`,
+      `Koleksi: ${collectionsCount}`,
+      `Total bouquet: ${bouquets.length}`,
+      `Siap: ${readyCount} (unit siap: ${totalReadyUnits})`,
+      `Preorder: ${preorderCount}`,
+      `Featured: ${featuredCount}`,
+      `New edition: ${newEditionCount}`,
+      ``,
+      `Kualitas data:`,
+      `- Tanpa gambar: ${missingImageCount}`,
+      `- Tanpa koleksi: ${missingCollectionCount}`,
+      `- Ready qty 0: ${zeroQtyReadyCount}`,
+      ``,
+      `Harga (bouquet dengan harga valid):`,
+      `- Min: ${priced.length ? formatIDR(priceMin) : "—"}`,
+      `- Rata-rata: ${priced.length ? formatIDR(priceAvg) : "—"}`,
+      `- Max: ${priced.length ? formatIDR(priceMax) : "—"}`,
+      ``,
+      `Top koleksi:`,
+      ...topCollections.map(([name, count]) => `- ${name}: ${count}`),
+    ];
+
+    if (insights && !insightsError) {
+      overviewLines.push("", "Analytics (estimasi)");
+
+      if (uniqueVisitorsAvailable) {
+        overviewLines.push(`Pengunjung unik (30 hari): ${uniqueVisitors30d}`);
+      }
+
+      if (topSearchTerms.length) {
+        overviewLines.push("Pencarian teratas:");
+        overviewLines.push(
+          ...topSearchTerms.slice(0, 5).map((t) => `- ${t.term}: ${t.count}`)
+        );
+      }
+
+      if (topBouquetsDays.length) {
+        overviewLines.push("Top 5 bouquet (30 hari):");
+        overviewLines.push(
+          ...topBouquetsDays.map((b) => `- ${labelBouquet(b.bouquetId)}: ${b.count}`)
+        );
+      }
+
+      if (visitHours.length) {
+        overviewLines.push("Jam kunjungan terpadat (WIB):");
+        overviewLines.push(
+          ...visitHours.slice(0, 3).map((h) => `- ${formatHour(h.hour)}: ${h.count}`)
+        );
+      }
+    }
+
+    const overviewText = overviewLines.join("\n");
+
+    // Store overview text for keyboard shortcut access
+    (this as any)._overviewText = overviewText;
+
+    return (
+      <div className="adminOverview">
+        {/* Professional Stats Cards */}
+        <div className="adminOverview__stats">
+          {/* Revenue Stats */}
+          {salesMetrics && (
+            <>
+              <div className="adminStatCard adminStatCard--revenue" role="region" aria-label="Revenue statistics">
+                <div className="adminStatCard__icon" aria-hidden="true">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div className="adminStatCard__content">
+                  <p className="adminStatCard__label">Total Revenue</p>
+                  <p className="adminStatCard__value" aria-label={`Total revenue: ${formatIDR(salesMetrics.totalRevenue)}`}>
+                    {formatIDR(salesMetrics.totalRevenue)}
+                  </p>
+                  <p className="adminStatCard__change">Bulan ini: {formatIDR(salesMetrics.thisMonthRevenue)}</p>
+                </div>
+              </div>
+
+              <div className="adminStatCard adminStatCard--orders">
+                <div className="adminStatCard__icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div className="adminStatCard__content">
+                  <p className="adminStatCard__label">Total Orders</p>
+                  <p className="adminStatCard__value">{salesMetrics.totalOrders}</p>
+                  <p className="adminStatCard__change">Hari ini: {salesMetrics.todayOrders}</p>
+                </div>
+              </div>
+
+              <div className="adminStatCard adminStatCard--customers">
+                <div className="adminStatCard__icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M13 7a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div className="adminStatCard__content">
+                  <p className="adminStatCard__label">Total Customers</p>
+                  <p className="adminStatCard__value">{salesMetrics.totalCustomers}</p>
+                  <p className="adminStatCard__change">AOV: {formatIDR(salesMetrics.averageOrderValue)}</p>
+                </div>
+              </div>
+
+              <div className="adminStatCard adminStatCard--pending">
+                <div className="adminStatCard__icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                </div>
+                <div className="adminStatCard__content">
+                  <p className="adminStatCard__label">Pending Orders</p>
+                  <p className="adminStatCard__value">{salesMetrics.pendingOrders}</p>
+                  <p className="adminStatCard__change">Processing: {salesMetrics.processingOrders}</p>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Website Stats */}
+          <div className="adminStatCard adminStatCard--visits">
+            <div className="adminStatCard__icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M2 12h20M12 2v20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M3 12c0-4.97 4.03-9 9-9s9 4.03 9 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <div className="adminStatCard__content">
+              <p className="adminStatCard__label">Pageviews (30d)</p>
+              <p className="adminStatCard__value">
+                {insightsError ? visitorsCount : pageviews30d || visitorsCount}
+              </p>
+              <p className="adminStatCard__change">
+                Unique: {uniqueVisitorsAvailable ? uniqueVisitors30d : "—"}
+              </p>
+            </div>
+          </div>
+
+          <div className="adminStatCard adminStatCard--bouquets">
+            <div className="adminStatCard__icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <div className="adminStatCard__content">
+              <p className="adminStatCard__label">Total Bouquets</p>
+              <p className="adminStatCard__value">{bouquets.length}</p>
+              <p className="adminStatCard__change">Ready: {readyCount} | Preorder: {preorderCount}</p>
+            </div>
+          </div>
+
+          <div className="adminStatCard adminStatCard--collections">
+            <div className="adminStatCard__icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <div className="adminStatCard__content">
+              <p className="adminStatCard__label">Collections</p>
+              <p className="adminStatCard__value">{collectionsCount}</p>
+              <p className="adminStatCard__change">Featured: {featuredCount}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="adminOverview__quickActions">
+          <h2 className="adminOverview__sectionTitle">Quick Actions</h2>
+          <div className="adminOverview__actionGrid">
+            <button
+              type="button"
+              className="adminQuickAction"
+              onClick={() => this.setActiveTab("upload")}
+              aria-label="Upload Bouquet"
+              title="Upload Bouquet baru"
+            >
+              <div className="adminQuickAction__icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <span className="adminQuickAction__label">Upload Bouquet</span>
+            </button>
+            <button
+              type="button"
+              className="adminQuickAction"
+              onClick={() => this.setActiveTab("edit")}
+            >
+              <div className="adminQuickAction__icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <span className="adminQuickAction__label">Edit Bouquet</span>
+            </button>
+            <button
+              type="button"
+              className="adminQuickAction"
+              onClick={() => this.setActiveTab("orders")}
+            >
+              <div className="adminQuickAction__icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 8 0 4 4 0 0 0-8 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M22 11l-4-4m0 0l-4 4m4-4v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <span className="adminQuickAction__label">View Orders</span>
+            </button>
+            <button
+              type="button"
+              className="adminQuickAction"
+              onClick={() => this.setActiveTab("customers")}
+            >
+              <div className="adminQuickAction__icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M13 7a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <span className="adminQuickAction__label">Manage Customers</span>
+            </button>
+            <button
+              type="button"
+              className="adminQuickAction"
+              onClick={() => this.setActiveTab("hero")}
+            >
+              <div className="adminQuickAction__icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2"/>
+                  <line x1="9" y1="3" x2="9" y2="21" stroke="currentColor" strokeWidth="2"/>
+                </svg>
+              </div>
+              <span className="adminQuickAction__label">Hero Slider</span>
+            </button>
+            <button
+              type="button"
+              className="adminQuickAction"
+              onClick={() => this.setActiveTab("analytics")}
+            >
+              <div className="adminQuickAction__icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M3 3v18h18M7 16l4-4 4 4 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M17 8h4v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <span className="adminQuickAction__label">Analytics</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Detailed Metrics Section */}
+        <div className="adminOverview__details">
+          <div className="adminOverview__grid">
+            {/* Bouquet Metrics */}
+            <div className="adminOverview__card">
+              <h3 className="adminOverview__cardTitle">Bouquet Metrics</h3>
+              <div className="adminOverview__metricGrid">
+                <div className="adminOverview__metricItem">
+                  <span className="adminOverview__metricLabel">Total Bouquets</span>
+                  <span className="adminOverview__metricValue">{bouquets.length}</span>
+                </div>
+                <div className="adminOverview__metricItem">
+                  <span className="adminOverview__metricLabel">Ready</span>
+                  <span className="adminOverview__metricValue">{readyCount}</span>
+                </div>
+                <div className="adminOverview__metricItem">
+                  <span className="adminOverview__metricLabel">Preorder</span>
+                  <span className="adminOverview__metricValue">{preorderCount}</span>
+                </div>
+                <div className="adminOverview__metricItem">
+                  <span className="adminOverview__metricLabel">Featured</span>
+                  <span className="adminOverview__metricValue">{featuredCount}</span>
+                </div>
+                <div className="adminOverview__metricItem">
+                  <span className="adminOverview__metricLabel">New Edition</span>
+                  <span className="adminOverview__metricValue">{newEditionCount}</span>
+                </div>
+                <div className="adminOverview__metricItem">
+                  <span className="adminOverview__metricLabel">Total Units Ready</span>
+                  <span className="adminOverview__metricValue">{totalReadyUnits}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Price Range */}
+            <div className="adminOverview__card">
+              <h3 className="adminOverview__cardTitle">Price Range</h3>
+              <div className="adminOverview__priceInfo">
+                <div className="adminOverview__priceItem">
+                  <span className="adminOverview__priceLabel">Minimum</span>
+                  <span className="adminOverview__priceValue">{priced.length ? formatIDR(priceMin) : "—"}</span>
+                </div>
+                <div className="adminOverview__priceItem">
+                  <span className="adminOverview__priceLabel">Average</span>
+                  <span className="adminOverview__priceValue">{priced.length ? formatIDR(priceAvg) : "—"}</span>
+                </div>
+                <div className="adminOverview__priceItem">
+                  <span className="adminOverview__priceLabel">Maximum</span>
+                  <span className="adminOverview__priceValue">{priced.length ? formatIDR(priceMax) : "—"}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Data Quality */}
+            <div className="adminOverview__card">
+              <h3 className="adminOverview__cardTitle">Data Quality</h3>
+              <div className="adminOverview__qualityList">
+                <div className="adminOverview__qualityItem">
+                  <span className="adminOverview__qualityLabel">Missing Images</span>
+                  <span className={`adminOverview__qualityValue ${missingImageCount > 0 ? "adminOverview__qualityValue--warning" : ""}`}>
+                    {missingImageCount}
+                  </span>
+                </div>
+                <div className="adminOverview__qualityItem">
+                  <span className="adminOverview__qualityLabel">No Collection</span>
+                  <span className={`adminOverview__qualityValue ${missingCollectionCount > 0 ? "adminOverview__qualityValue--warning" : ""}`}>
+                    {missingCollectionCount}
+                  </span>
+                </div>
+                <div className="adminOverview__qualityItem">
+                  <span className="adminOverview__qualityLabel">Ready Qty 0</span>
+                  <span className={`adminOverview__qualityValue ${zeroQtyReadyCount > 0 ? "adminOverview__qualityValue--error" : ""}`}>
+                    {zeroQtyReadyCount}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Top Collections */}
+            {topCollections.length > 0 && (
+              <div className="adminOverview__card">
+                <h3 className="adminOverview__cardTitle">Top Collections</h3>
+                <div className="adminOverview__collectionList">
+                  {topCollections.map(([name, count], idx) => (
+                    <div key={name} className="adminOverview__collectionItem">
+                      <span className="adminOverview__collectionRank">#{idx + 1}</span>
+                      <span className="adminOverview__collectionName" title={name}>{name}</span>
+                      <span className="adminOverview__collectionCount">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Sales Metrics - if available */}
+            {salesMetrics && (
+              <>
+                <div className="adminOverview__card">
+                  <h3 className="adminOverview__cardTitle">Order Status</h3>
+                  <div className="adminOverview__statusGrid">
+                    <div className="adminOverview__statusItem">
+                      <span className="adminOverview__statusLabel">Pending</span>
+                      <span className="adminOverview__statusValue adminOverview__statusValue--pending">{salesMetrics.pendingOrders}</span>
+                    </div>
+                    <div className="adminOverview__statusItem">
+                      <span className="adminOverview__statusLabel">Processing</span>
+                      <span className="adminOverview__statusValue adminOverview__statusValue--processing">{salesMetrics.processingOrders}</span>
+                    </div>
+                    <div className="adminOverview__statusItem">
+                      <span className="adminOverview__statusLabel">Completed</span>
+                      <span className="adminOverview__statusValue adminOverview__statusValue--completed">{salesMetrics.completedOrders}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {salesMetrics.topSellingBouquets.length > 0 && (
+                  <div className="adminOverview__card">
+                    <h3 className="adminOverview__cardTitle">Top Selling Products</h3>
+                    <div className="adminOverview__topProducts">
+                      {salesMetrics.topSellingBouquets.slice(0, 5).map((item, idx) => (
+                        <div key={item.bouquetId} className="adminOverview__productItem">
+                          <span className="adminOverview__productRank">#{idx + 1}</span>
+                          <div className="adminOverview__productInfo">
+                            <span className="adminOverview__productName" title={item.bouquetName}>{item.bouquetName}</span>
+                            <span className="adminOverview__productStats">
+                              {item.orderCount} orders • {formatIDR(item.revenue)}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  private renderMetricsLegacy(): React.ReactNode {
     const bouquets = this.props.bouquets ?? [];
     const visitorsCount = this.props.visitorsCount ?? 0;
     const collectionsCount = this.props.collectionsCount ?? 0;
@@ -756,7 +1136,8 @@ class DashboardView extends Component<Props, State> {
       const t = Date.parse(candidate);
       return Number.isFinite(t) ? Math.max(max, t) : max;
     }, 0);
-    const lastUpdatedLabel = lastUpdatedMs
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _lastUpdatedLabel = lastUpdatedMs
       ? new Date(lastUpdatedMs).toLocaleString("id-ID")
       : "—";
 
@@ -836,7 +1217,7 @@ class DashboardView extends Component<Props, State> {
           <div className="overviewHeader__meta">
             <p className="overviewHeader__title">Ringkasan cepat</p>
             <p className="overviewHeader__sub">
-              Terakhir diperbarui: <b>{lastUpdatedLabel}</b>
+              Terakhir diperbarui: <b>{_lastUpdatedLabel}</b>
             </p>
           </div>
 
@@ -1653,6 +2034,15 @@ class DashboardView extends Component<Props, State> {
           />
         );
 
+      case "analytics":
+        return (
+          <AnalyticsDashboard
+            isOpen={true}
+            onClose={() => {}}
+            period="30d"
+          />
+        );
+
       default:
         return null;
     }
@@ -1662,157 +2052,102 @@ class DashboardView extends Component<Props, State> {
     const { loading } = this.props;
     const errorMessage = (this.props.errorMessage ?? "").trim();
 
-    const copyStatus = this.state.copyStatus;
-
     return (
-      <div className="dashboardLayout">
-        {this.renderSidebar()}
-
-        <main id="dashboard-main" className="dashboardMain">
-          {/* Luxury Mobile Menu Button */}
-          <button
-            type="button"
-            className={`dashboardMobileMenuBtn ${this.state.sidebarOpen ? "dashboardMobileMenuBtn--active" : ""}`}
-            onClick={() => this.setState({ sidebarOpen: !this.state.sidebarOpen })}
-            aria-label="Toggle sidebar"
-            aria-expanded={this.state.sidebarOpen}
-          >
-            <div className="dashboardMobileMenuBtn__icon">
-              <span className="dashboardMobileMenuBtn__line dashboardMobileMenuBtn__line--1"></span>
-              <span className="dashboardMobileMenuBtn__line dashboardMobileMenuBtn__line--2"></span>
-              <span className="dashboardMobileMenuBtn__line dashboardMobileMenuBtn__line--3"></span>
+      <section className="adminDashboard" aria-labelledby="admin-dashboard-title">
+        <div className="adminDashboard__container">
+          {/* Header */}
+          <div className="adminDashboard__header">
+            <div>
+              <h1 id="admin-dashboard-title" className="adminDashboard__title">
+                Admin Dashboard
+              </h1>
+              <p className="adminDashboard__subtitle">
+                Kelola website, pesanan, dan pelanggan Anda
+              </p>
             </div>
-            <div className="dashboardMobileMenuBtn__glow"></div>
-          </button>
-          {this.state.sidebarOpen && (
-            <div 
-              className="dashboardSidebarOverlay"
-              onClick={() => this.setState({ sidebarOpen: false })}
-              aria-hidden="false"
-            />
-          )}
-          <div className="dashboardContainer">
-            {/* Compact Top Bar - Replaces redundant header */}
-            <div className="dashboardTopBar">
-              <div className="dashboardTopBar__actions" aria-label="Aksi cepat">
-                <button
-                  type="button"
-                  className="dashboardActionBtn dashboardActionBtn--compact"
-                  onClick={() => this.setState({ showSearch: true })}
-                  title="Cari (Ctrl+K)"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M21 21l-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span className="dashboardActionBtn__label">Cari</span>
-                </button>
-                <button
-                  type="button"
-                  className="dashboardActionBtn dashboardActionBtn--compact"
-                  onClick={() => this.setState({ showQuickActions: true })}
-                  title="Quick Actions"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span className="dashboardActionBtn__label">Quick</span>
-                </button>
-                <button
-                  type="button"
-                  className="dashboardActionBtn dashboardActionBtn--compact"
-                  onClick={() => this.setState({ showActivityLog: true })}
-                  title="Activity Log"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span className="dashboardActionBtn__label">Log</span>
-                </button>
-                <button
-                  type="button"
-                  className="dashboardActionBtn dashboardActionBtn--compact"
-                  onClick={() => this.setState({ showSystemStatus: true })}
-                  title="System Status"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span className="dashboardActionBtn__label">Status</span>
-                </button>
-                <button
-                  type="button"
-                  className="dashboardActionBtn dashboardActionBtn--compact"
-                  onClick={this.copyCurrentLink}
-                  disabled={loading}
-                  title="Salin link tab"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M8 17V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M4 19h9a2 2 0 0 0 2-2V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span className="dashboardActionBtn__label">Salin</span>
-                </button>
-                <button
-                  type="button"
-                  className="dashboardActionBtn dashboardActionBtn--primary dashboardActionBtn--compact"
-                  onClick={this.reloadDashboard}
-                  title="Muat ulang dashboard"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8M21 8v5M21 8h-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16M3 16v-5M3 16h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span className="dashboardActionBtn__label">Reload</span>
-                </button>
-              </div>
-              {copyStatus && (
-                <div
-                  className={`dashboardTopBar__status dashboardTopBar__status--${copyStatus}`}
-                  role={copyStatus === "failed" ? "alert" : "status"}
-                  aria-live="polite"
-                >
-                  {copyStatus === "copied" ? (
-                    <>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      <span>Link tersalin</span>
-                    </>
-                  ) : (
-                    <>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      <span>Gagal menyalin</span>
-                    </>
-                  )}
-                </div>
-              )}
+            <div className="adminDashboard__headerActions">
+              <button
+                type="button"
+                className="adminDashboard__actionBtn"
+                onClick={() => this.setState({ showNotifications: !this.state.showNotifications })}
+                title="Notifications"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              <button
+                type="button"
+                className="adminDashboard__actionBtn adminDashboard__actionBtn--logout"
+                onClick={this.props.onLogout}
+                title="Keluar"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
             </div>
+          </div>
 
+          {/* Tab Bar */}
+          {this.renderTabBar()}
+
+          {/* Content */}
+          <div className="adminDashboard__content">
             {loading && (
-              <div className="dashboardState" aria-live="polite">
-                Memuat data dashboard...
+              <div className="adminDashboard__loading" aria-live="polite">
+                <div className="adminDashboard__spinner"></div>
+                <p>Memuat data dashboard...</p>
               </div>
             )}
 
             {!loading && errorMessage && (
               <div
-                className="dashboardState dashboardState--error"
+                className="adminDashboard__error"
                 role="alert"
               >
-                <p className="dashboardState__title">
+                <p className="adminDashboard__errorTitle">
                   Failed to load dashboard data
                 </p>
-                <p className="dashboardState__text">{errorMessage}</p>
+                <p className="adminDashboard__errorText">{errorMessage}</p>
               </div>
             )}
 
-            {!loading && this.renderMainContent()}
+            {!loading && !errorMessage && (
+              <div className="adminDashboard__tabPanel" role="tabpanel">
+                {this.renderMainContent()}
+              </div>
+            )}
+
+            {loading && this.state.activeTab === "overview" && (
+              <div className="adminOverview adminOverview--loading">
+                <div className="adminOverview__stats">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="adminStatCard adminStatCard--skeleton">
+                      <div className="adminStatCard__icon adminStatCard__icon--skeleton"></div>
+                      <div className="adminStatCard__content">
+                        <div className="adminStatCard__label adminStatCard__label--skeleton"></div>
+                        <div className="adminStatCard__value adminStatCard__value--skeleton"></div>
+                        <div className="adminStatCard__change adminStatCard__change--skeleton"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="adminOverview__quickActions">
+                  <div className="adminOverview__sectionTitle adminOverview__sectionTitle--skeleton"></div>
+                  <div className="adminOverview__actionGrid">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                      <div key={i} className="adminQuickAction adminQuickAction--skeleton">
+                        <div className="adminQuickAction__icon adminQuickAction__icon--skeleton"></div>
+                        <div className="adminQuickAction__label adminQuickAction__label--skeleton"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        </main>
+        </div>
 
         {/* Notifications Center */}
         <NotificationsCenter
@@ -1835,11 +2170,13 @@ class DashboardView extends Component<Props, State> {
         />
 
         {/* Analytics Dashboard */}
-        <AnalyticsDashboard
-          isOpen={this.state.showAnalytics}
-          onClose={() => this.setState({ showAnalytics: false })}
-          period="30d"
-        />
+        {this.state.showAnalytics && (
+          <AnalyticsDashboard
+            isOpen={this.state.showAnalytics}
+            onClose={() => this.setState({ showAnalytics: false })}
+            period="30d"
+          />
+        )}
         
         {/* Admin Support Features */}
         <QuickActionsPanel
@@ -1922,7 +2259,7 @@ class DashboardView extends Component<Props, State> {
           isOpen={this.state.showSystemStatus}
           onClose={() => this.setState({ showSystemStatus: false })}
         />
-      </div>
+      </section>
     );
   }
 }
