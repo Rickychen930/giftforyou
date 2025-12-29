@@ -8,10 +8,8 @@ import { formatIDR } from "../utils/money";
 import { buildWhatsAppLink } from "../utils/whatsapp";
 import { observeFadeIn, revealOnScroll, createRipple } from "../utils/luxury-enhancements";
 import { formatBouquetName, formatBouquetType, formatBouquetSize, formatCollectionName, formatOccasion, formatFlowerName, formatDescription } from "../utils/text-formatter";
-import AddressAutocomplete from "../components/AddressAutocomplete";
 import SocialProof from "../components/SocialProof";
 import UrgencyIndicator from "../components/UrgencyIndicator";
-import { calculateDeliveryPrice, type DeliveryPriceResult } from "../utils/delivery-calculator";
 import { calculateBulkDiscount } from "../utils/bulk-discount";
 import { isFavorite, toggleFavorite } from "../utils/favorites";
 import { addToRecentlyViewed } from "../utils/recently-viewed";
@@ -126,10 +124,9 @@ interface BouquetDetailState extends OrderFormState {
   formErrors: Partial<Record<keyof OrderFormState, string>>;
   showPreview: boolean;
   isFormValid: boolean;
-  deliveryLocation?: { lat: number; lng: number };
-  deliveryPriceResult?: DeliveryPriceResult;
   isFavorite: boolean;
   showDetails: boolean; // For collapsible details section
+  showOrderModal: boolean; // Order form modal
 }
 
 class BouquetDetailPage extends Component<Props, BouquetDetailState> {
@@ -151,6 +148,7 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
     isFormValid: false,
     isFavorite: false,
     showDetails: false, // Details collapsed by default for efficiency
+    showOrderModal: false, // Order form in modal for efficiency
   };
 
   private getDefaultDate(): string {
@@ -370,7 +368,7 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
     if (!bouquet) return { subtotal: 0, delivery: 0, discount: 0, total: 0 };
     
     // Cache key for memoization
-    const cacheKey = `${bouquet.price}-${this.state.quantity}-${this.state.deliveryType}-${this.state.deliveryPriceResult?.price || 0}`;
+    const cacheKey = `${bouquet.price}-${this.state.quantity}-${this.state.deliveryType}`;
     
     // Return cached result if available
     if (this.priceBreakdownCache && this.priceBreakdownCacheKey === cacheKey) {
@@ -382,10 +380,8 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
     const subtotal = bulkDiscount.originalPrice;
     const discount = bulkDiscount.discountAmount;
     
-    // Calculate delivery price
-    const delivery = this.state.deliveryType === "delivery" && this.state.deliveryPriceResult
-      ? this.state.deliveryPriceResult.price
-      : 0;
+    // Delivery price will be calculated by admin after order confirmation
+    const delivery = 0;
     
     const total = bulkDiscount.finalPrice + delivery;
     
@@ -401,7 +397,7 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
     const suggestions: string[] = [];
     
     if (this.state.deliveryType === "delivery" && !this.state.address) {
-      suggestions.push("💡 Masukkan alamat lengkap untuk estimasi ongkir yang akurat");
+      suggestions.push("💡 Masukkan alamat lengkap untuk memudahkan pengiriman");
     }
     
     if (this.state.quantity > 5) {
@@ -607,31 +603,8 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
     });
   };
 
-  private handleAddressChange = (address: string, placeDetails?: {
-    formatted_address?: string;
-    geometry?: {
-      location?: {
-        lat(): number;
-        lng(): number;
-      };
-    };
-  }): void => {
-    this.handleFormChange("address", address);
-    
-    // If place details have coordinates, calculate delivery price
-    if (placeDetails?.geometry?.location) {
-      const lat = placeDetails.geometry.location.lat();
-      const lng = placeDetails.geometry.location.lng();
-      this.handleLocationChange(lat, lng);
-    }
-  };
-
-  private handleLocationChange = (lat: number, lng: number): void => {
-    const deliveryPriceResult = calculateDeliveryPrice(lat, lng);
-    this.setState({
-      deliveryLocation: { lat, lng },
-      deliveryPriceResult,
-    });
+  private handleAddressChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+    this.handleFormChange("address", e.target.value);
   };
 
   private handleFavoriteToggle = (): void => {
@@ -713,6 +686,282 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
     // Optional: Show brief feedback (could add toast notification)
   };
 
+  private renderOrderModal(): React.ReactNode {
+    const { bouquet, detailUrl } = this.props;
+    if (!bouquet || !this.state.showOrderModal) return null;
+
+    const breakdown = this.calculatePriceBreakdown();
+    const waOrderLink = buildWhatsAppLink(
+      buildCustomerOrderMessage(bouquet, detailUrl, this.state)
+    );
+
+    return (
+      <div
+        className="bdOrderModalOverlay"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            this.setState({ showOrderModal: false });
+          }
+        }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="bd-order-modal-title"
+      >
+        <div className="bdOrderModal">
+          <div className="bdOrderModal__header">
+            <h2 id="bd-order-modal-title" className="bdOrderModal__title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Form Pemesanan
+            </h2>
+            <button
+              type="button"
+              className="bdOrderModal__close"
+              onClick={() => this.setState({ showOrderModal: false })}
+              aria-label="Tutup form pemesanan"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
+
+          <div className="bdOrderModal__content">
+            {/* Delivery Type */}
+            <div className="bdFormGroup">
+              <label className="bdFormLabel">
+                Tipe Pengiriman <span className="bdFormLabel__required">*</span>
+              </label>
+              <div className="bdFormRadioGroup">
+                <label className="bdFormRadio">
+                  <input
+                    type="radio"
+                    name="deliveryType"
+                    value="delivery"
+                    checked={this.state.deliveryType === "delivery"}
+                    onChange={(e) => this.handleFormChange("deliveryType", e.target.value)}
+                  />
+                  <span className="bdFormRadio__label">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Diantar
+                  </span>
+                </label>
+                <label className="bdFormRadio">
+                  <input
+                    type="radio"
+                    name="deliveryType"
+                    value="pickup"
+                    checked={this.state.deliveryType === "pickup"}
+                    onChange={(e) => this.handleFormChange("deliveryType", e.target.value)}
+                  />
+                  <span className="bdFormRadio__label">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Ambil di Toko
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            {/* Delivery Date */}
+            <div className="bdFormGroup">
+              <label htmlFor="bd-delivery-date" className="bdFormLabel">
+                {this.state.deliveryType === "delivery" ? "Tanggal Pengiriman" : "Tanggal Pengambilan"} <span className="bdFormLabel__required">*</span>
+              </label>
+              <input
+                id="bd-delivery-date"
+                type="date"
+                className="bdFormInput"
+                value={this.state.deliveryDate}
+                min={this.getDefaultDate()}
+                onChange={(e) => this.handleFormChange("deliveryDate", e.target.value)}
+                aria-invalid={!!this.state.formErrors.deliveryDate}
+                aria-describedby={this.state.formErrors.deliveryDate ? "bd-delivery-date-error" : undefined}
+              />
+              {this.state.formErrors.deliveryDate && (
+                <span id="bd-delivery-date-error" className="bdFormError" role="alert">
+                  {this.state.formErrors.deliveryDate}
+                </span>
+              )}
+            </div>
+
+            {/* Delivery Time Slot */}
+            {this.state.deliveryDate && (
+              <div className="bdFormGroup">
+                <label className="bdFormLabel">
+                  {this.state.deliveryType === "delivery" ? "Waktu Pengiriman" : "Waktu Pengambilan"}
+                </label>
+                <DeliveryTimeSlot
+                  selectedSlot={this.state.deliveryTimeSlot}
+                  selectedDate={this.state.deliveryDate}
+                  onSelect={(slotId) => this.handleFormChange("deliveryTimeSlot", slotId || "")}
+                />
+              </div>
+            )}
+
+            {/* Address - Only for delivery */}
+            {this.state.deliveryType === "delivery" && (
+              <div className="bdFormGroup">
+                <label htmlFor="bd-address" className="bdFormLabel">
+                  Alamat Pengiriman <span className="bdFormLabel__required">*</span>
+                </label>
+                <textarea
+                  id="bd-address"
+                  className="bdFormInput"
+                  rows={3}
+                  value={this.state.address}
+                  onChange={this.handleAddressChange}
+                  placeholder="Masukkan alamat lengkap (contoh: Jl. Contoh No. 123, RT/RW, Kelurahan, Kecamatan, Kota, Kode Pos)"
+                  aria-invalid={!!this.state.formErrors.address}
+                  aria-describedby={this.state.formErrors.address ? "bd-address-error" : undefined}
+                />
+                {this.state.formErrors.address && (
+                  <span id="bd-address-error" className="bdFormError" role="alert">
+                    {this.state.formErrors.address}
+                  </span>
+                )}
+                <div className="bdFormHint">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Pastikan alamat lengkap dan jelas untuk memudahkan pengiriman
+                </div>
+              </div>
+            )}
+
+            {/* Quantity */}
+            <div className="bdFormGroup">
+              <label htmlFor="bd-quantity" className="bdFormLabel">
+                Jumlah <span className="bdFormLabel__required">*</span>
+              </label>
+              <div className="bdQuantityControls">
+                <button
+                  type="button"
+                  className="bdQuantityBtn"
+                  onClick={() => {
+                    if (this.state.quantity > 1) {
+                      this.handleFormChange("quantity", this.state.quantity - 1);
+                    }
+                  }}
+                  aria-label="Kurangi jumlah"
+                  disabled={this.state.quantity <= 1}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+                <input
+                  id="bd-quantity"
+                  type="number"
+                  className="bdQuantityInput"
+                  min="1"
+                  max="99"
+                  value={this.state.quantity}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value, 10) || 1;
+                    this.handleFormChange("quantity", Math.max(1, Math.min(99, val)));
+                  }}
+                  aria-invalid={!!this.state.formErrors.quantity}
+                  aria-describedby={this.state.formErrors.quantity ? "bd-quantity-error" : undefined}
+                />
+                <button
+                  type="button"
+                  className="bdQuantityBtn"
+                  onClick={() => {
+                    if (this.state.quantity < 99) {
+                      this.handleFormChange("quantity", this.state.quantity + 1);
+                    }
+                  }}
+                  aria-label="Tambah jumlah"
+                  disabled={this.state.quantity >= 99}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+              {this.state.formErrors.quantity && (
+                <span id="bd-quantity-error" className="bdFormError" role="alert">
+                  {this.state.formErrors.quantity}
+                </span>
+              )}
+            </div>
+
+            {/* Greeting Card */}
+            <div className="bdFormGroup">
+              <label htmlFor="bd-greeting-card" className="bdFormLabel">
+                Kartu Ucapan (Opsional)
+              </label>
+              <textarea
+                id="bd-greeting-card"
+                className="bdFormTextarea"
+                rows={3}
+                value={this.state.greetingCard}
+                onChange={(e) => this.handleFormChange("greetingCard", e.target.value)}
+                placeholder="Tulis pesan untuk kartu ucapan..."
+                maxLength={200}
+              />
+              <div className="bdFormHint">
+                {this.state.greetingCard.length}/200 karakter
+              </div>
+            </div>
+          </div>
+
+          <div className="bdOrderModal__footer">
+            {!this.state.isFormValid && (
+              <div className="bdOrderModal__warning" role="alert">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M12 9v4M12 17h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span>Lengkapi semua field yang wajib untuk melanjutkan</span>
+              </div>
+            )}
+            <div className="bdOrderModal__summary">
+              <div className="bdOrderModal__total">
+                <span className="bdOrderModal__totalLabel">Total:</span>
+                <span className="bdOrderModal__totalValue">{formatPrice(breakdown.total)}</span>
+              </div>
+            </div>
+            <div className="bdOrderModal__actions">
+              <button
+                type="button"
+                className="bdBtn bdBtn--secondary"
+                onClick={() => this.setState({ showOrderModal: false })}
+              >
+                Batal
+              </button>
+              <a
+                href={waOrderLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`bdBtn bdBtn--primary ${!this.state.isFormValid ? "bdBtn--disabled" : ""}`}
+                onClick={(e) => {
+                  if (!this.state.isFormValid) {
+                    e.preventDefault();
+                    toast.error("Lengkapi semua field yang wajib terlebih dahulu");
+                  } else {
+                    this.setState({ showOrderModal: false });
+                  }
+                }}
+                aria-disabled={!this.state.isFormValid}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" fill="currentColor"/>
+                </svg>
+                Kirim ke WhatsApp
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   render(): React.ReactNode {
     const { bouquet, loading, error, detailUrl, similarBouquets = [] } = this.props;
 
@@ -760,19 +1009,10 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
     const { isAuthenticated } = require("../utils/auth-utils");
     const isAdmin = isAuthenticated();
 
-    const waCustomer = buildWhatsAppLink(
-      buildCustomerOrderMessage(bouquet, this.props.detailUrl, this.state)
-    );
-
     // Quick order link - instant order without filling form
     const waQuickOrder = buildWhatsAppLink(
       buildQuickOrderMessage(bouquet, this.props.detailUrl)
     );
-
-    // Get tomorrow's date as default min date
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const minDate = tomorrow.toISOString().split("T")[0];
 
     return (
       <section className="bdPage" aria-labelledby="bd-title">
@@ -923,27 +1163,32 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                 </div>
               )}
 
-              {/* Quick Order Button - Prominent */}
-              <div className="bdQuickOrderNew">
+              {/* Order Action Buttons - Compact */}
+              <div className="bdOrderActions">
+                <button
+                  type="button"
+                  className="bdOrderBtn bdOrderBtn--primary btn-luxury"
+                  onClick={() => this.setState({ showOrderModal: true })}
+                  aria-label="Buka form pemesanan"
+                >
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>Pesan Sekarang</span>
+                </button>
                 <a
-                  className="bdQuickOrderNew__btn btn-luxury"
+                  className="bdOrderBtn bdOrderBtn--secondary"
                   href={waQuickOrder}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Order langsung lewat WhatsApp tanpa isi form"
                   onClick={(e) => createRipple(e)}
                 >
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" fill="currentColor"/>
                   </svg>
-                  <span>Order Langsung via WhatsApp</span>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  <span>Order Langsung</span>
                 </a>
-                <p className="bdQuickOrderNew__hint">
-                  Chat langsung tanpa isi form. Detail bisa dibahas via WhatsApp.
-                </p>
               </div>
 
               {/* Details Section - Collapsible for Efficiency */}
@@ -1080,343 +1325,6 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                   </div>
               </div>
 
-              {/* Order Form Section - Simplified */}
-              <div className="bdOrderSection">
-                <h2 className="bdOrderSection__title">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  Form Pemesanan
-                </h2>
-
-                {/* Order Form - Simplified */}
-                <div className="bdOrderSection__form" aria-label="Form pemesanan">
-                  <div className="bdFormGroup">
-                    <label className="bdFormLabel">
-                    Jumlah
-                    <span className="bdFormLabel__required" aria-label="Wajib diisi">*</span>
-                  </label>
-                  <div className="bdFormInputWrapper">
-                    <button
-                      type="button"
-                      className="bdFormQuantityBtn"
-                      onClick={() => this.handleFormChange("quantity", Math.max(1, this.state.quantity - 1))}
-                      aria-label="Kurangi jumlah"
-                      disabled={this.state.quantity <= 1}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                      </svg>
-                    </button>
-                    <input
-                      type="number"
-                      className={`bdFormInput ${this.state.formErrors.quantity ? "bdFormInput--error" : ""}`}
-                      min="1"
-                      max="99"
-                      value={this.state.quantity}
-                      onChange={(e) =>
-                        this.handleFormChange(
-                          "quantity",
-                          Math.max(1, Math.min(99, parseInt(e.target.value) || 1))
-                        )
-                      }
-                      aria-label="Jumlah bouquet"
-                      aria-invalid={!!this.state.formErrors.quantity}
-                      aria-describedby={this.state.formErrors.quantity ? "quantity-error" : undefined}
-                    />
-                    <button
-                      type="button"
-                      className="bdFormQuantityBtn"
-                      onClick={() => this.handleFormChange("quantity", Math.min(99, this.state.quantity + 1))}
-                      aria-label="Tambah jumlah"
-                      disabled={this.state.quantity >= 99}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                      </svg>
-                    </button>
-                  </div>
-                  {this.state.formErrors.quantity && (
-                    <span className="bdFormError" id="quantity-error" role="alert">
-                      {this.state.formErrors.quantity}
-                    </span>
-                  )}
-                </div>
-
-                <div className="bdFormGroup">
-                  <label className="bdFormLabel">
-                    Tipe Pengiriman
-                    <span className="bdFormLabel__required" aria-label="Wajib diisi">*</span>
-                  </label>
-                  <div className="bdFormRadioGroup">
-                    <label className={`bdFormRadio ${this.state.deliveryType === "delivery" ? "bdFormRadio--active" : ""}`}>
-                      <input
-                        type="radio"
-                        name="deliveryType"
-                        value="delivery"
-                        checked={this.state.deliveryType === "delivery"}
-                        onChange={(e) =>
-                          this.handleFormChange("deliveryType", e.target.value)
-                        }
-                      />
-                      <span>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                          <path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        Diantar
-                      </span>
-                    </label>
-                    <label className={`bdFormRadio ${this.state.deliveryType === "pickup" ? "bdFormRadio--active" : ""}`}>
-                      <input
-                        type="radio"
-                        name="deliveryType"
-                        value="pickup"
-                        checked={this.state.deliveryType === "pickup"}
-                        onChange={(e) =>
-                          this.handleFormChange("deliveryType", e.target.value)
-                        }
-                      />
-                      <span>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeWidth="2"/>
-                          <circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="2"/>
-                        </svg>
-                        Ambil di Toko
-                      </span>
-                    </label>
-                  </div>
-                </div>
-
-                <div className="bdFormGroup">
-                  <label className="bdFormLabel">
-                    {this.state.deliveryType === "delivery"
-                      ? "Tanggal Pengiriman"
-                      : "Tanggal Pengambilan"}
-                    <span className="bdFormLabel__required" aria-label="Wajib diisi">*</span>
-                  </label>
-                  <div className="bdFormInputWrapper">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="bdFormInputIcon" aria-hidden="true">
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="2"/>
-                      <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                      <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                      <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" strokeWidth="2"/>
-                    </svg>
-                    <input
-                      type="date"
-                      className={`bdFormInput ${this.state.formErrors.deliveryDate ? "bdFormInput--error" : ""}`}
-                      min={minDate}
-                      value={this.state.deliveryDate}
-                      onChange={(e) => this.handleFormChange("deliveryDate", e.target.value)}
-                      aria-label={
-                        this.state.deliveryType === "delivery"
-                          ? "Tanggal pengiriman"
-                          : "Tanggal pengambilan"
-                      }
-                      aria-invalid={!!this.state.formErrors.deliveryDate}
-                      aria-describedby={this.state.formErrors.deliveryDate ? "deliveryDate-error" : undefined}
-                    />
-                  </div>
-                  {this.state.formErrors.deliveryDate && (
-                    <span className="bdFormError" id="deliveryDate-error" role="alert">
-                      {this.state.formErrors.deliveryDate}
-                    </span>
-                  )}
-                  {this.state.deliveryDate && this.calculateDeliveryTime() && (
-                    <span className="bdFormHint bdFormHint--deliveryTime">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                        <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                      </svg>
-                      {this.calculateDeliveryTime()}
-                    </span>
-                  )}
-                </div>
-
-                {this.state.deliveryDate && (
-                  <div className="bdFormGroup bdFormGroup--compact">
-                    <label className="bdFormLabel">
-                      {this.state.deliveryType === "delivery"
-                        ? "Waktu Pengiriman"
-                        : "Waktu Pengambilan"}
-                      <span className="bdFormLabel__optional">(Opsional)</span>
-                    </label>
-                    <DeliveryTimeSlot
-                      selectedDate={this.state.deliveryDate}
-                      selectedSlot={this.state.deliveryTimeSlot}
-                      onSelect={(slotId) => this.handleFormChange("deliveryTimeSlot", slotId)}
-                    />
-                  </div>
-                )}
-
-                {this.state.deliveryType === "delivery" && (
-                  <div className="bdFormGroup">
-                    <label className="bdFormLabel">
-                      Alamat Pengiriman
-                      <span className="bdFormLabel__required" aria-label="Wajib diisi">*</span>
-                    </label>
-                    <AddressAutocomplete
-                      value={this.state.address}
-                      onChange={this.handleAddressChange}
-                      placeholder="Masukkan alamat lengkap atau pilih dari alamat tersimpan"
-                      required
-                      error={this.state.formErrors.address}
-                      onLocationChange={this.handleLocationChange}
-                    />
-                    {getAccessToken() && (
-                      <button
-                        type="button"
-                        onClick={this.loadSavedAddress}
-                        className="bdFormAddressHelper"
-                        aria-label="Gunakan alamat default"
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeWidth="2"/>
-                          <circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="2"/>
-                        </svg>
-                        Gunakan Alamat Tersimpan
-                      </button>
-                    )}
-                    {this.state.deliveryPriceResult && (
-                      <div className="bdDeliveryPrice">
-                        <div className="bdDeliveryPrice__info">
-                          <span className="bdDeliveryPrice__label">Ongkir:</span>
-                          <span className="bdDeliveryPrice__value">
-                            {this.state.deliveryPriceResult.formattedPrice}
-                          </span>
-                        </div>
-                        <div className="bdDeliveryPrice__details">
-                          <span>Jarak: ~{this.state.deliveryPriceResult.distance} km</span>
-                          <span>•</span>
-                          <span>Estimasi: {this.state.deliveryPriceResult.estimatedTime}</span>
-                        </div>
-                      </div>
-                    )}
-                    {this.state.formErrors.address && (
-                      <span className="bdFormError" id="address-error" role="alert">
-                        {this.state.formErrors.address}
-                      </span>
-                    )}
-                  </div>
-                )}
-
-                <div className="bdFormGroup bdFormGroup--compact">
-                  <label className="bdFormLabel">
-                    Kartu Ucapan
-                    <span className="bdFormLabel__optional">(Opsional)</span>
-                  </label>
-                  <textarea
-                    className="bdFormTextarea"
-                    rows={2}
-                    placeholder="Tulis pesan untuk kartu ucapan..."
-                    value={this.state.greetingCard}
-                    onChange={(e) => this.handleFormChange("greetingCard", e.target.value)}
-                    aria-label="Kartu ucapan"
-                    maxLength={200}
-                  />
-                  {this.state.greetingCard.length > 0 && (
-                    <div className="bdFormCharCount">
-                      {this.state.greetingCard.length} / 200
-                    </div>
-                  )}
-                </div>
-
-                {/* Preview Message */}
-                {this.state.showPreview && (
-                  <div className="bdOrderPreview" aria-label="Preview pesan">
-                    <div className="bdOrderPreview__header">
-                      <h3 className="bdOrderPreview__title">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        Preview Pesan WhatsApp
-                      </h3>
-                      <button
-                        type="button"
-                        className="bdOrderPreview__close"
-                        onClick={() => this.setState({ showPreview: false })}
-                        aria-label="Tutup preview"
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </button>
-                    </div>
-                    <div className="bdOrderPreview__content">
-                      <pre className="bdOrderPreview__message">
-                        {buildCustomerOrderMessage(bouquet, this.props.detailUrl, this.state)}
-                      </pre>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="bdActions">
-                <div className="bdActions__buttons">
-                  <a
-                    className={`bdBtn bdBtn--primary btn-luxury ${!this.state.isFormValid ? "bdBtn--disabled" : ""}`}
-                    href={this.state.isFormValid ? waCustomer : "#"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Pesan bouquet ini lewat WhatsApp"
-                    onClick={(e) => {
-                      if (!this.state.isFormValid) {
-                        e.preventDefault();
-                        // Scroll to first error
-                        const firstError = document.querySelector(".bdFormInput--error, .bdFormTextarea--error");
-                        if (firstError) {
-                          firstError.scrollIntoView({ behavior: "smooth", block: "center" });
-                          (firstError as HTMLElement).focus();
-                        }
-                        return;
-                      }
-                      createRipple(e);
-                      
-                      // Save order data and prepare confirmation page URL
-                      const orderData = {
-                        bouquetName: bouquet.name,
-                        quantity: this.state.quantity,
-                        deliveryType: this.state.deliveryType,
-                        deliveryDate: this.state.deliveryDate,
-                        deliveryTimeSlot: this.state.deliveryTimeSlot,
-                        address: this.state.address,
-                        greetingCard: this.state.greetingCard,
-                        totalPrice: bouquet.price * this.state.quantity,
-                      };
-                      
-                      // Store in sessionStorage for confirmation page
-                      sessionStorage.setItem("orderData", JSON.stringify(orderData));
-                      
-                      // Clear saved form after successful order
-                      localStorage.removeItem(this.formStorageKey);
-                      
-                      // Build confirmation URL
-                      const confirmationUrl = new URL("/order-confirmation", window.location.origin);
-                      Object.entries(orderData).forEach(([key, value]) => {
-                        if (value !== null && value !== undefined && value !== "") {
-                          confirmationUrl.searchParams.set(key, encodeURIComponent(String(value)));
-                        }
-                      });
-                      
-                      // Store confirmation URL to redirect after WhatsApp opens
-                      sessionStorage.setItem("confirmationUrl", confirmationUrl.toString());
-                    }}
-                  >
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" fill="currentColor"/>
-                    </svg>
-                    <span>{this.state.isFormValid ? "Pesan Sekarang via WhatsApp" : "Lengkapi Form untuk Pesan"}</span>
-                  </a>
-                </div>
-
-                {!this.state.isFormValid && (
-                  <div className="bdActionWarning" role="alert">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <span>Lengkapi form di atas untuk melanjutkan</span>
-                  </div>
-                )}
-              </div>
             </div>
 
             {/* Sticky Order Summary Sidebar - Desktop Only */}
@@ -1481,7 +1389,7 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                               <div className="bdOrderSidebar__item bdOrderSidebar__item--breakdown">
                                 <span className="bdOrderSidebar__label">Ongkir</span>
                                 <span className="bdOrderSidebar__value">
-                                  {breakdown.delivery > 0 ? formatPrice(breakdown.delivery) : "Akan dihitung"}
+                                  Akan dihitung setelah konfirmasi
                                 </span>
                               </div>
                             )}
@@ -1540,7 +1448,6 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                 </div>
               </div>
             </div>
-          </div>
 
           {/* Similar Bouquets Section */}
           {similarBouquets.length > 0 && (
@@ -1612,6 +1519,9 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                   )}
                 </div>
               )}
+
+          {/* Order Form Modal */}
+          {this.renderOrderModal()}
         </div>
       </section>
     );
