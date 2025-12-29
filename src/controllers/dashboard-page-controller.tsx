@@ -22,6 +22,9 @@ import {
   type PerformanceState,
   type SeoState,
   type AlertsState,
+  type InsightsResponse,
+  type SalesMetrics,
+  type MetricsResponse,
   INITIAL_DASHBOARD_PAGE_VIEW_STATE,
   INITIAL_PERFORMANCE_STATE,
   INITIAL_SEO_STATE,
@@ -31,40 +34,6 @@ import {
   readTabFromLocation,
   writeTabToLocation,
 } from "../models/dashboard-page-model";
-
-type MetricsResponse = {
-  visitorsCount?: number;
-  collectionsCount?: number;
-  collections?: string[];
-};
-
-type InsightsResponse = {
-  days?: number;
-  pageviews30d?: number;
-  topSearchTerms?: Array<{ term: string; count: number }>;
-  topBouquetsDays?: Array<{ bouquetId: string; count: number }>;
-  topBouquets7d?: Array<{ bouquetId: string; count: number }>;
-  visitHours?: Array<{ hour: number; count: number }>;
-  uniqueVisitors30d?: number;
-  uniqueVisitorsAvailable?: boolean;
-};
-
-type SalesMetrics = {
-  totalOrders: number;
-  totalRevenue: number;
-  todayOrders: number;
-  todayRevenue: number;
-  thisMonthOrders: number;
-  thisMonthRevenue: number;
-  pendingOrders: number;
-  processingOrders: number;
-  completedOrders: number;
-  unpaidOrders: number;
-  paidOrders: number;
-  topSellingBouquets: Array<{ bouquetId: string; bouquetName: string; orderCount: number; revenue: number }>;
-  averageOrderValue: number;
-  totalCustomers: number;
-};
 
 interface State {
   bouquets: Bouquet[];

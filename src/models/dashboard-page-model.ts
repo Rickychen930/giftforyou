@@ -32,6 +32,49 @@ export const isActiveTab = (v: string): v is ActiveTab =>
   v === "analytics";
 
 /**
+ * Insights Response Type
+ */
+export interface InsightsResponse {
+  days?: number;
+  pageviews30d?: number;
+  topSearchTerms?: Array<{ term: string; count: number }>;
+  topBouquetsDays?: Array<{ bouquetId: string; count: number }>;
+  topBouquets7d?: Array<{ bouquetId: string; count: number }>;
+  visitHours?: Array<{ hour: number; count: number }>;
+  uniqueVisitors30d?: number;
+  uniqueVisitorsAvailable?: boolean;
+}
+
+/**
+ * Sales Metrics Type
+ */
+export interface SalesMetrics {
+  totalOrders: number;
+  totalRevenue: number;
+  todayOrders: number;
+  todayRevenue: number;
+  thisMonthOrders: number;
+  thisMonthRevenue: number;
+  pendingOrders: number;
+  processingOrders: number;
+  completedOrders: number;
+  unpaidOrders: number;
+  paidOrders: number;
+  topSellingBouquets: Array<{ bouquetId: string; bouquetName: string; orderCount: number; revenue: number }>;
+  averageOrderValue: number;
+  totalCustomers: number;
+}
+
+/**
+ * Metrics Response Type
+ */
+export interface MetricsResponse {
+  visitorsCount?: number;
+  collectionsCount?: number;
+  collections?: string[];
+}
+
+/**
  * Performance State
  */
 export interface PerformanceState {
@@ -154,4 +197,3 @@ export const writeTabToLocation = (tab: ActiveTab): void => {
     // ignore
   }
 };
-

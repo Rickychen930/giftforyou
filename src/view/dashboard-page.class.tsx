@@ -51,9 +51,6 @@ import {
 } from "./dashboard-page.icons";
 import { DASHBOARD_TABS, METRIC_CARDS_CONFIG, OVERVIEW_ACTIONS, PRICE_ITEMS, REVENUE_ROWS, ORDER_ROWS, ORDER_STATUS_ITEMS, PAYMENT_STATUS_ITEMS, DATA_QUALITY_ITEMS, PERFORMANCE_METRICS, EXPORT_BUTTONS, CUSTOMER_ACTIONS } from "./dashboard-page.static";
 import { SKELETON_COUNTS } from "./dashboard-page.constants";
-import { DASHBOARD_STYLES } from "./dashboard-page.styles";
-import { DASHBOARD_LIMITS, GRADE_LABELS, SEO_STATUS_ICONS, TREND_ARROWS } from "./dashboard-page.constants-extended";
-import { calculateLastUpdated, formatLastUpdatedLabel, getSalesMetricValue, getOverviewMetricValue, isTabNavigation, isToggleShowAction } from "./dashboard-page.helpers";
 import BouquetUploader from "../components/sections/dashboard-uploader-section";
 import BouquetEditorSection from "../components/sections/Bouquet-editor-section";
 import HeroSliderEditorSection from "../components/sections/HeroSliderEditorSection";
@@ -110,7 +107,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
   /**
    * Get icon component by key
    */
-  private getIcon = (iconKey: string, props?: React.ComponentProps<any>): React.ReactNode => {
+  private getIcon = (iconKey: string, props?: any): React.ReactNode => {
     const IconComponent = ICON_MAP[iconKey];
     if (!IconComponent) return null;
     return <IconComponent {...props} />;
@@ -125,7 +122,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
       return {
         key: tab.key,
         label: tab.label,
-        icon: Icon ? <Icon {...DASHBOARD_STYLES.ICON_LARGE} /> : null,
+        icon: Icon ? <Icon width={18} height={18} /> : null,
       };
     });
 
@@ -225,7 +222,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
       return {
         key: item.key,
         value: value > 0 ? formatIDR(value) : "—",
-        icon: Icon ? <Icon style={DASHBOARD_STYLES.ICON_OPACITY_LOW} /> : null,
+        icon: Icon ? <Icon style={{ opacity: 0.6 }} /> : null,
       };
     });
 
@@ -242,7 +239,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
     return (
       <div className="overviewKeyValue">
         {REVENUE_ROWS.map((row) => {
-          const value = getSalesMetricValue(salesMetrics, row.valueKey) as number;
+          const value = (salesMetrics as any)[row.valueKey];
           return (
             <div key={row.key} className="overviewKeyValue__row">
               <span className="overviewKeyValue__key">{row.key}</span>
@@ -264,7 +261,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
     return (
       <div className="overviewKeyValue">
         {ORDER_ROWS.map((row) => {
-          const value = getSalesMetricValue(salesMetrics, row.valueKey) as number;
+          const value = (salesMetrics as any)[row.valueKey];
           return (
             <div key={row.key} className="overviewKeyValue__row">
               <span className="overviewKeyValue__key">{row.key}</span>
@@ -286,7 +283,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
     return (
       <ul className="overviewList">
         {ORDER_STATUS_ITEMS.map((item) => {
-          const value = getSalesMetricValue(salesMetrics, item.valueKey) as number;
+          const value = (salesMetrics as any)[item.valueKey];
           return (
             <li key={item.label} className="overviewList__item">
               <span>{item.label}</span>
@@ -308,7 +305,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
     return (
       <ul className="overviewList">
         {PAYMENT_STATUS_ITEMS.map((item) => {
-          const value = getSalesMetricValue(salesMetrics, item.valueKey) as number;
+          const value = (salesMetrics as any)[item.valueKey];
           return (
             <li key={item.label} className="overviewList__item">
               <span>{item.label}</span>
@@ -329,15 +326,15 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
     return (
       <ul className="overviewList" aria-label="Ringkasan kualitas data">
         {DATA_QUALITY_ITEMS.map((item) => {
-          const value = getOverviewMetricValue(overviewMetrics, item.valueKey) as number;
-          const warningValue = getOverviewMetricValue(overviewMetrics, item.warningKey) as number;
+          const value = (overviewMetrics as any)[item.valueKey];
+          const warningValue = (overviewMetrics as any)[item.warningKey];
           const Icon = ICON_MAP[item.iconKey];
           const hasWarning = warningValue > 0;
 
           return (
             <li key={item.label} className={`overviewList__item ${hasWarning ? "overviewList__item--warning" : ""}`}>
               <span>
-                {Icon && <Icon {...DASHBOARD_STYLES.ICON_SMALL} style={DASHBOARD_STYLES.ICON_WITH_MARGIN_SMALL_OPACITY_LOW} />}
+                {Icon && <Icon width={14} height={14} style={{ marginRight: "0.4rem", opacity: 0.6 }} />}
                 {item.label}
               </span>
               <b>{value}</b>
@@ -360,7 +357,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
     }
 
     return (
-      <div className="overviewKeyValue" style={DASHBOARD_STYLES.MARGIN_TOP}>
+      <div className="overviewKeyValue" style={{ marginTop: "1rem" }}>
         {PERFORMANCE_METRICS.map((metric) => {
           const value = performance.metrics[metric.valueKey as keyof typeof performance.metrics];
           if (value === undefined) return null;
@@ -388,7 +385,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
     const { onExport } = this.props;
 
     return (
-      <div style={DASHBOARD_STYLES.EXPORT_BUTTONS_CONTAINER}>
+      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "1rem" }}>
         {EXPORT_BUTTONS.map((button) => (
           <LuxuryButton
             key={button.format}
@@ -410,14 +407,14 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
     const { onSetActiveTab, onToggleShow } = this.props;
 
     return (
-      <div style={DASHBOARD_STYLES.SECTION_DIVIDER}>
+      <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid rgba(0,0,0,0.1)", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
         {CUSTOMER_ACTIONS.map((action) => {
           const Icon = ICON_MAP[action.iconKey];
           const handleClick = () => {
-            if (isTabNavigation(action.onClickKey)) {
-              onSetActiveTab(action.onClickKey as ActiveTab);
-            } else if (isToggleShowAction(action.onClickKey)) {
-              onToggleShow(action.onClickKey);
+            if (action.onClickKey === "customers") {
+              onSetActiveTab("customers");
+            } else {
+              onToggleShow(action.onClickKey as any);
             }
           };
 
@@ -428,8 +425,8 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
               size="sm"
               onClick={handleClick}
               className={action.className}
-              style={DASHBOARD_STYLES.FLEX_FULL_WIDTH}
-              icon={Icon ? <Icon {...DASHBOARD_STYLES.ICON_MEDIUM} /> : null}
+              style={{ width: "100%", justifyContent: "center" }}
+              icon={Icon ? <Icon width={16} height={16} /> : null}
               iconPosition="left"
             >
               {action.label}
@@ -446,8 +443,15 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
   private renderOverviewHeader = (): React.ReactNode => {
     const { bouquets, viewState } = this.props;
 
-    const lastUpdatedMs = calculateLastUpdated(bouquets);
-    const lastUpdatedLabel = formatLastUpdatedLabel(lastUpdatedMs);
+    const lastUpdatedMs = bouquets.reduce((max, b) => {
+      const candidate = (b.updatedAt ?? b.createdAt ?? "").toString();
+      const t = Date.parse(candidate);
+      return Number.isFinite(t) ? Math.max(max, t) : max;
+    }, 0);
+    const lastUpdatedLabel = lastUpdatedMs
+      ? new Date(lastUpdatedMs).toLocaleString("id-ID")
+      : "—";
+
     const copyStatus = viewState.overviewCopyStatus;
 
     return (
@@ -489,10 +493,10 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
       return (
         <div className="overviewCard overviewCard--error" aria-label="Sales metrics">
           <p className="overviewCard__title">
-            <AlertIcon {...DASHBOARD_STYLES.ICON_MEDIUM} style={DASHBOARD_STYLES.ICON_WITH_MARGIN_OPACITY} />
+            <AlertIcon width={16} height={16} style={{ marginRight: "0.5rem", opacity: 0.8 }} />
             Penjualan
           </p>
-          <p className="overviewCard__empty" style={DASHBOARD_STYLES.ERROR_TEXT}>
+          <p className="overviewCard__empty" style={{ color: "var(--error-text)", fontSize: "0.9rem", textAlign: "left" }}>
             {salesError}
           </p>
         </div>
@@ -505,7 +509,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
       <>
         <div className="overviewCard" aria-label="Revenue">
           <p className="overviewCard__title">
-            <MoneyIcon {...DASHBOARD_STYLES.ICON_MEDIUM} style={DASHBOARD_STYLES.ICON_WITH_MARGIN_OPACITY} />
+            <MoneyIcon width={16} height={16} style={{ marginRight: "0.5rem", opacity: 0.8 }} />
             Revenue
           </p>
           {this.renderRevenueRows()}
@@ -513,7 +517,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
 
         <div className="overviewCard" aria-label="Orders">
           <p className="overviewCard__title">
-            <OrdersIcon {...DASHBOARD_STYLES.ICON_MEDIUM} style={DASHBOARD_STYLES.ICON_WITH_MARGIN_OPACITY} />
+            <OrdersIcon width={16} height={16} style={{ marginRight: "0.5rem", opacity: 0.8 }} />
             Orders
           </p>
           {this.renderOrderRows()}
@@ -530,18 +534,18 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
         </div>
 
         <div className="overviewCard" aria-label="Top Selling">
-          <p className="overviewCard__title">Top {DASHBOARD_LIMITS.TOP_SELLING_BOUQUETS} Produk Terlaris</p>
+          <p className="overviewCard__title">Top 5 Produk Terlaris</p>
           {salesMetrics.topSellingBouquets.length === 0 ? (
             <p className="overviewCard__empty">Belum ada data penjualan.</p>
           ) : (
             <ol className="overviewRank">
-              {salesMetrics.topSellingBouquets.slice(0, DASHBOARD_LIMITS.TOP_SELLING_BOUQUETS).map((item) => (
+              {salesMetrics.topSellingBouquets.map((item) => (
                 <li key={item.bouquetId} className="overviewRank__item">
-                  <div style={DASHBOARD_STYLES.RANK_ITEM_CONTAINER}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem", minWidth: 0 }}>
                     <span className="overviewRank__name" title={item.bouquetName}>
                       {item.bouquetName}
                     </span>
-                    <span style={DASHBOARD_STYLES.RANK_REVENUE_TEXT}>
+                    <span style={{ fontSize: "0.75rem", color: "var(--dash-text-muted)", fontWeight: 700 }}>
                       {formatIDR(item.revenue)}
                     </span>
                   </div>
@@ -554,7 +558,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
 
         <div className="overviewCard" aria-label="Customers">
           <p className="overviewCard__title">
-            <CustomersIcon {...DASHBOARD_STYLES.ICON_MEDIUM} style={DASHBOARD_STYLES.ICON_WITH_MARGIN_OPACITY} />
+            <CustomersIcon width={16} height={16} style={{ marginRight: "0.5rem", opacity: 0.8 }} />
             Pelanggan
           </p>
           <div className="overviewKeyValue">
@@ -583,7 +587,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
       labelBouquet,
     } = overviewMetrics;
 
-    const topBouquets7d = (this.props.insights?.topBouquets7d ?? []).slice(0, DASHBOARD_LIMITS.TOP_BOUQUETS_7D);
+    const topBouquets7d = (this.props.insights?.topBouquets7d ?? []).slice(0, 3);
 
     return (
       <>
@@ -613,7 +617,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
             <p className="overviewCard__empty">Belum ada data pencarian.</p>
           ) : (
             <ol className="overviewRank" aria-label="Daftar pencarian teratas">
-              {topSearchTerms.slice(0, DASHBOARD_LIMITS.TOP_SEARCH_TERMS).map((t) => (
+              {topSearchTerms.slice(0, 5).map((t) => (
                 <li key={t.term} className="overviewRank__item">
                   <span className="overviewRank__name" title={t.term}>
                     {t.term}
@@ -626,7 +630,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
         </div>
 
         <div className="overviewCard" aria-label="Bouquet terpopuler 30 hari">
-          <p className="overviewCard__title">Top {DASHBOARD_LIMITS.TOP_BOUQUETS_30D} bouquet (30 hari)</p>
+          <p className="overviewCard__title">Top 5 bouquet (30 hari)</p>
           {insightsError ? (
             <p className="overviewCard__empty">Insight belum tersedia.</p>
           ) : topBouquetsDays.length === 0 ? (
@@ -646,7 +650,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
         </div>
 
         <div className="overviewCard" aria-label="Bouquet terpopuler 7 hari">
-          <p className="overviewCard__title">Top {DASHBOARD_LIMITS.TOP_BOUQUETS_7D} bouquet (7 hari)</p>
+          <p className="overviewCard__title">Top 3 bouquet (7 hari)</p>
           {insightsError ? (
             <p className="overviewCard__empty">Insight belum tersedia.</p>
           ) : topBouquets7d.length === 0 ? (
@@ -673,7 +677,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
             <p className="overviewCard__empty">Belum ada data kunjungan.</p>
           ) : (
             <ol className="overviewRank" aria-label="Daftar jam kunjungan terpadat">
-              {visitHours.slice(0, DASHBOARD_LIMITS.TOP_VISIT_HOURS).map((h) => (
+              {visitHours.slice(0, 5).map((h) => (
                 <li key={h.hour} className="overviewRank__item">
                   <span className="overviewRank__name">{formatHour(h.hour)}</span>
                   <span className="overviewRank__count">{h.count}</span>
@@ -696,7 +700,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
     return (
       <div className="overviewCard overviewCard--performance" aria-label="Performance metrics">
         <p className="overviewCard__title">
-          <PerformanceIcon {...DASHBOARD_STYLES.ICON_MEDIUM} style={DASHBOARD_STYLES.ICON_WITH_MARGIN_OPACITY} />
+          <PerformanceIcon width={16} height={16} style={{ marginRight: "0.5rem", opacity: 0.8 }} />
           Performance
         </p>
         {performance.loading ? (
@@ -709,7 +713,10 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
                 <span className="overviewPerformanceScore__label">/ 100</span>
               </div>
               <div className="overviewPerformanceScore__grade">
-                {GRADE_LABELS[performance.score.grade] || performance.score.grade}
+                {performance.score.grade === "excellent" && "Excellent"}
+                {performance.score.grade === "good" && "Good"}
+                {performance.score.grade === "needs-improvement" && "Needs Improvement"}
+                {performance.score.grade === "poor" && "Poor"}
               </div>
             </div>
             {this.renderPerformanceMetrics()}
@@ -729,7 +736,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
     return (
       <div className="overviewCard overviewCard--seo" aria-label="SEO analysis">
         <p className="overviewCard__title">
-          <SeoIcon {...DASHBOARD_STYLES.ICON_MEDIUM} style={DASHBOARD_STYLES.ICON_WITH_MARGIN_OPACITY} />
+          <SeoIcon width={16} height={16} style={{ marginRight: "0.5rem", opacity: 0.8 }} />
           SEO Analysis
         </p>
         {seo.loading ? (
@@ -742,15 +749,20 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
                 <span className="overviewSeoScore__label">/ 100</span>
               </div>
               <div className="overviewSeoScore__grade">
-                {GRADE_LABELS[seo.analysis.grade] || seo.analysis.grade}
+                {seo.analysis.grade === "excellent" && "Excellent"}
+                {seo.analysis.grade === "good" && "Good"}
+                {seo.analysis.grade === "needs-improvement" && "Needs Improvement"}
+                {seo.analysis.grade === "poor" && "Poor"}
               </div>
             </div>
 
-            <div className="overviewSeoChecks" style={DASHBOARD_STYLES.SEO_CHECKS_CONTAINER}>
-              {seo.analysis.checks.slice(0, DASHBOARD_LIMITS.SEO_CHECKS).map((check, idx) => (
+            <div className="overviewSeoChecks" style={{ marginTop: "1rem" }}>
+              {seo.analysis.checks.slice(0, 6).map((check, idx) => (
                 <div key={idx} className={`overviewSeoCheck overviewSeoCheck--${check.status}`}>
                   <span className="overviewSeoCheck__icon">
-                    {SEO_STATUS_ICONS[check.status] || ""}
+                    {check.status === "pass" && "✓"}
+                    {check.status === "warning" && "⚠"}
+                    {check.status === "fail" && "✗"}
                   </span>
                   <div className="overviewSeoCheck__content">
                     <span className="overviewSeoCheck__name">{check.name}</span>
@@ -761,24 +773,24 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
             </div>
 
             {seo.analysis.recommendations.length > 0 && (
-              <div className="overviewSeoRecommendations" style={DASHBOARD_STYLES.RECOMMENDATIONS_CONTAINER}>
-                <p style={DASHBOARD_STYLES.RECOMMENDATIONS_TITLE}>Rekomendasi:</p>
-                <ul style={DASHBOARD_STYLES.RECOMMENDATIONS_LIST}>
-                  {seo.analysis.recommendations.slice(0, DASHBOARD_LIMITS.SEO_RECOMMENDATIONS).map((rec, idx) => (
-                    <li key={idx} style={DASHBOARD_STYLES.RECOMMENDATIONS_ITEM}>{rec}</li>
+              <div className="overviewSeoRecommendations" style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid rgba(0,0,0,0.1)" }}>
+                <p style={{ fontWeight: 800, marginBottom: "0.5rem", fontSize: "0.9rem" }}>Rekomendasi:</p>
+                <ul style={{ margin: 0, paddingLeft: "1.25rem", fontSize: "0.85rem", lineHeight: "1.6" }}>
+                  {seo.analysis.recommendations.slice(0, 3).map((rec, idx) => (
+                    <li key={idx} style={{ marginBottom: "0.4rem" }}>{rec}</li>
                   ))}
                 </ul>
               </div>
             )}
 
             {seo.trends && (
-              <div style={DASHBOARD_STYLES.TRENDS_CONTAINER}>
-                <p style={DASHBOARD_STYLES.TRENDS_TITLE}>Trends (30 days):</p>
+              <div style={{ marginTop: "1.5rem", paddingTop: "1rem", borderTop: "1px solid rgba(0,0,0,0.1)" }}>
+                <p style={{ fontWeight: 800, marginBottom: "0.75rem", fontSize: "0.9rem" }}>Trends (30 days):</p>
                 {seo.trends.score && (
-                  <div style={DASHBOARD_STYLES.TRENDS_ITEM}>
-                    <span style={DASHBOARD_STYLES.TRENDS_LABEL}>Score: </span>
+                  <div style={{ marginBottom: "0.5rem", fontSize: "0.85rem" }}>
+                    <span style={{ fontWeight: 700 }}>Score: </span>
                     <span className={seo.trends.score.trend === "up" ? "overviewKeyValue__val--good" : ""}>
-                      {seo.trends.score.changePercent.toFixed(1)}% {TREND_ARROWS[seo.trends.score.trend] || ""}
+                      {seo.trends.score.changePercent.toFixed(1)}% {seo.trends.score.trend === "up" ? "↑" : seo.trends.score.trend === "down" ? "↓" : "→"}
                     </span>
                   </div>
                 )}
@@ -802,11 +814,11 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
     return (
       <div className="overviewCard overviewCard--alerts" aria-label="Alerts">
         <p className="overviewCard__title">
-          <AlertIcon {...DASHBOARD_STYLES.ICON_MEDIUM} style={{ ...DASHBOARD_STYLES.ICON_MARGIN, ...DASHBOARD_STYLES.ICON_OPACITY }} />
+          <AlertIcon width={16} height={16} style={{ marginRight: "0.5rem", opacity: 0.8 }} />
           Alerts ({alerts.alerts.length})
         </p>
-        <div className="overviewAlerts" style={DASHBOARD_STYLES.ALERTS_CONTAINER}>
-          {alerts.alerts.slice(0, DASHBOARD_LIMITS.ALERTS_DISPLAY).map((alert) => (
+        <div className="overviewAlerts" style={{ marginTop: "1rem" }}>
+          {alerts.alerts.slice(0, 5).map((alert) => (
             <div key={alert.id} className={`overviewAlert overviewAlert--${alert.severity}`}>
               <div className="overviewAlert__content">
                 <span className="overviewAlert__title">{alert.title}</span>
@@ -814,9 +826,9 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
               </div>
             </div>
           ))}
-          {alerts.alerts.length > DASHBOARD_LIMITS.ALERTS_DISPLAY && (
-            <p style={DASHBOARD_STYLES.ALERT_MORE_TEXT}>
-              +{alerts.alerts.length - DASHBOARD_LIMITS.ALERTS_DISPLAY} more alerts
+          {alerts.alerts.length > 5 && (
+            <p style={{ fontSize: "0.85rem", color: "var(--ink-550)", marginTop: "0.5rem" }}>
+              +{alerts.alerts.length - 5} more alerts
             </p>
           )}
         </div>
@@ -831,7 +843,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
     return (
       <div className="overviewCard" aria-label="Export analytics">
         <p className="overviewCard__title">
-          <ExportIcon {...DASHBOARD_STYLES.ICON_MEDIUM} style={DASHBOARD_STYLES.ICON_WITH_MARGIN_OPACITY} />
+          <ExportIcon width={16} height={16} style={{ marginRight: "0.5rem", opacity: 0.8 }} />
           Export Analytics
         </p>
         {this.renderExportButtons()}
@@ -966,7 +978,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
             ariaLabel="Notifications"
             tooltip="Notifications"
             className="adminDashboard__actionBtn"
-            icon={<NotificationIcon {...DASHBOARD_STYLES.ICON_HEADER} />}
+            icon={<NotificationIcon width={20} height={20} />}
           />
           <IconButton
             variant="ghost"
@@ -975,7 +987,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
             ariaLabel="Keluar"
             tooltip="Keluar"
             className="adminDashboard__actionBtn adminDashboard__actionBtn--logout"
-            icon={<LogoutIcon {...DASHBOARD_STYLES.ICON_HEADER} />}
+            icon={<LogoutIcon width={20} height={20} />}
           />
         </div>
       </div>
