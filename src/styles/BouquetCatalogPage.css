@@ -190,18 +190,19 @@
 
 .catalogSummary {
   margin: 0;
-  padding: 1.5rem;
+  padding: clamp(1.25rem, 2.5vw, 1.75rem);
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.98) 100%
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(255, 255, 255, 0.95) 100%
   );
   border: 1.5px solid rgba(212, 140, 156, 0.15);
   border-radius: 20px;
   box-shadow: 
     0 8px 24px rgba(0, 0, 0, 0.06),
+    0 4px 16px rgba(0, 0, 0, 0.04),
     0 2px 8px rgba(0, 0, 0, 0.03),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   display: flex;
@@ -496,9 +497,10 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: clamp(1.25rem, 2.6vw, 1.75rem);
+  gap: clamp(2rem, 4vw, 3rem);
   align-items: stretch;
   padding: 0 clamp(1rem, 3vw, 1.5rem);
+  position: relative;
 }
 
 .catalogFilters--top {
@@ -606,49 +608,63 @@
 .catalogResults {
   min-height: 300px;
   width: 100%;
+  position: relative;
+  animation: fadeInUp 0.6s ease-out;
 }
 
-/* Grid results - Optimized for efficiency and visual appeal */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Grid results - Luxury, Efficient, and Elegant Layout */
 .catalogGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
-  gap: clamp(1rem, 2vw, 1.5rem);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: clamp(1.75rem, 4vw, 2.5rem);
   align-items: stretch;
   grid-auto-rows: auto;
   min-height: 200px;
   width: 100%;
   position: relative;
+  padding: 0.5rem 0;
 }
 
-/* Tablet and small desktop - 3 columns */
-@media (min-width: 900px) {
+/* Tablet and small desktop - 2-3 columns */
+@media (min-width: 768px) {
   .catalogGrid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: clamp(1.5rem, 2.5vw, 2rem);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: clamp(2rem, 3vw, 2.5rem);
   }
 }
 
-/* Desktop - 4 columns for better space utilization */
-@media (min-width: 1200px) {
+/* Desktop - 3-4 columns for better space utilization */
+@media (min-width: 1024px) {
   .catalogGrid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: 2.5rem;
   }
 }
 
-/* Large desktop - 4-5 columns depending on screen size */
+/* Large desktop - 4 columns */
 @media (min-width: 1440px) {
   .catalogGrid {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 2.25rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+    gap: 3rem;
   }
 }
 
-/* Ultra-wide - 5-6 columns */
+/* Ultra-wide - 4-5 columns */
 @media (min-width: 1920px) {
   .catalogGrid {
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 2.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+    gap: 3.5rem;
   }
 }
 
@@ -1169,8 +1185,8 @@
   }
 
   .catalogGrid {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+    gap: 1.5rem;
   }
 
   .catalogHeader__content {
@@ -1197,7 +1213,7 @@
 
   .catalogGrid {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 1.5rem;
   }
 
   .catalogSummary {
@@ -1258,7 +1274,7 @@
   }
 
   .catalogGrid {
-    gap: 1rem;
+    gap: 1.25rem;
   }
 
   .catalogSummary {
@@ -1295,7 +1311,7 @@
   }
 
   .catalogGrid {
-    gap: 0.9rem;
+    gap: 1rem;
   }
 
   .catalogSummary {

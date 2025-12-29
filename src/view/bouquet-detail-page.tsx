@@ -884,7 +884,7 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                         {formatBouquetType(bouquet.type)}
                       </span>
                     )}
-                    {typeof (bouquet as any).quantity === "number" && (bouquet as any).quantity > 0 && (
+                    {bouquet.status === "ready" && typeof (bouquet as any).quantity === "number" && (bouquet as any).quantity > 0 && (
                       <span className="bdHero__chip bdHero__chip--stock">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                           <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -897,7 +897,7 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                   {/* Social Proof & Urgency - Compact */}
                   <div className="bdHero__indicators">
                     <SocialProof bouquetId={bouquet._id} />
-                    {bouquet.quantity !== undefined && bouquet.quantity > 0 && bouquet.quantity <= 5 && (
+                    {bouquet.status === "ready" && bouquet.quantity !== undefined && bouquet.quantity > 0 && bouquet.quantity <= 5 && (
                       <UrgencyIndicator type="limited-stock" stockCount={bouquet.quantity} />
                     )}
                     {this.state.deliveryDate && (() => {
@@ -975,8 +975,11 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                   </svg>
                 </button>
                 
-                {this.state.showDetails && (
-                  <div id="bd-details-content" className="bdDetailsSection__content">
+                <div 
+                  id="bd-details-content" 
+                  className="bdDetailsSection__content"
+                  aria-expanded={this.state.showDetails}
+                >
                     {/* Additional Info Chips */}
                     {(bouquet.collectionName || bouquet.isNewEdition || bouquet.isFeatured) && (
                       <div className="bdDetailsSection__chips">
@@ -1075,10 +1078,9 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                       </div>
                     </div>
                   </div>
-                )}
               </div>
 
-              {/* Order Form Section - Always Visible */}
+              {/* Order Form Section - Simplified */}
               <div className="bdOrderSection">
                 <h2 className="bdOrderSection__title">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -1086,35 +1088,8 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                   </svg>
                   Form Pemesanan
                 </h2>
-                
-                {/* Progress Indicator - Compact */}
-                <div className="bdOrderSection__progress" aria-label="Progress form">
-                  <div className="bdOrderSection__progressBar">
-                    <div 
-                      className="bdOrderSection__progressFill"
-                      style={{ 
-                        width: `${this.calculateFormProgress()}%`,
-                        transition: "width 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
-                      }}
-                    />
-                  </div>
-                  <span className="bdOrderSection__progressText">
-                    {this.calculateFormProgress()}% Lengkap
-                  </span>
-                </div>
 
-                {/* Smart Suggestions - Compact */}
-                {this.getSmartSuggestions().length > 0 && (
-                  <div className="bdOrderSection__suggestions" aria-label="Tips">
-                    {this.getSmartSuggestions().slice(0, 2).map((suggestion, idx) => (
-                      <div key={idx} className="bdOrderSection__suggestion">
-                        {suggestion}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Order Form - Streamlined */}
+                {/* Order Form - Simplified */}
                 <div className="bdOrderSection__form" aria-label="Form pemesanan">
                   <div className="bdFormGroup">
                     <label className="bdFormLabel">
@@ -1166,9 +1141,6 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                       {this.state.formErrors.quantity}
                     </span>
                   )}
-                  <span className="bdFormHint">
-                    Pilih jumlah bouquet yang ingin dipesan (1-99)
-                  </span>
                 </div>
 
                 <div className="bdFormGroup">
@@ -1213,9 +1185,6 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                       </span>
                     </label>
                   </div>
-                  <span className="bdFormHint">
-                    Pilih metode pengiriman yang diinginkan
-                  </span>
                 </div>
 
                 <div className="bdFormGroup">
@@ -1252,24 +1221,19 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                       {this.state.formErrors.deliveryDate}
                     </span>
                   )}
-                  <div className="bdFormHintWrapper">
-                    <span className="bdFormHint">
-                      Pilih tanggal {this.state.deliveryType === "delivery" ? "pengiriman" : "pengambilan"} (minimal besok)
+                  {this.state.deliveryDate && this.calculateDeliveryTime() && (
+                    <span className="bdFormHint bdFormHint--deliveryTime">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                        <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                      </svg>
+                      {this.calculateDeliveryTime()}
                     </span>
-                    {this.state.deliveryDate && this.calculateDeliveryTime() && (
-                      <span className="bdFormHint bdFormHint--deliveryTime">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                          <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        </svg>
-                        {this.calculateDeliveryTime()}
-                      </span>
-                    )}
-                  </div>
+                  )}
                 </div>
 
                 {this.state.deliveryDate && (
-                  <div className="bdFormGroup">
+                  <div className="bdFormGroup bdFormGroup--compact">
                     <label className="bdFormLabel">
                       {this.state.deliveryType === "delivery"
                         ? "Waktu Pengiriman"
@@ -1281,9 +1245,6 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                       selectedSlot={this.state.deliveryTimeSlot}
                       onSelect={(slotId) => this.handleFormChange("deliveryTimeSlot", slotId)}
                     />
-                    <span className="bdFormHint">
-                      Pilih slot waktu yang nyaman untuk {this.state.deliveryType === "delivery" ? "pengiriman" : "pengambilan"}
-                    </span>
                   </div>
                 )}
 
@@ -1335,32 +1296,26 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                         {this.state.formErrors.address}
                       </span>
                     )}
-                    <span className="bdFormHint">
-                      Gunakan autocomplete untuk alamat yang lebih akurat dan estimasi ongkir otomatis.
-                    </span>
                   </div>
                 )}
 
-                <div className="bdFormGroup">
+                <div className="bdFormGroup bdFormGroup--compact">
                   <label className="bdFormLabel">
                     Kartu Ucapan
                     <span className="bdFormLabel__optional">(Opsional)</span>
                   </label>
                   <textarea
                     className="bdFormTextarea"
-                    rows={3}
-                    placeholder="Tulis pesan untuk kartu ucapan... (contoh: Selamat ulang tahun! Semoga selalu bahagia)"
+                    rows={2}
+                    placeholder="Tulis pesan untuk kartu ucapan..."
                     value={this.state.greetingCard}
                     onChange={(e) => this.handleFormChange("greetingCard", e.target.value)}
                     aria-label="Kartu ucapan"
                     maxLength={200}
                   />
-                  <span className="bdFormHint">
-                    Pesan akan ditulis di kartu ucapan yang menyertai bouquet. Maksimal 200 karakter.
-                  </span>
                   {this.state.greetingCard.length > 0 && (
                     <div className="bdFormCharCount">
-                      {this.state.greetingCard.length} / 200 karakter
+                      {this.state.greetingCard.length} / 200
                     </div>
                   )}
                 </div>
@@ -1397,19 +1352,6 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
 
               <div className="bdActions">
                 <div className="bdActions__buttons">
-                  <button
-                    type="button"
-                    className="bdBtn bdBtn--secondary"
-                    onClick={() => this.setState({ showPreview: !this.state.showPreview })}
-                    aria-label="Lihat preview pesan"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2"/>
-                      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
-                    </svg>
-                    <span>{this.state.showPreview ? "Sembunyikan" : "Lihat"} Preview</span>
-                  </button>
-                  
                   <a
                     className={`bdBtn bdBtn--primary btn-luxury ${!this.state.isFormValid ? "bdBtn--disabled" : ""}`}
                     href={this.state.isFormValid ? waCustomer : "#"}
@@ -1459,15 +1401,10 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                       sessionStorage.setItem("confirmationUrl", confirmationUrl.toString());
                     }}
                   >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" fill="currentColor"/>
                     </svg>
-                    <span>Pesan lewat WhatsApp</span>
-                    {!this.state.isFormValid && (
-                      <span className="bdBtn__badge" aria-label="Form belum lengkap">
-                        !
-                      </span>
-                    )}
+                    <span>{this.state.isFormValid ? "Pesan Sekarang via WhatsApp" : "Lengkapi Form untuk Pesan"}</span>
                   </a>
                 </div>
 
@@ -1476,38 +1413,24 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                       <path d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    <span>Lengkapi semua field yang wajib diisi untuk melanjutkan pemesanan.</span>
+                    <span>Lengkapi form di atas untuk melanjutkan</span>
                   </div>
                 )}
-                
-                <p className={`bdActionHint ${this.state.isFormValid ? "bdActionHint--success" : ""}`}>
-                  {this.state.isFormValid 
-                    ? (
-                      <>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ display: "inline-block", marginRight: "0.5rem", verticalAlign: "middle" }}>
-                          <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                        </svg>
-                        <span>Form sudah lengkap! Klik tombol di atas untuk mengirim pesan ke WhatsApp.</span>
-                      </>
-                    )
-                    : "Lengkapi form di atas, lalu klik tombol untuk mengirim pesan ke WhatsApp."}
-                </p>
               </div>
             </div>
 
             {/* Sticky Order Summary Sidebar - Desktop Only */}
             <div className="bdOrderSidebar">
-              {/* Order Summary - Sticky */}
-              {this.state.isFormValid && (
-                <div className="bdOrderSidebar__summary" aria-label="Ringkasan pesanan">
-                  <div className="bdOrderSidebar__header">
-                    <h3 className="bdOrderSidebar__title">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      Ringkasan
-                    </h3>
+              {/* Order Summary - Always Visible with Useful Info */}
+              <div className="bdOrderSidebar__summary" aria-label="Ringkasan pesanan">
+                <div className="bdOrderSidebar__header">
+                  <h3 className="bdOrderSidebar__title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    {this.state.isFormValid ? "Ringkasan" : "Info Cepat"}
+                  </h3>
+                  {this.state.isFormValid && (
                     <button
                       type="button"
                       className="bdOrderSidebar__copy"
@@ -1520,68 +1443,102 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                         <path d="M4 19h9a2 2 0 0 0 2-2V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </button>
-                  </div>
-                  <div className="bdOrderSidebar__content">
-                    <div className="bdOrderSidebar__item">
-                      <span className="bdOrderSidebar__label">Bouquet</span>
-                      <span className="bdOrderSidebar__value">{formatBouquetName(bouquet.name)}</span>
-                    </div>
-                    <div className="bdOrderSidebar__item">
-                      <span className="bdOrderSidebar__label">Jumlah</span>
-                      <span className="bdOrderSidebar__value">{this.state.quantity} pcs</span>
-                    </div>
-                    
-                    {/* Price Breakdown */}
-                    {(() => {
-                      const breakdown = this.calculatePriceBreakdown();
-                      const bulkDiscount = calculateBulkDiscount(bouquet.price, this.state.quantity);
-                      return (
-                        <>
-                          <div className="bdOrderSidebar__item bdOrderSidebar__item--breakdown">
-                            <span className="bdOrderSidebar__label">Subtotal</span>
-                            <span className="bdOrderSidebar__value">{formatPrice(breakdown.subtotal)}</span>
-                          </div>
-                          {breakdown.discount > 0 && (
-                            <div className="bdOrderSidebar__item bdOrderSidebar__item--discount">
-                              <span className="bdOrderSidebar__label">
-                                Diskon ({bulkDiscount.discountPercentage}%)
-                              </span>
-                              <span className="bdOrderSidebar__value bdOrderSidebar__value--discount">
-                                -{formatPrice(breakdown.discount)}
-                              </span>
-                            </div>
-                          )}
-                          {this.state.deliveryType === "delivery" && (
-                            <div className="bdOrderSidebar__item bdOrderSidebar__item--breakdown">
-                              <span className="bdOrderSidebar__label">Ongkir</span>
-                              <span className="bdOrderSidebar__value">
-                                {breakdown.delivery > 0 ? formatPrice(breakdown.delivery) : "Akan dihitung"}
-                              </span>
-                            </div>
-                          )}
-                          <div className="bdOrderSidebar__item bdOrderSidebar__item--total">
-                            <span className="bdOrderSidebar__label">Total</span>
-                            <span className="bdOrderSidebar__value bdOrderSidebar__value--total">
-                              {formatPrice(breakdown.total)}
-                            </span>
-                          </div>
-                        </>
-                      );
-                    })()}
-                    
-                    {/* Delivery Time Estimate */}
-                    {this.state.deliveryDate && this.calculateDeliveryTime() && (
-                      <div className="bdOrderSidebar__deliveryTime">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                          <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        </svg>
-                        <span>{this.calculateDeliveryTime()}</span>
-                      </div>
-                    )}
-                  </div>
+                  )}
                 </div>
-              )}
+                <div className="bdOrderSidebar__content">
+                  {this.state.isFormValid ? (
+                    <>
+                      <div className="bdOrderSidebar__item">
+                        <span className="bdOrderSidebar__label">Bouquet</span>
+                        <span className="bdOrderSidebar__value">{formatBouquetName(bouquet.name)}</span>
+                      </div>
+                      <div className="bdOrderSidebar__item">
+                        <span className="bdOrderSidebar__label">Jumlah</span>
+                        <span className="bdOrderSidebar__value">{this.state.quantity} pcs</span>
+                      </div>
+                      
+                      {/* Price Breakdown */}
+                      {(() => {
+                        const breakdown = this.calculatePriceBreakdown();
+                        const bulkDiscount = calculateBulkDiscount(bouquet.price, this.state.quantity);
+                        return (
+                          <>
+                            <div className="bdOrderSidebar__item bdOrderSidebar__item--breakdown">
+                              <span className="bdOrderSidebar__label">Subtotal</span>
+                              <span className="bdOrderSidebar__value">{formatPrice(breakdown.subtotal)}</span>
+                            </div>
+                            {breakdown.discount > 0 && (
+                              <div className="bdOrderSidebar__item bdOrderSidebar__item--discount">
+                                <span className="bdOrderSidebar__label">
+                                  Diskon ({bulkDiscount.discountPercentage}%)
+                                </span>
+                                <span className="bdOrderSidebar__value bdOrderSidebar__value--discount">
+                                  -{formatPrice(breakdown.discount)}
+                                </span>
+                              </div>
+                            )}
+                            {this.state.deliveryType === "delivery" && (
+                              <div className="bdOrderSidebar__item bdOrderSidebar__item--breakdown">
+                                <span className="bdOrderSidebar__label">Ongkir</span>
+                                <span className="bdOrderSidebar__value">
+                                  {breakdown.delivery > 0 ? formatPrice(breakdown.delivery) : "Akan dihitung"}
+                                </span>
+                              </div>
+                            )}
+                            <div className="bdOrderSidebar__item bdOrderSidebar__item--total">
+                              <span className="bdOrderSidebar__label">Total</span>
+                              <span className="bdOrderSidebar__value bdOrderSidebar__value--total">
+                                {formatPrice(breakdown.total)}
+                              </span>
+                            </div>
+                          </>
+                        );
+                      })()}
+                      
+                      {/* Delivery Time Estimate */}
+                      {this.state.deliveryDate && this.calculateDeliveryTime() && (
+                        <div className="bdOrderSidebar__deliveryTime">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                            <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                          </svg>
+                          <span>{this.calculateDeliveryTime()}</span>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="bdOrderSidebar__quickInfo">
+                      <div className="bdOrderSidebar__quickInfoItem">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <div>
+                          <span className="bdOrderSidebar__quickInfoLabel">Harga</span>
+                          <span className="bdOrderSidebar__quickInfoValue">{formatPrice(bouquet.price)}</span>
+                        </div>
+                      </div>
+                      <div className="bdOrderSidebar__quickInfoItem">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <div>
+                          <span className="bdOrderSidebar__quickInfoLabel">Status</span>
+                          <span className="bdOrderSidebar__quickInfoValue">{bouquet.status === "ready" ? "✓ Siap Kirim" : "📅 Preorder"}</span>
+                        </div>
+                      </div>
+                      <div className="bdOrderSidebar__quickInfoItem">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <div>
+                          <span className="bdOrderSidebar__quickInfoLabel">Progress</span>
+                          <span className="bdOrderSidebar__quickInfoValue">{Math.round(this.calculateFormProgress())}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
