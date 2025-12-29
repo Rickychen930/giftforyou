@@ -123,17 +123,21 @@ interface OrderFormState {
 }
 
 interface BouquetDetailState extends OrderFormState {
-  activeTab: "overview" | "order";
   formErrors: Partial<Record<keyof OrderFormState, string>>;
   showPreview: boolean;
   isFormValid: boolean;
   deliveryLocation?: { lat: number; lng: number };
   deliveryPriceResult?: DeliveryPriceResult;
   isFavorite: boolean;
+  showDetails: boolean; // For collapsible details section
 }
 
 class BouquetDetailPage extends Component<Props, BouquetDetailState> {
   private formStorageKey = "bouquet_order_form_data";
+  private saveFormDataTimeout: NodeJS.Timeout | null = null;
+  private validateFormTimeout: NodeJS.Timeout | null = null;
+  private priceBreakdownCache: { subtotal: number; delivery: number; discount: number; total: number } | null = null;
+  private priceBreakdownCacheKey: string = "";
 
   state: BouquetDetailState = {
     deliveryType: "delivery",
@@ -142,11 +146,11 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
     address: "",
     greetingCard: "",
     quantity: 1,
-    activeTab: "overview",
     formErrors: {},
     showPreview: false,
     isFormValid: false,
     isFavorite: false,
+    showDetails: false, // Details collapsed by default for efficiency
   };
 
   private getDefaultDate(): string {
@@ -284,6 +288,12 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
   }
 
   private calculateFormProgress(): number {
+    // Memoize calculation - only recalculate if state changes
+    const stateKey = `${this.state.quantity}-${this.state.deliveryType}-${this.state.deliveryDate}-${this.state.address.length}`;
+    if ((this as any)._formProgressCache?.key === stateKey) {
+      return (this as any)._formProgressCache.value;
+    }
+    
     let completed = 0;
     const total = 4; // quantity, deliveryType, deliveryDate, address (if delivery)
 
@@ -315,11 +325,22 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
       completed++;
     }
 
-    return Math.round((completed / total) * 100);
+    const progress = Math.round((completed / total) * 100);
+    
+    // Cache the result
+    (this as any)._formProgressCache = { key: stateKey, value: progress };
+    
+    return progress;
   }
 
   private calculateDeliveryTime(): string {
     if (!this.state.deliveryDate) return "";
+    
+    // Memoize calculation
+    const cacheKey = this.state.deliveryDate;
+    if ((this as any)._deliveryTimeCache?.key === cacheKey) {
+      return (this as any)._deliveryTimeCache.value;
+    }
     
     const selectedDate = new Date(this.state.deliveryDate);
     const today = new Date();
@@ -327,22 +348,34 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
     const diffTime = selectedDate.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
+    let result = "";
     if (diffDays === 1) {
-      return "Same-day delivery (jika order sebelum 14:00)";
+      result = "Same-day delivery (jika order sebelum 14:00)";
     } else if (diffDays === 2) {
-      return "Next-day delivery";
+      result = "Next-day delivery";
     } else if (diffDays > 2 && diffDays <= 7) {
-      return `${diffDays - 1} hari lagi`;
+      result = `${diffDays - 1} hari lagi`;
     } else if (diffDays > 7) {
-      return `${diffDays - 1} hari lagi (Pre-order)`;
+      result = `${diffDays - 1} hari lagi (Pre-order)`;
     }
     
-    return "";
+    // Cache the result
+    (this as any)._deliveryTimeCache = { key: cacheKey, value: result };
+    
+    return result;
   }
 
   private calculatePriceBreakdown(): { subtotal: number; delivery: number; discount: number; total: number } {
     const { bouquet } = this.props;
     if (!bouquet) return { subtotal: 0, delivery: 0, discount: 0, total: 0 };
+    
+    // Cache key for memoization
+    const cacheKey = `${bouquet.price}-${this.state.quantity}-${this.state.deliveryType}-${this.state.deliveryPriceResult?.price || 0}`;
+    
+    // Return cached result if available
+    if (this.priceBreakdownCache && this.priceBreakdownCacheKey === cacheKey) {
+      return this.priceBreakdownCache;
+    }
     
     // Calculate bulk discount
     const bulkDiscount = calculateBulkDiscount(bouquet.price, this.state.quantity);
@@ -356,7 +389,12 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
     
     const total = bulkDiscount.finalPrice + delivery;
     
-    return { subtotal, delivery, discount, total };
+    // Cache the result
+    const result = { subtotal, delivery, discount, total };
+    this.priceBreakdownCache = result;
+    this.priceBreakdownCacheKey = cacheKey;
+    
+    return result;
   }
 
   private getSmartSuggestions(): string[] {
@@ -413,33 +451,55 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
   };
 
   componentDidMount(): void {
+    // Critical: Apply SEO immediately
     this.applySeo();
+    
+    // Load saved form data
     this.loadSavedFormData();
     
     // Check favorite status and track recently viewed
     const { bouquet } = this.props;
     if (bouquet) {
       this.setState({ isFavorite: isFavorite(bouquet._id) });
-      // Track recently viewed
-      addToRecentlyViewed(
-        bouquet._id,
-        bouquet.name,
-        bouquet.price,
-        bouquet.image
-      );
+      // Track recently viewed (non-blocking)
+      if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+        window.requestIdleCallback(() => {
+          addToRecentlyViewed(
+            bouquet._id,
+            bouquet.name,
+            bouquet.price,
+            bouquet.image
+          );
+        }, { timeout: 1000 });
+      } else {
+        setTimeout(() => {
+          addToRecentlyViewed(
+            bouquet._id,
+            bouquet.name,
+            bouquet.price,
+            bouquet.image
+          );
+        }, 100);
+      }
     }
     
-    // Validate form after loading saved data
-    setTimeout(() => {
+    // Validate form after loading saved data (non-blocking)
+    const validateForm = () => {
       const validation = this.validateForm();
       this.setState({
         formErrors: validation.errors,
         isFormValid: validation.isValid,
       });
-    }, 100);
+    };
     
-    // Initialize luxury enhancements - ensure elements are visible
-    setTimeout(() => {
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      window.requestIdleCallback(validateForm, { timeout: 200 });
+    } else {
+      setTimeout(validateForm, 100);
+    }
+    
+    // Initialize luxury enhancements (non-blocking)
+    const initLuxuryEnhancements = () => {
       // Make all fade-in elements visible immediately
       const fadeElements = document.querySelectorAll(".fade-in");
       fadeElements.forEach((el) => {
@@ -455,7 +515,31 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
       // Then set up observers for future elements
       observeFadeIn(".fade-in");
       revealOnScroll();
-    }, 50);
+    };
+    
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      window.requestIdleCallback(initLuxuryEnhancements, { timeout: 100 });
+    } else {
+      setTimeout(initLuxuryEnhancements, 50);
+    }
+  }
+
+  componentWillUnmount(): void {
+    // Cleanup timeouts
+    if (this.saveFormDataTimeout) {
+      clearTimeout(this.saveFormDataTimeout);
+      this.saveFormDataTimeout = null;
+    }
+    if (this.validateFormTimeout) {
+      clearTimeout(this.validateFormTimeout);
+      this.validateFormTimeout = null;
+    }
+    
+    // Clear caches
+    this.priceBreakdownCache = null;
+    this.priceBreakdownCacheKey = "";
+    (this as any)._formProgressCache = null;
+    (this as any)._deliveryTimeCache = null;
   }
 
   componentDidUpdate(prevProps: Props): void {
@@ -464,13 +548,25 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
       prevProps.detailUrl !== this.props.detailUrl ||
       prevProps.error !== this.props.error
     ) {
+      // Critical: Apply SEO immediately
       this.applySeo();
       
-      // Re-initialize luxury enhancements on update
-      setTimeout(() => {
-        observeFadeIn(".fade-in");
-        revealOnScroll();
-      }, 100);
+      // Clear price breakdown cache when bouquet changes
+      this.priceBreakdownCache = null;
+      this.priceBreakdownCacheKey = "";
+      
+      // Re-initialize luxury enhancements on update (non-blocking)
+      if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+        window.requestIdleCallback(() => {
+          observeFadeIn(".fade-in");
+          revealOnScroll();
+        }, { timeout: 200 });
+      } else {
+        setTimeout(() => {
+          observeFadeIn(".fade-in");
+          revealOnScroll();
+        }, 100);
+      }
     }
   }
 
@@ -484,19 +580,30 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
         [field]: value,
       };
       
-      // Auto-save form data
-      setTimeout(() => {
+      // Debounce auto-save form data
+      if (this.saveFormDataTimeout) {
+        clearTimeout(this.saveFormDataTimeout);
+      }
+      this.saveFormDataTimeout = setTimeout(() => {
         this.saveFormData();
-      }, 300);
+      }, 500);
       
-      // Validate form in real-time
-      const validation = this.validateForm();
+      // Debounce form validation
+      if (this.validateFormTimeout) {
+        clearTimeout(this.validateFormTimeout);
+      }
+      this.validateFormTimeout = setTimeout(() => {
+        const validation = this.validateForm();
+        this.setState({
+          formErrors: validation.errors,
+          isFormValid: validation.isValid,
+        });
+        // Clear price breakdown cache when form changes
+        this.priceBreakdownCache = null;
+        this.priceBreakdownCacheKey = "";
+      }, 200);
       
-      return {
-        ...newState,
-        formErrors: validation.errors,
-        isFormValid: validation.isValid,
-      };
+      return newState;
     });
   };
 
@@ -682,305 +789,144 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
             <span className="bdBreadcrumb__current">{bouquet.name}</span>
           </nav>
 
-          <div className="bdLayout">
-            <div className="bdMedia reveal-on-scroll" style={{ opacity: 1, visibility: 'visible' }}>
-              <img
-                src={buildImageUrl(bouquet.image)}
-                alt={bouquet.name}
-                loading="eager"
-                decoding="async"
-                fetchPriority="high"
-                width="600"
-                height="750"
-                style={{ aspectRatio: "4 / 5" }}
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = FALLBACK_IMAGE;
-                }}
-              />
-
-              <span
-                className={`bdBadge ${
-                  bouquet.status === "ready" ? "is-ready" : "is-preorder"
-                }`}
-              >
-                {bouquet.status === "ready" ? "Siap" : "Preorder"}
-              </span>
-            </div>
-
-            <div className="bdInfo reveal-on-scroll">
-              {/* Header Section - Clear & Informative */}
-              <div className="bdInfo__header">
-                <div className="bdInfo__titleRow">
-                  <h1 id="bd-title" className="bdTitle gradient-text">
-                    {formatBouquetName(bouquet.name)}
-                  </h1>
-                  <button
-                    type="button"
-                    onClick={this.handleFavoriteToggle}
-                    className={`bdFavoriteBtn ${this.state.isFavorite ? "bdFavoriteBtn--active" : ""}`}
-                    aria-label={this.state.isFavorite ? "Hapus dari favorit" : "Tambahkan ke favorit"}
-                    title={this.state.isFavorite ? "Hapus dari favorit" : "Tambahkan ke favorit"}
+          {/* New Luxury Layout - Single Column with Sticky Order Section */}
+          <div className="bdLayoutNew">
+            {/* Main Content Area */}
+            <div className="bdMainContent">
+              {/* Hero Section - Image + Key Info */}
+              <div className="bdHero">
+                <div className="bdHero__media">
+                  <div className="bdMedia__wrapper">
+                    <img
+                      src={buildImageUrl(bouquet.image)}
+                      alt={bouquet.name}
+                      loading="eager"
+                      decoding="async"
+                      fetchPriority="high"
+                      width="600"
+                      height="750"
+                      style={{ aspectRatio: "4 / 5" }}
+                      className="bdMedia__image"
+                      onLoad={(e) => {
+                        e.currentTarget.classList.add("bdMedia__image--loaded");
+                        const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
+                        if (placeholder && placeholder.classList.contains("bdMedia__placeholder")) {
+                          setTimeout(() => {
+                            placeholder.style.opacity = "0";
+                            setTimeout(() => {
+                              placeholder.style.display = "none";
+                            }, 300);
+                          }, 100);
+                        }
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = FALLBACK_IMAGE;
+                        e.currentTarget.classList.add("bdMedia__image--loaded");
+                      }}
+                    />
+                    <div className="bdMedia__placeholder" aria-hidden="true">
+                      <div className="bdMedia__spinner"></div>
+                    </div>
+                  </div>
+                  <span
+                    className={`bdBadge ${
+                      bouquet.status === "ready" ? "is-ready" : "is-preorder"
+                    }`}
                   >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill={this.state.isFavorite ? "currentColor" : "none"} xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </button>
-                </div>
-                
-                {/* Price & Key Info */}
-                <div className="bdInfo__priceRow">
-                  <p className="bdPrice">{formatPrice(bouquet.price)}</p>
-                  {bouquet.status && (
-                    <span className={`bdStatusBadge bdStatusBadge--${bouquet.status}`}>
-                      {bouquet.status === "ready" ? "✓ Siap Kirim" : "📅 Preorder"}
-                    </span>
-                  )}
+                    {bouquet.status === "ready" ? "Siap" : "Preorder"}
+                  </span>
                 </div>
 
-                {/* Quick Info Chips */}
-                <div className="bdInfo__quickInfo">
-                  {bouquet.size && (
-                    <span className="bdInfoChip">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  {/* Title & Favorite */}
+                  <div className="bdHero__titleRow">
+                    <h1 id="bd-title" className="bdHero__title gradient-text">
+                      {formatBouquetName(bouquet.name)}
+                    </h1>
+                    <button
+                      type="button"
+                      onClick={this.handleFavoriteToggle}
+                      className={`bdHero__favorite ${this.state.isFavorite ? "bdHero__favorite--active" : ""}`}
+                      aria-label={this.state.isFavorite ? "Hapus dari favorit" : "Tambahkan ke favorit"}
+                      title={this.state.isFavorite ? "Hapus dari favorit" : "Tambahkan ke favorit"}
+                    >
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill={this.state.isFavorite ? "currentColor" : "none"} xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
-                      {formatBouquetSize(bouquet.size)}
-                    </span>
-                  )}
-                  {bouquet.type && (
-                    <span className="bdInfoChip">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      {formatBouquetType(bouquet.type)}
-                    </span>
-                  )}
-                  {typeof (bouquet as any).quantity === "number" && (bouquet as any).quantity > 0 && (
-                    <span className="bdInfoChip bdInfoChip--stock">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      {(bouquet as any).quantity} tersedia
-                    </span>
-                  )}
-                </div>
-
-                {/* Social Proof & Urgency Indicators */}
-                <div className="bdInfo__indicators">
-                  <SocialProof bouquetId={bouquet._id} />
-                  {bouquet.quantity !== undefined && bouquet.quantity > 0 && bouquet.quantity <= 5 && (
-                    <UrgencyIndicator type="limited-stock" stockCount={bouquet.quantity} />
-                  )}
-                  {this.state.deliveryDate && (() => {
-                    const selectedDate = new Date(this.state.deliveryDate);
-                    const today = new Date();
-                    const diffDays = Math.ceil((selectedDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                    if (diffDays === 1) {
-                      return <UrgencyIndicator type="same-day" deadlineTime="14:00" />;
-                    }
-                    return null;
-                  })()}
-                  {bouquet.status === "preorder" && (
-                    <UrgencyIndicator type="preorder" />
-                  )}
-                </div>
-              </div>
-
-              {bouquet.description && (
-                <p className="bdDesc">{formatDescription(bouquet.description)}</p>
-              )}
-
-              {/* Tab Navigation */}
-              <div className="bdTabs" role="tablist" aria-label="Detail bouquet tabs">
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={this.state.activeTab === "overview"}
-                  aria-controls="bd-tabpanel-overview"
-                  id="bd-tab-overview"
-                  className={`bdTab ${this.state.activeTab === "overview" ? "bdTab--active" : ""}`}
-                  onClick={() => this.setState({ activeTab: "overview" })}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span>Overview</span>
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={this.state.activeTab === "order"}
-                  aria-controls="bd-tabpanel-order"
-                  id="bd-tab-order"
-                  className={`bdTab ${this.state.activeTab === "order" ? "bdTab--active" : ""}`}
-                  onClick={() => this.setState({ activeTab: "order" })}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span>Pesan</span>
-                </button>
-              </div>
-
-              {/* Tab Panel: Overview */}
-              {this.state.activeTab === "overview" && (
-                <div
-                  role="tabpanel"
-                  id="bd-tabpanel-overview"
-                  aria-labelledby="bd-tab-overview"
-                  className="bdTabPanel"
-                >
-              <div className="bdMeta" aria-label="Ringkasan bouquet">
-                {bouquet.size && <span className="bdChip">Ukuran: {formatBouquetSize(bouquet.size)}</span>}
-                {bouquet.type && <span className="bdChip">Tipe: {formatBouquetType(bouquet.type)}</span>}
-                {bouquet.collectionName && (
-                  <span className="bdChip">Koleksi: {formatCollectionName(bouquet.collectionName)}</span>
-                )}
-                {bouquet.isNewEdition && (
-                  <span className="bdChip bdChip--new">Edisi Baru</span>
-                )}
-                {bouquet.isFeatured && (
-                  <span className="bdChip bdChip--featured">Featured</span>
-                )}
-              </div>
-
-              {/* Stock & Tags - Compact */}
-              <div className="bdMetaSecondary">
-                {typeof (bouquet as any).quantity === "number" && (
-                  <div className="bdStockCompact" aria-label="Ketersediaan stok">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      {(bouquet as any).quantity > 0 ? (
-                        <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      ) : (
-                        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      )}
-                    </svg>
-                    <span>
-                      {(bouquet as any).quantity > 0 
-                        ? `${(bouquet as any).quantity} tersedia` 
-                        : "Stok habis"}
-                    </span>
+                    </button>
                   </div>
-                )}
-                {Array.isArray((bouquet as any).customPenanda) && (bouquet as any).customPenanda.length > 0 && (
-                  <div className="bdPenandaCompact" aria-label="Tag kustom">
-                    {(bouquet as any).customPenanda.map((tag: string, idx: number) => (
-                      <span key={idx} className="bdPenandaCompact__tag">
-                        {formatTag(tag)}
+                  
+                  {/* Price & Status */}
+                  <div className="bdHero__priceRow">
+                    <p className="bdHero__price">{formatPrice(bouquet.price)}</p>
+                    {bouquet.status && (
+                      <span className={`bdHero__status bdHero__status--${bouquet.status}`}>
+                        {bouquet.status === "ready" ? "✓ Siap Kirim" : "📅 Preorder"}
                       </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="bdDetails" aria-label="Rincian bouquet">
-                <h2 className="bdSectionTitle">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  Rincian
-                </h2>
-                <dl className="bdDl">
-                  {Array.isArray((bouquet as any).occasions) &&
-                    (bouquet as any).occasions.length > 0 && (
-                      <>
-                        <dt>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                          Acara
-                        </dt>
-                        <dd>{(bouquet as any).occasions.map(formatOccasion).join(", ")}</dd>
-                      </>
                     )}
+                  </div>
 
-                  {Array.isArray((bouquet as any).flowers) &&
-                    (bouquet as any).flowers.length > 0 && (
-                      <>
-                        <dt>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                          Bunga
-                        </dt>
-                        <dd>{(bouquet as any).flowers.map(formatFlowerName).join(", ")}</dd>
-                      </>
+                  {/* Quick Info Chips - Compact */}
+                  <div className="bdHero__chips">
+                    {bouquet.size && (
+                      <span className="bdHero__chip">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        {formatBouquetSize(bouquet.size)}
+                      </span>
                     )}
-                </dl>
-              </div>
+                    {bouquet.type && (
+                      <span className="bdHero__chip">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        {formatBouquetType(bouquet.type)}
+                      </span>
+                    )}
+                    {typeof (bouquet as any).quantity === "number" && (bouquet as any).quantity > 0 && (
+                      <span className="bdHero__chip bdHero__chip--stock">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        {(bouquet as any).quantity} tersedia
+                      </span>
+                    )}
+                  </div>
 
-              {/* Care Instructions */}
-              {typeof (bouquet as any).careInstructions === "string" &&
-                (bouquet as any).careInstructions.trim() && (
-                  <div className="bdCare" aria-label="Instruksi perawatan">
-                    <h2 className="bdSectionTitle">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      Tips Perawatan
-                    </h2>
-                    <p className="bdCare__text">{(bouquet as any).careInstructions.trim()}</p>
-                  </div>
-                )}
-
-              {/* Service Info - Consolidated */}
-              <div className="bdService" aria-label="Informasi layanan">
-                <h2 className="bdSectionTitle">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  Layanan & Informasi
-                </h2>
-                <div className="bdService__grid">
-                  <div className="bdService__item">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <div>
-                      <strong>Pengiriman</strong>
-                      <span>Area Cirebon & sekitarnya • Same-day delivery tersedia</span>
-                    </div>
-                  </div>
-                  <div className="bdService__item">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <rect x="1" y="4" width="22" height="16" rx="2" ry="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <div>
-                      <strong>Pembayaran</strong>
-                      <span>Transfer Bank • E-Wallet • COD (area tertentu)</span>
-                    </div>
-                  </div>
-                  <div className="bdService__item">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <div>
-                      <strong>Garansi</strong>
-                      <span>Kualitas terjamin • 100% uang kembali jika tidak puas</span>
-                    </div>
+                  {/* Social Proof & Urgency - Compact */}
+                  <div className="bdHero__indicators">
+                    <SocialProof bouquetId={bouquet._id} />
+                    {bouquet.quantity !== undefined && bouquet.quantity > 0 && bouquet.quantity <= 5 && (
+                      <UrgencyIndicator type="limited-stock" stockCount={bouquet.quantity} />
+                    )}
+                    {this.state.deliveryDate && (() => {
+                      const selectedDate = new Date(this.state.deliveryDate);
+                      const today = new Date();
+                      const diffDays = Math.ceil((selectedDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                      if (diffDays === 1) {
+                        return <UrgencyIndicator type="same-day" deadlineTime="14:00" />;
+                      }
+                      return null;
+                    })()}
+                    {bouquet.status === "preorder" && (
+                      <UrgencyIndicator type="preorder" />
+                    )}
                   </div>
                 </div>
               </div>
 
+              {/* Description */}
+              {bouquet.description && (
+                <div className="bdDescription">
+                  <p className="bdDescription__text">{formatDescription(bouquet.description)}</p>
                 </div>
               )}
 
-              {/* Tab Panel: Order */}
-              {this.state.activeTab === "order" && (
-                <div
-                  role="tabpanel"
-                  id="bd-tabpanel-order"
-                  aria-labelledby="bd-tab-order"
-                  className="bdTabPanel"
-                >
-              {/* Quick Order Button - Instant order without form */}
-              <div className="bdQuickOrder" aria-label="Order langsung">
+              {/* Quick Order Button - Prominent */}
+              <div className="bdQuickOrderNew">
                 <a
-                  className="bdBtn bdBtn--quickOrder btn-luxury"
+                  className="bdQuickOrderNew__btn btn-luxury"
                   href={waQuickOrder}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -990,155 +936,188 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" fill="currentColor"/>
                   </svg>
-                  <span>Order Langsung</span>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ marginLeft: 'auto' }}>
+                  <span>Order Langsung via WhatsApp</span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </a>
-                <p className="bdQuickOrderHint">
-                  Klik untuk langsung chat WhatsApp tanpa isi form. Detail bisa dibahas langsung.
+                <p className="bdQuickOrderNew__hint">
+                  Chat langsung tanpa isi form. Detail bisa dibahas via WhatsApp.
                 </p>
               </div>
 
-              {/* Smart Suggestions */}
-              {this.getSmartSuggestions().length > 0 && (
-                <div className="bdSmartSuggestions" aria-label="Saran">
-                  <h3 className="bdSmartSuggestions__title">
+              {/* Details Section - Collapsible for Efficiency */}
+              <div className="bdDetailsSection">
+                <button
+                  type="button"
+                  className="bdDetailsSection__toggle"
+                  onClick={() => this.setState({ showDetails: !this.state.showDetails })}
+                  aria-expanded={this.state.showDetails}
+                  aria-controls="bd-details-content"
+                >
+                  <h2 className="bdDetailsSection__title">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor"/>
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    Tips & Saran
-                  </h3>
-                  <ul className="bdSmartSuggestions__list">
-                    {this.getSmartSuggestions().map((suggestion, idx) => (
-                      <li key={idx} className="bdSmartSuggestions__item">
-                        {suggestion}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Quick Order Summary - Sticky Summary */}
-              {this.state.isFormValid && (
-                <div className="bdOrderSummary" aria-label="Ringkasan pesanan">
-                  <div className="bdOrderSummary__header">
-                    <h3 className="bdOrderSummary__title">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      Ringkasan Pesanan
-                    </h3>
-                    <button
-                      type="button"
-                      className="bdCopyOrderBtn"
-                      onClick={this.copyOrderDetails}
-                      aria-label="Salin detail pesanan"
-                      title="Salin detail pesanan"
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M8 17V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M4 19h9a2 2 0 0 0 2-2V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
-                  </div>
-                  <div className="bdOrderSummary__content">
-                    <div className="bdOrderSummary__item">
-                      <span className="bdOrderSummary__label">Bouquet</span>
-                      <span className="bdOrderSummary__value">{formatBouquetName(bouquet.name)}</span>
-                    </div>
-                    <div className="bdOrderSummary__item">
-                      <span className="bdOrderSummary__label">Jumlah</span>
-                      <span className="bdOrderSummary__value">{this.state.quantity} pcs</span>
-                    </div>
-                    
-                    {/* Price Breakdown */}
-                    {(() => {
-                      const breakdown = this.calculatePriceBreakdown();
-                      const bulkDiscount = calculateBulkDiscount(bouquet.price, this.state.quantity);
-                      const discountMessage = getBulkDiscountMessage(this.state.quantity);
-                      return (
-                        <>
-                          <div className="bdOrderSummary__item bdOrderSummary__item--breakdown">
-                            <span className="bdOrderSummary__label">Subtotal</span>
-                            <span className="bdOrderSummary__value">{formatPrice(breakdown.subtotal)}</span>
-                          </div>
-                          {breakdown.discount > 0 && (
-                            <div className="bdOrderSummary__item bdOrderSummary__item--discount">
-                              <span className="bdOrderSummary__label">
-                                Diskon ({bulkDiscount.discountPercentage}%)
-                              </span>
-                              <span className="bdOrderSummary__value bdOrderSummary__value--discount">
-                                -{formatPrice(breakdown.discount)}
-                              </span>
-                            </div>
-                          )}
-                          {discountMessage && breakdown.discount === 0 && (
-                            <div className="bdOrderSummary__hint">
-                              {discountMessage}
-                            </div>
-                          )}
-                          {this.state.deliveryType === "delivery" && (
-                            <div className="bdOrderSummary__item bdOrderSummary__item--breakdown">
-                              <span className="bdOrderSummary__label">Ongkir</span>
-                              <span className="bdOrderSummary__value">
-                                {breakdown.delivery > 0 ? formatPrice(breakdown.delivery) : "Akan dihitung"}
-                              </span>
-                            </div>
-                          )}
-                          <div className="bdOrderSummary__item bdOrderSummary__item--total">
-                            <span className="bdOrderSummary__label">Total</span>
-                            <span className="bdOrderSummary__value bdOrderSummary__value--total">
-                              {formatPrice(breakdown.total)}
-                            </span>
-                          </div>
-                        </>
-                      );
-                    })()}
-                    
-                    {/* Delivery Time Estimate */}
-                    {this.state.deliveryDate && this.calculateDeliveryTime() && (
-                      <div className="bdOrderSummary__deliveryTime">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                          <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        </svg>
-                        <span>{this.calculateDeliveryTime()}</span>
+                    Detail Produk
+                  </h2>
+                  <svg 
+                    width="20" 
+                    height="20" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    xmlns="http://www.w3.org/2000/svg"
+                    className={`bdDetailsSection__icon ${this.state.showDetails ? "bdDetailsSection__icon--open" : ""}`}
+                    aria-hidden="true"
+                  >
+                    <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+                
+                {this.state.showDetails && (
+                  <div id="bd-details-content" className="bdDetailsSection__content">
+                    {/* Additional Info Chips */}
+                    {(bouquet.collectionName || bouquet.isNewEdition || bouquet.isFeatured) && (
+                      <div className="bdDetailsSection__chips">
+                        {bouquet.collectionName && (
+                          <span className="bdDetailsSection__chip">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                              <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2"/>
+                              <rect x="14" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2"/>
+                              <rect x="14" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2"/>
+                              <rect x="3" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2"/>
+                            </svg>
+                            {formatCollectionName(bouquet.collectionName)}
+                          </span>
+                        )}
+                        {bouquet.isNewEdition && (
+                          <span className="bdDetailsSection__chip bdDetailsSection__chip--new">✨ Edisi Baru</span>
+                        )}
+                        {bouquet.isFeatured && (
+                          <span className="bdDetailsSection__chip bdDetailsSection__chip--featured">⭐ Featured</span>
+                        )}
                       </div>
                     )}
-                  </div>
-                </div>
-              )}
 
-              {/* Order Form */}
-              <div className="bdOrderForm" aria-label="Form pemesanan">
-                <div className="bdOrderForm__header">
-                  <h2 className="bdSectionTitle">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    Form Pemesanan Detail
-                  </h2>
-                  
-                  {/* Progress Indicator */}
-                  <div className="bdOrderForm__progress" aria-label="Progress form">
-                    <div className="bdOrderForm__progressBar">
-                      <div 
-                        className="bdOrderForm__progressFill"
-                        style={{ 
-                          width: `${this.calculateFormProgress()}%`,
-                          transition: "width 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
-                        }}
-                      />
+                    {/* Details List */}
+                    <dl className="bdDetailsSection__list">
+                      {Array.isArray((bouquet as any).occasions) &&
+                        (bouquet as any).occasions.length > 0 && (
+                          <div className="bdDetailsSection__item">
+                            <dt className="bdDetailsSection__term">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                              Acara
+                            </dt>
+                            <dd className="bdDetailsSection__desc">{(bouquet as any).occasions.map(formatOccasion).join(", ")}</dd>
+                          </div>
+                        )}
+
+                      {Array.isArray((bouquet as any).flowers) &&
+                        (bouquet as any).flowers.length > 0 && (
+                          <div className="bdDetailsSection__item">
+                            <dt className="bdDetailsSection__term">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                              Bunga
+                            </dt>
+                            <dd className="bdDetailsSection__desc">{(bouquet as any).flowers.map(formatFlowerName).join(", ")}</dd>
+                          </div>
+                        )}
+                    </dl>
+
+                    {/* Care Instructions */}
+                    {typeof (bouquet as any).careInstructions === "string" &&
+                      (bouquet as any).careInstructions.trim() && (
+                        <div className="bdDetailsSection__care">
+                          <h3 className="bdDetailsSection__careTitle">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            Tips Perawatan
+                          </h3>
+                          <p className="bdDetailsSection__careText">{(bouquet as any).careInstructions.trim()}</p>
+                        </div>
+                      )}
+
+                    {/* Service Info - Compact */}
+                    <div className="bdDetailsSection__services">
+                      <div className="bdDetailsSection__service">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <div>
+                          <strong>Pengiriman</strong>
+                          <span>Area Cirebon & sekitarnya • Same-day delivery</span>
+                        </div>
+                      </div>
+                      <div className="bdDetailsSection__service">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <rect x="1" y="4" width="22" height="16" rx="2" ry="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <div>
+                          <strong>Pembayaran</strong>
+                          <span>Transfer Bank • E-Wallet • COD</span>
+                        </div>
+                      </div>
+                      <div className="bdDetailsSection__service">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <div>
+                          <strong>Garansi</strong>
+                          <span>Kualitas terjamin • 100% uang kembali</span>
+                        </div>
+                      </div>
                     </div>
-                    <span className="bdOrderForm__progressText">
-                      {this.calculateFormProgress()}% Lengkap
-                    </span>
                   </div>
+                )}
+              </div>
+
+              {/* Order Form Section - Always Visible */}
+              <div className="bdOrderSection">
+                <h2 className="bdOrderSection__title">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Form Pemesanan
+                </h2>
+                
+                {/* Progress Indicator - Compact */}
+                <div className="bdOrderSection__progress" aria-label="Progress form">
+                  <div className="bdOrderSection__progressBar">
+                    <div 
+                      className="bdOrderSection__progressFill"
+                      style={{ 
+                        width: `${this.calculateFormProgress()}%`,
+                        transition: "width 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
+                      }}
+                    />
+                  </div>
+                  <span className="bdOrderSection__progressText">
+                    {this.calculateFormProgress()}% Lengkap
+                  </span>
                 </div>
 
-                <div className="bdFormGroup">
-                  <label className="bdFormLabel">
+                {/* Smart Suggestions - Compact */}
+                {this.getSmartSuggestions().length > 0 && (
+                  <div className="bdOrderSection__suggestions" aria-label="Tips">
+                    {this.getSmartSuggestions().slice(0, 2).map((suggestion, idx) => (
+                      <div key={idx} className="bdOrderSection__suggestion">
+                        {suggestion}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Order Form - Streamlined */}
+                <div className="bdOrderSection__form" aria-label="Form pemesanan">
+                  <div className="bdFormGroup">
+                    <label className="bdFormLabel">
                     Jumlah
                     <span className="bdFormLabel__required" aria-label="Wajib diisi">*</span>
                   </label>
@@ -1515,36 +1494,92 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
                     : "Lengkapi form di atas, lalu klik tombol untuk mengirim pesan ke WhatsApp."}
                 </p>
               </div>
-                </div>
-              )}
+            </div>
 
-              {/* Admin Links - Only visible to admins, minimal design */}
-              {isAdmin && (
-                <div className="bdAdminLinks" aria-label="Tautan admin">
-                  <button
-                    type="button"
-                    className="bdAdminLink"
-                    onClick={() => this.copyToClipboard(detailUrl)}
-                    aria-label="Salin tautan bouquet"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path d="M8 17V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <span>Salin tautan</span>
-                  </button>
-                  {imageUrl && (
+            {/* Sticky Order Summary Sidebar - Desktop Only */}
+            <div className="bdOrderSidebar">
+              {/* Order Summary - Sticky */}
+              {this.state.isFormValid && (
+                <div className="bdOrderSidebar__summary" aria-label="Ringkasan pesanan">
+                  <div className="bdOrderSidebar__header">
+                    <h3 className="bdOrderSidebar__title">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      Ringkasan
+                    </h3>
                     <button
                       type="button"
-                      className="bdAdminLink"
-                      onClick={() => this.copyToClipboard(imageUrl)}
-                      aria-label="Salin tautan gambar"
+                      className="bdOrderSidebar__copy"
+                      onClick={this.copyOrderDetails}
+                      aria-label="Salin detail pesanan"
+                      title="Salin detail pesanan"
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M8 17V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M4 19h9a2 2 0 0 0 2-2V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
-                      <span>Salin gambar</span>
                     </button>
-                  )}
+                  </div>
+                  <div className="bdOrderSidebar__content">
+                    <div className="bdOrderSidebar__item">
+                      <span className="bdOrderSidebar__label">Bouquet</span>
+                      <span className="bdOrderSidebar__value">{formatBouquetName(bouquet.name)}</span>
+                    </div>
+                    <div className="bdOrderSidebar__item">
+                      <span className="bdOrderSidebar__label">Jumlah</span>
+                      <span className="bdOrderSidebar__value">{this.state.quantity} pcs</span>
+                    </div>
+                    
+                    {/* Price Breakdown */}
+                    {(() => {
+                      const breakdown = this.calculatePriceBreakdown();
+                      const bulkDiscount = calculateBulkDiscount(bouquet.price, this.state.quantity);
+                      return (
+                        <>
+                          <div className="bdOrderSidebar__item bdOrderSidebar__item--breakdown">
+                            <span className="bdOrderSidebar__label">Subtotal</span>
+                            <span className="bdOrderSidebar__value">{formatPrice(breakdown.subtotal)}</span>
+                          </div>
+                          {breakdown.discount > 0 && (
+                            <div className="bdOrderSidebar__item bdOrderSidebar__item--discount">
+                              <span className="bdOrderSidebar__label">
+                                Diskon ({bulkDiscount.discountPercentage}%)
+                              </span>
+                              <span className="bdOrderSidebar__value bdOrderSidebar__value--discount">
+                                -{formatPrice(breakdown.discount)}
+                              </span>
+                            </div>
+                          )}
+                          {this.state.deliveryType === "delivery" && (
+                            <div className="bdOrderSidebar__item bdOrderSidebar__item--breakdown">
+                              <span className="bdOrderSidebar__label">Ongkir</span>
+                              <span className="bdOrderSidebar__value">
+                                {breakdown.delivery > 0 ? formatPrice(breakdown.delivery) : "Akan dihitung"}
+                              </span>
+                            </div>
+                          )}
+                          <div className="bdOrderSidebar__item bdOrderSidebar__item--total">
+                            <span className="bdOrderSidebar__label">Total</span>
+                            <span className="bdOrderSidebar__value bdOrderSidebar__value--total">
+                              {formatPrice(breakdown.total)}
+                            </span>
+                          </div>
+                        </>
+                      );
+                    })()}
+                    
+                    {/* Delivery Time Estimate */}
+                    {this.state.deliveryDate && this.calculateDeliveryTime() && (
+                      <div className="bdOrderSidebar__deliveryTime">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                          <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                        <span>{this.calculateDeliveryTime()}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -1590,6 +1625,36 @@ class BouquetDetailPage extends Component<Props, BouquetDetailState> {
               </div>
             </div>
           )}
+
+          {/* Admin Links - Only visible to admins, minimal design */}
+          {isAdmin && (
+            <div className="bdAdminLinks" aria-label="Tautan admin">
+                  <button
+                    type="button"
+                    className="bdAdminLink"
+                    onClick={() => this.copyToClipboard(detailUrl)}
+                    aria-label="Salin tautan bouquet"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path d="M8 17V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span>Salin tautan</span>
+                  </button>
+                  {imageUrl && (
+                    <button
+                      type="button"
+                      className="bdAdminLink"
+                      onClick={() => this.copyToClipboard(imageUrl)}
+                      aria-label="Salin tautan gambar"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M8 17V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      <span>Salin gambar</span>
+                    </button>
+                  )}
+                </div>
+              )}
         </div>
       </section>
     );

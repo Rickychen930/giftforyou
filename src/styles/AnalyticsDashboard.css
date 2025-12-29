@@ -14,6 +14,19 @@
   pointer-events: none;
 }
 
+/* Inline mode: render as regular content */
+.analyticsDashboard--inline {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  z-index: auto;
+  padding: 0;
+  pointer-events: all;
+  animation: none;
+}
+
 .analyticsDashboard__overlay {
   position: absolute;
   top: 0;
@@ -41,6 +54,14 @@
   border: 2px solid rgba(212, 140, 156, 0.2);
   pointer-events: all;
   overflow: hidden;
+}
+
+/* Inline mode panel adjustments */
+.analyticsDashboard--inline .analyticsDashboard__panel {
+  max-width: 100%;
+  max-height: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  animation: none;
 }
 
 .analyticsDashboard__header {

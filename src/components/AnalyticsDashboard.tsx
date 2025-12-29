@@ -27,12 +27,14 @@ interface AnalyticsDashboardProps {
   isOpen: boolean;
   onClose: () => void;
   period?: "7d" | "30d" | "90d" | "1y";
+  inline?: boolean; // If true, render as inline content instead of modal
 }
 
 const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   isOpen,
   onClose,
   period = "30d",
+  inline = false,
 }) => {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -260,8 +262,175 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
   if (!isOpen) return null;
 
+  // Inline mode: render as regular content without modal overlay
+  if (inline) {
+    return (
+      <div className="analyticsDashboard analyticsDashboard--inline">
+        <div
+          className="analyticsDashboard__panel"
+          role="region"
+          aria-labelledby="analytics-title"
+        >
+          <div className="analyticsDashboard__header">
+          <h2 id="analytics-title" className="analyticsDashboard__title">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 3v18h18M7 16l4-4 4 4 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Advanced Analytics
+          </h2>
+          <div className="analyticsDashboard__headerActions">
+            <div className="analyticsDashboard__periodSelector">
+              {(["7d", "30d", "90d", "1y"] as const).map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  className={`analyticsDashboard__periodBtn ${selectedPeriod === p ? "is-active" : ""}`}
+                  onClick={() => setSelectedPeriod(p)}
+                >
+                  {p === "7d" ? "7 Hari" : p === "30d" ? "30 Hari" : p === "90d" ? "90 Hari" : "1 Tahun"}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="analyticsDashboard__close"
+              onClick={onClose}
+              aria-label="Tutup analytics dashboard"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div className="analyticsDashboard__body">
+          {loading ? (
+            <div className="analyticsDashboard__loading">
+              <div className="analyticsDashboard__spinner"></div>
+              <p>Memuat analytics...</p>
+            </div>
+          ) : !data ? (
+            <div className="analyticsDashboard__empty">
+              <p>Tidak ada data analytics</p>
+            </div>
+          ) : (
+            <>
+              {/* Revenue Trends */}
+              <div className="analyticsCard">
+                <h3 className="analyticsCard__title">Revenue Trends</h3>
+                <div className="analyticsCard__content">
+                  {revenueChart}
+                  <div className="analyticsCard__stats">
+                    <div className="analyticsCard__stat">
+                      <span className="analyticsCard__statLabel">Total Revenue</span>
+                      <span className="analyticsCard__statValue">
+                        {formatIDR(data.revenueTrends.reduce((sum, d) => sum + d.revenue, 0))}
+                      </span>
+                    </div>
+                    <div className="analyticsCard__stat">
+                      <span className="analyticsCard__statLabel">Average Daily</span>
+                      <span className="analyticsCard__statValue">
+                        {formatIDR(
+                          data.revenueTrends.length > 0
+                            ? data.revenueTrends.reduce((sum, d) => sum + d.revenue, 0) / data.revenueTrends.length
+                            : 0
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Trends */}
+              <div className="analyticsCard">
+                <h3 className="analyticsCard__title">Order Trends</h3>
+                <div className="analyticsCard__content">
+                  {orderChart}
+                  <div className="analyticsCard__stats">
+                    <div className="analyticsCard__stat">
+                      <span className="analyticsCard__statLabel">Total Orders</span>
+                      <span className="analyticsCard__statValue">
+                        {data.revenueTrends.reduce((sum, d) => sum + d.orders, 0)}
+                      </span>
+                    </div>
+                    <div className="analyticsCard__stat">
+                      <span className="analyticsCard__statLabel">Average Daily</span>
+                      <span className="analyticsCard__statValue">
+                        {data.revenueTrends.length > 0
+                          ? Math.round(
+                              data.revenueTrends.reduce((sum, d) => sum + d.orders, 0) / data.revenueTrends.length
+                            )
+                          : 0}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Status Breakdown */}
+              <div className="analyticsCard">
+                <h3 className="analyticsCard__title">Order Status Breakdown</h3>
+                <div className="analyticsCard__content">
+                  <div className="analyticsBreakdown">
+                    {Object.entries(data.orderStatusBreakdown).map(([status, count]) => {
+                      const total = Object.values(data.orderStatusBreakdown).reduce((sum, c) => sum + c, 0);
+                      const percentage = total > 0 ? (count / total) * 100 : 0;
+                      
+                      return (
+                        <div key={status} className="analyticsBreakdown__item">
+                          <div className="analyticsBreakdown__header">
+                            <span className="analyticsBreakdown__label">{status.replace(/_/g, " ")}</span>
+                            <span className="analyticsBreakdown__value">{count}</span>
+                          </div>
+                          <div className="analyticsBreakdown__bar">
+                            <div
+                              className="analyticsBreakdown__fill"
+                              style={{ width: `${percentage}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Top Selling Bouquets */}
+              <div className="analyticsCard">
+                <h3 className="analyticsCard__title">Top Selling Bouquets</h3>
+                <div className="analyticsCard__content">
+                  <div className="analyticsRanking">
+                    {data.topBouquets.map((bouquet, index) => (
+                      <div key={bouquet.bouquetId} className="analyticsRanking__item">
+                        <span className="analyticsRanking__rank">#{index + 1}</span>
+                        <div className="analyticsRanking__content">
+                          <span className="analyticsRanking__name">{bouquet.bouquetName}</span>
+                          <span className="analyticsRanking__meta">
+                            {bouquet.orders} orders • {formatIDR(bouquet.revenue)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Modal mode: render with overlay
   return (
-    <div className="analyticsDashboard" onClick={onClose}>
+    <div className="analyticsDashboard" onClick={(e) => {
+      // Only close if clicking the overlay, not the panel
+      if (e.target === e.currentTarget) {
+        onClose();
+      }
+    }}>
       <div className="analyticsDashboard__overlay"></div>
       <div
         className="analyticsDashboard__panel"

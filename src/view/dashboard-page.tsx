@@ -195,24 +195,56 @@ class DashboardView extends Component<Props, State> {
       writeTabToLocation(this.state.activeTab);
     }
 
+    // Critical: Apply SEO immediately
     this.applySeo();
-    this.loadPerformanceMetrics();
-    this.loadSeoAnalysis();
-    this.loadAlerts();
-    this.loadTrends();
-    this.loadBenchmarks();
-    this.initGoogleAnalytics();
-    this.initABTests();
 
+    // Critical: Load essential data immediately
+    this.loadAlerts();
+
+    // Non-critical: Load in background with requestIdleCallback or setTimeout
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      window.requestIdleCallback(() => {
+        this.loadPerformanceMetrics();
+        this.loadSeoAnalysis();
+        this.loadTrends();
+        this.loadBenchmarks();
+      }, { timeout: 2000 });
+    } else {
+      // Fallback for browsers without requestIdleCallback
+      setTimeout(() => {
+        this.loadPerformanceMetrics();
+        this.loadSeoAnalysis();
+        this.loadTrends();
+        this.loadBenchmarks();
+      }, 100);
+    }
+
+    // Analytics: Load after initial render
+    setTimeout(() => {
+      this.initGoogleAnalytics();
+      this.initABTests();
+    }, 500);
+
+    // Event listeners with proper cleanup
     window.addEventListener("hashchange", this.handleHashChange);
     window.addEventListener("keydown", this.handleKeyDown);
   }
 
   componentWillUnmount(): void {
+    // Cleanup event listeners
     window.removeEventListener("hashchange", this.handleHashChange);
     window.removeEventListener("keydown", this.handleKeyDown);
+    
+    // Cleanup performance observer
     if (this.performanceCleanup) {
       this.performanceCleanup();
+      this.performanceCleanup = null;
+    }
+    
+    // Cleanup any pending timeouts
+    if ((this as any)._copyTimeoutId) {
+      clearTimeout((this as any)._copyTimeoutId);
+      (this as any)._copyTimeoutId = null;
     }
   }
 
@@ -274,29 +306,50 @@ class DashboardView extends Component<Props, State> {
   };
 
   private loadSeoAnalysis = (): void => {
-    // Small delay to ensure DOM is ready
-    setTimeout(() => {
-      const analysis = analyzeSeo();
-      
-      // Save to history
-      saveSeoHistory(analysis);
-      
-      // Check alerts
-      checkSeoAlerts(analysis);
-      
-      // Send to Google Analytics
-      const gaConfig = getGAConfig();
-      if (gaConfig.enabled) {
-        sendSEOToGA(analysis.score, analysis.checks);
+    // Use requestAnimationFrame for better performance
+    const analyze = () => {
+      try {
+        const analysis = analyzeSeo();
+        
+        // Batch operations
+        saveSeoHistory(analysis);
+        checkSeoAlerts(analysis);
+        
+        // Send to Google Analytics (non-blocking)
+        const gaConfig = getGAConfig();
+        if (gaConfig.enabled) {
+          // Use setTimeout to avoid blocking
+          setTimeout(() => {
+            sendSEOToGA(analysis.score, analysis.checks);
+          }, 0);
+        }
+        
+        this.setState({
+          seo: {
+            analysis,
+            loading: false,
+          },
+        });
+      } catch (error) {
+        // Only log in development
+        if (process.env.NODE_ENV === "development") {
+          console.error("SEO analysis error:", error);
+        }
+        this.setState({
+          seo: {
+            analysis: { score: 0, grade: "poor", checks: [], recommendations: [] },
+            loading: false,
+          },
+        });
       }
-      
-      this.setState({
-        seo: {
-          analysis,
-          loading: false,
-        },
-      });
-    }, 100);
+    };
+
+    // Use requestAnimationFrame for DOM readiness
+    if (typeof window !== "undefined" && "requestAnimationFrame" in window) {
+      requestAnimationFrame(analyze);
+    } else {
+      analyze();
+    }
   };
 
   private loadAlerts = (): void => {
@@ -466,14 +519,14 @@ class DashboardView extends Component<Props, State> {
     }
   };
 
-  private handleHashChange = () => {
+  private handleHashChange = (): void => {
     const next = readTabFromLocation();
     if (next && next !== this.state.activeTab) {
-      this.setState({ activeTab: next });
+      this.setActiveTab(next);
     }
   };
 
-  private handleKeyDown = (e: KeyboardEvent) => {
+  private handleKeyDown = (e: KeyboardEvent): void => {
     const target = e.target as HTMLElement | null;
     const tag = (target?.tagName ?? "").toLowerCase();
     const isTypingTarget =
@@ -483,19 +536,22 @@ class DashboardView extends Component<Props, State> {
       (target?.isContentEditable ?? false);
     if (isTypingTarget) return;
 
+    // Fix: Check Alt key correctly (Alt+number shortcuts)
     if (!e.altKey || e.metaKey || e.ctrlKey) return;
 
     const key = e.key;
     const map: Record<string, ActiveTab> = {
       "1": "overview",
       "2": "orders",
-      "3": "upload",
-      "4": "edit",
-      "5": "hero",
+      "3": "customers",
+      "4": "upload",
+      "5": "edit",
+      "6": "hero",
+      "7": "analytics",
     };
 
     const next = map[key];
-    if (!next) return;
+    if (!next || next === this.state.activeTab) return;
 
     e.preventDefault();
     this.setActiveTab(next);
@@ -618,6 +674,7 @@ class DashboardView extends Component<Props, State> {
     const pageviews30d = Number(insights?.pageviews30d ?? 0);
     const topSearchTerms = (insights?.topSearchTerms ?? []).slice(0, 10);
     const topBouquetsDays = (insights?.topBouquetsDays ?? []).slice(0, 5);
+    const topBouquets7d = (insights?.topBouquets7d ?? []).slice(0, 3);
     const visitHours = (insights?.visitHours ?? []).slice(0, 8);
     const uniqueVisitors30d = Number(insights?.uniqueVisitors30d ?? 0);
     const uniqueVisitorsAvailable = Boolean(insights?.uniqueVisitorsAvailable);
@@ -1076,7 +1133,9 @@ class DashboardView extends Component<Props, State> {
     );
   }
 
-  private renderMetricsLegacy(): React.ReactNode {
+  // Removed renderMetricsLegacy - not used anymore, replaced by renderMetrics
+  // Keeping this comment for reference
+  private _renderMetricsLegacyUnused(): React.ReactNode {
     const bouquets = this.props.bouquets ?? [];
     const visitorsCount = this.props.visitorsCount ?? 0;
     const collectionsCount = this.props.collectionsCount ?? 0;
@@ -2038,8 +2097,12 @@ class DashboardView extends Component<Props, State> {
         return (
           <AnalyticsDashboard
             isOpen={true}
-            onClose={() => {}}
+            onClose={() => {
+              // When closing from tab, switch to overview tab
+              this.setActiveTab("overview");
+            }}
             period="30d"
+            inline={true}
           />
         );
 
@@ -2169,12 +2232,13 @@ class DashboardView extends Component<Props, State> {
           }}
         />
 
-        {/* Analytics Dashboard */}
-        {this.state.showAnalytics && (
+        {/* Analytics Dashboard Modal - Only show when not in analytics tab */}
+        {this.state.showAnalytics && this.state.activeTab !== "analytics" && (
           <AnalyticsDashboard
             isOpen={this.state.showAnalytics}
             onClose={() => this.setState({ showAnalytics: false })}
             period="30d"
+            inline={false}
           />
         )}
         
