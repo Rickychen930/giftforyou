@@ -1,6 +1,6 @@
 // src/routes/instagram-routes.ts
 
-import { Router, Request, Response } from "express";
+import { Router } from "express";
 import { getInstagramPosts, getInstagramProfile } from "../controllers/instagram-controller";
 
 const router = Router();

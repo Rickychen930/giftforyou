@@ -33,17 +33,10 @@ const ShareButton: React.FC<ShareButtonProps> = ({
   }, [isOpen]);
 
   const fullUrl = url.startsWith("http") ? url : `${window.location.origin}${url}`;
-  const shareText = `${title}${description ? ` - ${description}` : ""}`;
 
   const shareToWhatsApp = () => {
     const message = encodeURIComponent(`${title}\n\n${fullUrl}`);
     window.open(`https://wa.me/?text=${message}`, "_blank");
-    setIsOpen(false);
-  };
-
-  const shareToInstagram = () => {
-    // Instagram doesn't support direct sharing, open in new tab
-    window.open("https://www.instagram.com/", "_blank");
     setIsOpen(false);
   };
 
