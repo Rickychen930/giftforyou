@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.changeCustomerPassword = void 0;
+exports.changeCustomerPassword = changeCustomerPassword;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const user_model_1 = require("../models/user-model");
 const input_validation_1 = require("../middleware/input-validation");
@@ -58,5 +58,4 @@ async function changeCustomerPassword(req, res) {
         res.status(500).json({ error: "Failed to change password" });
     }
 }
-exports.changeCustomerPassword = changeCustomerPassword;
 //# sourceMappingURL=customer-change-password-controller.js.map

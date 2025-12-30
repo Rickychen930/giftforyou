@@ -1,6 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setDefaultAddress = exports.deleteCustomerAddress = exports.updateCustomerAddress = exports.createCustomerAddress = exports.getCustomerAddresses = void 0;
+exports.getCustomerAddresses = getCustomerAddresses;
+exports.createCustomerAddress = createCustomerAddress;
+exports.updateCustomerAddress = updateCustomerAddress;
+exports.deleteCustomerAddress = deleteCustomerAddress;
+exports.setDefaultAddress = setDefaultAddress;
 const customer_model_1 = require("../models/customer-model");
 const validation_1 = require("../utils/validation");
 /**
@@ -29,7 +33,6 @@ async function getCustomerAddresses(req, res) {
         res.status(500).json({ error: "Failed to get addresses" });
     }
 }
-exports.getCustomerAddresses = getCustomerAddresses;
 /**
  * Create customer address
  * POST /api/customer/addresses
@@ -91,7 +94,6 @@ async function createCustomerAddress(req, res) {
         res.status(500).json({ error: "Failed to create address" });
     }
 }
-exports.createCustomerAddress = createCustomerAddress;
 /**
  * Update customer address
  * PATCH /api/customer/addresses/:id
@@ -142,7 +144,6 @@ async function updateCustomerAddress(req, res) {
         res.status(500).json({ error: "Failed to update address" });
     }
 }
-exports.updateCustomerAddress = updateCustomerAddress;
 /**
  * Delete customer address
  * DELETE /api/customer/addresses/:id
@@ -183,7 +184,6 @@ async function deleteCustomerAddress(req, res) {
         res.status(500).json({ error: "Failed to delete address" });
     }
 }
-exports.deleteCustomerAddress = deleteCustomerAddress;
 /**
  * Set default address
  * PATCH /api/customer/addresses/:id/set-default
@@ -224,5 +224,4 @@ async function setDefaultAddress(req, res) {
         res.status(500).json({ error: "Failed to set default address" });
     }
 }
-exports.setDefaultAddress = setDefaultAddress;
 //# sourceMappingURL=customer-addresses-controller.js.map

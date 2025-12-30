@@ -42,7 +42,7 @@ const allowedExt = new Set([
 ]);
 const upload = (0, multer_1.default)({
     storage: multer_1.default.memoryStorage(),
-    limits: { fileSize: 10 * 1024 * 1024 },
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
     fileFilter: (_req, file, cb) => {
         const ext = path_1.default.extname(file.originalname).toLowerCase();
         // allow by mimetype OR extension (some devices send odd mimetypes)
@@ -90,7 +90,7 @@ router.post("/home/upload", auth_middleware_1.authenticate, auth_middleware_1.re
         // ✅ Convert HEIC/HEIF -> JPEG buffer (same approach as your working upload.ts)
         if (isHeic) {
             const converted = await (0, heic_convert_1.default)({
-                buffer: req.file.buffer,
+                buffer: req.file.buffer, // ✅ important (matches your working code)
                 format: "JPEG",
                 quality: 0.9, // 0..1
             });

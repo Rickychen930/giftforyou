@@ -1,6 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteOrder = exports.getOrders = exports.updateOrder = exports.createOrder = void 0;
+exports.createOrder = createOrder;
+exports.updateOrder = updateOrder;
+exports.getOrders = getOrders;
+exports.deleteOrder = deleteOrder;
 const order_model_1 = require("../models/order-model");
 const bouquet_model_1 = require("../models/bouquet-model");
 const customer_model_1 = require("../models/customer-model");
@@ -123,7 +126,6 @@ async function createOrder(req, res) {
         res.status(500).json({ message: "Failed to create order" });
     }
 }
-exports.createOrder = createOrder;
 async function updateOrder(req, res) {
     try {
         const id = (0, validation_1.normalizeString)(req.params?.id, "", 64);
@@ -309,7 +311,6 @@ async function updateOrder(req, res) {
         res.status(500).json({ message: "Failed to update order" });
     }
 }
-exports.updateOrder = updateOrder;
 async function getOrders(req, res) {
     try {
         if (process.env.NODE_ENV === "development") {
@@ -362,7 +363,6 @@ async function getOrders(req, res) {
         res.status(500).json({ message: "Failed to get orders" });
     }
 }
-exports.getOrders = getOrders;
 async function deleteOrder(req, res) {
     try {
         const id = (0, validation_1.normalizeString)(req.params?.id, "", 64);
@@ -382,5 +382,4 @@ async function deleteOrder(req, res) {
         res.status(500).json({ message: "Failed to delete order" });
     }
 }
-exports.deleteOrder = deleteOrder;
 //# sourceMappingURL=order-controller.js.map

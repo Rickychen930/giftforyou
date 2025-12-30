@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateCustomerProfile = exports.getCustomerProfile = void 0;
+exports.getCustomerProfile = getCustomerProfile;
+exports.updateCustomerProfile = updateCustomerProfile;
 const user_model_1 = require("../models/user-model");
 const customer_model_1 = require("../models/customer-model");
 const validation_1 = require("../utils/validation");
@@ -50,7 +51,6 @@ async function getCustomerProfile(req, res) {
         res.status(500).json({ error: "Failed to get profile" });
     }
 }
-exports.getCustomerProfile = getCustomerProfile;
 /**
  * Update customer profile
  * PATCH /api/customer/profile
@@ -110,5 +110,4 @@ async function updateCustomerProfile(req, res) {
         res.status(500).json({ error: "Failed to update profile" });
     }
 }
-exports.updateCustomerProfile = updateCustomerProfile;
 //# sourceMappingURL=customer-profile-controller.js.map

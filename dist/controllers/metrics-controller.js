@@ -1,6 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getInsights = exports.postAnalyticsEvent = exports.getVisitorStats = exports.getMetrics = void 0;
+exports.getMetrics = getMetrics;
+exports.getVisitorStats = getVisitorStats;
+exports.postAnalyticsEvent = postAnalyticsEvent;
+exports.getInsights = getInsights;
 const bouquet_model_1 = require("../models/bouquet-model");
 const collection_model_1 = require("../models/collection-model");
 const analytics_event_model_1 = require("../models/analytics-event-model");
@@ -22,7 +25,6 @@ async function getMetrics(req, res) {
         res.status(500).json({ error: "Failed to get metrics" });
     }
 }
-exports.getMetrics = getMetrics;
 async function getVisitorStats(req, res) {
     try {
         const rawDays = req.query.days;
@@ -63,7 +65,6 @@ async function getVisitorStats(req, res) {
         res.status(500).json({ error: "Failed to get visitor stats" });
     }
 }
-exports.getVisitorStats = getVisitorStats;
 const clampInt = (n, min, max) => Math.min(Math.max(Math.floor(n), min), max);
 const normalizeTerm = (term) => {
     if (typeof term !== "string")
@@ -127,7 +128,6 @@ async function postAnalyticsEvent(req, res) {
         res.status(200).json({ success: false, error: "Event not saved" });
     }
 }
-exports.postAnalyticsEvent = postAnalyticsEvent;
 async function getInsights(req, res) {
     try {
         const rawDays = req.query.days;
@@ -241,5 +241,4 @@ async function getInsights(req, res) {
         res.status(500).json({ error: "Failed to get insights" });
     }
 }
-exports.getInsights = getInsights;
 //# sourceMappingURL=metrics-controller.js.map

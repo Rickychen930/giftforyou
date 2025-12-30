@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.trackVisitor = void 0;
+exports.trackVisitor = trackVisitor;
 const visitor_stat_model_1 = require("../models/visitor-stat-model");
 /**
  * Middleware: track site visitors per day.
@@ -17,5 +17,4 @@ async function trackVisitor(_req, _res, next) {
     }
     next();
 }
-exports.trackVisitor = trackVisitor;
 //# sourceMappingURL=visitor-tracker.js.map

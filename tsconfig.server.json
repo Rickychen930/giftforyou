@@ -40,6 +40,11 @@
     "src/**/*.tsx",
     "src/**/*.test.ts",
     "src/**/*.spec.ts",
+    "src/utils/**/*.ts",
+    "src/models/dashboard-page-model.ts",
+    "src/models/cart-page-model.ts",
+    "src/models/favorites-page-model.ts",
+    "src/models/checkout-page-model.ts",
     "node_modules"
   ]
 }

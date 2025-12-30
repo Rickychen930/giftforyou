@@ -10,16 +10,18 @@ const cors_1 = __importDefault(require("cors"));
 const path_1 = __importDefault(require("path"));
 const multer_1 = __importDefault(require("multer"));
 const fs_1 = __importDefault(require("fs"));
-const metrics_routes_1 = __importDefault(require("../routes/metrics-routes"));
-const auth_routes_1 = __importDefault(require("../routes/auth-routes"));
-const bouquet_routes_1 = __importDefault(require("../routes/bouquet-routes"));
-const collection_routes_1 = __importDefault(require("../routes/collection-routes"));
-const hero_slider_routes_1 = __importDefault(require("../routes/hero-slider-routes"));
-const order_routes_1 = __importDefault(require("../routes/order-routes"));
-const customer_routes_1 = __importDefault(require("../routes/customer-routes"));
-const instagram_routes_1 = __importDefault(require("../routes/instagram-routes"));
-const security_headers_1 = require("../middleware/security-headers");
-const rate_limit_middleware_1 = require("../middleware/rate-limit-middleware");
+// API Routes (Backend)
+const metrics_routes_1 = __importDefault(require("../api/routes/metrics-routes"));
+const auth_routes_1 = __importDefault(require("../api/routes/auth-routes"));
+const bouquet_routes_1 = __importDefault(require("../api/routes/bouquet-routes"));
+const collection_routes_1 = __importDefault(require("../api/routes/collection-routes"));
+const hero_slider_routes_1 = __importDefault(require("../api/routes/hero-slider-routes"));
+const order_routes_1 = __importDefault(require("../api/routes/order-routes"));
+const customer_routes_1 = __importDefault(require("../api/routes/customer-routes"));
+const instagram_routes_1 = __importDefault(require("../api/routes/instagram-routes"));
+// API Middleware (Backend)
+const security_headers_1 = require("../api/middleware/security-headers");
+const rate_limit_middleware_1 = require("../api/middleware/rate-limit-middleware");
 /**
  * Read a required env var (crash early if missing)
  */
