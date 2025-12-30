@@ -6,27 +6,35 @@ Aplikasi ini menggunakan pattern **MVC (Model-View-Controller)** yang jelas untu
 
 ```
 src/
-├── models/              # Data models, domain models, business logic
-│   ├── domain/          # Domain models (Bouquet, Collection, etc.)
-│   └── *.ts            # Model definitions
-│
-├── views/               # Presentation layer (React pages)
-│   └── *.tsx           # View components (pages)
-│
-├── controllers/         # Frontend controllers (React)
-│   └── *.tsx           # Controllers yang menghubungkan models dan views
-│
-├── api/                 # Backend API (Express)
+├── api/                 # Backend API (Express) - SEMUA backend code
 │   ├── controllers/    # Backend controllers (Express Request/Response handlers)
 │   ├── routes/         # Backend API routes
 │   └── middleware/     # Backend middleware
 │
+├── models/              # Data models, domain models, business logic
+│   ├── domain/         # Domain models (Bouquet, Collection, etc.)
+│   └── *.ts            # Model definitions
+│
+├── view/                # Presentation layer (React pages)
+│   └── *.tsx           # View components (pages)
+│
+├── controllers/         # Frontend controllers (React) - HANYA .tsx files
+│   └── *.tsx           # Controllers yang menghubungkan models dan views
+│
+├── routes/              # Frontend routes (React Router)
+│   └── *.tsx           # Route wrappers untuk React Router
+│
 ├── components/          # Reusable UI components
 ├── services/            # Business logic services
 ├── utils/               # Utility functions
+├── hooks/               # React custom hooks
 ├── config/              # Configuration files
 ├── constants/           # Constants
-└── styles/              # CSS files
+├── types/               # TypeScript type definitions
+├── styles/              # CSS files
+├── seed/                # Database seed scripts
+└── server/              # Server entry point
+    └── server.ts        # Express server setup
 ```
 
 ## Separation of Concerns
@@ -87,15 +95,19 @@ Controller → View → User
 ## Migration Notes
 
 ### Backend Files
-Backend files telah dipindahkan dari:
-- `src/controllers/*.ts` (backend) → `src/api/controllers/`
-- `src/routes/*.ts` → `src/api/routes/`
-- `src/middleware/*.ts` → `src/api/middleware/`
+Backend files telah dipindahkan dan duplikat dihapus:
+- ✅ `src/api/controllers/` - Backend controllers (digunakan oleh server)
+- ✅ `src/api/routes/` - Backend API routes (digunakan oleh server)
+- ✅ `src/api/middleware/` - Backend middleware (digunakan oleh server)
+- ❌ `src/controllers/*.ts` (backend) - DIHAPUS (duplikat)
+- ❌ `src/routes/*.ts` (backend) - DIHAPUS (duplikat)
+- ❌ `src/middleware/*.ts` (backend) - DIHAPUS (duplikat)
 
 ### Frontend Files
 Frontend files tetap di:
-- `src/controllers/*.tsx` (frontend React controllers)
-- `src/views/*.tsx` (React view components)
+- ✅ `src/controllers/*.tsx` (frontend React controllers)
+- ✅ `src/view/*.tsx` (React view components)
+- ✅ `src/routes/*.tsx` (frontend React Router routes)
 
 ## Best Practices
 

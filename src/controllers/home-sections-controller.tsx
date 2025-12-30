@@ -11,7 +11,6 @@ import { API_BASE } from "../config/api";
 import HeroCollectionSlider from "../components/sections/hero-collection-slider";
 import OurCollectionSection from "../components/sections/our-collection-section";
 import StoreLocationSection from "../components/sections/store-location-section";
-import { storeData } from "../models/store-model";
 import { aboutUsContent } from "../models/about-us-model";
 import AboutUsSection from "../components/sections/about-us-section";
 

@@ -3,7 +3,7 @@ import "@testing-library/jest-dom";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import BouquetUploader from "./components/sections/dashboard-uploader-section";
+import BouquetUploader from "../components/sections/dashboard-uploader-section";
 
 describe("BouquetUploader QA smoke", () => {
   const originalCreateObjectURL = URL.createObjectURL;
