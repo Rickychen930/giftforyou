@@ -95,10 +95,9 @@ const DEFAULT_ALERT_RULES: AlertRule[] = [
  * Get alert rules
  */
 export function getAlertRules(): AlertRule[] {
-  if (typeof localStorage === "undefined") return DEFAULT_ALERT_RULES;
+  if (typeof window === "undefined" || typeof window.localStorage === "undefined") return DEFAULT_ALERT_RULES;
   try {
-    const storage = localStorage as Storage;
-    const stored = storage.getItem(ALERT_RULES_STORAGE_KEY);
+    const stored = window.localStorage.getItem(ALERT_RULES_STORAGE_KEY);
     if (stored) {
       return JSON.parse(stored) as AlertRule[];
     }
@@ -112,10 +111,9 @@ export function getAlertRules(): AlertRule[] {
  * Save alert rules
  */
 export function saveAlertRules(rules: AlertRule[]): void {
-  if (typeof localStorage === "undefined") return;
+  if (typeof window === "undefined" || typeof window.localStorage === "undefined") return;
   try {
-    const storage = localStorage as Storage;
-    storage.setItem(ALERT_RULES_STORAGE_KEY, JSON.stringify(rules));
+    window.localStorage.setItem(ALERT_RULES_STORAGE_KEY, JSON.stringify(rules));
   } catch (error) {
     console.error("Failed to save alert rules:", error);
   }
@@ -125,10 +123,9 @@ export function saveAlertRules(rules: AlertRule[]): void {
  * Get alerts
  */
 export function getAlerts(): Alert[] {
-  if (typeof localStorage === "undefined") return [];
+  if (typeof window === "undefined" || typeof window.localStorage === "undefined") return [];
   try {
-    const storage = localStorage as Storage;
-    const stored = storage.getItem(ALERTS_STORAGE_KEY);
+    const stored = window.localStorage.getItem(ALERTS_STORAGE_KEY);
     if (stored) {
       return JSON.parse(stored) as Alert[];
     }
@@ -142,12 +139,11 @@ export function getAlerts(): Alert[] {
  * Save alerts
  */
 function saveAlerts(alerts: Alert[]): void {
-  if (typeof localStorage === "undefined") return;
+  if (typeof window === "undefined" || typeof window.localStorage === "undefined") return;
   try {
     // Keep only last 100 alerts
     const limited = alerts.slice(-100);
-    const storage = localStorage as Storage;
-    storage.setItem(ALERTS_STORAGE_KEY, JSON.stringify(limited));
+    window.localStorage.setItem(ALERTS_STORAGE_KEY, JSON.stringify(limited));
   } catch (error) {
     console.error("Failed to save alerts:", error);
   }
