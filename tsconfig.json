@@ -5,9 +5,6 @@
 
     // Lib untuk DOM (frontend) dan ESNext (backend)
     "lib": ["DOM", "DOM.Iterable", "ESNext", "ES2020"],
-    
-    // Types untuk browser APIs
-    "types": ["node"],
 
     // Izinkan file JS (jika ada), dan dukung interop
     "allowJs": true,
