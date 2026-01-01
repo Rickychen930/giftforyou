@@ -16,7 +16,7 @@ import QuickActionButton from "../components/common/QuickActionButton";
 import KeyValueList from "../components/common/KeyValueList";
 import AlertMessage from "../components/common/AlertMessage";
 import IconButton from "../components/common/IconButton";
-import LuxuryButton from "../components/LuxuryButton";
+import LuxuryButton from "../components/buttons/LuxuryButton";
 import {
   AddIcon,
   EditIcon,
@@ -59,13 +59,13 @@ import BouquetEditorSection from "../components/sections/Bouquet-editor-section"
 import HeroSliderEditorSection from "../components/sections/HeroSliderEditorSection";
 import OrdersSection from "../components/sections/orders-section";
 import CustomersSection from "../components/sections/customers-section";
-import NotificationsCenter from "../components/NotificationsCenter";
-import InventoryManager from "../components/InventoryManager";
+import NotificationsCenter from "../components/modals/NotificationsCenter";
+import InventoryManager from "../components/modals/InventoryManager";
 import AnalyticsDashboard from "../components/AnalyticsDashboard";
-import QuickActionsPanel from "../components/QuickActionsPanel";
-import DashboardSearch from "../components/DashboardSearch";
-import ActivityLog from "../components/ActivityLog";
-import SystemStatus from "../components/SystemStatus";
+import QuickActionsPanel from "../components/modals/QuickActionsPanel";
+import DashboardSearch from "../components/modals/DashboardSearch";
+import ActivityLog from "../components/modals/ActivityLog";
+import SystemStatus from "../components/modals/SystemStatus";
 import { QUICK_ACTIONS } from "./dashboard-page.constants";
 
 /**

@@ -1,4 +1,9 @@
-import React from "react";
+/**
+ * Hero Progress Component (OOP)
+ * Class-based component following SOLID principles
+ */
+
+import React, { Component } from "react";
 import "../../styles/hero/HeroProgress.css";
 
 export interface HeroProgressProps {
@@ -8,55 +13,68 @@ export interface HeroProgressProps {
   isPlaying?: boolean;
 }
 
-const HeroProgress: React.FC<HeroProgressProps> = ({
-  currentIndex,
-  totalSlides,
-  autoplayProgress = 0,
-  isPlaying = false,
-}) => {
-  if (totalSlides <= 1) return null;
+interface HeroProgressState {
+  // No state needed, but keeping for consistency
+}
 
-  const slideProgress = ((currentIndex + 1) / totalSlides) * 100;
+/**
+ * Hero Progress Component
+ * Class-based component for hero slider progress indicator
+ */
+class HeroProgress extends Component<HeroProgressProps, HeroProgressState> {
+  private baseClass: string = "hero-progress";
 
-  return (
-    <div className="hero-progress-wrapper">
-      <div
-        className="hero-progress"
-        role="progressbar"
-        aria-valuenow={currentIndex + 1}
-        aria-valuemin={1}
-        aria-valuemax={totalSlides}
-        aria-label={`Slide ${currentIndex + 1} of ${totalSlides}`}
-      >
+  private calculateSlideProgress(): number {
+    const { currentIndex, totalSlides } = this.props;
+    return ((currentIndex + 1) / totalSlides) * 100;
+  }
+
+  render(): React.ReactNode {
+    const { currentIndex, totalSlides, autoplayProgress = 0, isPlaying = false } = this.props;
+
+    if (totalSlides <= 1) return null;
+
+    const slideProgress = this.calculateSlideProgress();
+
+    return (
+      <div className="hero-progress-wrapper">
         <div
-          className="hero-progress__bar"
-          style={{ width: `${slideProgress}%` }}
-        />
-        {isPlaying && (
+          className={this.baseClass}
+          role="progressbar"
+          aria-valuenow={currentIndex + 1}
+          aria-valuemin={1}
+          aria-valuemax={totalSlides}
+          aria-label={`Slide ${currentIndex + 1} of ${totalSlides}`}
+        >
           <div
-            className="hero-progress__autoplay"
-            style={{ width: `${autoplayProgress}%` }}
-            aria-hidden="true"
+            className={`${this.baseClass}__bar`}
+            style={{ width: `${slideProgress}%` }}
           />
-        )}
+          {isPlaying && (
+            <div
+              className={`${this.baseClass}__autoplay`}
+              style={{ width: `${autoplayProgress}%` }}
+              aria-hidden="true"
+            />
+          )}
+        </div>
+        <div
+          className={`${this.baseClass}__counter`}
+          aria-live="polite"
+          aria-atomic="true"
+          role="status"
+        >
+          <span className={`${this.baseClass}__current`} aria-hidden="true">
+            {currentIndex + 1}
+          </span>
+          <span className={`${this.baseClass}__separator`} aria-hidden="true">/</span>
+          <span className={`${this.baseClass}__total`} aria-hidden="true">
+            {totalSlides}
+          </span>
+        </div>
       </div>
-      <div
-        className="hero-progress__counter"
-        aria-live="polite"
-        aria-atomic="true"
-        role="status"
-      >
-        <span className="hero-progress__current" aria-hidden="true">
-          {currentIndex + 1}
-        </span>
-        <span className="hero-progress__separator" aria-hidden="true">/</span>
-        <span className="hero-progress__total" aria-hidden="true">
-          {totalSlides}
-        </span>
-      </div>
-    </div>
-  );
-};
+    );
+  }
+}
 
 export default HeroProgress;
-

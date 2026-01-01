@@ -1,62 +1,105 @@
-import React, { useState, FormEvent } from "react";
+/**
+ * Footer Newsletter Component (OOP)
+ * Class-based component following SOLID principles
+ */
+
+import React, { Component, FormEvent } from "react";
 import "../../styles/footer/FooterNewsletter.css";
 
-const FooterNewsletter: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+interface FooterNewsletterState {
+  email: string;
+  status: "idle" | "success" | "error";
+  timeoutId: NodeJS.Timeout | null;
+}
 
-  const handleSubmit = (e: FormEvent) => {
+/**
+ * Footer Newsletter Component
+ * Class-based component for newsletter subscription
+ */
+class FooterNewsletter extends Component<{}, FooterNewsletterState> {
+  private baseClass: string = "footer-newsletter";
+
+  constructor(props: {}) {
+    super(props);
+    this.state = {
+      email: "",
+      status: "idle",
+      timeoutId: null,
+    };
+  }
+
+  componentWillUnmount(): void {
+    if (this.state.timeoutId) {
+      clearTimeout(this.state.timeoutId);
+    }
+  }
+
+  private handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    this.setState({ email: e.target.value });
+  };
+
+  private handleSubmit = (e: FormEvent): void => {
     e.preventDefault();
+    const { email } = this.state;
+
     if (email && email.includes("@")) {
-      setStatus("success");
-      setEmail("");
-      setTimeout(() => setStatus("idle"), 3000);
+      this.setState({ status: "success", email: "" });
+      const timeoutId = setTimeout(() => {
+        this.setState({ status: "idle", timeoutId: null });
+      }, 3000);
+      this.setState({ timeoutId });
     } else {
-      setStatus("error");
-      setTimeout(() => setStatus("idle"), 3000);
+      this.setState({ status: "error" });
+      const timeoutId = setTimeout(() => {
+        this.setState({ status: "idle", timeoutId: null });
+      }, 3000);
+      this.setState({ timeoutId });
     }
   };
 
-  return (
-    <div className="footer-newsletter">
-      <form onSubmit={handleSubmit} className="footer-newsletter__form">
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Langganan newsletter"
-          className="footer-newsletter__input"
-          aria-label="Alamat email untuk newsletter"
-          required
-        />
-        <button
-          type="submit"
-          className="footer-newsletter__button"
-          aria-label="Langganan"
-        >
-          Langganan
-        </button>
-      </form>
-      {status === "success" && (
-        <p
-          className="footer-newsletter__message footer-newsletter__message--success"
-          role="status"
-          aria-live="polite"
-        >
-          Berhasil berlangganan!
-        </p>
-      )}
-      {status === "error" && (
-        <p
-          className="footer-newsletter__message footer-newsletter__message--error"
-          role="alert"
-        >
-          Email tidak valid
-        </p>
-      )}
-    </div>
-  );
-};
+  render(): React.ReactNode {
+    const { email, status } = this.state;
+
+    return (
+      <div className={this.baseClass}>
+        <form onSubmit={this.handleSubmit} className={`${this.baseClass}__form`}>
+          <input
+            type="email"
+            value={email}
+            onChange={this.handleEmailChange}
+            placeholder="Langganan newsletter"
+            className={`${this.baseClass}__input`}
+            aria-label="Alamat email untuk newsletter"
+            required
+          />
+          <button
+            type="submit"
+            className={`${this.baseClass}__button`}
+            aria-label="Langganan"
+          >
+            Langganan
+          </button>
+        </form>
+        {status === "success" && (
+          <p
+            className={`${this.baseClass}__message ${this.baseClass}__message--success`}
+            role="status"
+            aria-live="polite"
+          >
+            Berhasil berlangganan!
+          </p>
+        )}
+        {status === "error" && (
+          <p
+            className={`${this.baseClass}__message ${this.baseClass}__message--error`}
+            role="alert"
+          >
+            Email tidak valid
+          </p>
+        )}
+      </div>
+    );
+  }
+}
 
 export default FooterNewsletter;
-

@@ -14,7 +14,7 @@ import SuccessIcon from "../components/common/SuccessIcon";
 import SummaryCard from "../components/common/SummaryCard";
 import WhatsAppButton from "../components/common/WhatsAppButton";
 import HelpSection from "../components/common/HelpSection";
-import LuxuryButton from "../components/LuxuryButton";
+import LuxuryButton from "../components/buttons/LuxuryButton";
 
 interface OrderConfirmationPageViewProps {
   orderData: OrderConfirmationData;

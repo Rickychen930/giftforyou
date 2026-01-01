@@ -7,12 +7,12 @@ import React from "react";
 import { Link, Navigate } from "react-router-dom";
 import "../styles/CustomerProfilePage.css";
 import AddressAutocomplete from "../components/AddressAutocomplete";
-import AutoSaveIndicator from "../components/AutoSaveIndicator";
-import ConfettiEffect from "../components/ConfettiEffect";
+import AutoSaveIndicator from "../components/common/AutoSaveIndicator";
+import ConfettiEffect from "../components/common/ConfettiEffect";
 import BackLink from "../components/common/BackLink";
 import AlertMessage from "../components/common/AlertMessage";
 import FormField from "../components/common/FormField";
-import LuxuryButton from "../components/LuxuryButton";
+import LuxuryButton from "../components/buttons/LuxuryButton";
 import type {
   ProfileUser,
   ProfileFormData,

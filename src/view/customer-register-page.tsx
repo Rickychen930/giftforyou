@@ -7,12 +7,12 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "../styles/CustomerAuthPage.css";
 import { STORE_PROFILE } from "../config/store-profile";
-import ConfettiEffect from "../components/ConfettiEffect";
+import ConfettiEffect from "../components/common/ConfettiEffect";
 import type { RegisterFormData, RegisterFormErrors } from "../models/customer-register-page-model";
 import PasswordInput from "../components/common/PasswordInput";
 import FormField from "../components/common/FormField";
 import AlertMessage from "../components/common/AlertMessage";
-import LuxuryButton from "../components/LuxuryButton";
+import LuxuryButton from "../components/buttons/LuxuryButton";
 
 interface CustomerRegisterPageViewProps {
   formData: RegisterFormData;

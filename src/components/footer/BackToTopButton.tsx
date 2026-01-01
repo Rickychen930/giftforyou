@@ -1,32 +1,55 @@
-import React, { useState, useEffect } from "react";
+/**
+ * Back To Top Button Component (OOP)
+ * Class-based component following SOLID principles
+ */
+
+import React, { Component } from "react";
 import "../../styles/footer/BackToTopButton.css";
 
-const BackToTopButton: React.FC = () => {
-  const [isVisible, setIsVisible] = useState(false);
+interface BackToTopButtonState {
+  isVisible: boolean;
+  rafId: number;
+}
 
-  useEffect(() => {
-    let rafId = 0;
+/**
+ * Back To Top Button Component
+ * Class-based component for scroll-to-top functionality
+ */
+class BackToTopButton extends Component<{}, BackToTopButtonState> {
+  private baseClass: string = "back-to-top";
 
-    const update = () => {
-      rafId = 0;
-      const y = window.scrollY || document.documentElement.scrollTop || 0;
-      setIsVisible(y > 420);
+  constructor(props: {}) {
+    super(props);
+    this.state = {
+      isVisible: false,
+      rafId: 0,
     };
+  }
 
-    const onScroll = () => {
-      if (rafId) return;
-      rafId = window.requestAnimationFrame(update);
-    };
+  componentDidMount(): void {
+    this.updateVisibility();
+    window.addEventListener("scroll", this.handleScroll, { passive: true });
+  }
 
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (rafId) window.cancelAnimationFrame(rafId);
-    };
-  }, []);
+  componentWillUnmount(): void {
+    window.removeEventListener("scroll", this.handleScroll);
+    if (this.state.rafId) {
+      window.cancelAnimationFrame(this.state.rafId);
+    }
+  }
 
-  const scrollToTop = () => {
+  private updateVisibility = (): void => {
+    const y = window.scrollY || document.documentElement.scrollTop || 0;
+    this.setState({ isVisible: y > 420, rafId: 0 });
+  };
+
+  private handleScroll = (): void => {
+    if (this.state.rafId) return;
+    const rafId = window.requestAnimationFrame(this.updateVisibility);
+    this.setState({ rafId });
+  };
+
+  private scrollToTop = (): void => {
     const prefersReducedMotion =
       typeof window !== "undefined" &&
       typeof window.matchMedia === "function" &&
@@ -38,19 +61,32 @@ const BackToTopButton: React.FC = () => {
     });
   };
 
-  return (
-    <button
-      onClick={scrollToTop}
-      className={`back-to-top ${isVisible ? "back-to-top--visible" : ""}`}
-      aria-label="Kembali ke atas"
-      title="Kembali ke atas"
-    >
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M12 19V5M12 5l-7 7M12 5l7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    </button>
-  );
-};
+  private getClasses(): string {
+    const { isVisible } = this.state;
+    const visibleClass = isVisible ? `${this.baseClass}--visible` : "";
+    return `${this.baseClass} ${visibleClass}`.trim();
+  }
+
+  render(): React.ReactNode {
+    return (
+      <button
+        onClick={this.scrollToTop}
+        className={this.getClasses()}
+        aria-label="Kembali ke atas"
+        title="Kembali ke atas"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path
+            d="M12 19V5M12 5l-7 7M12 5l7 7"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+    );
+  }
+}
 
 export default BackToTopButton;
-

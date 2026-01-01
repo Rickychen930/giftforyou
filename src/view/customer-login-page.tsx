@@ -11,7 +11,7 @@ import type { LoginFormData } from "../models/customer-login-page-model";
 import PasswordInput from "../components/common/PasswordInput";
 import FormField from "../components/common/FormField";
 import AlertMessage from "../components/common/AlertMessage";
-import LuxuryButton from "../components/LuxuryButton";
+import LuxuryButton from "../components/buttons/LuxuryButton";
 
 interface CustomerLoginPageViewProps {
   formData: LoginFormData;

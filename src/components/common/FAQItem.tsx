@@ -1,9 +1,9 @@
 /**
- * FAQ Item Component
- * Luxury and responsive FAQ accordion item
+ * FAQ Item Component (OOP)
+ * Class-based component following SOLID principles
  */
 
-import React from "react";
+import React, { Component } from "react";
 import "../../styles/FAQItem.css";
 
 interface FAQItemProps {
@@ -14,53 +14,92 @@ interface FAQItemProps {
   index?: number;
 }
 
+interface FAQItemState {
+  isOpen: boolean;
+}
+
 /**
  * FAQ Item Component
- * Luxury styled FAQ accordion item
+ * Class-based component for FAQ accordion items
  */
-const FAQItem: React.FC<FAQItemProps> = ({
-  question,
-  answer,
-  isOpen,
-  onToggle,
-  index = 0,
-}) => {
-  return (
-    <div
-      className={`faqItem fade-in ${isOpen ? "faqItem--open" : ""}`}
-      style={{ animationDelay: `${index * 0.05}s` }}
-    >
-      <button
-        className="faqItem__question"
-        onClick={onToggle}
-        aria-expanded={isOpen}
+class FAQItem extends Component<FAQItemProps, FAQItemState> {
+  private baseClass: string = "faqItem";
+
+  constructor(props: FAQItemProps) {
+    super(props);
+    this.state = {
+      isOpen: props.isOpen,
+    };
+  }
+
+  componentDidUpdate(prevProps: FAQItemProps): void {
+    if (prevProps.isOpen !== this.props.isOpen) {
+      this.setState({ isOpen: this.props.isOpen });
+    }
+  }
+
+  private getClasses(): string {
+    const { index = 0 } = this.props;
+    const { isOpen } = this.state;
+    const openClass = isOpen ? `${this.baseClass}--open` : "";
+    return `${this.baseClass} fade-in ${openClass}`.trim();
+  }
+
+  private getStyle(): React.CSSProperties {
+    const { index = 0 } = this.props;
+    return { animationDelay: `${index * 0.05}s` };
+  }
+
+  private handleToggle = (): void => {
+    this.setState({ isOpen: !this.state.isOpen });
+    this.props.onToggle();
+  };
+
+  private renderChevron(): React.ReactNode {
+    const { isOpen } = this.state;
+
+    return (
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className={`${this.baseClass}__chevron ${isOpen ? `${this.baseClass}__chevron--open` : ""}`}
       >
-        <span className="faqItem__questionText">{question}</span>
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className={`faqItem__chevron ${isOpen ? "faqItem__chevron--open" : ""}`}
+        <path
+          d="M6 9l6 6 6-6"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+
+  render(): React.ReactNode {
+    const { question, answer } = this.props;
+    const { isOpen } = this.state;
+
+    return (
+      <div className={this.getClasses()} style={this.getStyle()}>
+        <button
+          className={`${this.baseClass}__question`}
+          onClick={this.handleToggle}
+          aria-expanded={isOpen}
         >
-          <path
-            d="M6 9l6 6 6-6"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
-      <div className={`faqItem__answer ${isOpen ? "faqItem__answer--open" : ""}`}>
-        <div className="faqItem__answerContent">
-          <p>{answer}</p>
+          <span className={`${this.baseClass}__questionText`}>{question}</span>
+          {this.renderChevron()}
+        </button>
+        <div className={`${this.baseClass}__answer ${isOpen ? `${this.baseClass}__answer--open` : ""}`}>
+          <div className={`${this.baseClass}__answerContent`}>
+            <p>{answer}</p>
+          </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  }
+}
 
 export default FAQItem;
-

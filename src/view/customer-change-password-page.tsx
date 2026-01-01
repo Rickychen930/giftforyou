@@ -6,12 +6,12 @@
 import React from "react";
 import { Link, Navigate } from "react-router-dom";
 import "../styles/CustomerChangePasswordPage.css";
-import ConfettiEffect from "../components/ConfettiEffect";
+import ConfettiEffect from "../components/common/ConfettiEffect";
 import BackLink from "../components/common/BackLink";
 import PasswordInput from "../components/common/PasswordInput";
 import FormField from "../components/common/FormField";
 import AlertMessage from "../components/common/AlertMessage";
-import LuxuryButton from "../components/LuxuryButton";
+import LuxuryButton from "../components/buttons/LuxuryButton";
 import type {
   ChangePasswordFormData,
   ChangePasswordFormErrors,

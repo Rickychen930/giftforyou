@@ -7,13 +7,13 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 import "../styles/CustomerAddressesPage.css";
 import AddressAutocomplete from "../components/AddressAutocomplete";
-import ConfettiEffect from "../components/ConfettiEffect";
-import EmptyState from "../components/EmptyState";
+import ConfettiEffect from "../components/common/ConfettiEffect";
+import EmptyState from "../components/common/EmptyState";
 import BackLink from "../components/common/BackLink";
 import AlertMessage from "../components/common/AlertMessage";
 import FormField from "../components/common/FormField";
 import IconButton from "../components/common/IconButton";
-import LuxuryButton from "../components/LuxuryButton";
+import LuxuryButton from "../components/buttons/LuxuryButton";
 import type {
   Address,
   AddressFormData,

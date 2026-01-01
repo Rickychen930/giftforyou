@@ -31,8 +31,8 @@ import CustomerAddressesPageController from "./controllers/customer-addresses-pa
 import CustomerChangePasswordPageController from "./controllers/customer-change-password-page-controller";
 import CustomerNotificationsPageController from "./controllers/customer-notifications-page-controller";
 import ErrorBoundary from "./components/error-boundary";
-import ScrollToTop from "./components/scroll-to-top";
-import LuxuryToastContainer from "./components/LuxuryToastContainer";
+import ScrollToTop, { RouteScrollHandler } from "./components/common/ScrollToTop";
+import LuxuryToastContainer from "./components/common/LuxuryToastContainer";
 import { toast } from "./utils/toast";
 import { trackPageview } from "./services/analytics.service";
 
@@ -242,6 +242,7 @@ const App: React.FC = () => {
   return (
     <Router>
       <ErrorBoundary>
+        <RouteScrollHandler />
         <ScrollToTop />
         <AppLayout />
       </ErrorBoundary>

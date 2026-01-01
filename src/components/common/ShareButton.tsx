@@ -1,0 +1,197 @@
+/**
+ * Share Button Component (OOP)
+ * Class-based component following SOLID principles
+ */
+
+import React, { Component, RefObject } from "react";
+import "../../styles/ShareButton.css";
+
+interface ShareButtonProps {
+  url: string;
+  title: string;
+  description?: string;
+  image?: string;
+  className?: string;
+}
+
+interface ShareButtonState {
+  isOpen: boolean;
+}
+
+/**
+ * Share Button Component
+ * Class-based component for sharing functionality
+ */
+class ShareButton extends Component<ShareButtonProps, ShareButtonState> {
+  private baseClass: string = "share-button";
+  private menuRef: RefObject<HTMLDivElement>;
+
+  constructor(props: ShareButtonProps) {
+    super(props);
+    this.state = {
+      isOpen: false,
+    };
+    this.menuRef = React.createRef();
+  }
+
+  componentDidMount(): void {
+    if (this.state.isOpen) {
+      document.addEventListener("mousedown", this.handleClickOutside);
+    }
+  }
+
+  componentDidUpdate(prevProps: ShareButtonProps, prevState: ShareButtonState): void {
+    if (this.state.isOpen && !prevState.isOpen) {
+      document.addEventListener("mousedown", this.handleClickOutside);
+    } else if (!this.state.isOpen && prevState.isOpen) {
+      document.removeEventListener("mousedown", this.handleClickOutside);
+    }
+  }
+
+  componentWillUnmount(): void {
+    document.removeEventListener("mousedown", this.handleClickOutside);
+  }
+
+  private handleClickOutside = (e: MouseEvent): void => {
+    if (this.menuRef.current && !this.menuRef.current.contains(e.target as Node)) {
+      this.setState({ isOpen: false });
+    }
+  };
+
+  private toggleMenu = (): void => {
+    this.setState({ isOpen: !this.state.isOpen });
+  };
+
+  private getFullUrl(): string {
+    const { url } = this.props;
+    return url.startsWith("http") ? url : `${window.location.origin}${url}`;
+  }
+
+  private shareToWhatsApp = (): void => {
+    const { title } = this.props;
+    const message = encodeURIComponent(`${title}\n\n${this.getFullUrl()}`);
+    window.open(`https://wa.me/?text=${message}`, "_blank");
+    this.setState({ isOpen: false });
+  };
+
+  private copyLink = async (): Promise<void> => {
+    try {
+      await navigator.clipboard.writeText(this.getFullUrl());
+      this.setState({ isOpen: false });
+    } catch (err) {
+      console.error("Failed to copy link:", err);
+    }
+  };
+
+  private shareNative = async (): Promise<void> => {
+    const { title, description = "" } = this.props;
+    if (typeof navigator.share === "function") {
+      try {
+        await navigator.share({
+          title,
+          text: description,
+          url: this.getFullUrl(),
+        });
+        this.setState({ isOpen: false });
+      } catch (err) {
+        console.error("Share failed:", err);
+      }
+    }
+  };
+
+  private renderShareIcon(): React.ReactNode {
+    return (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM15 5l-6 4M9 15l6 4"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+
+  private renderWhatsAppIcon(): React.ReactNode {
+    return (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+      </svg>
+    );
+  }
+
+  private renderCopyIcon(): React.ReactNode {
+    return (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+
+  render(): React.ReactNode {
+    const { className = "" } = this.props;
+    const { isOpen } = this.state;
+
+    return (
+      <div className={`${this.baseClass} ${className}`.trim()} ref={this.menuRef}>
+        <button
+          className={`${this.baseClass}__trigger`}
+          onClick={this.toggleMenu}
+          aria-label="Share"
+          aria-expanded={isOpen}
+        >
+          {this.renderShareIcon()}
+          <span>Share</span>
+        </button>
+
+        {isOpen && (
+          <div className={`${this.baseClass}__menu`}>
+            {typeof navigator.share === "function" && (
+              <button
+                className={`${this.baseClass}__item`}
+                onClick={this.shareNative}
+                aria-label="Share using native share"
+              >
+                {this.renderShareIcon()}
+                Share
+              </button>
+            )}
+            <button
+              className={`${this.baseClass}__item`}
+              onClick={this.shareToWhatsApp}
+              aria-label="Share to WhatsApp"
+            >
+              {this.renderWhatsAppIcon()}
+              WhatsApp
+            </button>
+            <button
+              className={`${this.baseClass}__item`}
+              onClick={this.copyLink}
+              aria-label="Copy link"
+            >
+              {this.renderCopyIcon()}
+              Copy Link
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+}
+
+export default ShareButton;
+

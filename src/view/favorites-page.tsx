@@ -6,7 +6,7 @@
 import React from "react";
 import "../styles/FavoritesPage.css";
 import type { FavoriteItem } from "../utils/favorites";
-import EmptyState from "../components/EmptyState";
+import EmptyState from "../components/common/EmptyState";
 import FavoriteCard from "../components/common/FavoriteCard";
 import BackLink from "../components/common/BackLink";
 

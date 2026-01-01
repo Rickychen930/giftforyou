@@ -1,9 +1,9 @@
 /**
- * Checkout Item Component
- * Luxury and responsive checkout item card
+ * Checkout Item Component (OOP)
+ * Class-based component following SOLID principles
  */
 
-import React from "react";
+import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import { formatIDR } from "../../utils/money";
 import { buildImageUrl } from "../../utils/image-utils";
@@ -20,53 +20,60 @@ interface CheckoutItemProps {
   fallbackImage?: string;
 }
 
+interface CheckoutItemState {
+  // No state needed, but keeping for consistency
+}
+
 /**
  * Checkout Item Component
- * Luxury styled checkout item card
+ * Class-based component for checkout items
  */
-const CheckoutItem: React.FC<CheckoutItemProps> = ({
-  bouquetId,
-  bouquetName,
-  bouquetPrice,
-  quantity,
-  image,
-  itemTotal,
-  discountPercentage,
-  fallbackImage = "/images/placeholder-bouquet.jpg",
-}) => {
-  const hasDiscount = discountPercentage !== undefined && discountPercentage > 0;
-  const imageUrl = image ? buildImageUrl(image) : fallbackImage;
+class CheckoutItem extends Component<CheckoutItemProps, CheckoutItemState> {
+  private baseClass: string = "checkoutItem";
 
-  return (
-    <div className="checkoutItem">
-      <Link to={`/bouquet/${bouquetId}`} className="checkoutItem__image">
-        <img
-          src={imageUrl}
-          alt={bouquetName}
-          loading="lazy"
-        />
-      </Link>
-      <div className="checkoutItem__details">
-        <Link to={`/bouquet/${bouquetId}`} className="checkoutItem__name">
-          {bouquetName}
+  private getImageUrl(): string {
+    const { image, fallbackImage = "/images/placeholder-bouquet.jpg" } = this.props;
+    return image ? buildImageUrl(image) : fallbackImage;
+  }
+
+  private hasDiscount(): boolean {
+    const { discountPercentage } = this.props;
+    return discountPercentage !== undefined && discountPercentage > 0;
+  }
+
+  render(): React.ReactNode {
+    const { bouquetId, bouquetName, bouquetPrice, quantity, itemTotal, discountPercentage } = this.props;
+
+    return (
+      <div className={this.baseClass}>
+        <Link to={`/bouquet/${bouquetId}`} className={`${this.baseClass}__image`}>
+          <img
+            src={this.getImageUrl()}
+            alt={bouquetName}
+            loading="lazy"
+          />
         </Link>
-        <div className="checkoutItem__meta">
-          <span className="checkoutItem__price">
-            {formatIDR(bouquetPrice)} x {quantity}
-          </span>
-          {hasDiscount && (
-            <span className="checkoutItem__discount">
-              Diskon {discountPercentage}%
+        <div className={`${this.baseClass}__details`}>
+          <Link to={`/bouquet/${bouquetId}`} className={`${this.baseClass}__name`}>
+            {bouquetName}
+          </Link>
+          <div className={`${this.baseClass}__meta`}>
+            <span className={`${this.baseClass}__price`}>
+              {formatIDR(bouquetPrice)} x {quantity}
             </span>
-          )}
+            {this.hasDiscount() && (
+              <span className={`${this.baseClass}__discount`}>
+                Diskon {discountPercentage}%
+              </span>
+            )}
+          </div>
+        </div>
+        <div className={`${this.baseClass}__total`}>
+          {formatIDR(itemTotal)}
         </div>
       </div>
-      <div className="checkoutItem__total">
-        {formatIDR(itemTotal)}
-      </div>
-    </div>
-  );
-};
+    );
+  }
+}
 
 export default CheckoutItem;
-

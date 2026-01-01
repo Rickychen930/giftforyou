@@ -1,24 +1,40 @@
-import React from "react";
+/**
+ * Hero Skeleton Component (OOP)
+ * Class-based component following SOLID principles
+ */
+
+import React, { Component } from "react";
 import "../../styles/hero/HeroSkeleton.css";
 
-const HeroSkeleton: React.FC = () => {
-  return (
-    <section className="hero-skeleton" aria-label="Memuat hero slider">
-      <div className="hero-skeleton__container">
-        <div className="hero-skeleton__image" />
-        <div className="hero-skeleton__content">
-          <div className="hero-skeleton__badge" />
-          <div className="hero-skeleton__title" />
-          <div className="hero-skeleton__subtitle" />
-          <div className="hero-skeleton__buttons">
-            <div className="hero-skeleton__button" />
-            <div className="hero-skeleton__button" />
+interface HeroSkeletonState {
+  // No state needed, but keeping for consistency
+}
+
+/**
+ * Hero Skeleton Component
+ * Class-based component for hero slider loading skeleton
+ */
+class HeroSkeleton extends Component<{}, HeroSkeletonState> {
+  private baseClass: string = "hero-skeleton";
+
+  render(): React.ReactNode {
+    return (
+      <section className={this.baseClass} aria-label="Memuat hero slider">
+        <div className={`${this.baseClass}__container`}>
+          <div className={`${this.baseClass}__image`} />
+          <div className={`${this.baseClass}__content`}>
+            <div className={`${this.baseClass}__badge`} />
+            <div className={`${this.baseClass}__title`} />
+            <div className={`${this.baseClass}__subtitle`} />
+            <div className={`${this.baseClass}__buttons`}>
+              <div className={`${this.baseClass}__button`} />
+              <div className={`${this.baseClass}__button`} />
+            </div>
           </div>
         </div>
-      </div>
-    </section>
-  );
-};
+      </section>
+    );
+  }
+}
 
 export default HeroSkeleton;
-

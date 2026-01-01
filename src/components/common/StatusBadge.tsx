@@ -1,4 +1,9 @@
-import React from "react";
+/**
+ * Status Badge Component (OOP)
+ * Class-based component following SOLID principles
+ */
+
+import React, { Component } from "react";
 import "../../styles/common/StatusBadge.css";
 
 export type StatusBadgeType = "ready" | "preorder" | "featured" | "new" | "limited";
@@ -11,15 +16,38 @@ export interface StatusBadgeProps {
   size?: "sm" | "md" | "lg";
 }
 
-const StatusBadge: React.FC<StatusBadgeProps> = ({
-  type,
-  label,
-  count,
-  className = "",
-  size = "md",
-}) => {
-  const getLabel = () => {
+interface StatusBadgeState {
+  displayLabel: string;
+}
+
+/**
+ * Status Badge Component
+ * Class-based component for status badges
+ */
+class StatusBadge extends Component<StatusBadgeProps, StatusBadgeState> {
+  private baseClass: string = "status-badge";
+
+  constructor(props: StatusBadgeProps) {
+    super(props);
+    this.state = {
+      displayLabel: this.getLabel(),
+    };
+  }
+
+  componentDidUpdate(prevProps: StatusBadgeProps): void {
+    if (
+      prevProps.type !== this.props.type ||
+      prevProps.label !== this.props.label ||
+      prevProps.count !== this.props.count
+    ) {
+      this.setState({ displayLabel: this.getLabel() });
+    }
+  }
+
+  private getLabel(): string {
+    const { label, type, count } = this.props;
     if (label) return label;
+
     switch (type) {
       case "ready":
         return "Siap";
@@ -34,9 +62,11 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
       default:
         return "";
     }
-  };
+  }
 
-  const getIcon = () => {
+  private getIcon(): React.ReactNode {
+    const { type } = this.props;
+
     switch (type) {
       case "ready":
         return (
@@ -71,19 +101,27 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
       default:
         return null;
     }
-  };
+  }
 
-  return (
-    <span
-      className={`status-badge status-badge--${type} status-badge--${size} ${className}`}
-      role="status"
-      aria-label={getLabel()}
-    >
-      {getIcon()}
-      <span className="status-badge__text">{getLabel()}</span>
-    </span>
-  );
-};
+  private getClasses(): string {
+    const { type, size = "md", className = "" } = this.props;
+    return `${this.baseClass} ${this.baseClass}--${type} ${this.baseClass}--${size} ${className}`.trim();
+  }
+
+  render(): React.ReactNode {
+    const { displayLabel } = this.state;
+
+    return (
+      <span
+        className={this.getClasses()}
+        role="status"
+        aria-label={displayLabel}
+      >
+        {this.getIcon()}
+        <span className={`${this.baseClass}__text`}>{displayLabel}</span>
+      </span>
+    );
+  }
+}
 
 export default StatusBadge;
-

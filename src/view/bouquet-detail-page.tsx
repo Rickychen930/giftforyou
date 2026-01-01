@@ -18,12 +18,12 @@ import OrderForm from "../components/bouquet-detail/OrderForm";
 import PriceSummary from "../components/bouquet-detail/PriceSummary";
 import SimilarProducts from "../components/bouquet-detail/SimilarProducts";
 import Breadcrumb from "../components/bouquet-detail/Breadcrumb";
-import SocialProof from "../components/SocialProof";
-import UrgencyIndicator from "../components/UrgencyIndicator";
-import EmptyState from "../components/EmptyState";
+import SocialProof from "../components/common/SocialProof";
+import UrgencyIndicator from "../components/common/UrgencyIndicator";
+import EmptyState from "../components/common/EmptyState";
 import IconButton from "../components/common/IconButton";
 import AlertMessage from "../components/common/AlertMessage";
-import LuxuryButton from "../components/LuxuryButton";
+import LuxuryButton from "../components/buttons/LuxuryButton";
 
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
 

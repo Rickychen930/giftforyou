@@ -1,9 +1,9 @@
 /**
- * Help Section Component
- * Luxury and responsive help/info section
+ * Help Section Component (OOP)
+ * Class-based component following SOLID principles
  */
 
-import React from "react";
+import React, { Component } from "react";
 import "../../styles/HelpSection.css";
 
 interface HelpSectionProps {
@@ -13,26 +13,35 @@ interface HelpSectionProps {
   className?: string;
 }
 
+interface HelpSectionState {
+  // No state needed, but keeping for consistency
+}
+
 /**
  * Help Section Component
- * Luxury styled help/info section
+ * Class-based component for help/info sections
  */
-const HelpSection: React.FC<HelpSectionProps> = ({
-  title,
-  children,
-  icon,
-  className = "",
-}) => {
-  return (
-    <div className={`helpSection ${className}`}>
-      <h3 className="helpSection__title">
-        {icon && <span className="helpSection__icon">{icon}</span>}
-        {title}
-      </h3>
-      <p className="helpSection__text">{children}</p>
-    </div>
-  );
-};
+class HelpSection extends Component<HelpSectionProps, HelpSectionState> {
+  private baseClass: string = "helpSection";
+
+  private getClasses(): string {
+    const { className = "" } = this.props;
+    return `${this.baseClass} ${className}`.trim();
+  }
+
+  render(): React.ReactNode {
+    const { title, children, icon } = this.props;
+
+    return (
+      <div className={this.getClasses()}>
+        <h3 className={`${this.baseClass}__title`}>
+          {icon && <span className={`${this.baseClass}__icon`}>{icon}</span>}
+          {title}
+        </h3>
+        <p className={`${this.baseClass}__text`}>{children}</p>
+      </div>
+    );
+  }
+}
 
 export default HelpSection;
-

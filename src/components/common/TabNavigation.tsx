@@ -1,9 +1,9 @@
 /**
- * Tab Navigation Component
- * Luxury and responsive tab navigation
+ * Tab Navigation Component (OOP)
+ * Class-based component following SOLID principles
  */
 
-import React from "react";
+import React, { Component } from "react";
 import "../../styles/TabNavigation.css";
 
 export interface TabItem {
@@ -20,41 +20,75 @@ interface TabNavigationProps {
   className?: string;
 }
 
+interface TabNavigationState {
+  activeTab: string;
+}
+
 /**
  * Tab Navigation Component
- * Luxury styled tab navigation
+ * Class-based component for tab navigation
  */
-const TabNavigation: React.FC<TabNavigationProps> = ({
-  tabs,
-  activeTab,
-  onTabChange,
-  className = "",
-}) => {
-  return (
-    <div className={`tabNavigation ${className}`} role="tablist">
-      {tabs.map((tab) => (
-        <button
-          key={tab.key}
-          type="button"
-          role="tab"
-          aria-selected={activeTab === tab.key}
-          className={`tabNavigation__tab ${
-            activeTab === tab.key ? "tabNavigation__tab--active" : ""
-          }`}
-          onClick={() => onTabChange(tab.key)}
-        >
-          {tab.icon && <span className="tabNavigation__icon">{tab.icon}</span>}
-          <span className="tabNavigation__label">{tab.label}</span>
-          {tab.shortcut && (
-            <span className="tabNavigation__shortcut" aria-label={`Shortcut: ${tab.shortcut}`}>
-              {tab.shortcut}
-            </span>
-          )}
-        </button>
-      ))}
-    </div>
-  );
-};
+class TabNavigation extends Component<TabNavigationProps, TabNavigationState> {
+  private baseClass: string = "tabNavigation";
+
+  constructor(props: TabNavigationProps) {
+    super(props);
+    this.state = {
+      activeTab: props.activeTab,
+    };
+  }
+
+  componentDidUpdate(prevProps: TabNavigationProps): void {
+    if (prevProps.activeTab !== this.props.activeTab) {
+      this.setState({ activeTab: this.props.activeTab });
+    }
+  }
+
+  private getClasses(): string {
+    const { className = "" } = this.props;
+    return `${this.baseClass} ${className}`.trim();
+  }
+
+  private handleTabClick = (key: string): void => {
+    this.setState({ activeTab: key });
+    this.props.onTabChange(key);
+  };
+
+  private renderTab(tab: TabItem): React.ReactNode {
+    const { activeTab } = this.state;
+    const isActive = activeTab === tab.key;
+
+    return (
+      <button
+        key={tab.key}
+        type="button"
+        role="tab"
+        aria-selected={isActive}
+        className={`${this.baseClass}__tab ${
+          isActive ? `${this.baseClass}__tab--active` : ""
+        }`}
+        onClick={() => this.handleTabClick(tab.key)}
+      >
+        {tab.icon && <span className={`${this.baseClass}__icon`}>{tab.icon}</span>}
+        <span className={`${this.baseClass}__label`}>{tab.label}</span>
+        {tab.shortcut && (
+          <span className={`${this.baseClass}__shortcut`} aria-label={`Shortcut: ${tab.shortcut}`}>
+            {tab.shortcut}
+          </span>
+        )}
+      </button>
+    );
+  }
+
+  render(): React.ReactNode {
+    const { tabs } = this.props;
+
+    return (
+      <div className={this.getClasses()} role="tablist">
+        {tabs.map((tab) => this.renderTab(tab))}
+      </div>
+    );
+  }
+}
 
 export default TabNavigation;
-

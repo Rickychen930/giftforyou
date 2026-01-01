@@ -1,0 +1,670 @@
+/**
+ * Invoice Component (OOP)
+ * Class-based component following SOLID principles
+ */
+
+import React, { Component, RefObject } from "react";
+import "../../styles/InvoiceComponent.css";
+import { STORE_PROFILE } from "../../config/store-profile";
+import { formatIDR } from "../../utils/money";
+
+export type Order = {
+  _id?: string;
+  customerId?: string;
+  buyerName: string;
+  phoneNumber: string;
+  address: string;
+  bouquetId: string;
+  bouquetName: string;
+  bouquetPrice?: number;
+  orderStatus?:
+    | "bertanya"
+    | "memesan"
+    | "sedang_diproses"
+    | "menunggu_driver"
+    | "pengantaran"
+    | "terkirim";
+  paymentStatus?: "belum_bayar" | "dp" | "sudah_bayar";
+  paymentMethod?: "" | "cash" | "transfer_bank" | "ewallet" | "qris" | "lainnya";
+  downPaymentAmount?: number;
+  additionalPayment?: number;
+  deliveryPrice?: number;
+  totalAmount?: number;
+  deliveryAt?: string;
+  createdAt?: string;
+};
+
+interface InvoiceComponentProps {
+  order: Order;
+  onClose?: () => void;
+}
+
+interface InvoiceComponentState {
+  // No state needed, but keeping for consistency
+}
+
+/**
+ * Invoice Component
+ * Class-based component for invoice display and printing
+ */
+class InvoiceComponent extends Component<InvoiceComponentProps, InvoiceComponentState> {
+  private baseClass: string = "invoice";
+  private invoiceRef: RefObject<HTMLDivElement>;
+
+  constructor(props: InvoiceComponentProps) {
+    super(props);
+    this.invoiceRef = React.createRef();
+  }
+
+  private formatDate(dateString?: string): string {
+    if (!dateString) return "—";
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString("id-ID", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch {
+      return "—";
+    }
+  }
+
+  private formatDateTime(dateString?: string): string {
+    if (!dateString) return "—";
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString("id-ID", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return "—";
+    }
+  }
+
+  private getStatusLabel(status?: string): string {
+    const labels: Record<string, string> = {
+      bertanya: "Bertanya",
+      memesan: "Memesan",
+      sedang_diproses: "Sedang Diproses",
+      menunggu_driver: "Menunggu Driver",
+      pengantaran: "Pengantaran",
+      terkirim: "Terkirim",
+    };
+    return labels[status || ""] || status || "—";
+  }
+
+  private getPaymentStatusLabel(status?: string): string {
+    const labels: Record<string, string> = {
+      belum_bayar: "Belum Bayar",
+      dp: "Down Payment",
+      sudah_bayar: "Lunas",
+    };
+    return labels[status || ""] || status || "—";
+  }
+
+  private getPaymentMethodLabel(method?: string): string {
+    const labels: Record<string, string> = {
+      cash: "Tunai",
+      transfer_bank: "Transfer Bank",
+      ewallet: "E-Wallet",
+      qris: "QRIS",
+      lainnya: "Lainnya",
+    };
+    return labels[method || ""] || method || "—";
+  }
+
+  private generateInvoiceNumber(orderId?: string, createdAt?: string): string {
+    if (!orderId) return "N/A";
+    const date = createdAt ? new Date(createdAt) : new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const shortId = orderId.slice(-6).toUpperCase();
+    return `INV-${year}${month}-${shortId}`;
+  }
+
+  private generateOrderReference(orderId?: string): string {
+    if (!orderId) return "N/A";
+    return `ORD-${orderId.slice(-8).toUpperCase()}`;
+  }
+
+  private handlePrint = (): void => {
+    if (!this.invoiceRef.current) return;
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+
+    const { order } = this.props;
+    const printContent = this.invoiceRef.current.innerHTML;
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Invoice - ${order.bouquetName}</title>
+          <style>
+            @page {
+              size: A4;
+              margin: 0;
+            }
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+              padding: 40px;
+              background: white;
+              color: #1a1a1a;
+            }
+            ${document.querySelector("style")?.innerHTML || ""}
+          </style>
+        </head>
+        <body>
+          ${printContent}
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 250);
+  };
+
+  private handleDownloadPDF = (): void => {
+    if (!this.invoiceRef.current) return;
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      this.handlePrint();
+      return;
+    }
+
+    const { order } = this.props;
+    const invoiceNumber = this.generateInvoiceNumber(order._id, order.createdAt);
+
+    // Get all styles from the document
+    const styles = Array.from(document.styleSheets)
+      .map((sheet) => {
+        try {
+          return Array.from(sheet.cssRules)
+            .map((rule) => rule.cssText)
+            .join("\n");
+        } catch {
+          return "";
+        }
+      })
+      .join("\n");
+
+    const printContent = this.invoiceRef.current.innerHTML;
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html lang="id">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Invoice - ${invoiceNumber}</title>
+          <style>
+            @page {
+              size: A4;
+              margin: 20mm;
+            }
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+              padding: 40px;
+              background: white;
+              color: #1a1a1a;
+              line-height: 1.6;
+            }
+            ${styles}
+            @media print {
+              .invoice-overlay {
+                background: white;
+                padding: 0;
+              }
+              .invoice-container {
+                max-width: 100%;
+                max-height: 100%;
+                border: none;
+                box-shadow: none;
+                border-radius: 0;
+                margin: 0;
+                padding: 0;
+              }
+              .invoice-header__actions {
+                display: none;
+              }
+              .invoice-watermark {
+                opacity: 0.05;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          ${printContent}
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.focus();
+        printWindow.print();
+      }, 250);
+    };
+  };
+
+  private calculateAmounts(): {
+    bouquetPrice: number;
+    deliveryPrice: number;
+    downPayment: number;
+    additionalPayment: number;
+    totalAmount: number;
+    remainingAmount: number;
+  } {
+    const { order } = this.props;
+    const bouquetPrice = order.bouquetPrice || 0;
+    const deliveryPrice = order.deliveryPrice || 0;
+    const downPayment = order.downPaymentAmount || 0;
+    const additionalPayment = order.additionalPayment || 0;
+    const totalAmount = order.totalAmount || bouquetPrice + deliveryPrice;
+    const remainingAmount = totalAmount - downPayment - additionalPayment;
+
+    return {
+      bouquetPrice,
+      deliveryPrice,
+      downPayment,
+      additionalPayment,
+      totalAmount,
+      remainingAmount,
+    };
+  }
+
+  render(): React.ReactNode {
+    const { order, onClose } = this.props;
+    const invoiceNumber = this.generateInvoiceNumber(order._id, order.createdAt);
+    const orderReference = this.generateOrderReference(order._id);
+    const amounts = this.calculateAmounts();
+
+    return (
+      <div className="invoice-overlay" onClick={onClose}>
+        <div
+          className="invoice-container"
+          onClick={(e) => e.stopPropagation()}
+          ref={this.invoiceRef}
+        >
+          {/* Header */}
+          <div className="invoice-header">
+            <div className="invoice-header__top">
+              <div className="invoice-header__brand">
+                <h1 className="invoice-brand__name">{STORE_PROFILE.brand.displayName}</h1>
+                <p className="invoice-brand__tagline">{STORE_PROFILE.brand.tagline}</p>
+              </div>
+              <div className="invoice-header__actions">
+                <button
+                  type="button"
+                  className="invoice-btn invoice-btn--download"
+                  onClick={this.handleDownloadPDF}
+                  aria-label="Download invoice as PDF"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <polyline
+                      points="7 10 12 15 17 10"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <line
+                      x1="12"
+                      y1="15"
+                      x2="12"
+                      y2="3"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  Download PDF
+                </button>
+                <button
+                  type="button"
+                  className="invoice-btn invoice-btn--print"
+                  onClick={this.handlePrint}
+                  aria-label="Print invoice"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M6 14h12v8H6z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  Print
+                </button>
+                {onClose && (
+                  <button
+                    type="button"
+                    className="invoice-btn invoice-btn--close"
+                    onClick={onClose}
+                    aria-label="Close invoice"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M18 6L6 18M6 6l12 12"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="invoice-header__divider" />
+          </div>
+
+          {/* Invoice Content */}
+          <div className="invoice-content">
+            {/* Watermark */}
+            <div className="invoice-watermark">INVOICE</div>
+
+            {/* Invoice Title */}
+            <div className="invoice-title-section">
+              <div className="invoice-title-wrapper">
+                <h2 className="invoice-title">INVOICE</h2>
+                <p className="invoice-subtitle">Official Invoice Document</p>
+              </div>
+              <div className="invoice-meta">
+                <div className="invoice-meta__item">
+                  <span className="invoice-meta__label">Invoice No.</span>
+                  <span className="invoice-meta__value">{invoiceNumber}</span>
+                </div>
+                <div className="invoice-meta__item">
+                  <span className="invoice-meta__label">Order Ref.</span>
+                  <span className="invoice-meta__value">{orderReference}</span>
+                </div>
+                <div className="invoice-meta__item">
+                  <span className="invoice-meta__label">Tanggal</span>
+                  <span className="invoice-meta__value">{this.formatDate(order.createdAt)}</span>
+                </div>
+                <div className="invoice-meta__item">
+                  <span className="invoice-meta__label">Due Date</span>
+                  <span className="invoice-meta__value">
+                    {this.formatDate(order.deliveryAt || order.createdAt)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Customer & Store Info */}
+            <div className="invoice-info-grid">
+              <div className="invoice-info-card">
+                <h3 className="invoice-info-card__title">Bill To</h3>
+                <div className="invoice-info-card__content">
+                  <p className="invoice-info-card__name">{order.buyerName}</p>
+                  <p className="invoice-info-card__detail">{order.phoneNumber}</p>
+                  <p className="invoice-info-card__detail">{order.address}</p>
+                </div>
+              </div>
+              <div className="invoice-info-card">
+                <h3 className="invoice-info-card__title">From</h3>
+                <div className="invoice-info-card__content">
+                  <p className="invoice-info-card__name">{STORE_PROFILE.brand.displayName}</p>
+                  <p className="invoice-info-card__detail">{STORE_PROFILE.location.streetAddress}</p>
+                  <p className="invoice-info-card__detail">
+                    {STORE_PROFILE.location.locality}, {STORE_PROFILE.location.region}{" "}
+                    {STORE_PROFILE.location.postalCode}
+                  </p>
+                  <p className="invoice-info-card__detail">{STORE_PROFILE.contact.phoneDisplay}</p>
+                  <p className="invoice-info-card__detail">{STORE_PROFILE.contact.email}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Order Details */}
+            <div className="invoice-details">
+              <h3 className="invoice-details__title">Order Details</h3>
+              <div className="invoice-table">
+                <div className="invoice-table__header">
+                  <div className="invoice-table__col invoice-table__col--item">Item</div>
+                  <div className="invoice-table__col invoice-table__col--qty">Qty</div>
+                  <div className="invoice-table__col invoice-table__col--price">Price</div>
+                  <div className="invoice-table__col invoice-table__col--total">Total</div>
+                </div>
+                <div className="invoice-table__row">
+                  <div className="invoice-table__col invoice-table__col--item">
+                    <div className="invoice-item">
+                      <span className="invoice-item__name">{order.bouquetName}</span>
+                      <span className="invoice-item__id">ID: {order.bouquetId.slice(-8)}</span>
+                    </div>
+                  </div>
+                  <div className="invoice-table__col invoice-table__col--qty">1</div>
+                  <div className="invoice-table__col invoice-table__col--price">
+                    {formatIDR(amounts.bouquetPrice)}
+                  </div>
+                  <div className="invoice-table__col invoice-table__col--total">
+                    {formatIDR(amounts.bouquetPrice)}
+                  </div>
+                </div>
+                {amounts.deliveryPrice > 0 && (
+                  <div className="invoice-table__row invoice-table__row--subtotal">
+                    <div className="invoice-table__col invoice-table__col--item">
+                      <span className="invoice-item__name">Biaya Pengiriman</span>
+                    </div>
+                    <div className="invoice-table__col invoice-table__col--qty">—</div>
+                    <div className="invoice-table__col invoice-table__col--price">
+                      {formatIDR(amounts.deliveryPrice)}
+                    </div>
+                    <div className="invoice-table__col invoice-table__col--total">
+                      {formatIDR(amounts.deliveryPrice)}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Summary */}
+            <div className="invoice-summary">
+              <div className="invoice-summary__row">
+                <span className="invoice-summary__label">Subtotal</span>
+                <span className="invoice-summary__value">
+                  {formatIDR(amounts.bouquetPrice + amounts.deliveryPrice)}
+                </span>
+              </div>
+              {amounts.downPayment > 0 && (
+                <div className="invoice-summary__row invoice-summary__row--payment">
+                  <span className="invoice-summary__label">Down Payment</span>
+                  <span className="invoice-summary__value invoice-summary__value--negative">
+                    -{formatIDR(amounts.downPayment)}
+                  </span>
+                </div>
+              )}
+              {amounts.additionalPayment > 0 && (
+                <div className="invoice-summary__row invoice-summary__row--payment">
+                  <span className="invoice-summary__label">Additional Payment</span>
+                  <span className="invoice-summary__value invoice-summary__value--negative">
+                    -{formatIDR(amounts.additionalPayment)}
+                  </span>
+                </div>
+              )}
+              <div className="invoice-summary__row invoice-summary__row--total">
+                <span className="invoice-summary__label">Total Amount</span>
+                <span className="invoice-summary__value invoice-summary__value--total">
+                  {formatIDR(amounts.totalAmount)}
+                </span>
+              </div>
+              {amounts.remainingAmount > 0 && (
+                <div className="invoice-summary__row invoice-summary__row--remaining">
+                  <span className="invoice-summary__label">Remaining</span>
+                  <span className="invoice-summary__value invoice-summary__value--remaining">
+                    {formatIDR(amounts.remainingAmount)}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Payment & Status Info */}
+            <div className="invoice-status-grid">
+              <div className="invoice-status-card">
+                <h4 className="invoice-status-card__title">Payment Status</h4>
+                <div className="invoice-status-badge invoice-status-badge--payment">
+                  {this.getPaymentStatusLabel(order.paymentStatus)}
+                </div>
+                {order.paymentMethod && (
+                  <p className="invoice-status-card__detail">
+                    Method: {this.getPaymentMethodLabel(order.paymentMethod)}
+                  </p>
+                )}
+                {amounts.downPayment > 0 && (
+                  <p className="invoice-status-card__detail">DP: {formatIDR(amounts.downPayment)}</p>
+                )}
+                {amounts.additionalPayment > 0 && (
+                  <p className="invoice-status-card__detail">
+                    Additional: {formatIDR(amounts.additionalPayment)}
+                  </p>
+                )}
+              </div>
+              <div className="invoice-status-card">
+                <h4 className="invoice-status-card__title">Order Status</h4>
+                <div className="invoice-status-badge invoice-status-badge--order">
+                  {this.getStatusLabel(order.orderStatus)}
+                </div>
+                {order.deliveryAt && (
+                  <p className="invoice-status-card__detail">
+                    Delivery: {this.formatDate(order.deliveryAt)}
+                  </p>
+                )}
+              </div>
+              <div className="invoice-status-card">
+                <h4 className="invoice-status-card__title">Payment Summary</h4>
+                <div className="invoice-payment-summary">
+                  <div className="invoice-payment-summary__row">
+                    <span>Total Amount</span>
+                    <span className="invoice-payment-summary__value">
+                      {formatIDR(amounts.totalAmount)}
+                    </span>
+                  </div>
+                  {(amounts.downPayment > 0 || amounts.additionalPayment > 0) && (
+                    <div className="invoice-payment-summary__row">
+                      <span>Paid</span>
+                      <span className="invoice-payment-summary__value invoice-payment-summary__value--paid">
+                        {formatIDR(amounts.downPayment + amounts.additionalPayment)}
+                      </span>
+                    </div>
+                  )}
+                  {amounts.remainingAmount > 0 && (
+                    <div className="invoice-payment-summary__row invoice-payment-summary__row--remaining">
+                      <span>Remaining</span>
+                      <span className="invoice-payment-summary__value invoice-payment-summary__value--remaining">
+                        {formatIDR(amounts.remainingAmount)}
+                      </span>
+                    </div>
+                  )}
+                  {amounts.remainingAmount <= 0 && (
+                    <div className="invoice-payment-summary__row invoice-payment-summary__row--paid">
+                      <span>Status</span>
+                      <span className="invoice-payment-summary__value invoice-payment-summary__value--paid">
+                        Fully Paid
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Instructions */}
+            {amounts.remainingAmount > 0 && (
+              <div className="invoice-payment-instructions">
+                <h4 className="invoice-payment-instructions__title">Payment Instructions</h4>
+                <div className="invoice-payment-instructions__content">
+                  <p>
+                    Please complete your payment of <strong>{formatIDR(amounts.remainingAmount)}</strong> to
+                    confirm your order.
+                  </p>
+                  <p>Payment can be made via:</p>
+                  <ul>
+                    <li>Bank Transfer: {STORE_PROFILE.contact.phoneDisplay}</li>
+                    <li>E-Wallet / QRIS: Contact us for payment details</li>
+                    <li>Cash on Delivery: Available for local deliveries</li>
+                  </ul>
+                  <p className="invoice-payment-instructions__note">
+                    <strong>Note:</strong> Please include invoice number <strong>{invoiceNumber}</strong> in
+                    your payment reference.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Terms & Conditions */}
+            <div className="invoice-terms">
+              <h4 className="invoice-terms__title">Terms & Conditions</h4>
+              <div className="invoice-terms__content">
+                <ul>
+                  <li>
+                    All prices are in Indonesian Rupiah (IDR) and include applicable taxes.
+                  </li>
+                  <li>Payment must be completed before delivery unless otherwise agreed.</li>
+                  <li>
+                    Orders are subject to product availability. We reserve the right to substitute items of
+                    equal or greater value.
+                  </li>
+                  <li>Delivery dates are estimates and may vary based on location and availability.</li>
+                  <li>
+                    For cancellations, please contact us at least 24 hours before the scheduled delivery date.
+                  </li>
+                  <li>This invoice is valid for 30 days from the date of issue.</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="invoice-footer">
+              <div className="invoice-footer__divider" />
+              <p className="invoice-footer__text">
+                Terima kasih telah mempercayai {STORE_PROFILE.brand.displayName} untuk kebutuhan hadiah
+                Anda.
+              </p>
+              <p className="invoice-footer__text invoice-footer__text--small">
+                Invoice ini dibuat secara otomatis pada {this.formatDateTime(order.createdAt)}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+export default InvoiceComponent;
+

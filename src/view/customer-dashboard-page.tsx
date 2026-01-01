@@ -7,10 +7,10 @@ import React from "react";
 import { Link, Navigate } from "react-router-dom";
 import "../styles/CustomerDashboardPage.css";
 import { formatIDR } from "../utils/money";
-import EmptyState from "../components/EmptyState";
+import EmptyState from "../components/common/EmptyState";
 import StatCard from "../components/common/StatCard";
 import TabNavigation from "../components/common/TabNavigation";
-import LuxuryButton from "../components/LuxuryButton";
+import LuxuryButton from "../components/buttons/LuxuryButton";
 import type {
   DashboardUser,
   DashboardStats,

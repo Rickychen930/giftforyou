@@ -1,4 +1,9 @@
-import React, { useState, FormEvent } from "react";
+/**
+ * Catalog Search Component (OOP)
+ * Class-based component following SOLID principles
+ */
+
+import React, { Component, FormEvent } from "react";
 import "../../styles/catalog/CatalogSearch.css";
 import { SearchIcon } from "../icons/UIIcons";
 import { CloseIcon } from "../icons/UIIcons";
@@ -11,25 +16,41 @@ export interface CatalogSearchProps {
   disabled?: boolean;
 }
 
-const CatalogSearch: React.FC<CatalogSearchProps> = ({
-  value = "",
-  placeholder = "Cari bouquet, koleksi, momen...",
-  onSearch,
-  onClear,
-  disabled = false,
-}) => {
-  const [query, setQuery] = useState(value);
+interface CatalogSearchState {
+  query: string;
+}
 
-  React.useEffect(() => {
-    setQuery(value);
-  }, [value]);
+/**
+ * Catalog Search Component
+ * Class-based component for catalog search
+ */
+class CatalogSearch extends Component<CatalogSearchProps, CatalogSearchState> {
+  private baseClass: string = "catalog-search";
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  constructor(props: CatalogSearchProps) {
+    super(props);
+    this.state = {
+      query: props.value || "",
+    };
+  }
+
+  componentDidUpdate(prevProps: CatalogSearchProps): void {
+    if (this.props.value !== prevProps.value) {
+      this.setState({ query: this.props.value || "" });
+    }
+  }
+
+  private handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    this.setState({ query: e.target.value });
+  };
+
+  private handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const searchQuery = (formData.get("q") as string)?.trim() || "";
-    if (onSearch) {
-      onSearch(searchQuery);
+
+    if (this.props.onSearch) {
+      this.props.onSearch(searchQuery);
     } else {
       // Fallback: update URL directly
       const params = new URLSearchParams(window.location.search);
@@ -42,42 +63,48 @@ const CatalogSearch: React.FC<CatalogSearchProps> = ({
     }
   };
 
-  const handleClear = () => {
-    setQuery("");
-    onClear?.();
+  private handleClear = (): void => {
+    this.setState({ query: "" });
+    if (this.props.onClear) {
+      this.props.onClear();
+    }
   };
 
-  return (
-    <div className="catalog-search">
-      <form className="catalog-search__form" onSubmit={handleSubmit}>
-        <div className="catalog-search__wrapper">
-          <SearchIcon className="catalog-search__icon" width={20} height={20} />
-          <input
-            type="search"
-            name="q"
-            className="catalog-search__input"
-            placeholder={placeholder}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            aria-label="Cari bouquet"
-            disabled={disabled}
-          />
-          {query && (
-            <button
-              type="button"
-              className="catalog-search__clear"
-              onClick={handleClear}
-              aria-label="Hapus pencarian"
+  render(): React.ReactNode {
+    const { placeholder = "Cari bouquet, koleksi, momen...", disabled = false } = this.props;
+    const { query } = this.state;
+
+    return (
+      <div className={this.baseClass}>
+        <form className={`${this.baseClass}__form`} onSubmit={this.handleSubmit}>
+          <div className={`${this.baseClass}__wrapper`}>
+            <SearchIcon className={`${this.baseClass}__icon`} width={20} height={20} />
+            <input
+              type="search"
+              name="q"
+              className={`${this.baseClass}__input`}
+              placeholder={placeholder}
+              value={query}
+              onChange={this.handleInputChange}
+              aria-label="Cari bouquet"
               disabled={disabled}
-            >
-              <CloseIcon width={16} height={16} />
-            </button>
-          )}
-        </div>
-      </form>
-    </div>
-  );
-};
+            />
+            {query && (
+              <button
+                type="button"
+                className={`${this.baseClass}__clear`}
+                onClick={this.handleClear}
+                aria-label="Hapus pencarian"
+                disabled={disabled}
+              >
+                <CloseIcon width={16} height={16} />
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+    );
+  }
+}
 
 export default CatalogSearch;
-

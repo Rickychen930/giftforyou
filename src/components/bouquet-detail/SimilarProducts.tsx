@@ -1,4 +1,9 @@
-import React from "react";
+/**
+ * Similar Products Component (OOP)
+ * Class-based component following SOLID principles
+ */
+
+import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import "../../styles/bouquet-detail/SimilarProducts.css";
 import { formatIDR } from "../../utils/money";
@@ -10,44 +15,62 @@ interface SimilarProductsProps {
   bouquets: Bouquet[];
 }
 
-const SimilarProducts: React.FC<SimilarProductsProps> = ({ bouquets }) => {
-  if (bouquets.length === 0) return null;
+interface SimilarProductsState {
+  // No state needed, but keeping for consistency
+}
 
-  return (
-    <section className="similar-products">
-      <h2 className="similar-products__title">Produk Serupa</h2>
-      <div className="similar-products__grid">
-        {bouquets.map((bouquet) => (
-          <Link
-            key={bouquet._id}
-            to={`/bouquet/${bouquet._id}`}
-            className="similar-products__card"
-            aria-label={`Lihat detail ${bouquet.name}`}
-          >
-            <div className="similar-products__image-wrapper">
-              <ProductImage
-                image={bouquet.image}
-                alt={bouquet.name}
-                aspectRatio="4 / 5"
-                showLightbox={false}
-                loading="lazy"
-                className="similar-products__image"
-              />
-              <StatusBadge
-                type={bouquet.status === "ready" ? "ready" : "preorder"}
-                size="sm"
-                className="similar-products__badge"
-              />
-            </div>
-            <div className="similar-products__body">
-              <h3 className="similar-products__name">{bouquet.name}</h3>
-              <p className="similar-products__price">{formatIDR(bouquet.price)}</p>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </section>
-  );
-};
+/**
+ * Similar Products Component
+ * Class-based component for similar products display
+ */
+class SimilarProducts extends Component<SimilarProductsProps, SimilarProductsState> {
+  private baseClass: string = "similar-products";
+
+  private renderProductCard(bouquet: Bouquet): React.ReactNode {
+    return (
+      <Link
+        key={bouquet._id}
+        to={`/bouquet/${bouquet._id}`}
+        className={`${this.baseClass}__card`}
+        aria-label={`Lihat detail ${bouquet.name}`}
+      >
+        <div className={`${this.baseClass}__image-wrapper`}>
+          <ProductImage
+            image={bouquet.image}
+            alt={bouquet.name}
+            aspectRatio="4 / 5"
+            showLightbox={false}
+            loading="lazy"
+            className={`${this.baseClass}__image`}
+          />
+          <StatusBadge
+            type={bouquet.status === "ready" ? "ready" : "preorder"}
+            size="sm"
+            className={`${this.baseClass}__badge`}
+          />
+        </div>
+        <div className={`${this.baseClass}__body`}>
+          <h3 className={`${this.baseClass}__name`}>{bouquet.name}</h3>
+          <p className={`${this.baseClass}__price`}>{formatIDR(bouquet.price)}</p>
+        </div>
+      </Link>
+    );
+  }
+
+  render(): React.ReactNode {
+    const { bouquets } = this.props;
+
+    if (bouquets.length === 0) return null;
+
+    return (
+      <section className={this.baseClass}>
+        <h2 className={`${this.baseClass}__title`}>Produk Serupa</h2>
+        <div className={`${this.baseClass}__grid`}>
+          {bouquets.map((bouquet) => this.renderProductCard(bouquet))}
+        </div>
+      </section>
+    );
+  }
+}
 
 export default SimilarProducts;

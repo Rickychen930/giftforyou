@@ -1,9 +1,9 @@
 /**
- * Contact Info Item Component
- * Luxury and responsive contact information item
+ * Contact Info Item Component (OOP)
+ * Class-based component following SOLID principles
  */
 
-import React from "react";
+import React, { Component } from "react";
 import "../../styles/ContactInfoItem.css";
 
 interface ContactInfoItemProps {
@@ -14,45 +14,58 @@ interface ContactInfoItemProps {
   className?: string;
 }
 
+interface ContactInfoItemState {
+  // No state needed, but keeping for consistency
+}
+
 /**
  * Contact Info Item Component
- * Luxury styled contact information item
+ * Class-based component for contact information items
  */
-const ContactInfoItem: React.FC<ContactInfoItemProps> = ({
-  icon,
-  label,
-  value,
-  href,
-  className = "",
-}) => {
-  const content = (
-    <>
-      <div className="contactInfoItem__icon">{icon}</div>
-      <div className="contactInfoItem__content">
-        <span className="contactInfoItem__label">{label}</span>
-        <span className="contactInfoItem__value">{value}</span>
-      </div>
-    </>
-  );
+class ContactInfoItem extends Component<ContactInfoItemProps, ContactInfoItemState> {
+  private baseClass: string = "contactInfoItem";
 
-  if (href) {
+  private getClasses(): string {
+    const { href, className = "" } = this.props;
+    const linkClass = href ? `${this.baseClass}--link` : "";
+    return `${this.baseClass} ${linkClass} ${className}`.trim();
+  }
+
+  private renderContent(): React.ReactNode {
+    const { icon, label, value } = this.props;
+
     return (
-      <a
-        href={href}
-        className={`contactInfoItem contactInfoItem--link ${className}`}
-        aria-label={`${label} ${value}`}
-      >
-        {content}
-      </a>
+      <>
+        <div className={`${this.baseClass}__icon`}>{icon}</div>
+        <div className={`${this.baseClass}__content`}>
+          <span className={`${this.baseClass}__label`}>{label}</span>
+          <span className={`${this.baseClass}__value`}>{value}</span>
+        </div>
+      </>
     );
   }
 
-  return (
-    <div className={`contactInfoItem ${className}`}>
-      {content}
-    </div>
-  );
-};
+  render(): React.ReactNode {
+    const { href, label, value } = this.props;
+
+    if (href) {
+      return (
+        <a
+          href={href}
+          className={this.getClasses()}
+          aria-label={`${label} ${value}`}
+        >
+          {this.renderContent()}
+        </a>
+      );
+    }
+
+    return (
+      <div className={this.getClasses()}>
+        {this.renderContent()}
+      </div>
+    );
+  }
+}
 
 export default ContactInfoItem;
-

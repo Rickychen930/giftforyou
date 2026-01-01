@@ -8,8 +8,8 @@ import { Link } from "react-router-dom";
 import "../styles/CartPage.css";
 import { formatIDR } from "../utils/money";
 import type { CartItem } from "../utils/cart";
-import LuxuryButton from "../components/LuxuryButton";
-import EmptyState from "../components/EmptyState";
+import LuxuryButton from "../components/buttons/LuxuryButton";
+import EmptyState from "../components/common/EmptyState";
 import CartItemCard from "../components/common/CartItemCard";
 import SummaryCard from "../components/common/SummaryCard";
 

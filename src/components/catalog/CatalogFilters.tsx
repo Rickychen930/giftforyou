@@ -1,6 +1,11 @@
-import React, { useRef } from "react";
+/**
+ * Catalog Filters Component (OOP)
+ * Class-based component following SOLID principles
+ */
+
+import React, { Component, RefObject } from "react";
 import "../../styles/catalog/CatalogFilters.css";
-import FilterPanel from "../filter-panel-component";
+import FilterPanel from "../FilterPanel";
 
 export interface CatalogFiltersProps {
   priceRange: [number, number];
@@ -22,104 +27,124 @@ export interface CatalogFiltersProps {
   onFilterChange?: () => void;
 }
 
-const CatalogFilters: React.FC<CatalogFiltersProps> = ({
-  priceRange,
-  selectedTypes,
-  selectedSizes,
-  selectedCollections,
-  allTypes,
-  allSizes,
-  allCollections,
-  sortBy,
-  disabled = false,
-  onPriceChange,
-  onToggleFilter,
-  onClearFilter,
-  onSortChange,
-  onFilterChange,
-}) => {
-  const mobileFiltersRef = useRef<HTMLDetailsElement>(null);
+interface CatalogFiltersState {
+  // No state needed, but keeping for consistency
+}
 
-  const closeMobileFiltersIfNeeded = () => {
+/**
+ * Catalog Filters Component
+ * Class-based component for catalog filters
+ */
+class CatalogFilters extends Component<CatalogFiltersProps, CatalogFiltersState> {
+  private baseClass: string = "catalog-filters";
+  private mobileFiltersRef: RefObject<HTMLDetailsElement>;
+
+  constructor(props: CatalogFiltersProps) {
+    super(props);
+    this.mobileFiltersRef = React.createRef();
+  }
+
+  private closeMobileFiltersIfNeeded = (): void => {
     if (typeof window === "undefined") return;
-    const detailsEl = mobileFiltersRef.current;
+    const detailsEl = this.mobileFiltersRef.current;
     if (!detailsEl) return;
 
     const isMobile = window.matchMedia("(max-width: 860px)").matches;
     if (isMobile) {
       detailsEl.open = false;
-      onFilterChange?.();
+      if (this.props.onFilterChange) {
+        this.props.onFilterChange();
+      }
     }
   };
 
-  const handleToggleFilter = (
+  private handleToggleFilter = (
     key: "selectedTypes" | "selectedSizes" | "selectedCollections",
     value: string
-  ) => {
-    onToggleFilter(key, value);
-    closeMobileFiltersIfNeeded();
+  ): void => {
+    this.props.onToggleFilter(key, value);
+    this.closeMobileFiltersIfNeeded();
   };
 
-  const handleClearFilter = (key: "selectedTypes" | "selectedSizes" | "selectedCollections") => {
-    onClearFilter(key);
-    closeMobileFiltersIfNeeded();
+  private handleClearFilter = (
+    key: "selectedTypes" | "selectedSizes" | "selectedCollections"
+  ): void => {
+    this.props.onClearFilter(key);
+    this.closeMobileFiltersIfNeeded();
   };
 
-  const handleSortChange = (value: string) => {
-    onSortChange(value);
-    closeMobileFiltersIfNeeded();
+  private handleSortChange = (value: string): void => {
+    this.props.onSortChange(value);
+    this.closeMobileFiltersIfNeeded();
   };
 
-  return (
-    <div className="catalog-filters" aria-label="Filter">
-      <details className="catalog-filters__mobile" ref={mobileFiltersRef}>
-        <summary className="catalog-filters__summary">Filter & Urutkan</summary>
-        <div className="catalog-filters__body">
-          <FilterPanel
-            embedded
-            hideHeader
-            priceRange={priceRange}
-            selectedTypes={selectedTypes}
-            selectedSizes={selectedSizes}
-            selectedCollections={selectedCollections}
-            allSizes={allSizes}
-            allTypes={allTypes}
-            allCollections={allCollections}
-            sortBy={sortBy}
-            disabled={disabled}
-            onPriceChange={onPriceChange}
-            onToggleFilter={handleToggleFilter}
-            onClearFilter={handleClearFilter}
-            onSortChange={handleSortChange}
-          />
-        </div>
-      </details>
+  render(): React.ReactNode {
+    const {
+      priceRange,
+      selectedTypes,
+      selectedSizes,
+      selectedCollections,
+      allTypes,
+      allSizes,
+      allCollections,
+      sortBy,
+      disabled = false,
+      onPriceChange,
+      onToggleFilter,
+      onClearFilter,
+      onSortChange,
+    } = this.props;
 
-      <div className="catalog-filters__desktop">
-        <div className="catalog-filters__panel">
-          <FilterPanel
-            embedded
-            hideHeader
-            variant="topbar"
-            priceRange={priceRange}
-            selectedTypes={selectedTypes}
-            selectedSizes={selectedSizes}
-            selectedCollections={selectedCollections}
-            allSizes={allSizes}
-            allTypes={allTypes}
-            allCollections={allCollections}
-            sortBy={sortBy}
-            disabled={disabled}
-            onPriceChange={onPriceChange}
-            onToggleFilter={onToggleFilter}
-            onClearFilter={onClearFilter}
-            onSortChange={onSortChange}
-          />
+    return (
+      <div className={this.baseClass} aria-label="Filter">
+        <details className={`${this.baseClass}__mobile`} ref={this.mobileFiltersRef}>
+          <summary className={`${this.baseClass}__summary`}>Filter & Urutkan</summary>
+          <div className={`${this.baseClass}__body`}>
+            <FilterPanel
+              embedded
+              hideHeader
+              priceRange={priceRange}
+              selectedTypes={selectedTypes}
+              selectedSizes={selectedSizes}
+              selectedCollections={selectedCollections}
+              allSizes={allSizes}
+              allTypes={allTypes}
+              allCollections={allCollections}
+              sortBy={sortBy}
+              disabled={disabled}
+              onPriceChange={onPriceChange}
+              onToggleFilter={this.handleToggleFilter}
+              onClearFilter={this.handleClearFilter}
+              onSortChange={this.handleSortChange}
+            />
+          </div>
+        </details>
+
+        <div className={`${this.baseClass}__desktop`}>
+          <div className={`${this.baseClass}__panel`}>
+            <FilterPanel
+              embedded
+              hideHeader
+              variant="topbar"
+              priceRange={priceRange}
+              selectedTypes={selectedTypes}
+              selectedSizes={selectedSizes}
+              selectedCollections={selectedCollections}
+              allSizes={allSizes}
+              allTypes={allTypes}
+              allCollections={allCollections}
+              sortBy={sortBy}
+              disabled={disabled}
+              onPriceChange={onPriceChange}
+              onToggleFilter={onToggleFilter}
+              onClearFilter={onClearFilter}
+              onSortChange={onSortChange}
+            />
+          </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  }
+}
 
 export default CatalogFilters;
-

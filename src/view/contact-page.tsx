@@ -13,7 +13,7 @@ import { PhoneIcon, EmailIcon, ClockIcon } from "../components/icons/UIIcons";
 import ContactInfoItem from "../components/common/ContactInfoItem";
 import FormField from "../components/common/FormField";
 import AlertMessage from "../components/common/AlertMessage";
-import LuxuryButton from "../components/LuxuryButton";
+import LuxuryButton from "../components/buttons/LuxuryButton";
 import WhatsAppButton from "../components/common/WhatsAppButton";
 
 interface ContactPageViewProps {

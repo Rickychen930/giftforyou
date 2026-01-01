@@ -1,4 +1,4 @@
-import { type Toast } from "../components/LuxuryToast";
+import { type Toast } from "../components/common/Toast";
 
 // Global toast state management
 let toastListeners: Array<(toasts: Toast[]) => void> = [];

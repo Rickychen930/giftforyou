@@ -6,7 +6,7 @@
 import React from "react";
 import "../styles/OrderHistoryPage.css";
 import type { OrderHistoryItem } from "../models/order-history-page-model";
-import EmptyState from "../components/EmptyState";
+import EmptyState from "../components/common/EmptyState";
 import OrderHistoryCard from "../components/common/OrderHistoryCard";
 import BackLink from "../components/common/BackLink";
 

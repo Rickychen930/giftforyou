@@ -33,5 +33,6 @@
     // Skip lib check untuk kecepatan build
     "skipLibCheck": true
   },
-  "include": ["src", "server", "server/server.ts"]
+  "include": ["src", "server", "server/server.ts"],
+  "exclude": ["src/__tests__", "src/archive", "node_modules", "dist"]
 }

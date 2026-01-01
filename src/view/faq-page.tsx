@@ -13,7 +13,7 @@ import SearchInput from "../components/common/SearchInput";
 import CategoryFilter from "../components/common/CategoryFilter";
 import HelpSection from "../components/common/HelpSection";
 import WhatsAppButton from "../components/common/WhatsAppButton";
-import LuxuryButton from "../components/LuxuryButton";
+import LuxuryButton from "../components/buttons/LuxuryButton";
 
 interface FAQPageViewProps {
   faqs: FAQItem[];

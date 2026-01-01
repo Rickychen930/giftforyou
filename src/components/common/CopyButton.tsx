@@ -1,4 +1,9 @@
-import React, { useState, useEffect } from "react";
+/**
+ * Copy Button Component (OOP)
+ * Class-based component following SOLID principles
+ */
+
+import React, { Component } from "react";
 import "../../styles/common/CopyButton.css";
 
 export interface CopyButtonProps {
@@ -10,51 +15,73 @@ export interface CopyButtonProps {
   size?: "sm" | "md" | "lg";
 }
 
-const CopyButton: React.FC<CopyButtonProps> = ({
-  text,
-  label = "Salin",
-  copiedLabel = "Tersalin",
-  onCopy,
-  className = "",
-  size = "md",
-}) => {
-  const [copied, setCopied] = useState(false);
-  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+interface CopyButtonState {
+  copied: boolean;
+  timeoutId: NodeJS.Timeout | null;
+}
 
-  useEffect(() => {
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
+/**
+ * Copy Button Component
+ * Class-based component for copying text to clipboard
+ */
+class CopyButton extends Component<CopyButtonProps, CopyButtonState> {
+  private baseClass: string = "copy-button";
+
+  constructor(props: CopyButtonProps) {
+    super(props);
+    this.state = {
+      copied: false,
+      timeoutId: null,
     };
-  }, [timeoutId]);
+  }
 
-  const handleCopy = async (): Promise<void> => {
+  componentWillUnmount(): void {
+    if (this.state.timeoutId) {
+      clearTimeout(this.state.timeoutId);
+    }
+  }
+
+  private getClasses(): string {
+    const { size = "md", className = "" } = this.props;
+    const { copied } = this.state;
+    const copiedClass = copied ? `${this.baseClass}--copied` : "";
+    return `${this.baseClass} ${this.baseClass}--${size} ${copiedClass} ${className}`.trim();
+  }
+
+  private setCopiedState = (): void => {
+    const { onCopy, copiedLabel = "Tersalin" } = this.props;
+    const { timeoutId } = this.state;
+
+    this.setState({ copied: true });
+    onCopy?.();
+
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+
+    const newTimeoutId = setTimeout(() => {
+      this.setState({ copied: false });
+    }, 1800);
+
+    this.setState({ timeoutId: newTimeoutId });
+  };
+
+  private handleCopy = async (): Promise<void> => {
+    const { text } = this.props;
     const trimmed = String(text ?? "").trim();
     if (!trimmed) return;
-
-    const setCopiedState = () => {
-      setCopied(true);
-      onCopy?.();
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      const newTimeoutId = setTimeout(() => {
-        setCopied(false);
-      }, 1800);
-      setTimeoutId(newTimeoutId);
-    };
 
     try {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(trimmed);
-        setCopiedState();
+        this.setCopiedState();
         return;
       }
     } catch {
       // fall back below
     }
 
+    // Fallback for older browsers
     const textarea = document.createElement("textarea");
     textarea.value = trimmed;
     textarea.setAttribute("readonly", "true");
@@ -66,20 +93,16 @@ const CopyButton: React.FC<CopyButtonProps> = ({
 
     try {
       const ok = document.execCommand("copy");
-      if (ok) setCopiedState();
+      if (ok) this.setCopiedState();
     } finally {
       document.body.removeChild(textarea);
     }
   };
 
-  return (
-    <button
-      type="button"
-      className={`copy-button copy-button--${size} ${copied ? "copy-button--copied" : ""} ${className}`}
-      onClick={handleCopy}
-      aria-label={copied ? copiedLabel : label}
-      title={copied ? copiedLabel : label}
-    >
+  private renderIcon(): React.ReactNode {
+    const { copied } = this.state;
+
+    return (
       <svg
         width="16"
         height="16"
@@ -98,10 +121,26 @@ const CopyButton: React.FC<CopyButtonProps> = ({
           </>
         )}
       </svg>
-      <span className="copy-button__text">{copied ? copiedLabel : label}</span>
-    </button>
-  );
-};
+    );
+  }
+
+  render(): React.ReactNode {
+    const { label = "Salin", copiedLabel = "Tersalin" } = this.props;
+    const { copied } = this.state;
+
+    return (
+      <button
+        type="button"
+        className={this.getClasses()}
+        onClick={this.handleCopy}
+        aria-label={copied ? copiedLabel : label}
+        title={copied ? copiedLabel : label}
+      >
+        {this.renderIcon()}
+        <span className={`${this.baseClass}__text`}>{copied ? copiedLabel : label}</span>
+      </button>
+    );
+  }
+}
 
 export default CopyButton;
-

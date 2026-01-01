@@ -1,4 +1,9 @@
-import React from "react";
+/**
+ * Hero Navigation Component (OOP)
+ * Class-based component following SOLID principles
+ */
+
+import React, { Component } from "react";
 import "../../styles/hero/HeroNavigation.css";
 import type { Swiper as SwiperType } from "swiper";
 
@@ -10,31 +15,39 @@ export interface HeroNavigationProps {
   onBlur?: () => void;
 }
 
-const HeroNavigation: React.FC<HeroNavigationProps> = ({
-  swiperInstance,
-  onPrev,
-  onNext,
-  onFocus,
-  onBlur,
-}) => {
-  const handlePrev = () => {
+interface HeroNavigationState {
+  // No state needed, but keeping for consistency
+}
+
+/**
+ * Hero Navigation Component
+ * Class-based component for hero slider navigation buttons
+ */
+class HeroNavigation extends Component<HeroNavigationProps, HeroNavigationState> {
+  private baseClass: string = "hero-nav";
+
+  private handlePrev = (): void => {
+    const { swiperInstance, onPrev } = this.props;
     swiperInstance?.slidePrev();
     onPrev?.();
   };
 
-  const handleNext = () => {
+  private handleNext = (): void => {
+    const { swiperInstance, onNext } = this.props;
     swiperInstance?.slideNext();
     onNext?.();
   };
 
-  return (
-    <>
+  private renderPrevButton(): React.ReactNode {
+    const { onFocus, onBlur } = this.props;
+
+    return (
       <button
-        className="hero-nav hero-slider__nav--prev"
+        className={`${this.baseClass} hero-slider__nav--prev`}
         aria-label="Previous slide"
         type="button"
         title="Previous slide (Left Arrow)"
-        onClick={handlePrev}
+        onClick={this.handlePrev}
         onFocus={onFocus}
         onBlur={onBlur}
       >
@@ -55,12 +68,19 @@ const HeroNavigation: React.FC<HeroNavigationProps> = ({
           />
         </svg>
       </button>
+    );
+  }
+
+  private renderNextButton(): React.ReactNode {
+    const { onFocus, onBlur } = this.props;
+
+    return (
       <button
-        className="hero-nav hero-slider__nav--next"
+        className={`${this.baseClass} hero-slider__nav--next`}
         aria-label="Next slide"
         type="button"
         title="Next slide (Right Arrow)"
-        onClick={handleNext}
+        onClick={this.handleNext}
         onFocus={onFocus}
         onBlur={onBlur}
       >
@@ -81,9 +101,17 @@ const HeroNavigation: React.FC<HeroNavigationProps> = ({
           />
         </svg>
       </button>
-    </>
-  );
-};
+    );
+  }
+
+  render(): React.ReactNode {
+    return (
+      <>
+        {this.renderPrevButton()}
+        {this.renderNextButton()}
+      </>
+    );
+  }
+}
 
 export default HeroNavigation;
-
