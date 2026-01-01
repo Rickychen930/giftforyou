@@ -36,7 +36,7 @@ class BouquetEditorView extends Component<Props> {
 
   // ==================== Header Section ====================
   private renderHeader(): React.ReactNode {
-    const { state, getters, handlers, refs } = this.getControllerState();
+    const { state, getters } = this.getControllerState();
     const { form } = state;
 
     return (
@@ -267,10 +267,9 @@ class BouquetEditorView extends Component<Props> {
 
   // ==================== Image Section ====================
   private renderImageSection(): React.ReactNode {
-    const { state, getters, handlers } = this.getControllerState();
-    const { preview, file, isImageLoading, isDraggingImage, imageDimensions } =
-      state;
+    const { state, getters } = this.getControllerState();
     const { previewUrl } = getters;
+    const { imageDimensions } = state;
 
     return (
       <div className="becImage">
@@ -416,7 +415,7 @@ class BouquetEditorView extends Component<Props> {
 
   // ==================== Form Fields ====================
   private renderFormFields(): React.ReactNode {
-    const { state, handlers, getters, refs } = this.getControllerState();
+    const { state, handlers, refs } = this.getControllerState();
     const {
       form,
       fieldErrors,
@@ -426,11 +425,6 @@ class BouquetEditorView extends Component<Props> {
       typeOptions,
       occasionOptions,
       flowerOptions,
-      stockLevelOptions,
-      file,
-      imageDimensions,
-      isImageLoading,
-      isDraggingImage,
     } = state;
     const { collections } = this.props.controller.props;
 

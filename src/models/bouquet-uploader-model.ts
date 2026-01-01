@@ -2,7 +2,6 @@
 // Business logic model for bouquet uploader form
 // Reuses code from bouquet-editor-model and adds upload-specific logic
 
-import type { BouquetSize } from "../constants/bouquet-constants";
 import {
   validateField,
   validatePenandaInput,

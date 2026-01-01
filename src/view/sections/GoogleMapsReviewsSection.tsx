@@ -37,7 +37,6 @@ class GoogleMapsReviewsSection extends Component<
   private baseClass: string = "googleMapsReviews";
 
   private getDefaultReviews(): Review[] {
-    const { placeName = "GiftForYou.idn" } = this.props;
     return [
       {
         id: "1",
