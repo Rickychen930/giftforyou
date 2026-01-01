@@ -8,7 +8,7 @@ import { BaseModal, BaseModalProps } from "../base/BaseModal";
 import { formatIDR } from "../../utils/money";
 import type { CartItem } from "../../utils/cart";
 import { calculateBulkDiscount } from "../../utils/bulk-discount";
-import LuxuryButton from "../LuxuryButton";
+import LuxuryButton from "../buttons/LuxuryButton";
 import "../../styles/OrderSummaryModal.css";
 
 interface OrderSummaryModalProps extends BaseModalProps {

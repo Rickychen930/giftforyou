@@ -5,7 +5,7 @@
 
 import React from "react";
 import { BaseCard, BaseCardProps } from "../base/BaseCard";
-import LuxuryTooltip from "../LuxuryTooltip";
+import LuxuryTooltip from "../common/LuxuryTooltip";
 import "../../styles/StatCard.css";
 
 interface StatCardProps extends BaseCardProps {

@@ -166,22 +166,24 @@ export class BouquetUploaderController extends Component<Props, State> {
   private loadDraftSilently(): void {
     const draft = loadDraft();
     if (draft) {
-      this.setState({
+      this.setState((prevState) => ({
+        ...prevState,
         ...draft,
         hasDraft: true,
         fieldErrors: {},
-      });
+      }));
     }
   }
 
   private loadDraftWithMessage = (): void => {
     const draft = loadDraft();
     if (draft) {
-      this.setState({
+      this.setState((prevState) => ({
+        ...prevState,
         ...draft,
         hasDraft: true,
         fieldErrors: {},
-      });
+      }));
       this.setMessage("Draft berhasil dimuat.", "success");
       
       if (this.scrollTimeout) {

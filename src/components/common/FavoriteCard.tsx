@@ -7,7 +7,7 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import { formatIDR } from "../../utils/money";
 import { buildImageUrl } from "../../utils/image-utils";
-import LuxuryButton from "../LuxuryButton";
+import LuxuryButton from "../buttons/LuxuryButton";
 import IconButton from "./IconButton";
 import "../../styles/FavoriteCard.css";
 

@@ -4,7 +4,7 @@
  */
 
 import React, { Component } from "react";
-import LuxuryButton from "../LuxuryButton";
+import LuxuryButton from "../buttons/LuxuryButton";
 import "../../styles/WhatsAppButton.css";
 
 interface WhatsAppButtonProps {

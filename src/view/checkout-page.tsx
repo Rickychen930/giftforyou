@@ -18,7 +18,7 @@ import OrderSummaryModal from "../components/modals/OrderSummaryModal";
 import CheckoutItem from "../components/common/CheckoutItem";
 import FormField from "../components/common/FormField";
 import RadioGroup from "../components/common/RadioGroup";
-import TextareaWithCounter from "../components/common/TextareaWithCounter";
+import TextareaWithCounter from "../components/inputs/TextareaWithCounter";
 import SummaryCard from "../components/common/SummaryCard";
 
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
@@ -293,7 +293,7 @@ const CheckoutPageView: React.FC<CheckoutPageViewProps> = ({
                   rows={3}
                   placeholder="Tulis pesan untuk kartu ucapan..."
                   value={greetingCard}
-                  onChange={(e) => onFormChange("greetingCard", e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onFormChange("greetingCard", e.target.value)}
                   maxLength={200}
                   currentLength={greetingCard.length}
                   error={formErrors.greetingCard}
@@ -313,7 +313,7 @@ const CheckoutPageView: React.FC<CheckoutPageViewProps> = ({
                   rows={3}
                   placeholder="Instruksi khusus untuk pengiriman, permintaan khusus, dll..."
                   value={orderNotes}
-                  onChange={(e) => onFormChange("orderNotes", e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onFormChange("orderNotes", e.target.value)}
                   maxLength={500}
                   currentLength={orderNotes.length}
                   error={formErrors.orderNotes}

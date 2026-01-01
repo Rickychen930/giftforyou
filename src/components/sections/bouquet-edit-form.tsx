@@ -3,7 +3,7 @@ import type { Bouquet } from "../../models/domain/bouquet";
 import type { Collection } from "../../models/domain/collection";
 import "../../styles/BouquetEditForm.css";
 import BouquetEditor from "../bouquet-card-edit-component";
-import DropdownWithModal from "../DropdownWithModal";
+import DropdownWithModal from "../inputs/DropdownWithModal";
 
 interface Props {
   bouquet: Bouquet;

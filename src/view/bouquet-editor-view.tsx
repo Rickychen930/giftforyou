@@ -314,9 +314,9 @@ class BouquetEditorView extends Component<Props> {
     const {
       saveStatus,
       saveMessage,
-      validationError,
       touchedFields,
     } = state;
+    const { validationError } = getters;
 
     return (
       <>
@@ -1041,9 +1041,10 @@ class BouquetEditorView extends Component<Props> {
             }));
             const droppedFile = e.dataTransfer.files?.[0];
             if (droppedFile) {
-              await handlers.handleImageChange({
+              const syntheticEvent = {
                 target: { files: [droppedFile] },
-              } as React.ChangeEvent<HTMLInputElement>);
+              } as unknown as React.ChangeEvent<HTMLInputElement>;
+              await handlers.handleImageChange(syntheticEvent);
             }
           }}
         >
@@ -1127,7 +1128,8 @@ class BouquetEditorView extends Component<Props> {
   // ==================== Footer Section ====================
   private renderFooter(): React.ReactNode {
     const { state, handlers, getters } = this.getControllerState();
-    const { saving, validationError } = state;
+    const { saving } = state;
+    const { validationError } = getters;
     const { canSave, isDirty } = getters;
 
     return (

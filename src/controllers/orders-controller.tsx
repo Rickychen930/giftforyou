@@ -123,7 +123,7 @@ export class OrdersController extends Component<Props, State> {
   private bouquetSelectRef = React.createRef<HTMLSelectElement>();
   private drawerRef = React.createRef<HTMLDivElement>();
   private drawerCloseBtnRef = React.createRef<HTMLButtonElement>();
-  private loadedCustomerIdsRef = React.createRef<Set<string>>(new Set());
+  private loadedCustomerIdsRef: React.MutableRefObject<Set<string>> = { current: new Set() };
   private debounceTimer: NodeJS.Timeout | null = null;
   private copyFeedbackTimer: NodeJS.Timeout | null = null;
   private componentMounted = false;
@@ -297,7 +297,7 @@ export class OrdersController extends Component<Props, State> {
             (c) => (c._id ?? "").toString() === this.state.selectedCustomerId
           )
         ) {
-          this.loadCustomerById(this.state.selectedCustomerId);
+          void this.loadCustomerById(this.state.selectedCustomerId);
         }
       }
     }

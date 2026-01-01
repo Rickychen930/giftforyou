@@ -1019,7 +1019,6 @@ class BouquetUploaderView extends Component<Props> {
             type="submit"
             disabled={submitting || isImageLoading}
             aria-busy={submitting}
-            type="submit"
           >
             {submitting ? (
               <>

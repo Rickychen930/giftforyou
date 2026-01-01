@@ -6,7 +6,7 @@
 import React, { Component } from "react";
 import type { Collection } from "../../models/domain/collection";
 import type { Bouquet } from "../../models/domain/bouquet";
-import DropdownWithModal from "../DropdownWithModal";
+import DropdownWithModal from "../inputs/DropdownWithModal";
 import "../../styles/CollectionDetailView.css";
 import { API_BASE } from "../../config/api";
 import { formatIDR } from "../../utils/money";
@@ -465,7 +465,7 @@ class CollectionDetailView extends Component<Props, CollectionDetailViewState> {
                     label="Pindahkan ke"
                     value=""
                     options={availableCollections.map((c) => c.name)}
-                    onChange={(value) => {
+                    onChange={(value: string) => {
                       const targetCollection = availableCollections.find((c) => c.name === value);
                       if (targetCollection) {
                         void this.handleMove(bouquet._id, targetCollection._id);

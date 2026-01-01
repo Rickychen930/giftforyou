@@ -6,7 +6,7 @@
 import React, { Component } from "react";
 import { formatIDR } from "../../utils/money";
 import { buildWhatsAppLink } from "../../utils/whatsapp";
-import LuxuryButton from "../LuxuryButton";
+import LuxuryButton from "../buttons/LuxuryButton";
 import IconButton from "./IconButton";
 import "../../styles/OrderHistoryCard.css";
 
