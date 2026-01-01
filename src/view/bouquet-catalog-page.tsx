@@ -1,9 +1,10 @@
 /**
  * Bouquet Catalog Page View
  * Pure presentation component - no business logic
+ * OOP-based class component following SOLID principles
  */
 
-import React, { useRef, useEffect } from "react";
+import React, { Component, RefObject } from "react";
 import "../styles/BouquetCatalogPage.css";
 
 import type { Bouquet } from "../models/domain/bouquet";
@@ -57,7 +58,7 @@ interface BouquetCatalogPageViewProps {
   onClearSearchQuery: () => void;
   onClearCollectionNameFilter: () => void;
   onSearchChange?: (query: string) => void;
-  onScrollToResults: (resultsRef: React.RefObject<HTMLElement>) => void;
+  onScrollToResults: (resultsRef: RefObject<HTMLElement>) => void;
   onLoad?: () => void;
 
   loading?: boolean;
@@ -66,144 +67,180 @@ interface BouquetCatalogPageViewProps {
 
 /**
  * Bouquet Catalog Page View Component
- * Pure presentation - receives all data and handlers via props
+ * Pure presentation class component - receives all data and handlers via props
+ * Follows Single Responsibility Principle: only handles UI rendering
  */
-const BouquetCatalogPageView: React.FC<BouquetCatalogPageViewProps> = ({
-  bouquets,
-  total,
-  allTypes,
-  allSizes,
-  allCollections,
-  collectionNameFilter,
-  searchQuery,
-  priceRange,
-  selectedTypes,
-  selectedSizes,
-  selectedCollections,
-  sortBy,
-  currentPage,
-  itemsPerPage,
-  minPrice,
-  hasActiveFilters,
-  filterChips,
-  onPriceChange,
-  onToggleFilter,
-  onClearFilter,
-  onClearAll,
-  onSortChange,
-  onPageChange,
-  onClearSearchQuery,
-  onClearCollectionNameFilter,
-  onSearchChange,
-  onScrollToResults,
-  onLoad,
-  loading = false,
-  error = null,
-}) => {
-  const resultsRef = useRef<HTMLElement>(null);
+class BouquetCatalogPageView extends Component<BouquetCatalogPageViewProps> {
+  private resultsRef: RefObject<HTMLElement> = React.createRef<HTMLElement>();
 
-  // Notify controller when component is ready
-  useEffect(() => {
+  /**
+   * Component lifecycle: notify controller when component is ready
+   */
+  componentDidMount(): void {
+    const { onLoad } = this.props;
     if (onLoad) {
       onLoad();
     }
-  }, [onLoad]);
+  }
 
-  // Scroll to results when page or filters change
-  useEffect(() => {
-    if (!loading && bouquets.length > 0) {
-      onScrollToResults(resultsRef);
+  /**
+   * Component lifecycle: scroll to results when page or filters change
+   */
+  componentDidUpdate(prevProps: Readonly<BouquetCatalogPageViewProps>): void {
+    const { loading, bouquets, onScrollToResults, currentPage, selectedTypes, selectedSizes, priceRange, sortBy } = this.props;
+
+    if (
+      !loading &&
+      bouquets.length > 0 &&
+      (prevProps.currentPage !== currentPage ||
+        prevProps.selectedTypes !== selectedTypes ||
+        prevProps.selectedSizes !== selectedSizes ||
+        prevProps.priceRange !== priceRange ||
+        prevProps.sortBy !== sortBy ||
+        prevProps.loading !== loading ||
+        prevProps.bouquets.length !== bouquets.length)
+    ) {
+      onScrollToResults(this.resultsRef);
     }
-  }, [currentPage, selectedTypes, selectedSizes, priceRange, sortBy, loading, bouquets.length, onScrollToResults]);
+  }
 
-  if (error) {
+  /**
+   * Render error state
+   */
+  private renderError(): React.ReactNode {
     return (
       <section className="catalog-page">
         <CatalogHeader title="Katalog Bouquet" subtitle="Jelajahi bouquet dan koleksi terbaru kami." />
         <div className="catalog-page__error" role="alert">
-          {error}
+          {this.props.error}
         </div>
       </section>
     );
   }
 
-  const skeletonCount = Math.max(6, Math.min(itemsPerPage || 0, 12));
+  /**
+   * Render main catalog content
+   */
+  private renderContent(): React.ReactNode {
+    const {
+      bouquets,
+      total,
+      allTypes,
+      allSizes,
+      allCollections,
+      searchQuery,
+      priceRange,
+      selectedTypes,
+      selectedSizes,
+      selectedCollections,
+      sortBy,
+      currentPage,
+      itemsPerPage,
+      minPrice,
+      hasActiveFilters,
+      filterChips,
+      loading = false,
+      onPriceChange,
+      onToggleFilter,
+      onClearFilter,
+      onClearAll,
+      onSortChange,
+      onPageChange,
+      onClearSearchQuery,
+      onSearchChange,
+    } = this.props;
 
-  return (
-    <section className="catalog-page" aria-labelledby="catalog-title">
-      <CatalogHeader
-        totalItems={total}
-        minPrice={minPrice}
-        loading={loading}
-      />
+    const skeletonCount = Math.max(6, Math.min(itemsPerPage || 0, 12));
 
-      <div className="catalog-page__summary">
-        <CatalogSearch
-          value={searchQuery}
-          onSearch={onSearchChange}
-          onClear={onClearSearchQuery}
-          disabled={loading}
-        />
-        {hasActiveFilters && !loading && (
-          <div className="catalog-page__summary-actions">
-            <CatalogResetButton
-              onClearAll={onClearAll}
-              disabled={loading}
-            />
-          </div>
-        )}
-      </div>
-
-      {filterChips.length > 0 && (
-        <CatalogActiveFilters chips={filterChips} loading={loading} />
-      )}
-
-      <div className="catalog-page__layout">
-        <CatalogFilters
-          priceRange={priceRange}
-          selectedTypes={selectedTypes}
-          selectedSizes={selectedSizes}
-          selectedCollections={selectedCollections}
-          allTypes={allTypes}
-          allSizes={allSizes}
-          allCollections={allCollections}
-          sortBy={sortBy}
-          disabled={loading}
-          onPriceChange={onPriceChange}
-          onToggleFilter={onToggleFilter}
-          onClearFilter={onClearFilter}
-          onSortChange={onSortChange}
+    return (
+      <section className="catalog-page" aria-labelledby="catalog-title">
+        <CatalogHeader
+          totalItems={total}
+          minPrice={minPrice}
+          loading={loading}
         />
 
-        <main className="catalog-page__results" aria-label="Hasil bouquet" ref={resultsRef}>
-          {loading ? (
-            <CatalogSkeleton count={skeletonCount} showLoadingState />
-          ) : bouquets.length > 0 ? (
-            <>
-              <CatalogGrid
-                bouquets={bouquets}
-                ariaLabel={`Menampilkan ${bouquets.length} dari ${total} bouquet`}
+        <div className="catalog-page__summary">
+          <CatalogSearch
+            value={searchQuery}
+            onSearch={onSearchChange}
+            onClear={onClearSearchQuery}
+            disabled={loading}
+          />
+          {hasActiveFilters && !loading && (
+            <div className="catalog-page__summary-actions">
+              <CatalogResetButton
+                onClearAll={onClearAll}
+                disabled={loading}
               />
-              <CatalogPagination
-                currentPage={currentPage}
-                totalItems={total}
-                itemsPerPage={itemsPerPage}
-                onPageChange={onPageChange}
-              />
-            </>
-          ) : (
-            <CatalogEmpty
-              hasActiveFilters={hasActiveFilters}
-              chips={filterChips}
-              onClearAll={onClearAll}
-              onRemoveLastFilter={filterChips.length > 0 ? filterChips[filterChips.length - 1].onRemove : undefined}
-              loading={loading}
-            />
+            </div>
           )}
-        </main>
-      </div>
-    </section>
-  );
-};
+        </div>
+
+        {filterChips.length > 0 && (
+          <CatalogActiveFilters chips={filterChips} loading={loading} />
+        )}
+
+        <div className="catalog-page__layout">
+          <CatalogFilters
+            priceRange={priceRange}
+            selectedTypes={selectedTypes}
+            selectedSizes={selectedSizes}
+            selectedCollections={selectedCollections}
+            allTypes={allTypes}
+            allSizes={allSizes}
+            allCollections={allCollections}
+            sortBy={sortBy}
+            disabled={loading}
+            onPriceChange={onPriceChange}
+            onToggleFilter={onToggleFilter}
+            onClearFilter={onClearFilter}
+            onSortChange={onSortChange}
+          />
+
+          <main className="catalog-page__results" aria-label="Hasil bouquet" ref={this.resultsRef}>
+            {loading ? (
+              <CatalogSkeleton count={skeletonCount} showLoadingState />
+            ) : bouquets.length > 0 ? (
+              <>
+                <CatalogGrid
+                  bouquets={bouquets}
+                  ariaLabel={`Menampilkan ${bouquets.length} dari ${total} bouquet`}
+                />
+                <CatalogPagination
+                  currentPage={currentPage}
+                  totalItems={total}
+                  itemsPerPage={itemsPerPage}
+                  onPageChange={onPageChange}
+                />
+              </>
+            ) : (
+              <CatalogEmpty
+                hasActiveFilters={hasActiveFilters}
+                chips={filterChips}
+                onClearAll={onClearAll}
+                onRemoveLastFilter={filterChips.length > 0 ? filterChips[filterChips.length - 1].onRemove : undefined}
+                loading={loading}
+              />
+            )}
+          </main>
+        </div>
+      </section>
+    );
+  }
+
+  /**
+   * Render method - Single Responsibility: render UI only
+   */
+  render(): React.ReactNode {
+    const { error } = this.props;
+
+    if (error) {
+      return this.renderError();
+    }
+
+    return this.renderContent();
+  }
+}
 
 export default BouquetCatalogPageView;

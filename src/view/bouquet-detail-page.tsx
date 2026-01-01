@@ -1,9 +1,10 @@
 /**
  * Bouquet Detail Page View
  * Pure presentation component - no business logic
+ * OOP-based class component following SOLID principles
  */
 
-import React from "react";
+import React, { Component } from "react";
 import "../styles/BouquetDetailPage.css";
 import type { Bouquet } from "../models/domain/bouquet";
 import { isAuthenticated } from "../utils/auth-utils";
@@ -50,29 +51,14 @@ interface BouquetDetailPageViewProps {
 
 /**
  * Bouquet Detail Page View Component
- * Pure presentation - receives all data and handlers via props
+ * Pure presentation class component - receives all data and handlers via props
+ * Follows Single Responsibility Principle: only handles UI rendering
  */
-const BouquetDetailPageView: React.FC<BouquetDetailPageViewProps> = ({
-  bouquet,
-  loading,
-  error,
-  detailUrl,
-  similarBouquets,
-  formData,
-  formErrors,
-  isFormValid,
-  isFavorite,
-  showOrderModal,
-  formProgress,
-  getDefaultDate,
-  onFormChange,
-  onAddressChange,
-  onFavoriteToggle,
-  onOrderSubmit,
-  onShowOrderModal,
-  onCloseOrderModal,
-}) => {
-  if (loading) {
+class BouquetDetailPageView extends Component<BouquetDetailPageViewProps> {
+  /**
+   * Render loading state
+   */
+  private renderLoading(): React.ReactNode {
     return (
       <section className="bouquet-detail-page">
         <div className="bouquet-detail-page__container">
@@ -85,7 +71,10 @@ const BouquetDetailPageView: React.FC<BouquetDetailPageViewProps> = ({
     );
   }
 
-  if (error || !bouquet) {
+  /**
+   * Render error state
+   */
+  private renderError(error: string | null): React.ReactNode {
     return (
       <section className="bouquet-detail-page">
         <div className="bouquet-detail-page__container">
@@ -106,7 +95,40 @@ const BouquetDetailPageView: React.FC<BouquetDetailPageViewProps> = ({
     );
   }
 
-  const isAdmin = isAuthenticated();
+  /**
+   * Render method - Single Responsibility: render UI only
+   */
+  render(): React.ReactNode {
+    const {
+      bouquet,
+      loading,
+      error,
+      detailUrl,
+      similarBouquets,
+      formData,
+      formErrors,
+      isFormValid,
+      isFavorite,
+      showOrderModal,
+      formProgress,
+      getDefaultDate,
+      onFormChange,
+      onAddressChange,
+      onFavoriteToggle,
+      onOrderSubmit,
+      onShowOrderModal,
+      onCloseOrderModal,
+    } = this.props;
+
+    if (loading) {
+      return this.renderLoading();
+    }
+
+    if (error || !bouquet) {
+      return this.renderError(error);
+    }
+
+    const isAdmin = isAuthenticated();
 
   return (
     <section className="bouquet-detail-page" aria-labelledby="bouquet-title">
@@ -285,7 +307,8 @@ const BouquetDetailPageView: React.FC<BouquetDetailPageViewProps> = ({
         )}
       </div>
     </section>
-  );
-};
+    );
+  }
+}
 
 export default BouquetDetailPageView;

@@ -1,9 +1,10 @@
 /**
  * Customer Dashboard Page View
  * Pure presentation component - no business logic
+ * OOP-based class component following SOLID principles
  */
 
-import React from "react";
+import React, { Component } from "react";
 import { Link, Navigate } from "react-router-dom";
 import "../styles/CustomerDashboardPage.css";
 import { formatIDR } from "../utils/money";
@@ -33,21 +34,14 @@ interface CustomerDashboardPageViewProps {
 
 /**
  * Customer Dashboard Page View Component
- * Pure presentation - receives all data and handlers via props
+ * Pure presentation class component - receives all data and handlers via props
+ * Follows Single Responsibility Principle: only handles UI rendering
  */
-const CustomerDashboardPageView: React.FC<CustomerDashboardPageViewProps> = ({
-  user,
-  stats,
-  recentOrders,
-  isLoading,
-  error,
-  activeTab,
-  formatDate,
-  getStatusBadge,
-  onLogout,
-  onTabChange,
-}) => {
-  if (isLoading) {
+class CustomerDashboardPageView extends Component<CustomerDashboardPageViewProps> {
+  /**
+   * Render loading state
+   */
+  private renderLoading(): React.ReactNode {
     return (
       <section className="customerDashboard customerDashboard--loading">
         <div className="customerDashboard__loading">
@@ -58,11 +52,32 @@ const CustomerDashboardPageView: React.FC<CustomerDashboardPageViewProps> = ({
     );
   }
 
-  if (error || !user) {
-    return <Navigate to="/customer/login" replace />;
-  }
+  /**
+   * Render method - Single Responsibility: render UI only
+   */
+  render(): React.ReactNode {
+    const {
+      user,
+      stats,
+      recentOrders,
+      isLoading,
+      error,
+      activeTab,
+      formatDate,
+      getStatusBadge,
+      onLogout,
+      onTabChange,
+    } = this.props;
 
-  return (
+    if (isLoading) {
+      return this.renderLoading();
+    }
+
+    if (error || !user) {
+      return <Navigate to="/customer/login" replace />;
+    }
+
+    return (
     <section className="customerDashboard" aria-labelledby="dashboard-title">
       <div className="customerDashboard__container">
         {/* Header */}
@@ -419,7 +434,8 @@ const CustomerDashboardPageView: React.FC<CustomerDashboardPageViewProps> = ({
         </div>
       </div>
     </section>
-  );
-};
+    );
+  }
+}
 
 export default CustomerDashboardPageView;

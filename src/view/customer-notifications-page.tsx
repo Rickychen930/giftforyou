@@ -1,9 +1,10 @@
 /**
  * Customer Notifications Page View
  * Pure presentation component - no business logic
+ * OOP-based class component following SOLID principles
  */
 
-import React from "react";
+import React, { Component } from "react";
 import { Navigate } from "react-router-dom";
 import "../styles/CustomerNotificationsPage.css";
 import type { NotificationSettings } from "../models/customer-notifications-page-model";
@@ -21,20 +22,14 @@ interface CustomerNotificationsPageViewProps {
 
 /**
  * Customer Notifications Page View Component
- * Pure presentation - receives all data and handlers via props
+ * Pure presentation class component - receives all data and handlers via props
+ * Follows Single Responsibility Principle: only handles UI rendering
  */
-const CustomerNotificationsPageView: React.FC<CustomerNotificationsPageViewProps> = ({
-  settings,
-  isLoading,
-  isAuthenticated,
-  showSuccess,
-  onSettingChange,
-}) => {
-  if (!isAuthenticated) {
-    return <Navigate to="/customer/login" replace />;
-  }
-
-  if (isLoading) {
+class CustomerNotificationsPageView extends Component<CustomerNotificationsPageViewProps> {
+  /**
+   * Render loading state
+   */
+  private renderLoading(): React.ReactNode {
     return (
       <section className="customerNotifications customerNotifications--loading">
         <div className="customerNotifications__loading">
@@ -45,7 +40,21 @@ const CustomerNotificationsPageView: React.FC<CustomerNotificationsPageViewProps
     );
   }
 
-  return (
+  /**
+   * Render method - Single Responsibility: render UI only
+   */
+  render(): React.ReactNode {
+    const { settings, isLoading, isAuthenticated, showSuccess, onSettingChange } = this.props;
+
+    if (!isAuthenticated) {
+      return <Navigate to="/customer/login" replace />;
+    }
+
+    if (isLoading) {
+      return this.renderLoading();
+    }
+
+    return (
     <section className="customerNotifications" aria-labelledby="notifications-title">
       <div className="customerNotifications__container">
         <div className="customerNotifications__header">
@@ -167,7 +176,8 @@ const CustomerNotificationsPageView: React.FC<CustomerNotificationsPageViewProps
         </div>
       </div>
     </section>
-  );
-};
+    );
+  }
+}
 
 export default CustomerNotificationsPageView;

@@ -1,9 +1,10 @@
 /**
  * Checkout Page View
  * Pure presentation component - no business logic
+ * OOP-based class component following SOLID principles
  */
 
-import React from "react";
+import React, { Component } from "react";
 import "../styles/CheckoutPage.css";
 import { formatIDR } from "../utils/money";
 import { calculateBulkDiscount } from "../utils/bulk-discount";
@@ -61,37 +62,14 @@ interface CheckoutPageViewProps {
 
 /**
  * Checkout Page View Component
- * Pure presentation - receives all data and handlers via props
+ * Pure presentation class component - receives all data and handlers via props
+ * Follows Single Responsibility Principle: only handles UI rendering
  */
-const CheckoutPageView: React.FC<CheckoutPageViewProps> = ({
-  items,
-  isLoading,
-  isSubmitting,
-  deliveryType,
-  deliveryDate,
-  deliveryTimeSlot,
-  address,
-  greetingCard,
-  orderNotes,
-  formErrors,
-  isFormValid,
-  deliveryPriceResult,
-  savedAddresses,
-  loadingAddresses,
-  showPreviewModal,
-  canUseExpressCheckout = false,
-  calculateItemTotal,
-  calculateGrandTotal,
-  getDefaultDate,
-  onFormChange,
-  onAddressChange,
-  onLocationChange,
-  onExpressCheckout,
-  onPreview,
-  onClosePreviewModal,
-  onConfirmSubmit,
-}) => {
-  if (isLoading) {
+class CheckoutPageView extends Component<CheckoutPageViewProps> {
+  /**
+   * Render loading state
+   */
+  private renderLoading(): React.ReactNode {
     return (
       <section className="checkoutPage checkoutPage--loading">
         <div className="checkoutPage__container">
@@ -105,8 +83,45 @@ const CheckoutPageView: React.FC<CheckoutPageViewProps> = ({
     );
   }
 
-  const grandTotal = calculateGrandTotal();
-  const minDate = getDefaultDate();
+  /**
+   * Render method - Single Responsibility: render UI only
+   */
+  render(): React.ReactNode {
+    const {
+      items,
+      isLoading,
+      isSubmitting,
+      deliveryType,
+      deliveryDate,
+      deliveryTimeSlot,
+      address,
+      greetingCard,
+      orderNotes,
+      formErrors,
+      isFormValid,
+      deliveryPriceResult,
+      savedAddresses,
+      loadingAddresses,
+      showPreviewModal,
+      canUseExpressCheckout = false,
+      calculateItemTotal,
+      calculateGrandTotal,
+      getDefaultDate,
+      onFormChange,
+      onAddressChange,
+      onLocationChange,
+      onExpressCheckout,
+      onPreview,
+      onClosePreviewModal,
+      onConfirmSubmit,
+    } = this.props;
+
+    if (isLoading) {
+      return this.renderLoading();
+    }
+
+    const grandTotal = calculateGrandTotal();
+    const minDate = getDefaultDate();
 
   return (
     <section className="checkoutPage">
@@ -400,7 +415,8 @@ const CheckoutPageView: React.FC<CheckoutPageViewProps> = ({
         isSubmitting={isSubmitting}
       />
     </section>
-  );
-};
+    );
+  }
+}
 
 export default CheckoutPageView;

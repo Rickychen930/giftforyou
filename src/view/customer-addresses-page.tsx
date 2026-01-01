@@ -1,9 +1,10 @@
 /**
  * Customer Addresses Page View
  * Pure presentation component - no business logic
+ * OOP-based class component following SOLID principles
  */
 
-import React from "react";
+import React, { Component } from "react";
 import { Navigate } from "react-router-dom";
 import "../styles/CustomerAddressesPage.css";
 import AddressAutocomplete from "../components/AddressAutocomplete";
@@ -52,34 +53,14 @@ interface CustomerAddressesPageViewProps {
 
 /**
  * Customer Addresses Page View Component
- * Pure presentation - receives all data and handlers via props
+ * Pure presentation class component - receives all data and handlers via props
+ * Follows Single Responsibility Principle: only handles UI rendering
  */
-const CustomerAddressesPageView: React.FC<CustomerAddressesPageViewProps> = ({
-  addresses,
-  isLoading,
-  isSaving,
-  isAuthenticated,
-  showForm,
-  editingId,
-  formData,
-  errors,
-  showSuccess,
-  successMessage,
-  showConfetti,
-  onFormChange,
-  onAddressChange,
-  onFormSubmit,
-  onEdit,
-  onDelete,
-  onSetDefault,
-  onCancel,
-  onShowForm,
-}) => {
-  if (!isAuthenticated) {
-    return <Navigate to="/customer/login" replace />;
-  }
-
-  if (isLoading) {
+class CustomerAddressesPageView extends Component<CustomerAddressesPageViewProps> {
+  /**
+   * Render loading state
+   */
+  private renderLoading(): React.ReactNode {
     return (
       <section className="customerAddresses customerAddresses--loading">
         <div className="customerAddresses__loading">
@@ -90,7 +71,41 @@ const CustomerAddressesPageView: React.FC<CustomerAddressesPageViewProps> = ({
     );
   }
 
-  return (
+  /**
+   * Render method - Single Responsibility: render UI only
+   */
+  render(): React.ReactNode {
+    const {
+      addresses,
+      isLoading,
+      isSaving,
+      isAuthenticated,
+      showForm,
+      editingId,
+      formData,
+      errors,
+      showSuccess,
+      successMessage,
+      showConfetti,
+      onFormChange,
+      onAddressChange,
+      onFormSubmit,
+      onEdit,
+      onDelete,
+      onSetDefault,
+      onCancel,
+      onShowForm,
+    } = this.props;
+
+    if (!isAuthenticated) {
+      return <Navigate to="/customer/login" replace />;
+    }
+
+    if (isLoading) {
+      return this.renderLoading();
+    }
+
+    return (
     <section className="customerAddresses" aria-labelledby="addresses-title">
       <ConfettiEffect trigger={showConfetti} />
       <div className="customerAddresses__container">
@@ -294,7 +309,8 @@ const CustomerAddressesPageView: React.FC<CustomerAddressesPageViewProps> = ({
         </div>
       </div>
     </section>
-  );
-};
+    );
+  }
+}
 
 export default CustomerAddressesPageView;

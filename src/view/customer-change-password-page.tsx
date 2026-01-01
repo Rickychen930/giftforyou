@@ -1,9 +1,10 @@
 /**
  * Customer Change Password Page View
  * Pure presentation component - no business logic
+ * OOP-based class component following SOLID principles
  */
 
-import React from "react";
+import React, { Component } from "react";
 import { Link, Navigate } from "react-router-dom";
 import "../styles/CustomerChangePasswordPage.css";
 import ConfettiEffect from "../components/common/ConfettiEffect";
@@ -34,26 +35,14 @@ interface CustomerChangePasswordPageViewProps {
 
 /**
  * Customer Change Password Page View Component
- * Pure presentation - receives all data and handlers via props
+ * Pure presentation class component - receives all data and handlers via props
+ * Follows Single Responsibility Principle: only handles UI rendering
  */
-const CustomerChangePasswordPageView: React.FC<CustomerChangePasswordPageViewProps> = ({
-  formData,
-  errors,
-  isLoading,
-  isSaving,
-  isAuthenticated,
-  showPassword,
-  showSuccess,
-  showConfetti,
-  onFormChange,
-  onTogglePasswordVisibility,
-  onFormSubmit,
-}) => {
-  if (!isAuthenticated) {
-    return <Navigate to="/customer/login" replace />;
-  }
-
-  if (isLoading) {
+class CustomerChangePasswordPageView extends Component<CustomerChangePasswordPageViewProps> {
+  /**
+   * Render loading state
+   */
+  private renderLoading(): React.ReactNode {
     return (
       <section className="customerChangePassword customerChangePassword--loading">
         <div className="customerChangePassword__loading">
@@ -64,7 +53,33 @@ const CustomerChangePasswordPageView: React.FC<CustomerChangePasswordPageViewPro
     );
   }
 
-  return (
+  /**
+   * Render method - Single Responsibility: render UI only
+   */
+  render(): React.ReactNode {
+    const {
+      formData,
+      errors,
+      isLoading,
+      isSaving,
+      isAuthenticated,
+      showPassword,
+      showSuccess,
+      showConfetti,
+      onFormChange,
+      onTogglePasswordVisibility,
+      onFormSubmit,
+    } = this.props;
+
+    if (!isAuthenticated) {
+      return <Navigate to="/customer/login" replace />;
+    }
+
+    if (isLoading) {
+      return this.renderLoading();
+    }
+
+    return (
     <section className="customerChangePassword" aria-labelledby="change-password-title">
       <ConfettiEffect trigger={showConfetti} />
       <div className="customerChangePassword__container">
@@ -187,7 +202,8 @@ const CustomerChangePasswordPageView: React.FC<CustomerChangePasswordPageViewPro
         </div>
       </div>
     </section>
-  );
-};
+    );
+  }
+}
 
 export default CustomerChangePasswordPageView;

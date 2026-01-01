@@ -1,9 +1,10 @@
 /**
  * FAQ Page View
  * Pure presentation component - no business logic
+ * OOP-based class component following SOLID principles
  */
 
-import React from "react";
+import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import "../styles/FAQPage.css";
 import type { FAQItem, FAQCategory } from "../models/faq-page-model";
@@ -29,20 +30,27 @@ interface FAQPageViewProps {
 
 /**
  * FAQ Page View Component
- * Pure presentation - receives all data and handlers via props
+ * Pure presentation class component - receives all data and handlers via props
+ * Follows Single Responsibility Principle: only handles UI rendering
  */
-const FAQPageView: React.FC<FAQPageViewProps> = ({
-  faqs,
-  filteredFAQs,
-  categories,
-  selectedCategory,
-  searchQuery,
-  openItems,
-  onCategoryChange,
-  onSearchChange,
-  onToggleItem,
-}) => {
-  return (
+class FAQPageView extends Component<FAQPageViewProps> {
+  /**
+   * Render method - Single Responsibility: render UI only
+   */
+  render(): React.ReactNode {
+    const {
+      faqs,
+      filteredFAQs,
+      categories,
+      selectedCategory,
+      searchQuery,
+      openItems,
+      onCategoryChange,
+      onSearchChange,
+      onToggleItem,
+    } = this.props;
+
+    return (
     <main className="faq-page">
       <div className="faq-container">
         <header className="faq-header reveal-on-scroll">
@@ -134,7 +142,8 @@ const FAQPageView: React.FC<FAQPageViewProps> = ({
         </HelpSection>
       </div>
     </main>
-  );
-};
+    );
+  }
+}
 
 export default FAQPageView;

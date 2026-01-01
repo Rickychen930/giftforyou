@@ -1,9 +1,10 @@
 /**
  * Favorites Page View
  * Pure presentation component - no business logic
+ * OOP-based class component following SOLID principles
  */
 
-import React from "react";
+import React, { Component } from "react";
 import "../styles/FavoritesPage.css";
 import type { FavoriteItem } from "../utils/favorites";
 import EmptyState from "../components/common/EmptyState";
@@ -23,17 +24,14 @@ interface FavoritesPageViewProps {
 
 /**
  * Favorites Page View Component
- * Pure presentation - receives all data and handlers via props
+ * Pure presentation class component - receives all data and handlers via props
+ * Follows Single Responsibility Principle: only handles UI rendering
  */
-const FavoritesPageView: React.FC<FavoritesPageViewProps> = ({
-  favorites,
-  isLoading,
-  formatDate,
-  onRemove,
-  onQuickOrder,
-  onAddToCart,
-}) => {
-  if (isLoading) {
+class FavoritesPageView extends Component<FavoritesPageViewProps> {
+  /**
+   * Render loading state
+   */
+  private renderLoading(): React.ReactNode {
     return (
       <section className="favPage favPage--loading">
         <div className="favContainer">
@@ -46,7 +44,10 @@ const FavoritesPageView: React.FC<FavoritesPageViewProps> = ({
     );
   }
 
-  if (favorites.length === 0) {
+  /**
+   * Render empty state
+   */
+  private renderEmpty(): React.ReactNode {
     return (
       <section className="favPage">
         <div className="favContainer">
@@ -65,44 +66,68 @@ const FavoritesPageView: React.FC<FavoritesPageViewProps> = ({
     );
   }
 
-  return (
-    <section className="favPage" aria-labelledby="fav-title">
-      <div className="favContainer">
-        <div className="favHeader">
-          <h1 id="fav-title" className="favHeader__title">
-            Favorit Saya
-          </h1>
-          <p className="favHeader__subtitle">
-            {favorites.length} {favorites.length === 1 ? "bouquet" : "bouquets"} tersimpan
-          </p>
-        </div>
+  /**
+   * Render content with favorites
+   */
+  private renderContent(): React.ReactNode {
+    const { favorites, formatDate, onRemove, onQuickOrder, onAddToCart } = this.props;
 
-        <div className="favGrid">
-          {favorites.map((favorite) => (
-            <FavoriteCard
-              key={favorite.bouquetId}
-              bouquetId={favorite.bouquetId}
-              bouquetName={favorite.bouquetName}
-              bouquetPrice={favorite.bouquetPrice}
-              bouquetImage={favorite.bouquetImage}
-              addedAt={favorite.addedAt}
-              fallbackImage={FALLBACK_IMAGE}
-              formatDate={formatDate}
-              onQuickOrder={() => onQuickOrder(favorite)}
-              onAddToCart={() => onAddToCart(favorite)}
-              onRemove={() => onRemove(favorite.bouquetId)}
-            />
-          ))}
-        </div>
+    return (
+      <section className="favPage" aria-labelledby="fav-title">
+        <div className="favContainer">
+          <div className="favHeader">
+            <h1 id="fav-title" className="favHeader__title">
+              Favorit Saya
+            </h1>
+            <p className="favHeader__subtitle">
+              {favorites.length} {favorites.length === 1 ? "bouquet" : "bouquets"} tersimpan
+            </p>
+          </div>
 
-        <div className="favFooter">
-          <BackLink to="/collection" className="favFooter__link">
-            ← Kembali ke Katalog
-          </BackLink>
+          <div className="favGrid">
+            {favorites.map((favorite) => (
+              <FavoriteCard
+                key={favorite.bouquetId}
+                bouquetId={favorite.bouquetId}
+                bouquetName={favorite.bouquetName}
+                bouquetPrice={favorite.bouquetPrice}
+                bouquetImage={favorite.bouquetImage}
+                addedAt={favorite.addedAt}
+                fallbackImage={FALLBACK_IMAGE}
+                formatDate={formatDate}
+                onQuickOrder={() => onQuickOrder(favorite)}
+                onAddToCart={() => onAddToCart(favorite)}
+                onRemove={() => onRemove(favorite.bouquetId)}
+              />
+            ))}
+          </div>
+
+          <div className="favFooter">
+            <BackLink to="/collection" className="favFooter__link">
+              ← Kembali ke Katalog
+            </BackLink>
+          </div>
         </div>
-      </div>
-    </section>
-  );
-};
+      </section>
+    );
+  }
+
+  /**
+   * Render method - Single Responsibility: render UI only
+   */
+  render(): React.ReactNode {
+    const { isLoading, favorites } = this.props;
+
+    if (isLoading) {
+      return this.renderLoading();
+    }
+
+    if (favorites.length === 0) {
+      return this.renderEmpty();
+    }
+
+    return this.renderContent();
+  }
+}
 
 export default FavoritesPageView;

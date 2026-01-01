@@ -1,9 +1,10 @@
 /**
  * Contact Page View
  * Pure presentation component - no business logic
+ * OOP-based class component following SOLID principles
  */
 
-import React from "react";
+import React, { Component } from "react";
 import "../styles/ContactPage.css";
 import type { ContactFormData, ContactFormStatus } from "../models/contact-page-model";
 import { STORE_PROFILE } from "../config/store-profile";
@@ -28,16 +29,17 @@ interface ContactPageViewProps {
 
 /**
  * Contact Page View Component
- * Pure presentation - receives all data and handlers via props
+ * Pure presentation class component - receives all data and handlers via props
+ * Follows Single Responsibility Principle: only handles UI rendering
  */
-const ContactPageView: React.FC<ContactPageViewProps> = ({
-  formData,
-  status,
-  errorMessage,
-  onFormChange,
-  onFormSubmit,
-}) => {
-  return (
+class ContactPageView extends Component<ContactPageViewProps> {
+  /**
+   * Render method - Single Responsibility: render UI only
+   */
+  render(): React.ReactNode {
+    const { formData, status, errorMessage, onFormChange, onFormSubmit } = this.props;
+
+    return (
     <main className="contact-page">
       <div className="contact-container">
         <header className="contact-header reveal-on-scroll">
@@ -286,7 +288,8 @@ const ContactPageView: React.FC<ContactPageViewProps> = ({
         </div>
       </div>
     </main>
-  );
-};
+    );
+  }
+}
 
 export default ContactPageView;

@@ -1,9 +1,10 @@
 /**
  * Customer Profile Page View
  * Pure presentation component - no business logic
+ * OOP-based class component following SOLID principles
  */
 
-import React from "react";
+import React, { Component } from "react";
 import { Link, Navigate } from "react-router-dom";
 import "../styles/CustomerProfilePage.css";
 import AddressAutocomplete from "../components/AddressAutocomplete";
@@ -36,27 +37,14 @@ interface CustomerProfilePageViewProps {
 
 /**
  * Customer Profile Page View Component
- * Pure presentation - receives all data and handlers via props
+ * Pure presentation class component - receives all data and handlers via props
+ * Follows Single Responsibility Principle: only handles UI rendering
  */
-const CustomerProfilePageView: React.FC<CustomerProfilePageViewProps> = ({
-  user,
-  formData,
-  errors,
-  isLoading,
-  isSaving,
-  isAuthenticated,
-  showSuccess,
-  lastSaved,
-  showConfetti,
-  onFormChange,
-  onAddressChange,
-  onFormSubmit,
-}) => {
-  if (!isAuthenticated) {
-    return <Navigate to="/customer/login" replace />;
-  }
-
-  if (isLoading) {
+class CustomerProfilePageView extends Component<CustomerProfilePageViewProps> {
+  /**
+   * Render loading state
+   */
+  private renderLoading(): React.ReactNode {
     return (
       <section className="customerProfile customerProfile--loading">
         <div className="customerProfile__loading">
@@ -67,7 +55,34 @@ const CustomerProfilePageView: React.FC<CustomerProfilePageViewProps> = ({
     );
   }
 
-  return (
+  /**
+   * Render method - Single Responsibility: render UI only
+   */
+  render(): React.ReactNode {
+    const {
+      user,
+      formData,
+      errors,
+      isLoading,
+      isSaving,
+      isAuthenticated,
+      showSuccess,
+      lastSaved,
+      showConfetti,
+      onFormChange,
+      onAddressChange,
+      onFormSubmit,
+    } = this.props;
+
+    if (!isAuthenticated) {
+      return <Navigate to="/customer/login" replace />;
+    }
+
+    if (isLoading) {
+      return this.renderLoading();
+    }
+
+    return (
     <section className="customerProfile" aria-labelledby="profile-title">
       <ConfettiEffect trigger={showConfetti} />
       <AutoSaveIndicator isSaving={isSaving} lastSaved={lastSaved} />
@@ -195,7 +210,8 @@ const CustomerProfilePageView: React.FC<CustomerProfilePageViewProps> = ({
         </div>
       </div>
     </section>
-  );
-};
+    );
+  }
+}
 
 export default CustomerProfilePageView;

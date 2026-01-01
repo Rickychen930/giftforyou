@@ -1,9 +1,10 @@
 /**
  * Home Page View
  * Pure presentation component - no business logic or data fetching
+ * OOP-based class component following SOLID principles
  */
 
-import React from "react";
+import React, { Component } from "react";
 import "../styles/HomePage.css";
 import type { Collection } from "../models/domain/collection";
 import type { HeroSliderContent } from "../components/hero/HeroSlider";
@@ -21,33 +22,36 @@ interface HomePageViewProps {
 
 /**
  * Home Page View Component
- * Pure presentation - receives all data via props
+ * Pure presentation class component - receives all data via props
+ * Follows Single Responsibility Principle: only handles UI rendering
  */
-const HomePageView: React.FC<HomePageViewProps> = ({
-  collections,
-  heroContent,
-  loading,
-  errorMessage,
-}) => {
-  return (
-    <main className="Home-page-container">
-      {/* Hero slider section */}
-      <HeroCollectionSlider content={heroContent ?? undefined} loading={loading} />
+class HomePageView extends Component<HomePageViewProps> {
+  /**
+   * Render method - Single Responsibility: render UI only
+   */
+  render(): React.ReactNode {
+    const { collections, heroContent, loading, errorMessage } = this.props;
 
-      {/* Collections section */}
-      <OurCollectionSection
-        items={collections}
-        loading={loading}
-        errorMessage={errorMessage}
-      />
+    return (
+      <main className="Home-page-container">
+        {/* Hero slider section */}
+        <HeroCollectionSlider content={heroContent ?? undefined} loading={loading} />
 
-      {/* Store location section */}
-      <StoreLocationSection />
+        {/* Collections section */}
+        <OurCollectionSection
+          items={collections}
+          loading={loading}
+          errorMessage={errorMessage}
+        />
 
-      {/* Google Maps reviews section */}
-      <GoogleMapsReviewsSection placeName="GiftForYou.idn" />
-    </main>
-  );
-};
+        {/* Store location section */}
+        <StoreLocationSection />
+
+        {/* Google Maps reviews section */}
+        <GoogleMapsReviewsSection placeName="GiftForYou.idn" />
+      </main>
+    );
+  }
+}
 
 export default HomePageView;
