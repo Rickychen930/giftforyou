@@ -6,7 +6,7 @@
 import React, { Component } from "react";
 import type { Collection } from "../../models/domain/collection";
 import type { Bouquet } from "../../models/domain/bouquet";
-import DropdownWithModal from "../inputs/DropdownWithModal";
+import DropdownWithModal from "../../components/inputs/DropdownWithModal";
 import "../../styles/CollectionDetailView.css";
 import { API_BASE } from "../../config/api";
 import { formatIDR } from "../../utils/money";

@@ -39,7 +39,6 @@ class FAQItem extends Component<FAQItemProps, FAQItemState> {
   }
 
   private getClasses(): string {
-    const { index = 0 } = this.props;
     const { isOpen } = this.state;
     const openClass = isOpen ? `${this.baseClass}--open` : "";
     return `${this.baseClass} fade-in ${openClass}`.trim();

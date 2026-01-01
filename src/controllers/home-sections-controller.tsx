@@ -8,11 +8,11 @@ import type { Collection } from "../models/domain/collection";
 import type { HeroSliderContent } from "../components/hero/HeroSlider";
 import { getCollections } from "../services/collection.service";
 import { API_BASE } from "../config/api";
-import HeroCollectionSlider from "../components/sections/hero-collection-slider";
-import OurCollectionSection from "../components/sections/our-collection-section";
-import StoreLocationSection from "../components/sections/store-location-section";
+import HeroCollectionSlider from "../view/sections/hero-collection-slider";
+import OurCollectionSection from "../view/sections/our-collection-section";
+import StoreLocationSection from "../view/sections/store-location-section";
 import { aboutUsContent } from "../models/about-us-model";
-import AboutUsSection from "../components/sections/about-us-section";
+import AboutUsSection from "../view/sections/about-us-section";
 
 // ============================================================================
 // Hero Section Controller

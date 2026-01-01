@@ -106,7 +106,7 @@ class TagInput extends Component<TagInputProps, TagInputState> {
   };
 
   private handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
-    const { tags, maxTags = 20, onChange } = this.props;
+    const { tags, onChange } = this.props;
     const { inputValue } = this.state;
 
     if (e.key === "Enter" || e.key === ",") {

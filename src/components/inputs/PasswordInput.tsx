@@ -24,9 +24,6 @@ interface PasswordInputState {
 class PasswordInput extends BaseInput<PasswordInputProps, PasswordInputState> {
   protected baseClass: string = "passwordInput";
 
-  constructor(props: PasswordInputProps) {
-    super(props);
-  }
 
   protected getWrapperClasses(): string {
     const { error } = this.props;

@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import type { Bouquet } from "../../models/domain/bouquet";
 import type { Collection } from "../../models/domain/collection";
 import "../../styles/BouquetEditForm.css";
-import BouquetEditor from "../bouquet-card-edit-component";
-import DropdownWithModal from "../inputs/DropdownWithModal";
+import BouquetEditor from "../../components/bouquet-card-edit-component";
+import DropdownWithModal from "../../components/inputs/DropdownWithModal";
 
 interface Props {
   bouquet: Bouquet;

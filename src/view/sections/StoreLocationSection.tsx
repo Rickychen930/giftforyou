@@ -7,10 +7,10 @@ import React, { Component } from "react";
 import "../../styles/StoreLocationSection.css";
 import type { StoreData } from "../../models/store-model";
 import { storeData } from "../../models/store-model";
-import StoreAddressCard from "../store-location/StoreAddressCard";
-import StoreContactCard from "../store-location/StoreContactCard";
-import StoreHoursCard from "../store-location/StoreHoursCard";
-import StoreSocialLinks from "../store-location/StoreSocialLinks";
+import StoreAddressCard from "../../components/store-location/StoreAddressCard";
+import StoreContactCard from "../../components/store-location/StoreContactCard";
+import StoreHoursCard from "../../components/store-location/StoreHoursCard";
+import StoreSocialLinks from "../../components/store-location/StoreSocialLinks";
 
 interface StoreLocationSectionProps {
   data?: StoreData;

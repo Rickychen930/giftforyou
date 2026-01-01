@@ -31,9 +31,6 @@ interface SummaryCardState {
 class SummaryCard extends BaseCard<SummaryCardProps, SummaryCardState> {
   protected baseClass: string = "summaryCard";
 
-  constructor(props: SummaryCardProps) {
-    super(props);
-  }
 
   protected renderHeader(): React.ReactNode {
     const { title, titleIcon } = this.props;

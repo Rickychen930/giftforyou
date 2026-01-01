@@ -7,10 +7,10 @@ import React from "react";
 import "../styles/HomePage.css";
 import type { Collection } from "../models/domain/collection";
 import type { HeroSliderContent } from "../components/hero/HeroSlider";
-import HeroCollectionSlider from "../components/sections/hero-collection-slider";
-import OurCollectionSection from "../components/sections/our-collection-section";
-import StoreLocationSection from "../components/sections/store-location-section";
-import GoogleMapsReviewsSection from "../components/sections/google-maps-reviews-section";
+import HeroCollectionSlider from "./sections/hero-collection-slider";
+import OurCollectionSection from "./sections/our-collection-section";
+import StoreLocationSection from "./sections/store-location-section";
+import GoogleMapsReviewsSection from "./sections/google-maps-reviews-section";
 
 interface HomePageViewProps {
   collections: Collection[];

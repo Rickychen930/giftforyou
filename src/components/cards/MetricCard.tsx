@@ -27,9 +27,6 @@ interface MetricCardState {
 class MetricCard extends BaseCard<MetricCardProps, MetricCardState> {
   protected baseClass: string = "metricCard";
 
-  constructor(props: MetricCardProps) {
-    super(props);
-  }
 
   protected getClasses(): string {
     const { variant = "primary", className = "" } = this.props;
@@ -39,7 +36,7 @@ class MetricCard extends BaseCard<MetricCardProps, MetricCardState> {
   }
 
   protected renderContent(): React.ReactNode {
-    const { label, value, note, icon, ariaLabel } = this.props;
+    const { label, value, note, icon } = this.props;
 
     return (
       <>

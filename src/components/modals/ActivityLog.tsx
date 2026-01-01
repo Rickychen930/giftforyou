@@ -3,7 +3,7 @@
  * Class-based component extending BaseModal
  */
 
-import React, { Component } from "react";
+import React from "react";
 import { BaseModal, BaseModalProps, BaseModalState } from "../base/BaseModal";
 import "../../styles/ActivityLog.css";
 

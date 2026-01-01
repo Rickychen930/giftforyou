@@ -49,7 +49,7 @@ class CopyButton extends Component<CopyButtonProps, CopyButtonState> {
   }
 
   private setCopiedState = (): void => {
-    const { onCopy, copiedLabel = "Tersalin" } = this.props;
+    const { onCopy } = this.props;
     const { timeoutId } = this.state;
 
     this.setState({ copied: true });

@@ -5,10 +5,10 @@
 
 import React, { Component, RefObject } from "react";
 import "../../styles/OurCollectionSection.css";
-import CollectionContainer, { type BouquetCardProps } from "../cards/CollectionCard";
+import CollectionContainer, { type BouquetCardProps } from "../../components/cards/CollectionCard";
 import type { Collection } from "../../models/domain/collection";
 import type { Bouquet } from "../../models/domain/bouquet";
-import SkeletonLoader from "../common/SkeletonLoader";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 interface OurCollectionViewProps {
   items: Collection[];

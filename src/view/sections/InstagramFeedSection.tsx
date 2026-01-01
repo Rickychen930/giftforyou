@@ -10,7 +10,7 @@ import {
   getInstagramProfile,
   type InstagramPost,
 } from "../../services/instagram.service";
-import SkeletonLoader from "../common/SkeletonLoader";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 interface InstagramFeedSectionProps {
   instagramUsername?: string; // e.g., "giftforyou.idn"

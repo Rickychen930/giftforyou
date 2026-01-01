@@ -27,9 +27,6 @@ interface QuickActionButtonState {
 class QuickActionButton extends BaseButton<QuickActionButtonProps, QuickActionButtonState> {
   protected baseClass: string = "quickActionBtn";
 
-  constructor(props: QuickActionButtonProps) {
-    super(props);
-  }
 
   protected getClasses(): string {
     const { variant = "default", className = "" } = this.props;

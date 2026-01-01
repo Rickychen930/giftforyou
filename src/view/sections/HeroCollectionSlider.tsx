@@ -4,7 +4,7 @@
  */
 
 import React, { Component } from "react";
-import HeroSlider, { HeroSliderContent } from "../hero/HeroSlider";
+import HeroSlider, { HeroSliderContent } from "../../components/hero/HeroSlider";
 
 interface HeroCollectionSliderProps {
   content?: HeroSliderContent;

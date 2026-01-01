@@ -3,7 +3,7 @@
  * Class-based component extending BaseModal
  */
 
-import React, { Component, RefObject } from "react";
+import React, { RefObject } from "react";
 import { BaseModal, BaseModalProps, BaseModalState } from "../base/BaseModal";
 import "../../styles/DashboardSearch.css";
 

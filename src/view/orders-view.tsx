@@ -3,7 +3,7 @@
 // Follows OOP and SOLID principles - only handles presentation
 
 import React, { Component } from "react";
-import "../../styles/OrdersSection.css";
+import "../styles/OrdersSection.css";
 import type { OrdersController } from "../controllers/orders-controller";
 import InvoiceComponent from "../components/common/InvoiceComponent";
 import EmptyState from "../components/common/EmptyState";

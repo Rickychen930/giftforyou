@@ -26,9 +26,6 @@ interface IconButtonState {
 class IconButton extends BaseButton<IconButtonProps, IconButtonState> {
   protected baseClass: string = "iconBtn";
 
-  constructor(props: IconButtonProps) {
-    super(props);
-  }
 
   protected getClasses(): string {
     const { variant = "default", size = "md", className = "" } = this.props;

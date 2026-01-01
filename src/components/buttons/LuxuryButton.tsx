@@ -23,9 +23,6 @@ interface LuxuryButtonState {
 class LuxuryButton extends BaseButton<LuxuryButtonProps, LuxuryButtonState> {
   protected baseClass: string = "luxuryBtn";
 
-  constructor(props: LuxuryButtonProps) {
-    super(props);
-  }
 
   protected getClasses(): string {
     const { variant = "primary", size = "md", isLoading, className = "", disabled } = this.props;

@@ -27,13 +27,8 @@ interface StatCardState {
 class StatCard extends BaseCard<StatCardProps, StatCardState> {
   protected baseClass: string = "statCard";
 
-  constructor(props: StatCardProps) {
-    super(props);
-  }
-
   protected getClasses(): string {
-    const { iconVariant = "default", className = "" } = this.props;
-    const iconVariantClass = `${this.baseClass}__icon--${iconVariant}`;
+    const { className = "" } = this.props;
     const hoverClass = this.state.isHovered ? `${this.baseClass}--hovered` : "";
     return `${this.baseClass} ${hoverClass} ${className}`.trim();
   }

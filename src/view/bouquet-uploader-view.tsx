@@ -3,7 +3,7 @@
 // Follows OOP and SOLID principles - only handles presentation
 
 import React, { Component } from "react";
-import "../../styles/DashboardUploaderSection.css";
+import "../styles/DashboardUploaderSection.css";
 import type { BouquetUploaderController } from "../controllers/bouquet-uploader-controller";
 import {
   formatBytes,
@@ -157,17 +157,12 @@ class BouquetUploaderView extends Component<Props> {
       quantity,
       occasions,
       flowers,
-      isNewEdition,
-      isFeatured,
-      customPenanda,
-      newPenandaInput,
       careInstructions,
       fieldErrors,
       touchedFields,
       submitting,
       collectionOptions,
       typeOptions,
-      occasionOptions,
       flowerOptions,
       stockLevelOptions,
       sizeOptions,
@@ -801,7 +796,6 @@ class BouquetUploaderView extends Component<Props> {
     const { state, handlers, refs } = this.getControllerState();
     const {
       file,
-      previewUrl,
       isDraggingImage,
       isImageLoading,
       imageDimensions,
