@@ -8,10 +8,10 @@ import React, { Component } from "react";
 import "../styles/HomePage.css";
 import type { Collection } from "../models/domain/collection";
 import type { HeroSliderContent } from "../components/hero/HeroSlider";
-import HeroCollectionSlider from "./sections/hero-collection-slider";
-import OurCollectionSection from "./sections/our-collection-section";
-import StoreLocationSection from "./sections/store-location-section";
-import GoogleMapsReviewsSection from "./sections/google-maps-reviews-section";
+import HeroCollectionSlider from "./sections/HeroCollectionSlider";
+import OurCollectionSection from "./sections/OurCollectionSection";
+import StoreLocationSection from "./sections/StoreLocationSection";
+import GoogleMapsReviewsSection from "./sections/GoogleMapsReviewsSection";
 
 interface HomePageViewProps {
   collections: Collection[];

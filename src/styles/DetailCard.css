@@ -1,0 +1,39 @@
+@import "colors.css";
+
+.detailCard {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(212, 140, 156, 0.15);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.detailCard:hover {
+  border-color: rgba(212, 140, 156, 0.25);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.detailCard__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ink-900);
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid rgba(212, 140, 156, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.detailCard__titleIcon {
+  display: flex;
+  align-items: center;
+  color: var(--brand-rose-600);
+}
+
+.detailCard__content {
+  /* Content styling handled by children components */
+}

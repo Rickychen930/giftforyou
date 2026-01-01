@@ -1,0 +1,83 @@
+@import "colors.css";
+
+.customerCard {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%);
+  border: 1.5px solid rgba(212, 140, 156, 0.2);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  backdrop-filter: blur(15px);
+}
+
+.customerCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  border-color: rgba(212, 140, 156, 0.35);
+}
+
+.customerCard:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(212, 140, 156, 0.2), 0 8px 24px rgba(0, 0, 0, 0.1);
+  border-color: rgba(212, 140, 156, 0.4);
+}
+
+.customerCard__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+  gap: 1rem;
+}
+
+.customerCard__info {
+  flex: 1;
+}
+
+.customerCard__name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ink-900);
+  margin: 0 0 0.5rem 0;
+}
+
+.customerCard__phone {
+  font-size: 0.95rem;
+  color: var(--ink-600);
+  margin: 0;
+}
+
+.customerCard__badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.customerCard__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(212, 140, 156, 0.1);
+}
+
+.customerCard__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.customerCard__statLabel {
+  font-size: 0.75rem;
+  color: var(--ink-500);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.customerCard__statValue {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink-900);
+}

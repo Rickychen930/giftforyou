@@ -3,10 +3,17 @@
  * Class-based component following SOLID principles
  */
 
+/**
+ * Hero Slider Editor Section Component (OOP)
+ * Class-based component following SOLID principles
+ */
+
 import React, { Component } from "react";
 import "../../styles/HeroSliderEditorSection.css";
 import { STORE_PROFILE } from "../../config/store-profile";
 import { API_BASE } from "../../config/api";
+import EmptyState from "../../components/common/EmptyState";
+import AlertMessage from "../../components/common/AlertMessage";
 
 type HeroSlide = {
   id: string;
@@ -695,7 +702,11 @@ class HeroSliderEditorSection extends Component<Props, HeroSliderEditorSectionSt
               </div>
             )}
             {uploadError[slide.id] && (
-              <div className="hsAlert hsAlert--error hsAlert--small">{uploadError[slide.id]}</div>
+              <AlertMessage
+                variant="error"
+                message={uploadError[slide.id]}
+                className="hsAlert hsAlert--small"
+              />
             )}
 
             <div className="hsAltSource">
@@ -989,66 +1000,42 @@ class HeroSliderEditorSection extends Component<Props, HeroSliderEditorSectionSt
           ) : (
             <>
               {error && (
-                <div className="hsAlert hsAlert--error" role="alert" aria-live="assertive">
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                  >
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                    <path
-                      d="M12 8v4M12 16h.01"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  <span>{error}</span>
-                </div>
+                <AlertMessage
+                  variant="error"
+                  message={error}
+                  className="hsAlert"
+                />
               )}
               {success && (
-                <div className="hsAlert hsAlert--success" role="status" aria-live="polite">
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                  >
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                    <path
-                      d="M9 12l2 2 4-4"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  <span>{success}</span>
-                </div>
+                <AlertMessage
+                  variant="success"
+                  message={success}
+                  className="hsAlert"
+                />
               )}
 
               {slides.length === 0 ? (
-                <div className="hsEmpty">
-                  <svg
-                    width="64"
-                    height="64"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M12 2s2 3.5 5 4 4.5 1.8 4 4-2.2 4.2-4 5-4 1-5 4c0 0-2-3.5-5-4s-4.5-1.8-4-4 2.2-4.2 4-5 4-1 5-4z"
-                      fill="currentColor"
-                      opacity="0.2"
-                    />
-                  </svg>
-                  <p>Belum ada slide. Klik "Tambah Slide" untuk memulai!</p>
-                </div>
+                <EmptyState
+                  title="Belum ada slide"
+                  description="Klik 'Tambah Slide' untuk memulai!"
+                  icon={
+                    <svg
+                      width="64"
+                      height="64"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M12 2s2 3.5 5 4 4.5 1.8 4 4-2.2 4.2-4 5-4 1-5 4c0 0-2-3.5-5-4s-4.5-1.8-4-4 2.2-4.2 4-5 4-1 5-4z"
+                        fill="currentColor"
+                        opacity="0.3"
+                      />
+                    </svg>
+                  }
+                  className="hsEmpty"
+                />
               ) : (
                 <div className="hsSlides">
                   {slides.map((slide, index) => this.renderSlideCard(slide, index))}

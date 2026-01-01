@@ -7,6 +7,8 @@ import React, { Component } from "react";
 import type { Collection } from "../../models/domain/collection";
 import type { Bouquet } from "../../models/domain/bouquet";
 import DropdownWithModal from "../../components/inputs/DropdownWithModal";
+import SectionHeader from "../../components/common/SectionHeader";
+import EmptyState from "../../components/common/EmptyState";
 import "../../styles/CollectionDetailView.css";
 import { API_BASE } from "../../config/api";
 import { formatIDR } from "../../utils/money";
@@ -327,28 +329,35 @@ class CollectionDetailView extends Component<Props, CollectionDetailViewState> {
     return `${API_BASE}${bouquet.image}`;
   }
 
+  /**
+   * Render empty state
+   */
   private renderEmptyState(): React.ReactNode {
     return (
-      <div className={`${this.baseClass}__empty`} role="status">
-        <svg
-          width="64"
-          height="64"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <path
-            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        <h3>Koleksi kosong</h3>
-        <p>Belum ada bouquet di koleksi ini.</p>
-      </div>
+      <EmptyState
+        title="Koleksi kosong"
+        description="Belum ada bouquet di koleksi ini."
+        icon={
+          <svg
+            width="64"
+            height="64"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <path
+              d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.3"
+            />
+          </svg>
+        }
+        className={`${this.baseClass}__empty`}
+      />
     );
   }
 
@@ -602,46 +611,21 @@ class CollectionDetailView extends Component<Props, CollectionDetailViewState> {
         className={this.baseClass}
         aria-label={`Detail koleksi ${collection.name}`}
       >
-        <header className={`${this.baseClass}__header`}>
-          <button
-            type="button"
-            className={`${this.baseClass}__backBtn`}
-            onClick={onBack}
-            aria-label="Kembali ke daftar koleksi"
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-            >
-              <path
-                d="M19 12H5M12 19l-7-7 7-7"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Kembali
-          </button>
-          <div className={`${this.baseClass}__headerContent`}>
-            <h2 className={`${this.baseClass}__title`}>{collection.name}</h2>
-            {collection.description && (
-              <p className={`${this.baseClass}__description`}>{collection.description}</p>
-            )}
-            <div className={`${this.baseClass}__stats`}>
-              <span>
-                {bouquets.length} {bouquets.length === 1 ? "bouquet" : "bouquets"}
-              </span>
-            </div>
-            <div className={`${this.baseClass}__actions`}>
-              <DownloadPDFButton collectionName={collection.name} bouquets={bouquets} />
-            </div>
-          </div>
-        </header>
+        <SectionHeader
+          title={collection.name}
+          subtitle={collection.description}
+          stats={
+            <span>
+              {bouquets.length} {bouquets.length === 1 ? "bouquet" : "bouquets"}
+            </span>
+          }
+          actions={<DownloadPDFButton collectionName={collection.name} bouquets={bouquets} />}
+          backButton={{
+            onClick: onBack,
+            label: "Kembali",
+          }}
+          className={`${this.baseClass}__header`}
+        />
 
         {bouquets.length === 0 ? (
           this.renderEmptyState()

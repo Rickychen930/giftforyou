@@ -1,9 +1,15 @@
+/**
+ * Bouquet Edit Form Component (OOP)
+ * Class-based component following SOLID principles
+ */
+
 import React, { Component } from "react";
 import type { Bouquet } from "../../models/domain/bouquet";
 import type { Collection } from "../../models/domain/collection";
 import "../../styles/BouquetEditForm.css";
 import BouquetEditor from "../../components/bouquet-card-edit-component";
 import DropdownWithModal from "../../components/inputs/DropdownWithModal";
+import SectionHeader from "../../components/common/SectionHeader";
 
 interface Props {
   bouquet: Bouquet;
@@ -56,38 +62,15 @@ class BouquetEditForm extends Component<Props, State> {
 
     return (
       <section className="bouquetEditForm" aria-label={`Edit bouquet ${bouquet.name}`}>
-        <header className="bouquetEditForm__header">
-          <button
-            type="button"
-            className="bouquetEditForm__backBtn"
-            onClick={onBack}
-            aria-label="Kembali ke detail koleksi"
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-            >
-              <path
-                d="M19 12H5M12 19l-7-7 7-7"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Kembali
-          </button>
-          <div className="bouquetEditForm__headerContent">
-            <h2 className="bouquetEditForm__title">Edit Bouquet</h2>
-            <p className="bouquetEditForm__subtitle">
-              Edit detail bouquet. Perubahan akan tersimpan ke database.
-            </p>
-          </div>
-        </header>
+        <SectionHeader
+          title="Edit Bouquet"
+          subtitle="Edit detail bouquet. Perubahan akan tersimpan ke database."
+          backButton={{
+            onClick: onBack,
+            label: "Kembali",
+          }}
+          className="bouquetEditForm__header"
+        />
 
         <div className="bouquetEditForm__collectionSelector">
           <label className="bouquetEditForm__collectionLabel">

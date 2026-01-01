@@ -3,9 +3,16 @@
  * Class-based component following SOLID principles
  */
 
+/**
+ * Collection List View Component (OOP)
+ * Class-based component following SOLID principles
+ */
+
 import React, { Component, RefObject } from "react";
 import type { Collection } from "../../models/domain/collection";
 import "../../styles/CollectionListView.css";
+import SectionHeader from "../../components/common/SectionHeader";
+import EmptyState from "../../components/common/EmptyState";
 
 interface Props {
   collections: Collection[];
@@ -168,28 +175,35 @@ class CollectionListView extends Component<Props, CollectionListViewState> {
     this.setState({ deleteConfirmId: null });
   };
 
+  /**
+   * Render empty state
+   */
   private renderEmptyState(): React.ReactNode {
     return (
-      <div className={`${this.baseClass}__empty`} role="status">
-        <svg
-          width="64"
-          height="64"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <path
-            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        <h3>Tidak ada koleksi</h3>
-        <p>Belum ada koleksi yang dibuat.</p>
-      </div>
+      <EmptyState
+        title="Tidak ada koleksi"
+        description="Belum ada koleksi yang dibuat."
+        icon={
+          <svg
+            width="64"
+            height="64"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <path
+              d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.3"
+            />
+          </svg>
+        }
+        className={`${this.baseClass}__empty`}
+      />
     );
   }
 
@@ -436,14 +450,11 @@ class CollectionListView extends Component<Props, CollectionListViewState> {
 
     return (
       <section className={this.baseClass} aria-label="Daftar koleksi">
-        <header className={`${this.baseClass}__header`}>
-          <div className={`${this.baseClass}__headerContent`}>
-            <h2 className={`${this.baseClass}__title`}>Edit Koleksi & Bouquet</h2>
-            <p className={`${this.baseClass}__subtitle`}>
-              Pilih koleksi untuk melihat dan mengelola bouquet di dalamnya
-            </p>
-          </div>
-        </header>
+        <SectionHeader
+          title="Edit Koleksi & Bouquet"
+          subtitle="Pilih koleksi untuk melihat dan mengelola bouquet di dalamnya"
+          className={`${this.baseClass}__header`}
+        />
 
         {collections.length === 0 ? (
           this.renderEmptyState()

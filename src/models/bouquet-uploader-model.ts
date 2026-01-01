@@ -2,6 +2,8 @@
 // Business logic model for bouquet uploader form
 // Reuses code from bouquet-editor-model and adds upload-specific logic
 
+/// <reference lib="dom" />
+
 import {
   validateField,
   validatePenandaInput,

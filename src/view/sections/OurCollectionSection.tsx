@@ -3,12 +3,20 @@
  * Class-based component following SOLID principles
  */
 
+/**
+ * Our Collection Section Component (OOP)
+ * Class-based component following SOLID principles
+ */
+
 import React, { Component, RefObject } from "react";
 import "../../styles/OurCollectionSection.css";
 import CollectionContainer, { type BouquetCardProps } from "../../components/cards/CollectionCard";
 import type { Collection } from "../../models/domain/collection";
 import type { Bouquet } from "../../models/domain/bouquet";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
+import EmptyState from "../../components/common/EmptyState";
+import AlertMessage from "../../components/common/AlertMessage";
+import SectionHeader from "../../components/common/SectionHeader";
 
 interface OurCollectionViewProps {
   items: Collection[];
@@ -179,56 +187,36 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
     );
   }
 
+  /**
+   * Render error state
+   */
   private renderErrorState(): React.ReactNode {
     const { errorMessage } = this.props;
     return (
-      <div className={`${this.baseClass}__error`} role="alert" aria-live="polite">
-        <div className={`${this.baseClass}__errorIcon`} aria-hidden="true">
-          <svg
-            width="48"
-            height="48"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 9V13"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-            <path
-              d="M12 17H12.01"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-            <path
-              d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-        <h3 className={`${this.baseClass}__errorTitle`}>Gagal memuat koleksi</h3>
-        <p className={`${this.baseClass}__errorText`}>
-          {errorMessage || "Silakan refresh halaman."}
-        </p>
-      </div>
+      <AlertMessage
+        variant="error"
+        message={`Gagal memuat koleksi. ${errorMessage || "Silakan refresh halaman."}`}
+        className={`${this.baseClass}__error`}
+      />
     );
   }
 
+  /**
+   * Render empty state
+   */
   private renderEmptyState(): React.ReactNode {
     return (
-      <div className={`${this.baseClass}__empty`} role="status" aria-live="polite">
-        <div className={`${this.baseClass}__emptyIcon`} aria-hidden="true">
+      <EmptyState
+        title="Belum ada koleksi"
+        description="Silakan cek kembali — koleksi baru akan ditambahkan secara berkala."
+        icon={
           <svg
             width="48"
             height="48"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
           >
             <path
               d="M20 7H4C2.89543 7 2 7.89543 2 9V19C2 20.1046 2.89543 21 4 21H20C21.1046 21 22 20.1046 22 19V9C22 7.89543 21.1046 7 20 7Z"
@@ -236,6 +224,7 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
+              opacity="0.3"
             />
             <path
               d="M16 7V5C16 4.46957 15.7893 3.96086 15.4142 3.58579C15.0391 3.21071 14.5304 3 14 3H10C9.46957 3 8.96086 3.21071 8.58579 3.58579C8.21071 3.96086 8 4.46957 8 5V7"
@@ -243,14 +232,12 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
+              opacity="0.3"
             />
           </svg>
-        </div>
-        <h3 className={`${this.baseClass}__emptyTitle`}>Belum ada koleksi</h3>
-        <p className={`${this.baseClass}__emptyText`}>
-          Silakan cek kembali — koleksi baru akan ditambahkan secara berkala.
-        </p>
-      </div>
+        }
+        className={`${this.baseClass}__empty`}
+      />
     );
   }
 
@@ -267,18 +254,13 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
         aria-labelledby="ourCollection-title"
       >
         <div className={`${this.baseClass}__container`}>
-          <header className={`${this.baseClass}__header`}>
-            <p className={`${this.baseClass}__eyebrow`}>Pilihan terbaik untuk setiap momen</p>
-
-            <h2 id="ourCollection-title" className={`${this.baseClass}__title`}>
-              Koleksi Kami
-            </h2>
-
-            <p className={`${this.baseClass}__subtitle`}>
-              Bouquet dan gift arrangement pilihan untuk perayaan, kejutan, dan keseharian yang
-              lebih elegan.
-            </p>
-          </header>
+          <SectionHeader
+            eyebrow="Pilihan terbaik untuk setiap momen"
+            title="Koleksi Kami"
+            subtitle="Bouquet dan gift arrangement pilihan untuk perayaan, kejutan, dan keseharian yang lebih elegan."
+            className={`${this.baseClass}__header`}
+            titleId="ourCollection-title"
+          />
 
           {loading ? (
             <div

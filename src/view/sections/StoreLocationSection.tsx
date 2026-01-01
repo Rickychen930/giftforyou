@@ -3,6 +3,11 @@
  * Class-based component following SOLID principles
  */
 
+/**
+ * Store Location Section Component (OOP)
+ * Class-based component following SOLID principles
+ */
+
 import React, { Component } from "react";
 import "../../styles/StoreLocationSection.css";
 import type { StoreData } from "../../models/store-model";
@@ -11,6 +16,7 @@ import StoreAddressCard from "../../components/store-location/StoreAddressCard";
 import StoreContactCard from "../../components/store-location/StoreContactCard";
 import StoreHoursCard from "../../components/store-location/StoreHoursCard";
 import StoreSocialLinks from "../../components/store-location/StoreSocialLinks";
+import SectionHeader from "../../components/common/SectionHeader";
 
 interface StoreLocationSectionProps {
   data?: StoreData;
@@ -44,11 +50,12 @@ class StoreLocationSection extends Component<StoreLocationSectionProps, StoreLoc
       <section className={this.baseClass} id="Location">
         <div className={`${this.baseClass}__container`}>
           <div className={`${this.baseClass}__info`} aria-labelledby="store-location-title">
-            <p className={`${this.baseClass}__kicker`}>Toko & Kontak</p>
-
-            <h2 id="store-location-title" className={`${this.baseClass}__title`}>
-              Kunjungi Toko Kami di Cirebon
-            </h2>
+            <SectionHeader
+              eyebrow="Toko & Kontak"
+              title="Kunjungi Toko Kami di Cirebon"
+              className={`${this.baseClass}__header`}
+              titleId="store-location-title"
+            />
 
             <div className={`${this.baseClass}__cards`}>
               <StoreAddressCard

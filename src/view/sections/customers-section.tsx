@@ -1,8 +1,20 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+/**
+ * Customers Section Component (OOP)
+ * Class-based component following SOLID principles
+ */
+
+import React, { Component } from "react";
 import "../../styles/CustomersSection.css";
 import { API_BASE } from "../../config/api";
 import { formatIDR } from "../../utils/money";
 import { getAccessToken } from "../../utils/auth-utils";
+import EmptyState from "../../components/common/EmptyState";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
+import CustomerCard from "../../components/cards/CustomerCard";
+import SectionHeader from "../../components/common/SectionHeader";
+import SearchInput from "../../components/inputs/SearchInput";
+// Note: Additional reusable components (BackButton, QuickActionsBar, DetailCard, KeyValueList, StatCard)
+// are available for refactoring detail view in the future
 
 type Customer = {
   _id?: string;
@@ -44,9 +56,23 @@ type CustomerWithStats = Customer & {
   };
 };
 
-type Props = {
+interface CustomersSectionProps {
   onSelectCustomer?: (customerId: string) => void;
-};
+}
+
+interface CustomersSectionState {
+  customers: CustomerWithStats[];
+  loading: boolean;
+  error: string | null;
+  searchQuery: string;
+  debouncedSearchQuery: string;
+  selectedCustomer: CustomerWithStats | null;
+  viewMode: "list" | "detail";
+  sortBy: "name" | "orders" | "spent" | "date";
+  sortDirection: "asc" | "desc";
+  filterBy: "all" | "registered" | "guest";
+  debounceTimer?: NodeJS.Timeout;
+}
 
 
 const formatDate = (v?: string): string => {
@@ -60,31 +86,65 @@ const formatDate = (v?: string): string => {
   });
 };
 
-export default function CustomersSection({ onSelectCustomer }: Props) {
-  const [customers, setCustomers] = useState<CustomerWithStats[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
-  const [selectedCustomer, setSelectedCustomer] = useState<CustomerWithStats | null>(null);
-  const [viewMode, setViewMode] = useState<"list" | "detail">("list");
-  const [sortBy, setSortBy] = useState<"name" | "orders" | "spent" | "date">("date");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const [filterBy, setFilterBy] = useState<"all" | "registered" | "guest">("all");
+/**
+ * Customers Section Component
+ * Class-based component for customer management section
+ */
+class CustomersSection extends Component<CustomersSectionProps, CustomersSectionState> {
+  private baseClass: string = "customersSection";
 
-  // Debounce search
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+  constructor(props: CustomersSectionProps) {
+    super(props);
+    this.state = {
+      customers: [],
+      loading: true,
+      error: null,
+      searchQuery: "",
+      debouncedSearchQuery: "",
+      selectedCustomer: null,
+      viewMode: "list",
+      sortBy: "date",
+      sortDirection: "desc",
+      filterBy: "all",
+      debounceTimer: undefined,
+    };
+  }
 
-  // Load customers
-  const loadCustomers = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  componentDidMount(): void {
+    this.loadCustomers();
+  }
+
+  componentDidUpdate(prevProps: CustomersSectionProps, prevState: CustomersSectionState): void {
+    // Handle search query debounce
+    if (prevState.searchQuery !== this.state.searchQuery) {
+      if (this.state.debounceTimer) {
+        clearTimeout(this.state.debounceTimer);
+      }
+      const timer = setTimeout(() => {
+        this.setState({ debouncedSearchQuery: this.state.searchQuery });
+      }, 300);
+      this.setState({ debounceTimer: timer });
+    }
+
+    // Load customers when debounced search query changes
+    if (prevState.debouncedSearchQuery !== this.state.debouncedSearchQuery) {
+      this.loadCustomers();
+    }
+  }
+
+  componentWillUnmount(): void {
+    if (this.state.debounceTimer) {
+      clearTimeout(this.state.debounceTimer);
+    }
+  }
+
+  /**
+   * Load customers from API
+   */
+  private loadCustomers = async (): Promise<void> => {
+    this.setState({ loading: true, error: null });
     try {
+      const { debouncedSearchQuery } = this.state;
       const query = debouncedSearchQuery ? `?q=${encodeURIComponent(debouncedSearchQuery)}` : "";
       const token = getAccessToken();
       const headers: HeadersInit = {
@@ -219,21 +279,22 @@ export default function CustomersSection({ onSelectCustomer }: Props) {
         })
       );
 
-      setCustomers(customersWithStats);
+      this.setState({ customers: customersWithStats });
     } catch (err) {
       console.error("Failed to load customers:", err);
-      setError(err instanceof Error ? err.message : "Failed to load customers");
+      this.setState({
+        error: err instanceof Error ? err.message : "Failed to load customers",
+      });
     } finally {
-      setLoading(false);
+      this.setState({ loading: false });
     }
-  }, [debouncedSearchQuery]);
+  };
 
-  useEffect(() => {
-    loadCustomers();
-  }, [loadCustomers]);
-
-  // Filter and sort customers
-  const filteredAndSortedCustomers = useMemo(() => {
+  /**
+   * Filter and sort customers
+   */
+  private getFilteredAndSortedCustomers(): CustomerWithStats[] {
+    const { customers, filterBy, sortBy, sortDirection } = this.state;
     let filtered = customers;
 
     // Filter by registration status
@@ -276,34 +337,46 @@ export default function CustomersSection({ onSelectCustomer }: Props) {
     });
 
     return filtered;
-  }, [customers, sortBy, sortDirection, filterBy]);
+  }
 
-  const handleCustomerClick = (customer: CustomerWithStats) => {
-    setSelectedCustomer(customer);
-    setViewMode("detail");
-    if (onSelectCustomer && customer._id) {
-      onSelectCustomer(customer._id);
+  /**
+   * Handle customer click to show detail
+   */
+  private handleCustomerClick = (customer: CustomerWithStats): void => {
+    this.setState({ selectedCustomer: customer, viewMode: "detail" });
+    if (this.props.onSelectCustomer && customer._id) {
+      this.props.onSelectCustomer(customer._id);
     }
   };
 
-  if (viewMode === "detail" && selectedCustomer) {
+  /**
+   * Handle back to list view
+   */
+  private handleBackToList = (): void => {
+    this.setState({ viewMode: "list", selectedCustomer: null });
+  };
+
+  /**
+   * Render detail view
+   */
+  private renderDetailView(): React.ReactNode {
+    const { selectedCustomer } = this.state;
+    if (!selectedCustomer) return null;
+
     return (
-      <div className="customersSection">
-        <div className="customersSection__header">
+      <div className={this.baseClass}>
+        <div className={`${this.baseClass}__header`}>
           <button
             type="button"
-            className="customersSection__backBtn"
-            onClick={() => {
-              setViewMode("list");
-              setSelectedCustomer(null);
-            }}
+            className={`${this.baseClass}__backBtn`}
+            onClick={this.handleBackToList}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             Kembali ke Daftar
           </button>
-          <h2 className="customersSection__title">Detail Customer</h2>
+          <h2 className={`${this.baseClass}__title`}>Detail Customer</h2>
         </div>
 
         <div className="customersDetail">
@@ -480,161 +553,168 @@ export default function CustomersSection({ onSelectCustomer }: Props) {
     );
   }
 
-  return (
-    <div className="customersSection">
-      <div className="customersSection__header">
-        <h2 className="customersSection__title">Customer Management</h2>
-        <div className="customersSection__controls">
-          <button
-            type="button"
-            className="customersSection__exportBtn"
-            onClick={() => {
-              // Export to CSV
-              const csv = [
-                ["Nama", "Telepon", "Alamat", "Total Pesanan", "Total Belanja", "Status", "Bergabung"],
-                ...filteredAndSortedCustomers.map((c) => [
-                  c.buyerName,
-                  c.phoneNumber,
-                  c.address || "",
-                  (c.stats?.totalOrders || 0).toString(),
-                  (c.stats?.totalSpent || 0).toString(),
-                  c.userId ? "Terdaftar" : "Guest",
-                  formatDate(c.createdAt),
-                ]),
-              ]
-                .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
-                .join("\n");
-              
-              const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-              const link = document.createElement("a");
-              const url = URL.createObjectURL(blob);
-              link.setAttribute("href", url);
-              link.setAttribute("download", `customers_${new Date().toISOString().split("T")[0]}.csv`);
-              link.style.visibility = "hidden";
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            }}
-            title="Export ke CSV"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Export CSV
-          </button>
-          <div className="customersSection__search">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
-              <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-            <input
-              type="text"
-              placeholder="Cari customer..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="customersSection__searchInput"
-            />
-          </div>
-          <select
-            value={filterBy}
-            onChange={(e) => setFilterBy(e.target.value as "all" | "registered" | "guest")}
-            className="customersSection__filter"
-          >
-            <option value="all">Semua</option>
-            <option value="registered">Terdaftar</option>
-            <option value="guest">Guest</option>
-          </select>
-          <select
-            value={`${sortBy}-${sortDirection}`}
-            onChange={(e) => {
-              const [by, dir] = e.target.value.split("-");
-              setSortBy(by as typeof sortBy);
-              setSortDirection(dir as typeof sortDirection);
-            }}
-            className="customersSection__sort"
-          >
-            <option value="date-desc">Terbaru</option>
-            <option value="date-asc">Terlama</option>
-            <option value="name-asc">Nama A-Z</option>
-            <option value="name-desc">Nama Z-A</option>
-            <option value="orders-desc">Pesanan Terbanyak</option>
-            <option value="spent-desc">Belanja Terbanyak</option>
-          </select>
-        </div>
-      </div>
+  /**
+   * Handle export to CSV
+   */
+  private handleExportCSV = (): void => {
+    const csv = [
+      ["Nama", "Telepon", "Alamat", "Total Pesanan", "Total Belanja", "Status", "Bergabung"],
+      ...this.getFilteredAndSortedCustomers().map((c) => [
+        c.buyerName,
+        c.phoneNumber,
+        c.address || "",
+        (c.stats?.totalOrders || 0).toString(),
+        (c.stats?.totalSpent || 0).toString(),
+        c.userId ? "Terdaftar" : "Guest",
+        formatDate(c.createdAt),
+      ]),
+    ]
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
 
-      {loading && (
-        <div className="customersSection__loading">
-          <div className="customersSection__spinner"></div>
-          <p>Memuat data customer...</p>
-        </div>
-      )}
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `customers_${new Date().toISOString().split("T")[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
-      {error && (
-        <div className="customersSection__error">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-            <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-          <p>{error}</p>
-        </div>
-      )}
+  /**
+   * Render list view
+   */
+  private renderListView(): React.ReactNode {
+    const { loading, error, searchQuery, filterBy, sortBy, sortDirection } = this.state;
+    const filteredAndSortedCustomers = this.getFilteredAndSortedCustomers();
 
-      {!loading && !error && filteredAndSortedCustomers.length === 0 && (
-        <div className="customersSection__empty">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.3"/>
-          </svg>
-          <p>Tidak ada customer ditemukan</p>
-        </div>
-      )}
-
-      {!loading && !error && filteredAndSortedCustomers.length > 0 && (
-        <div className="customersSection__list">
-          {filteredAndSortedCustomers.map((customer) => (
-            <div
-              key={customer._id}
-              className="customersSection__card"
-              onClick={() => handleCustomerClick(customer)}
-            >
-              <div className="customersSection__cardHeader">
-                <div className="customersSection__cardInfo">
-                  <h3 className="customersSection__cardName">{customer.buyerName}</h3>
-                  <p className="customersSection__cardPhone">{customer.phoneNumber}</p>
-                </div>
-                <div className="customersSection__cardBadges">
-                  {customer.userId ? (
-                    <span className="customersSection__badge customersSection__badge--registered">
-                      Terdaftar
-                    </span>
-                  ) : (
-                    <span className="customersSection__badge customersSection__badge--guest">
-                      Guest
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="customersSection__cardStats">
-                <div className="customersSection__stat">
-                  <span className="customersSection__statLabel">Pesanan</span>
-                  <span className="customersSection__statValue">{customer.stats?.totalOrders || 0}</span>
-                </div>
-                <div className="customersSection__stat">
-                  <span className="customersSection__statLabel">Total Belanja</span>
-                  <span className="customersSection__statValue">
-                    {formatIDR(customer.stats?.totalSpent || 0)}
-                  </span>
-                </div>
-                <div className="customersSection__stat">
-                  <span className="customersSection__statLabel">Bergabung</span>
-                  <span className="customersSection__statValue">{formatDate(customer.createdAt)}</span>
-                </div>
-              </div>
+    return (
+      <div className={this.baseClass}>
+        <SectionHeader
+          title="Customer Management"
+          actions={
+            <div className={`${this.baseClass}__controls`}>
+              <button
+                type="button"
+                className={`${this.baseClass}__exportBtn`}
+                onClick={this.handleExportCSV}
+                title="Export ke CSV"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Export CSV
+              </button>
+              <SearchInput
+                placeholder="Cari customer..."
+                value={searchQuery}
+                onSearchChange={(value) => this.setState({ searchQuery: value })}
+                className={`${this.baseClass}__searchInput`}
+              />
+              <select
+                value={filterBy}
+                onChange={(e) => this.setState({ filterBy: e.target.value as "all" | "registered" | "guest" })}
+                className={`${this.baseClass}__filter`}
+              >
+                <option value="all">Semua</option>
+                <option value="registered">Terdaftar</option>
+                <option value="guest">Guest</option>
+              </select>
+              <select
+                value={`${sortBy}-${sortDirection}`}
+                onChange={(e) => {
+                  const [by, dir] = e.target.value.split("-");
+                  this.setState({
+                    sortBy: by as "name" | "orders" | "spent" | "date",
+                    sortDirection: dir as "asc" | "desc",
+                  });
+                }}
+                className={`${this.baseClass}__sort`}
+              >
+                <option value="date-desc">Terbaru</option>
+                <option value="date-asc">Terlama</option>
+                <option value="name-asc">Nama A-Z</option>
+                <option value="name-desc">Nama Z-A</option>
+                <option value="orders-desc">Pesanan Terbanyak</option>
+                <option value="spent-desc">Belanja Terbanyak</option>
+              </select>
             </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+          }
+          className={`${this.baseClass}__header`}
+        />
+
+        {loading && (
+          <div className={`${this.baseClass}__loading`}>
+            <SkeletonLoader variant="card" />
+            <SkeletonLoader variant="card" />
+            <SkeletonLoader variant="card" />
+          </div>
+        )}
+
+        {error && (
+          <div className={`${this.baseClass}__error`}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+              <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+            <p>{error}</p>
+          </div>
+        )}
+
+        {!loading && !error && filteredAndSortedCustomers.length === 0 && (
+          <EmptyState
+            title="Tidak ada customer ditemukan"
+            description="Coba ubah filter atau kata kunci pencarian"
+            icon={
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.3"/>
+              </svg>
+            }
+            className={`${this.baseClass}__empty`}
+          />
+        )}
+
+        {!loading && !error && filteredAndSortedCustomers.length > 0 && (
+          <div className={`${this.baseClass}__list`}>
+            {filteredAndSortedCustomers.map((customer) => (
+              <CustomerCard
+                key={customer._id}
+                customerId={customer._id}
+                name={customer.buyerName}
+                phone={customer.phoneNumber}
+                totalOrders={customer.stats?.totalOrders || 0}
+                totalSpent={formatIDR(customer.stats?.totalSpent || 0)}
+                joinedDate={formatDate(customer.createdAt)}
+                isRegistered={!!customer.userId}
+                onClick={(id) => {
+                  const customerToSelect = filteredAndSortedCustomers.find((c) => c._id === id);
+                  if (customerToSelect) {
+                    this.handleCustomerClick(customerToSelect);
+                  }
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /**
+   * Render method - Single Responsibility: render UI only
+   */
+  render(): React.ReactNode {
+    const { viewMode } = this.state;
+
+    if (viewMode === "detail") {
+      return this.renderDetailView();
+    }
+
+    return this.renderListView();
+  }
 }
+
+export default CustomersSection;
 

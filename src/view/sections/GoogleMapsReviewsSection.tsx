@@ -3,8 +3,15 @@
  * Class-based component following SOLID principles
  */
 
+/**
+ * Google Maps Reviews Section Component (OOP)
+ * Class-based component following SOLID principles
+ */
+
 import React, { Component } from "react";
 import "../../styles/GoogleMapsReviewsSection.css";
+import SectionHeader from "../../components/common/SectionHeader";
+import EmptyState from "../../components/common/EmptyState";
 
 interface Review {
   id: string;
@@ -176,28 +183,60 @@ class GoogleMapsReviewsSection extends Component<
     );
   }
 
+  /**
+   * Render empty state
+   */
+  private renderEmptyState(): React.ReactNode {
+    return (
+      <EmptyState
+        title="Belum ada ulasan"
+        description="Ulasan akan muncul di sini setelah pelanggan memberikan rating di Google Maps."
+        icon={
+          <svg
+            width="64"
+            height="64"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <path
+              d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.3"
+            />
+          </svg>
+        }
+        className={`${this.baseClass}__empty`}
+      />
+    );
+  }
+
   render(): React.ReactNode {
     const { placeName = "GiftForYou.idn" } = this.props;
     const reviews = this.getSortedReviews().slice(0, 6); // Show top 6 reviews
 
-    if (reviews.length === 0) return null;
-
     return (
       <section className={this.baseClass} id="Reviews" aria-labelledby="reviews-title">
         <div className={`${this.baseClass}__container`}>
-          <header className={`${this.baseClass}__header`}>
-            <p className={`${this.baseClass}__kicker`}>Testimoni Pelanggan</p>
-            <h2 id="reviews-title" className={`${this.baseClass}__title`}>
-              Ulasan Google Maps
-            </h2>
-            <p className={`${this.baseClass}__subtitle`}>
-              Lihat apa yang pelanggan katakan tentang {placeName}
-            </p>
-          </header>
+          <SectionHeader
+            eyebrow="Testimoni Pelanggan"
+            title="Ulasan Google Maps"
+            subtitle={`Lihat apa yang pelanggan katakan tentang ${placeName}`}
+            className={`${this.baseClass}__header`}
+            titleId="reviews-title"
+          />
 
-          <div className={`${this.baseClass}__reviews`}>
-            {reviews.map((review) => this.renderReview(review))}
-          </div>
+          {reviews.length === 0 ? (
+            this.renderEmptyState()
+          ) : (
+            <div className={`${this.baseClass}__reviews`}>
+              {reviews.map((review) => this.renderReview(review))}
+            </div>
+          )}
 
           <div className={`${this.baseClass}__footer`}>
             <a

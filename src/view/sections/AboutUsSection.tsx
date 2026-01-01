@@ -3,10 +3,16 @@
  * Class-based component following SOLID principles
  */
 
+/**
+ * About Us Section Component (OOP)
+ * Class-based component following SOLID principles
+ */
+
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import "../../styles/AboutUsSection.css";
 import { AboutUsContent } from "../../models/about-us-model";
+import SectionHeader from "../../components/common/SectionHeader";
 
 interface AboutUsSectionProps {
   content: AboutUsContent;
@@ -31,13 +37,13 @@ class AboutUsSection extends Component<AboutUsSectionProps, AboutUsSectionState>
       <section id="AboutUs" className={this.baseClass} aria-labelledby="aboutUs-title">
         <div className={`${this.baseClass}__container`}>
           <div className={`${this.baseClass}__card`}>
-            <p className={`${this.baseClass}__kicker`}>About Our Florist</p>
-
-            <h2 id="aboutUs-title" className={`${this.baseClass}__title`}>
-              {content.title}
-            </h2>
-
-            <p className={`${this.baseClass}__description`}>{content.description}</p>
+            <SectionHeader
+              eyebrow="About Our Florist"
+              title={content.title}
+              subtitle={content.description}
+              className={`${this.baseClass}__header`}
+              titleId="aboutUs-title"
+            />
 
             <div className={`${this.baseClass}__actions`}>
               <Link to={ctaHref} className={`${this.baseClass}__button`}>

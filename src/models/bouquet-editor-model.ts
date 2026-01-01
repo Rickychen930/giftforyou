@@ -2,6 +2,8 @@
 // Business logic model for bouquet editor form
 // Handles validation, image processing, form data building, and utility functions
 
+/// <reference lib="dom" />
+
 import { API_BASE } from "../config/api";
 import { formatIDR } from "../utils/money";
 import type { BouquetSize } from "../constants/bouquet-constants";
@@ -325,7 +327,7 @@ export async function compressImage(
 ): Promise<{ file: File; dimensions: { width: number; height: number } }> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = (e: ProgressEvent<FileReader>) => {
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement("canvas");
@@ -349,7 +351,7 @@ export async function compressImage(
         ctx.drawImage(img, 0, 0, width, height);
 
         canvas.toBlob(
-          (blob) => {
+          (blob: Blob | null) => {
             if (!blob) {
               reject(new Error("Failed to compress image"));
               return;

@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import type { Bouquet } from "../../models/domain/bouquet";
 import type { Collection } from "../../models/domain/collection";
 import "../../styles/BouquetEditorSection.css";
-import CollectionListView from "./collection-list-view";
-import CollectionDetailView from "./collection-detail-view";
+import CollectionListView from "./CollectionListView";
+import CollectionDetailView from "./CollectionDetailView";
 import BouquetEditForm from "./bouquet-edit-form";
 import { API_BASE } from "../../config/api";
 
