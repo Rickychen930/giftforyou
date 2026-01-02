@@ -1,6 +1,7 @@
 /**
  * Header Controller
  * OOP-based controller for managing header state and data fetching
+ * Follows SOLID principles: Single Responsibility, DRY, efficient state management
  */
 
 import React, { Component } from "react";
@@ -13,6 +14,7 @@ import {
 } from "../models/header-model";
 import HeaderView from "../view/header";
 import type { NavItem } from "../components/header/HeaderNavigation";
+import { setupClickOutside } from "../utils/click-outside-utils";
 
 interface HeaderControllerProps {
   location: Location;
@@ -32,6 +34,7 @@ export class HeaderController extends Component<
   private scrollHandler: (() => void) | null = null;
   private collectionsCloseTimer: number | null = null;
   private collectionsAnimateTimer: number | null = null;
+  private collectionsClickOutsideCleanup: (() => void) | null = null;
   private searchButtonRef: React.RefObject<HTMLButtonElement>;
   private hamburgerButtonRef: React.RefObject<HTMLButtonElement>;
   private collectionsItemRef: React.RefObject<HTMLLIElement>;
@@ -230,6 +233,44 @@ export class HeaderController extends Component<
   };
 
   /**
+   * Handle collections click outside
+   */
+  private handleCollectionsClickOutside = (): void => {
+    if (this.state.mobileOpen) return;
+    this.handleCollectionsClose();
+  };
+
+  /**
+   * Setup collections click outside listener
+   */
+  private setupCollectionsClickOutside(): void {
+    // Cleanup existing listener
+    if (this.collectionsClickOutsideCleanup) {
+      this.collectionsClickOutsideCleanup();
+      this.collectionsClickOutsideCleanup = null;
+    }
+
+    // Setup new listener if collections is open and not mobile
+    if (this.state.collectionsOpen && !this.state.mobileOpen && this.collectionsItemRef.current) {
+      this.collectionsClickOutsideCleanup = setupClickOutside(
+        this.collectionsItemRef.current,
+        this.handleCollectionsClickOutside,
+        true
+      );
+    }
+  }
+
+  /**
+   * Cleanup collections click outside listener
+   */
+  private cleanupCollectionsClickOutside(): void {
+    if (this.collectionsClickOutsideCleanup) {
+      this.collectionsClickOutsideCleanup();
+      this.collectionsClickOutsideCleanup = null;
+    }
+  }
+
+  /**
    * Handle navigate
    */
   handleNavigate = (): void => {
@@ -250,7 +291,7 @@ export class HeaderController extends Component<
   /**
    * Component lifecycle: Update
    */
-  componentDidUpdate(prevProps: HeaderControllerProps): void {
+  componentDidUpdate(prevProps: HeaderControllerProps, prevState: HeaderState): void {
     // Close mobile menu and search when location changes
     if (
       prevProps.location.pathname !== this.props.location.pathname ||
@@ -261,6 +302,16 @@ export class HeaderController extends Component<
       this.setState({ collectionsOpen: false });
       this.cancelCollectionsClose();
       this.cancelCollectionsAnimate();
+      this.cleanupCollectionsClickOutside();
+      return;
+    }
+
+    // Setup/cleanup collections click outside listener
+    if (
+      prevState.collectionsOpen !== this.state.collectionsOpen ||
+      prevState.mobileOpen !== this.state.mobileOpen
+    ) {
+      this.setupCollectionsClickOutside();
     }
   }
 
@@ -272,6 +323,7 @@ export class HeaderController extends Component<
     this.cleanupScrollHandler();
     this.cancelCollectionsClose();
     this.cancelCollectionsAnimate();
+    this.cleanupCollectionsClickOutside();
   }
 
   /**

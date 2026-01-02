@@ -58,8 +58,10 @@
   height: 2.5px;
   background: linear-gradient(90deg, var(--brand-rose-500), var(--brand-sage-400));
   border-radius: 2px;
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(212, 140, 156, 0.3);
+  transition: transform var(--transition-elegant);
+  box-shadow: 
+    0 2px 8px rgba(212, 140, 156, 0.3),
+    0 0 12px rgba(212, 140, 156, 0.2);
 }
 
 .header-navigation__link:hover {

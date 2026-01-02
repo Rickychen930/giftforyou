@@ -2,6 +2,7 @@
  * Header View
  * Pure presentation component - no business logic
  * OOP-based class component following SOLID principles
+ * Luxury, elegant, responsive, and reusable
  */
 
 import React, { Component } from "react";
@@ -12,6 +13,7 @@ import HeaderBrand from "../components/header/HeaderBrand";
 import HeaderNavigation, { NavItem } from "../components/header/HeaderNavigation";
 import HeaderSearch from "../components/header/HeaderSearch";
 import HeaderActions from "../components/header/HeaderActions";
+import Backdrop from "../components/common/Backdrop";
 
 interface HeaderViewProps {
   navLinks: NavItem[];
@@ -40,136 +42,12 @@ interface HeaderViewProps {
  * Header View Component
  * Pure presentation class component - receives all data and handlers via props
  * Follows Single Responsibility Principle: only handles UI rendering
+ * Logic extracted to controller and utilities (DRY principle)
  */
 class HeaderView extends Component<HeaderViewProps> {
-  private prevBodyOverflow: string = "";
-
-  /**
-   * Handle body scroll lock when mobile menu or search is open
-   */
-  private handleBodyScrollLock(): void {
-    const { mobileOpen, searchOpen } = this.props;
-    if (!mobileOpen && !searchOpen) {
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.width = "";
-      return;
-    }
-    this.prevBodyOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    document.body.style.position = "fixed";
-    document.body.style.width = "100%";
-  }
-
-  /**
-   * Cleanup body scroll lock
-   */
-  private cleanupBodyScrollLock(): void {
-    document.body.style.overflow = this.prevBodyOverflow;
-    document.body.style.position = "";
-    document.body.style.width = "";
-  }
-
-  /**
-   * Handle click outside collections dropdown
-   */
-  private handleCollectionsClickOutside = (e: MouseEvent | TouchEvent): void => {
-    const { collectionsOpen, mobileOpen, collectionsItemRef, onCollectionsClose } = this.props;
-    if (!collectionsOpen || mobileOpen) return;
-    const root = collectionsItemRef.current;
-    if (!root) return;
-    const target = e.target as Node;
-    if (root.contains(target)) return;
-    setTimeout(() => {
-      onCollectionsClose();
-    }, 100);
-  };
-
-  /**
-   * Handle keyboard shortcuts
-   */
-  private handleKeyboardShortcuts = (e: KeyboardEvent): void => {
-    const { searchOpen, mobileOpen, onToggleSearch, onCloseSearch, onCloseMobile } = this.props;
-    if (e.key === "Escape") {
-      if (searchOpen) {
-        onCloseSearch({ returnFocus: true });
-      }
-      if (mobileOpen) {
-        onCloseMobile({ returnFocus: true });
-      }
-      return;
-    }
-
-    if ((e.ctrlKey || e.metaKey) && e.key === "k") {
-      const target = e.target as HTMLElement;
-      if (
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.isContentEditable
-      ) {
-        return;
-      }
-      e.preventDefault();
-      if (!searchOpen) {
-        onToggleSearch();
-      }
-    }
-  };
-
-  /**
-   * Setup event listeners on mount
-   */
-  componentDidMount(): void {
-    const { collectionsOpen, mobileOpen } = this.props;
-    this.handleBodyScrollLock();
-    window.addEventListener("keydown", this.handleKeyboardShortcuts);
-    
-    // Setup collections click outside listener if needed
-    if (collectionsOpen && !mobileOpen) {
-      document.addEventListener("mousedown", this.handleCollectionsClickOutside);
-      document.addEventListener("touchstart", this.handleCollectionsClickOutside, { passive: true });
-    }
-  }
-
-  /**
-   * Update effects when props change
-   */
-  componentDidUpdate(prevProps: HeaderViewProps): void {
-    const { mobileOpen, searchOpen, collectionsOpen } = this.props;
-
-    // Handle body scroll lock
-    if (prevProps.mobileOpen !== mobileOpen || prevProps.searchOpen !== searchOpen) {
-      this.handleBodyScrollLock();
-    }
-
-    // Handle collections click outside
-    if (prevProps.collectionsOpen !== collectionsOpen || prevProps.mobileOpen !== mobileOpen) {
-      // Remove old listeners
-      if (prevProps.collectionsOpen && !prevProps.mobileOpen) {
-        document.removeEventListener("mousedown", this.handleCollectionsClickOutside);
-        document.removeEventListener("touchstart", this.handleCollectionsClickOutside);
-      }
-      
-      // Add new listeners if needed
-      if (collectionsOpen && !mobileOpen) {
-        document.addEventListener("mousedown", this.handleCollectionsClickOutside);
-        document.addEventListener("touchstart", this.handleCollectionsClickOutside, { passive: true });
-      }
-    }
-  }
-
-  /**
-   * Cleanup event listeners on unmount
-   */
-  componentWillUnmount(): void {
-    this.cleanupBodyScrollLock();
-    window.removeEventListener("keydown", this.handleKeyboardShortcuts);
-    document.removeEventListener("mousedown", this.handleCollectionsClickOutside);
-    document.removeEventListener("touchstart", this.handleCollectionsClickOutside);
-  }
-
   /**
    * Render method - Single Responsibility: render UI only
+   * All business logic handled by controller
    */
   render(): React.ReactNode {
     const {
@@ -199,15 +77,19 @@ class HeaderView extends Component<HeaderViewProps> {
       collectionNames.length > 0 ? collectionNames : [];
 
     return (
-    <header className={`header ${scrolled ? "header--scrolled" : ""}`}>
-      {mobileOpen && (
-        <div
-          className="header__mobile-backdrop"
+      <header 
+        className={`header ${scrolled ? "header--scrolled" : ""}`}
+        role="banner"
+        aria-label="Main navigation"
+      >
+        <Backdrop
+          isOpen={mobileOpen}
           onClick={() => onCloseMobile({ returnFocus: true })}
-          aria-hidden="true"
+          className="header__mobile-backdrop"
+          zIndex={1400}
+          aria-label="Close mobile menu"
         />
-      )}
-      <div className="header__container">
+        <div className="header__container">
         {/* Logo & Brand */}
         <div className="header__left">
           <HeaderBrand logoSrc={logoSrc} onNavigate={onNavigate} />
