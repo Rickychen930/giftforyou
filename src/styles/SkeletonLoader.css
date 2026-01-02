@@ -7,16 +7,14 @@
 @import "design-system.css";
 
 .skeletonLoader {
-  background: linear-gradient(
-    90deg,
-    rgba(212, 140, 156, 0.1) 0%,
-    rgba(212, 140, 156, 0.15) 50%,
-    rgba(212, 140, 156, 0.1) 100%
-  );
+  background: var(--gradient-luxury-gold-subtle);
   background-size: 200% 100%;
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-sm);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .skeletonLoader--animated {
@@ -39,25 +37,21 @@
 }
 
 .skeletonLoader__line {
-  background: linear-gradient(
-    90deg,
-    rgba(212, 140, 156, 0.1) 0%,
-    rgba(212, 140, 156, 0.15) 50%,
-    rgba(212, 140, 156, 0.1) 100%
-  );
+  background: var(--gradient-luxury-gold-subtle);
   background-size: 200% 100%;
   border-radius: var(--radius-xs);
   height: 1rem;
 }
 
 .skeletonLoader--card {
-  background: var(--backdrop-glass-md);
-  border: 1.5px solid var(--border-2);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: var(--card-shadow);
-  backdrop-filter: var(--backdrop-blur-md);
-  -webkit-backdrop-filter: var(--backdrop-blur-md);
+  box-shadow: var(--shadow-luxury-md), var(--shadow-elegant);
+  backdrop-filter: var(--backdrop-blur-lg);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg);
 }
 
 .skeletonLoader__header {

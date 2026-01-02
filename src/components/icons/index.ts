@@ -46,6 +46,8 @@ export {
   ShieldIcon,
   PackageIcon,
   ChevronRightIcon,
+  ChartIcon,
+  EyeIcon,
 } from "./CommonIcons";
 
 // UI Icons (existing)

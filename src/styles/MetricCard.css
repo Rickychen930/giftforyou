@@ -10,10 +10,14 @@
   position: relative;
   padding: var(--card-padding-md);
   border-radius: var(--radius-lg);
-  background: var(--gradient-surface);
-  border: var(--card-border);
-  transition: var(--transition-all);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  transition: var(--transition-elegant);
   overflow: hidden;
+  box-shadow: var(--shadow-luxury-md), var(--shadow-elegant);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
 }
 
 .metricCard::before {
@@ -27,9 +31,9 @@
 }
 
 .metricCard:hover {
-  box-shadow: var(--card-shadow-hover);
+  box-shadow: var(--shadow-luxury-xl), var(--shadow-luxury-gold-lg);
   transform: translateY(-2px);
-  border-color: var(--border-2);
+  border-color: var(--border-luxury-gold);
 }
 
 .metricCard:hover::before {
@@ -73,8 +77,18 @@
 
 .metricCard__value {
   font-size: var(--font-size-4xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--ink-900);
+  font-weight: var(--font-weight-black);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0 0 var(--space-1) 0;
   line-height: var(--line-height-tight);
 }

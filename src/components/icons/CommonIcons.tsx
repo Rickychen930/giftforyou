@@ -304,3 +304,23 @@ export const ChevronRightIcon: React.FC<Omit<IconProps, "children">> = (props) =
     <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
   </Icon>
 );
+
+/**
+ * Chart/Analytics Icon
+ */
+export const ChartIcon: React.FC<Omit<IconProps, "children">> = (props) => (
+  <Icon {...props}>
+    <path d="M3 3v18h18" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M7 16l4-4 4 4 6-6" strokeLinecap="round" strokeLinejoin="round" />
+  </Icon>
+);
+
+/**
+ * Eye/View Icon
+ */
+export const EyeIcon: React.FC<Omit<IconProps, "children">> = (props) => (
+  <Icon {...props}>
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" />
+  </Icon>
+);

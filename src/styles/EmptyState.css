@@ -10,13 +10,15 @@
 .emptyState {
   text-align: center;
   padding: clamp(var(--space-12), 6vw, var(--space-20)) clamp(var(--space-6), 3vw, var(--space-8));
-  background: var(--gradient-overlay);
-  border: 1.5px solid var(--border-2);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-lg);
-  backdrop-filter: var(--backdrop-blur-md);
-  -webkit-backdrop-filter: var(--backdrop-blur-md);
+  backdrop-filter: var(--backdrop-blur-lg);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg);
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-luxury-lg), var(--shadow-elegant);
 }
 
 .emptyState::before {
@@ -51,7 +53,17 @@
 .emptyState__title {
   font-size: clamp(var(--font-size-xl), 3vw, var(--font-size-3xl));
   font-weight: var(--font-weight-black);
-  color: var(--ink-800);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0 0 var(--space-3) 0;
   font-family: var(--font-family-heading);
   line-height: var(--line-height-tight);

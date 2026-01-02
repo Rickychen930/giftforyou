@@ -19,25 +19,27 @@
   align-items: center;
   gap: var(--gap-sm);
   padding: var(--btn-padding-md);
-  background: var(--backdrop-glass-sm);
+  background: var(--gradient-luxury-gold-subtle);
   backdrop-filter: var(--backdrop-blur-md);
   -webkit-backdrop-filter: var(--backdrop-blur-md);
-  border: 1.5px solid var(--border-2);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-md);
-  color: var(--ink-700);
+  color: var(--luxury-gold-700);
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-sm);
   cursor: pointer;
-  transition: var(--transition-all);
+  transition: var(--transition-elegant);
   text-decoration: none;
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .sectionHeader__backBtn:hover {
-  background: var(--backdrop-glass-md);
-  border-color: var(--border-3);
-  color: var(--brand-rose-700);
+  background: var(--gradient-luxury-gold-subtle);
+  border-color: var(--border-luxury-gold);
+  color: var(--luxury-gold-600);
   transform: translateX(-4px);
-  box-shadow: var(--shadow-brand-sm);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
 }
 
 .sectionHeader__backBtn:active {
@@ -74,8 +76,18 @@
 
 .sectionHeader__title {
   font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--ink-900);
+  font-weight: var(--font-weight-black);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0 0 var(--space-2) 0;
   line-height: var(--line-height-tight);
 }
