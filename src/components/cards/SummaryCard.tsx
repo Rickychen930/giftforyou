@@ -22,14 +22,41 @@ interface SummaryCardProps extends BaseCardProps {
 
 interface SummaryCardState {
   isHovered: boolean;
+  isPressed: boolean;
 }
+
+// Set default BaseCard props for SummaryCard
+const defaultSummaryCardProps: Partial<BaseCardProps> = {
+  variant: "glass",
+  padding: "lg",
+  shadow: "md",
+  hoverable: true,
+};
 
 /**
  * Summary Card Component
  * Class-based component extending BaseCard
+ * Enhanced with BaseCard luxury variants
  */
 class SummaryCard extends BaseCard<SummaryCardProps, SummaryCardState> {
   protected baseClass: string = "summaryCard";
+
+  constructor(props: SummaryCardProps) {
+    super({
+      ...defaultSummaryCardProps,
+      ...props,
+    } as SummaryCardProps);
+  }
+
+  protected getClasses(): string {
+    const { className = "" } = this.props;
+    
+    // Use BaseCard's getClasses and add SummaryCard specific classes
+    const baseClasses = super.getClasses();
+    const hoverClass = this.state.isHovered ? `${this.baseClass}--hovered` : "";
+    
+    return `${baseClasses} ${this.baseClass} ${hoverClass} ${className}`.trim();
+  }
 
 
   protected renderHeader(): React.ReactNode {
@@ -65,11 +92,18 @@ class SummaryCard extends BaseCard<SummaryCardProps, SummaryCardState> {
   }
 
   render(): React.ReactNode {
+    const { ariaLabel } = this.props;
+    const cardAttrs = this.getCardAttributes();
+
     return (
       <div
+        {...cardAttrs}
         className={this.getClasses()}
+        aria-label={ariaLabel}
         onMouseEnter={this.handleMouseEnter}
         onMouseLeave={this.handleMouseLeave}
+        onMouseDown={this.handleMouseDown}
+        onMouseUp={this.handleMouseUp}
       >
         {this.renderHeader()}
         {this.renderContent()}
