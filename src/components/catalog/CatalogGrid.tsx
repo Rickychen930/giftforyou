@@ -1,10 +1,12 @@
 /**
  * Catalog Grid Component (OOP)
  * Class-based component following SOLID principles
+ * Enhanced with Grid component for consistent responsive layout
  */
 
 import React, { Component } from "react";
 import "../../styles/catalog/CatalogGrid.css";
+import Grid from "../layout/Grid";
 import BouquetCard from "../cards/BouquetCard";
 import type { Bouquet } from "../../models/domain/bouquet";
 
@@ -21,6 +23,7 @@ interface CatalogGridState {
 /**
  * Catalog Grid Component
  * Class-based component for displaying bouquets in a grid
+ * Uses Grid component for consistent responsive layout
  */
 class CatalogGrid extends Component<CatalogGridProps, CatalogGridState> {
   private baseClass: string = "catalog-grid";
@@ -31,10 +34,11 @@ class CatalogGrid extends Component<CatalogGridProps, CatalogGridState> {
     if (bouquets.length === 0) return null;
 
     return (
-      <div
+      <Grid
+        minColumnWidth="sm"
+        gap="lg"
         className={`${this.baseClass} ${className}`}
-        role="list"
-        aria-label={ariaLabel || `Menampilkan ${bouquets.length} bouquet`}
+        ariaLabel={ariaLabel || `Menampilkan ${bouquets.length} bouquet`}
       >
         {bouquets.map((b) => (
           <BouquetCard
@@ -53,7 +57,7 @@ class CatalogGrid extends Component<CatalogGridProps, CatalogGridState> {
             isFeatured={b.isFeatured}
           />
         ))}
-      </div>
+      </Grid>
     );
   }
 }

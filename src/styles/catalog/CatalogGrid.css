@@ -1,29 +1,68 @@
-@import "../colors.css";
+/**
+ * Catalog Grid Component Styles
+ * Luxury, DRY, Efficient, Responsive
+ * Uses Grid component for layout, only adds catalog-specific styling
+ */
+
+@import "../design-system.css";
 
 .catalog-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: clamp(1.5rem, 3vw, 2rem);
-  padding: 0.25rem 0;
+  /* Grid component handles layout, we only add catalog-specific styles */
+  padding: var(--space-1) 0;
+  position: relative;
 }
 
-@media (min-width: 640px) {
-  .catalog-grid {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+/* Ensure cards take full height in grid */
+.catalog-grid > * {
+  height: 100%;
+}
+
+/* Luxury enhancement: smooth fade-in for grid items */
+.catalog-grid > * {
+  animation: fadeInCard 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.catalog-grid > *:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.catalog-grid > *:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.catalog-grid > *:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.catalog-grid > *:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+.catalog-grid > *:nth-child(5) {
+  animation-delay: 0.5s;
+}
+
+.catalog-grid > *:nth-child(6) {
+  animation-delay: 0.6s;
+}
+
+@keyframes fadeInCard {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@media (min-width: 1024px) {
-  .catalog-grid {
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: clamp(2rem, 4vw, 2.5rem);
-  }
-}
-
-@media (max-width: 480px) {
-  .catalog-grid {
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .catalog-grid > * {
+    animation: none;
+    opacity: 1;
   }
 }
 
