@@ -130,19 +130,61 @@ export class CustomerLoginPageController extends BaseController<
         }),
       });
 
-      const data = await response.json();
+      // Read response text first to handle both JSON and non-JSON responses
+      const responseText = await response.text();
+      let data: any = {};
 
-      if (!response.ok) {
+      // Try to parse as JSON
+      try {
+        if (responseText.trim()) {
+          data = JSON.parse(responseText);
+        }
+      } catch (parseError) {
+        // Response is not JSON (could be HTML error page or plain text)
+        console.error("Failed to parse login response as JSON:", parseError);
         this.setState({
-          error: data.error || "Username atau password salah",
+          error: response.ok 
+            ? "Login gagal. Format respons tidak valid." 
+            : `Login gagal (${response.status}). Silakan coba lagi.`,
           isLoading: false,
         });
         return;
       }
 
+      if (!response.ok) {
+        // Handle different error scenarios
+        let errorMessage = "Username atau password salah";
+        
+        if (data.error) {
+          errorMessage = data.error;
+        } else if (data.message) {
+          errorMessage = data.message;
+        } else if (response.status === 401) {
+          errorMessage = "Username atau password salah";
+        } else if (response.status === 429) {
+          errorMessage = data.error || "Terlalu banyak percobaan login. Silakan coba lagi nanti.";
+        } else if (response.status === 403) {
+          errorMessage = data.error || "Akses ditolak. Akun mungkin tidak aktif.";
+        } else if (response.status >= 500) {
+          errorMessage = "Server sedang bermasalah. Silakan coba lagi nanti.";
+        }
+
+        this.setState({
+          error: errorMessage,
+          isLoading: false,
+        });
+        return;
+      }
+
+      // Backend wraps response in { success: true, data: {...} }
+      // Extract the actual data from the response
+      const responseData = data.data || data;
+      const token = responseData.token;
+      const refreshToken = responseData.refreshToken;
+
       // Save tokens
-      if (data.token) {
-        setTokens(data.token, data.refreshToken);
+      if (token) {
+        setTokens(token, refreshToken);
 
         // Save username if remember me is checked
         if (this.state.formData.rememberMe) {
@@ -153,7 +195,7 @@ export class CustomerLoginPageController extends BaseController<
 
         // Check user role and redirect accordingly
         try {
-          const tokenPayload = JSON.parse(atob(data.token.split(".")[1]));
+          const tokenPayload = JSON.parse(atob(token.split(".")[1]));
           const role = tokenPayload.role;
 
           toast.success("Login berhasil! Selamat datang kembali!");
@@ -176,14 +218,23 @@ export class CustomerLoginPageController extends BaseController<
         }
       } else {
         this.setState({
-          error: "Login gagal. Silakan coba lagi.",
+          error: "Login gagal. Token tidak diterima dari server.",
           isLoading: false,
         });
       }
     } catch (error) {
       console.error("Login error:", error);
+      
+      // Handle network errors specifically
+      let errorMessage = "Terjadi kesalahan. Silakan coba lagi nanti.";
+      if (error instanceof TypeError && error.message.includes("fetch")) {
+        errorMessage = "Tidak dapat terhubung ke server. Periksa koneksi internet Anda.";
+      } else if (error instanceof Error) {
+        errorMessage = `Terjadi kesalahan: ${error.message}`;
+      }
+      
       this.setState({
-        error: "Terjadi kesalahan. Silakan coba lagi nanti.",
+        error: errorMessage,
         isLoading: false,
       });
     }
@@ -204,23 +255,65 @@ export class CustomerLoginPageController extends BaseController<
         body: JSON.stringify({ credential }),
       });
 
-      const data = await response.json();
+      // Read response text first to handle both JSON and non-JSON responses
+      const responseText = await response.text();
+      let data: any = {};
 
-      if (!response.ok) {
+      // Try to parse as JSON
+      try {
+        if (responseText.trim()) {
+          data = JSON.parse(responseText);
+        }
+      } catch (parseError) {
+        // Response is not JSON (could be HTML error page or plain text)
+        console.error("Failed to parse Google login response as JSON:", parseError);
         this.setState({
-          error: data.error || "Login dengan Google gagal",
+          error: response.ok 
+            ? "Login dengan Google gagal. Format respons tidak valid." 
+            : `Login dengan Google gagal (${response.status}). Silakan coba lagi.`,
           googleLoading: false,
         });
         return;
       }
 
+      if (!response.ok) {
+        // Handle different error scenarios
+        let errorMessage = "Login dengan Google gagal";
+        
+        if (data.error) {
+          errorMessage = data.error;
+        } else if (data.message) {
+          errorMessage = data.message;
+        } else if (response.status === 401) {
+          errorMessage = "Autentikasi Google gagal";
+        } else if (response.status === 429) {
+          errorMessage = data.error || "Terlalu banyak percobaan login. Silakan coba lagi nanti.";
+        } else if (response.status === 403) {
+          errorMessage = data.error || "Akses ditolak. Akun mungkin tidak aktif.";
+        } else if (response.status >= 500) {
+          errorMessage = "Server sedang bermasalah. Silakan coba lagi nanti.";
+        }
+
+        this.setState({
+          error: errorMessage,
+          googleLoading: false,
+        });
+        return;
+      }
+
+      // Backend wraps response in { success: true, data: {...} }
+      // Extract the actual data from the response
+      const responseData = data.data || data;
+      const token = responseData.token;
+      const refreshToken = responseData.refreshToken;
+
       // Save tokens
-      if (data.token) {
-        setTokens(data.token, data.refreshToken);
+      if (token) {
+        setTokens(token, refreshToken);
 
         // Check user role and redirect accordingly
         try {
-          const tokenPayload = JSON.parse(atob(data.token.split(".")[1]));
+          const tokenPayload = JSON.parse(atob(token.split(".")[1]));
           const role = tokenPayload.role;
 
           toast.success("Login dengan Google berhasil! Selamat datang!");
@@ -243,14 +336,23 @@ export class CustomerLoginPageController extends BaseController<
         }
       } else {
         this.setState({
-          error: "Login gagal. Silakan coba lagi.",
+          error: "Login dengan Google gagal. Token tidak diterima dari server.",
           googleLoading: false,
         });
       }
     } catch (error) {
       console.error("Google login error:", error);
+      
+      // Handle network errors specifically
+      let errorMessage = "Terjadi kesalahan. Silakan coba lagi nanti.";
+      if (error instanceof TypeError && error.message.includes("fetch")) {
+        errorMessage = "Tidak dapat terhubung ke server. Periksa koneksi internet Anda.";
+      } else if (error instanceof Error) {
+        errorMessage = `Terjadi kesalahan: ${error.message}`;
+      }
+      
       this.setState({
-        error: "Terjadi kesalahan. Silakan coba lagi nanti.",
+        error: errorMessage,
         googleLoading: false,
       });
     }
