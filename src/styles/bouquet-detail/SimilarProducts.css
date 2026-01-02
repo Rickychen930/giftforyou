@@ -41,10 +41,15 @@
   border-color: var(--brand-rose-border);
   backdrop-filter: var(--backdrop-blur-md);
   -webkit-backdrop-filter: var(--backdrop-blur-md);
-  transition: var(--transition-elegant);
+  transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              border-color 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              background 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   text-decoration: none;
   color: inherit;
   box-shadow: var(--shadow-luxury-md), var(--shadow-elegant);
+  contain: layout style paint;
+  touch-action: manipulation;
 }
 
 .similar-products__card:hover {
@@ -108,10 +113,31 @@
   background-clip: text;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
+  .similar-products {
+    margin-top: clamp(2.5rem, 4vw, 3rem);
+    padding-top: clamp(1.5rem, 3vw, 2rem);
+  }
+
+  .similar-products__title {
+    font-size: clamp(1.35rem, 2.5vw, 1.5rem);
+    margin-bottom: clamp(1.25rem, 2.5vw, 1.5rem);
+  }
+
   .similar-products__grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1rem;
+    gap: clamp(0.875rem, 1.5vw, 1rem);
+  }
+}
+
+@media (max-width: 640px) {
+  .similar-products__grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.875rem;
+  }
+
+  .similar-products__body {
+    padding: 0.875rem;
   }
 }
 
@@ -119,5 +145,24 @@
   .similar-products__grid {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 0.75rem;
+  }
+
+  .similar-products__name {
+    font-size: 0.9rem;
+  }
+
+  .similar-products__price {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .similar-products__grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.625rem;
+  }
+
+  .similar-products__body {
+    padding: 0.75rem;
   }
 }

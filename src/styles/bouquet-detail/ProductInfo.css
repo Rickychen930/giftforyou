@@ -141,20 +141,71 @@
   line-height: 1.6;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
   .product-info {
-    padding: 1.25rem;
-    border-radius: 20px;
+    padding: clamp(1.25rem, 2.5vw, 1.5rem);
+    border-radius: var(--radius-xl);
   }
 
   .product-info__chip {
-    font-size: 0.8rem;
-    padding: 0.5rem 0.875rem;
+    font-size: clamp(0.8rem, 1.2vw, 0.875rem);
+    padding: clamp(0.5rem, 1vw, 0.625rem) clamp(0.875rem, 1.5vw, 1rem);
   }
 
   .product-info__detail-icon {
-    width: 40px;
-    height: 40px;
+    width: clamp(40px, 5vw, 48px);
+    height: clamp(40px, 5vw, 48px);
+  }
+}
+
+@media (max-width: 640px) {
+  .product-info {
+    padding: clamp(1rem, 2vw, 1.25rem);
+    gap: clamp(1.25rem, 2.5vw, 1.5rem);
+  }
+
+  .product-info__chips {
+    gap: 0.625rem;
+  }
+
+  .product-info__details {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-info {
+    padding: 1rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .product-info__chip {
+    font-size: 0.75rem;
+    padding: 0.45rem 0.8rem;
+  }
+
+  .product-info__detail-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .product-info__detail-title {
+    font-size: 0.95rem;
+  }
+
+  .product-info__detail-text {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .product-info {
+    padding: 0.875rem;
+  }
+
+  .product-info__chip {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.7rem;
   }
 }
 

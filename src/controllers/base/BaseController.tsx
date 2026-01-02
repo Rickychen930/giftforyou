@@ -181,7 +181,14 @@ export abstract class BaseController<
       const errorMessage = error.message || defaultMessage;
       // Only log errors that are not expected/graceful handling cases
       // Skip logging for common API format issues that are handled gracefully
-      if (errorMessage && !errorMessage.includes("API returned unexpected format")) {
+      // Also skip logging for data validation errors that are handled gracefully
+      const isGracefulError = 
+        errorMessage.includes("API returned unexpected format") ||
+        errorMessage.includes("Bouquet data is invalid") ||
+        errorMessage.includes("missing _id or name") ||
+        errorMessage.includes("Empty response body");
+      
+      if (errorMessage && !isGracefulError) {
         console.error(`[${this.constructor.name}] Error:`, errorMessage);
       } else if (errorMessage && process.env.NODE_ENV === "development") {
         // In development, log as warning for debugging

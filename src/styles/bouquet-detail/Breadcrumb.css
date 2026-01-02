@@ -51,9 +51,28 @@
   overflow: hidden;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
   .breadcrumb {
-    font-size: 0.8rem;
+    font-size: clamp(0.8rem, 1.2vw, 0.85rem);
+    margin-bottom: clamp(1.25rem, 2.5vw, 1.5rem);
+  }
+}
+
+@media (max-width: 640px) {
+  .breadcrumb {
+    gap: 0.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .breadcrumb {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .breadcrumb {
+    font-size: 0.7rem;
   }
 }
 

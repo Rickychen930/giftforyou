@@ -168,9 +168,52 @@
   text-align: center;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
+  .price-summary {
+    gap: clamp(0.875rem, 1.5vw, 1rem);
+  }
+
+  .price-summary__title {
+    font-size: clamp(1.05rem, 1.8vw, 1.1rem);
+  }
+
   .price-summary__value--total {
-    font-size: 1.25rem;
+    font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  }
+}
+
+@media (max-width: 640px) {
+  .price-summary__item {
+    padding: clamp(0.625rem, 1.2vw, 0.75rem) 0;
+  }
+
+  .price-summary__label,
+  .price-summary__value {
+    font-size: clamp(0.85rem, 1.5vw, 0.9rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .price-summary__value--total {
+    font-size: 1.15rem;
+  }
+
+  .price-summary__quick-item {
+    padding: 0.75rem;
+  }
+
+  .price-summary__quick-label {
+    font-size: 0.75rem;
+  }
+
+  .price-summary__quick-value {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .price-summary__value--total {
+    font-size: 1.05rem;
   }
 }
 

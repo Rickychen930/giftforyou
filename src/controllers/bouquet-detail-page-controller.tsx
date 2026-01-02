@@ -161,12 +161,35 @@ export class BouquetDetailPageController extends BaseController<
         throw new Error("Empty response body");
       }
 
-      const normalizedBouquet = normalizeBouquet(data);
+      // Handle array response (some APIs return array)
+      let bouquetData = data;
+      if (Array.isArray(data) && data.length > 0) {
+        bouquetData = data[0];
+      } else if (data && typeof data === "object") {
+        const obj = data as Record<string, unknown>;
+        // Try common property names for bouquet data
+        bouquetData = obj.bouquet ?? obj.data ?? obj.item ?? data;
+      }
+
+      const normalizedBouquet = normalizeBouquet(bouquetData);
       if (!normalizedBouquet) {
+        // Log detailed info in development for debugging
         if (process.env.NODE_ENV === "development") {
-          console.error("[Detail] Bouquet normalization failed. Raw data:", data);
+          console.warn("[Detail] Bouquet normalization failed. Raw data:", {
+            hasData: !!data,
+            dataType: typeof data,
+            isArray: Array.isArray(data),
+            keys: data && typeof data === "object" ? Object.keys(data) : [],
+            sample: JSON.stringify(data).slice(0, 300),
+          });
         }
-        throw new Error("Bouquet data is invalid (missing _id or name)");
+        // Set error state gracefully instead of throwing
+        this.setState({
+          bouquet: null,
+          error: "Data bouquet tidak valid atau tidak lengkap. Silakan coba lagi atau hubungi admin.",
+          loading: false,
+        });
+        return;
       }
 
       if (process.env.NODE_ENV === "development") {
@@ -598,7 +621,44 @@ export class BouquetDetailPageController extends BaseController<
     detailUrl: string;
   }): void {
     super.componentDidUpdate(prevProps, prevState);
-    // BaseController will handle SEO updates via dynamicSeo config
+    
+    // Reload bouquet if ID changed
+    if (prevProps.id !== this.props.id) {
+      this.initializeDetailUrl();
+      this.loadBouquet();
+      this.loadSavedFormData();
+      // Reset form validation
+      const validation = this.validateForm();
+      this.setState({
+        formErrors: validation.errors,
+        isFormValid: validation.isValid,
+        formProgress: this.calculateFormProgress(),
+      });
+    }
+    
+    // Sync form data changes with validation (only if form data actually changed)
+    // Note: Validation is already handled in handleFormChange, this is just a safety check
+    if (
+      prevState.formData.deliveryType !== this.state.formData.deliveryType ||
+      prevState.formData.deliveryDate !== this.state.formData.deliveryDate ||
+      prevState.formData.deliveryTimeSlot !== this.state.formData.deliveryTimeSlot ||
+      prevState.formData.address !== this.state.formData.address ||
+      prevState.formData.greetingCard !== this.state.formData.greetingCard ||
+      prevState.formData.quantity !== this.state.formData.quantity
+    ) {
+      // Form data changed, but validation is handled in handleFormChange
+      // Only update if validation state is out of sync (shouldn't happen, but safety check)
+      const currentProgress = this.calculateFormProgress();
+      if (prevState.formProgress !== currentProgress) {
+        // Progress changed, recalculate validation
+        const validation = this.validateForm();
+        this.setState({
+          formErrors: validation.errors,
+          isFormValid: validation.isValid,
+          formProgress: currentProgress,
+        });
+      }
+    }
   }
 
   /**
