@@ -332,8 +332,28 @@ export class OrdersController extends BaseController<Props, State & BaseControll
       }
     }
 
-    // Update computed values
-    this.updateComputedValues();
+    // Update computed values only when relevant state has changed
+    // This prevents infinite loops from setState in updateComputedValues
+    const relevantStateChanged =
+      prevState.orders !== this.state.orders ||
+      prevState.debouncedListQuery !== this.state.debouncedListQuery ||
+      prevState.filterOrderStatus !== this.state.filterOrderStatus ||
+      prevState.filterPaymentStatus !== this.state.filterPaymentStatus ||
+      prevState.sortBy !== this.state.sortBy ||
+      prevState.sortDirection !== this.state.sortDirection ||
+      prevState.bouquetId !== this.state.bouquetId ||
+      prevState.bouquetOptions !== this.state.bouquetOptions ||
+      prevState.editingId !== this.state.editingId ||
+      prevState.downPaymentAmount !== this.state.downPaymentAmount ||
+      prevState.additionalPayment !== this.state.additionalPayment ||
+      prevState.deliveryPrice !== this.state.deliveryPrice ||
+      prevState.selectedCustomerId !== this.state.selectedCustomerId ||
+      prevState.customers !== this.state.customers ||
+      prevState.mode !== this.state.mode;
+
+    if (relevantStateChanged) {
+      this.updateComputedValues();
+    }
   }
 
   // ==================== Keyboard Handlers ====================
@@ -476,20 +496,37 @@ export class OrdersController extends BaseController<Props, State & BaseControll
     const showOrderDetails = mode === "update_order" || Boolean(selectedCustomerId);
     const isFormOpen = mode === "add_order" || mode === "update_order";
 
-    this.setState({
-      filteredAndSortedOrders,
-      orderStats,
-      selectedCustomer,
-      selectedBouquetName,
-      selectedBouquetPrice,
-      editingOrder,
-      bouquetPriceForCalc,
-      derivedNumbers,
-      buyerFieldsLocked,
-      buyerFieldsDisabled,
-      showOrderDetails,
-      isFormOpen,
-    });
+    // Only update state if values have actually changed to prevent infinite loops
+    const hasChanges =
+      this.state.filteredAndSortedOrders !== filteredAndSortedOrders ||
+      this.state.orderStats !== orderStats ||
+      this.state.selectedCustomer !== selectedCustomer ||
+      this.state.selectedBouquetName !== selectedBouquetName ||
+      this.state.selectedBouquetPrice !== selectedBouquetPrice ||
+      this.state.editingOrder !== editingOrder ||
+      this.state.bouquetPriceForCalc !== bouquetPriceForCalc ||
+      this.state.derivedNumbers !== derivedNumbers ||
+      this.state.buyerFieldsLocked !== buyerFieldsLocked ||
+      this.state.buyerFieldsDisabled !== buyerFieldsDisabled ||
+      this.state.showOrderDetails !== showOrderDetails ||
+      this.state.isFormOpen !== isFormOpen;
+
+    if (hasChanges) {
+      this.setState({
+        filteredAndSortedOrders,
+        orderStats,
+        selectedCustomer,
+        selectedBouquetName,
+        selectedBouquetPrice,
+        editingOrder,
+        bouquetPriceForCalc,
+        derivedNumbers,
+        buyerFieldsLocked,
+        buyerFieldsDisabled,
+        showOrderDetails,
+        isFormOpen,
+      });
+    }
   }
 
   // ==================== API Methods ====================
