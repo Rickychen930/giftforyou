@@ -115,9 +115,7 @@
 }
 
 .collectionDetailView__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
-  gap: var(--space-8);
+  /* Grid component handles grid layout */
   position: relative;
   z-index: var(--z-base);
 }
@@ -451,8 +449,7 @@
   }
 
   .collectionDetailView__grid {
-    grid-template-columns: 1fr;
-    gap: var(--space-6);
+    /* Grid component handles responsive grid layout */
   }
 
   .collectionDetailView__actions {

@@ -14,6 +14,7 @@ import "../../styles/CollectionListView.css";
 import SectionHeader from "../../components/common/SectionHeader";
 import EmptyState from "../../components/common/EmptyState";
 import { CollectionIcon, CheckIcon, CloseIcon, EditIcon, DeleteIcon, SpinnerIcon } from "../../components/icons";
+import Grid from "../../components/layout/Grid";
 
 interface Props {
   collections: Collection[];
@@ -357,16 +358,14 @@ class CollectionListView extends Component<Props, CollectionListViewState> {
         {collections.length === 0 ? (
           this.renderEmptyState()
         ) : (
-          <div
+          <Grid
+            minColumnWidth="md"
+            gap="lg"
             className={`${this.baseClass}__grid`}
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-              gap: "1.5rem",
-            }}
+            ariaLabel={`Menampilkan ${collections.length} koleksi`}
           >
             {collections.map((collection) => this.renderCollectionCard(collection))}
-          </div>
+          </Grid>
         )}
       </section>
     );

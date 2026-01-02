@@ -9,6 +9,7 @@ import type { Bouquet } from "../../models/domain/bouquet";
 import DropdownWithModal from "../../components/inputs/DropdownWithModal";
 import SectionHeader from "../../components/common/SectionHeader";
 import EmptyState from "../../components/common/EmptyState";
+import Grid from "../../components/layout/Grid";
 import "../../styles/CollectionDetailView.css";
 import { API_BASE } from "../../config/api";
 import { formatIDR } from "../../utils/money";
@@ -509,9 +510,14 @@ class CollectionDetailView extends Component<Props, CollectionDetailViewState> {
         {bouquets.length === 0 ? (
           this.renderEmptyState()
         ) : (
-          <div className={`${this.baseClass}__grid`}>
+          <Grid
+            minColumnWidth="sm"
+            gap="lg"
+            className={`${this.baseClass}__grid`}
+            ariaLabel={`Menampilkan ${bouquets.length} bouquet dalam koleksi ${collection.name}`}
+          >
             {bouquets.map((bouquet) => this.renderBouquetCard(bouquet))}
-          </div>
+          </Grid>
         )}
       </section>
     );
