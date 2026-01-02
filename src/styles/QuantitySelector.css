@@ -10,21 +10,26 @@
   display: inline-flex;
   align-items: center;
   gap: var(--gap-sm);
-  border: 2px solid var(--input-border);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-md);
-  background: var(--input-bg);
+  background: var(--gradient-elegant-surface);
   padding: var(--space-1);
-  transition: var(--transition-all);
+  transition: var(--transition-elegant);
+  box-shadow: var(--shadow-luxury-sm);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
 .quantitySelector:hover {
-  border-color: var(--input-border-focus);
-  box-shadow: var(--shadow-sm);
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-sm);
+  background: var(--gradient-luxury-gold-subtle);
 }
 
 .quantitySelector:focus-within {
-  border-color: var(--input-border-focus);
-  box-shadow: var(--input-shadow-focus);
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-focus), var(--shadow-luxury-md);
 }
 
 .quantitySelector__button {

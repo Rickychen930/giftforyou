@@ -7,14 +7,15 @@
 @import "design-system.css";
 
 .detailCard {
-  background: var(--backdrop-glass-md);
+  background: var(--gradient-elegant-surface);
   backdrop-filter: var(--backdrop-blur-lg);
   -webkit-backdrop-filter: var(--backdrop-blur-lg);
-  border: 2px solid var(--border-2);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-lg);
   padding: var(--card-padding-lg);
-  box-shadow: var(--card-shadow);
-  transition: var(--transition-all);
+  box-shadow: var(--shadow-luxury-lg), var(--shadow-elegant);
+  transition: var(--transition-elegant);
   position: relative;
   overflow: hidden;
 }
@@ -23,15 +24,15 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--gradient-brand-soft);
+  background: var(--gradient-luxury-gold-subtle);
   opacity: 0;
-  transition: var(--transition-opacity);
+  transition: var(--transition-elegant);
   pointer-events: none;
 }
 
 .detailCard:hover {
-  border-color: var(--border-3);
-  box-shadow: var(--card-shadow-hover);
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-xl), var(--shadow-luxury-gold-lg);
   transform: translateY(-2px);
 }
 
@@ -47,17 +48,28 @@
 
 .detailCard__title {
   font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--ink-900);
+  font-weight: var(--font-weight-black);
   margin: 0 0 var(--space-6) 0;
   padding-bottom: var(--space-4);
-  border-bottom: 2px solid var(--border-2);
+  border-bottom: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   display: flex;
   align-items: center;
   gap: var(--space-3);
   line-height: var(--line-height-tight);
   position: relative;
   z-index: 1;
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .detailCard__titleIcon {

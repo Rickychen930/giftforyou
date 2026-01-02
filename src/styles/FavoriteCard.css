@@ -10,15 +10,15 @@
 @import "design-system.css";
 
 .favoriteCard {
-  background: var(--backdrop-glass-md);
-  border: var(--border-2);
-  border-color: var(--border-brand-subtle);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-xl);
   padding: clamp(var(--space-5), 2.5vw, var(--space-6));
-  box-shadow: var(--card-shadow);
-  backdrop-filter: var(--backdrop-blur-md);
-  -webkit-backdrop-filter: var(--backdrop-blur-md);
-  transition: var(--transition-all);
+  box-shadow: var(--shadow-luxury-lg), var(--shadow-elegant);
+  backdrop-filter: var(--backdrop-blur-lg);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg);
+  transition: var(--transition-elegant);
   position: relative;
   overflow: hidden;
   display: flex;
@@ -29,8 +29,8 @@
 @media (hover: hover) and (pointer: fine) {
   .favoriteCard:hover {
     transform: translateY(var(--space-neg-1));
-    box-shadow: var(--card-shadow-hover);
-    border-color: var(--border-brand-strong);
+    box-shadow: var(--shadow-luxury-xl), var(--shadow-luxury-gold-lg);
+    border-color: var(--border-luxury-gold);
   }
 }
 
@@ -52,9 +52,19 @@
 .favoriteCard__title {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-black);
-  color: var(--ink-900);
   margin: 0;
   font-family: var(--font-family-heading);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   line-height: var(--line-height-tight);
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -65,9 +75,8 @@
 .favoriteCard__price {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-black);
-  color: var(--brand-rose-700);
   margin: 0;
-  background: var(--gradient-brand);
+  background: var(--gradient-luxury-gold);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

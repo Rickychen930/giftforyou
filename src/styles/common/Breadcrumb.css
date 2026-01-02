@@ -31,12 +31,12 @@
   left: 0;
   width: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--brand-rose-500), var(--brand-rose-600));
-  transition: width var(--transition-base);
+  background: var(--gradient-luxury-gold);
+  transition: width var(--transition-elegant);
 }
 
 .breadcrumb__link:hover {
-  color: var(--brand-rose-600);
+  color: var(--luxury-gold-700);
 }
 
 .breadcrumb__link:hover::after {
@@ -61,8 +61,18 @@
 }
 
 .breadcrumb__current {
-  color: var(--ink-900);
-  font-weight: var(--font-weight-bold);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: var(--font-weight-black);
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;

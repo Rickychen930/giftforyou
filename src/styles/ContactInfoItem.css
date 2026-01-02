@@ -12,19 +12,22 @@
   align-items: flex-start;
   gap: var(--space-3);
   padding: var(--space-4);
-  background: var(--backdrop-glass-sm);
-  border: var(--border-1);
-  border-color: var(--border-brand-subtle);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-lg);
-  transition: var(--transition-all);
+  transition: var(--transition-elegant);
+  box-shadow: var(--shadow-luxury-sm);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .contactInfoItem:hover {
-    background: var(--backdrop-glass-md);
-    border-color: var(--border-brand-strong);
+    background: var(--gradient-luxury-gold-subtle);
+    border-color: var(--border-luxury-gold);
     transform: translateY(var(--space-neg-1));
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
   }
 }
 

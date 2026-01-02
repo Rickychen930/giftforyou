@@ -10,15 +10,15 @@
 @import "design-system.css";
 
 .ohCard {
-  background: var(--backdrop-glass-md);
-  border: var(--border-2);
-  border-color: var(--border-brand-subtle);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-xl);
   padding: clamp(var(--space-6), 3vw, var(--space-8));
-  box-shadow: var(--card-shadow);
-  backdrop-filter: var(--backdrop-blur-md);
-  -webkit-backdrop-filter: var(--backdrop-blur-md);
-  transition: var(--transition-all);
+  box-shadow: var(--shadow-luxury-lg), var(--shadow-elegant);
+  backdrop-filter: var(--backdrop-blur-lg);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg);
+  transition: var(--transition-elegant);
   position: relative;
   overflow: hidden;
 }
@@ -26,8 +26,8 @@
 @media (hover: hover) and (pointer: fine) {
   .ohCard:hover {
     transform: translateY(var(--space-neg-1));
-    box-shadow: var(--card-shadow-hover);
-    border-color: var(--border-brand-strong);
+    box-shadow: var(--shadow-luxury-xl), var(--shadow-luxury-gold-lg);
+    border-color: var(--border-luxury-gold);
   }
 }
 
@@ -45,10 +45,16 @@
 .ohCard__title {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-black);
-  color: var(--ink-900);
   margin: 0;
   font-family: var(--font-family-heading);
-  background: var(--gradient-heading);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

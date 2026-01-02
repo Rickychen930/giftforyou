@@ -22,13 +22,15 @@
 
 .luxuryToast {
   position: relative;
-  background: var(--gradient-surface);
-  border: var(--border-width-2) solid var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-lg);
   padding: var(--space-4) var(--space-5);
   box-shadow: 
-    var(--shadow-xl),
-    var(--shadow-lg),
+    var(--shadow-luxury-xl),
+    var(--shadow-luxury-lg),
+    var(--shadow-elegant),
     0 0 0 1px rgba(255, 255, 255, 0.9) inset,
     0 0 40px var(--brand-rose-border);
   backdrop-filter: var(--backdrop-blur-lg);

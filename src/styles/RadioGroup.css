@@ -16,29 +16,34 @@
   display: flex;
   align-items: center;
   padding: var(--space-4) var(--space-5);
-  border: 2px solid var(--input-border);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-md);
-  background: var(--input-bg);
+  background: var(--gradient-elegant-surface);
   cursor: pointer;
-  transition: var(--transition-all);
+  transition: var(--transition-elegant);
   position: relative;
+  box-shadow: var(--shadow-luxury-sm);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
 .radioGroup__option::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--tab-bg);
+  background: var(--gradient-luxury-gold-subtle);
   opacity: 0;
-  transition: var(--transition-opacity);
+  transition: var(--transition-elegant);
   border-radius: inherit;
   pointer-events: none;
 }
 
 .radioGroup__option:hover {
-  border-color: var(--input-border-focus);
+  border-color: var(--border-luxury-gold);
   transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-sm);
+  background: var(--gradient-luxury-gold-subtle);
 }
 
 .radioGroup__option:hover::before {
@@ -47,13 +52,13 @@
 
 .radioGroup__option:focus-within {
   outline: none;
-  box-shadow: var(--focus-ring);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-focus), var(--shadow-luxury-md);
 }
 
 .radioGroup__option--active {
-  border-color: var(--tab-border);
-  background: linear-gradient(135deg, var(--tab-bg-hover) 0%, var(--tab-bg) 100%);
-  box-shadow: var(--shadow-sm);
+  border-color: var(--border-luxury-gold);
+  background: var(--gradient-luxury-gold-subtle);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
 }
 
 .radioGroup__option--active::before {

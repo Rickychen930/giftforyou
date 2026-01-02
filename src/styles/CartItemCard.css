@@ -12,32 +12,36 @@
   gap: var(--gap-md);
   align-items: center;
   padding: var(--space-4);
-  background: var(--gradient-surface);
+  background: var(--gradient-elegant-surface);
   border-radius: var(--radius-md);
-  border: var(--card-border);
-  transition: var(--transition-all);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  transition: var(--transition-elegant);
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-luxury-md), var(--shadow-elegant);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
 }
 
 .cartItemCard::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--gradient-brand-soft);
+  background: var(--gradient-luxury-gold-subtle);
   opacity: 0;
-  transition: var(--transition-opacity);
+  transition: var(--transition-elegant);
   pointer-events: none;
 }
 
 .cartItemCard:hover {
-  box-shadow: var(--card-shadow-hover);
+  box-shadow: var(--shadow-luxury-xl), var(--shadow-luxury-gold-lg);
   transform: translateY(-2px);
-  border-color: var(--border-2);
+  border-color: var(--border-luxury-gold);
 }
 
 .cartItemCard:hover::before {
-  opacity: 0.1;
+  opacity: 1;
 }
 
 .cartItemCard__image {
@@ -129,8 +133,11 @@
 
 .cartItemCard__totalAmount {
   font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  color: var(--ink-900);
+  font-weight: var(--font-weight-black);
+  background: var(--gradient-luxury-gold);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .cartItemCard__totalOriginal {

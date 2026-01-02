@@ -95,19 +95,19 @@
 }
 
 /* =========================================================
-   Variant: Primary (Green - Success/Action)
+   Variant: Primary (Luxury Gold)
    ========================================================= */
 .baseBtn--primary {
-  background: var(--gradient-green);
-  color: var(--neutral-0);
-  box-shadow: var(--shadow-green-md);
-  border-color: transparent;
+  background: var(--gradient-luxury-gold);
+  color: var(--elegant-white);
+  border: var(--border-luxury-gold-strong);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
 }
 
 .baseBtn--primary:hover:not(.baseBtn--disabled) {
   transform: translateY(-2px);
-  filter: saturate(1.1) brightness(1.05);
-  box-shadow: var(--shadow-green-lg);
+  filter: brightness(1.05) saturate(1.1);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-xl);
 }
 
 .baseBtn--primary:active:not(.baseBtn--disabled) {
@@ -116,19 +116,22 @@
 }
 
 /* =========================================================
-   Variant: Secondary (Brand Rose)
+   Variant: Secondary (Luxury Gold Subtle)
    ========================================================= */
 .baseBtn--secondary {
-  background: var(--gradient-brand);
-  color: var(--neutral-0);
-  box-shadow: var(--shadow-brand-md);
-  border-color: transparent;
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-700);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .baseBtn--secondary:hover:not(.baseBtn--disabled) {
   transform: translateY(-2px);
-  filter: saturate(1.1) brightness(1.05);
-  box-shadow: var(--shadow-brand-lg);
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-600);
 }
 
 .baseBtn--secondary:active:not(.baseBtn--disabled) {
@@ -137,21 +140,24 @@
 }
 
 /* =========================================================
-   Variant: Outline
+   Variant: Outline (Luxury)
    ========================================================= */
 .baseBtn--outline {
-  background: var(--surface-1);
-  color: var(--ink-900);
-  border-color: var(--border-3);
-  box-shadow: var(--shadow-sm);
+  background: var(--gradient-elegant-surface);
+  color: var(--elegant-black);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  box-shadow: var(--shadow-luxury-sm);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
 .baseBtn--outline:hover:not(.baseBtn--disabled) {
-  background: var(--surface-2);
-  border-color: var(--brand-rose-500);
-  color: var(--brand-rose-600);
+  background: var(--gradient-luxury-gold-subtle);
+  border-color: var(--border-luxury-gold);
+  color: var(--luxury-gold-700);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
 }
 
 .baseBtn--outline:active:not(.baseBtn--disabled) {

@@ -33,21 +33,23 @@
   border: 1px solid var(--border-1);
 }
 
-/* Glass Morphism Variant */
+/* Glass Morphism Variant (Luxury) */
 .baseCard--glass {
-  background: var(--backdrop-glass-md);
-  backdrop-filter: var(--backdrop-blur-md);
-  -webkit-backdrop-filter: var(--backdrop-blur-md);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: var(--gradient-elegant-surface);
+  backdrop-filter: var(--backdrop-blur-lg);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  box-shadow: var(--shadow-luxury-md), var(--shadow-elegant);
 }
 
 .baseCard--glass::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--gradient-brand-soft);
+  background: var(--gradient-luxury-gold-subtle);
   opacity: 0;
-  transition: var(--transition-opacity);
+  transition: var(--transition-elegant);
   pointer-events: none;
   z-index: 0;
 }
@@ -154,37 +156,41 @@
   }
 
   .baseCard--hovered.baseCard--shadow-sm {
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-luxury-md);
   }
 
   .baseCard--hovered.baseCard--shadow-md {
-    box-shadow: var(--card-shadow-hover);
+    box-shadow: var(--shadow-luxury-lg), var(--shadow-elegant);
   }
 
   .baseCard--hovered.baseCard--shadow-lg {
-    box-shadow: var(--shadow-xl);
+    box-shadow: var(--shadow-luxury-xl), var(--shadow-luxury-gold-lg);
   }
 
   .baseCard--hovered.baseCard--shadow-xl {
-    box-shadow: var(--shadow-2xl);
+    box-shadow: var(--shadow-luxury-xl), var(--shadow-luxury-gold-lg);
   }
 
   .baseCard--hovered.baseCard--shadow-brand {
-    box-shadow: var(--shadow-brand-lg);
+    box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-xl);
   }
 
   .baseCard--hovered.baseCard--glass::before {
-    opacity: 0.5;
+    opacity: 1;
+  }
+
+  .baseCard--hovered.baseCard--glass {
+    border-color: var(--border-luxury-gold);
   }
 
   .baseCard--hovered.baseCard--elevated {
-    box-shadow: var(--shadow-xl);
-    border-color: var(--border-3);
+    box-shadow: var(--shadow-luxury-xl), var(--shadow-luxury-gold-lg);
+    border-color: var(--border-luxury-gold);
   }
 
   .baseCard--hovered.baseCard--outlined {
-    border-color: var(--brand-rose-500);
-    background: var(--surface-2);
+    border-color: var(--border-luxury-gold);
+    background: var(--gradient-luxury-gold-subtle);
   }
 
   .baseCard--hovered.baseCard--gradient::before {

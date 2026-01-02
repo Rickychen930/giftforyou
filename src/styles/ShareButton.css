@@ -17,26 +17,27 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-5);
-  background: var(--backdrop-glass-sm);
-  border: var(--border-2);
-  border-color: var(--border-brand-subtle);
+  background: var(--gradient-luxury-gold-subtle);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-full);
-  color: var(--ink-700);
+  color: var(--luxury-gold-700);
   font-weight: var(--font-weight-extrabold);
   font-size: var(--font-size-sm);
   cursor: pointer;
-  transition: var(--transition-all);
+  transition: var(--transition-elegant);
   backdrop-filter: var(--backdrop-blur-md);
   -webkit-backdrop-filter: var(--backdrop-blur-md);
-  box-shadow: var(--shadow-xs);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .share-button__trigger:hover {
-    background: var(--brand-rose-50);
-    border-color: var(--border-brand-strong);
+    background: var(--gradient-luxury-gold-subtle);
+    border-color: var(--border-luxury-gold);
     transform: translateY(var(--space-neg-1));
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
+    color: var(--luxury-gold-600);
   }
 }
 
@@ -54,11 +55,11 @@
   top: calc(100% + var(--space-2));
   right: 0;
   min-width: var(--size-45);
-  background: var(--backdrop-glass-lg);
-  border: var(--border-2);
-  border-color: var(--border-brand-subtle);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-2xl);
+  box-shadow: var(--shadow-luxury-xl), var(--shadow-elegant);
   backdrop-filter: var(--backdrop-blur-lg);
   -webkit-backdrop-filter: var(--backdrop-blur-lg);
   padding: var(--space-2);
@@ -96,8 +97,9 @@
 
 @media (hover: hover) and (pointer: fine) {
   .share-button__item:hover {
-    background: var(--brand-rose-50);
-    color: var(--brand-rose-700);
+    background: var(--gradient-luxury-gold-subtle);
+    color: var(--luxury-gold-700);
+    border-color: var(--border-luxury-gold);
   }
 }
 
