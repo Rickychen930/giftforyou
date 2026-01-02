@@ -32,15 +32,15 @@
   padding: var(--space-3-5) var(--space-4-5);
   font-size: var(--font-size-base);
 
-  border: var(--border-width-base) solid var(--border-color-base);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: 999px;
 
-  background: rgba(255, 255, 255, 0.75);
-  color: var(--ink-800);
+  background: var(--gradient-elegant-surface);
+  color: var(--elegant-black);
 
-  box-shadow: var(--shadow-sm);
-  transition: border-color var(--transition-fast) ease, box-shadow var(--transition-fast) ease, transform var(--transition-fast) ease,
-    background var(--transition-fast) ease;
+  box-shadow: var(--shadow-luxury-sm);
+  transition: var(--transition-elegant);
 }
 
 .search-bar::placeholder {
@@ -51,14 +51,15 @@
 
 @media (hover: hover) and (pointer: fine) {
   .search-bar:hover {
-    border-color: rgba(0, 0, 0, 0.18);
-    background: rgba(255, 255, 255, 0.9);
+    border-color: var(--border-luxury-gold);
+    background: var(--gradient-luxury-gold-subtle);
+    box-shadow: var(--shadow-luxury-gold);
   }
 }
 
 .search-bar:focus {
-  border-color: var(--brand-rose-500);
-  box-shadow: var(--shadow-focus), 0 12px 30px rgba(0, 0, 0, 0.08);
+  border-color: var(--border-luxury-gold-strong);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-focus), 0 12px 30px rgba(0, 0, 0, 0.08);
   outline: none;
   transform: translateY(-1px);
 }
@@ -83,25 +84,25 @@
   margin-left: var(--space-2);
   padding: var(--space-2-5) var(--space-4-5);
 
-  background: var(--gradient-brand);
-  color: var(--text-on-brand);
+  background: var(--gradient-luxury-gold);
+  color: var(--elegant-white);
 
-  border: var(--border-width-base) solid transparent;
+  border: var(--border-luxury-gold-strong);
   border-radius: var(--radius-lg);
 
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.01em;
 
   cursor: pointer;
-  box-shadow: var(--shadow-sm);
-  transition: transform var(--transition-fast) ease, box-shadow var(--transition-fast) ease, filter var(--transition-fast) ease;
+  box-shadow: var(--shadow-luxury-gold);
+  transition: var(--transition-elegant);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .bulk-actions button:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-    filter: saturate(1.05);
+    box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
+    filter: brightness(1.05) saturate(1.1);
   }
 }
 
@@ -125,8 +126,9 @@
 
 /* === Bouquet Editor Card === */
 .bouquet-editor {
-  background: var(--gradient-surface);
-  border: var(--border-width-base) solid var(--border-color-base);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   padding: var(--space-5);
   border-radius: var(--radius-lg);
   width: 100%;
@@ -136,15 +138,15 @@
   flex-direction: column;
   gap: var(--space-4);
 
-  box-shadow: var(--shadow-md);
-  transition: box-shadow var(--transition-base) ease, transform var(--transition-base) ease, border-color var(--transition-base) ease;
+  box-shadow: var(--shadow-luxury-lg), var(--shadow-elegant);
+  transition: var(--transition-elegant);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .bouquet-editor:hover {
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-luxury-xl), var(--shadow-luxury-gold-lg);
     transform: translateY(-3px);
-    border-color: rgba(0, 0, 0, 0.12);
+    border-color: var(--border-luxury-gold);
   }
 }
 
@@ -162,27 +164,30 @@
 .bouquet-editor select {
   padding: var(--space-3) var(--space-3-5);
   font-size: var(--font-size-base);
-  border: var(--border-width-base) solid var(--border-color-base);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-lg);
-  background-color: rgba(255, 255, 255, 0.85);
-  color: var(--ink-800);
-  transition: border-color var(--transition-fast) ease, box-shadow var(--transition-fast) ease, background var(--transition-fast) ease;
+  background: var(--gradient-elegant-surface);
+  color: var(--elegant-black);
+  transition: var(--transition-elegant);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .bouquet-editor input:hover,
   .bouquet-editor textarea:hover,
   .bouquet-editor select:hover {
-    border-color: rgba(0, 0, 0, 0.18);
-    background-color: rgba(255, 255, 255, 0.95);
+    border-color: var(--border-luxury-gold);
+    background: var(--gradient-luxury-gold-subtle);
+    box-shadow: var(--shadow-luxury-gold);
   }
 }
 
 .bouquet-editor input:focus,
 .bouquet-editor textarea:focus,
 .bouquet-editor select:focus {
-  border-color: var(--brand-rose-500);
-  box-shadow: var(--shadow-focus);
+  border-color: var(--border-luxury-gold-strong);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-focus);
   outline: none;
 }
 
@@ -194,10 +199,10 @@
 
 /* ✅ Enhanced Save Button (inside card) */
 .bouquet-editor button {
-  background: var(--gradient-brand);
-  color: var(--text-on-brand);
+  background: var(--gradient-luxury-gold);
+  color: var(--elegant-white);
 
-  border: var(--border-width-base) solid transparent;
+  border: var(--border-luxury-gold-strong);
   padding: var(--space-3-5) var(--space-4);
   border-radius: var(--radius-lg);
 
@@ -205,16 +210,16 @@
   letter-spacing: 0.01em;
 
   cursor: pointer;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-luxury-gold);
 
-  transition: transform var(--transition-fast) ease, box-shadow var(--transition-fast) ease, filter var(--transition-fast) ease;
+  transition: var(--transition-elegant);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .bouquet-editor button:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-    filter: saturate(1.05);
+    box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
+    filter: brightness(1.05) saturate(1.1);
   }
 }
 
@@ -241,14 +246,15 @@
 /* ✅ Enhanced Pagination Buttons */
 .pagination button {
   padding: var(--space-2-5) var(--space-4);
-  border: var(--border-width-base) solid var(--border-color-base);
-  background: rgba(255, 255, 255, 0.75);
-  color: var(--ink-700);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-700);
   border-radius: var(--radius-lg);
   cursor: pointer;
 
-  transition: transform var(--transition-fast) ease, box-shadow var(--transition-fast) ease, background var(--transition-fast) ease,
-    border-color var(--transition-fast) ease, color var(--transition-fast) ease;
+  transition: var(--transition-elegant);
+  box-shadow: var(--shadow-luxury-sm);
 
   min-width: 56px;
 }
@@ -256,10 +262,10 @@
 @media (hover: hover) and (pointer: fine) {
   .pagination button:hover {
     transform: translateY(-1px);
-    box-shadow: var(--shadow-sm);
-    background: rgba(255, 255, 255, 0.92);
-    border-color: var(--brand-rose-500);
-    color: var(--brand-rose-500);
+    box-shadow: var(--shadow-luxury-gold);
+    background: var(--gradient-luxury-gold-subtle);
+    border-color: var(--border-luxury-gold);
+    color: var(--luxury-gold-600);
   }
 }
 
@@ -268,11 +274,11 @@
 }
 
 .pagination button.active {
-  background: var(--gradient-brand);
-  color: var(--text-on-brand);
+  background: var(--gradient-luxury-gold);
+  color: var(--elegant-white);
   font-weight: var(--font-weight-extrabold);
-  border-color: transparent;
-  box-shadow: var(--shadow-md);
+  border-color: var(--border-luxury-gold-strong);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
 }
 
 .pagination button:disabled {

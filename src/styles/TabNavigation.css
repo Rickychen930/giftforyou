@@ -25,17 +25,19 @@
   align-items: center;
   gap: var(--gap-sm);
   padding: var(--btn-padding-md);
-  border: none;
-  background: transparent;
-  color: var(--tab-text);
+  border: var(--border-elegant);
+  border-bottom: 2px solid transparent;
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-700);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  border-bottom: 2px solid transparent;
   margin-bottom: -2px;
-  transition: var(--transition-all);
+  transition: var(--transition-elegant);
   white-space: nowrap;
   position: relative;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .tabNavigation__tab::before {
@@ -50,7 +52,11 @@
 }
 
 .tabNavigation__tab:hover {
-  color: var(--tab-color-hover);
+  color: var(--luxury-gold-600);
+  background: var(--gradient-luxury-gold-subtle);
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold);
+  transform: translateY(-1px);
 }
 
 .tabNavigation__tab:hover::before {
@@ -63,13 +69,16 @@
 }
 
 .tabNavigation__tab--active {
-  color: var(--tab-text-active);
-  border-bottom-color: var(--tab-border);
+  color: var(--elegant-white);
+  background: var(--gradient-luxury-gold);
+  border-color: var(--border-luxury-gold-strong);
+  border-bottom-color: var(--border-luxury-gold-strong);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
 }
 
 .tabNavigation__tab--active::before {
   opacity: 1;
-  background: var(--tab-bg);
+  background: var(--gradient-luxury-gold);
 }
 
 .tabNavigation__icon {

@@ -13,13 +13,15 @@
   flex-direction: column;
   border-radius: var(--radius-xl);
   overflow: hidden;
-  background: var(--gradient-surface);
-  border: var(--border-width-2) solid var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   box-shadow: 
-    var(--shadow-xl),
-    var(--shadow-lg),
+    var(--shadow-luxury-xl),
+    var(--shadow-luxury-lg),
+    var(--shadow-elegant),
     0 0 0 1px rgba(255, 255, 255, 0.8) inset;
-  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), border-color var(--transition-smooth);
+  transition: var(--transition-elegant);
   backdrop-filter: var(--backdrop-blur-lg);
   -webkit-backdrop-filter: var(--backdrop-blur-lg);
 }
@@ -28,10 +30,11 @@
   .becCard:hover {
     transform: translateY(-2px);
     box-shadow: 
-      var(--shadow-2xl),
-      var(--shadow-xl),
+      var(--shadow-luxury-xl),
+      var(--shadow-luxury-gold-lg),
+      var(--shadow-elegant),
       0 0 0 1px rgba(255, 255, 255, 0.9) inset;
-    border-color: var(--brand-rose-border-2);
+    border-color: var(--border-luxury-gold);
   }
 }
 
@@ -42,10 +45,12 @@
   justify-content: space-between;
   gap: var(--space-4);
   padding: var(--space-4) var(--space-5);
-  border-bottom: var(--border-width-1) solid var(--border-2);
-  background: rgba(255, 255, 255, 0.55);
+  border-bottom: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-luxury-gold-subtle);
   backdrop-filter: var(--backdrop-blur-md);
   -webkit-backdrop-filter: var(--backdrop-blur-md);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .becHeader__right {
@@ -64,7 +69,17 @@
   margin: 0;
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-black);
-  color: var(--ink-900);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   letter-spacing: var(--letter-spacing-tight);
   display: flex;
   align-items: center;
@@ -294,10 +309,11 @@
 /* Drag and Drop Zone */
 .becDropzone {
   position: relative;
-  border: var(--border-width-2) dashed var(--brand-rose-border);
+  border: var(--border-luxury) dashed;
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-lg);
   padding: var(--space-10) var(--space-6);
-  background: var(--gradient-surface-subtle);
+  background: var(--gradient-luxury-gold-subtle);
   backdrop-filter: var(--backdrop-blur-md);
   -webkit-backdrop-filter: var(--backdrop-blur-md);
   display: flex;
@@ -307,28 +323,30 @@
   gap: var(--space-3);
   text-align: center;
   cursor: pointer;
-  transition: all var(--transition-slow) cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--transition-elegant);
   min-height: 180px;
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .becDropzone:hover {
-    border-color: var(--brand-rose-border-2);
-    background: var(--gradient-surface);
+    border-color: var(--border-luxury-gold);
+    background: var(--gradient-luxury-gold-subtle);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-brand-md);
+    box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
   }
 
   .becDropzone:hover svg {
     opacity: 1;
     transform: translateY(-4px);
+    color: var(--luxury-gold-600);
   }
 }
 
 .becDropzone.is-dragging {
-  border-color: var(--brand-rose-600);
-  background: var(--gradient-brand-soft);
-  box-shadow: var(--shadow-brand-lg);
+  border-color: var(--border-luxury-gold-strong);
+  background: var(--gradient-luxury-gold-subtle);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-xl);
   transform: scale(1.02);
 }
 
@@ -428,17 +446,19 @@
 .becField input,
 .becField select,
 .becField textarea {
-  border: var(--border-width-1) solid var(--border-2);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-4);
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--ink-900);
+  background: var(--gradient-elegant-surface);
+  color: var(--elegant-black);
   font-size: var(--font-size-base);
-  transition: box-shadow var(--transition-smooth), border-color var(--transition-smooth), background var(--transition-smooth);
+  transition: var(--transition-elegant);
   width: 100%;
   box-sizing: border-box;
   -webkit-appearance: none;
   appearance: none;
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .becField select {
@@ -467,11 +487,13 @@
   gap: var(--space-4);
   flex-wrap: wrap;
   padding: var(--space-3) var(--space-4);
-  border: var(--border-width-1) solid var(--border-2);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--gradient-luxury-gold-subtle);
   min-height: 48px; /* Touch target */
   align-items: center;
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .becToggle {
@@ -498,14 +520,15 @@
 
 @media (hover: hover) and (pointer: fine) {
   .becToggle:hover {
-    background: var(--gradient-brand-soft);
+    background: var(--gradient-luxury-gold-subtle);
   }
 
   .becField input:hover,
   .becField select:hover,
   .becField textarea:hover {
-    border-color: var(--brand-rose-border-2);
-    background: rgba(255, 255, 255, 1);
+    border-color: var(--border-luxury-gold);
+    background: var(--gradient-luxury-gold-subtle);
+    box-shadow: var(--shadow-luxury-gold);
   }
 }
 
@@ -513,9 +536,9 @@
 .becField select:focus,
 .becField textarea:focus {
   outline: none;
-  border-color: var(--brand-rose-600);
-  box-shadow: var(--focus-ring);
-  background: rgba(255, 255, 255, 1);
+  border-color: var(--border-luxury-gold-strong);
+  box-shadow: var(--shadow-luxury-gold), var(--focus-ring);
+  background: var(--gradient-elegant-surface);
 }
 
 .becField input[aria-invalid="true"],
@@ -602,15 +625,15 @@
 }
 
 .becSave {
-  border: none;
+  border: var(--border-luxury-gold-strong);
   cursor: pointer;
   padding: 0.95rem 1.25rem;
   border-radius: 999px;
   font-weight: 950;
-  color: var(--bec-btn-text);
-  background: linear-gradient(90deg, var(--bec-pink), var(--bec-pink2));
-  box-shadow: var(--bec-btn-shadow);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+  color: var(--elegant-white);
+  background: var(--gradient-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
+  transition: var(--transition-elegant);
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
@@ -629,8 +652,8 @@
 
 .becSave:hover {
   transform: translateY(-2px);
-  box-shadow: var(--bec-btn-shadow-hover);
-  filter: saturate(1.03);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-xl);
+  filter: brightness(1.05) saturate(1.1);
 }
 
 .becSave:disabled {

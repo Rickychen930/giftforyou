@@ -14,9 +14,10 @@
   margin: 0 auto;
   padding: clamp(var(--space-6), 3vw, var(--space-8));
   border-radius: var(--radius-2xl);
-  border: 1.5px solid rgba(212, 140, 156, 0.15);
-  background: var(--gradient-surface);
-  box-shadow: var(--shadow-xl), var(--shadow-inner);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
+  box-shadow: var(--shadow-luxury-xl), var(--shadow-elegant);
   backdrop-filter: var(--backdrop-blur-lg);
   -webkit-backdrop-filter: var(--backdrop-blur-lg);
   position: relative;
@@ -50,7 +51,14 @@
   font-size: clamp(var(--font-size-2xl), 3vw, var(--font-size-3xl));
   font-weight: var(--font-weight-black);
   letter-spacing: var(--letter-spacing-tight);
-  background: linear-gradient(135deg, var(--editor-text) 0%, rgba(0, 0, 0, 0.7) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -72,25 +80,26 @@
 
 /* Primary action (reset) */
 .editorClearAll {
-  border: 1.5px solid rgba(0, 0, 0, 0.14);
+  border: var(--border-luxury-gold);
   cursor: pointer;
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-full);
   font-weight: var(--font-weight-black);
-  color: var(--editor-text);
-  background: var(--backdrop-glass-sm);
-  box-shadow: var(--shadow-base), var(--shadow-inner);
+  color: var(--luxury-gold-700);
+  background: var(--gradient-luxury-gold-subtle);
+  box-shadow: var(--shadow-luxury-sm);
   backdrop-filter: var(--backdrop-blur-sm);
   -webkit-backdrop-filter: var(--backdrop-blur-sm);
-  transition: var(--transition-all);
+  transition: var(--transition-elegant);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .editorClearAll:hover:not(:disabled) {
     transform: translateY(-2px) scale(1.02);
-    box-shadow: var(--shadow-md), var(--shadow-inner);
-    background: var(--backdrop-glass-md);
-    border-color: rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
+    background: var(--gradient-luxury-gold);
+    color: var(--elegant-white);
+    border-color: var(--border-luxury-gold-strong);
   }
 }
 
@@ -124,19 +133,20 @@
   align-items: center;
   flex: 1;
   min-width: 280px;
-  background: var(--backdrop-glass-sm);
-  border: var(--border-1);
+  background: var(--gradient-luxury-gold-subtle);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-full);
   padding: var(--space-1-5);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-luxury-sm);
   backdrop-filter: var(--backdrop-blur-sm);
   -webkit-backdrop-filter: var(--backdrop-blur-sm);
-  transition: var(--transition-all);
+  transition: var(--transition-elegant);
 }
 
 .editorSearchWrap:focus-within {
-  border-color: var(--editor-border-strong);
-  box-shadow: var(--focus-ring), var(--shadow-lg);
+  border-color: var(--border-luxury-gold-strong);
+  box-shadow: var(--shadow-luxury-gold), var(--focus-ring), var(--shadow-luxury-lg);
   transform: translateY(-1px);
 }
 
@@ -159,22 +169,24 @@
 }
 
 .editorSearchClear {
-  border: var(--border-1);
-  background: var(--backdrop-glass-md);
-  color: var(--editor-text);
+  border: var(--border-luxury-gold);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-700);
   font-weight: var(--font-weight-black);
   border-radius: var(--radius-full);
   padding: var(--space-2-5) var(--space-3-5);
   cursor: pointer;
-  box-shadow: var(--shadow-md);
-  transition: var(--transition-all);
+  box-shadow: var(--shadow-luxury-sm);
+  transition: var(--transition-elegant);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .editorSearchClear:hover {
     transform: translateY(-1px);
-    box-shadow: var(--shadow-lg);
-    background: var(--backdrop-glass-lg);
+    box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
+    background: var(--gradient-luxury-gold);
+    color: var(--elegant-white);
+    border-color: var(--border-luxury-gold-strong);
   }
 }
 
@@ -331,21 +343,22 @@
 }
 
 .editorEmpty__btn {
-  border: none;
+  border: var(--border-luxury-gold-strong);
   cursor: pointer;
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-full);
   font-weight: var(--font-weight-black);
-  color: var(--editor-on-brand);
-  background: var(--gradient-brand);
-  box-shadow: var(--shadow-brand-md);
-  transition: var(--transition-transform), var(--transition-shadow);
+  color: var(--elegant-white);
+  background: var(--gradient-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
+  transition: var(--transition-elegant);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .editorEmpty__btn:hover {
     transform: translateY(-1px);
-    box-shadow: var(--shadow-brand-lg);
+    box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-xl);
+    filter: brightness(1.05) saturate(1.1);
   }
 }
 
@@ -369,14 +382,16 @@
 
 .editorPagination__btn,
 .editorPagination__page {
-  border: var(--border-1);
-  background: var(--backdrop-glass-sm);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-luxury-gold-subtle);
   cursor: pointer;
   padding: var(--space-2-5) var(--space-3-5);
   border-radius: var(--radius-md);
   font-weight: var(--font-weight-black);
-  color: var(--editor-text);
-  transition: var(--transition-all);
+  color: var(--luxury-gold-700);
+  transition: var(--transition-elegant);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .editorPagination__btn:disabled {
@@ -388,16 +403,17 @@
   .editorPagination__btn:hover:not(:disabled),
   .editorPagination__page:hover {
     transform: translateY(-1px);
-    box-shadow: var(--shadow-sm);
-    background: var(--backdrop-glass-md);
+    box-shadow: var(--shadow-luxury-gold);
+    background: var(--gradient-luxury-gold-subtle);
+    border-color: var(--border-luxury-gold);
   }
 }
 
 .editorPagination__page.is-active {
-  background: var(--gradient-brand);
-  color: var(--editor-on-brand);
-  border-color: transparent;
-  box-shadow: var(--shadow-brand-sm);
+  background: var(--gradient-luxury-gold);
+  color: var(--elegant-white);
+  border-color: var(--border-luxury-gold-strong);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
 }
 
 .editorPagination__btn:focus-visible,

@@ -1,4 +1,5 @@
 /* src/styles/DashboardPage.css */
+@import "design-system.css";
 @import "colors.css";
 @import "luxury-enhancements.css";
 
@@ -6,12 +7,7 @@
 .adminDashboard {
   min-height: 100vh;
   padding: clamp(2rem, 4vw, 3rem) clamp(1rem, 3vw, 1.5rem) clamp(3rem, 5vw, 4rem);
-  background: linear-gradient(
-    135deg,
-    var(--brand-sage-50) 0%,
-    var(--brand-rose-50) 50%,
-    var(--brand-sage-100) 100%
-  );
+  background: var(--gradient-elegant-surface);
   position: relative;
   overflow: hidden;
 }
@@ -48,13 +44,16 @@
 .adminDashboard__title {
   font-size: clamp(2rem, 4vw, 3rem);
   font-weight: 950;
-  color: var(--ink-900);
+  color: var(--elegant-black);
   margin: 0 0 0.5rem;
   font-family: "Playfair Display", Georgia, serif;
   background: linear-gradient(
     135deg,
-    var(--brand-rose-700) 0%,
-    var(--brand-green-700) 100%
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 20%,
+    var(--brand-rose-600) 55%,
+    var(--luxury-gold-600) 75%,
+    var(--brand-sage-500) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -80,28 +79,24 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem 1.25rem;
-  border: 1.5px solid rgba(212, 140, 156, 0.3);
-  border-radius: 12px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
-  color: var(--ink-700);
+  border: var(--border-luxury-gold);
+  border-radius: var(--radius-lg);
+  background: var(--gradient-elegant-surface);
+  color: var(--luxury-gold-700);
   font-weight: 800;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  transition: var(--transition-elegant);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .adminDashboard__actionBtn:hover {
-  border-color: rgba(212, 140, 156, 0.5);
+  border-color: var(--border-luxury-gold-strong);
   transform: translateY(-1px);
-  box-shadow: 
-    0 4px 12px rgba(212, 140, 156, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  box-shadow: var(--shadow-luxury-gold);
+  background: var(--gradient-luxury-gold-subtle);
 }
 
 .adminDashboard__actionBtn--logout {
@@ -146,19 +141,20 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.875rem 1.5rem;
-  border: none;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.6);
-  color: var(--ink-700);
+  border: var(--border-elegant);
+  border-radius: var(--radius-lg);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-700);
   font-weight: 700;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--transition-elegant);
   position: relative;
   white-space: nowrap;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
   overflow: hidden;
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .adminDashboard__tab::before {
@@ -182,11 +178,10 @@
 }
 
 .adminDashboard__tab:hover {
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--gradient-luxury-gold-subtle);
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 
-    0 4px 12px rgba(212, 140, 156, 0.15),
-    0 0 0 1px rgba(212, 140, 156, 0.1);
+  box-shadow: var(--shadow-luxury-gold);
+  border-color: var(--border-luxury-gold-strong);
 }
 
 .adminDashboard__tab:active {
@@ -202,16 +197,10 @@
 }
 
 .adminDashboard__tab--active {
-  background: linear-gradient(
-    135deg,
-    rgba(212, 140, 156, 0.15) 0%,
-    rgba(168, 213, 186, 0.1) 100%
-  );
-  color: var(--brand-rose-700);
-  border: 1.5px solid rgba(212, 140, 156, 0.3);
-  box-shadow: 
-    0 4px 16px rgba(212, 140, 156, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  background: var(--gradient-luxury-gold);
+  color: var(--elegant-white);
+  border: var(--border-luxury-gold-strong);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
 }
 
 .adminDashboard__tabIcon {
@@ -424,24 +413,18 @@
 }
 
 .adminStatCard {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
-  border: 1.5px solid rgba(212, 140, 156, 0.2);
-  border-radius: 20px;
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  border-radius: var(--radius-2xl);
   padding: 1.5rem;
   display: flex;
   align-items: center;
   gap: 1.25rem;
-  box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.06),
-    0 4px 12px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-luxury-lg), var(--shadow-elegant);
+  backdrop-filter: var(--backdrop-blur-lg);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg);
+  transition: var(--transition-elegant);
   animation: fadeInScale 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   overflow: hidden;
@@ -469,11 +452,8 @@
 
 .adminStatCard:hover {
   transform: translateY(-4px) scale(1.02);
-  box-shadow: 
-    0 12px 32px rgba(0, 0, 0, 0.08),
-    0 6px 16px rgba(0, 0, 0, 0.06),
-    0 0 0 2px rgba(212, 140, 156, 0.1);
-  border-color: rgba(212, 140, 156, 0.4);
+  box-shadow: var(--shadow-luxury-xl), var(--shadow-luxury-gold-lg);
+  border-color: var(--border-luxury-gold);
 }
 
 .adminStatCard__icon {
@@ -544,7 +524,17 @@
 .adminStatCard__value {
   font-size: 1.75rem;
   font-weight: 950;
-  color: var(--ink-900);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--brand-wine-700) 35%,
+    var(--luxury-gold-600) 65%,
+    var(--brand-rose-600) 90%,
+    var(--luxury-gold-500) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0 0 0.25rem;
   font-family: "Playfair Display", Georgia, serif;
   line-height: 1.2;
@@ -673,25 +663,21 @@
   align-items: center;
   gap: 0.75rem;
   padding: 1.25rem 1rem;
-  border: 1.5px solid rgba(212, 140, 156, 0.2);
-  border-radius: 16px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
+  border: var(--border-luxury-gold);
+  border-radius: var(--radius-xl);
+  background: var(--gradient-elegant-surface);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  transition: var(--transition-elegant);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
+  box-shadow: var(--shadow-luxury-md);
 }
 
 .adminQuickAction:hover {
   transform: translateY(-2px) scale(1.05);
-  border-color: rgba(212, 140, 156, 0.4);
-  box-shadow: 
-    0 8px 20px rgba(212, 140, 156, 0.15),
-    0 0 0 2px rgba(212, 140, 156, 0.1);
+  border-color: var(--border-luxury-gold-strong);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
+  background: var(--gradient-luxury-gold-subtle);
 }
 
 .adminQuickAction:active {
@@ -710,12 +696,13 @@
 .adminQuickAction__icon {
   width: 48px;
   height: 48px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(212, 140, 156, 0.1) 0%, rgba(168, 213, 186, 0.1) 100%);
-  color: var(--brand-rose-600);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-600);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .adminQuickAction__label {
@@ -737,20 +724,15 @@
 }
 
 .adminOverview__card {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
-  border: 1.5px solid rgba(212, 140, 156, 0.2);
-  border-radius: 20px;
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  border-radius: var(--radius-2xl);
   padding: 1.5rem;
-  box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.06),
-    0 4px 12px rgba(0, 0, 0, 0.04);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-luxury-lg), var(--shadow-elegant);
+  backdrop-filter: var(--backdrop-blur-lg);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg);
+  transition: var(--transition-elegant);
   position: relative;
   overflow: hidden;
 }
@@ -773,10 +755,8 @@
 
 .adminOverview__card:hover {
   transform: translateY(-2px);
-  box-shadow: 
-    0 12px 32px rgba(0, 0, 0, 0.08),
-    0 6px 16px rgba(0, 0, 0, 0.06);
-  border-color: rgba(212, 140, 156, 0.3);
+  box-shadow: var(--shadow-luxury-xl), var(--shadow-luxury-gold-lg);
+  border-color: var(--border-luxury-gold);
 }
 
 .adminOverview__card:hover::before {
@@ -1951,22 +1931,16 @@
 
 .metricCard {
   position: relative;
-  border-radius: 20px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
-  border: 1.5px solid rgba(212, 140, 156, 0.15);
-  box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.06),
-    0 2px 8px rgba(0, 0, 0, 0.03),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  border-radius: var(--radius-2xl);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  box-shadow: var(--shadow-luxury-lg), var(--shadow-elegant);
   padding: 1.5rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--transition-elegant);
   overflow: hidden;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
 }
 
 .metricCard::before {
@@ -2004,11 +1978,8 @@
 @media (hover: hover) and (pointer: fine) {
   .metricCard:hover {
     transform: translateY(-4px);
-    box-shadow: 
-      0 12px 32px rgba(0, 0, 0, 0.1),
-      0 4px 12px rgba(0, 0, 0, 0.05),
-      0 0 0 1px rgba(255, 255, 255, 0.9) inset;
-    border-color: rgba(212, 140, 156, 0.25);
+    box-shadow: var(--shadow-luxury-xl), var(--shadow-luxury-gold-lg);
+    border-color: var(--border-luxury-gold);
   }
 
   .metricCard:hover::after {
@@ -2043,8 +2014,11 @@
   font-weight: 950;
   background: linear-gradient(
     135deg,
-    var(--dash-text-main) 0%,
-    rgba(0, 0, 0, 0.85) 100%
+    var(--elegant-black) 0%,
+    var(--brand-wine-700) 35%,
+    var(--luxury-gold-600) 65%,
+    var(--brand-rose-600) 90%,
+    var(--luxury-gold-500) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -2161,19 +2135,13 @@
   gap: 1.5rem;
   margin-bottom: 2rem;
   padding: 1.75rem;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
+  background: var(--gradient-elegant-surface);
   border-radius: 24px;
-  border: 1.5px solid rgba(212, 140, 156, 0.15);
-  box-shadow: 
-    0 12px 32px rgba(0, 0, 0, 0.08),
-    0 4px 16px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  box-shadow: var(--shadow-luxury-xl), var(--shadow-elegant);
+  backdrop-filter: var(--backdrop-blur-lg) saturate(180%);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg) saturate(180%);
 }
 
 @media (max-width: 768px) {
@@ -2199,8 +2167,11 @@
   font-size: 1.5rem;
   background: linear-gradient(
     135deg,
-    var(--dash-brand-pink) 0%,
-    var(--dash-brand-pink-2) 100%
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -2223,29 +2194,24 @@
 }
 
 .overviewActionBtn {
-  border: 1.5px solid rgba(212, 140, 156, 0.15);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.9) 100%
-  );
-  color: var(--dash-text-main);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-700);
   border-radius: 999px;
   padding: 0.75rem 1.1rem;
   font-weight: 900;
   font-size: 0.9rem;
   cursor: pointer;
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.06),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-luxury-sm);
+  transition: var(--transition-elegant);
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   min-height: 44px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
   position: relative;
   overflow: hidden;
 }
@@ -2254,13 +2220,9 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(212, 140, 156, 0.1) 0%,
-    rgba(212, 140, 156, 0.05) 100%
-  );
+  background: var(--gradient-luxury-gold-subtle);
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--transition-elegant);
 }
 
 .overviewActionBtn:hover::before {
@@ -2269,10 +2231,10 @@
 
 .overviewActionBtn:hover {
   transform: translateY(-2px);
-  border-color: rgba(212, 140, 156, 0.25);
-  box-shadow: 
-    0 8px 20px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-gold-lg);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-600);
 }
 
 .overviewActionBtn:focus-visible {
@@ -2281,17 +2243,10 @@
 }
 
 .overviewActionBtn--primary {
-  border: none;
-  color: var(--dash-on-brand);
-  background: linear-gradient(
-    135deg,
-    var(--dash-brand-pink) 0%,
-    var(--dash-brand-pink-2) 50%,
-    rgba(160, 76, 92, 0.95) 100%
-  );
-  box-shadow: 
-    0 8px 24px rgba(212, 140, 156, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+  border: var(--border-luxury-gold-strong);
+  color: var(--elegant-white);
+  background: var(--gradient-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
 }
 
 .overviewActionBtn--primary::before {
@@ -2303,10 +2258,8 @@
 }
 
 .overviewActionBtn--primary:hover {
-  filter: saturate(1.1) brightness(1.05);
-  box-shadow: 
-    0 12px 32px rgba(212, 140, 156, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+  filter: brightness(1.05) saturate(1.1);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-xl);
   transform: translateY(-3px);
 }
 
@@ -2314,22 +2267,16 @@
   margin: 0 0 1rem;
   padding: 1rem 1.25rem;
   border-radius: 16px;
-  background: linear-gradient(
-    135deg,
-    rgba(16, 185, 129, 0.12) 0%,
-    rgba(16, 185, 129, 0.08) 100%
-  );
-  border: 1.5px solid rgba(16, 185, 129, 0.35);
-  box-shadow: 
-    0 4px 16px rgba(0, 0, 0, 0.06),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  background: var(--gradient-luxury-gold-subtle);
+  border: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-sm);
   font-weight: 900;
-  color: rgba(5, 150, 105, 0.95);
+  color: var(--luxury-gold-700);
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
   animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   overflow: hidden;
@@ -2408,21 +2355,15 @@
 }
 
 .overviewCard {
-  border: 1.5px solid rgba(212, 140, 156, 0.15);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
-  border-radius: 24px;
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
+  border-radius: var(--radius-2xl);
   padding: 1.5rem;
-  box-shadow: 
-    0 12px 32px rgba(0, 0, 0, 0.08),
-    0 4px 16px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-luxury-lg), var(--shadow-elegant);
+  backdrop-filter: var(--backdrop-blur-lg) saturate(180%);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg) saturate(180%);
+  transition: var(--transition-elegant);
   position: relative;
   overflow: hidden;
   isolation: isolate;
@@ -2447,12 +2388,8 @@
 @media (hover: hover) and (pointer: fine) {
   .overviewCard:hover {
     transform: translateY(-3px);
-    box-shadow: 
-      0 20px 60px rgba(0, 0, 0, 0.12),
-      0 8px 24px rgba(0, 0, 0, 0.06),
-      0 0 0 1px rgba(255, 255, 255, 0.9) inset,
-      0 0 0 2px rgba(212, 140, 156, 0.2);
-    border-color: rgba(212, 140, 156, 0.3);
+    box-shadow: var(--shadow-luxury-xl), var(--shadow-luxury-gold-lg), 0 0 30px var(--overlay-luxury-gold-strong);
+    border-color: var(--border-luxury-gold);
   }
 }
 
@@ -2483,8 +2420,11 @@
   font-size: 1.15rem;
   background: linear-gradient(
     135deg,
-    var(--dash-brand-pink) 0%,
-    var(--dash-brand-pink-2) 100%
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -2579,41 +2519,32 @@
   gap: 0.75rem;
   padding: 0.85rem 1rem;
   border-radius: 14px;
-  border: 1.5px solid rgba(212, 140, 156, 0.12);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.9) 100%
-  );
-  color: var(--dash-text-main);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--elegant-black);
   font-weight: 900;
-  transition: all 0.2s ease;
-  box-shadow: 
-    0 2px 6px rgba(0, 0, 0, 0.03),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  transition: var(--transition-elegant);
+  box-shadow: var(--shadow-luxury-sm);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
 .overviewList__item:hover {
   transform: translateX(4px);
-  border-color: rgba(212, 140, 156, 0.2);
-  box-shadow: 
-    0 4px 10px rgba(0, 0, 0, 0.05),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
+  background: var(--gradient-luxury-gold-subtle);
 }
 
 .overviewList__item b {
   font-weight: 950;
-  background: linear-gradient(
-    135deg,
-    var(--dash-brand-pink) 0%,
-    var(--dash-brand-pink-2) 100%
-  );
+  background: var(--gradient-luxury-gold);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   font-size: 1.1rem;
+  color: var(--luxury-gold-600);
 }
 
 .overviewList__item--warning {
@@ -2651,18 +2582,13 @@
   align-items: center;
   padding: 0.85rem 1rem;
   border-radius: 14px;
-  border: 1.5px solid rgba(212, 140, 156, 0.12);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.9) 100%
-  );
-  transition: all 0.2s ease;
-  box-shadow: 
-    0 2px 6px rgba(0, 0, 0, 0.03),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-luxury-gold-subtle);
+  transition: var(--transition-elegant);
+  box-shadow: var(--shadow-luxury-sm);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
   position: relative;
 }
 
@@ -2674,22 +2600,17 @@
   transform: translateY(-50%);
   width: 3px;
   height: 60%;
-  background: linear-gradient(
-    180deg,
-    var(--dash-brand-pink) 0%,
-    var(--dash-brand-pink-2) 100%
-  );
+  background: var(--gradient-luxury-gold);
   border-radius: 999px;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity var(--transition-elegant);
 }
 
 .overviewRank__item:hover {
   transform: translateX(4px);
-  border-color: rgba(212, 140, 156, 0.2);
-  box-shadow: 
-    0 4px 10px rgba(0, 0, 0, 0.05),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
+  background: var(--gradient-luxury-gold-subtle);
 }
 
 .overviewRank__item:hover::before {
@@ -2697,12 +2618,8 @@
 }
 
 .overviewRank__item:first-child {
-  background: linear-gradient(
-    135deg,
-    rgba(212, 140, 156, 0.08) 0%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
-  border-color: rgba(212, 140, 156, 0.2);
+  background: var(--gradient-luxury-gold-subtle);
+  border-color: var(--border-luxury-gold);
 }
 
 .overviewRank__item:first-child::before {
@@ -2728,12 +2645,10 @@
   margin: 1rem 0;
   padding: 1rem;
   border-radius: 16px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.9) 100%
-  );
-  border: 1.5px solid rgba(212, 140, 156, 0.12);
+  background: var(--gradient-luxury-gold-subtle);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .overviewPerformanceScore__badge {
@@ -2798,12 +2713,10 @@
   margin: 1rem 0;
   padding: 1rem;
   border-radius: 16px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.9) 100%
-  );
-  border: 1.5px solid rgba(212, 140, 156, 0.12);
+  background: var(--gradient-luxury-gold-subtle);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .overviewSeoScore__badge {
@@ -2860,15 +2773,18 @@
   gap: 0.75rem;
   padding: 0.75rem;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.6);
-  border: 1.5px solid rgba(212, 140, 156, 0.1);
-  transition: all 0.2s ease;
+  background: var(--gradient-luxury-gold-subtle);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  transition: var(--transition-elegant);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .overviewSeoCheck:hover {
-  background: rgba(255, 255, 255, 0.8);
-  border-color: rgba(212, 140, 156, 0.2);
+  background: var(--gradient-luxury-gold-subtle);
+  border-color: var(--border-luxury-gold);
   transform: translateX(2px);
+  box-shadow: var(--shadow-luxury-gold);
 }
 
 .overviewSeoCheck--pass {
@@ -3013,13 +2929,11 @@
   gap: 0.5rem;
   height: 120px;
   padding: 0.5rem;
-  background: linear-gradient(
-    135deg,
-    rgba(212, 140, 156, 0.03) 0%,
-    rgba(212, 140, 156, 0.01) 100%
-  );
+  background: var(--gradient-luxury-gold-subtle);
   border-radius: 12px;
-  border: 1px solid rgba(212, 140, 156, 0.1);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .overviewChart__bar {
@@ -3446,16 +3360,17 @@
 .overviewAlert {
   padding: 1rem;
   border-radius: 12px;
-  border: 1.5px solid;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
+  border: var(--border-luxury);
+  background: var(--gradient-luxury-gold-subtle);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
+  transition: var(--transition-elegant);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .overviewAlert:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
 }
 
 .overviewAlert--critical {

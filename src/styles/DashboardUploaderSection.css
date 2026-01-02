@@ -10,13 +10,14 @@
 .uploader {
   max-width: 1400px;
   margin: 0 auto;
-  background: var(--gradient-surface);
-  border: var(--border-width-2) solid var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-2xl);
   box-shadow: 
-    var(--shadow-2xl),
-    var(--shadow-xl),
-    var(--shadow-lg),
+    var(--shadow-luxury-xl),
+    var(--shadow-luxury-lg),
+    var(--shadow-elegant),
     0 0 0 1px rgba(255, 255, 255, 0.9) inset,
     0 0 0 2px var(--brand-rose-border-2) inset;
   padding: clamp(var(--space-10), 5vw, var(--space-14));
@@ -106,7 +107,14 @@
   font-size: clamp(var(--font-size-2xl), 4vw, var(--font-size-3xl));
   font-weight: var(--font-weight-black);
   letter-spacing: -0.025em;
-  background: var(--gradient-brand);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -137,25 +145,25 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2-5) var(--space-4);
-  border: var(--border-width-2) solid var(--brand-rose-border);
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--brand-rose-500);
+  border: var(--border-luxury-gold);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-700);
   border-radius: var(--radius-base);
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-sm);
   cursor: pointer;
-  transition: all var(--transition-base) cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--transition-elegant);
   backdrop-filter: var(--backdrop-blur-sm);
   -webkit-backdrop-filter: var(--backdrop-blur-sm);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .uploader__draftBtn:hover:not(:disabled) {
-    background: var(--brand-rose-500);
-    color: white;
-    border-color: var(--brand-rose-500);
-    box-shadow: var(--shadow-md);
+    background: var(--gradient-luxury-gold);
+    color: var(--elegant-white);
+    border-color: var(--border-luxury-gold-strong);
+    box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
     transform: translateY(-2px);
   }
 }
@@ -338,17 +346,18 @@
 .uploader__field input,
 .uploader__field textarea,
 .uploader__field select {
-  border: var(--border-width-2) solid var(--brand-rose-border);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-lg);
   padding: clamp(var(--space-3-5), 1.4vw, var(--space-4)) clamp(var(--space-4), 1.6vw, var(--space-4-5));
   font-size: clamp(var(--font-size-sm), 1.2vw, var(--font-size-base));
   font-weight: var(--font-weight-bold);
-  background: var(--gradient-surface);
-  color: var(--ink-900);
-  transition: all var(--transition-base) cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: var(--gradient-elegant-surface);
+  color: var(--elegant-black);
+  transition: var(--transition-elegant);
   font-family: inherit;
   box-shadow: 
-    var(--shadow-sm),
+    var(--shadow-luxury-sm),
     0 0 0 1px rgba(255, 255, 255, 0.8) inset;
   backdrop-filter: var(--backdrop-blur-sm);
   -webkit-backdrop-filter: var(--backdrop-blur-sm);
@@ -358,10 +367,10 @@
   .uploader__field input:hover,
   .uploader__field textarea:hover,
   .uploader__field select:hover {
-    border-color: rgba(212, 140, 156, 0.35);
-    background: rgba(255, 255, 255, 1);
+    border-color: var(--border-luxury-gold);
+    background: var(--gradient-elegant-surface);
     box-shadow: 
-      0 4px 12px rgba(0, 0, 0, 0.06),
+      var(--shadow-luxury-md),
       0 0 0 1px rgba(255, 255, 255, 0.9) inset;
     transform: translateY(-1px);
   }
@@ -371,12 +380,12 @@
 .uploader__field textarea:focus,
 .uploader__field select:focus {
   outline: none;
-  border-color: var(--brand-rose-600);
-  background: rgba(255, 255, 255, 1);
+  border-color: var(--border-luxury-gold-strong);
+  background: var(--gradient-elegant-surface);
   box-shadow: 
+    var(--shadow-luxury-gold),
+    var(--shadow-luxury-md),
     var(--shadow-focus),
-    var(--shadow-md),
-    var(--shadow-sm),
     0 0 0 1px rgba(255, 255, 255, 0.9) inset;
   transform: translateY(-1px);
 }
@@ -460,21 +469,23 @@
   gap: var(--space-6);
   flex-wrap: wrap;
   padding: var(--space-4) var(--space-5);
-  border: var(--border-width-2) solid rgba(0, 0, 0, 0.1);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--gradient-luxury-gold-subtle);
   backdrop-filter: var(--backdrop-blur-md);
   -webkit-backdrop-filter: var(--backdrop-blur-md);
   box-shadow:
-    var(--shadow-sm),
+    var(--shadow-luxury-sm),
     inset 0 1px 2px rgba(255, 255, 255, 0.8);
-  transition: all var(--transition-base) ease;
+  transition: var(--transition-elegant);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .uploader__toggles:hover {
-    border-color: var(--brand-rose-border);
-    background: rgba(255, 255, 255, 0.8);
+    border-color: var(--border-luxury-gold);
+    background: var(--gradient-luxury-gold-subtle);
+    box-shadow: var(--shadow-luxury-gold);
   }
 }
 
@@ -679,10 +690,11 @@
 /* Dropzone - Luxury Design */
 .uploader__dropzone {
   position: relative;
-  border: var(--border-width-2) dashed var(--brand-rose-border);
+  border: var(--border-luxury) dashed;
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-lg);
   padding: var(--space-8) var(--space-6);
-  background: var(--gradient-surface);
+  background: var(--gradient-elegant-surface);
   backdrop-filter: var(--backdrop-blur-md);
   -webkit-backdrop-filter: var(--backdrop-blur-md);
   display: flex;
@@ -690,18 +702,19 @@
   justify-content: space-between;
   gap: var(--space-6);
   cursor: pointer;
-  transition: all var(--transition-base) cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--transition-elegant);
   box-shadow:
-    var(--shadow-md),
+    var(--shadow-luxury-md),
     inset 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .uploader__dropzone:hover {
-    border-color: var(--brand-rose-border);
-    background: var(--gradient-surface);
+    border-color: var(--border-luxury-gold);
+    background: var(--gradient-luxury-gold-subtle);
     box-shadow:
-      var(--shadow-lg),
+      var(--shadow-luxury-gold-lg),
+      var(--shadow-luxury-lg),
       inset 0 1px 2px rgba(255, 255, 255, 0.9);
     transform: translateY(-2px);
   }
@@ -714,14 +727,11 @@
 }
 
 .uploader__dropzone.is-dragging {
-  border-color: var(--brand-rose-500);
-  background: linear-gradient(
-    135deg,
-    rgba(212, 140, 156, 0.1) 0%,
-    rgba(168, 213, 186, 0.08) 100%
-  );
+  border-color: var(--border-luxury-gold-strong);
+  background: var(--gradient-luxury-gold-subtle);
   box-shadow:
-    0 8px 32px rgba(212, 140, 156, 0.25),
+    var(--shadow-luxury-gold-lg),
+    var(--shadow-luxury-xl),
     inset 0 1px 2px rgba(255, 255, 255, 0.9);
   transform: scale(1.02);
 }
@@ -763,15 +773,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--brand-rose-500);
-  background: rgba(212, 140, 156, 0.1);
+  color: var(--luxury-gold-600);
+  background: var(--gradient-luxury-gold-subtle);
   border-radius: var(--radius-lg);
-  transition: all var(--transition-base) ease;
+  transition: var(--transition-elegant);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .uploader__dropzone:hover .uploader__dropzoneIcon {
-    background: rgba(212, 140, 156, 0.15);
+    background: var(--gradient-luxury-gold);
+    color: var(--elegant-white);
+    box-shadow: var(--shadow-luxury-gold);
     transform: scale(1.1);
   }
 }
@@ -859,14 +872,16 @@
 
 /* Preview Section */
 .uploader__preview {
-  border: var(--border-width-2) solid var(--brand-rose-border-2);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-xl);
   padding: var(--space-6);
-  background: var(--gradient-surface);
+  background: var(--gradient-elegant-surface);
   backdrop-filter: var(--backdrop-blur-md);
   -webkit-backdrop-filter: var(--backdrop-blur-md);
   box-shadow:
-    var(--shadow-lg),
+    var(--shadow-luxury-lg),
+    var(--shadow-elegant),
     inset 0 1px 2px rgba(255, 255, 255, 0.8);
   position: sticky;
   top: var(--space-8);
@@ -1042,9 +1057,10 @@
   .uploader__submit:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow:
-      var(--shadow-xl),
-      var(--shadow-lg),
+      var(--shadow-luxury-gold-lg),
+      var(--shadow-luxury-xl),
       inset 0 1px 2px rgba(255, 255, 255, 0.4);
+    filter: brightness(1.05) saturate(1.1);
   }
 }
 
