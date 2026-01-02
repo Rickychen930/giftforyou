@@ -101,16 +101,13 @@
 /* Reviews horizontal scroll - Infinite auto scroll */
 .googleMapsReviews__reviews {
   position: relative;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: var(--space-6);
+  width: 100%;
   margin-bottom: var(--space-12);
 }
 
-@media (min-width: 1024px) {
-  .googleMapsReviews__reviews {
-    grid-template-columns: repeat(3, 1fr);
-  }
+/* Auto-scroll container styling */
+.googleMapsReviews__reviews .review-auto-scroll {
+  width: 100%;
 }
 
 /* Remove old animation that's no longer used */
@@ -173,7 +170,7 @@
 /* Responsive adjustments */
 @media (max-width: 1024px) {
   .googleMapsReviews__reviews {
-    grid-template-columns: repeat(2, 1fr);
+    margin-bottom: var(--space-10);
   }
 }
 
@@ -187,8 +184,7 @@
   }
 
   .googleMapsReviews__reviews {
-    grid-template-columns: 1fr;
-    gap: var(--space-4);
+    margin-bottom: var(--space-8);
   }
 
   /* Review card responsive styles are in ReviewCard.css */

@@ -13,6 +13,7 @@ import "../../styles/GoogleMapsReviewsSection.css";
 import SectionHeader from "../../components/common/SectionHeader";
 import EmptyState from "../../components/common/EmptyState";
 import ReviewCard from "../../components/reviews/ReviewCard";
+import ReviewAutoScroll from "../../components/reviews/ReviewAutoScroll";
 
 interface Review {
   id: string;
@@ -183,7 +184,7 @@ class GoogleMapsReviewsSection extends Component<
 
   render(): React.ReactNode {
     const { placeName = "GiftForYou.idn" } = this.props;
-    const reviews = this.getSortedReviews().slice(0, 6); // Show top 6 reviews
+    const reviews = this.getSortedReviews(); // Use all reviews for auto-scroll
 
     return (
       <section className={this.baseClass} id="Reviews" aria-labelledby="reviews-title">
@@ -200,7 +201,14 @@ class GoogleMapsReviewsSection extends Component<
             this.renderEmptyState()
           ) : (
             <div className={`${this.baseClass}__reviews`}>
-              {reviews.map((review) => this.renderReview(review))}
+              <ReviewAutoScroll
+                speed={30}
+                pauseOnHover={true}
+                gap={40}
+                className={`${this.baseClass}__auto-scroll`}
+              >
+                {reviews.map((review) => this.renderReview(review))}
+              </ReviewAutoScroll>
             </div>
           )}
 

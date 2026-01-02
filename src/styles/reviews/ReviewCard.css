@@ -23,6 +23,11 @@
   isolation: isolate;
   backdrop-filter: var(--backdrop-blur-sm);
   -webkit-backdrop-filter: var(--backdrop-blur-sm);
+  /* Fixed width for horizontal scroll */
+  width: clamp(300px, 30vw, 380px);
+  min-width: 300px;
+  max-width: 380px;
+  flex-shrink: 0;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -94,8 +99,19 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 767px) {
+@media (max-width: 1024px) {
   .review-card {
+    width: clamp(280px, 32vw, 360px);
+    min-width: 280px;
+    max-width: 360px;
+  }
+}
+
+@media (max-width: 768px) {
+  .review-card {
+    width: clamp(260px, 40vw, 340px);
+    min-width: 260px;
+    max-width: 340px;
     padding: var(--space-6);
   }
 
@@ -106,6 +122,22 @@
 
   .review-card__time {
     align-self: flex-end;
+  }
+}
+
+@media (max-width: 640px) {
+  .review-card {
+    width: clamp(240px, 50vw, 320px);
+    min-width: 240px;
+    max-width: 320px;
+  }
+}
+
+@media (max-width: 480px) {
+  .review-card {
+    width: clamp(220px, 60vw, 300px);
+    min-width: 220px;
+    max-width: 300px;
   }
 }
 
