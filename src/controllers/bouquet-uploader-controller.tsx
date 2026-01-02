@@ -1,8 +1,9 @@
 // src/controllers/bouquet-uploader-controller.tsx
 // Controller for bouquet uploader form
 // Manages state and event handlers following MVC pattern
+// Extends BaseController for common functionality (SOLID, DRY)
 
-import React, { Component } from "react";
+import React from "react";
 import { getDropdownOptions } from "../services/dropdown-options.service";
 import { BOUQUET_SIZE_OPTIONS } from "../constants/bouquet-constants";
 import {
@@ -20,12 +21,13 @@ import {
   type UploadFormState,
   type MessageType,
 } from "../models/bouquet-uploader-model";
+import { BaseController, type BaseControllerProps, type BaseControllerState } from "./base/BaseController";
 
-interface Props {
+interface Props extends BaseControllerProps {
   onUpload: (formData: FormData) => Promise<boolean>;
 }
 
-interface State extends UploadFormState {
+interface State extends UploadFormState, BaseControllerState {
   file: File | null;
   previewUrl: string;
   isDraggingImage: boolean;
@@ -52,8 +54,9 @@ interface State extends UploadFormState {
 /**
  * Controller for Bouquet Uploader
  * Manages all state and business logic
+ * Extends BaseController to avoid code duplication
  */
-export class BouquetUploaderController extends Component<Props, State> {
+export class BouquetUploaderController extends BaseController<Props, State> {
   private fileInputRef = React.createRef<HTMLInputElement>();
   private formRef = React.createRef<HTMLFormElement>();
   private validationTimeout: NodeJS.Timeout | null = null;
@@ -65,6 +68,7 @@ export class BouquetUploaderController extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
+      ...this.state,
       ...initializeEmptyFormState(),
       file: null,
       previewUrl: "",
@@ -90,7 +94,12 @@ export class BouquetUploaderController extends Component<Props, State> {
     };
   }
 
-    componentDidMount(): void {
+  /**
+   * Component lifecycle: Mount
+   * BaseController handles initialization
+   */
+  componentDidMount(): void {
+    super.componentDidMount();
     this.componentMounted = true;
     
     // Check for draft existence
@@ -109,6 +118,10 @@ export class BouquetUploaderController extends Component<Props, State> {
     this.loadDropdownOptions();
   }
 
+  /**
+   * Component lifecycle: Unmount
+   * BaseController handles cleanup
+   */
   componentWillUnmount(): void {
     this.componentMounted = false;
     
@@ -142,12 +155,14 @@ export class BouquetUploaderController extends Component<Props, State> {
     
     // Remove keyboard listener
     window.removeEventListener("keydown", this.handleKeyboardShortcuts);
+    
+    super.componentWillUnmount();
   }
 
   // ==================== Dropdown Options ====================
   private loadDropdownOptions = async (): Promise<void> => {
     try {
-      const options = await getDropdownOptions();
+      const options = await getDropdownOptions(this.abortController?.signal);
       this.setState({
         collectionOptions: options.collections,
         typeOptions: options.types,
@@ -156,8 +171,11 @@ export class BouquetUploaderController extends Component<Props, State> {
         stockLevelOptions: options.stockLevels,
       });
     } catch (err) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to load dropdown options:", err);
+      if (!this.abortController?.signal.aborted) {
+        this.setError(err, "Failed to load dropdown options");
+        if (process.env.NODE_ENV === "development") {
+          console.error("Failed to load dropdown options:", err);
+        }
       }
     }
   };

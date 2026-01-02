@@ -1,9 +1,10 @@
 /**
  * FAQ Page Controller
  * OOP-based controller for managing FAQ page state and filtering
+ * Extends BaseController for common functionality (SOLID, DRY)
  */
 
-import React, { Component } from "react";
+import React from "react";
 import {
   type FAQItem,
   type FAQCategory,
@@ -13,32 +14,40 @@ import {
   INITIAL_FAQ_PAGE_STATE,
   DEFAULT_FAQ_PAGE_SEO,
 } from "../models/faq-page-model";
-import { setSeo, setFaqSeo } from "../utils/seo";
+import { setFaqSeo } from "../utils/seo";
+import { BaseController, type BaseControllerProps, type BaseControllerState, type SeoConfig } from "./base/BaseController";
 import FAQPageView from "../view/faq-page";
 
-interface FAQPageControllerProps {
+interface FAQPageControllerProps extends BaseControllerProps {
   // Add any props if needed in the future
 }
 
 /**
  * FAQ Page Controller Class
  * Manages all business logic, filtering, and state for the FAQ page
+ * Extends BaseController to avoid code duplication
  */
-export class FAQPageController extends Component<
+export class FAQPageController extends BaseController<
   FAQPageControllerProps,
-  FAQPageState
+  FAQPageState & BaseControllerState
 > {
   constructor(props: FAQPageControllerProps) {
-    super(props);
-    this.state = { ...INITIAL_FAQ_PAGE_STATE };
+    const seoConfig: SeoConfig = {
+      defaultSeo: DEFAULT_FAQ_PAGE_SEO,
+    };
+
+    super(props, seoConfig);
+
+    this.state = {
+      ...this.state,
+      ...INITIAL_FAQ_PAGE_STATE,
+    };
   }
 
   /**
-   * Initialize SEO
+   * Initialize FAQ structured data for SEO
    */
-  private initializeSeo(): void {
-    setSeo(DEFAULT_FAQ_PAGE_SEO);
-
+  private initializeFaqSeo(): void {
     // Set FAQ structured data for SEO
     setFaqSeo(
       FAQ_DATA.map((item) => ({
@@ -96,9 +105,11 @@ export class FAQPageController extends Component<
 
   /**
    * Component lifecycle: Mount
+   * BaseController handles SEO initialization
    */
   componentDidMount(): void {
-    this.initializeSeo();
+    super.componentDidMount();
+    this.initializeFaqSeo();
   }
 
   /**

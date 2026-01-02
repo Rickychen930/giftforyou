@@ -1,44 +1,55 @@
-// src/controllers/instagram-controller.ts
+/**
+ * Instagram Controller
+ * Backend API controller for managing Instagram integration
+ * Extends BaseApiController for common functionality (SOLID, DRY)
+ */
 
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import type { InstagramPost } from "../../services/instagram.service";
+import { BaseApiController } from "./base/BaseApiController";
 
 /**
- * Get Instagram posts
- * This will integrate with Instagram Basic Display API or Graph API
- * For now, returns placeholder data until Instagram API credentials are configured
+ * Instagram Controller Class
+ * Manages all Instagram-related API endpoints
+ * Extends BaseApiController to avoid code duplication
  */
-export async function getInstagramPosts(req: Request, res: Response): Promise<void> {
-  try {
-    const limitRaw = typeof req.query.limit === "string" ? req.query.limit : "10";
-    const limit = Math.min(Math.max(Number.parseInt(limitRaw, 10) || 10, 1), 20);
+const instagramController = new (class extends BaseApiController {
+  /**
+   * Get Instagram posts
+   * This will integrate with Instagram Basic Display API or Graph API
+   * For now, returns placeholder data until Instagram API credentials are configured
+   */
+  async getInstagramPosts(req: Request, res: Response): Promise<void> {
+    try {
+      const limitRaw = typeof req.query.limit === "string" ? req.query.limit : "10";
+      const limit = Math.min(Math.max(Number.parseInt(limitRaw, 10) || 10, 1), 20);
 
-    // Check if Instagram API credentials are configured
-    const hasInstagramConfig = 
-      process.env.INSTAGRAM_ACCESS_TOKEN || 
-      process.env.INSTAGRAM_APP_ID ||
-      process.env.INSTAGRAM_APP_SECRET;
+      // Check if Instagram API credentials are configured
+      const hasInstagramConfig = 
+        process.env.INSTAGRAM_ACCESS_TOKEN || 
+        process.env.INSTAGRAM_APP_ID ||
+        process.env.INSTAGRAM_APP_SECRET;
 
-    if (!hasInstagramConfig) {
-      // Return empty array with message - frontend will use fallback
-      res.status(200).json({
-        posts: [],
-        message: "Instagram API not configured. Using placeholder posts.",
-      });
-      return;
-    }
+      if (!hasInstagramConfig) {
+        // Return empty array with message - frontend will use fallback
+        this.sendSuccess(res, {
+          posts: [],
+          message: "Instagram API not configured. Using placeholder posts.",
+        }, "Instagram posts retrieved");
+        return;
+      }
 
-    // Instagram Graph API Integration
-    // Requires: INSTAGRAM_ACCESS_TOKEN (Long-lived token from Facebook App)
-    const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN;
-    
-    if (!accessToken) {
-      res.status(200).json({
-        posts: [],
-        message: "Instagram API not configured. Using placeholder posts.",
-      });
-      return;
-    }
+      // Instagram Graph API Integration
+      // Requires: INSTAGRAM_ACCESS_TOKEN (Long-lived token from Facebook App)
+      const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN;
+      
+      if (!accessToken) {
+        this.sendSuccess(res, {
+          posts: [],
+          message: "Instagram API not configured. Using placeholder posts.",
+        }, "Instagram posts retrieved");
+        return;
+      }
 
     try {
       // Fetch media from Instagram Graph API
@@ -55,10 +66,10 @@ export async function getInstagramPosts(req: Request, res: Response): Promise<vo
         console.error("Instagram API error:", response.status, errorText);
         
         // Return empty array - frontend will use fallback
-        res.status(200).json({
+        this.sendSuccess(res, {
           posts: [],
           message: "Instagram API returned an error. Using placeholder posts.",
-        });
+        }, "Instagram posts retrieved");
         return;
       }
 
@@ -74,10 +85,10 @@ export async function getInstagramPosts(req: Request, res: Response): Promise<vo
       };
 
       if (!data.data || !Array.isArray(data.data)) {
-        res.status(200).json({
+        this.sendSuccess(res, {
           posts: [],
           message: "Instagram API returned invalid data. Using placeholder posts.",
-        });
+        }, "Instagram posts retrieved");
         return;
       }
 
@@ -102,55 +113,53 @@ export async function getInstagramPosts(req: Request, res: Response): Promise<vo
         };
       });
 
-      res.status(200).json({
+      this.sendSuccess(res, {
         posts: posts,
         username: process.env.INSTAGRAM_USERNAME,
-      });
+      }, "Instagram posts retrieved");
     } catch (apiErr) {
       console.error("Instagram API fetch error:", apiErr);
       // Return empty array on error - frontend will use fallback
-      res.status(200).json({
+      this.sendSuccess(res, {
         posts: [],
         message: "Failed to fetch from Instagram API. Using placeholder posts.",
-      });
+      }, "Instagram posts retrieved");
     }
   } catch (err) {
-    console.error("getInstagramPosts failed:", err);
-    res.status(500).json({
+    this.sendError(res, err instanceof Error ? err : new Error("Failed to get Instagram posts"), 500, {
       posts: [],
-      error: err instanceof Error ? err.message : "Unknown error",
     });
   }
 }
 
-/**
- * Get Instagram profile information
- */
-export async function getInstagramProfile(req: Request, res: Response): Promise<void> {
-  try {
-    const hasInstagramConfig = 
-      process.env.INSTAGRAM_ACCESS_TOKEN || 
-      process.env.INSTAGRAM_APP_ID ||
-      process.env.INSTAGRAM_APP_SECRET;
+  /**
+   * Get Instagram profile information
+   */
+  async getInstagramProfile(req: Request, res: Response): Promise<void> {
+    try {
+      const hasInstagramConfig = 
+        process.env.INSTAGRAM_ACCESS_TOKEN || 
+        process.env.INSTAGRAM_APP_ID ||
+        process.env.INSTAGRAM_APP_SECRET;
 
-    if (!hasInstagramConfig) {
-      res.status(200).json({
-        username: process.env.INSTAGRAM_USERNAME || "giftforyou.idn",
-        message: "Instagram API not configured. Using default username.",
-      });
-      return;
-    }
+      if (!hasInstagramConfig) {
+        this.sendSuccess(res, {
+          username: process.env.INSTAGRAM_USERNAME || "giftforyou.idn",
+          message: "Instagram API not configured. Using default username.",
+        }, "Instagram profile retrieved");
+        return;
+      }
 
-    // Instagram Graph API - Get profile info
-    const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN;
-    
-    if (!accessToken) {
-      res.status(200).json({
-        username: process.env.INSTAGRAM_USERNAME || "giftforyou.idn",
-        message: "Instagram API not configured. Using default username.",
-      });
-      return;
-    }
+      // Instagram Graph API - Get profile info
+      const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN;
+      
+      if (!accessToken) {
+        this.sendSuccess(res, {
+          username: process.env.INSTAGRAM_USERNAME || "giftforyou.idn",
+          message: "Instagram API not configured. Using default username.",
+        }, "Instagram profile retrieved");
+        return;
+      }
 
     try {
       const apiUrl = `https://graph.instagram.com/me?fields=username,account_type&access_token=${accessToken}`;
@@ -163,9 +172,9 @@ export async function getInstagramProfile(req: Request, res: Response): Promise<
 
       if (!response.ok) {
         // Fallback to env var username
-        res.status(200).json({
+        this.sendSuccess(res, {
           username: process.env.INSTAGRAM_USERNAME || "giftforyou.idn",
-        });
+        }, "Instagram profile retrieved");
         return;
       }
 
@@ -174,22 +183,24 @@ export async function getInstagramProfile(req: Request, res: Response): Promise<
         account_type?: string;
       };
       
-      res.status(200).json({
+      this.sendSuccess(res, {
         username: data.username || process.env.INSTAGRAM_USERNAME || "giftforyou.idn",
         accountType: data.account_type,
-      });
+      }, "Instagram profile retrieved");
     } catch (apiErr) {
       console.error("Instagram profile API error:", apiErr);
       // Fallback to env var username
-      res.status(200).json({
+      this.sendSuccess(res, {
         username: process.env.INSTAGRAM_USERNAME || "giftforyou.idn",
-      });
+      }, "Instagram profile retrieved");
     }
   } catch (err) {
-    console.error("getInstagramProfile failed:", err);
-    res.status(500).json({
-      error: err instanceof Error ? err.message : "Unknown error",
-    });
+    this.sendError(res, err instanceof Error ? err : new Error("Failed to get Instagram profile"), 500);
   }
 }
+})();
+
+// Export functions for backward compatibility
+export const getInstagramPosts = instagramController.getInstagramPosts.bind(instagramController);
+export const getInstagramProfile = instagramController.getInstagramProfile.bind(instagramController);
 

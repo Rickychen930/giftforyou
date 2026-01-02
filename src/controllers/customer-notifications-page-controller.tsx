@@ -1,43 +1,46 @@
 /**
  * Customer Notifications Page Controller
  * OOP-based controller for managing customer notifications page state and operations
+ * Extends BaseController for common functionality (SOLID, DRY)
  */
 
-import React, { Component } from "react";
+import React from "react";
 import { getAccessToken } from "../utils/auth-utils";
-import { setSeo } from "../utils/seo";
 import {
   type NotificationsPageState,
   type NotificationSettings,
   INITIAL_NOTIFICATIONS_PAGE_STATE,
   DEFAULT_NOTIFICATIONS_PAGE_SEO,
 } from "../models/customer-notifications-page-model";
+import { BaseController, type BaseControllerProps, type BaseControllerState, type SeoConfig } from "./base/BaseController";
 import CustomerNotificationsPageView from "../view/customer-notifications-page";
 
-interface CustomerNotificationsPageControllerProps {
+interface CustomerNotificationsPageControllerProps extends BaseControllerProps {
   // Add any props if needed in the future
 }
 
 /**
  * Customer Notifications Page Controller Class
  * Manages all business logic and notification settings operations
+ * Extends BaseController to avoid code duplication
  */
-export class CustomerNotificationsPageController extends Component<
+export class CustomerNotificationsPageController extends BaseController<
   CustomerNotificationsPageControllerProps,
-  NotificationsPageState
+  NotificationsPageState & BaseControllerState
 > {
   private successTimeout: NodeJS.Timeout | null = null;
 
   constructor(props: CustomerNotificationsPageControllerProps) {
-    super(props);
-    this.state = { ...INITIAL_NOTIFICATIONS_PAGE_STATE };
-  }
+    const seoConfig: SeoConfig = {
+      defaultSeo: DEFAULT_NOTIFICATIONS_PAGE_SEO,
+    };
 
-  /**
-   * Initialize SEO
-   */
-  private initializeSeo(): void {
-    setSeo(DEFAULT_NOTIFICATIONS_PAGE_SEO);
+    super(props, seoConfig);
+
+    this.state = {
+      ...this.state,
+      ...INITIAL_NOTIFICATIONS_PAGE_STATE,
+    };
   }
 
   /**
@@ -47,15 +50,13 @@ export class CustomerNotificationsPageController extends Component<
     try {
       const saved = localStorage.getItem("notificationSettings");
       if (saved) {
-        const settings = JSON.parse(saved) as NotificationSettings;
+        const settings = this.safeJsonParse<NotificationSettings>(saved, {} as NotificationSettings);
         this.setState({ settings, isLoading: false });
       } else {
         this.setState({ isLoading: false });
       }
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to load notification settings:", error);
-      }
+      this.setError(error, "Terjadi kesalahan saat memuat pengaturan notifikasi");
       this.setState({ isLoading: false });
     }
   };
@@ -104,9 +105,10 @@ export class CustomerNotificationsPageController extends Component<
 
   /**
    * Component lifecycle: Mount
+   * BaseController handles SEO initialization
    */
   componentDidMount(): void {
-    this.initializeSeo();
+    super.componentDidMount();
     window.scrollTo({ top: 0, behavior: "smooth" });
 
     const token = getAccessToken();
@@ -121,8 +123,10 @@ export class CustomerNotificationsPageController extends Component<
 
   /**
    * Component lifecycle: Unmount
+   * BaseController handles cleanup
    */
   componentWillUnmount(): void {
+    super.componentWillUnmount();
     if (this.successTimeout) {
       clearTimeout(this.successTimeout);
     }

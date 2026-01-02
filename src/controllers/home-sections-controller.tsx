@@ -1,9 +1,10 @@
 /**
  * Home Sections Controllers
  * OOP-based controllers for individual homepage sections
+ * Extends BaseController for common functionality (SOLID, DRY)
  */
 
-import React, { Component } from "react";
+import React from "react";
 import type { Collection } from "../models/domain/collection";
 import type { HeroSliderContent } from "../components/hero/HeroSlider";
 import { getCollections } from "../services/collection.service";
@@ -13,17 +14,18 @@ import OurCollectionSection from "../view/sections/OurCollectionSection";
 import StoreLocationSection from "../view/sections/StoreLocationSection";
 import { aboutUsContent } from "../models/about-us-model";
 import AboutUsSection from "../view/sections/AboutUsSection";
+import { BaseController, type BaseControllerProps, type BaseControllerState } from "./base/BaseController";
 
 // ============================================================================
 // Hero Section Controller
 // ============================================================================
 
-interface HeroControllerProps {
+interface HeroControllerProps extends BaseControllerProps {
   content?: HeroSliderContent;
   loading?: boolean;
 }
 
-interface HeroControllerState {
+interface HeroControllerState extends BaseControllerState {
   heroContent: HeroSliderContent | null;
   isLoading: boolean;
 }
@@ -31,13 +33,13 @@ interface HeroControllerState {
 /**
  * Hero Section Controller
  * Manages hero slider data fetching and state
+ * Extends BaseController to avoid code duplication
  */
-export class HeroController extends Component<HeroControllerProps, HeroControllerState> {
-  private abortController: AbortController | null = null;
-
+export class HeroController extends BaseController<HeroControllerProps, HeroControllerState> {
   constructor(props: HeroControllerProps) {
     super(props);
     this.state = {
+      ...this.state,
       heroContent: props.content || null,
       isLoading: props.loading || false,
     };
@@ -47,22 +49,21 @@ export class HeroController extends Component<HeroControllerProps, HeroControlle
    * Fetch hero content from API
    */
   private async fetchHeroContent(): Promise<void> {
-    if (!this.abortController) return;
-
     try {
-      this.setState({ isLoading: true });
+      this.setLoading(true);
 
-      const response = await fetch(
-        `${API_BASE}/api/hero-slider/home`,
-        { signal: this.abortController.signal }
+      const response = await this.safeFetch(
+        `${API_BASE}/api/hero-slider/home`
       );
 
-      if (!response.ok) {
-        this.setState({ heroContent: null, isLoading: false });
+      if (!response || !response.ok) {
+        this.setState({ heroContent: null });
+        this.setLoading(false);
         return;
       }
 
-      const data = await response.json();
+      const text = await response.text();
+      const data = this.safeJsonParse<HeroSliderContent | null>(text, null);
 
       // Validate data structure
       const hasSlides =
@@ -73,27 +74,36 @@ export class HeroController extends Component<HeroControllerProps, HeroControlle
 
       this.setState({
         heroContent: hasSlides ? (data as HeroSliderContent) : null,
-        isLoading: false,
       });
+      this.setLoading(false);
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === "AbortError") {
         return;
       }
-      console.error("Failed to fetch hero slider:", err);
-      this.setState({ heroContent: null, isLoading: false });
+      this.setError(err, "Failed to fetch hero slider");
+      this.setState({ heroContent: null });
+      this.setLoading(false);
     }
   }
 
+  /**
+   * Component lifecycle: Mount
+   * BaseController handles initialization
+   */
   componentDidMount(): void {
+    super.componentDidMount();
     // Only fetch if content is not provided via props
     if (!this.props.content) {
-      this.abortController = new AbortController();
       this.fetchHeroContent();
     }
   }
 
+  /**
+   * Component lifecycle: Unmount
+   * BaseController handles cleanup
+   */
   componentWillUnmount(): void {
-    this.abortController?.abort();
+    super.componentWillUnmount();
   }
 
   render(): React.ReactNode {
@@ -110,27 +120,25 @@ export class HeroController extends Component<HeroControllerProps, HeroControlle
 // Collections Section Controller
 // ============================================================================
 
-interface OurCollectionControllerState {
+interface OurCollectionControllerState extends BaseControllerState {
   collections: Collection[];
-  loading: boolean;
   errorMessage: string;
 }
 
 /**
  * Our Collection Section Controller
  * Manages collections data fetching and state
+ * Extends BaseController to avoid code duplication
  */
-export class OurCollectionController extends Component<
-  {},
+export class OurCollectionController extends BaseController<
+  BaseControllerProps,
   OurCollectionControllerState
 > {
-  private abortController: AbortController | null = null;
-
-  constructor(props: {}) {
+  constructor(props: BaseControllerProps) {
     super(props);
     this.state = {
+      ...this.state,
       collections: [],
-      loading: true,
       errorMessage: "",
     };
   }
@@ -139,48 +147,55 @@ export class OurCollectionController extends Component<
    * Load collections data
    */
   private async loadCollections(): Promise<void> {
-    if (!this.abortController) return;
-
     try {
-      this.setState({ loading: true, errorMessage: "" });
+      this.setLoading(true);
+      this.setError(null);
 
-      const data = await getCollections(this.abortController.signal);
+      const data = await getCollections(this.abortController?.signal);
 
       this.setState({
         collections: data,
-        loading: false,
         errorMessage: "",
       });
+      this.setLoading(false);
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === "AbortError") {
         return;
       }
 
       const errorMessage = err instanceof Error ? err.message : "Unknown error";
-
+      this.setError(err, errorMessage);
       this.setState({
-        loading: false,
         errorMessage,
       });
+      this.setLoading(false);
     }
   }
 
+  /**
+   * Component lifecycle: Mount
+   * BaseController handles initialization
+   */
   componentDidMount(): void {
-    this.abortController = new AbortController();
+    super.componentDidMount();
     this.loadCollections();
   }
 
+  /**
+   * Component lifecycle: Unmount
+   * BaseController handles cleanup
+   */
   componentWillUnmount(): void {
-    this.abortController?.abort();
+    super.componentWillUnmount();
   }
 
   render(): React.ReactNode {
-    const { collections, loading, errorMessage } = this.state;
+    const { collections, errorMessage } = this.state;
 
     return (
       <OurCollectionSection
         items={collections}
-        loading={loading}
+        loading={this.state.loading || false}
         errorMessage={errorMessage}
       />
     );
@@ -195,7 +210,7 @@ export class OurCollectionController extends Component<
  * Store Location Section Controller
  * Simple controller that passes static data to view
  */
-export class StoreLocationController extends Component {
+export class StoreLocationController extends BaseController<BaseControllerProps, BaseControllerState> {
   render(): React.ReactNode {
     return <StoreLocationSection />;
   }
@@ -209,7 +224,7 @@ export class StoreLocationController extends Component {
  * About Us Section Controller
  * Simple controller that passes static data to view
  */
-export class AboutUsController extends Component {
+export class AboutUsController extends BaseController<BaseControllerProps, BaseControllerState> {
   render(): React.ReactNode {
     return <AboutUsSection content={aboutUsContent} />;
   }

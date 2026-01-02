@@ -34,3 +34,13 @@ export const INITIAL_ORDER_HISTORY_PAGE_STATE: OrderHistoryPageState = {
   isLoading: true,
 };
 
+/**
+ * Default SEO for Order History Page
+ */
+export const DEFAULT_ORDER_HISTORY_PAGE_SEO = {
+  title: "Riwayat Pesanan | Giftforyou.idn - Florist Cirebon",
+  description: "Lihat riwayat pesanan Anda di Giftforyou.idn. Pesan ulang dengan mudah atau tambahkan ke keranjang.",
+  keywords: "riwayat pesanan, order history, pesanan saya, florist cirebon, toko bunga cirebon",
+  path: "/customer/orders",
+};
+

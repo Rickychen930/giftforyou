@@ -1,8 +1,9 @@
 // src/controllers/bouquet-editor-controller.tsx
 // Controller for bouquet editor form
 // Handles all event handlers and state management
+// Extends BaseController for common functionality (SOLID, DRY)
 
-import React, { Component, createRef } from "react";
+import React, { createRef } from "react";
 import type { Bouquet } from "../models/domain/bouquet";
 import { getDropdownOptions } from "../services/dropdown-options.service";
 import {
@@ -22,8 +23,9 @@ import {
   DEFAULT_STOCK_LEVELS,
   buildPreviewUrl,
 } from "../models/bouquet-editor-model";
+import { BaseController, type BaseControllerProps, type BaseControllerState } from "./base/BaseController";
 
-interface Props {
+interface Props extends BaseControllerProps {
   bouquet: Bouquet;
   collections: string[];
   onSave: (formData: FormData) => Promise<boolean> | void;
@@ -31,7 +33,7 @@ interface Props {
   onDelete?: (bouquetId: string) => Promise<void>;
 }
 
-interface State {
+interface State extends BaseControllerState {
   // Form state
   form: FormState;
   initialForm: FormState;
@@ -60,11 +62,10 @@ interface State {
   stockLevelOptions: string[];
 }
 
-export class BouquetEditorController extends Component<Props, State> {
+export class BouquetEditorController extends BaseController<Props, State> {
   private previewRef: string = "";
   private nameInputRef = createRef<HTMLInputElement>();
   private quickActionsRef = createRef<HTMLDivElement>();
-  private abortController: AbortController | null = null;
   private saveStatusTimeout: number | null = null;
   private keyboardShortcutHandler: ((e: KeyboardEvent) => void) | null = null;
   private clickOutsideHandler: ((e: MouseEvent | TouchEvent) => void) | null = null;
@@ -74,6 +75,7 @@ export class BouquetEditorController extends Component<Props, State> {
     super(props);
     const initialForm = initializeFormState(props.bouquet);
     this.state = {
+      ...this.state,
       form: initialForm,
       initialForm,
       saving: false,
@@ -99,7 +101,12 @@ export class BouquetEditorController extends Component<Props, State> {
     this.previewRef = props.bouquet.image ?? "";
   }
 
+  /**
+   * Component lifecycle: Mount
+   * BaseController handles initialization
+   */
   componentDidMount(): void {
+    super.componentDidMount();
     this.loadDropdownOptions();
     this.autoFocusNameInput();
     this.setupKeyboardShortcuts();
@@ -117,18 +124,22 @@ export class BouquetEditorController extends Component<Props, State> {
     }
   }
 
+  /**
+   * Component lifecycle: Unmount
+   * BaseController handles cleanup
+   */
   componentWillUnmount(): void {
     this.cleanup();
     this.removeQuickActionsListeners();
     this.removeKeyboardShortcuts();
+    super.componentWillUnmount();
   }
 
   // ==================== Lifecycle Helpers ====================
 
   private loadDropdownOptions = async (): Promise<void> => {
-    this.abortController = new AbortController();
     try {
-      const options = await getDropdownOptions(this.abortController.signal);
+      const options = await getDropdownOptions(this.abortController?.signal);
       this.setState({
         collectionOptions: options.collections,
         typeOptions: options.types,
@@ -137,8 +148,8 @@ export class BouquetEditorController extends Component<Props, State> {
         stockLevelOptions: options.stockLevels,
       });
     } catch (err) {
-      if (!this.abortController.signal.aborted) {
-        console.error("Failed to load dropdown options:", err);
+      if (!this.abortController?.signal.aborted) {
+        this.setError(err, "Failed to load dropdown options");
         // Keep defaults
       }
     }
@@ -180,15 +191,11 @@ export class BouquetEditorController extends Component<Props, State> {
       URL.revokeObjectURL(this.previewRef);
     }
 
-    // Abort fetch requests
-    if (this.abortController) {
-      this.abortController.abort();
-    }
-
     // Clear timeouts
     if (this.saveStatusTimeout) {
       window.clearTimeout(this.saveStatusTimeout);
     }
+    // Note: AbortController cleanup is handled by BaseController
   };
 
   private setupKeyboardShortcuts = (): void => {

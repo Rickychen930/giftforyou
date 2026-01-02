@@ -1,9 +1,10 @@
 /**
  * Order History Page Controller
  * OOP-based controller for managing order history page state and operations
+ * Extends BaseController for common functionality (SOLID, DRY)
  */
 
-import React, { Component } from "react";
+import React from "react";
 import { formatIDR } from "../utils/money";
 import { STORE_PROFILE } from "../config/store-profile";
 import { addToCart } from "../utils/cart";
@@ -12,24 +13,35 @@ import {
   type OrderHistoryItem,
   type OrderHistoryPageState,
   INITIAL_ORDER_HISTORY_PAGE_STATE,
+  DEFAULT_ORDER_HISTORY_PAGE_SEO,
 } from "../models/order-history-page-model";
+import { BaseController, type BaseControllerProps, type BaseControllerState, type SeoConfig } from "./base/BaseController";
 import OrderHistoryPageView from "../view/order-history-page";
 
-interface OrderHistoryPageControllerProps {
+interface OrderHistoryPageControllerProps extends BaseControllerProps {
   // Add any props if needed in the future
 }
 
 /**
  * Order History Page Controller Class
  * Manages all business logic, order history operations, and state
+ * Extends BaseController to avoid code duplication
  */
-export class OrderHistoryPageController extends Component<
+export class OrderHistoryPageController extends BaseController<
   OrderHistoryPageControllerProps,
-  OrderHistoryPageState
+  OrderHistoryPageState & BaseControllerState
 > {
   constructor(props: OrderHistoryPageControllerProps) {
-    super(props);
-    this.state = { ...INITIAL_ORDER_HISTORY_PAGE_STATE };
+    const seoConfig: SeoConfig = {
+      defaultSeo: DEFAULT_ORDER_HISTORY_PAGE_SEO,
+    };
+
+    super(props, seoConfig);
+
+    this.state = {
+      ...this.state,
+      ...INITIAL_ORDER_HISTORY_PAGE_STATE,
+    };
   }
 
   /**
@@ -140,8 +152,10 @@ export class OrderHistoryPageController extends Component<
 
   /**
    * Component lifecycle: Mount
+   * BaseController handles SEO initialization
    */
   componentDidMount(): void {
+    super.componentDidMount();
     this.loadOrderHistory();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }

@@ -1,45 +1,48 @@
 /**
  * Customer Profile Page Controller
  * OOP-based controller for managing customer profile page state and operations
+ * Extends BaseController for common functionality (SOLID, DRY)
  */
 
-import React, { Component } from "react";
+import React from "react";
 import { API_BASE } from "../config/api";
 import { getAccessToken, clearAuth } from "../utils/auth-utils";
 import { toast } from "../utils/toast";
-import { setSeo } from "../utils/seo";
 import {
   type ProfilePageState,
   type ProfileFormErrors,
   INITIAL_PROFILE_PAGE_STATE,
   DEFAULT_PROFILE_PAGE_SEO,
 } from "../models/customer-profile-page-model";
+import { BaseController, type BaseControllerProps, type BaseControllerState, type SeoConfig } from "./base/BaseController";
 import CustomerProfilePageView from "../view/customer-profile-page";
 
-interface CustomerProfilePageControllerProps {
+interface CustomerProfilePageControllerProps extends BaseControllerProps {
   // Add any props if needed in the future
 }
 
 /**
  * Customer Profile Page Controller Class
  * Manages all business logic, form validation, and profile operations
+ * Extends BaseController to avoid code duplication
  */
-export class CustomerProfilePageController extends Component<
+export class CustomerProfilePageController extends BaseController<
   CustomerProfilePageControllerProps,
-  ProfilePageState
+  ProfilePageState & BaseControllerState
 > {
   private confettiTimeout: NodeJS.Timeout | null = null;
 
   constructor(props: CustomerProfilePageControllerProps) {
-    super(props);
-    this.state = { ...INITIAL_PROFILE_PAGE_STATE };
-  }
+    const seoConfig: SeoConfig = {
+      defaultSeo: DEFAULT_PROFILE_PAGE_SEO,
+    };
 
-  /**
-   * Initialize SEO
-   */
-  private initializeSeo(): void {
-    setSeo(DEFAULT_PROFILE_PAGE_SEO);
+    super(props, seoConfig);
+
+    this.state = {
+      ...this.state,
+      ...INITIAL_PROFILE_PAGE_STATE,
+    };
   }
 
   /**
@@ -50,14 +53,15 @@ export class CustomerProfilePageController extends Component<
     if (!token) return;
 
     try {
-      const response = await fetch(`${API_BASE}/api/customer/profile`, {
+      const response = await this.safeFetch(`${API_BASE}/api/customer/profile`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response && response.ok) {
+        const text = await response.text();
+        const data = this.safeJsonParse<any>(text, {});
         this.setState({
           user: data,
           formData: {
@@ -67,7 +71,7 @@ export class CustomerProfilePageController extends Component<
           },
           isLoading: false,
         });
-      } else if (response.status === 401) {
+      } else if (response && response.status === 401) {
         clearAuth();
         this.setState({ isAuthenticated: false, isLoading: false });
       } else {
@@ -161,7 +165,7 @@ export class CustomerProfilePageController extends Component<
     }
 
     try {
-      const response = await fetch(`${API_BASE}/api/customer/profile`, {
+      const response = await this.safeFetch(`${API_BASE}/api/customer/profile`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -170,7 +174,16 @@ export class CustomerProfilePageController extends Component<
         body: JSON.stringify(this.state.formData),
       });
 
-      const data = await response.json();
+      if (!response) {
+        this.setState({
+          errors: { general: "Gagal menyimpan profil" },
+          isSaving: false,
+        });
+        return;
+      }
+
+      const text = await response.text();
+      const data = this.safeJsonParse<any>(text, {});
 
       if (!response.ok) {
         this.setState({
@@ -218,9 +231,10 @@ export class CustomerProfilePageController extends Component<
 
   /**
    * Component lifecycle: Mount
+   * BaseController handles SEO initialization
    */
   componentDidMount(): void {
-    this.initializeSeo();
+    super.componentDidMount();
     window.scrollTo({ top: 0, behavior: "smooth" });
 
     const token = getAccessToken();
@@ -235,8 +249,10 @@ export class CustomerProfilePageController extends Component<
 
   /**
    * Component lifecycle: Unmount
+   * BaseController handles cleanup
    */
   componentWillUnmount(): void {
+    super.componentWillUnmount();
     if (this.confettiTimeout) {
       clearTimeout(this.confettiTimeout);
     }

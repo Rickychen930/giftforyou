@@ -1,56 +1,68 @@
+/**
+ * Customer Addresses Controller
+ * Backend API controller for managing customer addresses
+ * Extends BaseApiController for common functionality (SOLID, DRY)
+ */
+
 import type { Request, Response } from "express";
 import { CustomerModel, IAddress } from "../../models/customer-model";
 import { normalizeString } from "../../utils/validation";
+import { BaseApiController } from "./base/BaseApiController";
 
 /**
- * Get customer addresses
- * GET /api/customer/addresses
+ * Customer Addresses Controller Class
+ * Manages all customer address-related API endpoints
+ * Extends BaseApiController to avoid code duplication
  */
-export async function getCustomerAddresses(req: Request, res: Response): Promise<void> {
-  try {
-    const userId = (req as any).user?.id;
-    if (!userId) {
-      res.status(401).json({ error: "Unauthorized" });
-      return;
+const customerAddressesController = new (class extends BaseApiController {
+  /**
+   * Get customer addresses
+   * GET /api/customer/addresses
+   */
+  async getCustomerAddresses(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = (req as any).user?.id;
+      if (!userId) {
+        this.sendForbidden(res, "Unauthorized");
+        return;
+      }
+
+      // Find customer by userId
+      const customer = await CustomerModel.findOne({ userId }).lean().exec();
+
+      if (!customer) {
+        this.sendSuccess(res, { addresses: [] }, "Addresses retrieved successfully");
+        return;
+      }
+
+      // Return addresses array or empty array
+      const addresses = customer.addresses || [];
+      this.sendSuccess(res, { addresses }, "Addresses retrieved successfully");
+    } catch (err) {
+      this.sendError(res, err instanceof Error ? err : new Error("Failed to get addresses"), 500);
     }
-
-    // Find customer by userId
-    const customer = await CustomerModel.findOne({ userId }).lean().exec();
-
-    if (!customer) {
-      res.json({ addresses: [] });
-      return;
-    }
-
-    // Return addresses array or empty array
-    const addresses = customer.addresses || [];
-    res.json({ addresses });
-  } catch (err) {
-    console.error("getCustomerAddresses failed:", err);
-    res.status(500).json({ error: "Failed to get addresses" });
   }
-}
 
-/**
- * Create customer address
- * POST /api/customer/addresses
- */
-export async function createCustomerAddress(req: Request, res: Response): Promise<void> {
-  try {
-    const userId = (req as any).user?.id;
-    if (!userId) {
-      res.status(401).json({ error: "Unauthorized" });
-      return;
-    }
+  /**
+   * Create customer address
+   * POST /api/customer/addresses
+   */
+  async createCustomerAddress(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = (req as any).user?.id;
+      if (!userId) {
+        this.sendForbidden(res, "Unauthorized");
+        return;
+      }
 
-    const label = normalizeString(req.body?.label, "", 50);
-    const address = normalizeString(req.body?.address, "", 500);
-    const isDefault = Boolean(req.body?.isDefault);
+      const label = normalizeString(req.body?.label, "", 50);
+      const address = normalizeString(req.body?.address, "", 500);
+      const isDefault = Boolean(req.body?.isDefault);
 
-    if (!label || !address) {
-      res.status(400).json({ error: "Label and address are required" });
-      return;
-    }
+      if (!label || !address) {
+        this.sendBadRequest(res, "Label and address are required");
+        return;
+      }
 
     // Find or create customer
     let customer = await CustomerModel.findOne({ userId }).exec();
@@ -92,44 +104,40 @@ export async function createCustomerAddress(req: Request, res: Response): Promis
 
     await customer.save();
 
-    res.status(201).json({
-      message: "Address created successfully",
-      address: newAddress,
-    });
+    this.sendSuccess(res, { address: newAddress }, "Address created successfully", 201);
   } catch (err) {
-    console.error("createCustomerAddress failed:", err);
-    res.status(500).json({ error: "Failed to create address" });
+    this.sendError(res, err instanceof Error ? err : new Error("Failed to create address"), 500);
   }
 }
 
-/**
- * Update customer address
- * PATCH /api/customer/addresses/:id
- */
-export async function updateCustomerAddress(req: Request, res: Response): Promise<void> {
-  try {
-    const userId = (req as any).user?.id;
-    const addressId = req.params?.id;
+  /**
+   * Update customer address
+   * PATCH /api/customer/addresses/:id
+   */
+  async updateCustomerAddress(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = (req as any).user?.id;
+      const addressId = req.params?.id;
 
-    if (!userId || !addressId) {
-      res.status(400).json({ error: "Missing required parameters" });
-      return;
-    }
+      if (!userId || !addressId) {
+        this.sendBadRequest(res, "Missing required parameters");
+        return;
+      }
 
-    const customer = await CustomerModel.findOne({ userId }).exec();
-    if (!customer || !customer.addresses) {
-      res.status(404).json({ error: "Address not found" });
-      return;
-    }
+      const customer = await CustomerModel.findOne({ userId }).exec();
+      if (!customer || !customer.addresses) {
+        this.sendNotFound(res, "Address not found");
+        return;
+      }
 
-    const addressIndex = customer.addresses.findIndex(
-      (addr) => (addr as any)._id?.toString() === addressId
-    );
+      const addressIndex = customer.addresses.findIndex(
+        (addr) => (addr as any)._id?.toString() === addressId
+      );
 
-    if (addressIndex === -1) {
-      res.status(404).json({ error: "Address not found" });
-      return;
-    }
+      if (addressIndex === -1) {
+        this.sendNotFound(res, "Address not found");
+        return;
+      }
 
     const label = normalizeString(req.body?.label, "", 50);
     const address = normalizeString(req.body?.address, "", 500);
@@ -151,44 +159,40 @@ export async function updateCustomerAddress(req: Request, res: Response): Promis
 
     await customer.save();
 
-    res.json({
-      message: "Address updated successfully",
-      address: customer.addresses[addressIndex],
-    });
+    this.sendSuccess(res, { address: customer.addresses[addressIndex] }, "Address updated successfully");
   } catch (err) {
-    console.error("updateCustomerAddress failed:", err);
-    res.status(500).json({ error: "Failed to update address" });
+    this.sendError(res, err instanceof Error ? err : new Error("Failed to update address"), 500);
   }
 }
 
-/**
- * Delete customer address
- * DELETE /api/customer/addresses/:id
- */
-export async function deleteCustomerAddress(req: Request, res: Response): Promise<void> {
-  try {
-    const userId = (req as any).user?.id;
-    const addressId = req.params?.id;
+  /**
+   * Delete customer address
+   * DELETE /api/customer/addresses/:id
+   */
+  async deleteCustomerAddress(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = (req as any).user?.id;
+      const addressId = req.params?.id;
 
-    if (!userId || !addressId) {
-      res.status(400).json({ error: "Missing required parameters" });
-      return;
-    }
+      if (!userId || !addressId) {
+        this.sendBadRequest(res, "Missing required parameters");
+        return;
+      }
 
-    const customer = await CustomerModel.findOne({ userId }).exec();
-    if (!customer || !customer.addresses) {
-      res.status(404).json({ error: "Address not found" });
-      return;
-    }
+      const customer = await CustomerModel.findOne({ userId }).exec();
+      if (!customer || !customer.addresses) {
+        this.sendNotFound(res, "Address not found");
+        return;
+      }
 
-    const addressIndex = customer.addresses.findIndex(
-      (addr) => (addr as any)._id?.toString() === addressId
-    );
+      const addressIndex = customer.addresses.findIndex(
+        (addr) => (addr as any)._id?.toString() === addressId
+      );
 
-    if (addressIndex === -1) {
-      res.status(404).json({ error: "Address not found" });
-      return;
-    }
+      if (addressIndex === -1) {
+        this.sendNotFound(res, "Address not found");
+        return;
+      }
 
     const wasDefault = customer.addresses[addressIndex].isDefault;
     customer.addresses.splice(addressIndex, 1);
@@ -203,41 +207,40 @@ export async function deleteCustomerAddress(req: Request, res: Response): Promis
 
     await customer.save();
 
-    res.json({ message: "Address deleted successfully" });
+    this.sendSuccess(res, {}, "Address deleted successfully");
   } catch (err) {
-    console.error("deleteCustomerAddress failed:", err);
-    res.status(500).json({ error: "Failed to delete address" });
+    this.sendError(res, err instanceof Error ? err : new Error("Failed to delete address"), 500);
   }
 }
 
-/**
- * Set default address
- * PATCH /api/customer/addresses/:id/set-default
- */
-export async function setDefaultAddress(req: Request, res: Response): Promise<void> {
-  try {
-    const userId = (req as any).user?.id;
-    const addressId = req.params?.id;
+  /**
+   * Set default address
+   * PATCH /api/customer/addresses/:id/set-default
+   */
+  async setDefaultAddress(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = (req as any).user?.id;
+      const addressId = req.params?.id;
 
-    if (!userId || !addressId) {
-      res.status(400).json({ error: "Missing required parameters" });
-      return;
-    }
+      if (!userId || !addressId) {
+        this.sendBadRequest(res, "Missing required parameters");
+        return;
+      }
 
-    const customer = await CustomerModel.findOne({ userId }).exec();
-    if (!customer || !customer.addresses) {
-      res.status(404).json({ error: "Address not found" });
-      return;
-    }
+      const customer = await CustomerModel.findOne({ userId }).exec();
+      if (!customer || !customer.addresses) {
+        this.sendNotFound(res, "Address not found");
+        return;
+      }
 
-    const addressIndex = customer.addresses.findIndex(
-      (addr) => (addr as any)._id?.toString() === addressId
-    );
+      const addressIndex = customer.addresses.findIndex(
+        (addr) => (addr as any)._id?.toString() === addressId
+      );
 
-    if (addressIndex === -1) {
-      res.status(404).json({ error: "Address not found" });
-      return;
-    }
+      if (addressIndex === -1) {
+        this.sendNotFound(res, "Address not found");
+        return;
+      }
 
     // Unset all defaults
     customer.addresses.forEach((addr) => {
@@ -250,13 +253,17 @@ export async function setDefaultAddress(req: Request, res: Response): Promise<vo
 
     await customer.save();
 
-    res.json({
-      message: "Default address updated successfully",
-      address: customer.addresses[addressIndex],
-    });
+    this.sendSuccess(res, { address: customer.addresses[addressIndex] }, "Default address updated successfully");
   } catch (err) {
-    console.error("setDefaultAddress failed:", err);
-    res.status(500).json({ error: "Failed to set default address" });
+    this.sendError(res, err instanceof Error ? err : new Error("Failed to set default address"), 500);
   }
 }
+})();
+
+// Export functions for backward compatibility
+export const getCustomerAddresses = customerAddressesController.getCustomerAddresses.bind(customerAddressesController);
+export const createCustomerAddress = customerAddressesController.createCustomerAddress.bind(customerAddressesController);
+export const updateCustomerAddress = customerAddressesController.updateCustomerAddress.bind(customerAddressesController);
+export const deleteCustomerAddress = customerAddressesController.deleteCustomerAddress.bind(customerAddressesController);
+export const setDefaultAddress = customerAddressesController.setDefaultAddress.bind(customerAddressesController);
 

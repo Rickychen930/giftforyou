@@ -1,43 +1,46 @@
 /**
  * Contact Page Controller
  * OOP-based controller for managing contact page state and form handling
+ * Extends BaseController for common functionality (SOLID, DRY)
  */
 
-import React, { Component } from "react";
+import React from "react";
 import {
   type ContactPageState,
   INITIAL_CONTACT_FORM_DATA,
   INITIAL_CONTACT_PAGE_STATE,
   DEFAULT_CONTACT_PAGE_SEO,
 } from "../models/contact-page-model";
-import { setSeo } from "../utils/seo";
 import { STORE_PROFILE } from "../config/store-profile";
+import { BaseController, type BaseControllerProps, type BaseControllerState, type SeoConfig } from "./base/BaseController";
 import ContactPageView from "../view/contact-page";
 
-interface ContactPageControllerProps {
+interface ContactPageControllerProps extends BaseControllerProps {
   // Add any props if needed in the future
 }
 
 /**
  * Contact Page Controller Class
  * Manages all business logic, form handling, and state for the contact page
+ * Extends BaseController to avoid code duplication
  */
-export class ContactPageController extends Component<
+export class ContactPageController extends BaseController<
   ContactPageControllerProps,
-  ContactPageState
+  ContactPageState & BaseControllerState
 > {
   private successTimeout: NodeJS.Timeout | null = null;
 
   constructor(props: ContactPageControllerProps) {
-    super(props);
-    this.state = { ...INITIAL_CONTACT_PAGE_STATE };
-  }
+    const seoConfig: SeoConfig = {
+      defaultSeo: DEFAULT_CONTACT_PAGE_SEO,
+    };
 
-  /**
-   * Initialize SEO
-   */
-  private initializeSeo(): void {
-    setSeo(DEFAULT_CONTACT_PAGE_SEO);
+    super(props, seoConfig);
+
+    this.state = {
+      ...this.state,
+      ...INITIAL_CONTACT_PAGE_STATE,
+    };
   }
 
   /**
@@ -168,14 +171,20 @@ export class ContactPageController extends Component<
   /**
    * Component lifecycle: Mount
    */
+  /**
+   * Component lifecycle: Mount
+   * BaseController handles SEO initialization
+   */
   componentDidMount(): void {
-    this.initializeSeo();
+    super.componentDidMount();
   }
 
   /**
    * Component lifecycle: Unmount
+   * BaseController handles cleanup
    */
   componentWillUnmount(): void {
+    super.componentWillUnmount();
     if (this.successTimeout) {
       clearTimeout(this.successTimeout);
     }

@@ -1,13 +1,13 @@
 /**
  * Customer Change Password Page Controller
  * OOP-based controller for managing customer change password page state and operations
+ * Extends BaseController for common functionality (SOLID, DRY)
  */
 
-import React, { Component } from "react";
+import React from "react";
 import { API_BASE } from "../config/api";
 import { getAccessToken } from "../utils/auth-utils";
 import { toast } from "../utils/toast";
-import { setSeo } from "../utils/seo";
 import {
   type ChangePasswordPageState,
   type ChangePasswordFormErrors,
@@ -16,32 +16,35 @@ import {
   INITIAL_PASSWORD_VISIBILITY,
   DEFAULT_CHANGE_PASSWORD_PAGE_SEO,
 } from "../models/customer-change-password-page-model";
+import { BaseController, type BaseControllerProps, type BaseControllerState, type SeoConfig } from "./base/BaseController";
 import CustomerChangePasswordPageView from "../view/customer-change-password-page";
 
-interface CustomerChangePasswordPageControllerProps {
+interface CustomerChangePasswordPageControllerProps extends BaseControllerProps {
   // Add any props if needed in the future
 }
 
 /**
  * Customer Change Password Page Controller Class
  * Manages all business logic, form validation, and password change operations
+ * Extends BaseController to avoid code duplication
  */
-export class CustomerChangePasswordPageController extends Component<
+export class CustomerChangePasswordPageController extends BaseController<
   CustomerChangePasswordPageControllerProps,
-  ChangePasswordPageState
+  ChangePasswordPageState & BaseControllerState
 > {
   private confettiTimeout: NodeJS.Timeout | null = null;
 
   constructor(props: CustomerChangePasswordPageControllerProps) {
-    super(props);
-    this.state = { ...INITIAL_CHANGE_PASSWORD_PAGE_STATE };
-  }
+    const seoConfig: SeoConfig = {
+      defaultSeo: DEFAULT_CHANGE_PASSWORD_PAGE_SEO,
+    };
 
-  /**
-   * Initialize SEO
-   */
-  private initializeSeo(): void {
-    setSeo(DEFAULT_CHANGE_PASSWORD_PAGE_SEO);
+    super(props, seoConfig);
+
+    this.state = {
+      ...this.state,
+      ...INITIAL_CHANGE_PASSWORD_PAGE_STATE,
+    };
   }
 
   /**
@@ -129,7 +132,7 @@ export class CustomerChangePasswordPageController extends Component<
     }
 
     try {
-      const response = await fetch(`${API_BASE}/api/customer/change-password`, {
+      const response = await this.safeFetch(`${API_BASE}/api/customer/change-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -141,7 +144,16 @@ export class CustomerChangePasswordPageController extends Component<
         }),
       });
 
-      const data = await response.json();
+      if (!response) {
+        this.setState({
+          errors: { general: "Gagal mengubah password" },
+          isSaving: false,
+        });
+        return;
+      }
+
+      const text = await response.text();
+      const data = this.safeJsonParse<{ error?: string }>(text, {});
 
       if (!response.ok) {
         this.setState({

@@ -1,47 +1,50 @@
 /**
  * Customer Dashboard Page Controller
  * OOP-based controller for managing customer dashboard page state and data
+ * Extends BaseController for common functionality (SOLID, DRY)
  */
 
-import React, { Component } from "react";
+import React from "react";
 import { API_BASE } from "../config/api";
 import { getAccessToken, clearAuth, decodeToken } from "../utils/auth-utils";
 import { getFavoritesCount } from "../utils/favorites";
 import { keyboardShortcuts } from "../utils/keyboard-shortcuts";
-import { setSeo } from "../utils/seo";
 import {
   type DashboardPageState,
   INITIAL_DASHBOARD_PAGE_STATE,
   DEFAULT_DASHBOARD_PAGE_SEO,
   getStatusBadge,
 } from "../models/customer-dashboard-page-model";
+import { BaseController, type BaseControllerProps, type BaseControllerState, type SeoConfig } from "./base/BaseController";
 import CustomerDashboardPageView from "../view/customer-dashboard-page";
 
-interface CustomerDashboardPageControllerProps {
+interface CustomerDashboardPageControllerProps extends BaseControllerProps {
   // Add any props if needed in the future
 }
 
 /**
  * Customer Dashboard Page Controller Class
  * Manages all business logic, data fetching, and state for the dashboard
+ * Extends BaseController to avoid code duplication
  */
-export class CustomerDashboardPageController extends Component<
+export class CustomerDashboardPageController extends BaseController<
   CustomerDashboardPageControllerProps,
-  DashboardPageState
+  DashboardPageState & BaseControllerState
 > {
   private unregisterShortcuts: (() => void) | null = null;
   private favoritesUpdateListener: (() => void) | null = null;
 
   constructor(props: CustomerDashboardPageControllerProps) {
-    super(props);
-    this.state = { ...INITIAL_DASHBOARD_PAGE_STATE };
-  }
+    const seoConfig: SeoConfig = {
+      defaultSeo: DEFAULT_DASHBOARD_PAGE_SEO,
+    };
 
-  /**
-   * Initialize SEO
-   */
-  private initializeSeo(): void {
-    setSeo(DEFAULT_DASHBOARD_PAGE_SEO);
+    super(props, seoConfig);
+
+    this.state = {
+      ...this.state,
+      ...INITIAL_DASHBOARD_PAGE_STATE,
+    };
   }
 
   /**
@@ -209,8 +212,10 @@ export class CustomerDashboardPageController extends Component<
 
   /**
    * Component lifecycle: Unmount
+   * BaseController handles cleanup
    */
   componentWillUnmount(): void {
+    super.componentWillUnmount();
     if (this.favoritesUpdateListener) {
       window.removeEventListener("favoritesUpdated", this.favoritesUpdateListener);
     }

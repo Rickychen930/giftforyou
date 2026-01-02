@@ -8,6 +8,7 @@ import {
   isStrongPassword,
   isValidUsername,
 } from "../middleware/input-validation";
+import { BaseApiController } from "./base/BaseApiController";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET || JWT_SECRET === "secretkey") {
@@ -46,61 +47,66 @@ function getClientId(req: Request): string {
   return req.ip || req.socket.remoteAddress || "unknown";
 }
 
-export async function createUser(req: Request, res: Response): Promise<void> {
-  try {
-    // Check if public registration is allowed
-    // Allow registration if:
-    // 1. Not in production mode, OR
-    // 2. In production but ALLOW_PUBLIC_REGISTRATION is explicitly set to "true"
-    const isProduction = process.env.NODE_ENV === "production";
-    const allowRegistration = process.env.ALLOW_PUBLIC_REGISTRATION === "true";
-    
-    // Debug logging (both development and production for troubleshooting)
-    console.log("[Auth] Registration check:", {
-      isProduction,
-      allowRegistration,
-      ALLOW_PUBLIC_REGISTRATION: process.env.ALLOW_PUBLIC_REGISTRATION,
-      NODE_ENV: process.env.NODE_ENV,
-      timestamp: new Date().toISOString(),
-    });
-    
-    if (isProduction && !allowRegistration) {
-      res.status(403).json({ error: "Registration is disabled" });
-      return;
-    }
-    
-    // Also check if explicitly disabled in development
-    if (!isProduction && process.env.ALLOW_PUBLIC_REGISTRATION === "false") {
-      res.status(403).json({ error: "Registration is disabled" });
-      return;
-    }
+/**
+ * Auth API Controller
+ * Extends BaseApiController for common functionality (SOLID, DRY)
+ */
+class AuthController extends BaseApiController {
+  /**
+   * Create user (register)
+   */
+  async createUser(req: Request, res: Response): Promise<void> {
+    try {
+      // Check if public registration is allowed
+      // Allow registration if:
+      // 1. Not in production mode, OR
+      // 2. In production but ALLOW_PUBLIC_REGISTRATION is explicitly set to "true"
+      const isProduction = process.env.NODE_ENV === "production";
+      const allowRegistration = process.env.ALLOW_PUBLIC_REGISTRATION === "true";
+      
+      // Debug logging (both development and production for troubleshooting)
+      console.log("[Auth] Registration check:", {
+        isProduction,
+        allowRegistration,
+        ALLOW_PUBLIC_REGISTRATION: process.env.ALLOW_PUBLIC_REGISTRATION,
+        NODE_ENV: process.env.NODE_ENV,
+        timestamp: new Date().toISOString(),
+      });
+      
+      if (isProduction && !allowRegistration) {
+        this.sendForbidden(res, "Registration is disabled");
+        return;
+      }
+      
+      // Also check if explicitly disabled in development
+      if (!isProduction && process.env.ALLOW_PUBLIC_REGISTRATION === "false") {
+        this.sendForbidden(res, "Registration is disabled");
+        return;
+      }
 
     const username = sanitizeString(req.body.username);
     const email = sanitizeString(req.body.email).toLowerCase();
     const password = sanitizeString(req.body.password);
 
-    // Validate username
-    const usernameValidation = isValidUsername(username);
-    if (!usernameValidation.valid) {
-      res.status(400).json({ error: usernameValidation.error });
-      return;
-    }
+      // Validate username
+      const usernameValidation = isValidUsername(username);
+      if (!usernameValidation.valid) {
+        this.sendBadRequest(res, usernameValidation.error || "Invalid username");
+        return;
+      }
 
-    // Validate email
-    if (!isValidEmail(email)) {
-      res.status(400).json({ error: "Invalid email address" });
-      return;
-    }
+      // Validate email
+      if (!isValidEmail(email)) {
+        this.sendBadRequest(res, "Invalid email address");
+        return;
+      }
 
-    // Validate password strength
-    const passwordValidation = isStrongPassword(password);
-    if (!passwordValidation.valid) {
-      res.status(400).json({
-        error: "Password does not meet requirements",
-        details: passwordValidation.errors,
-      });
-      return;
-    }
+      // Validate password strength
+      const passwordValidation = isStrongPassword(password);
+      if (!passwordValidation.valid) {
+        this.sendBadRequest(res, "Password does not meet requirements", passwordValidation.errors);
+        return;
+      }
 
     // Check for existing user
     const [u1, u2] = await Promise.all([
@@ -108,14 +114,14 @@ export async function createUser(req: Request, res: Response): Promise<void> {
       UserModel.findOne({ email }).lean().exec(),
     ]);
 
-    if (u1) {
-      res.status(409).json({ error: "Username already exists" });
-      return;
-    }
-    if (u2) {
-      res.status(409).json({ error: "Email already exists" });
-      return;
-    }
+      if (u1) {
+        this.sendConflict(res, "Username already exists");
+        return;
+      }
+      if (u2) {
+        this.sendConflict(res, "Email already exists");
+        return;
+      }
 
     // Hash password with higher cost factor for better security
     const hashed = await bcrypt.hash(password, 12);
@@ -147,39 +153,42 @@ export async function createUser(req: Request, res: Response): Promise<void> {
       }
     }
 
-    res.status(201).json({ message: "User registered successfully" });
-  } catch (err) {
-    console.error("Register failed:", err);
-    // Don't leak error details
-    res.status(500).json({ error: "Registration failed" });
+      this.sendSuccess(res, null, "User registered successfully", 201);
+    } catch (err) {
+      this.sendError(res, err instanceof Error ? err : new Error("Registration failed"));
+    }
   }
-}
 
-export async function loginUser(req: Request, res: Response): Promise<void> {
-  try {
-    // Apply rate limiting
-    const clientId = getClientId(req);
-    const lockoutKey = `login:${clientId}`;
-    const lockout = lockoutStore.get(lockoutKey);
+  /**
+   * Login user
+   */
+  async loginUser(req: Request, res: Response): Promise<void> {
+    try {
+      // Apply rate limiting
+      const clientId = this.getClientId(req);
+      const lockoutKey = `login:${clientId}`;
+      const lockout = lockoutStore.get(lockoutKey);
 
-    // Check if account is locked
-    if (lockout?.lockedUntil && lockout.lockedUntil > Date.now()) {
-      const remainingMinutes = Math.ceil(
-        (lockout.lockedUntil - Date.now()) / 60000
-      );
-      res.status(429).json({
-        error: `Account temporarily locked. Try again in ${remainingMinutes} minute(s).`,
-      });
-      return;
-    }
+      // Check if account is locked
+      if (lockout?.lockedUntil && lockout.lockedUntil > Date.now()) {
+        const remainingMinutes = Math.ceil(
+          (lockout.lockedUntil - Date.now()) / 60000
+        );
+        this.sendRateLimit(
+          res,
+          `Account temporarily locked. Try again in ${remainingMinutes} minute(s).`,
+          remainingMinutes * 60
+        );
+        return;
+      }
 
-    const username = sanitizeString(req.body.username);
-    const password = sanitizeString(req.body.password);
+      const username = sanitizeString(req.body.username);
+      const password = sanitizeString(req.body.password);
 
-    if (!username || !password) {
-      res.status(400).json({ error: "Username and password are required" });
-      return;
-    }
+      if (!username || !password) {
+        this.sendBadRequest(res, "Username and password are required");
+        return;
+      }
 
     // Find user
     const user = await UserModel.findOne({ username }).exec();
@@ -195,34 +204,37 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
       const current = lockoutStore.get(lockoutKey) || { attempts: 0, lockedUntil: null };
       current.attempts += 1;
 
-      if (current.attempts >= MAX_LOGIN_ATTEMPTS) {
-        current.lockedUntil = Date.now() + LOCKOUT_DURATION;
-        res.status(429).json({
-          error: `Too many failed attempts. Account locked for 15 minutes.`,
-        });
-      } else {
-        res.status(401).json({
-          error: "Invalid credentials",
-          remainingAttempts: MAX_LOGIN_ATTEMPTS - current.attempts,
-        });
+        if (current.attempts >= MAX_LOGIN_ATTEMPTS) {
+          current.lockedUntil = Date.now() + LOCKOUT_DURATION;
+          this.sendRateLimit(
+            res,
+            "Too many failed attempts. Account locked for 15 minutes.",
+            15 * 60
+          );
+        } else {
+          res.status(401).json({
+            success: false,
+            error: "Invalid credentials",
+            remainingAttempts: MAX_LOGIN_ATTEMPTS - current.attempts,
+          });
+        }
+
+        lockoutStore.set(lockoutKey, current);
+        return;
       }
 
-      lockoutStore.set(lockoutKey, current);
-      return;
-    }
+      // Reset lockout on successful login
+      lockoutStore.delete(lockoutKey);
 
-    // Reset lockout on successful login
-    lockoutStore.delete(lockoutKey);
+      if (!user.isActive) {
+        this.sendForbidden(res, "Account is inactive");
+        return;
+      }
 
-    if (!user.isActive) {
-      res.status(403).json({ error: "Account is inactive" });
-      return;
-    }
-
-    if (!JWT_SECRET) {
-      res.status(500).json({ error: "Server configuration error" });
-      return;
-    }
+      if (!JWT_SECRET) {
+        this.sendError(res, new Error("Server configuration error"), 500);
+        return;
+      }
 
     // Generate access token (short-lived for security)
     const accessToken = jwt.sign(
@@ -254,47 +266,45 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
       console.log("Login successful for user:", user.username);
     }
 
-    res.status(200).json(responseData);
-  } catch (err) {
-    console.error("Login failed:", err);
-    // Don't leak error details
-    res.status(500).json({ error: "Login failed" });
-  }
-}
-
-/**
- * Refresh token endpoint
- */
-export async function googleLogin(req: Request, res: Response): Promise<void> {
-  try {
-    const { credential } = req.body;
-
-    if (!credential) {
-      res.status(400).json({ error: "Google credential is required" });
-      return;
+      this.sendSuccess(res, responseData);
+    } catch (err) {
+      this.sendError(res, err instanceof Error ? err : new Error("Login failed"));
     }
+  }
+
+  /**
+   * Google login
+   */
+  async googleLogin(req: Request, res: Response): Promise<void> {
+    try {
+      const { credential } = req.body;
+
+      if (!credential) {
+        this.sendBadRequest(res, "Google credential is required");
+        return;
+      }
 
     // Decode Google JWT token
     // Note: In production, you should verify the token with Google's API
     // For now, we decode it (client-side already verified it with Google)
     try {
-      // Validate JWT structure
-      const parts = credential.split(".");
-      if (parts.length !== 3) {
-        res.status(400).json({ error: "Invalid Google credential format" });
-        return;
-      }
-      
-      const payload = JSON.parse(Buffer.from(parts[1], "base64").toString());
-      
-      const email = payload.email?.toLowerCase();
-      const name = payload.name || "";
-      const googleId = payload.sub;
+        // Validate JWT structure
+        const parts = credential.split(".");
+        if (parts.length !== 3) {
+          this.sendBadRequest(res, "Invalid Google credential format");
+          return;
+        }
+        
+        const payload = JSON.parse(Buffer.from(parts[1], "base64").toString());
+        
+        const email = payload.email?.toLowerCase();
+        const name = payload.name || "";
+        const googleId = payload.sub;
 
-      if (!email) {
-        res.status(400).json({ error: "Email not found in Google credential" });
-        return;
-      }
+        if (!email) {
+          this.sendBadRequest(res, "Email not found in Google credential");
+          return;
+        }
 
       // Find or create user
       let user = await UserModel.findOne({ email }).exec();
@@ -331,16 +341,16 @@ export async function googleLogin(req: Request, res: Response): Promise<void> {
         } catch (err) {
           console.warn("Failed to create customer profile for Google user:", err);
         }
-      } else if (!user.isActive) {
-        res.status(403).json({ error: "Account is inactive" });
-        return;
-      }
+        } else if (!user.isActive) {
+          this.sendForbidden(res, "Account is inactive");
+          return;
+        }
 
-      // Generate tokens
-      if (!JWT_SECRET) {
-        res.status(500).json({ error: "Server configuration error" });
-        return;
-      }
+        // Generate tokens
+        if (!JWT_SECRET) {
+          this.sendError(res, new Error("Server configuration error"), 500);
+          return;
+        }
 
       const accessToken = jwt.sign(
         { id: String(user._id), username: user.username, role: user.role },
@@ -354,78 +364,95 @@ export async function googleLogin(req: Request, res: Response): Promise<void> {
         { expiresIn: "7d" }
       );
 
-      res.status(200).json({
-        token: accessToken,
-        refreshToken,
-        user: {
-          id: String(user._id),
-          username: user.username,
-          role: user.role,
-        },
-      });
-    } catch (decodeError) {
-      console.error("Failed to decode Google credential:", decodeError);
-      res.status(400).json({ error: "Invalid Google credential" });
-    }
-  } catch (err) {
-    console.error("Google login failed:", err);
-    res.status(500).json({ error: "Google login failed" });
-  }
-}
-
-export async function refreshToken(req: Request, res: Response): Promise<void> {
-  try {
-    const { refreshToken: token } = req.body;
-
-    if (!token) {
-      res.status(400).json({ error: "Refresh token required" });
-      return;
-    }
-
-    if (!JWT_SECRET) {
-      res.status(500).json({ error: "Server configuration error" });
-      return;
-    }
-
-    try {
-      const decoded = jwt.verify(token, JWT_SECRET) as {
-        id: string;
-        type?: string;
-      };
-
-      if (decoded.type !== "refresh") {
-        res.status(401).json({ error: "Invalid token type" });
-        return;
+        this.sendSuccess(res, {
+          token: accessToken,
+          refreshToken,
+          user: {
+            id: String(user._id),
+            username: user.username,
+            role: user.role,
+          },
+        });
+      } catch (decodeError) {
+        this.sendBadRequest(res, "Invalid Google credential");
       }
-
-      // Get user to verify they still exist and are active
-      const user = await UserModel.findById(decoded.id).exec();
-      if (!user || !user.isActive) {
-        res.status(401).json({ error: "User not found or inactive" });
-        return;
-      }
-
-      // Generate new access token
-      const accessToken = jwt.sign(
-        { id: String(user._id), username: user.username, role: user.role },
-        JWT_SECRET,
-        { expiresIn: "15m" } // Token expires in 15 minutes (for security)
-      );
-
-      res.status(200).json({ token: accessToken });
     } catch (err) {
-      if (err instanceof jwt.TokenExpiredError) {
-        res.status(401).json({ error: "Refresh token expired" });
-        return;
-      }
-      if (err instanceof jwt.JsonWebTokenError) {
-        res.status(401).json({ error: "Invalid refresh token" });
-        return;
-      }
-      throw err;
+      this.sendError(res, err instanceof Error ? err : new Error("Google login failed"));
     }
-  } catch (err) {
-    console.error("Refresh token failed:", err);
-    res.status(500).json({ error: "Token refresh failed" });
+  }
+
+  /**
+   * Refresh token
+   */
+  async refreshToken(req: Request, res: Response): Promise<void> {
+    try {
+      const { refreshToken: token } = req.body;
+
+      if (!token) {
+        this.sendBadRequest(res, "Refresh token required");
+        return;
+      }
+
+      if (!JWT_SECRET) {
+        this.sendError(res, new Error("Server configuration error"), 500);
+        return;
+      }
+
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET) as {
+          id: string;
+          type?: string;
+        };
+
+        if (decoded.type !== "refresh") {
+          this.sendUnauthorized(res, "Invalid token type");
+          return;
+        }
+
+        // Get user to verify they still exist and are active
+        const user = await UserModel.findById(decoded.id).exec();
+        if (!user || !user.isActive) {
+          this.sendUnauthorized(res, "User not found or inactive");
+          return;
+        }
+
+        // Generate new access token
+        const accessToken = jwt.sign(
+          { id: String(user._id), username: user.username, role: user.role },
+          JWT_SECRET,
+          { expiresIn: "15m" } // Token expires in 15 minutes (for security)
+        );
+
+        this.sendSuccess(res, { token: accessToken });
+      } catch (err) {
+        if (err instanceof jwt.TokenExpiredError) {
+          this.sendUnauthorized(res, "Refresh token expired");
+          return;
+        }
+        if (err instanceof jwt.JsonWebTokenError) {
+          this.sendUnauthorized(res, "Invalid refresh token");
+          return;
+        }
+        throw err;
+      }
+    } catch (err) {
+      this.sendError(res, err instanceof Error ? err : new Error("Token refresh failed"));
+    }
   }
 }
+
+// Export controller instance
+const authController = new AuthController();
+
+// Export methods for backward compatibility
+export const createUser = (req: Request, res: Response): Promise<void> =>
+  authController.createUser(req, res);
+
+export const loginUser = (req: Request, res: Response): Promise<void> =>
+  authController.loginUser(req, res);
+
+export const googleLogin = (req: Request, res: Response): Promise<void> =>
+  authController.googleLogin(req, res);
+
+export const refreshToken = (req: Request, res: Response): Promise<void> =>
+  authController.refreshToken(req, res);

@@ -1,9 +1,10 @@
 /**
  * Customer Login Page Controller
  * OOP-based controller for managing customer login page state and authentication
+ * Extends BaseController for common functionality (SOLID, DRY)
  */
 
-import React, { Component } from "react";
+import React from "react";
 import { useSearchParams } from "react-router-dom";
 import { API_BASE } from "../config/api";
 import { setTokens } from "../utils/auth-utils";
@@ -14,31 +15,33 @@ import {
   INITIAL_LOGIN_PAGE_STATE,
   DEFAULT_LOGIN_PAGE_SEO,
 } from "../models/customer-login-page-model";
-import { setSeo } from "../utils/seo";
+import { BaseController, type BaseControllerProps, type BaseControllerState, type SeoConfig } from "./base/BaseController";
 import CustomerLoginPageView from "../view/customer-login-page";
 
-interface CustomerLoginPageControllerProps {
+interface CustomerLoginPageControllerProps extends BaseControllerProps {
   searchParams: URLSearchParams;
 }
 
 /**
  * Customer Login Page Controller Class
  * Manages all business logic, authentication, and state for the login page
+ * Extends BaseController to avoid code duplication
  */
-export class CustomerLoginPageController extends Component<
+export class CustomerLoginPageController extends BaseController<
   CustomerLoginPageControllerProps,
-  LoginPageState
+  LoginPageState & BaseControllerState
 > {
   constructor(props: CustomerLoginPageControllerProps) {
-    super(props);
-    this.state = { ...INITIAL_LOGIN_PAGE_STATE };
-  }
+    const seoConfig: SeoConfig = {
+      defaultSeo: DEFAULT_LOGIN_PAGE_SEO,
+    };
 
-  /**
-   * Initialize SEO
-   */
-  private initializeSeo(): void {
-    setSeo(DEFAULT_LOGIN_PAGE_SEO);
+    super(props, seoConfig);
+
+    this.state = {
+      ...this.state,
+      ...INITIAL_LOGIN_PAGE_STATE,
+    };
   }
 
   /**
@@ -264,9 +267,10 @@ export class CustomerLoginPageController extends Component<
 
   /**
    * Component lifecycle: Mount
+   * BaseController handles SEO initialization
    */
   componentDidMount(): void {
-    this.initializeSeo();
+    super.componentDidMount();
     window.scrollTo({ top: 0, behavior: "smooth" });
     this.loadSavedUsername();
     this.initializeGoogleAuth();

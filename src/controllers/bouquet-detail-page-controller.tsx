@@ -1,15 +1,15 @@
 /**
  * Bouquet Detail Page Controller
  * OOP-based controller for managing bouquet detail page state and operations
+ * Extends BaseController for common functionality (SOLID, DRY)
  */
 
-import React, { Component } from "react";
+import React from "react";
 import { useParams } from "react-router-dom";
 import type { Bouquet } from "../models/domain/bouquet";
 import { API_BASE } from "../config/api";
 import { trackBouquetView } from "../services/analytics.service";
 import { normalizeBouquet, normalizeBouquets } from "../utils/bouquet-normalizer";
-import { setSeo } from "../utils/seo";
 import { buildImageUrl } from "../utils/image-utils";
 import { buildWhatsAppLink } from "../utils/whatsapp";
 import { formatIDR } from "../utils/money";
@@ -19,7 +19,6 @@ import { isFavorite, toggleFavorite } from "../utils/favorites";
 import { addToRecentlyViewed } from "../utils/recently-viewed";
 import { toast } from "../utils/toast";
 import { getAccessToken } from "../utils/auth-utils";
-import { observeFadeIn, revealOnScroll } from "../utils/luxury-enhancements";
 import type { OrderFormData } from "../components/bouquet-detail/OrderForm";
 import {
   type BouquetDetailPageState,
@@ -27,6 +26,7 @@ import {
   getDefaultDate,
   FORM_STORAGE_KEY,
 } from "../models/bouquet-detail-page-model";
+import { BaseController, type BaseControllerProps, type BaseControllerState, type SeoConfig } from "./base/BaseController";
 import BouquetDetailPageView from "../view/bouquet-detail-page";
 
 /**
@@ -37,17 +37,18 @@ const BouquetDetailPageControllerWrapper: React.FC = () => {
   return <BouquetDetailPageController id={id || ""} />;
 };
 
-interface BouquetDetailPageControllerProps {
+interface BouquetDetailPageControllerProps extends BaseControllerProps {
   id: string;
 }
 
 /**
  * Bouquet Detail Page Controller Class
  * Manages all business logic, form validation, and bouquet operations
+ * Extends BaseController to avoid code duplication
  */
-export class BouquetDetailPageController extends Component<
+export class BouquetDetailPageController extends BaseController<
   BouquetDetailPageControllerProps,
-  BouquetDetailPageState & {
+  BouquetDetailPageState & BaseControllerState & {
     bouquet: Bouquet | null;
     loading: boolean;
     error: string | null;
@@ -57,11 +58,57 @@ export class BouquetDetailPageController extends Component<
 > {
   private saveFormDataTimeout: NodeJS.Timeout | null = null;
   private validateFormTimeout: NodeJS.Timeout | null = null;
-  private abortController: AbortController | null = null;
 
   constructor(props: BouquetDetailPageControllerProps) {
-    super(props);
+    const seoConfig: SeoConfig = {
+      dynamicSeo: (state) => {
+        const bouquet = (state as any).bouquet;
+        if (!bouquet) return null;
+
+        const details = [bouquet.type, bouquet.size].filter(Boolean).join(" • ");
+        const price = Number.isFinite(bouquet.price) ? formatIDR(bouquet.price) : undefined;
+        const titleParts = [formatBouquetName(bouquet.name), details].filter(Boolean).join(" — ");
+
+        return {
+          title: `${titleParts} | Giftforyou.idn - Florist Cirebon`,
+          description:
+            `${formatBouquetName(bouquet.name)}${details ? ` (${details})` : ""}` +
+            (price ? ` — ${price}.` : ".") +
+            ` Tersedia di Cirebon, Jawa Barat. Pesan mudah lewat WhatsApp dengan pengiriman cepat ke seluruh Cirebon dan sekitarnya.`,
+          keywords:
+            `${formatBouquetName(bouquet.name).toLowerCase()}, bouquet cirebon, gift box cirebon, stand acrylic cirebon, florist cirebon, toko bunga cirebon, hadiah cirebon, kado cirebon, florist jawa barat`,
+          path: window.location.pathname,
+          ogImagePath: bouquet.image ? buildImageUrl(bouquet.image) : undefined,
+          structuredData: {
+            "@type": "Product",
+            name: bouquet.name,
+            description: bouquet.description || `${bouquet.name} tersedia di Cirebon, Jawa Barat`,
+            image: bouquet.image ? buildImageUrl(bouquet.image) : undefined,
+            offers: {
+              "@type": "Offer",
+              price: bouquet.price,
+              priceCurrency: "IDR",
+              availability: bouquet.status === "ready" ? "https://schema.org/InStock" : "https://schema.org/PreOrder",
+              url: window.location.href,
+            },
+            brand: {
+              "@type": "Brand",
+              name: STORE_PROFILE.brand.name,
+            },
+            category: bouquet.type || "Bouquet",
+          },
+        };
+      },
+    };
+
+    super(props, seoConfig, {
+      enableFadeIn: true,
+      enableRevealOnScroll: true,
+      enableLazyLoadImages: false, // Images are handled by ProductImage component
+    });
+
     this.state = {
+      ...this.state,
       ...INITIAL_BOUQUET_DETAIL_PAGE_STATE,
       bouquet: null,
       loading: true,
@@ -97,29 +144,21 @@ export class BouquetDetailPageController extends Component<
 
     trackBouquetView(this.props.id, `/bouquet/${this.props.id}`);
 
-    this.abortController = new AbortController();
-
     try {
-      this.setState({ loading: true, error: null });
+      this.setLoading(true);
+      this.setState({ error: null });
 
-      const res = await fetch(`${API_BASE}/api/bouquets/${this.props.id}`, {
-        signal: this.abortController.signal,
-      });
+      const res = await this.safeFetch(`${API_BASE}/api/bouquets/${this.props.id}`);
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`Gagal memuat bouquet (${res.status}): ${text}`);
+      if (!res || !res.ok) {
+        const text = res ? await res.text() : "No response";
+        throw new Error(`Gagal memuat bouquet (${res?.status || 0}): ${text}`);
       }
 
-      let data: unknown;
-      try {
-        const text = await res.text();
-        if (!text.trim()) {
-          throw new Error("Empty response body");
-        }
-        data = JSON.parse(text);
-      } catch (parseErr) {
-        throw new Error(`Failed to parse response: ${parseErr instanceof Error ? parseErr.message : "Invalid JSON"}`);
+      const text = await res.text();
+      const data = this.safeJsonParse<unknown>(text, null);
+      if (!data) {
+        throw new Error("Empty response body");
       }
 
       const normalizedBouquet = normalizeBouquet(data);
@@ -165,8 +204,7 @@ export class BouquetDetailPageController extends Component<
         }, 100);
       }
 
-      // Apply SEO
-      this.applySeo(normalizedBouquet);
+      // SEO is handled by BaseController via dynamicSeo config
 
       // Load similar bouquets
       this.loadSimilarBouquets(normalizedBouquet);
@@ -175,15 +213,16 @@ export class BouquetDetailPageController extends Component<
         return;
       }
       if (!this.abortController?.signal.aborted) {
+        this.setError(e, "Gagal memuat bouquet.");
         this.setState({
           bouquet: null,
-          error: e instanceof Error ? e.message : "Gagal memuat bouquet.",
+          error: this.handleError(e, "Gagal memuat bouquet."),
           loading: false,
         });
       }
     } finally {
       if (!this.abortController?.signal.aborted) {
-        this.setState({ loading: false });
+        this.setLoading(false);
       }
     }
   };
@@ -195,17 +234,10 @@ export class BouquetDetailPageController extends Component<
     if (!this.abortController) return;
 
     try {
-      const allRes = await fetch(`${API_BASE}/api/bouquets`, {
-        signal: this.abortController.signal,
-      });
-      if (allRes.ok) {
-        let allData: unknown;
-        try {
-          const allText = await allRes.text();
-          allData = allText.trim() ? JSON.parse(allText) : [];
-        } catch {
-          allData = [];
-        }
+      const allRes = await this.safeFetch(`${API_BASE}/api/bouquets`);
+      if (allRes && allRes.ok) {
+        const allText = await allRes.text();
+        const allData = this.safeJsonParse<any[]>(allText, []);
         const allBouquets = Array.isArray(allData) ? normalizeBouquets(allData) : [];
 
         if (!this.abortController.signal.aborted) {
@@ -226,44 +258,7 @@ export class BouquetDetailPageController extends Component<
     }
   };
 
-  /**
-   * Apply SEO
-   */
-  private applySeo = (bouquet: Bouquet): void => {
-    const details = [bouquet.type, bouquet.size].filter(Boolean).join(" • ");
-    const price = Number.isFinite(bouquet.price) ? formatIDR(bouquet.price) : undefined;
-    const titleParts = [formatBouquetName(bouquet.name), details].filter(Boolean).join(" — ");
-
-    setSeo({
-      title: `${titleParts} | Giftforyou.idn - Florist Cirebon`,
-      description:
-        `${formatBouquetName(bouquet.name)}${details ? ` (${details})` : ""}` +
-        (price ? ` — ${price}.` : ".") +
-        ` Tersedia di Cirebon, Jawa Barat. Pesan mudah lewat WhatsApp dengan pengiriman cepat ke seluruh Cirebon dan sekitarnya.`,
-      keywords:
-        `${formatBouquetName(bouquet.name).toLowerCase()}, bouquet cirebon, gift box cirebon, stand acrylic cirebon, florist cirebon, toko bunga cirebon, hadiah cirebon, kado cirebon, florist jawa barat`,
-      path: window.location.pathname,
-      ogImagePath: bouquet.image ? buildImageUrl(bouquet.image) : undefined,
-      structuredData: {
-        "@type": "Product",
-        name: bouquet.name,
-        description: bouquet.description || `${bouquet.name} tersedia di Cirebon, Jawa Barat`,
-        image: bouquet.image ? buildImageUrl(bouquet.image) : undefined,
-        offers: {
-          "@type": "Offer",
-          price: bouquet.price,
-          priceCurrency: "IDR",
-          availability: bouquet.status === "ready" ? "https://schema.org/InStock" : "https://schema.org/PreOrder",
-          url: window.location.href,
-        },
-        brand: {
-          "@type": "Brand",
-          name: STORE_PROFILE.brand.name,
-        },
-        category: bouquet.type || "Bouquet",
-      },
-    });
-  };
+  // SEO is now handled by BaseController via dynamicSeo config
 
   /**
    * Load saved form data
@@ -566,23 +561,13 @@ export class BouquetDetailPageController extends Component<
 
   /**
    * Component lifecycle: Mount
+   * BaseController handles SEO and luxury enhancements initialization
    */
   componentDidMount(): void {
+    super.componentDidMount();
     this.initializeDetailUrl();
     this.loadSavedFormData();
     this.loadBouquet();
-
-    // Initialize luxury enhancements
-    const initLuxuryEnhancements = () => {
-      observeFadeIn(".fade-in");
-      revealOnScroll();
-    };
-
-    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      window.requestIdleCallback(initLuxuryEnhancements, { timeout: 100 });
-    } else {
-      setTimeout(initLuxuryEnhancements, 50);
-    }
 
     // Initial validation
     const validateForm = () => {
@@ -603,43 +588,30 @@ export class BouquetDetailPageController extends Component<
 
   /**
    * Component lifecycle: Update
+   * BaseController handles SEO updates and luxury enhancements re-initialization
    */
-  componentDidUpdate(prevProps: BouquetDetailPageControllerProps, prevState: BouquetDetailPageState & {
+  componentDidUpdate(prevProps: BouquetDetailPageControllerProps, prevState: BouquetDetailPageState & BaseControllerState & {
     bouquet: Bouquet | null;
     loading: boolean;
     error: string | null;
     similarBouquets: Bouquet[];
     detailUrl: string;
   }): void {
-    if (prevState.bouquet !== this.state.bouquet && this.state.bouquet) {
-      this.applySeo(this.state.bouquet);
-
-      if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-        window.requestIdleCallback(() => {
-          observeFadeIn(".fade-in");
-          revealOnScroll();
-        }, { timeout: 200 });
-      } else {
-        setTimeout(() => {
-          observeFadeIn(".fade-in");
-          revealOnScroll();
-        }, 100);
-      }
-    }
+    super.componentDidUpdate(prevProps, prevState);
+    // BaseController will handle SEO updates via dynamicSeo config
   }
 
   /**
    * Component lifecycle: Unmount
+   * BaseController handles AbortController cleanup
    */
   componentWillUnmount(): void {
+    super.componentWillUnmount();
     if (this.saveFormDataTimeout) {
       clearTimeout(this.saveFormDataTimeout);
     }
     if (this.validateFormTimeout) {
       clearTimeout(this.validateFormTimeout);
-    }
-    if (this.abortController) {
-      this.abortController.abort();
     }
   }
 

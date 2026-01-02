@@ -1,4 +1,10 @@
-import React, { Component } from "react";
+/**
+ * Bouquet Catalog Page Controller
+ * OOP-based controller for managing bouquet catalog page state and filtering
+ * Extends BaseController for common functionality (SOLID, DRY)
+ */
+
+import React from "react";
 import type { Bouquet } from "../models/domain/bouquet";
 import BouquetCatalogView from "../view/bouquet-catalog-page";
 
@@ -7,8 +13,8 @@ import { getBouquetSizeFilterOptions } from "../constants/bouquet-constants";
 import { trackSearch } from "../services/analytics.service";
 import { normalizeBouquets } from "../utils/bouquet-normalizer";
 import { isNonEmptyString } from "../utils/validation";
-import { setSeo } from "../utils/seo";
 import { formatIDR } from "../utils/money";
+import { setSeo } from "../utils/seo";
 import type { FilterChip } from "../components/catalog/CatalogActiveFilters";
 import {
   type BouquetCatalogPageState,
@@ -17,21 +23,33 @@ import {
   INITIAL_BOUQUET_CATALOG_PAGE_STATE,
   DEFAULT_PRICE_RANGE,
 } from "../models/bouquet-catalog-page-model";
+import { BaseController, type BaseControllerProps, type BaseControllerState } from "./base/BaseController";
 
 // Removed duplicate type definitions - now using types from model file
 
-class BouquetCatalogController extends Component<
-  { locationSearch?: string; navigate?: NavigateFn },
-  BouquetCatalogPageState
-> {
-  private abortController: AbortController | null = null;
+interface BouquetCatalogControllerProps extends BaseControllerProps {
+  locationSearch?: string;
+  navigate?: NavigateFn;
+}
 
-  constructor(props: {}) {
+class BouquetCatalogController extends BaseController<
+  BouquetCatalogControllerProps,
+  BouquetCatalogPageState & BaseControllerState
+> {
+  constructor(props: BouquetCatalogControllerProps) {
     super(props);
-    this.state = { ...INITIAL_BOUQUET_CATALOG_PAGE_STATE };
+    this.state = {
+      ...this.state,
+      ...INITIAL_BOUQUET_CATALOG_PAGE_STATE,
+    };
   }
 
+  /**
+   * Component lifecycle: Mount
+   * BaseController handles initialization
+   */
   componentDidMount(): void {
+    super.componentDidMount();
     this.applyLocationSearch(this.props.locationSearch);
     this.loadBouquets();
   }
@@ -68,8 +86,12 @@ class BouquetCatalogController extends Component<
     this.syncUrlFromState();
   }
 
+  /**
+   * Component lifecycle: Unmount
+   * BaseController handles cleanup
+   */
   componentWillUnmount(): void {
-    this.abortController?.abort();
+    super.componentWillUnmount();
   }
 
   private applyLocationSearch = (locationSearch?: string) => {
@@ -234,31 +256,21 @@ class BouquetCatalogController extends Component<
   // Using centralized normalizer from utils
 
   private loadBouquets = async () => {
-    // cancel previous request if any
-    this.abortController?.abort();
-    this.abortController = new AbortController();
-
-    this.setState({ loading: true, error: null });
+    this.setLoading(true);
+    this.setError(null);
 
     try {
       const url = `${API_BASE}/api/bouquets`;
 
-      const res = await fetch(url, {
-        signal: this.abortController.signal,
-      });
+      const res = await this.safeFetch(url);
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`Failed to fetch bouquets (${res.status}): ${text}`);
+      if (!res || !res.ok) {
+        const text = res ? await res.text() : "";
+        throw new Error(`Failed to fetch bouquets (${res?.status || "Unknown"}): ${text}`);
       }
 
-      let data: unknown;
-      try {
-        const text = await res.text();
-        data = text.trim() ? JSON.parse(text) : [];
-      } catch (parseErr) {
-        throw new Error(`Failed to parse response: ${parseErr instanceof Error ? parseErr.message : "Invalid JSON"}`);
-      }
+      const text = await res.text();
+      const data = this.safeJsonParse<unknown[]>(text, []);
 
       if (!Array.isArray(data)) {
         throw new Error("API returned unexpected format (expected an array).");
@@ -289,17 +301,17 @@ class BouquetCatalogController extends Component<
         console.warn("[Catalog] Sample raw data:", JSON.stringify(data.slice(0, 1), null, 2));
       }
 
-      this.setState({ bouquets, loading: false, error: null }, () => {
+      this.setState({ bouquets }, () => {
+        this.setLoading(false);
+        this.setError(null);
         // Apply SEO after bouquets are loaded
         this.applySeo();
       });
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === "AbortError") return;
 
-      this.setState({
-        loading: false,
-        error: err instanceof Error ? err.message : "Failed to load bouquets.",
-      });
+      this.setError(err, "Failed to load bouquets.");
+      this.setLoading(false);
     }
   };
 

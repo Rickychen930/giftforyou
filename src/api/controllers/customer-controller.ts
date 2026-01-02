@@ -1,8 +1,21 @@
+/**
+ * Customer Controller
+ * Backend API controller for managing customers
+ * Extends BaseApiController for common functionality (SOLID, DRY)
+ */
+
 import type { Request, Response } from "express";
 import { CustomerModel } from "../../models/customer-model";
 import { escapeRegex, normalizeString } from "../../utils/validation";
+import { BaseApiController } from "./base/BaseApiController";
 
-export async function getCustomers(req: Request, res: Response): Promise<void> {
+/**
+ * Customer Controller Class
+ * Manages all customer-related API endpoints
+ * Extends BaseApiController to avoid code duplication
+ */
+const customerController = new (class extends BaseApiController {
+  async getCustomers(req: Request, res: Response): Promise<void> {
   try {
     if (process.env.NODE_ENV === "development") {
       console.log(`[getCustomers] Request: ${req.method} ${req.path}`, { query: req.query });
@@ -31,14 +44,13 @@ export async function getCustomers(req: Request, res: Response): Promise<void> {
       console.log(`[getCustomers] Found ${customers.length} customers`);
     }
 
-    res.status(200).json(customers);
+    this.sendSuccess(res, customers, "Customers retrieved successfully");
   } catch (err) {
-    console.error("getCustomers failed:", err);
-    res.status(500).json({ message: "Failed to get customers", error: err instanceof Error ? err.message : "Unknown error" });
+    this.sendError(res, err instanceof Error ? err : new Error("Failed to get customers"), 500);
   }
 }
 
-export async function createCustomer(req: Request, res: Response): Promise<void> {
+  async createCustomer(req: Request, res: Response): Promise<void> {
   try {
     const buyerName = normalizeString(req.body?.buyerName, "", 120);
     const phoneNumber = normalizeString(req.body?.phoneNumber, "", 40);
@@ -53,7 +65,7 @@ export async function createCustomer(req: Request, res: Response): Promise<void>
       if (!buyerName) missing.push("buyerName");
       if (!phoneNumber) missing.push("phoneNumber");
       if (!address) missing.push("address");
-      res.status(400).json({ message: "Missing required fields", missing });
+      this.sendBadRequest(res, `Missing required fields: ${missing.join(", ")}`);
       return;
     }
 
@@ -70,7 +82,7 @@ export async function createCustomer(req: Request, res: Response): Promise<void>
         .lean()
         .exec();
 
-      res.status(200).json(updated ?? existing);
+      this.sendSuccess(res, updated ?? existing, "Customer updated successfully");
       return;
     }
 
@@ -78,35 +90,40 @@ export async function createCustomer(req: Request, res: Response): Promise<void>
       console.log("[createCustomer] Creating new customer");
     }
     const created = await CustomerModel.create({ buyerName, phoneNumber, address });
-    res.status(201).json(created);
+    this.sendSuccess(res, created, "Customer created successfully", 201);
   } catch (err) {
-    console.error("createCustomer failed:", err);
     if (err instanceof Error && err.message.includes("E11000")) {
       // Duplicate key error (MongoDB unique constraint)
-      res.status(409).json({ message: "Customer with this phone number already exists" });
+      const errorMessage = this.formatUserFriendlyError("Customer with this phone number already exists");
+      this.sendError(res, new Error(errorMessage), 409);
       return;
     }
-    res.status(500).json({ message: "Failed to create customer", error: err instanceof Error ? err.message : "Unknown error" });
+    this.sendError(res, err instanceof Error ? err : new Error("Failed to create customer"), 500);
   }
 }
 
-export async function getCustomerById(req: Request, res: Response): Promise<void> {
-  try {
-    const id = normalizeString(req.params?.id, "", 64);
-    if (!id) {
-      res.status(400).json({ message: "Missing id" });
-      return;
-    }
+  async getCustomerById(req: Request, res: Response): Promise<void> {
+    try {
+      const id = normalizeString(req.params?.id, "", 64);
+      if (!id) {
+        this.sendBadRequest(res, "Missing id");
+        return;
+      }
 
-    const customer = await CustomerModel.findById(id).lean().exec();
-    if (!customer) {
-      res.status(404).json({ message: "Customer not found" });
-      return;
-    }
+      const customer = await CustomerModel.findById(id).lean().exec();
+      if (!customer) {
+        this.sendNotFound(res, "Customer not found");
+        return;
+      }
 
-    res.status(200).json(customer);
-  } catch (err) {
-    console.error("getCustomerById failed:", err);
-    res.status(500).json({ message: "Failed to get customer" });
+      this.sendSuccess(res, customer, "Customer retrieved successfully");
+    } catch (err) {
+      this.sendError(res, err instanceof Error ? err : new Error("Failed to get customer"), 500);
+    }
   }
-}
+})();
+
+// Export functions for backward compatibility
+export const getCustomers = customerController.getCustomers.bind(customerController);
+export const createCustomer = customerController.createCustomer.bind(customerController);
+export const getCustomerById = customerController.getCustomerById.bind(customerController);

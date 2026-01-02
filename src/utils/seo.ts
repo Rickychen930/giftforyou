@@ -1,6 +1,6 @@
 import { STORE_PROFILE } from "../config/store-profile";
 
-type SeoInput = {
+export type SeoData = {
   title: string;
   description?: string;
   keywords?: string; // comma-separated keywords
@@ -9,6 +9,8 @@ type SeoInput = {
   ogImagePath?: string; // e.g. "/images/logo.png"
   structuredData?: unknown; // Additional structured data
 };
+
+type SeoInput = SeoData;
 
 const ensureMetaByName = (name: string): HTMLMetaElement => {
   let el = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;

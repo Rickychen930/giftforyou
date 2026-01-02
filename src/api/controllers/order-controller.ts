@@ -1,9 +1,16 @@
+/**
+ * Order Controller
+ * Backend API controller for managing orders
+ * Extends BaseApiController for common functionality (SOLID, DRY)
+ */
+
 import type { Request, Response } from "express";
 import { OrderModel } from "../../models/order-model";
 import type { OrderProgressStatus, PaymentMethod, PaymentStatus } from "../../models/order-model";
 import { BouquetModel } from "../../models/bouquet-model";
 import { CustomerModel } from "../../models/customer-model";
 import { escapeRegex, normalizeString, parseNonNegativeInt } from "../../utils/validation";
+import { BaseApiController } from "./base/BaseApiController";
 
 const isOrderStatus = (v: string): v is OrderProgressStatus =>
   v === "bertanya" ||
@@ -61,20 +68,26 @@ const resolveBouquetSnapshot = async (
   };
 };
 
-export async function createOrder(req: Request, res: Response): Promise<void> {
-  try {
-    const customerId = normalizeString(req.body?.customerId, "", 64);
+/**
+ * Order Controller Class
+ * Manages all order-related API endpoints
+ * Extends BaseApiController to avoid code duplication
+ */
+const orderController = new (class extends BaseApiController {
+  async createOrder(req: Request, res: Response): Promise<void> {
+    try {
+      const customerId = normalizeString(req.body?.customerId, "", 64);
 
-    let buyerName = normalizeString(req.body?.buyerName, "", 120);
-    let phoneNumber = normalizeString(req.body?.phoneNumber, "", 40);
-    let address = normalizeString(req.body?.address, "", 500);
+      let buyerName = normalizeString(req.body?.buyerName, "", 120);
+      let phoneNumber = normalizeString(req.body?.phoneNumber, "", 40);
+      let address = normalizeString(req.body?.address, "", 500);
 
-    if (customerId) {
-      const customer = await CustomerModel.findById(customerId).lean().exec();
-      if (!customer) {
-        res.status(400).json({ message: "Invalid customerId" });
-        return;
-      }
+      if (customerId) {
+        const customer = await CustomerModel.findById(customerId).lean().exec();
+        if (!customer) {
+          this.sendBadRequest(res, "Invalid customerId");
+          return;
+        }
       buyerName = normalizeString((customer as any).buyerName, "", 120);
       phoneNumber = normalizeString((customer as any).phoneNumber, "", 40);
       address = normalizeString((customer as any).address, "", 500);
@@ -115,12 +128,12 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     const deliveryAt = deliveryAtRaw ? new Date(deliveryAtRaw) : undefined;
 
     if (!buyerName || !phoneNumber || !address || !bouquetId || !bouquetName) {
-      res.status(400).json({ message: "Missing required fields" });
+      this.sendBadRequest(res, "Missing required fields");
       return;
     }
 
     if (deliveryAtRaw && !Number.isFinite(deliveryAt?.getTime())) {
-      res.status(400).json({ message: "Invalid deliveryAt" });
+      this.sendBadRequest(res, "Invalid deliveryAt");
       return;
     }
 
@@ -149,26 +162,25 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       ],
     });
 
-    res.status(201).json(created);
+    this.sendSuccess(res, created, "Order created successfully", 201);
   } catch (err) {
-    console.error("createOrder failed:", err);
-    res.status(500).json({ message: "Failed to create order" });
+    this.sendError(res, err instanceof Error ? err : new Error("Failed to create order"), 500);
   }
 }
 
-export async function updateOrder(req: Request, res: Response): Promise<void> {
-  try {
-    const id = normalizeString(req.params?.id, "", 64);
-    if (!id) {
-      res.status(400).json({ message: "Missing id" });
-      return;
-    }
+  async updateOrder(req: Request, res: Response): Promise<void> {
+    try {
+      const id = normalizeString(req.params?.id, "", 64);
+      if (!id) {
+        this.sendBadRequest(res, "Missing id");
+        return;
+      }
 
-    const existing = await OrderModel.findById(id).lean().exec();
-    if (!existing) {
-      res.status(404).json({ message: "Order not found" });
-      return;
-    }
+      const existing = await OrderModel.findById(id).lean().exec();
+      if (!existing) {
+        this.sendNotFound(res, "Order not found");
+        return;
+      }
 
     const existingCustomerId =
       typeof (existing as any).customerId === "string" ? ((existing as any).customerId as string).trim() : "";
@@ -188,7 +200,7 @@ export async function updateOrder(req: Request, res: Response): Promise<void> {
       } else {
         const customer = await CustomerModel.findById(customerId).lean().exec();
         if (!customer) {
-          res.status(400).json({ message: "Invalid customerId" });
+          this.sendBadRequest(res, "Invalid customerId");
           return;
         }
 
@@ -220,13 +232,13 @@ export async function updateOrder(req: Request, res: Response): Promise<void> {
 
     if (req.body?.paymentMethod !== undefined) {
       if (typeof req.body.paymentMethod !== "string") {
-        res.status(400).json({ message: "Invalid paymentMethod" });
+        this.sendBadRequest(res, "Invalid paymentMethod");
         return;
       }
 
       const paymentMethodRaw = normalizeString(req.body.paymentMethod, "", 32);
       if (!isPaymentMethod(paymentMethodRaw)) {
-        res.status(400).json({ message: "Invalid paymentMethod" });
+        this.sendBadRequest(res, "Invalid paymentMethod");
         return;
       }
 
@@ -250,7 +262,7 @@ export async function updateOrder(req: Request, res: Response): Promise<void> {
     const hasDeliveryAt = req.body?.deliveryAt !== undefined;
     if (hasDeliveryAt) {
       if (typeof req.body.deliveryAt !== "string") {
-        res.status(400).json({ message: "Invalid deliveryAt" });
+        this.sendBadRequest(res, "Invalid deliveryAt");
         return;
       }
 
@@ -260,7 +272,7 @@ export async function updateOrder(req: Request, res: Response): Promise<void> {
       } else {
         const d = new Date(deliveryAtRaw);
         if (!Number.isFinite(d.getTime())) {
-          res.status(400).json({ message: "Invalid deliveryAt" });
+          this.sendBadRequest(res, "Invalid deliveryAt");
           return;
         }
         setPatch.deliveryAt = d;
@@ -377,18 +389,17 @@ export async function updateOrder(req: Request, res: Response): Promise<void> {
       .exec();
 
     if (!updated) {
-      res.status(404).json({ message: "Order not found" });
+      this.sendNotFound(res, "Order not found");
       return;
     }
 
-    res.status(200).json(updated);
+    this.sendSuccess(res, updated, "Order updated successfully");
   } catch (err) {
-    console.error("updateOrder failed:", err);
-    res.status(500).json({ message: "Failed to update order" });
+    this.sendError(res, err instanceof Error ? err : new Error("Failed to update order"), 500);
   }
 }
 
-export async function getOrders(req: Request, res: Response): Promise<void> {
+  async getOrders(req: Request, res: Response): Promise<void> {
   try {
     if (process.env.NODE_ENV === "development") {
       console.log(`[getOrders] Request: ${req.method} ${req.path}`, { query: req.query });
@@ -416,7 +427,7 @@ export async function getOrders(req: Request, res: Response): Promise<void> {
         filter.customerId = String(customer._id);
       } else {
         // If no customer profile exists, return empty array
-        res.status(200).json([]);
+        this.sendSuccess(res, [], "No orders found");
         return;
       }
     } else if (userId && userRole === "admin") {
@@ -427,7 +438,7 @@ export async function getOrders(req: Request, res: Response): Promise<void> {
       }
     } else {
       // Unauthenticated or unknown role - return empty
-      res.status(200).json([]);
+      this.sendSuccess(res, [], "No orders found");
       return;
     }
 
@@ -437,30 +448,35 @@ export async function getOrders(req: Request, res: Response): Promise<void> {
       .lean()
       .exec();
 
-    res.status(200).json(orders);
+    this.sendSuccess(res, orders, "Orders retrieved successfully");
   } catch (err) {
-    console.error("getOrders failed:", err);
-    res.status(500).json({ message: "Failed to get orders" });
+    this.sendError(res, err instanceof Error ? err : new Error("Failed to get orders"), 500);
   }
 }
 
-export async function deleteOrder(req: Request, res: Response): Promise<void> {
-  try {
-    const id = normalizeString(req.params?.id, "", 64);
-    if (!id) {
-      res.status(400).json({ message: "Missing id" });
-      return;
-    }
+  async deleteOrder(req: Request, res: Response): Promise<void> {
+    try {
+      const id = normalizeString(req.params?.id, "", 64);
+      if (!id) {
+        this.sendBadRequest(res, "Missing id");
+        return;
+      }
 
-    const deleted = await OrderModel.findByIdAndDelete(id).lean().exec();
-    if (!deleted) {
-      res.status(404).json({ message: "Order not found" });
-      return;
-    }
+      const deleted = await OrderModel.findByIdAndDelete(id).lean().exec();
+      if (!deleted) {
+        this.sendNotFound(res, "Order not found");
+        return;
+      }
 
-    res.status(200).json({ ok: true });
-  } catch (err) {
-    console.error("deleteOrder failed:", err);
-    res.status(500).json({ message: "Failed to delete order" });
+      this.sendSuccess(res, { ok: true }, "Order deleted successfully");
+    } catch (err) {
+      this.sendError(res, err instanceof Error ? err : new Error("Failed to delete order"), 500);
+    }
   }
-}
+})();
+
+// Export functions for backward compatibility
+export const createOrder = orderController.createOrder.bind(orderController);
+export const updateOrder = orderController.updateOrder.bind(orderController);
+export const getOrders = orderController.getOrders.bind(orderController);
+export const deleteOrder = orderController.deleteOrder.bind(orderController);

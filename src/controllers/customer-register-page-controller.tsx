@@ -1,9 +1,10 @@
 /**
  * Customer Register Page Controller
  * OOP-based controller for managing customer register page state and registration
+ * Extends BaseController for common functionality (SOLID, DRY)
  */
 
-import React, { Component } from "react";
+import React from "react";
 import { API_BASE } from "../config/api";
 import { setTokens } from "../utils/auth-utils";
 import { toast } from "../utils/toast";
@@ -13,31 +14,33 @@ import {
   INITIAL_REGISTER_PAGE_STATE,
   DEFAULT_REGISTER_PAGE_SEO,
 } from "../models/customer-register-page-model";
-import { setSeo } from "../utils/seo";
+import { BaseController, type BaseControllerProps, type BaseControllerState, type SeoConfig } from "./base/BaseController";
 import CustomerRegisterPageView from "../view/customer-register-page";
 
-interface CustomerRegisterPageControllerProps {
+interface CustomerRegisterPageControllerProps extends BaseControllerProps {
   // Add any props if needed in the future
 }
 
 /**
  * Customer Register Page Controller Class
  * Manages all business logic, form validation, and registration
+ * Extends BaseController to avoid code duplication
  */
-export class CustomerRegisterPageController extends Component<
+export class CustomerRegisterPageController extends BaseController<
   CustomerRegisterPageControllerProps,
-  RegisterPageState
+  RegisterPageState & BaseControllerState
 > {
   constructor(props: CustomerRegisterPageControllerProps) {
-    super(props);
-    this.state = { ...INITIAL_REGISTER_PAGE_STATE };
-  }
+    const seoConfig: SeoConfig = {
+      defaultSeo: DEFAULT_REGISTER_PAGE_SEO,
+    };
 
-  /**
-   * Initialize SEO
-   */
-  private initializeSeo(): void {
-    setSeo(DEFAULT_REGISTER_PAGE_SEO);
+    super(props, seoConfig);
+
+    this.state = {
+      ...this.state,
+      ...INITIAL_REGISTER_PAGE_STATE,
+    };
   }
 
   /**
@@ -215,9 +218,10 @@ export class CustomerRegisterPageController extends Component<
 
   /**
    * Component lifecycle: Mount
+   * BaseController handles SEO initialization
    */
   componentDidMount(): void {
-    this.initializeSeo();
+    super.componentDidMount();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 

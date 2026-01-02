@@ -1,35 +1,47 @@
 /**
  * Favorites Page Controller
  * OOP-based controller for managing favorites page state and operations
+ * Extends BaseController for common functionality (SOLID, DRY)
  */
 
-import React, { Component } from "react";
+import React from "react";
 import { getFavorites, removeFromFavorites, type FavoriteItem } from "../utils/favorites";
 import { addToCart } from "../utils/cart";
 import { toast } from "../utils/toast";
 import {
   type FavoritesPageState,
   INITIAL_FAVORITES_PAGE_STATE,
+  DEFAULT_FAVORITES_PAGE_SEO,
 } from "../models/favorites-page-model";
+import { BaseController, type BaseControllerProps, type BaseControllerState, type SeoConfig } from "./base/BaseController";
 import FavoritesPageView from "../view/favorites-page";
 
-interface FavoritesPageControllerProps {
+interface FavoritesPageControllerProps extends BaseControllerProps {
   // Add any props if needed in the future
 }
 
 /**
  * Favorites Page Controller Class
  * Manages all business logic, favorites operations, and state for the favorites page
+ * Extends BaseController to avoid code duplication
  */
-export class FavoritesPageController extends Component<
+export class FavoritesPageController extends BaseController<
   FavoritesPageControllerProps,
-  FavoritesPageState
+  FavoritesPageState & BaseControllerState
 > {
   private favoritesUpdateListener: (() => void) | null = null;
 
   constructor(props: FavoritesPageControllerProps) {
-    super(props);
-    this.state = { ...INITIAL_FAVORITES_PAGE_STATE };
+    const seoConfig: SeoConfig = {
+      defaultSeo: DEFAULT_FAVORITES_PAGE_SEO,
+    };
+
+    super(props, seoConfig);
+
+    this.state = {
+      ...this.state,
+      ...INITIAL_FAVORITES_PAGE_STATE,
+    };
   }
 
   /**
@@ -98,8 +110,10 @@ export class FavoritesPageController extends Component<
 
   /**
    * Component lifecycle: Mount
+   * BaseController handles SEO initialization
    */
   componentDidMount(): void {
+    super.componentDidMount();
     this.loadFavorites();
     window.scrollTo({ top: 0, behavior: "smooth" });
 
@@ -110,8 +124,10 @@ export class FavoritesPageController extends Component<
 
   /**
    * Component lifecycle: Unmount
+   * BaseController handles cleanup
    */
   componentWillUnmount(): void {
+    super.componentWillUnmount();
     if (this.favoritesUpdateListener) {
       window.removeEventListener("favoritesUpdated", this.favoritesUpdateListener);
     }

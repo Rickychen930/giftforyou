@@ -1,23 +1,27 @@
 /**
  * Order Confirmation Page Controller
  * OOP-based controller for managing order confirmation page
+ * Extends BaseController for common functionality (SOLID, DRY)
  */
 
-import React, { Component } from "react";
+import React from "react";
 import { useSearchParams } from "react-router-dom";
 import type { OrderConfirmationData } from "../models/order-confirmation-page-model";
+import { BaseController, type BaseControllerProps, type BaseControllerState } from "./base/BaseController";
 import OrderConfirmationPageView from "../view/order-confirmation-page";
 
-interface OrderConfirmationPageControllerProps {
-  // Props will be passed from wrapper
+interface OrderConfirmationPageControllerProps extends BaseControllerProps {
+  searchParams: URLSearchParams;
 }
 
 /**
  * Order Confirmation Page Controller Class
  * Manages order confirmation data parsing and state
+ * Extends BaseController to avoid code duplication
  */
-export class OrderConfirmationPageController extends Component<
-  OrderConfirmationPageControllerProps & { searchParams: URLSearchParams }
+export class OrderConfirmationPageController extends BaseController<
+  OrderConfirmationPageControllerProps,
+  BaseControllerState
 > {
   /**
    * Parse order data from search params
@@ -52,8 +56,10 @@ export class OrderConfirmationPageController extends Component<
 
   /**
    * Component lifecycle: Mount
+   * BaseController handles initialization
    */
   componentDidMount(): void {
+    super.componentDidMount();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 

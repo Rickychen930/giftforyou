@@ -1,9 +1,10 @@
 /**
  * Home Page Controller
  * OOP-based controller for managing homepage state and data fetching
+ * Extends BaseController for common functionality (SOLID, DRY)
  */
 
-import React, { Component } from "react";
+import React from "react";
 import type { Collection } from "../models/domain/collection";
 import type { HeroSliderContent } from "../components/hero/HeroSlider";
 import {
@@ -13,43 +14,41 @@ import {
 } from "../models/home-page-model";
 import { getCollections } from "../services/collection.service";
 import { API_BASE } from "../config/api";
-import { setSeo } from "../utils/seo";
-import { observeFadeIn, revealOnScroll, lazyLoadImages } from "../utils/luxury-enhancements";
+import { BaseController, type BaseControllerProps, type BaseControllerState, type SeoConfig } from "./base/BaseController";
 import HomePageView from "../view/home-page";
 
-interface HomePageControllerProps {
+interface HomePageControllerProps extends BaseControllerProps {
   // Add any props if needed in the future
 }
 
-interface HomePageControllerState {
+interface HomePageControllerState extends BaseControllerState {
   data: HomePageData;
 }
 
 /**
  * Home Page Controller Class
  * Manages all business logic, data fetching, and state for the homepage
+ * Extends BaseController to avoid code duplication
  */
-export class HomePageController extends Component<
+export class HomePageController extends BaseController<
   HomePageControllerProps,
   HomePageControllerState
 > {
-  private abortController: AbortController | null = null;
-  private fadeObserver: IntersectionObserver | null = null;
-  private revealObserver: IntersectionObserver | null = null;
-  private imageObserver: IntersectionObserver | null = null;
-
   constructor(props: HomePageControllerProps) {
-    super(props);
+    const seoConfig: SeoConfig = {
+      defaultSeo: DEFAULT_HOME_PAGE_SEO,
+    };
+
+    super(props, seoConfig, {
+      enableFadeIn: true,
+      enableRevealOnScroll: true,
+      enableLazyLoadImages: true,
+    });
+
     this.state = {
+      ...this.state,
       data: { ...INITIAL_HOME_PAGE_DATA },
     };
-  }
-
-  /**
-   * Initialize SEO
-   */
-  private initializeSeo(): void {
-    setSeo(DEFAULT_HOME_PAGE_SEO);
   }
 
   /**
@@ -59,14 +58,11 @@ export class HomePageController extends Component<
     if (!this.abortController) return null;
 
     try {
-      const response = await fetch(
-        `${API_BASE}/api/hero-slider/home`,
-        { signal: this.abortController.signal }
-      );
+      const response = await this.safeFetch(`${API_BASE}/api/hero-slider/home`);
+      if (!response || !response.ok) return null;
 
-      if (!response.ok) return null;
-
-      const data = await response.json();
+      const text = await response.text();
+      const data = this.safeJsonParse<HeroSliderContent | null>(text, null);
 
       // Validate data structure
       const hasSlides =
@@ -105,6 +101,7 @@ export class HomePageController extends Component<
    * Load all homepage data
    */
   private async loadData(): Promise<void> {
+    this.setLoading(true);
     this.setState((prevState) => ({
       data: {
         ...prevState.data,
@@ -127,117 +124,31 @@ export class HomePageController extends Component<
           loadState: "success",
           errorMessage: "",
         },
+        loading: false,
       });
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === "AbortError") {
         return;
       }
 
-      const errorMessage = err instanceof Error ? err.message : "Unknown error";
-
+      this.setError(err, "Failed to load homepage data");
       this.setState((prevState) => ({
         data: {
           ...prevState.data,
           loadState: "error",
-          errorMessage,
+          errorMessage: this.handleError(err, "Failed to load homepage data"),
         },
       }));
     }
   }
 
   /**
-   * Initialize luxury enhancements (animations, lazy loading)
-   * Optimized with proper error handling
-   */
-  private initializeLuxuryEnhancements(): void {
-    try {
-      // Cleanup existing observers first to prevent duplicates
-      this.cleanupLuxuryEnhancements();
-      
-      // Initialize observers with error handling
-      this.fadeObserver = observeFadeIn(".fade-in");
-      this.revealObserver = revealOnScroll();
-      this.imageObserver = lazyLoadImages();
-    } catch (error) {
-      console.warn("Failed to initialize luxury enhancements:", error);
-      // Continue execution even if enhancements fail
-    }
-  }
-
-  /**
-   * Cleanup luxury enhancements
-   * Proper cleanup to prevent memory leaks
-   */
-  private cleanupLuxuryEnhancements(): void {
-    try {
-      if (this.fadeObserver) {
-        this.fadeObserver.disconnect();
-        this.fadeObserver = null;
-      }
-      if (this.revealObserver) {
-        this.revealObserver.disconnect();
-        this.revealObserver = null;
-      }
-      if (this.imageObserver) {
-        this.imageObserver.disconnect();
-        this.imageObserver = null;
-      }
-    } catch (error) {
-      console.warn("Error during luxury enhancements cleanup:", error);
-    }
-  }
-
-  /**
    * Component lifecycle: Mount
+   * BaseController handles SEO and luxury enhancements initialization
    */
   componentDidMount(): void {
-    this.abortController = new AbortController();
-    this.initializeSeo();
+    super.componentDidMount();
     this.loadData();
-    this.initializeLuxuryEnhancements();
-  }
-
-  /**
-   * Component lifecycle: Update
-   * Optimized to only re-initialize when necessary
-   */
-  componentDidUpdate(
-    _prevProps: HomePageControllerProps,
-    prevState: HomePageControllerState
-  ): void {
-    const { data } = this.state;
-    const prevData = prevState.data;
-    
-    // Only re-initialize luxury enhancements when data successfully loads
-    const dataChanged = 
-      prevData.loadState !== data.loadState ||
-      prevData.collections.length !== data.collections.length;
-    
-    const shouldReinitialize = 
-      dataChanged && 
-      data.loadState === "success" && 
-      data.collections.length > 0;
-    
-    if (shouldReinitialize) {
-      // Cleanup old observers first
-      this.cleanupLuxuryEnhancements();
-      
-      // Re-initialize with new data after a short delay to ensure DOM is ready
-      // Use requestAnimationFrame for better performance
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          this.initializeLuxuryEnhancements();
-        }, 150);
-      });
-    }
-  }
-
-  /**
-   * Component lifecycle: Unmount
-   */
-  componentWillUnmount(): void {
-    this.abortController?.abort();
-    this.cleanupLuxuryEnhancements();
   }
 
   /**

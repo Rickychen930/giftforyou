@@ -1,11 +1,15 @@
-// src/controllers/orders-controller.tsx
-// Controller for orders section
-// Manages state and event handlers following MVC pattern
+/**
+ * Orders Controller
+ * Controller for orders section
+ * Manages state and event handlers following MVC pattern
+ * Extends BaseController for common functionality (SOLID, DRY)
+ */
 
-import React, { Component } from "react";
+import React from "react";
 import { API_BASE } from "../config/api";
 import { getAuthHeaders } from "../utils/auth-utils";
 import type { Bouquet } from "../models/domain/bouquet";
+import { BaseController, type BaseControllerProps, type BaseControllerState } from "./base/BaseController";
 import {
   type Order,
   type Customer,
@@ -38,7 +42,7 @@ import {
 
 export type OrdersMode = "list" | "add_order" | "update_order" | "add_user";
 
-interface Props {
+interface Props extends BaseControllerProps {
   bouquets: Bouquet[];
 }
 
@@ -116,8 +120,9 @@ interface State {
 /**
  * Controller for Orders Section
  * Manages all state and business logic
+ * Extends BaseController to avoid code duplication
  */
-export class OrdersController extends Component<Props, State> {
+export class OrdersController extends BaseController<Props, State & BaseControllerState> {
   private customerSearchRef = React.createRef<HTMLInputElement>();
   private orderDetailsRef = React.createRef<HTMLDivElement>();
   private bouquetSelectRef = React.createRef<HTMLSelectElement>();
@@ -224,7 +229,12 @@ export class OrdersController extends Component<Props, State> {
     window.addEventListener("keydown", this.handleGlobalKeyDown);
   }
 
+  /**
+   * Component lifecycle: Unmount
+   * BaseController handles cleanup
+   */
   componentWillUnmount(): void {
+    super.componentWillUnmount();
     this.componentMounted = false;
     if (this.debounceTimer) {
       clearTimeout(this.debounceTimer);
@@ -484,9 +494,10 @@ export class OrdersController extends Component<Props, State> {
 
   // ==================== API Methods ====================
   loadOrders = async (): Promise<void> => {
-    this.setState({ loading: true, error: "" });
+    this.setLoading(true);
+    this.setError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/orders?limit=500`, {
+      const res = await this.safeFetch(`${API_BASE}/api/orders?limit=500`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -494,48 +505,32 @@ export class OrdersController extends Component<Props, State> {
         },
       });
 
-      const responseText = await res.text();
-
-      if (!res.ok) {
-        let errorMessage = `Gagal memuat order (${res.status})`;
-        try {
-          if (
-            responseText.includes("<!DOCTYPE html>") ||
-            responseText.includes("<html")
-          ) {
-            errorMessage =
-              "Endpoint /api/orders tidak tersedia. Pastikan server berjalan dan route dikonfigurasi dengan benar.";
-          } else {
-            try {
-              const json = JSON.parse(responseText);
-              errorMessage = json.message || json.error || errorMessage;
-            } catch {
-              errorMessage = responseText || errorMessage;
-            }
-          }
-        } catch {
-          errorMessage = responseText || errorMessage;
+      if (!res || !res.ok) {
+        const responseText = res ? await res.text() : "";
+        let errorMessage = `Gagal memuat order (${res?.status || "Unknown"})`;
+        if (
+          responseText.includes("<!DOCTYPE html>") ||
+          responseText.includes("<html")
+        ) {
+          errorMessage =
+            "Endpoint /api/orders tidak tersedia. Pastikan server berjalan dan route dikonfigurasi dengan benar.";
+        } else {
+          const errorData = this.safeJsonParse<{ message?: string; error?: string }>(responseText, {});
+          errorMessage = errorData.message || errorData.error || errorMessage;
         }
         throw new Error(errorMessage);
       }
 
-      let data: unknown;
-      try {
-        data = responseText.trim() ? JSON.parse(responseText) : [];
-      } catch (parseErr) {
-        throw new Error(
-          `Failed to parse orders response: ${parseErr instanceof Error ? parseErr.message : "Invalid JSON"}`
-        );
-      }
+      const responseText = await res.text();
+      const data = this.safeJsonParse<Order[]>(responseText, []);
+      
       this.setState({
-        orders: Array.isArray(data) ? (data as Order[]) : [],
-        loading: false,
+        orders: Array.isArray(data) ? data : [],
       });
+      this.setLoading(false);
     } catch (e: unknown) {
-      this.setState({
-        error: e instanceof Error ? e.message : "Gagal memuat order.",
-        loading: false,
-      });
+      this.setError(e, "Gagal memuat order.");
+      this.setLoading(false);
     }
   };
 
@@ -608,7 +603,7 @@ export class OrdersController extends Component<Props, State> {
     this.loadedCustomerIdsRef.current?.add(safeId);
 
     try {
-      const res = await fetch(
+      const res = await this.safeFetch(
         `${API_BASE}/api/customers/${encodeURIComponent(safeId)}`,
         {
           method: "GET",
@@ -619,7 +614,7 @@ export class OrdersController extends Component<Props, State> {
         }
       );
 
-      if (!res.ok) {
+      if (!res || !res.ok) {
         return;
       }
 
@@ -990,7 +985,7 @@ export class OrdersController extends Component<Props, State> {
 
     this.setState({ submitting: true, error: "", success: "" });
     try {
-      const res = await fetch(`${API_BASE}/api/orders/${id}`, {
+      const res = await this.safeFetch(`${API_BASE}/api/orders/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -998,9 +993,9 @@ export class OrdersController extends Component<Props, State> {
         },
       });
 
-      if (!res.ok) {
-        const t = await res.text();
-        throw new Error(`Gagal menghapus order (${res.status}): ${t}`);
+      if (!res || !res.ok) {
+        const t = res ? await res.text() : "";
+        throw new Error(`Gagal menghapus order (${res?.status || "Unknown"}): ${t}`);
       }
 
       if (this.state.editingId === id) {
@@ -1085,7 +1080,7 @@ export class OrdersController extends Component<Props, State> {
 
     this.setState({ customerSubmitting: true });
     try {
-      const res = await fetch(`${API_BASE}/api/customers`, {
+      const res = await this.safeFetch(`${API_BASE}/api/customers`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1094,43 +1089,25 @@ export class OrdersController extends Component<Props, State> {
         body: JSON.stringify({ buyerName: bn, phoneNumber: ph, address: ad }),
       });
 
-      const responseText = await res.text();
-
-      if (!res.ok) {
-        let errorMessage = `Gagal menyimpan customer (${res.status})`;
-        try {
-          if (
-            responseText.includes("<!DOCTYPE html>") ||
-            responseText.includes("<html")
-          ) {
-            errorMessage =
-              "Endpoint /api/customers tidak tersedia. Pastikan server berjalan dan route dikonfigurasi dengan benar.";
-          } else {
-            try {
-              const json = JSON.parse(responseText);
-              errorMessage = json.message || json.error || errorMessage;
-            } catch {
-              errorMessage =
-                responseText.length > 200
-                  ? `${errorMessage}: ${responseText.substring(0, 200)}...`
-                  : `${errorMessage}: ${responseText}`;
-            }
-          }
-        } catch {
-          // If we can't parse, use default message
+      if (!res || !res.ok) {
+        const responseText = res ? await res.text() : "";
+        let errorMessage = `Gagal menyimpan customer (${res?.status || "Unknown"})`;
+        if (
+          responseText.includes("<!DOCTYPE html>") ||
+          responseText.includes("<html")
+        ) {
+          errorMessage =
+            "Endpoint /api/customers tidak tersedia. Pastikan server berjalan dan route dikonfigurasi dengan benar.";
+        } else {
+          const errorData = this.safeJsonParse<{ message?: string; error?: string }>(responseText, {});
+          errorMessage = errorData.message || errorData.error || errorMessage;
         }
         throw new Error(errorMessage);
       }
 
       // Parse successful response
-      let created: unknown;
-      try {
-        created = responseText.trim() ? JSON.parse(responseText) : null;
-      } catch (parseErr) {
-        throw new Error(
-          `Failed to parse customer creation response: ${parseErr instanceof Error ? parseErr.message : "Invalid JSON"}`
-        );
-      }
+      const responseText = await res.text();
+      const created = this.safeJsonParse<{ _id?: string } | null>(responseText, null);
       const id =
         created && typeof created === "object"
           ? ((created as any)._id ?? "").toString()

@@ -1,11 +1,11 @@
 /**
  * Checkout Page Controller
  * OOP-based controller for managing checkout page state and operations
+ * Extends BaseController for common functionality (SOLID, DRY)
  */
 
-import React, { Component } from "react";
+import React from "react";
 import { Navigate } from "react-router-dom";
-import { setSeo } from "../utils/seo";
 import { formatIDR } from "../utils/money";
 import { getCartItems, clearCart, type CartItem } from "../utils/cart";
 import { calculateBulkDiscount } from "../utils/bulk-discount";
@@ -22,31 +22,35 @@ import {
   getDefaultDate,
   DEFAULT_CHECKOUT_PAGE_SEO,
 } from "../models/checkout-page-model";
+import { BaseController, type BaseControllerProps, type BaseControllerState, type SeoConfig } from "./base/BaseController";
 import CheckoutPageView from "../view/checkout-page";
 
-interface CheckoutPageControllerProps {
+interface CheckoutPageControllerProps extends BaseControllerProps {
   // Add any props if needed in the future
 }
 
 /**
  * Checkout Page Controller Class
  * Manages all business logic, form validation, and checkout operations
+ * Extends BaseController to avoid code duplication
  */
-export class CheckoutPageController extends Component<
+export class CheckoutPageController extends BaseController<
   CheckoutPageControllerProps,
-  CheckoutPageState
+  CheckoutPageState & BaseControllerState
 > {
   private formStorageKey = "checkout_form_data";
 
-  state: CheckoutPageState = {
-    ...INITIAL_CHECKOUT_PAGE_STATE,
-  };
+  constructor(props: CheckoutPageControllerProps) {
+    const seoConfig: SeoConfig = {
+      defaultSeo: DEFAULT_CHECKOUT_PAGE_SEO,
+    };
 
-  /**
-   * Initialize SEO
-   */
-  private initializeSeo(): void {
-    setSeo(DEFAULT_CHECKOUT_PAGE_SEO);
+    super(props, seoConfig);
+
+    this.state = {
+      ...this.state,
+      ...INITIAL_CHECKOUT_PAGE_STATE,
+    };
   }
 
   /**
@@ -445,9 +449,10 @@ export class CheckoutPageController extends Component<
 
   /**
    * Component lifecycle: Mount
+   * BaseController handles SEO initialization
    */
   componentDidMount(): void {
-    this.initializeSeo();
+    super.componentDidMount();
     window.scrollTo({ top: 0, behavior: "smooth" });
 
     const token = getAccessToken();

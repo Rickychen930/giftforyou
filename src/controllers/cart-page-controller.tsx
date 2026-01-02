@@ -1,9 +1,10 @@
 /**
  * Cart Page Controller
  * OOP-based controller for managing cart page state and operations
+ * Extends BaseController for common functionality (SOLID, DRY)
  */
 
-import React, { Component } from "react";
+import React from "react";
 import { Navigate } from "react-router-dom";
 import {
   getCartItems,
@@ -16,38 +17,40 @@ import { calculateBulkDiscount } from "../utils/bulk-discount";
 import { getAccessToken } from "../utils/auth-utils";
 import { toast } from "../utils/toast";
 import { saveForLater } from "../utils/save-for-later";
-import { setSeo } from "../utils/seo";
 import {
   type CartPageState,
   INITIAL_CART_PAGE_STATE,
   DEFAULT_CART_PAGE_SEO,
 } from "../models/cart-page-model";
+import { BaseController, type BaseControllerProps, type BaseControllerState, type SeoConfig } from "./base/BaseController";
 import CartPageView from "../view/cart-page";
 
-interface CartPageControllerProps {
+interface CartPageControllerProps extends BaseControllerProps {
   // Add any props if needed in the future
 }
 
 /**
  * Cart Page Controller Class
  * Manages all business logic, cart operations, and state for the cart page
+ * Extends BaseController to avoid code duplication
  */
-export class CartPageController extends Component<
+export class CartPageController extends BaseController<
   CartPageControllerProps,
-  CartPageState
+  CartPageState & BaseControllerState
 > {
   private cartUpdateListener: (() => void) | null = null;
 
   constructor(props: CartPageControllerProps) {
-    super(props);
-    this.state = { ...INITIAL_CART_PAGE_STATE };
-  }
+    const seoConfig: SeoConfig = {
+      defaultSeo: DEFAULT_CART_PAGE_SEO,
+    };
 
-  /**
-   * Initialize SEO
-   */
-  private initializeSeo(): void {
-    setSeo(DEFAULT_CART_PAGE_SEO);
+    super(props, seoConfig);
+
+    this.state = {
+      ...this.state,
+      ...INITIAL_CART_PAGE_STATE,
+    };
   }
 
   /**
@@ -135,9 +138,10 @@ export class CartPageController extends Component<
 
   /**
    * Component lifecycle: Mount
+   * BaseController handles SEO initialization
    */
   componentDidMount(): void {
-    this.initializeSeo();
+    super.componentDidMount();
     this.loadCart();
     window.scrollTo({ top: 0, behavior: "smooth" });
 
@@ -148,8 +152,10 @@ export class CartPageController extends Component<
 
   /**
    * Component lifecycle: Unmount
+   * BaseController handles cleanup
    */
   componentWillUnmount(): void {
+    super.componentWillUnmount();
     if (this.cartUpdateListener) {
       window.removeEventListener("cartUpdated", this.cartUpdateListener);
     }

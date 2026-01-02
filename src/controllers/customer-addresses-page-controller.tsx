@@ -1,13 +1,13 @@
 /**
  * Customer Addresses Page Controller
  * OOP-based controller for managing customer addresses page state and operations
+ * Extends BaseController for common functionality (SOLID, DRY)
  */
 
-import React, { Component } from "react";
+import React from "react";
 import { API_BASE } from "../config/api";
 import { getAccessToken, clearAuth } from "../utils/auth-utils";
 import { toast } from "../utils/toast";
-import { setSeo } from "../utils/seo";
 import {
   type AddressesPageState,
   type Address,
@@ -16,32 +16,35 @@ import {
   INITIAL_ADDRESS_FORM_DATA,
   DEFAULT_ADDRESSES_PAGE_SEO,
 } from "../models/customer-addresses-page-model";
+import { BaseController, type BaseControllerProps, type BaseControllerState, type SeoConfig } from "./base/BaseController";
 import CustomerAddressesPageView from "../view/customer-addresses-page";
 
-interface CustomerAddressesPageControllerProps {
+interface CustomerAddressesPageControllerProps extends BaseControllerProps {
   // Add any props if needed in the future
 }
 
 /**
  * Customer Addresses Page Controller Class
  * Manages all business logic, form validation, and address operations
+ * Extends BaseController to avoid code duplication
  */
-export class CustomerAddressesPageController extends Component<
+export class CustomerAddressesPageController extends BaseController<
   CustomerAddressesPageControllerProps,
-  AddressesPageState
+  AddressesPageState & BaseControllerState
 > {
   private confettiTimeout: NodeJS.Timeout | null = null;
 
   constructor(props: CustomerAddressesPageControllerProps) {
-    super(props);
-    this.state = { ...INITIAL_ADDRESSES_PAGE_STATE };
-  }
+    const seoConfig: SeoConfig = {
+      defaultSeo: DEFAULT_ADDRESSES_PAGE_SEO,
+    };
 
-  /**
-   * Initialize SEO
-   */
-  private initializeSeo(): void {
-    setSeo(DEFAULT_ADDRESSES_PAGE_SEO);
+    super(props, seoConfig);
+
+    this.state = {
+      ...this.state,
+      ...INITIAL_ADDRESSES_PAGE_STATE,
+    };
   }
 
   /**
@@ -52,19 +55,20 @@ export class CustomerAddressesPageController extends Component<
     if (!token) return;
 
     try {
-      const response = await fetch(`${API_BASE}/api/customer/addresses`, {
+      const response = await this.safeFetch(`${API_BASE}/api/customer/addresses`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response && response.ok) {
+        const text = await response.text();
+        const data = this.safeJsonParse<{ addresses?: Address[] }>(text, { addresses: [] });
         this.setState({
           addresses: data.addresses || [],
           isLoading: false,
         });
-      } else if (response.status === 401) {
+      } else if (response && response.status === 401) {
         clearAuth();
         this.setState({ isAuthenticated: false, isLoading: false });
       } else {
@@ -168,7 +172,7 @@ export class CustomerAddressesPageController extends Component<
 
       const method = this.state.editingId ? "PATCH" : "POST";
 
-      const response = await fetch(url, {
+      const response = await this.safeFetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
@@ -177,7 +181,16 @@ export class CustomerAddressesPageController extends Component<
         body: JSON.stringify(this.state.formData),
       });
 
-      const data = await response.json();
+      if (!response) {
+        this.setState({
+          errors: { general: "Gagal menyimpan alamat" },
+          isSaving: false,
+        });
+        return;
+      }
+
+      const text = await response.text();
+      const data = this.safeJsonParse<any>(text, {});
 
       if (!response.ok) {
         this.setState({
@@ -256,18 +269,19 @@ export class CustomerAddressesPageController extends Component<
     if (!token) return;
 
     try {
-      const response = await fetch(`${API_BASE}/api/customer/addresses/${addressId}`, {
+      const response = await this.safeFetch(`${API_BASE}/api/customer/addresses/${addressId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if (response.ok) {
+      if (response && response.ok) {
         toast.success("Alamat berhasil dihapus!");
         await this.loadAddresses();
       } else {
-        const data = await response.json();
+        const text = response ? await response.text() : "";
+        const data = this.safeJsonParse<{ error?: string }>(text, {});
         this.setState({
           errors: {
             general: data.error || "Gagal menghapus alamat",
@@ -294,18 +308,19 @@ export class CustomerAddressesPageController extends Component<
     if (!token) return;
 
     try {
-      const response = await fetch(`${API_BASE}/api/customer/addresses/${addressId}/set-default`, {
+      const response = await this.safeFetch(`${API_BASE}/api/customer/addresses/${addressId}/set-default`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if (response.ok) {
+      if (response && response.ok) {
         toast.success("Alamat default berhasil diubah!");
         await this.loadAddresses();
       } else {
-        const data = await response.json();
+        const text = response ? await response.text() : "";
+        const data = this.safeJsonParse<{ error?: string }>(text, {});
         this.setState({
           errors: {
             general: data.error || "Gagal mengubah alamat default",
@@ -351,8 +366,12 @@ export class CustomerAddressesPageController extends Component<
   /**
    * Component lifecycle: Mount
    */
+  /**
+   * Component lifecycle: Mount
+   * BaseController handles SEO initialization
+   */
   componentDidMount(): void {
-    this.initializeSeo();
+    super.componentDidMount();
     window.scrollTo({ top: 0, behavior: "smooth" });
 
     const token = getAccessToken();
@@ -367,8 +386,10 @@ export class CustomerAddressesPageController extends Component<
 
   /**
    * Component lifecycle: Unmount
+   * BaseController handles cleanup
    */
   componentWillUnmount(): void {
+    super.componentWillUnmount();
     if (this.confettiTimeout) {
       clearTimeout(this.confettiTimeout);
     }

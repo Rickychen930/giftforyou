@@ -1,11 +1,17 @@
-import React, { Component } from "react";
+/**
+ * Dashboard Page Controller
+ * Manages dashboard state and data fetching
+ * Extends BaseController for common functionality (SOLID, DRY)
+ */
+
+import React from "react";
 import DashboardView from "../view/dashboard-page";
 import type { Bouquet } from "../models/domain/bouquet";
 
 import { API_BASE } from "../config/api";
 import { normalizeBouquets, normalizeBouquet } from "../utils/bouquet-normalizer";
-import { setSeo } from "../utils/seo";
 import { formatIDR } from "../utils/money";
+import { setSeo } from "../utils/seo";
 import { getPerformanceMetrics, getPerformanceScore, observeCoreWebVitals } from "../utils/performance-monitor";
 import { analyzeSeo } from "../utils/seo-analyzer";
 import { savePerformanceHistory, saveSeoHistory } from "../utils/analytics-storage";
@@ -28,8 +34,9 @@ import {
   readTabFromLocation,
   writeTabToLocation,
 } from "../models/dashboard-page-model";
+import { BaseController, type BaseControllerProps, type BaseControllerState } from "./base/BaseController";
 
-interface State {
+interface State extends BaseControllerState {
   bouquets: Bouquet[];
   collectionsCount: number;
   visitorsCount: number;
@@ -41,24 +48,21 @@ interface State {
   salesMetrics?: SalesMetrics;
   salesError?: string;
 
-  loading: boolean;
-  errorMessage?: string;
-
   // Dashboard view state
   viewState: DashboardPageViewState;
 }
 
-class DashboardController extends Component<{}, State> {
-  private abortController: AbortController | null = null;
+class DashboardController extends BaseController<BaseControllerProps, State> {
   private metricsAbortController: AbortController | null = null;
   private metricsIntervalId: number | null = null;
 
   private performanceCleanup: (() => void) | null = null;
   private copyTimeoutId: NodeJS.Timeout | null = null;
 
-  constructor(props: {}) {
+  constructor(props: BaseControllerProps) {
     super(props);
     this.state = {
+      ...this.state,
       bouquets: [],
       collectionsCount: 0,
       visitorsCount: 0,
@@ -71,7 +75,13 @@ class DashboardController extends Component<{}, State> {
     };
   }
 
+  /**
+   * Component lifecycle: Mount
+   * BaseController handles initialization
+   */
   componentDidMount(): void {
+    super.componentDidMount();
+    
     // Initialize tab from location or localStorage
     const initial =
       readTabFromLocation() ||
@@ -131,7 +141,13 @@ class DashboardController extends Component<{}, State> {
     }, 60_000);
   }
 
-  componentDidUpdate(prevProps: {}, prevState: State): void {
+  /**
+   * Component lifecycle: Update
+   * BaseController handles SEO updates
+   */
+  componentDidUpdate(prevProps: BaseControllerProps, prevState: State): void {
+    super.componentDidUpdate(prevProps, prevState);
+    
     if (prevState.viewState.activeTab !== this.state.viewState.activeTab) {
       this.applySeo();
       writeTabToLocation(this.state.viewState.activeTab);
@@ -143,6 +159,10 @@ class DashboardController extends Component<{}, State> {
     }
   }
 
+  /**
+   * Component lifecycle: Unmount
+   * BaseController handles cleanup
+   */
   componentWillUnmount(): void {
     // Cleanup event listeners
     window.removeEventListener("hashchange", this.handleHashChange);
@@ -160,9 +180,11 @@ class DashboardController extends Component<{}, State> {
       this.copyTimeoutId = null;
     }
 
-    this.abortController?.abort();
     this.metricsAbortController?.abort();
     if (this.metricsIntervalId) window.clearInterval(this.metricsIntervalId);
+    
+    // Note: BaseController handles abortController cleanup
+    super.componentWillUnmount();
   }
 
   private getAuthHeaders(): HeadersInit {
@@ -173,10 +195,8 @@ class DashboardController extends Component<{}, State> {
   // Using centralized normalizer from utils
 
   private loadDashboard = async (): Promise<void> => {
-    this.abortController?.abort();
-    this.abortController = new AbortController();
-
-    this.setState({ loading: true, errorMessage: undefined });
+    this.setLoading(true);
+    this.setError(null);
 
     try {
       const headers: HeadersInit = {
@@ -184,28 +204,24 @@ class DashboardController extends Component<{}, State> {
         ...this.getAuthHeaders(),
       };
 
-      const metricsReq = fetch(`${API_BASE}/api/metrics`, {
+      const metricsReq = this.safeFetch(`${API_BASE}/api/metrics`, {
         method: "GET",
         headers,
-        signal: this.abortController.signal,
       });
 
-      const insightsReq = fetch(`${API_BASE}/api/metrics/insights?days=30`, {
+      const insightsReq = this.safeFetch(`${API_BASE}/api/metrics/insights?days=30`, {
         method: "GET",
         headers,
-        signal: this.abortController.signal,
       });
 
-      const bouquetsReq = fetch(`${API_BASE}/api/bouquets`, {
+      const bouquetsReq = this.safeFetch(`${API_BASE}/api/bouquets`, {
         method: "GET",
         headers,
-        signal: this.abortController.signal,
       });
 
-      const ordersReq = fetch(`${API_BASE}/api/orders?limit=1000`, {
+      const ordersReq = this.safeFetch(`${API_BASE}/api/orders?limit=1000`, {
         method: "GET",
         headers,
-        signal: this.abortController.signal,
       });
 
       const [metricsRes, bouquetsRes, insightsRes, ordersRes] = await Promise.all([
@@ -214,6 +230,11 @@ class DashboardController extends Component<{}, State> {
         insightsReq,
         ordersReq,
       ]);
+
+      // Check if any request was aborted
+      if (!metricsRes || !bouquetsRes || !insightsRes || !ordersRes) {
+        return; // Request was aborted
+      }
 
       // Handle auth errors clearly
       if (metricsRes.status === 401 || bouquetsRes.status === 401 || ordersRes.status === 401) {
@@ -264,35 +285,20 @@ class DashboardController extends Component<{}, State> {
         throw new Error(errorMessage);
       }
 
-      // Parse successful responses
-      let metricsJson: MetricsResponse;
-      let bouquetsJson: unknown;
-      
-      try {
-        metricsJson = metricsText.trim() ? JSON.parse(metricsText) : {};
-      } catch (e) {
-        throw new Error(`Failed to parse metrics response: ${e instanceof Error ? e.message : "Invalid JSON"}`);
-      }
-
-      try {
-        bouquetsJson = bouquetsText.trim() ? JSON.parse(bouquetsText) : [];
-      } catch (e) {
-        throw new Error(`Failed to parse bouquets response: ${e instanceof Error ? e.message : "Invalid JSON"}`);
-      }
+      // Parse successful responses using safeJsonParse
+      const metricsJson: MetricsResponse = this.safeJsonParse<MetricsResponse>(metricsText, {} as MetricsResponse);
+      const bouquetsJson: unknown = this.safeJsonParse<unknown[]>(bouquetsText, []);
 
       let insights: InsightsResponse | undefined;
       let insightsError: string | undefined;
       try {
         if (insightsRes.ok) {
-          try {
-            const insightsText = await insightsRes.text();
-            if (insightsText.trim()) {
-              insights = JSON.parse(insightsText) as InsightsResponse;
-            } else {
-              insights = undefined;
-            }
-          } catch (parseErr) {
-            insightsError = `Failed to parse insights: ${parseErr instanceof Error ? parseErr.message : "Invalid JSON"}`;
+          const insightsText = await insightsRes.text();
+          if (insightsText.trim()) {
+            const parsed = this.safeJsonParse<InsightsResponse>(insightsText, {} as InsightsResponse);
+            insights = parsed && typeof parsed === "object" ? parsed : undefined;
+          } else {
+            insights = undefined;
           }
         } else {
           const t = await insightsRes.text();
@@ -330,7 +336,7 @@ class DashboardController extends Component<{}, State> {
               console.warn("Orders API returned HTML instead of JSON");
               salesMetrics = undefined;
             } else if (ordersText.trim()) {
-              const ordersData = JSON.parse(ordersText) as Array<{
+              const ordersData = this.safeJsonParse<Array<{
                 _id?: string;
                 totalAmount?: number;
                 orderStatus?: string;
@@ -345,10 +351,19 @@ class DashboardController extends Component<{}, State> {
               const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
               const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-              const orders = Array.isArray(ordersData) ? ordersData : [];
+              const orders: Array<{
+                _id?: string;
+                totalAmount?: number;
+                orderStatus?: string;
+                paymentStatus?: string;
+                bouquetId?: string;
+                bouquetName?: string;
+                createdAt?: string;
+                customerId?: string;
+              }> = Array.isArray(ordersData) ? ordersData : [];
               
               const totalOrders = orders.length;
-              const totalRevenue = orders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+              const totalRevenue = orders.reduce((sum: number, o) => sum + (Number(o.totalAmount) || 0), 0);
               
               const todayOrders = orders.filter((o) => {
                 const created = o.createdAt ? new Date(o.createdAt) : null;
@@ -1661,7 +1676,7 @@ class DashboardController extends Component<{}, State> {
         insightsError={this.state.insightsError}
         salesMetrics={this.state.salesMetrics}
         salesError={this.state.salesError}
-        loading={this.state.loading}
+        loading={this.state.loading ?? false}
         errorMessage={this.state.errorMessage}
         viewState={this.state.viewState}
         overviewMetrics={overviewMetrics}

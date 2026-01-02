@@ -2,9 +2,10 @@
  * Header Controller
  * OOP-based controller for managing header state and data fetching
  * Follows SOLID principles: Single Responsibility, DRY, efficient state management
+ * Extends BaseController for common functionality (SOLID, DRY)
  */
 
-import React, { Component } from "react";
+import React from "react";
 import { useLocation, type Location } from "react-router-dom";
 import { getCollections } from "../services/collection.service";
 import { API_BASE } from "../config/api";
@@ -12,11 +13,12 @@ import {
   type HeaderState,
   INITIAL_HEADER_STATE,
 } from "../models/header-model";
+import { BaseController, type BaseControllerProps, type BaseControllerState } from "./base/BaseController";
 import HeaderView from "../view/header";
 import type { NavItem } from "../components/header/HeaderNavigation";
 import { setupClickOutside } from "../utils/click-outside-utils";
 
-interface HeaderControllerProps {
+interface HeaderControllerProps extends BaseControllerProps {
   location: Location;
   navLinks: NavItem[];
   logoSrc?: string;
@@ -25,12 +27,12 @@ interface HeaderControllerProps {
 /**
  * Header Controller Class
  * Manages all business logic, data fetching, and state for the header
+ * Extends BaseController to avoid code duplication
  */
-export class HeaderController extends Component<
+export class HeaderController extends BaseController<
   HeaderControllerProps,
-  HeaderState
+  HeaderState & BaseControllerState
 > {
-  private abortController: AbortController | null = null;
   private scrollHandler: (() => void) | null = null;
   private collectionsCloseTimer: number | null = null;
   private collectionsAnimateTimer: number | null = null;
@@ -40,8 +42,11 @@ export class HeaderController extends Component<
   private collectionsItemRef: React.RefObject<HTMLLIElement>;
 
   constructor(props: HeaderControllerProps) {
-    super(props);
-    this.state = { ...INITIAL_HEADER_STATE };
+    super(props); // No SEO config needed for header
+    this.state = {
+      ...this.state,
+      ...INITIAL_HEADER_STATE,
+    };
     this.searchButtonRef = React.createRef();
     this.hamburgerButtonRef = React.createRef();
     this.collectionsItemRef = React.createRef();
@@ -54,16 +59,17 @@ export class HeaderController extends Component<
     if (!this.abortController) return;
 
     try {
-      const [collections, bouquets] = await Promise.all([
+      const [collections, bouquetsResponse] = await Promise.all([
         getCollections(this.abortController.signal),
-        fetch(`${API_BASE}/api/bouquets`, { signal: this.abortController.signal })
-          .then(async (r) => {
-            if (!r.ok) return [];
-            const j = await r.json().catch(() => []);
-            return Array.isArray(j) ? j : [];
-          })
-          .catch(() => []),
+        this.safeFetch(`${API_BASE}/api/bouquets`),
       ]);
+
+      let bouquets: any[] = [];
+      if (bouquetsResponse && bouquetsResponse.ok) {
+        const text = await bouquetsResponse.text();
+        const data = this.safeJsonParse<any[]>(text, []);
+        bouquets = Array.isArray(data) ? data : [];
+      }
 
       const names = Array.from(
         new Set(
@@ -87,6 +93,7 @@ export class HeaderController extends Component<
       });
     } catch (e) {
       if (e instanceof DOMException && e.name === "AbortError") return;
+      // Silently fail - header navigation data is not critical
       this.setState({
         collectionNames: [],
         typeNames: [],
@@ -281,9 +288,10 @@ export class HeaderController extends Component<
 
   /**
    * Component lifecycle: Mount
+   * BaseController handles AbortController initialization
    */
   componentDidMount(): void {
-    this.abortController = new AbortController();
+    super.componentDidMount();
     this.setupScrollHandler();
     this.loadNavigationData();
   }
@@ -317,9 +325,10 @@ export class HeaderController extends Component<
 
   /**
    * Component lifecycle: Unmount
+   * BaseController handles AbortController cleanup
    */
   componentWillUnmount(): void {
-    this.abortController?.abort();
+    super.componentWillUnmount();
     this.cleanupScrollHandler();
     this.cancelCollectionsClose();
     this.cancelCollectionsAnimate();
