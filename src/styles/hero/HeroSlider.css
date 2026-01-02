@@ -2,7 +2,6 @@
 @import "../colors.css";
 @import "HeroSlide.css";
 @import "HeroNavigation.css";
-@import "HeroIndicators.css";
 @import "HeroProgress.css";
 @import "HeroPlayPause.css";
 @import "HeroSkeleton.css";
@@ -114,7 +113,10 @@ html {
   height: clamp(600px, 85vh, 900px);
   height: clamp(600px, 85svh, 900px);
   overflow: hidden;
-  background: var(--hero-surface);
+  background: 
+    radial-gradient(1400px 700px at 8% 4%, rgba(212, 140, 156, 0.08), transparent 70%),
+    radial-gradient(1400px 750px at 96% 16%, rgba(168, 213, 186, 0.06), transparent 70%),
+    var(--hero-surface);
   border-radius: 0;
   contain: layout style paint;
   box-sizing: border-box;
@@ -145,15 +147,6 @@ html {
   border: var(--border-elegant);
 }
 
-/* Pagination container */
-.hero-slider__pagination {
-  position: absolute;
-  bottom: var(--space-5) !important;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: calc(var(--z-dropdown) + 2);
-  width: auto;
-}
 
 /* Performance optimization - only apply will-change to active elements */
 .swiper-slide-active .hero-slide__img,

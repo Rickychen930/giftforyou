@@ -28,7 +28,6 @@ import { STORE_PROFILE } from "../../config/store-profile";
 import { API_BASE } from "../../config/api";
 import HeroSlide, { HeroSlideData } from "./HeroSlide";
 import HeroNavigation from "./HeroNavigation";
-import HeroIndicators from "./HeroIndicators";
 import HeroProgress from "./HeroProgress";
 import HeroPlayPause from "./HeroPlayPause";
 import HeroSkeleton from "./HeroSkeleton";
@@ -489,17 +488,6 @@ class HeroSlider extends Component<HeroSliderProps, HeroSliderState> {
     }
   };
 
-  private handleSlideClick = (index: number): void => {
-    const { swiperInstance } = this.state;
-    if (swiperInstance) {
-      if (swiperInstance.params?.loop) {
-        swiperInstance.slideToLoop(index);
-      } else {
-        swiperInstance.slideTo(index);
-      }
-    }
-  };
-
   render(): React.ReactNode {
     const { loading = false, autoplayDelay = 6000 } = this.props;
     const { hasError, activeIndex, isPlaying, imageLoadStates, transitionProgress, isVisible, swiperInstance } =
@@ -619,14 +607,6 @@ class HeroSlider extends Component<HeroSliderProps, HeroSliderState> {
                 <HeroPlayPause isPlaying={isPlaying} onToggle={this.toggleAutoplay} />
               </>
             )}
-
-            <div className={`${this.baseClass}__pagination`}>
-              <HeroIndicators
-                totalSlides={data.slides.length}
-                activeIndex={activeIndex}
-                onSlideClick={this.handleSlideClick}
-              />
-            </div>
           </Swiper>
         </div>
 

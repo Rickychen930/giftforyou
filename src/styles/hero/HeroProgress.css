@@ -25,7 +25,7 @@
   position: relative;
   width: 120px;
   height: var(--space-1);
-  background: var(--hero-progress-bg);
+  background: rgba(255, 255, 255, 0.25);
   border-radius: var(--radius-full);
   overflow: hidden;
   box-shadow: var(--shadow-inner-sm);
@@ -36,10 +36,17 @@
   top: 0;
   left: 0;
   height: 100%;
-  background: var(--hero-progress-bar-gradient);
+  background: linear-gradient(
+    90deg,
+    var(--brand-rose-500) 0%,
+    var(--brand-rose-300) 50%,
+    rgba(245, 158, 11, 0.8) 100%
+  );
   border-radius: var(--radius-full);
   transition: width var(--transition-base);
-  box-shadow: var(--shadow-luxury-gold-sm);
+  box-shadow: 
+    0 0 12px rgba(212, 140, 156, 0.6),
+    0 0 20px rgba(245, 158, 11, 0.3);
   z-index: 2;
 }
 
@@ -48,7 +55,7 @@
   top: 0;
   left: 0;
   height: 100%;
-  background: var(--hero-progress-autoplay-bg);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.45));
   border-radius: var(--radius-full);
   transition: width 0.1s linear;
   z-index: 1;
@@ -59,7 +66,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-5-5);
+  padding: var(--space-3) var(--space-6);
   border-radius: var(--radius-full);
   background: linear-gradient(
     135deg,
@@ -68,7 +75,7 @@
   );
   backdrop-filter: var(--backdrop-blur-md) saturate(1.1);
   -webkit-backdrop-filter: var(--backdrop-blur-md) saturate(1.1);
-  color: var(--neutral-0-opacity-98);
+  color: rgba(255, 255, 255, 0.98);
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-sm);
   border: var(--border-width-1) solid rgba(255, 255, 255, 0.15);

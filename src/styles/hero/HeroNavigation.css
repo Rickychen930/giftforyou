@@ -21,14 +21,17 @@
   color: var(--neutral-0);
   background: linear-gradient(
     135deg,
-    rgba(0, 0, 0, 0.4) 0%,
+    rgba(0, 0, 0, 0.45) 0%,
+    rgba(0, 0, 0, 0.35) 50%,
     rgba(0, 0, 0, 0.3) 100%
   );
-  border: var(--border-width-1-5) solid rgba(255, 255, 255, 0.22);
+  border: var(--border-width-1-5) solid rgba(255, 255, 255, 0.25);
   border-radius: var(--radius-full);
-  backdrop-filter: var(--backdrop-blur-lg);
-  -webkit-backdrop-filter: var(--backdrop-blur-lg);
-  box-shadow: var(--shadow-luxury-lg);
+  backdrop-filter: var(--backdrop-blur-lg) saturate(1.2);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg) saturate(1.2);
+  box-shadow: 
+    var(--shadow-luxury-lg),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   cursor: pointer;
   transition: all var(--transition-elegant);
   position: relative;
@@ -52,17 +55,19 @@
 }
 
 .hero-nav:hover {
-  transform: translateY(-50%) scale(1.12);
+  transform: translateY(-50%) scale(1.15);
   background: linear-gradient(
     135deg,
-    rgba(0, 0, 0, 0.5) 0%,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.45) 50%,
     rgba(0, 0, 0, 0.4) 100%
   );
-  border-color: rgba(255, 255, 255, 0.35);
+  border-color: rgba(255, 255, 255, 0.4);
   box-shadow: 
-    0 14px 36px rgba(0, 0, 0, 0.4),
-    0 6px 16px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    var(--shadow-luxury-xl),
+    0 0 0 1px rgba(255, 255, 255, 0.15) inset,
+    inset 0 1px 2px rgba(255, 255, 255, 0.2),
+    0 0 30px rgba(212, 140, 156, 0.2);
 }
 
 .hero-nav:hover::before {
