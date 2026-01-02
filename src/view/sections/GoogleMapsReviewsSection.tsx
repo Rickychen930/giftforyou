@@ -12,6 +12,7 @@ import React, { Component } from "react";
 import "../../styles/GoogleMapsReviewsSection.css";
 import SectionHeader from "../../components/common/SectionHeader";
 import EmptyState from "../../components/common/EmptyState";
+import ReviewCard from "../../components/reviews/ReviewCard";
 
 interface Review {
   id: string;
@@ -133,53 +134,18 @@ class GoogleMapsReviewsSection extends Component<
     });
   }
 
-  private renderStars(rating: number): React.ReactNode {
-    return Array.from({ length: 5 }, (_, i) => (
-      <svg
-        key={i}
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill={i < rating ? "currentColor" : "none"}
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-      >
-        <path
-          d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ));
-  }
-
   private renderReview(review: Review): React.ReactNode {
     return (
-      <div key={review.id} className={`${this.baseClass}__review`}>
-        <div className={`${this.baseClass}__reviewHeader`}>
-          <div className={`${this.baseClass}__reviewAuthor`}>
-            {review.authorPhoto && (
-              <img
-                src={review.authorPhoto}
-                alt={review.authorName}
-                className={`${this.baseClass}__reviewPhoto`}
-              />
-            )}
-            <div>
-              <h4 className={`${this.baseClass}__reviewName`}>{review.authorName}</h4>
-              <div className={`${this.baseClass}__reviewRating`} aria-label={`Rating: ${review.rating} bintang`}>
-                {this.renderStars(review.rating)}
-              </div>
-            </div>
-          </div>
-          <time className={`${this.baseClass}__reviewTime`} dateTime={review.time}>
-            {review.relativeTime}
-          </time>
-        </div>
-        <p className={`${this.baseClass}__reviewText`}>{review.text}</p>
-      </div>
+      <ReviewCard
+        key={review.id}
+        id={review.id}
+        authorName={review.authorName}
+        authorPhoto={review.authorPhoto}
+        rating={review.rating}
+        text={review.text}
+        time={review.time}
+        relativeTime={review.relativeTime}
+      />
     );
   }
 

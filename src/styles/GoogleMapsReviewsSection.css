@@ -101,110 +101,10 @@
 }
 
 /* Remove old animation that's no longer used */
-@keyframes scrollInfinite {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-33.333%);
-  }
-}
+/* Removed unused animations - using grid layout instead */
 
-@keyframes scrollInfinite {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-33.333%);
-  }
-}
-
-/* Pause animation on hover for better UX */
-@media (hover: hover) and (pointer: fine) {
-  .google-maps-reviews-scroll-container:hover .google-maps-reviews-scroll {
-    animation-play-state: paused;
-  }
-}
-
-.googleMapsReviews__review {
-  background: var(--neutral-0);
-  border-radius: var(--radius-xl);
-  padding: var(--space-8);
-  box-shadow: var(--shadow-md);
-  transition: all var(--transition-slow);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  border: var(--border-width-2) solid var(--border-1);
-  position: relative;
-  isolation: isolate;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .googleMapsReviews__review:hover {
-    transform: translateY(calc(var(--space-1) * -1));
-    box-shadow: var(--shadow-xl);
-    border-color: var(--brand-green-border);
-  }
-}
-
-.googleMapsReviews__reviewHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--space-4);
-}
-
-.googleMapsReviews__reviewAuthor {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  flex: 1;
-}
-
-.googleMapsReviews__reviewPhoto {
-  width: var(--size-12);
-  height: var(--size-12);
-  border-radius: var(--radius-full);
-  object-fit: cover;
-  flex-shrink: 0;
-  box-shadow: var(--shadow-sm);
-}
-
-.googleMapsReviews__reviewAuthor-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.googleMapsReviews__reviewName {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-bold);
-  color: var(--ink-900);
-  margin: 0 0 var(--space-2) 0;
-  line-height: var(--line-height-tight);
-}
-
-.googleMapsReviews__reviewRating {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  color: #fbbf24;
-}
-
-.googleMapsReviews__reviewTime {
-  font-size: var(--font-size-sm);
-  color: var(--ink-500);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.googleMapsReviews__reviewText {
-  font-size: var(--font-size-sm);
-  color: var(--ink-700);
-  line-height: var(--line-height-relaxed);
-  margin: 0;
-  margin-top: var(--space-2);
-}
+/* Review card styles are now in ReviewCard.css component */
+/* Keeping these for backward compatibility if needed */
 
 .googleMapsReviews__footer {
   text-align: center;
@@ -223,15 +123,17 @@
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-base);
   text-decoration: none;
-  transition: all var(--transition-slow);
+  transition: all var(--transition-elegant);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .googleMapsReviews__link:hover {
-    background: var(--brand-sage-500);
+    background: var(--gradient-green);
     color: var(--neutral-0);
-    transform: translateY(-2px);
+    transform: translateY(calc(var(--space-1) * -1));
     box-shadow: var(--shadow-green-md);
+    border-color: var(--brand-green-600);
   }
 }
 
@@ -240,7 +142,8 @@
 }
 
 .googleMapsReviews__link:focus-visible {
-  outline: none;
+  outline: var(--focus-ring-width) solid var(--brand-sage-500);
+  outline-offset: var(--focus-ring-offset);
   box-shadow: var(--focus-ring);
 }
 
@@ -272,18 +175,7 @@
     gap: var(--space-4);
   }
 
-  .googleMapsReviews__review {
-    padding: var(--space-6);
-  }
-
-  .googleMapsReviews__reviewHeader {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .googleMapsReviews__reviewTime {
-    align-self: flex-end;
-  }
+  /* Review card responsive styles are in ReviewCard.css */
 }
 
 /* Reduced motion support */
