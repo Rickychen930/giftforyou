@@ -12,6 +12,23 @@ import EmptyState from "../components/common/EmptyState";
 import StatCard from "../components/common/StatCard";
 import TabNavigation from "../components/common/TabNavigation";
 import LuxuryButton from "../components/buttons/LuxuryButton";
+import {
+  LogoutIcon,
+  CheckIcon,
+  ClockIcon,
+  CheckCircleIcon,
+  HeartIcon,
+  GridIcon,
+  UserIcon,
+  LocationIcon,
+  SettingsIcon,
+  PackageIcon,
+  FileTextIcon,
+  LockIcon,
+  ChevronRightIcon,
+  BellIcon,
+  ShieldIcon,
+} from "../components/icons";
 import type {
   DashboardUser,
   DashboardStats,

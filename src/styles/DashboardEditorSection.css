@@ -1,11 +1,18 @@
-@import "colors.css";
+/**
+ * Dashboard Editor Section Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ * Fully responsive on all devices: mobile, tablet, desktop
+ */
+
+@import "design-system.css";
 
 /* === Layout Wrapper === */
 .editor-list-wrapper {
-  margin-top: 2rem;
+  margin-top: var(--space-8);
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: var(--space-8);
 }
 
 /* === Controls: Filter + Search === */
@@ -14,42 +21,44 @@
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
 }
 
 /* ✅ Enhanced Search Bar */
 .search-bar {
   flex: 1;
   min-width: 260px;
-  padding: 0.85rem 1.1rem;
-  font-size: 1rem;
+  padding: var(--space-3-5) var(--space-4-5);
+  font-size: var(--font-size-base);
 
-  border: 1px solid var(--ed-border);
+  border: var(--border-width-base) solid var(--border-color-base);
   border-radius: 999px;
 
   background: rgba(255, 255, 255, 0.75);
-  color: var(--ed-text);
+  color: var(--ink-800);
 
-  box-shadow: var(--ed-shadow-soft);
-  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease,
-    background 0.18s ease;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-fast) ease, box-shadow var(--transition-fast) ease, transform var(--transition-fast) ease,
+    background var(--transition-fast) ease;
 }
 
 .search-bar::placeholder {
-  color: var(--ed-text);
+  color: var(--ink-600);
   opacity: 0.55;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
-.search-bar:hover {
-  border-color: rgba(0, 0, 0, 0.18);
-  background: rgba(255, 255, 255, 0.9);
+@media (hover: hover) and (pointer: fine) {
+  .search-bar:hover {
+    border-color: rgba(0, 0, 0, 0.18);
+    background: rgba(255, 255, 255, 0.9);
+  }
 }
 
 .search-bar:focus {
-  border-color: var(--ed-brand);
-  box-shadow: var(--ed-focus-ring), 0 12px 30px rgba(0, 0, 0, 0.08);
+  border-color: var(--brand-rose-500);
+  box-shadow: var(--shadow-focus), 0 12px 30px rgba(0, 0, 0, 0.08);
   outline: none;
   transform: translateY(-1px);
 }
@@ -59,150 +68,154 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 1rem 0;
+  margin: var(--space-4) 0;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .editor-header p {
-  font-weight: 600;
-  color: var(--ed-text);
+  font-weight: var(--font-weight-semibold);
+  color: var(--ink-800);
 }
 
 /* ✅ Enhanced Bulk Actions Buttons */
 .bulk-actions button {
-  margin-left: 0.5rem;
-  padding: 0.65rem 1.05rem;
+  margin-left: var(--space-2);
+  padding: var(--space-2-5) var(--space-4-5);
 
-  background: linear-gradient(135deg, var(--ed-brand), var(--ed-brand-strong, var(--ed-brand)));
-  color: var(--ed-on-brand);
+  background: var(--gradient-brand);
+  color: var(--text-on-brand);
 
-  border: 1px solid transparent;
-  border-radius: 12px;
+  border: var(--border-width-base) solid transparent;
+  border-radius: var(--radius-lg);
 
-  font-weight: 750;
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.01em;
 
   cursor: pointer;
-  box-shadow: var(--ed-shadow-soft);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast) ease, box-shadow var(--transition-fast) ease, filter var(--transition-fast) ease;
 }
 
-.bulk-actions button:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--ed-shadow-card-hover, var(--ed-shadow-soft));
-  filter: saturate(1.05);
+@media (hover: hover) and (pointer: fine) {
+  .bulk-actions button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    filter: saturate(1.05);
+  }
 }
 
 .bulk-actions button:active {
   transform: translateY(0px);
-  box-shadow: var(--ed-shadow-soft);
+  box-shadow: var(--shadow-sm);
 }
 
 .bulk-actions button:focus-visible {
   outline: none;
-  box-shadow: var(--ed-focus-ring), var(--ed-shadow-card, var(--ed-shadow-soft));
+  box-shadow: var(--shadow-focus), var(--shadow-md);
 }
 
 /* === Bouquet Editor Card Wrapper === */
 .bouquet-editor-wrapper {
   display: flex;
-  gap: 1.5rem;
+  gap: var(--space-6);
   align-items: flex-start;
   flex-wrap: wrap;
 }
 
 /* === Bouquet Editor Card === */
 .bouquet-editor {
-  background: linear-gradient(
-    to bottom right,
-    var(--ed-surface),
-    var(--ed-surface-soft, var(--ed-surface))
-  );
-  border: 1px solid var(--ed-border-soft, var(--ed-border));
-  padding: 1.25rem;
-  border-radius: 16px;
+  background: var(--gradient-surface);
+  border: var(--border-width-base) solid var(--border-color-base);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
   width: 100%;
   max-width: 340px;
 
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-4);
 
-  box-shadow: var(--ed-shadow-card, var(--ed-shadow-soft));
-  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+  box-shadow: var(--shadow-md);
+  transition: box-shadow var(--transition-base) ease, transform var(--transition-base) ease, border-color var(--transition-base) ease;
 }
 
-.bouquet-editor:hover {
-  box-shadow: var(--ed-shadow-card-hover, var(--ed-shadow-card, var(--ed-shadow-soft)));
-  transform: translateY(-3px);
-  border-color: rgba(0, 0, 0, 0.12);
+@media (hover: hover) and (pointer: fine) {
+  .bouquet-editor:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-3px);
+    border-color: rgba(0, 0, 0, 0.12);
+  }
 }
 
 .bouquet-editor img {
   width: 100%;
   height: 200px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   object-fit: cover;
-  box-shadow: var(--ed-shadow-soft);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Inputs */
 .bouquet-editor input,
 .bouquet-editor textarea,
 .bouquet-editor select {
-  padding: 0.72rem 0.85rem;
-  font-size: 0.98rem;
-  border: 1px solid var(--ed-border);
-  border-radius: 12px;
+  padding: var(--space-3) var(--space-3-5);
+  font-size: var(--font-size-base);
+  border: var(--border-width-base) solid var(--border-color-base);
+  border-radius: var(--radius-lg);
   background-color: rgba(255, 255, 255, 0.85);
-  color: var(--ed-text);
-  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  color: var(--ink-800);
+  transition: border-color var(--transition-fast) ease, box-shadow var(--transition-fast) ease, background var(--transition-fast) ease;
 }
 
-.bouquet-editor input:hover,
-.bouquet-editor textarea:hover,
-.bouquet-editor select:hover {
-  border-color: rgba(0, 0, 0, 0.18);
-  background-color: rgba(255, 255, 255, 0.95);
+@media (hover: hover) and (pointer: fine) {
+  .bouquet-editor input:hover,
+  .bouquet-editor textarea:hover,
+  .bouquet-editor select:hover {
+    border-color: rgba(0, 0, 0, 0.18);
+    background-color: rgba(255, 255, 255, 0.95);
+  }
 }
 
 .bouquet-editor input:focus,
 .bouquet-editor textarea:focus,
 .bouquet-editor select:focus {
-  border-color: var(--ed-brand);
-  box-shadow: var(--ed-focus-ring);
+  border-color: var(--brand-rose-500);
+  box-shadow: var(--shadow-focus);
   outline: none;
 }
 
 .bouquet-editor textarea {
   resize: vertical;
   min-height: 78px;
-  line-height: 1.55;
+  line-height: var(--line-height-relaxed);
 }
 
 /* ✅ Enhanced Save Button (inside card) */
 .bouquet-editor button {
-  background: linear-gradient(135deg, var(--ed-brand), var(--ed-brand-strong, var(--ed-brand)));
-  color: var(--ed-on-brand);
+  background: var(--gradient-brand);
+  color: var(--text-on-brand);
 
-  border: 1px solid transparent;
-  padding: 0.82rem 1rem;
-  border-radius: 12px;
+  border: var(--border-width-base) solid transparent;
+  padding: var(--space-3-5) var(--space-4);
+  border-radius: var(--radius-lg);
 
-  font-weight: 800;
+  font-weight: var(--font-weight-extrabold);
   letter-spacing: 0.01em;
 
   cursor: pointer;
-  box-shadow: var(--ed-shadow-soft);
+  box-shadow: var(--shadow-sm);
 
-  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+  transition: transform var(--transition-fast) ease, box-shadow var(--transition-fast) ease, filter var(--transition-fast) ease;
 }
 
-.bouquet-editor button:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--ed-shadow-card-hover, var(--ed-shadow-soft));
-  filter: saturate(1.05);
+@media (hover: hover) and (pointer: fine) {
+  .bouquet-editor button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    filter: saturate(1.05);
+  }
 }
 
 .bouquet-editor button:active {
@@ -219,33 +232,35 @@
 
 /* === Pagination === */
 .pagination {
-  margin-top: 2rem;
+  margin-top: var(--space-8);
   display: flex;
   justify-content: flex-end;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 /* ✅ Enhanced Pagination Buttons */
 .pagination button {
-  padding: 0.55rem 0.95rem;
-  border: 1px solid var(--ed-border);
+  padding: var(--space-2-5) var(--space-4);
+  border: var(--border-width-base) solid var(--border-color-base);
   background: rgba(255, 255, 255, 0.75);
-  color: var(--ed-pagination-text);
-  border-radius: 12px;
+  color: var(--ink-700);
+  border-radius: var(--radius-lg);
   cursor: pointer;
 
-  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease,
-    border-color 0.18s ease, color 0.18s ease;
+  transition: transform var(--transition-fast) ease, box-shadow var(--transition-fast) ease, background var(--transition-fast) ease,
+    border-color var(--transition-fast) ease, color var(--transition-fast) ease;
 
   min-width: 56px;
 }
 
-.pagination button:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--ed-shadow-soft);
-  background: rgba(255, 255, 255, 0.92);
-  border-color: var(--ed-brand);
-  color: var(--ed-brand);
+@media (hover: hover) and (pointer: fine) {
+  .pagination button:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+    background: rgba(255, 255, 255, 0.92);
+    border-color: var(--brand-rose-500);
+    color: var(--brand-rose-500);
+  }
 }
 
 .pagination button:active {
@@ -253,11 +268,11 @@
 }
 
 .pagination button.active {
-  background: linear-gradient(135deg, var(--ed-brand), var(--ed-brand-strong, var(--ed-brand)));
-  color: var(--ed-on-brand);
-  font-weight: 850;
+  background: var(--gradient-brand);
+  color: var(--text-on-brand);
+  font-weight: var(--font-weight-extrabold);
   border-color: transparent;
-  box-shadow: var(--ed-shadow-active, var(--ed-shadow-soft));
+  box-shadow: var(--shadow-md);
 }
 
 .pagination button:disabled {
@@ -268,10 +283,10 @@
 }
 
 /* === Responsive === */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .editor-controls {
     flex-direction: column;
-    gap: 1rem;
+    gap: var(--space-4);
   }
 
   .editor-header {
@@ -281,10 +296,25 @@
 
   .bouquet-editor-wrapper {
     flex-direction: column;
-    gap: 1rem;
+    gap: var(--space-4);
   }
 
   .search-bar {
     min-width: 100%;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .search-bar,
+  .bulk-actions button,
+  .bouquet-editor,
+  .bouquet-editor input,
+  .bouquet-editor textarea,
+  .bouquet-editor select,
+  .bouquet-editor button,
+  .pagination button {
+    transition: none;
+    animation: none;
   }
 }
