@@ -161,6 +161,7 @@ class BouquetUploaderView extends Component<Props> {
       fieldErrors,
       touchedFields,
       submitting,
+      isImageLoading,
       collectionOptions,
       typeOptions,
       flowerOptions,
@@ -168,11 +169,14 @@ class BouquetUploaderView extends Component<Props> {
       sizeOptions,
     } = state;
 
+    const isFormDisabled = submitting || isImageLoading;
+
     return (
       <div className="uploader__grid">
         {/* Name Field */}
         <FormField
           label="Nama"
+          required
           error={
             touchedFields.has("name") && fieldErrors.name
               ? fieldErrors.name
@@ -186,7 +190,7 @@ class BouquetUploaderView extends Component<Props> {
             value={name}
             onChange={handlers.handleTextChange}
             placeholder="mis., Orchid Elegance"
-            disabled={submitting}
+            disabled={isFormDisabled}
             required
             aria-required="true"
             aria-invalid={
@@ -209,6 +213,7 @@ class BouquetUploaderView extends Component<Props> {
         {/* Price Field */}
         <FormField
           label="Harga (IDR)"
+          required
           error={
             touchedFields.has("price") && fieldErrors.price
               ? fieldErrors.price
@@ -224,7 +229,7 @@ class BouquetUploaderView extends Component<Props> {
               value={price || ""}
               onChange={handlers.handleTextChange}
               placeholder="0"
-              disabled={submitting}
+              disabled={isFormDisabled}
               required
               min={0}
               step="any"
@@ -264,7 +269,7 @@ class BouquetUploaderView extends Component<Props> {
             }}
             onAddNew={() => {}}
             placeholder="Pilih status..."
-            disabled={submitting}
+            disabled={isFormDisabled}
             storageKey=""
             allowAddNew={false}
           />
@@ -273,6 +278,7 @@ class BouquetUploaderView extends Component<Props> {
         {/* Collection Field */}
         <FormField
           label="Koleksi"
+          required
           error={
             touchedFields.has("collectionName") && fieldErrors.collectionName
               ? fieldErrors.collectionName
@@ -289,7 +295,7 @@ class BouquetUploaderView extends Component<Props> {
             }}
             onAddNew={() => {}}
             placeholder="Pilih atau tambahkan koleksi baru..."
-            disabled={submitting}
+            disabled={isFormDisabled}
             error={
               touchedFields.has("collectionName") && fieldErrors.collectionName
                 ? fieldErrors.collectionName
@@ -311,7 +317,7 @@ class BouquetUploaderView extends Component<Props> {
             }}
             onAddNew={() => {}}
             placeholder="Pilih atau tambahkan tipe baru..."
-            disabled={submitting}
+            disabled={isFormDisabled}
             storageKey="uploader_types"
           />
         </FormField>
@@ -319,6 +325,7 @@ class BouquetUploaderView extends Component<Props> {
         {/* Size Field */}
         <FormField
           label="Ukuran"
+          required
           error={
             touchedFields.has("size") && fieldErrors.size
               ? fieldErrors.size
@@ -342,7 +349,7 @@ class BouquetUploaderView extends Component<Props> {
               }));
             }}
             placeholder="Pilih atau tambahkan ukuran baru..."
-            disabled={submitting}
+            disabled={isFormDisabled}
             error={
               touchedFields.has("size") && fieldErrors.size
                 ? fieldErrors.size
@@ -380,7 +387,7 @@ class BouquetUploaderView extends Component<Props> {
               }
             }}
             placeholder="Pilih jumlah stok..."
-            disabled={submitting}
+            disabled={isFormDisabled}
             error={
               touchedFields.has("quantity") && fieldErrors.quantity
                 ? fieldErrors.quantity
@@ -414,7 +421,7 @@ class BouquetUploaderView extends Component<Props> {
             onChange={handlers.handleTextChange}
             rows={4}
             placeholder="Deskripsi singkat..."
-            disabled={submitting}
+            disabled={isFormDisabled}
             maxLength={500}
             aria-invalid={
               touchedFields.has("description") && fieldErrors.description
@@ -468,7 +475,7 @@ class BouquetUploaderView extends Component<Props> {
               });
             }}
             placeholder="Tambahkan acara..."
-            disabled={submitting}
+            disabled={isFormDisabled}
             maxTags={10}
             maxLength={50}
             error={
@@ -517,7 +524,7 @@ class BouquetUploaderView extends Component<Props> {
               });
             }}
             placeholder="Tambahkan jenis bunga..."
-            disabled={submitting}
+            disabled={isFormDisabled}
             maxTags={20}
             maxLength={50}
             error={
@@ -553,7 +560,7 @@ class BouquetUploaderView extends Component<Props> {
             onChange={handlers.handleTextChange}
             rows={3}
             placeholder="Tips perawatan (opsional)"
-            disabled={submitting}
+            disabled={isFormDisabled}
             maxLength={300}
             aria-invalid={
               touchedFields.has("careInstructions") &&
@@ -583,7 +590,8 @@ class BouquetUploaderView extends Component<Props> {
 
   private renderFlagsSection(): React.ReactNode {
     const { state, handlers } = this.getControllerState();
-    const { isNewEdition, isFeatured, submitting } = state;
+    const { isNewEdition, isFeatured, submitting, isImageLoading } = state;
+    const isFormDisabled = submitting || isImageLoading;
 
     return (
       <div className="uploader__field uploader__field--full">
@@ -599,7 +607,7 @@ class BouquetUploaderView extends Component<Props> {
               name="isNewEdition"
               checked={isNewEdition}
               onChange={handlers.handleTextChange}
-              disabled={submitting}
+              disabled={isFormDisabled}
               aria-label="Edisi baru"
             />
             <span>Edisi baru</span>
@@ -611,7 +619,7 @@ class BouquetUploaderView extends Component<Props> {
               name="isFeatured"
               checked={isFeatured}
               onChange={handlers.handleTextChange}
-              disabled={submitting}
+              disabled={isFormDisabled}
               aria-label="Unggulan"
             />
             <span>Unggulan</span>
@@ -627,9 +635,11 @@ class BouquetUploaderView extends Component<Props> {
       customPenanda,
       newPenandaInput,
       submitting,
+      isImageLoading,
       fieldErrors,
       touchedFields,
     } = state;
+    const isFormDisabled = submitting || isImageLoading;
 
     return (
       <div className="uploader__field uploader__field--full uploader__customPenanda">
@@ -651,7 +661,7 @@ class BouquetUploaderView extends Component<Props> {
                 tabIndex={0}
                 aria-label={`Hapus penanda ${penanda}`}
                 onClick={() => {
-                  if (submitting) return;
+                  if (isFormDisabled) return;
                   const controller = this.props.controller;
                   controller.setState((prev) => ({
                     ...prev,
@@ -661,7 +671,7 @@ class BouquetUploaderView extends Component<Props> {
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    if (!submitting) {
+                    if (!isFormDisabled) {
                       const controller = this.props.controller;
                       controller.setState((prev) => ({
                         ...prev,
@@ -716,7 +726,7 @@ class BouquetUploaderView extends Component<Props> {
                   }
                 }}
                 placeholder="Tambah penanda baru..."
-                disabled={submitting}
+                disabled={isFormDisabled}
                 maxLength={30}
                 aria-label="Input penanda baru"
                 aria-invalid={
@@ -742,7 +752,7 @@ class BouquetUploaderView extends Component<Props> {
               type="button"
               className="uploader__addPenandaBtn"
               onClick={handlers.handleAddPenanda}
-              disabled={submitting || !newPenandaInput.trim()}
+              disabled={isFormDisabled || !newPenandaInput.trim()}
               aria-label="Tambah penanda"
             >
               <svg
@@ -801,6 +811,7 @@ class BouquetUploaderView extends Component<Props> {
       imageDimensions,
       submitting,
     } = state;
+    const isFormDisabled = submitting || isImageLoading;
 
     return (
       <div className="uploader__field uploader__field--full">
@@ -812,7 +823,7 @@ class BouquetUploaderView extends Component<Props> {
           role="button"
           tabIndex={0}
           aria-label="Pilih gambar bouquet"
-          aria-disabled={submitting || isImageLoading ? "true" : "false"}
+          aria-disabled={isFormDisabled ? "true" : "false"}
           onClick={handlers.openFilePicker}
           onKeyDown={handlers.handleDropzoneKeyDown}
           onDragOver={handlers.handleDropzoneDragOver}
@@ -874,7 +885,7 @@ class BouquetUploaderView extends Component<Props> {
                   e.stopPropagation();
                   handlers.clearImage();
                 }}
-                disabled={submitting}
+                disabled={isFormDisabled}
                 aria-label="Hapus gambar"
               >
                 Hapus
@@ -887,7 +898,7 @@ class BouquetUploaderView extends Component<Props> {
                   e.stopPropagation();
                   handlers.openFilePicker();
                 }}
-                disabled={submitting}
+                disabled={isFormDisabled}
                 aria-label="Pilih file"
               >
                 Pilih file
@@ -903,7 +914,7 @@ class BouquetUploaderView extends Component<Props> {
             capture="environment"
             aria-label="Upload gambar bouquet"
             onChange={handlers.handleImageChange}
-            disabled={submitting || isImageLoading}
+            disabled={isFormDisabled}
             tabIndex={-1}
           />
         </div>
@@ -1004,6 +1015,7 @@ class BouquetUploaderView extends Component<Props> {
   private renderFooter(): React.ReactNode {
     const { state, handlers } = this.getControllerState();
     const { submitting, isImageLoading, hasDraft, message, messageType } = state;
+    const isFormDisabled = submitting || isImageLoading;
 
     return (
       <div className="uploader__footer" aria-label="Aksi upload" role="group">
@@ -1011,7 +1023,7 @@ class BouquetUploaderView extends Component<Props> {
           <button
             className="uploader__submit"
             type="submit"
-            disabled={submitting || isImageLoading}
+            disabled={isFormDisabled}
             aria-busy={submitting}
           >
             {submitting ? (
@@ -1036,7 +1048,7 @@ class BouquetUploaderView extends Component<Props> {
                   handlers.clearDraft();
                 }
               }}
-              disabled={submitting}
+              disabled={isFormDisabled}
               aria-label="Hapus draft"
             >
               Hapus Draft
