@@ -32,6 +32,7 @@ export class ReviewAutoScroll extends Component<ReviewAutoScrollProps, ReviewAut
   private animationFrameId: number | null = null;
   private lastTimestamp: number = 0;
   private scrollPosition: number = 0;
+  private intersectionObserver: IntersectionObserver | null = null;
   private readonly DEFAULT_SPEED = 30; // pixels per second
   private readonly DEFAULT_GAP = 40; // Increased gap for better spacing between cards
 
@@ -67,7 +68,7 @@ export class ReviewAutoScroll extends Component<ReviewAutoScrollProps, ReviewAut
   private setupIntersectionObserver(): void {
     if (!this.scrollContainerRef.current) return;
 
-    const observer = new IntersectionObserver(
+    this.intersectionObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
@@ -87,11 +88,24 @@ export class ReviewAutoScroll extends Component<ReviewAutoScrollProps, ReviewAut
       }
     );
 
-    observer.observe(this.scrollContainerRef.current);
+    if (this.scrollContainerRef.current) {
+      this.intersectionObserver.observe(this.scrollContainerRef.current);
+    }
   }
 
   private cleanupIntersectionObserver(): void {
-    // Cleanup is handled by browser when element is removed
+    try {
+      if (this.intersectionObserver) {
+        if (this.scrollContainerRef.current) {
+          this.intersectionObserver.unobserve(this.scrollContainerRef.current);
+        }
+        this.intersectionObserver.disconnect();
+        this.intersectionObserver = null;
+      }
+    } catch (error) {
+      console.warn("Error during intersection observer cleanup:", error);
+      this.intersectionObserver = null;
+    }
   }
 
   private startAutoScroll = (): void => {

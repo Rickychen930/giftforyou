@@ -41,6 +41,7 @@ class HomePageView extends Component<HomePageViewProps> {
         className="Home-page-container"
         role="main"
         aria-label="Homepage content"
+        data-page="home"
       >
         {/* Hero slider section - Full width, no container */}
         <Section 
