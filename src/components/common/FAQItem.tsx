@@ -1,6 +1,7 @@
 /**
  * FAQ Item Component (OOP)
  * Class-based component following SOLID principles
+ * Luxury, elegant, UI/UX clean, effective
  */
 
 import React, { Component } from "react";
@@ -21,6 +22,7 @@ interface FAQItemState {
 /**
  * FAQ Item Component
  * Class-based component for FAQ accordion items
+ * Follows Single Responsibility Principle: handles single FAQ item UI
  */
 class FAQItem extends Component<FAQItemProps, FAQItemState> {
   private baseClass: string = "faqItem";
@@ -46,7 +48,9 @@ class FAQItem extends Component<FAQItemProps, FAQItemState> {
 
   private getStyle(): React.CSSProperties {
     const { index = 0 } = this.props;
-    return { animationDelay: `${index * 0.05}s` };
+    return { 
+      animationDelay: `${index * 0.05}s`
+    };
   }
 
   private handleToggle = (): void => {
@@ -54,22 +58,30 @@ class FAQItem extends Component<FAQItemProps, FAQItemState> {
     this.props.onToggle();
   };
 
+  private handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>): void => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      this.handleToggle();
+    }
+  };
+
   private renderChevron(): React.ReactNode {
     const { isOpen } = this.state;
 
     return (
       <svg
-        width="20"
-        height="20"
+        width="24"
+        height="24"
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className={`${this.baseClass}__chevron ${isOpen ? `${this.baseClass}__chevron--open` : ""}`}
+        aria-hidden="true"
       >
         <path
           d="M6 9l6 6 6-6"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -80,23 +92,34 @@ class FAQItem extends Component<FAQItemProps, FAQItemState> {
   render(): React.ReactNode {
     const { question, answer } = this.props;
     const { isOpen } = this.state;
+    const questionId = `faq-question-${this.props.index ?? 0}`;
+    const answerId = `faq-answer-${this.props.index ?? 0}`;
 
     return (
-      <div className={this.getClasses()} style={this.getStyle()}>
+      <article className={this.getClasses()} style={this.getStyle()}>
         <button
+          type="button"
           className={`${this.baseClass}__question`}
           onClick={this.handleToggle}
+          onKeyDown={this.handleKeyDown}
           aria-expanded={isOpen}
+          aria-controls={answerId}
+          id={questionId}
         >
           <span className={`${this.baseClass}__questionText`}>{question}</span>
           {this.renderChevron()}
         </button>
-        <div className={`${this.baseClass}__answer ${isOpen ? `${this.baseClass}__answer--open` : ""}`}>
+        <div 
+          id={answerId}
+          className={`${this.baseClass}__answer ${isOpen ? `${this.baseClass}__answer--open` : ""}`}
+          role="region"
+          aria-labelledby={questionId}
+        >
           <div className={`${this.baseClass}__answerContent`}>
             <p>{answer}</p>
           </div>
         </div>
-      </div>
+      </article>
     );
   }
 }

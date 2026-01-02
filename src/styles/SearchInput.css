@@ -1,10 +1,12 @@
 /**
  * Search Input Component
- * Luxury, DRY, Efficient, Responsive
+ * Luxury, elegant, UI/UX clean, effective
  * Uses design-system.css variables
+ * Fully responsive on all devices: mobile, tablet, desktop
  */
 
 @import "design-system.css";
+@import "colors.css";
 
 .searchInput {
   position: relative;
@@ -15,31 +17,37 @@
 
 .searchInput__input {
   width: 100%;
-  padding: var(--input-padding-md) 3rem var(--input-padding-md) var(--space-4);
-  border: var(--border-luxury);
-  border-color: var(--brand-rose-border);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-base);
+  padding: clamp(var(--space-4), 2.5vw, var(--space-5)) clamp(var(--space-10), 6vw, var(--space-12)) clamp(var(--space-4), 2.5vw, var(--space-5)) clamp(var(--space-5), 3vw, var(--space-6));
+  border: 2px solid;
+  border-image: linear-gradient(135deg, rgba(212, 140, 156, 0.3), rgba(184, 134, 11, 0.2)) 1;
+  border-radius: var(--radius-lg);
+  font-size: clamp(var(--font-size-sm), 1.8vw, var(--font-size-base));
   background: var(--gradient-elegant-surface);
   color: var(--elegant-black);
-  transition: var(--transition-elegant);
+  transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              border-image 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              background 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   font-family: inherit;
-  font-weight: var(--font-weight-normal);
+  font-weight: var(--font-weight-semibold);
   box-shadow: var(--shadow-luxury-sm);
-  backdrop-filter: var(--backdrop-blur-sm);
-  -webkit-backdrop-filter: var(--backdrop-blur-sm);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
+  contain: layout style paint;
 }
 
 .searchInput__input:focus {
   outline: none;
-  border-color: var(--border-luxury-gold);
+  border-image: linear-gradient(135deg, rgba(212, 140, 156, 0.6), rgba(184, 134, 11, 0.5)) 1;
   box-shadow: var(--shadow-luxury-gold), var(--shadow-focus), var(--shadow-luxury-md);
   background: var(--gradient-luxury-gold-subtle);
+  transform: translateY(-1px);
 }
 
 .searchInput__input::placeholder {
-  color: var(--input-placeholder);
-  font-weight: var(--font-weight-normal);
+  color: var(--ink-500);
+  font-weight: var(--font-weight-medium);
+  opacity: 0.7;
 }
 
 .searchInput__input:disabled {
@@ -50,23 +58,50 @@
 
 .searchInput__icon {
   position: absolute;
-  right: var(--space-4);
-  color: var(--input-icon);
+  right: clamp(var(--space-4), 2.5vw, var(--space-5));
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--luxury-gold-600);
   pointer-events: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: var(--transition-color);
+  transition: color 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  width: clamp(18px, 2.2vw, 22px);
+  height: clamp(18px, 2.2vw, 22px);
+  z-index: 1;
 }
 
 .searchInput__input:focus + .searchInput__icon {
-  color: var(--input-icon-focus);
+  color: var(--luxury-gold-700);
+  transform: translateY(-50%) scale(1.1);
 }
 
-/* Responsive: Mobile-first approach */
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .searchInput__input {
+    padding: clamp(var(--space-3-5), 2vw, var(--space-4)) clamp(var(--space-9), 5.5vw, var(--space-11)) clamp(var(--space-3-5), 2vw, var(--space-4)) clamp(var(--space-4), 2.5vw, var(--space-5));
+  }
+}
+
 @media (max-width: 768px) {
   .searchInput__input {
-    padding: var(--input-padding-sm) 2.75rem var(--input-padding-sm) var(--space-3);
+    padding: clamp(var(--space-3-5), 2vw, var(--space-4)) clamp(var(--space-8), 5vw, var(--space-10)) clamp(var(--space-3-5), 2vw, var(--space-4)) clamp(var(--space-4), 2.5vw, var(--space-5));
+    font-size: clamp(var(--font-size-xs), 1.5vw, var(--font-size-sm));
+    border-radius: var(--radius-md);
+  }
+
+  .searchInput__icon {
+    right: clamp(var(--space-3), 2vw, var(--space-4));
+    width: clamp(16px, 2vw, 20px);
+    height: clamp(16px, 2vw, 20px);
+  }
+}
+
+@media (max-width: 640px) {
+  .searchInput__input {
+    padding: var(--space-3-5) var(--space-8) var(--space-3-5) var(--space-4);
     font-size: var(--font-size-sm);
   }
 
@@ -77,15 +112,42 @@
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 480px) {
   .searchInput__input {
-    padding: var(--input-padding-sm) 2.5rem var(--input-padding-sm) var(--space-3);
-    font-size: var(--font-size-sm);
+    padding: var(--space-3) var(--space-7) var(--space-3) var(--space-3-5);
+    font-size: var(--font-size-xs);
   }
 
   .searchInput__icon {
-    right: var(--space-3);
+    right: var(--space-2-5);
     width: 16px;
     height: 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  .searchInput__input {
+    padding: var(--space-2-5) var(--space-6) var(--space-2-5) var(--space-3);
+  }
+
+  .searchInput__icon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .searchInput__input,
+  .searchInput__icon {
+    transition: none !important;
+  }
+
+  .searchInput__input:focus {
+    transform: none;
+  }
+
+  .searchInput__input:focus + .searchInput__icon {
+    transform: translateY(-50%);
   }
 }

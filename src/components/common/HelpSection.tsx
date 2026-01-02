@@ -38,7 +38,7 @@ class HelpSection extends Component<HelpSectionProps, HelpSectionState> {
           {icon && <span className={`${this.baseClass}__icon`}>{icon}</span>}
           {title}
         </h3>
-        <p className={`${this.baseClass}__text`}>{children}</p>
+        <div className={`${this.baseClass}__text`}>{children}</div>
       </div>
     );
   }

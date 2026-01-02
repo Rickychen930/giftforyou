@@ -30,9 +30,21 @@ class SearchInput extends BaseInput<SearchInputProps, SearchInputState> {
     return `${this.baseClass} ${focusedClass} ${className}`.trim();
   }
 
+  componentDidUpdate(prevProps: SearchInputProps, prevState: SearchInputState): void {
+    // Sync state with props if value prop is provided (controlled mode)
+    if (this.props.value !== undefined && this.props.value !== prevProps.value) {
+      const valueStr = typeof this.props.value === "string" ? this.props.value : String(this.props.value || "");
+      this.setState({ value: valueStr });
+    }
+  }
+
   protected handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
-    this.setState({ value });
+    
+    // If controlled (value prop provided), don't update state
+    if (this.props.value === undefined) {
+      this.setState({ value });
+    }
     
     // Call parent handler
     super.handleChange(e);
@@ -66,14 +78,19 @@ class SearchInput extends BaseInput<SearchInputProps, SearchInputState> {
   }
 
   render(): React.ReactNode {
-    const { onSearchChange, onFocus, onBlur, ...inputProps } = this.props;
+    const { onSearchChange, onFocus, onBlur, value: propValue, ...inputProps } = this.props;
+    
+    // Use controlled value if provided, otherwise use state
+    const inputValue = propValue !== undefined 
+      ? (typeof propValue === "string" ? propValue : String(propValue || ""))
+      : this.state.value;
 
     return (
       <div className={this.getWrapperClasses()}>
         <input
           type="text"
           className={this.getInputClasses()}
-          value={this.state.value}
+          value={inputValue}
           onChange={this.handleChange}
           onFocus={(e) => {
             this.handleFocus(e);

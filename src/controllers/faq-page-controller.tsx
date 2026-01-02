@@ -113,6 +113,16 @@ export class FAQPageController extends BaseController<
   }
 
   /**
+   * Component lifecycle: Update
+   * BaseController handles SEO updates and luxury enhancements re-initialization
+   */
+  componentDidUpdate(prevProps: FAQPageControllerProps, prevState: FAQPageState & BaseControllerState): void {
+    super.componentDidUpdate(prevProps, prevState);
+    // FAQ data is static, so no need for additional updates
+    // BaseController handles SEO and luxury enhancements updates
+  }
+
+  /**
    * Render view
    */
   render(): React.ReactNode {

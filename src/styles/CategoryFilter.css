@@ -1,34 +1,44 @@
 /**
  * Category Filter Component
- * Luxury, DRY, Efficient, Responsive
+ * Luxury, elegant, UI/UX clean, effective
  * Uses design-system.css variables
+ * Fully responsive on all devices: mobile, tablet, desktop
  */
 
 @import "design-system.css";
+@import "colors.css";
 
 .categoryFilter {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3);
+  gap: clamp(var(--space-2), 1.5vw, var(--space-3));
+  justify-content: center;
+  width: 100%;
 }
 
 .categoryFilter__button {
-  padding: var(--space-2-5) var(--space-5);
-  border: var(--border-luxury);
-  border-color: var(--brand-rose-border);
+  padding: clamp(var(--space-2-5), 1.8vw, var(--space-3)) clamp(var(--space-4), 2.5vw, var(--space-6));
+  border: 2px solid;
+  border-image: linear-gradient(135deg, rgba(212, 140, 156, 0.3), rgba(184, 134, 11, 0.2)) 1;
   border-radius: var(--radius-full);
   background: var(--gradient-elegant-surface);
-  color: var(--ink-600);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  color: var(--ink-700);
+  font-size: clamp(var(--font-size-xs), 1.5vw, var(--font-size-sm));
+  font-weight: var(--font-weight-bold);
   cursor: pointer;
-  transition: var(--transition-elegant);
+  transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              border-image 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              background 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              color 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   white-space: nowrap;
   position: relative;
   overflow: hidden;
   box-shadow: var(--shadow-luxury-sm);
-  backdrop-filter: var(--backdrop-blur-sm);
-  -webkit-backdrop-filter: var(--backdrop-blur-sm);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
+  touch-action: manipulation;
+  contain: layout style paint;
 }
 
 .categoryFilter__button::before {
@@ -37,31 +47,38 @@
   inset: 0;
   background: var(--gradient-luxury-gold-subtle);
   opacity: 0;
-  transition: var(--transition-elegant);
+  transition: opacity 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   pointer-events: none;
+  z-index: 0;
 }
 
 .categoryFilter__button:hover {
-  border-color: var(--border-luxury-gold);
+  border-image: linear-gradient(135deg, rgba(212, 140, 156, 0.5), rgba(184, 134, 11, 0.4)) 1;
   color: var(--luxury-gold-700);
-  transform: translateY(-1px);
+  transform: translateY(-2px) scale(1.02);
   box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
 }
 
 .categoryFilter__button:hover::before {
-  opacity: 1;
+  opacity: 0.6;
+}
+
+.categoryFilter__button:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .categoryFilter__button:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring), var(--shadow-luxury-md);
+  outline-offset: var(--focus-ring-offset-sm);
 }
 
 .categoryFilter__button--active {
   background: var(--gradient-luxury-gold);
   color: var(--elegant-white);
-  border-color: var(--border-luxury-gold-strong);
+  border-image: linear-gradient(135deg, rgba(184, 134, 11, 0.8), rgba(212, 140, 156, 0.6)) 1;
   box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
+  transform: scale(1.05);
 }
 
 .categoryFilter__button--active::before {
@@ -69,25 +86,80 @@
 }
 
 .categoryFilter__button--active:hover {
-  background: var(--gradient-luxury-gold-strong);
-  transform: translateY(-2px);
+  background: linear-gradient(135deg, var(--luxury-gold-600) 0%, var(--luxury-gold-700) 50%, var(--luxury-gold-600) 100%);
+  transform: translateY(-2px) scale(1.08);
   box-shadow: var(--shadow-luxury-gold-xl), var(--shadow-luxury-gold-lg);
 }
 
-/* Responsive: Mobile-first approach */
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .categoryFilter {
+    gap: clamp(var(--space-2), 1.2vw, var(--space-2-5));
+  }
+}
+
 @media (max-width: 768px) {
   .categoryFilter {
-    gap: var(--gap-sm);
+    gap: var(--space-2);
+    justify-content: flex-start;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    padding-bottom: var(--space-1);
+  }
+
+  .categoryFilter::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .categoryFilter::-webkit-scrollbar-track {
+    background: rgba(212, 140, 156, 0.1);
+    border-radius: 2px;
+  }
+
+  .categoryFilter::-webkit-scrollbar-thumb {
+    background: var(--brand-rose-400);
+    border-radius: 2px;
   }
 
   .categoryFilter__button {
-    padding: var(--space-2) var(--space-4);
-    font-size: var(--font-size-xs);
+    padding: clamp(var(--space-2), 1.5vw, var(--space-2-5)) clamp(var(--space-3), 2vw, var(--space-4));
+    font-size: clamp(var(--font-size-xs), 1.3vw, var(--font-size-sm));
   }
 }
 
 @media (max-width: 640px) {
   .categoryFilter {
-    gap: var(--gap-xs);
+    gap: var(--space-1-5);
+  }
+
+  .categoryFilter__button {
+    padding: var(--space-2) var(--space-3-5);
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .categoryFilter__button {
+    padding: var(--space-1-5) var(--space-3);
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: 360px) {
+  .categoryFilter__button {
+    padding: var(--space-1-5) var(--space-2-5);
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .categoryFilter__button {
+    transition: none !important;
+  }
+
+  .categoryFilter__button:hover,
+  .categoryFilter__button--active {
+    transform: none;
   }
 }
