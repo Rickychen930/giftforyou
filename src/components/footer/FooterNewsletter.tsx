@@ -68,11 +68,14 @@ class FooterNewsletter extends Component<{}, FooterNewsletterState> {
         <form onSubmit={this.handleSubmit} className={`${this.baseClass}__form`}>
           <input
             type="email"
+            id="footer-newsletter-email"
+            name="newsletterEmail"
             value={email}
             onChange={this.handleEmailChange}
             placeholder="Langganan newsletter"
             className={`${this.baseClass}__input`}
             aria-label="Alamat email untuk newsletter"
+            autoComplete="email"
             required
           />
           <button

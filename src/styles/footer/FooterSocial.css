@@ -10,11 +10,12 @@
 }
 
 .footer-social__label {
-  font-size: var(--font-size-sm);
+  font-size: clamp(var(--font-size-sm), 1.8vw, var(--font-size-base));
   font-weight: var(--font-weight-bold);
   color: var(--ink-600);
   margin: 0;
   white-space: nowrap;
+  letter-spacing: 0.02em;
 }
 
 .footer-social__row {
@@ -27,22 +28,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: clamp(var(--size-12), 3.5vw, var(--size-14));
-  height: clamp(var(--size-12), 3.5vw, var(--size-14));
+  width: clamp(var(--size-14), 4vw, var(--size-16));
+  height: clamp(var(--size-14), 4vw, var(--size-16));
   border-radius: var(--radius-full);
-  border: var(--border-luxury);
-  border-color: var(--brand-rose-border);
-  background: var(--gradient-elegant-surface);
+  border: 2px solid rgba(212, 140, 156, 0.25);
+  background: rgba(255, 255, 255, 0.6);
   color: var(--ink-700);
   text-decoration: none;
-  transition: all var(--transition-elegant) cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: 
-    var(--shadow-luxury-md),
-    var(--shadow-luxury-sm),
-    0 0 0 1px rgba(255, 255, 255, 0.4) inset,
-    0 0 20px rgba(212, 140, 156, 0.1);
-  backdrop-filter: var(--backdrop-blur-md) saturate(200%);
-  -webkit-backdrop-filter: var(--backdrop-blur-md) saturate(200%);
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    0 0 0 2px rgba(255, 255, 255, 0.5) inset,
+    0 0 24px rgba(212, 140, 156, 0.12);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   position: relative;
   overflow: hidden;
 }
@@ -51,28 +51,44 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
   opacity: 0;
-  transition: opacity var(--transition-elegant);
+  transition: opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.footer-social__icon::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, rgba(184, 134, 11, 0.3), rgba(212, 140, 156, 0.3));
+  opacity: 0;
+  transition: opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: -1;
+  filter: blur(10px);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .footer-social__icon:hover {
-    transform: translateY(calc(var(--space-1) * -1)) scale(1.2) rotate(5deg);
+    transform: translateY(calc(var(--space-1) * -1)) scale(1.15) rotate(5deg);
     box-shadow: 
-      var(--shadow-luxury-gold-lg),
-      var(--shadow-luxury-gold),
-      var(--shadow-luxury-md),
-      0 0 0 1px rgba(255, 255, 255, 0.6) inset,
-      0 0 30px rgba(212, 140, 156, 0.25);
-    border-color: var(--border-luxury-gold);
-    background: var(--gradient-luxury-gold-subtle);
+      0 8px 32px rgba(0, 0, 0, 0.12),
+      0 4px 16px rgba(0, 0, 0, 0.08),
+      0 0 0 2px rgba(255, 255, 255, 0.8) inset,
+      0 0 40px rgba(212, 140, 156, 0.3),
+      0 0 30px rgba(184, 134, 11, 0.2);
+    border-color: rgba(184, 134, 11, 0.5);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 248, 220, 0.8));
     color: var(--luxury-gold-700);
-    filter: brightness(1.1);
+    filter: brightness(1.08) saturate(1.1);
   }
 
   .footer-social__icon:hover::before {
     opacity: 1;
+  }
+
+  .footer-social__icon:hover::after {
+    opacity: 0.5;
   }
 }
 
@@ -92,10 +108,17 @@
 }
 
 .footer-social__icon-svg {
-  width: var(--size-4-5);
-  height: var(--size-4-5);
+  width: clamp(var(--size-4-5), 2.5vw, var(--size-5));
+  height: clamp(var(--size-4-5), 2.5vw, var(--size-5));
   flex: 0 0 auto;
-  opacity: var(--opacity-strong);
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .footer-social__icon:hover .footer-social__icon-svg {
+    opacity: 1;
+  }
 }
 
 .footer-social__icon:focus-visible {
@@ -117,13 +140,23 @@
 
 @media (max-width: 480px) {
   .footer-social__icon {
-    width: var(--size-9);
-    height: var(--size-9);
+    width: var(--size-10);
+    height: var(--size-10);
   }
 
   .footer-social__icon-svg {
     width: var(--size-4);
     height: var(--size-4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-social__icon {
+    transition: none;
+  }
+
+  .footer-social__icon:hover {
+    transform: none;
   }
 }
 

@@ -4,7 +4,8 @@
 .footer-brand {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-7);
+  position: relative;
 }
 
 .footer-brand__header {
@@ -15,48 +16,54 @@
 }
 
 .footer-brand__logo {
-  width: clamp(var(--size-16), 4.5vw, var(--size-20));
-  height: clamp(var(--size-16), 4.5vw, var(--size-20));
+  width: clamp(var(--size-18), 5vw, var(--size-24));
+  height: clamp(var(--size-18), 5vw, var(--size-24));
   border-radius: var(--radius-full);
   object-fit: cover;
-  border: var(--border-width-2) solid rgba(255, 255, 255, 0.9);
+  border: 2.5px solid rgba(255, 255, 255, 0.95);
   box-shadow: 
-    0 4px 16px rgba(0, 0, 0, 0.12),
-    0 2px 8px rgba(0, 0, 0, 0.08),
-    0 0 0 2px rgba(255, 255, 255, 0.6) inset,
-    0 0 20px rgba(212, 140, 156, 0.15);
+    0 6px 24px rgba(0, 0, 0, 0.1),
+    0 3px 12px rgba(0, 0, 0, 0.06),
+    0 0 0 3px rgba(255, 255, 255, 0.7) inset,
+    0 0 30px rgba(212, 140, 156, 0.2),
+    0 0 60px rgba(212, 140, 156, 0.08);
   flex: 0 0 auto;
-  transition: all var(--transition-elegant) cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   background: var(--gradient-elegant-surface);
   position: relative;
+  filter: brightness(1.02);
 }
 
 .footer-brand__logo::after {
   content: "";
   position: absolute;
-  inset: -2px;
+  inset: -3px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, var(--luxury-gold-400), var(--brand-rose-400), var(--luxury-gold-400));
+  background: linear-gradient(135deg, 
+    rgba(184, 134, 11, 0.4), 
+    rgba(212, 140, 156, 0.5), 
+    rgba(184, 134, 11, 0.4));
   opacity: 0;
-  transition: opacity var(--transition-elegant);
+  transition: opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: -1;
+  filter: blur(8px);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .footer-brand__logo:hover {
-    transform: scale(1.12) translateY(calc(var(--space-1) * -1)) rotate(5deg);
+    transform: scale(1.08) translateY(calc(var(--space-1) * -1)) rotate(3deg);
     box-shadow: 
-      0 8px 24px rgba(0, 0, 0, 0.16),
-      0 4px 12px rgba(0, 0, 0, 0.12),
-      0 0 0 2px rgba(255, 255, 255, 0.95) inset,
-      0 0 30px rgba(212, 140, 156, 0.25),
-      0 0 20px rgba(184, 134, 11, 0.2);
-    border-color: var(--border-luxury-gold);
-    filter: brightness(1.05);
+      0 10px 32px rgba(0, 0, 0, 0.14),
+      0 5px 16px rgba(0, 0, 0, 0.1),
+      0 0 0 3px rgba(255, 255, 255, 1) inset,
+      0 0 40px rgba(212, 140, 156, 0.3),
+      0 0 30px rgba(184, 134, 11, 0.25);
+    border-color: rgba(184, 134, 11, 0.6);
+    filter: brightness(1.06) saturate(1.1);
   }
 
   .footer-brand__logo:hover::after {
-    opacity: 0.3;
+    opacity: 0.4;
   }
 }
 
@@ -67,27 +74,45 @@
 
 .footer-brand__name {
   font-weight: var(--font-weight-black);
-  letter-spacing: var(--letter-spacing-tight);
-  font-size: clamp(var(--font-size-lg), 2vw, var(--font-size-xl));
-  line-height: var(--line-height-tight);
-  margin-bottom: var(--space-1);
+  letter-spacing: -0.02em;
+  font-size: clamp(var(--font-size-lg), 2.2vw, var(--font-size-2xl));
+  line-height: 1.2;
+  margin-bottom: var(--space-2);
   font-family: var(--font-family-playfair);
   word-break: break-word;
   overflow-wrap: break-word;
   background: linear-gradient(
     135deg,
     var(--elegant-black) 0%,
-    var(--elegant-charcoal) 20%,
-    var(--brand-rose-600) 50%,
-    var(--luxury-gold-600) 70%,
-    var(--brand-sage-500) 90%,
+    var(--elegant-charcoal) 15%,
+    var(--brand-rose-600) 45%,
+    var(--luxury-gold-600) 65%,
+    var(--brand-sage-500) 85%,
     var(--luxury-gold-500) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.08));
   position: relative;
+  background-size: 200% 200%;
+  animation: footer-brand-gradient-shift 8s ease infinite;
+}
+
+@keyframes footer-brand-gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-brand__name {
+    animation: none;
+    background-position: 0% 50%;
+  }
 }
 
 .footer-brand__tagline {
@@ -100,10 +125,11 @@
 .footer-brand__description {
   margin: 0;
   color: var(--ink-700);
-  line-height: var(--line-height-relaxed);
-  font-size: var(--font-size-sm);
+  line-height: 1.7;
+  font-size: clamp(var(--font-size-sm), 1.8vw, var(--font-size-base));
   font-weight: var(--font-weight-medium);
-  opacity: var(--opacity-strong);
+  opacity: 0.88;
+  letter-spacing: 0.01em;
 }
 
 @media (max-width: 768px) {
