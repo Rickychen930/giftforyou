@@ -1,17 +1,18 @@
+@import "../design-system.css";
 @import "../colors.css";
 
 .store-hours-card__time {
   margin: 0;
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   color: var(--ink-700);
-  line-height: 1.6;
-  padding: 0.25rem 0;
+  line-height: var(--line-height-relaxed);
+  padding: var(--space-1) 0;
 }
 
 .store-hours-card__time--closed {
   color: var(--ink-500);
-  opacity: 0.8;
+  opacity: var(--opacity-medium);
   font-style: italic;
 }
 
