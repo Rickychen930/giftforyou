@@ -13,7 +13,7 @@
   top: 50%;
   right: var(--space-20);
   transform: translateY(-50%);
-  z-index: var(--z-dropdown);
+  z-index: calc(var(--z-dropdown) + 1);
   width: var(--size-14);
   height: var(--size-14);
   display: flex;
@@ -25,17 +25,15 @@
     rgba(0, 0, 0, 0.4) 0%,
     rgba(0, 0, 0, 0.3) 100%
   );
-  border: var(--border-luxury);
-  border-color: rgba(255, 255, 255, 0.22);
+  border: var(--border-width-1-5) solid rgba(255, 255, 255, 0.22);
   border-radius: var(--radius-full);
   backdrop-filter: var(--backdrop-blur-lg);
   -webkit-backdrop-filter: var(--backdrop-blur-lg);
   box-shadow: var(--shadow-luxury-lg);
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition: all var(--transition-elegant);
   position: relative;
   overflow: hidden;
-  border: none;
   padding: 0;
 }
 
@@ -81,9 +79,9 @@
 }
 
 .hero-play-pause:focus-visible {
-  outline: 3px solid rgba(212, 140, 156, 0.6);
-  outline-offset: 4px;
-  border-radius: 50%;
+  outline: var(--focus-ring-width) solid var(--brand-rose-500);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-full);
 }
 
 /* Mobile - hide play/pause button */

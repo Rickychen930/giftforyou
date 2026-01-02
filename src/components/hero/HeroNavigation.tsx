@@ -16,7 +16,8 @@ export interface HeroNavigationProps {
 }
 
 interface HeroNavigationState {
-  // No state needed, but keeping for consistency
+  isBeginning: boolean;
+  isEnd: boolean;
 }
 
 /**
@@ -26,30 +27,96 @@ interface HeroNavigationState {
 class HeroNavigation extends Component<HeroNavigationProps, HeroNavigationState> {
   private baseClass: string = "hero-nav";
 
+  constructor(props: HeroNavigationProps) {
+    super(props);
+    this.state = {
+      isBeginning: true,
+      isEnd: false,
+    };
+  }
+
+  componentDidMount(): void {
+    this.updateNavigationState();
+  }
+
+  componentDidUpdate(prevProps: HeroNavigationProps): void {
+    if (prevProps.swiperInstance !== this.props.swiperInstance) {
+      this.updateNavigationState();
+      this.setupSwiperListeners();
+    }
+  }
+
+  componentWillUnmount(): void {
+    this.cleanupSwiperListeners();
+  }
+
+  private updateNavigationState(): void {
+    const { swiperInstance } = this.props;
+    if (!swiperInstance) {
+      this.setState({ isBeginning: true, isEnd: false });
+      return;
+    }
+
+    const isLoop = swiperInstance.params?.loop ?? false;
+    if (isLoop) {
+      this.setState({ isBeginning: false, isEnd: false });
+    } else {
+      this.setState({
+        isBeginning: swiperInstance.isBeginning ?? true,
+        isEnd: swiperInstance.isEnd ?? false,
+      });
+    }
+  }
+
+  private slideChangeHandler = (): void => {
+    this.updateNavigationState();
+  };
+
+  private setupSwiperListeners(): void {
+    const { swiperInstance } = this.props;
+    if (!swiperInstance) return;
+
+    swiperInstance.on("slideChange", this.slideChangeHandler);
+  }
+
+  private cleanupSwiperListeners(): void {
+    const { swiperInstance } = this.props;
+    if (!swiperInstance) return;
+
+    swiperInstance.off("slideChange", this.slideChangeHandler);
+  }
+
   private handlePrev = (): void => {
     const { swiperInstance, onPrev } = this.props;
+    const { isBeginning } = this.state;
+    if (isBeginning) return;
     swiperInstance?.slidePrev();
     onPrev?.();
   };
 
   private handleNext = (): void => {
     const { swiperInstance, onNext } = this.props;
+    const { isEnd } = this.state;
+    if (isEnd) return;
     swiperInstance?.slideNext();
     onNext?.();
   };
 
   private renderPrevButton(): React.ReactNode {
     const { onFocus, onBlur } = this.props;
+    const { isBeginning } = this.state;
 
     return (
       <button
-        className={`${this.baseClass} hero-slider__nav--prev`}
+        className={`${this.baseClass} hero-slider__nav--prev ${isBeginning ? `${this.baseClass}--disabled` : ""}`}
         aria-label="Previous slide"
+        aria-disabled={isBeginning}
         type="button"
         title="Previous slide (Left Arrow)"
         onClick={this.handlePrev}
         onFocus={onFocus}
         onBlur={onBlur}
+        disabled={isBeginning}
       >
         <svg
           width="24"
@@ -73,16 +140,19 @@ class HeroNavigation extends Component<HeroNavigationProps, HeroNavigationState>
 
   private renderNextButton(): React.ReactNode {
     const { onFocus, onBlur } = this.props;
+    const { isEnd } = this.state;
 
     return (
       <button
-        className={`${this.baseClass} hero-slider__nav--next`}
+        className={`${this.baseClass} hero-slider__nav--next ${isEnd ? `${this.baseClass}--disabled` : ""}`}
         aria-label="Next slide"
+        aria-disabled={isEnd}
         type="button"
         title="Next slide (Right Arrow)"
         onClick={this.handleNext}
         onFocus={onFocus}
         onBlur={onBlur}
+        disabled={isEnd}
       >
         <svg
           width="24"

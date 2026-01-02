@@ -13,7 +13,7 @@
   bottom: var(--space-5) !important;
   left: 50%;
   transform: translateX(-50%);
-  z-index: var(--z-dropdown);
+  z-index: calc(var(--z-dropdown) + 2);
   display: flex;
   gap: var(--space-2-5);
   padding: var(--space-2-5) var(--space-5);
