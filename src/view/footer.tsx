@@ -12,7 +12,7 @@ import FooterLinks from "../components/footer/FooterLinks";
 import FooterContact from "../components/footer/FooterContact";
 import FooterSocial from "../components/footer/FooterSocial";
 import FooterNewsletter from "../components/footer/FooterNewsletter";
-import BackToTopButton from "../components/footer/BackToTopButton";
+// BackToTopButton removed - using ScrollToTop from App.tsx to avoid duplication
 
 /**
  * Footer View Component
@@ -74,8 +74,7 @@ class Footer extends Component {
           </div>
         </div>
 
-        {/* Back to Top Button */}
-        <BackToTopButton />
+        {/* Back to Top Button - Removed duplicate, using ScrollToTop from App.tsx */}
       </footer>
     );
   }

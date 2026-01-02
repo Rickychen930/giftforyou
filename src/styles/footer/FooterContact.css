@@ -4,7 +4,7 @@
 .footer-contact {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-5);
 }
 
 .footer-contact__title {
@@ -36,26 +36,54 @@
 .footer-contact__item {
   display: flex;
   align-items: center;
-  gap: var(--space-2-5);
+  gap: var(--space-3);
   color: var(--ink-700);
   text-decoration: none;
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
-  transition: all var(--transition-base);
-  padding: var(--space-1-5);
+  line-height: var(--line-height-relaxed);
+  transition: all var(--transition-elegant) cubic-bezier(0.4, 0, 0.2, 1);
+  padding: var(--space-2-5) var(--space-4);
   border-radius: var(--radius-lg);
-  margin: calc(var(--space-1-5) * -1);
+  margin: calc(var(--space-2-5) * -1) calc(var(--space-4) * -1);
   word-break: break-all;
   overflow-wrap: anywhere;
   max-width: 100%;
+  border: var(--border-width-1) solid transparent;
+  position: relative;
 }
 
-.footer-contact__item:hover {
-  background: var(--gradient-luxury-gold-subtle);
-  color: var(--luxury-gold-700);
-  transform: translateX(var(--space-1));
-  box-shadow: var(--shadow-luxury-sm);
+.footer-contact__item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 0;
+  background: linear-gradient(180deg, var(--luxury-gold-400), var(--brand-rose-400));
+  border-radius: var(--radius-full);
+  transition: height var(--transition-elegant);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .footer-contact__item:hover {
+    background: 
+      linear-gradient(90deg, var(--gradient-luxury-gold-subtle) 0%, transparent 100%),
+      var(--gradient-luxury-gold-subtle);
+    color: var(--luxury-gold-700);
+    transform: translateX(var(--space-2));
+    box-shadow: 
+      var(--shadow-luxury-md),
+      var(--shadow-luxury-gold),
+      0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+    border-color: var(--border-luxury-gold);
+    padding-left: var(--space-5);
+  }
+
+  .footer-contact__item:hover::before {
+    height: 60%;
+  }
 }
 
 .footer-contact__item:focus-visible {

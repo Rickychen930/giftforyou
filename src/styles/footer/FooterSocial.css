@@ -4,7 +4,7 @@
 .footer-social {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-5);
   flex: 0 1 auto;
   min-width: 0;
 }
@@ -27,26 +27,53 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--size-11);
-  height: var(--size-11);
+  width: clamp(var(--size-12), 3.5vw, var(--size-14));
+  height: clamp(var(--size-12), 3.5vw, var(--size-14));
   border-radius: var(--radius-full);
   border: var(--border-luxury);
   border-color: var(--brand-rose-border);
   background: var(--gradient-elegant-surface);
   color: var(--ink-700);
   text-decoration: none;
-  transition: all var(--transition-elegant);
-  box-shadow: var(--shadow-luxury-sm);
-  backdrop-filter: var(--backdrop-blur-md);
-  -webkit-backdrop-filter: var(--backdrop-blur-md);
+  transition: all var(--transition-elegant) cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 
+    var(--shadow-luxury-md),
+    var(--shadow-luxury-sm),
+    0 0 0 1px rgba(255, 255, 255, 0.4) inset,
+    0 0 20px rgba(212, 140, 156, 0.1);
+  backdrop-filter: var(--backdrop-blur-md) saturate(200%);
+  -webkit-backdrop-filter: var(--backdrop-blur-md) saturate(200%);
+  position: relative;
+  overflow: hidden;
 }
 
-.footer-social__icon:hover {
-  transform: translateY(calc(var(--space-1) * -1)) scale(1.1);
-  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
-  border-color: var(--border-luxury-gold);
-  background: var(--gradient-luxury-gold-subtle);
-  color: var(--luxury-gold-700);
+.footer-social__icon::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity var(--transition-elegant);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .footer-social__icon:hover {
+    transform: translateY(calc(var(--space-1) * -1)) scale(1.2) rotate(5deg);
+    box-shadow: 
+      var(--shadow-luxury-gold-lg),
+      var(--shadow-luxury-gold),
+      var(--shadow-luxury-md),
+      0 0 0 1px rgba(255, 255, 255, 0.6) inset,
+      0 0 30px rgba(212, 140, 156, 0.25);
+    border-color: var(--border-luxury-gold);
+    background: var(--gradient-luxury-gold-subtle);
+    color: var(--luxury-gold-700);
+    filter: brightness(1.1);
+  }
+
+  .footer-social__icon:hover::before {
+    opacity: 1;
+  }
 }
 
 .footer-social__icon--instagram:hover {

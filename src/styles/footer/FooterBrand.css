@@ -4,7 +4,7 @@
 .footer-brand {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-6);
 }
 
 .footer-brand__header {
@@ -15,21 +15,49 @@
 }
 
 .footer-brand__logo {
-  width: var(--size-16);
-  height: var(--size-16);
+  width: clamp(var(--size-16), 4.5vw, var(--size-20));
+  height: clamp(var(--size-16), 4.5vw, var(--size-20));
   border-radius: var(--radius-full);
   object-fit: cover;
-  border: var(--border-width-2) solid rgba(255, 255, 255, 0.7);
-  box-shadow: var(--shadow-luxury-lg);
+  border: var(--border-width-2) solid rgba(255, 255, 255, 0.9);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    0 0 0 2px rgba(255, 255, 255, 0.6) inset,
+    0 0 20px rgba(212, 140, 156, 0.15);
   flex: 0 0 auto;
-  transition: all var(--transition-elegant);
-  background: var(--gradient-surface);
+  transition: all var(--transition-elegant) cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: var(--gradient-elegant-surface);
+  position: relative;
 }
 
-.footer-brand__logo:hover {
-  transform: scale(1.08) translateY(calc(var(--space-1) * -1));
-  box-shadow: var(--shadow-luxury-xl);
-  border-color: rgba(255, 255, 255, 0.9);
+.footer-brand__logo::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--luxury-gold-400), var(--brand-rose-400), var(--luxury-gold-400));
+  opacity: 0;
+  transition: opacity var(--transition-elegant);
+  z-index: -1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .footer-brand__logo:hover {
+    transform: scale(1.12) translateY(calc(var(--space-1) * -1)) rotate(5deg);
+    box-shadow: 
+      0 8px 24px rgba(0, 0, 0, 0.16),
+      0 4px 12px rgba(0, 0, 0, 0.12),
+      0 0 0 2px rgba(255, 255, 255, 0.95) inset,
+      0 0 30px rgba(212, 140, 156, 0.25),
+      0 0 20px rgba(184, 134, 11, 0.2);
+    border-color: var(--border-luxury-gold);
+    filter: brightness(1.05);
+  }
+
+  .footer-brand__logo:hover::after {
+    opacity: 0.3;
+  }
 }
 
 .footer-brand__text {
@@ -40,7 +68,7 @@
 .footer-brand__name {
   font-weight: var(--font-weight-black);
   letter-spacing: var(--letter-spacing-tight);
-  font-size: var(--font-size-lg);
+  font-size: clamp(var(--font-size-lg), 2vw, var(--font-size-xl));
   line-height: var(--line-height-tight);
   margin-bottom: var(--space-1);
   font-family: var(--font-family-playfair);
@@ -49,14 +77,17 @@
   background: linear-gradient(
     135deg,
     var(--elegant-black) 0%,
-    var(--elegant-charcoal) 25%,
-    var(--brand-rose-600) 60%,
-    var(--luxury-gold-600) 80%,
-    var(--brand-sage-500) 100%
+    var(--elegant-charcoal) 20%,
+    var(--brand-rose-600) 50%,
+    var(--luxury-gold-600) 70%,
+    var(--brand-sage-500) 90%,
+    var(--luxury-gold-500) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  position: relative;
 }
 
 .footer-brand__tagline {

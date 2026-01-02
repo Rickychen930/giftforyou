@@ -40,20 +40,23 @@ class FooterNewsletter extends Component<{}, FooterNewsletterState> {
 
   private handleSubmit = (e: FormEvent): void => {
     e.preventDefault();
-    const { email } = this.state;
+    const { email, timeoutId } = this.state;
+
+    // Clear existing timeout if any
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
 
     if (email && email.includes("@")) {
-      this.setState({ status: "success", email: "" });
-      const timeoutId = setTimeout(() => {
+      const newTimeoutId = setTimeout(() => {
         this.setState({ status: "idle", timeoutId: null });
       }, 3000);
-      this.setState({ timeoutId });
+      this.setState({ status: "success", email: "", timeoutId: newTimeoutId });
     } else {
-      this.setState({ status: "error" });
-      const timeoutId = setTimeout(() => {
+      const newTimeoutId = setTimeout(() => {
         this.setState({ status: "idle", timeoutId: null });
       }, 3000);
-      this.setState({ timeoutId });
+      this.setState({ status: "error", timeoutId: newTimeoutId });
     }
   };
 
