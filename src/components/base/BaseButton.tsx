@@ -194,7 +194,7 @@ export abstract class BaseButton<P extends BaseButtonProps = BaseButtonProps, S 
    * Override in child classes for custom icon rendering
    */
   protected renderIcon(): React.ReactNode {
-    const { icon, iconPosition = "left", isLoading, children } = this.props;
+    const { icon, iconPosition = "left", isLoading } = this.props;
     if (!icon || isLoading) return null;
 
     // Icon only mode
