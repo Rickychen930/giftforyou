@@ -15,7 +15,7 @@ import AlertMessage from "../components/common/AlertMessage";
 import FormField from "../components/common/FormField";
 import IconButton from "../components/common/IconButton";
 import LuxuryButton from "../components/buttons/LuxuryButton";
-import { UserPlusIcon, EditIcon, DeleteIcon, CheckCircleIcon, LocationIcon } from "../components/icons";
+import { EditIcon, DeleteIcon, CheckCircleIcon, LocationIcon } from "../components/icons";
 import type {
   Address,
   AddressFormData,

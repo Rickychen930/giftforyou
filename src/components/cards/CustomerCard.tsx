@@ -4,7 +4,7 @@
  * Reusable card component for displaying customer in list view
  */
 
-import React, { Component } from "react";
+import React from "react";
 import { BaseCard, BaseCardProps } from "../base/BaseCard";
 import StatusBadge from "../common/StatusBadge";
 import "../../styles/CustomerCard.css";
