@@ -126,17 +126,6 @@ class CollectionCard extends Component<CollectionContainerProps, CollectionCardS
             </div>
             <p className={`${this.baseClass}__description`}>{description}</p>
           </div>
-
-          <div className={`${this.baseClass}__headerActions`}>
-            <Link
-              to={browseHref}
-              className={`${this.baseClass}__ctaBtn ${this.baseClass}__ctaBtn--small`}
-              aria-label={`Lihat koleksi ${name}`}
-              title="Lihat koleksi"
-            >
-              Lihat koleksi
-            </Link>
-          </div>
         </header>
 
         {validBouquets.length === 0 ? (
@@ -154,16 +143,37 @@ class CollectionCard extends Component<CollectionContainerProps, CollectionCardS
               }}
             />
 
-            <div className={`${this.baseClass}__footer`}>
-              <Link
-                to={browseHref}
-                className={`${this.baseClass}__ctaBtn`}
-                aria-label={`Lihat semua bouquet di koleksi ${name}`}
-                title="Lihat semua"
-              >
-                Lihat semua ({validBouquets.length})
-              </Link>
-            </div>
+            {validBouquets.length > 0 && (
+              <div className={`${this.baseClass}__footer`}>
+                <Link
+                  to={browseHref}
+                  className={`${this.baseClass}__ctaBtn`}
+                  aria-label={`Lihat semua ${validBouquets.length} bouquet di koleksi ${name}`}
+                  title="Lihat semua bouquet"
+                >
+                  <span className={`${this.baseClass}__ctaText`}>
+                    Lihat Semua Koleksi
+                  </span>
+                  <span className={`${this.baseClass}__ctaCount`}>
+                    {validBouquets.length} produk
+                  </span>
+                  <svg
+                    className={`${this.baseClass}__ctaIcon`}
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
+            )}
           </div>
         )}
       </section>
