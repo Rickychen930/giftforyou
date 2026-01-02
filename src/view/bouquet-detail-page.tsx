@@ -2,11 +2,14 @@
  * Bouquet Detail Page View
  * Pure presentation component - no business logic
  * OOP-based class component following SOLID principles
+ * Enhanced with Container & Section components for consistent layout
  */
 
 import React, { Component } from "react";
 import "../styles/BouquetDetailPage.css";
 import type { Bouquet } from "../models/domain/bouquet";
+import Section from "../components/layout/Section";
+import Container from "../components/layout/Container";
 import { isAuthenticated } from "../utils/auth-utils";
 import { toast } from "../utils/toast";
 import type { OrderFormData } from "../components/bouquet-detail/OrderForm";
@@ -60,14 +63,14 @@ class BouquetDetailPageView extends Component<BouquetDetailPageViewProps> {
    */
   private renderLoading(): React.ReactNode {
     return (
-      <section className="bouquet-detail-page">
-        <div className="bouquet-detail-page__container">
+      <Section variant="gradient" padding="lg" className="bouquet-detail-page">
+        <Container variant="default" padding="md">
           <div className="bouquet-detail-page__loading">
             <div className="bouquet-detail-page__spinner"></div>
             <span>Memuat bouquet…</span>
           </div>
-        </div>
-      </section>
+        </Container>
+      </Section>
     );
   }
 
@@ -76,8 +79,8 @@ class BouquetDetailPageView extends Component<BouquetDetailPageViewProps> {
    */
   private renderError(error: string | null): React.ReactNode {
     return (
-      <section className="bouquet-detail-page">
-        <div className="bouquet-detail-page__container">
+      <Section variant="gradient" padding="lg" className="bouquet-detail-page">
+        <Container variant="default" padding="md">
           <EmptyState
             title={error ?? "Bouquet tidak ditemukan."}
             description="Coba kembali ke katalog atau periksa tautan yang Anda gunakan."
@@ -90,8 +93,8 @@ class BouquetDetailPageView extends Component<BouquetDetailPageViewProps> {
             }
             className="bouquet-detail-page__error"
           />
-        </div>
-      </section>
+        </Container>
+      </Section>
     );
   }
 
@@ -131,8 +134,8 @@ class BouquetDetailPageView extends Component<BouquetDetailPageViewProps> {
     const isAdmin = isAuthenticated();
 
   return (
-    <section className="bouquet-detail-page" aria-labelledby="bouquet-title">
-      <div className="bouquet-detail-page__container">
+    <Section variant="gradient" padding="lg" className="bouquet-detail-page" aria-labelledby="bouquet-title">
+      <Container variant="default" padding="md">
         <Breadcrumb currentPage={bouquet.name} />
 
         <div className="bouquet-detail-page__layout">
@@ -305,8 +308,7 @@ class BouquetDetailPageView extends Component<BouquetDetailPageViewProps> {
             </div>
           </div>
         )}
-      </div>
-    </section>
+    </Section>
     );
   }
 }
