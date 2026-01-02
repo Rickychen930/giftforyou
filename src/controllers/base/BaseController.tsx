@@ -172,12 +172,31 @@ export abstract class BaseController<
       return "";
     }
 
-    if (error instanceof Error) {
-      console.error(`[${this.constructor.name}] Error:`, error.message);
-      return error.message;
+    // Handle null or undefined errors
+    if (error === null || error === undefined) {
+      return "";
     }
 
-    console.error(`[${this.constructor.name}] Unknown error:`, error);
+    if (error instanceof Error) {
+      const errorMessage = error.message || defaultMessage;
+      if (errorMessage) {
+        console.error(`[${this.constructor.name}] Error:`, errorMessage);
+      }
+      return errorMessage;
+    }
+
+    // Handle string errors
+    if (typeof error === "string") {
+      if (error) {
+        console.error(`[${this.constructor.name}] Error:`, error);
+      }
+      return error || defaultMessage;
+    }
+
+    // For other types, log only if not null/undefined
+    if (error !== null && error !== undefined) {
+      console.error(`[${this.constructor.name}] Unknown error:`, error);
+    }
     return defaultMessage;
   }
 

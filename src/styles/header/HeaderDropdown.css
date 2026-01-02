@@ -53,6 +53,12 @@
     width: 100%;
     min-width: 0;
     animation: none;
+    overflow: visible;
+  }
+
+  /* Ensure dropdown only shows when mobile menu is open */
+  .header:not(.header--mobile-open) .header-navigation__links--mobile .header-dropdown {
+    display: none;
   }
 }
 

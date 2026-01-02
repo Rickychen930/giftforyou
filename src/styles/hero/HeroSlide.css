@@ -143,7 +143,7 @@
   pointer-events: none;
 }
 
-/* Content wrapper */
+/* Content wrapper - Now uses HeroSlideContent component */
 .hero-slide__content {
   position: relative;
   z-index: calc(var(--z-base) + 1);
@@ -156,6 +156,8 @@
   padding-right: clamp(var(--space-6), 4vw, var(--space-14));
   color: var(--hero-text);
   box-sizing: border-box;
+  display: flex;
+  align-items: flex-end;
 }
 
 /* Glass panel - luxury glass morphism - Premium Enhanced */

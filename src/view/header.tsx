@@ -78,7 +78,7 @@ class HeaderView extends Component<HeaderViewProps> {
 
     return (
       <header 
-        className={`header ${scrolled ? "header--scrolled" : ""}`}
+        className={`header ${scrolled ? "header--scrolled" : ""} ${mobileOpen ? "header--mobile-open" : ""}`}
         role="banner"
         aria-label="Main navigation"
       >

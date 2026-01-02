@@ -1,6 +1,8 @@
 @import "../design-system.css";
 @import "../colors.css";
 @import "HeroSlide.css";
+@import "HeroSlideContent.css";
+@import "HeroSlideBadge.css";
 @import "HeroNavigation.css";
 @import "HeroProgress.css";
 @import "HeroPlayPause.css";
