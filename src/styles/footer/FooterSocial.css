@@ -1,16 +1,17 @@
+@import "../design-system.css";
 @import "../colors.css";
 
 .footer-social {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-4);
   flex: 0 1 auto;
   min-width: 0;
 }
 
 .footer-social__label {
-  font-size: 0.88rem;
-  font-weight: 700;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
   color: var(--ink-600);
   margin: 0;
   white-space: nowrap;
@@ -18,7 +19,7 @@
 
 .footer-social__row {
   display: flex;
-  gap: 0.65rem;
+  gap: var(--space-2-5);
   flex-wrap: wrap;
 }
 
@@ -26,28 +27,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 2px solid rgba(212, 140, 156, 0.2);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+  width: var(--size-11);
+  height: var(--size-11);
+  border-radius: var(--radius-full);
+  border: var(--border-width-2) solid var(--brand-rose-border);
+  background: var(--gradient-surface);
   color: var(--ink-700);
   text-decoration: none;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.08),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  transition: all var(--transition-elegant);
+  box-shadow: var(--shadow-luxury-sm);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
 }
 
 .footer-social__icon:hover {
-  transform: translateY(-4px) scale(1.1);
-  box-shadow: 
-    0 12px 28px rgba(212, 140, 156, 0.25),
-    0 0 0 2px rgba(255, 255, 255, 0.9) inset;
-  border-color: rgba(212, 140, 156, 0.4);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.95));
+  transform: translateY(calc(var(--space-1) * -1)) scale(1.1);
+  box-shadow: var(--shadow-luxury-md);
+  border-color: var(--brand-rose-border-2);
+  background: var(--gradient-surface);
 }
 
 .footer-social__icon--instagram:hover {
@@ -66,15 +63,15 @@
 }
 
 .footer-social__icon-svg {
-  width: 18px;
-  height: 18px;
+  width: var(--size-4-5);
+  height: var(--size-4-5);
   flex: 0 0 auto;
-  opacity: 0.9;
+  opacity: var(--opacity-strong);
 }
 
 .footer-social__icon:focus-visible {
-  outline: 3px solid rgba(212, 140, 156, 0.5);
-  outline-offset: 2px;
+  outline: var(--focus-ring-width) solid var(--brand-rose-500);
+  outline-offset: var(--focus-ring-offset);
 }
 
 @media (max-width: 1024px) {
@@ -91,13 +88,13 @@
 
 @media (max-width: 480px) {
   .footer-social__icon {
-    width: 38px;
-    height: 38px;
+    width: var(--size-9);
+    height: var(--size-9);
   }
 
   .footer-social__icon-svg {
-    width: 16px;
-    height: 16px;
+    width: var(--size-4);
+    height: var(--size-4);
   }
 }
 

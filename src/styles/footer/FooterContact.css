@@ -1,78 +1,79 @@
+@import "../design-system.css";
 @import "../colors.css";
 
 .footer-contact {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .footer-contact__title {
-  font-weight: 900;
-  font-size: 0.95rem;
+  font-weight: var(--font-weight-black);
+  font-size: var(--font-size-base);
   color: var(--ink-900);
-  margin: 0 0 0.25rem 0;
-  letter-spacing: 0.14em;
+  margin: 0 0 var(--space-1) 0;
+  letter-spacing: var(--letter-spacing-wider);
   text-transform: uppercase;
-  line-height: 1.2;
+  line-height: var(--line-height-tight);
 }
 
 .footer-contact__group {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: var(--space-2-5);
 }
 
 .footer-contact__item {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: var(--space-2-5);
   color: var(--ink-700);
   text-decoration: none;
-  font-weight: 600;
-  font-size: 0.88rem;
-  line-height: 1.5;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 0.4rem;
-  border-radius: 8px;
-  margin: -0.4rem;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  transition: all var(--transition-base);
+  padding: var(--space-1-5);
+  border-radius: var(--radius-lg);
+  margin: calc(var(--space-1-5) * -1);
   word-break: break-all;
   overflow-wrap: anywhere;
   max-width: 100%;
 }
 
 .footer-contact__item:hover {
-  background: rgba(212, 140, 156, 0.08);
+  background: var(--gradient-brand-soft);
   color: var(--brand-rose-600);
-  transform: translateX(2px);
+  transform: translateX(var(--space-1));
 }
 
 .footer-contact__item:focus-visible {
-  outline: 3px solid rgba(212, 140, 156, 0.5);
-  outline-offset: 2px;
+  outline: var(--focus-ring-width) solid var(--brand-rose-500);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .footer-contact__item .icon {
-  width: 16px;
-  height: 16px;
+  width: var(--size-4);
+  height: var(--size-4);
   flex: 0 0 auto;
-  opacity: 0.8;
+  opacity: var(--opacity-medium);
 }
 
 .footer-contact__hours {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: var(--space-2-5);
   color: var(--ink-700);
-  font-weight: 600;
-  font-size: 0.88rem;
-  padding: 0.4rem;
-  margin: -0.4rem;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  padding: var(--space-1-5);
+  margin: calc(var(--space-1-5) * -1);
 }
 
 .footer-contact__hours .icon {
-  width: 16px;
-  height: 16px;
-  opacity: 0.8;
+  width: var(--size-4);
+  height: var(--size-4);
+  opacity: var(--opacity-medium);
   flex: 0 0 auto;
 }
 
@@ -89,7 +90,7 @@
 @media (max-width: 480px) {
   .footer-contact__item,
   .footer-contact__hours {
-    font-size: 0.82rem;
+    font-size: var(--font-size-xs);
   }
 }
 
