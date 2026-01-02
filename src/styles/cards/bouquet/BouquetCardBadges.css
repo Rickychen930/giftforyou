@@ -1,0 +1,154 @@
+/**
+ * Bouquet Card Badges Styles
+ * Luxury & Elegant badge styling
+ * Fully responsive
+ */
+
+@import "../../design-system.css";
+
+.bouquet-card-badges {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: var(--space-3);
+}
+
+.bouquet-card-badges__top-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1-5);
+  z-index: 3;
+}
+
+.bouquet-card-badges__top-right {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  z-index: 3;
+}
+
+.bouquet-card-badges__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  line-height: var(--line-height-tight);
+  font-weight: var(--font-weight-black);
+  font-size: var(--font-size-xs);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
+  pointer-events: auto;
+  transition: all var(--transition-slow) ease;
+}
+
+.bouquet-card-badges__badge svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+/* Featured Badge */
+.bouquet-card-badges__badge--featured {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 215, 0, 0.95) 0%,
+    rgba(255, 193, 7, 0.9) 100%
+  );
+  color: var(--ink-900);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 
+    0 6px 20px rgba(255, 215, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+  animation: pulse-glow var(--animation-speed-slow) ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 
+      0 6px 20px rgba(255, 215, 0, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+  }
+  50% {
+    box-shadow: 
+      0 8px 28px rgba(255, 215, 0, 0.6),
+      0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+  }
+}
+
+/* New Badge */
+.bouquet-card-badges__badge--new {
+  background: var(--gradient-green);
+  color: var(--neutral-0);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 
+    var(--shadow-green-sm),
+    0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+}
+
+/* Status Badge */
+.bouquet-card-badges__badge--status {
+  color: var(--neutral-0);
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.65) 0%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: var(--backdrop-blur-lg) saturate(180%);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg) saturate(180%);
+  box-shadow: 
+    var(--shadow-md),
+    0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+}
+
+.bouquet-card-badges__badge--status.is-ready {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.6) 0%,
+    rgba(5, 150, 105, 0.5) 100%
+  );
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+.bouquet-card-badges__badge--status.is-preorder {
+  background: linear-gradient(
+    135deg,
+    rgba(249, 115, 22, 0.6) 0%,
+    rgba(234, 88, 12, 0.5) 100%
+  );
+  border-color: rgba(249, 115, 22, 0.5);
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .bouquet-card-badges {
+    padding: var(--space-2);
+  }
+
+  .bouquet-card-badges__badge {
+    font-size: 0.65rem;
+    padding: var(--space-1-5) var(--space-2);
+    gap: var(--space-1);
+  }
+
+  .bouquet-card-badges__badge svg {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .bouquet-card-badges__badge--featured {
+    animation: none !important;
+  }
+}
+

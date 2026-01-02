@@ -335,21 +335,32 @@
 
 /* =========================
    Preview grid (easier browsing)
+   Now uses BouquetCardGrid component for efficient display
 ========================= */
 .collectionCard__previewWrap {
   position: relative;
+  width: 100%;
+  margin-top: var(--space-6);
 }
 
-.collectionCard__previewGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-4);
+/* BouquetCardGrid integration */
+.collectionCard__previewWrap .bouquet-card-grid {
+  width: 100%;
+}
+
+.collectionCard__previewWrap .bouquet-card-grid__grid {
+  /* Responsive grid handled by BouquetCardGrid component */
+  gap: clamp(var(--space-4), 2vw, var(--space-6));
+  /* Ensure cards are evenly distributed */
+  grid-auto-rows: minmax(auto, 1fr);
 }
 
 /* Collection context styling - BouquetCard already uses bouquetCard class */
-.collectionCard__previewGrid .bouquetCard {
+.collectionCard__previewWrap .bouquetCard {
   /* Already styled with luxury design */
   animation-delay: 0s;
+  /* Ensure consistent card height in grid */
+  height: 100%;
 }
 
 .collectionCard__footer {
@@ -362,17 +373,17 @@
   z-index: var(--z-base);
 }
 
+/* Responsive grid is now handled by BouquetCardGrid component */
+/* These media queries are kept for backward compatibility if needed */
 @media (min-width: 720px) {
-  .collectionCard__previewGrid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .collectionCard__previewWrap .bouquet-card-grid__grid {
     gap: var(--space-4);
   }
 }
 
 @media (min-width: 1024px) {
-  .collectionCard__previewGrid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--space-4);
+  .collectionCard__previewWrap .bouquet-card-grid__grid {
+    gap: var(--space-5);
   }
 }
 
@@ -1203,9 +1214,9 @@
     padding-top: 1rem;
   }
 
-  .collectionCard__previewGrid {
-    grid-template-columns: 1fr;
-    gap: 0.9rem;
+  .collectionCard__previewWrap .bouquet-card-grid__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
   }
 }
 

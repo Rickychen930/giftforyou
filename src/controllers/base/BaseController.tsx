@@ -179,8 +179,13 @@ export abstract class BaseController<
 
     if (error instanceof Error) {
       const errorMessage = error.message || defaultMessage;
-      if (errorMessage) {
+      // Only log errors that are not expected/graceful handling cases
+      // Skip logging for common API format issues that are handled gracefully
+      if (errorMessage && !errorMessage.includes("API returned unexpected format")) {
         console.error(`[${this.constructor.name}] Error:`, errorMessage);
+      } else if (errorMessage && process.env.NODE_ENV === "development") {
+        // In development, log as warning for debugging
+        console.warn(`[${this.constructor.name}] Handled gracefully:`, errorMessage);
       }
       return errorMessage;
     }
@@ -205,13 +210,16 @@ export abstract class BaseController<
    */
   protected setError(error: unknown, defaultMessage: string = "An error occurred"): void {
     const errorMessage = this.handleError(error, defaultMessage);
-    if (errorMessage) {
+    if (errorMessage && errorMessage.trim()) {
       this.setState((prevState) => ({
         ...prevState,
         error: errorMessage,
         errorMessage: errorMessage,
         loading: false,
       }));
+    } else {
+      // If no error message, just set loading to false
+      this.setLoading(false);
     }
   }
 

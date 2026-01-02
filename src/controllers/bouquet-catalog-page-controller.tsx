@@ -255,6 +255,40 @@ class BouquetCatalogController extends BaseController<
 
   // Using centralized normalizer from utils
 
+  /**
+   * Extract array from various API response formats
+   * Handles: array, { data: [] }, { bouquets: [] }, { items: [] }, etc.
+   */
+  private extractArrayFromResponse(data: unknown): unknown[] {
+    // If already an array, return it
+    if (Array.isArray(data)) {
+      return data;
+    }
+
+    // If it's an object, try to find array in common properties
+    if (data && typeof data === "object") {
+      const obj = data as Record<string, unknown>;
+      
+      // Try common property names
+      const arrayProps = ["data", "bouquets", "items", "results", "content"];
+      for (const prop of arrayProps) {
+        if (Array.isArray(obj[prop])) {
+          return obj[prop] as unknown[];
+        }
+      }
+
+      // Try to find any array property
+      for (const key in obj) {
+        if (Array.isArray(obj[key])) {
+          return obj[key] as unknown[];
+        }
+      }
+    }
+
+    // If nothing found, return empty array
+    return [];
+  }
+
   private loadBouquets = async () => {
     this.setLoading(true);
     this.setError(null);
@@ -270,10 +304,29 @@ class BouquetCatalogController extends BaseController<
       }
 
       const text = await res.text();
-      const data = this.safeJsonParse<unknown[]>(text, []);
+      const parsed = this.safeJsonParse<unknown>(text, null);
 
-      if (!Array.isArray(data)) {
-        throw new Error("API returned unexpected format (expected an array).");
+      // Handle empty or null response
+      if (parsed === null || parsed === undefined) {
+        console.warn("[Catalog] API returned null or undefined response");
+        this.setState({ bouquets: [] }, () => {
+          this.setLoading(false);
+          this.setError(null);
+          this.applySeo();
+        });
+        return;
+      }
+
+      // Extract array from various response formats
+      const data = this.extractArrayFromResponse(parsed);
+
+      // Log warning if format was unexpected (for debugging)
+      if (!Array.isArray(parsed) && data.length === 0 && parsed !== null) {
+        console.warn("[Catalog] API returned unexpected format. Expected array or object with array property.", {
+          type: typeof parsed,
+          keys: typeof parsed === "object" && parsed !== null ? Object.keys(parsed) : [],
+          sample: JSON.stringify(parsed).slice(0, 200),
+        });
       }
 
       const bouquets = normalizeBouquets(data);

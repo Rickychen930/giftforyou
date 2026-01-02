@@ -6,8 +6,8 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import "../../styles/CollectionCardComponent.css";
-import { BouquetCardInternal } from "./BouquetCard";
 import type { BouquetCardProps } from "./BouquetCard";
+import BouquetCardGrid from "../collections/BouquetCardGrid";
 
 export interface CollectionContainerProps {
   id: string;
@@ -36,32 +36,15 @@ class CollectionCard extends Component<CollectionContainerProps, CollectionCardS
   }
 
   private getPreviewBouquets(): BouquetCardProps[] {
-    return this.getValidBouquets().slice(0, 6);
+    // Show more bouquets for better user experience
+    return this.getValidBouquets().slice(0, 12);
   }
 
   private getBrowseHref(): string {
     return `/collection?name=${encodeURIComponent(this.props.name)}`;
   }
 
-  private renderBouquetCard(b: BouquetCardProps, cardIndex: number): React.ReactNode {
-    return (
-      <BouquetCardInternal
-        key={b._id}
-        _id={b._id}
-        name={b.name}
-        description={b.description}
-        price={b.price}
-        type={b.type}
-        size={b.size}
-        image={b.image}
-        status={b.status}
-        collectionName={b.collectionName}
-        customPenanda={[]}
-        isNewEdition={b.isNewEdition}
-        isFeatured={b.isFeatured}
-      />
-    );
-  }
+  // Removed renderBouquetCard - now using BouquetCardGrid component
 
   private renderEmptyState(): React.ReactNode {
     const browseHref = this.getBrowseHref();
@@ -160,13 +143,15 @@ class CollectionCard extends Component<CollectionContainerProps, CollectionCardS
           this.renderEmptyState()
         ) : (
           <div className={`${this.baseClass}__previewWrap`}>
-            <div
-              className={`${this.baseClass}__previewGrid`}
-              role="list"
-              aria-label={`Bouquet di koleksi ${name}`}
-            >
-              {previewBouquets.map((b, idx) => this.renderBouquetCard(b, idx))}
-            </div>
+            <BouquetCardGrid
+              bouquets={previewBouquets}
+              maxVisible={previewBouquets.length}
+              loading={false}
+              onBouquetClick={(bouquetId) => {
+                // Optional: Handle bouquet click
+                console.log("Bouquet clicked:", bouquetId);
+              }}
+            />
 
             {validBouquets.length > previewBouquets.length && (
               <div className={`${this.baseClass}__footer`}>

@@ -135,10 +135,17 @@
 }
 
 /* ===== Grid with Staggered Animation ===== */
+/* Now uses CollectionGrid component */
 .ourCollection__grid {
   display: flex;
   flex-direction: column;
   gap: clamp(var(--space-7), 3.25vw, var(--space-10-5));
+  width: 100%;
+}
+
+/* CollectionGrid integration */
+.ourCollection__grid .collection-grid {
+  width: 100%;
 }
 
 /* Keep cards nicely contained for a premium feel */

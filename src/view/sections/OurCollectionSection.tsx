@@ -10,7 +10,7 @@
 
 import React, { Component, RefObject } from "react";
 import "../../styles/OurCollectionSection.css";
-import CollectionContainer, { type BouquetCardProps } from "../../components/cards/CollectionCard";
+import type { BouquetCardProps } from "../../components/cards/CollectionCard";
 import type { Collection } from "../../models/domain/collection";
 import type { Bouquet } from "../../models/domain/bouquet";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
@@ -18,6 +18,7 @@ import EmptyState from "../../components/common/EmptyState";
 import AlertMessage from "../../components/common/AlertMessage";
 import SectionHeader from "../../components/common/SectionHeader";
 import Container from "../../components/layout/Container";
+import CollectionGrid from "../../components/collections/CollectionGrid";
 
 interface OurCollectionViewProps {
   items: Collection[];
@@ -285,18 +286,14 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
           ) : !prepared.length ? (
             this.renderEmptyState()
           ) : (
-            <div className={`${this.baseClass}__grid`}>
-              {prepared.map((c, index) => (
-                <CollectionContainer
-                  key={c.id}
-                  id={c.id}
-                  name={c.name}
-                  description={c.description}
-                  bouquets={c.bouquets}
-                  index={index}
-                />
-              ))}
-            </div>
+            <CollectionGrid
+              collections={prepared}
+              loading={false}
+              onCollectionClick={(collectionId) => {
+                // Optional: Handle collection click
+                console.log("Collection clicked:", collectionId);
+              }}
+            />
           )}
         </Container>
       </section>

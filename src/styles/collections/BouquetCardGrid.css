@@ -1,0 +1,195 @@
+/**
+ * Bouquet Card Grid Styles
+ * Luxury & Elegant grid layout for bouquet cards
+ * Efficient, clean, and fully responsive
+ */
+
+@import "../design-system.css";
+
+.bouquet-card-grid {
+  width: 100%;
+  position: relative;
+}
+
+.bouquet-card-grid__grid {
+  display: grid;
+  gap: clamp(var(--space-4), 2vw, var(--space-6));
+  width: 100%;
+  grid-auto-rows: minmax(auto, 1fr);
+  /* Responsive auto-fill grid for optimal layout */
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+}
+
+/* Skeleton Loading States */
+.bouquet-card-grid__skeleton {
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-luxury-sm);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.bouquet-card-grid__skeleton-image {
+  aspect-ratio: 3 / 4;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.06) 25%,
+    rgba(0, 0, 0, 0.10) 50%,
+    rgba(0, 0, 0, 0.06) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.bouquet-card-grid__skeleton-body {
+  padding: var(--space-4);
+}
+
+.bouquet-card-grid__skeleton-title {
+  height: 20px;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.06) 25%,
+    rgba(0, 0, 0, 0.10) 50%,
+    rgba(0, 0, 0, 0.06) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-2);
+  width: 80%;
+}
+
+.bouquet-card-grid__skeleton-price {
+  height: 18px;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.06) 25%,
+    rgba(0, 0, 0, 0.10) 50%,
+    rgba(0, 0, 0, 0.06) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+  width: 60%;
+}
+
+/* Load More Indicator */
+.bouquet-card-grid__load-more-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-6) 0;
+  margin-top: var(--space-4);
+}
+
+.bouquet-card-grid__load-more-dots {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.bouquet-card-grid__load-more-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--brand-rose-500);
+  opacity: 0.6;
+  animation: loadMorePulse 1.4s ease-in-out infinite;
+}
+
+.bouquet-card-grid__load-more-dots span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.bouquet-card-grid__load-more-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.bouquet-card-grid__load-more-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes loadMorePulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Responsive Design - Desktop */
+@media (min-width: 1280px) {
+  .bouquet-card-grid__grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--space-6);
+  }
+}
+
+/* Responsive Design - Large Tablet */
+@media (min-width: 980px) and (max-width: 1279px) {
+  .bouquet-card-grid__grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-5);
+  }
+}
+
+/* Responsive Design - Tablet */
+@media (min-width: 720px) and (max-width: 979px) {
+  .bouquet-card-grid__grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-4);
+  }
+}
+
+/* Responsive Design - Mobile */
+@media (min-width: 640px) and (max-width: 719px) {
+  .bouquet-card-grid__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+}
+
+/* Responsive Design - Small Mobile */
+@media (max-width: 639px) {
+  .bouquet-card-grid__grid {
+    /* Ensure minimum card width for readability */
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr));
+    gap: var(--space-3);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .bouquet-card-grid__skeleton,
+  .bouquet-card-grid__skeleton-image,
+  .bouquet-card-grid__skeleton-title,
+  .bouquet-card-grid__skeleton-price,
+  .bouquet-card-grid__load-more-dots span {
+    animation: none;
+  }
+}
+
