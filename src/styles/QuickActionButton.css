@@ -2,73 +2,53 @@
  * Quick Action Button Component
  * Luxury, DRY, Efficient, Responsive
  * Uses design-system.css variables
+ * Enhanced with BaseButton foundation
  */
 
 @import "design-system.css";
 
 .quickActionBtn {
+  /* BaseButton handles base styles, we add QuickActionButton specific */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--space-3);
-  padding: var(--card-padding-sm);
-  border: 2px solid var(--border-1);
-  border-radius: var(--radius-md);
-  background: var(--gradient-surface);
-  color: var(--ink-900);
-  cursor: pointer;
-  transition: var(--transition-all);
   text-align: center;
   min-width: 120px;
   position: relative;
   overflow: hidden;
 }
 
-.quickActionBtn::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--gradient-brand-soft);
-  opacity: 0;
-  transition: var(--transition-opacity);
-  pointer-events: none;
+/* Override BaseButton styles for QuickActionButton specific layout */
+.quickActionBtn.baseBtn {
+  flex-direction: column;
+  padding: var(--card-padding-sm);
+  min-width: 120px;
 }
 
-.quickActionBtn:hover {
-  border-color: var(--tab-color);
-  background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md), 0 10px 15px rgba(139, 92, 246, 0.1);
+/* Variant overrides - use BaseButton variants but with QuickActionButton layout */
+.quickActionBtn.baseBtn--outline {
+  /* BaseButton outline styles already applied */
 }
 
-.quickActionBtn:hover::before {
-  opacity: 0.1;
+.quickActionBtn.baseBtn--primary {
+  /* BaseButton primary styles already applied */
 }
 
-.quickActionBtn:active {
-  transform: translateY(0);
-  box-shadow: var(--shadow-sm);
+.quickActionBtn.baseBtn--secondary {
+  /* BaseButton secondary styles already applied */
 }
 
-.quickActionBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
+.quickActionBtn.baseBtn--ghost {
+  /* BaseButton ghost styles already applied */
 }
 
-.quickActionBtn--primary {
-  background: linear-gradient(135deg, var(--tab-color) 0%, var(--tab-color-hover) 100%);
-  color: var(--neutral-0);
-  border-color: var(--tab-color);
-}
-
-.quickActionBtn--primary::before {
-  background: linear-gradient(135deg, var(--tab-color-hover) 0%, #6d28d9 100%);
-}
-
-.quickActionBtn--primary:hover {
-  background: linear-gradient(135deg, var(--tab-color-hover) 0%, #6d28d9 100%);
-  box-shadow: var(--shadow-lg), 0 10px 15px rgba(139, 92, 246, 0.3);
+/* QuickActionButton specific hover effects */
+@media (hover: hover) and (pointer: fine) {
+  .quickActionBtn:hover {
+    transform: translateY(-2px);
+  }
 }
 
 .quickActionBtn__icon {

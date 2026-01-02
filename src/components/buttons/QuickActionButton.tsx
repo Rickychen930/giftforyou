@@ -7,10 +7,10 @@ import React from "react";
 import { BaseButton, BaseButtonProps } from "../base/BaseButton";
 import "../../styles/QuickActionButton.css";
 
-interface QuickActionButtonProps extends Omit<BaseButtonProps, "variant"> {
+interface QuickActionButtonProps extends Omit<BaseButtonProps, "variant" | "children" | "iconPosition"> {
   icon: React.ReactNode;
   label: string;
-  variant?: "default" | "primary";
+  variant?: "primary" | "secondary" | "outline" | "ghost";
   ariaLabel?: string;
   title?: string;
 }
@@ -18,45 +18,61 @@ interface QuickActionButtonProps extends Omit<BaseButtonProps, "variant"> {
 interface QuickActionButtonState {
   isPressed: boolean;
   isFocused: boolean;
+  ripples: Array<{ id: number; x: number; y: number }>;
 }
 
 /**
  * Quick Action Button Component
  * Class-based component extending BaseButton
+ * Enhanced with BaseButton luxury variants and features
  */
 class QuickActionButton extends BaseButton<QuickActionButtonProps, QuickActionButtonState> {
   protected baseClass: string = "quickActionBtn";
 
+  constructor(props: QuickActionButtonProps) {
+    super({
+      ...props,
+      iconPosition: "left", // QuickActionButton uses icon on top, but BaseButton expects left/right
+    } as QuickActionButtonProps);
+  }
 
   protected getClasses(): string {
-    const { variant = "default", className = "" } = this.props;
+    const { variant = "outline", className = "" } = this.props;
+    
+    // Use BaseButton's getClasses and add QuickActionButton specific classes
+    const baseClasses = super.getClasses();
     const variantClass = `${this.baseClass}--${variant}`;
-    const pressedClass = this.state.isPressed ? `${this.baseClass}--pressed` : "";
-    const focusedClass = this.state.isFocused ? `${this.baseClass}--focused` : "";
-
-    return `${this.baseClass} ${variantClass} ${pressedClass} ${focusedClass} ${className}`.trim();
+    
+    return `${baseClasses} ${this.baseClass} ${variantClass} ${className}`.trim();
   }
 
   protected renderIcon(): React.ReactNode {
-    return <div className={`${this.baseClass}__icon`}>{this.props.icon}</div>;
+    // QuickActionButton has icon on top, so we override the icon rendering
+    const { icon, isLoading } = this.props;
+    if (!icon || isLoading) return null;
+    
+    return <div className={`${this.baseClass}__icon`}>{icon}</div>;
   }
 
   protected renderContent(): React.ReactNode {
-    return <span className={`${this.baseClass}__label`}>{this.props.label}</span>;
+    const { label } = this.props;
+    return <span className={`${this.baseClass}__label`}>{label}</span>;
   }
 
   render(): React.ReactNode {
-    const { label, ariaLabel, title, onClick, onMouseDown, onMouseUp, onFocus, onBlur } = this.props;
+    const { label, ariaLabel, title, onClick, onMouseDown, onMouseUp, onFocus, onBlur, disabled, isLoading, ...restProps } = this.props;
 
     return (
       <button
+        {...restProps}
         type="button"
         className={this.getClasses()}
+        disabled={disabled || isLoading}
         onClick={onClick}
         aria-label={ariaLabel || label}
         title={title || label}
         onMouseDown={(e) => {
-          this.handleMouseDown();
+          this.handleMouseDown(e);
           if (onMouseDown) onMouseDown(e);
         }}
         onMouseUp={(e) => {
@@ -72,7 +88,9 @@ class QuickActionButton extends BaseButton<QuickActionButtonProps, QuickActionBu
           if (onBlur) onBlur(e);
         }}
       >
-        {this.renderIcon()}
+        {this.renderRipples()}
+        {this.renderSpinner()}
+        {!isLoading && this.renderIcon()}
         {this.renderContent()}
       </button>
     );
