@@ -16,6 +16,14 @@ interface StatCardProps extends BaseCardProps {
   iconVariant?: "orders" | "pending" | "completed" | "favorites" | "default";
 }
 
+// Set default BaseCard props for StatCard
+const defaultStatCardProps: Partial<BaseCardProps> = {
+  variant: "glass",
+  padding: "md",
+  shadow: "md",
+  hoverable: true,
+};
+
 interface StatCardState {
   isHovered: boolean;
 }
@@ -27,10 +35,21 @@ interface StatCardState {
 class StatCard extends BaseCard<StatCardProps, StatCardState> {
   protected baseClass: string = "statCard";
 
+  constructor(props: StatCardProps) {
+    super({
+      ...defaultStatCardProps,
+      ...props,
+    } as StatCardProps);
+  }
+
   protected getClasses(): string {
     const { className = "" } = this.props;
+    
+    // Use BaseCard's getClasses and add StatCard specific classes
+    const baseClasses = super.getClasses();
     const hoverClass = this.state.isHovered ? `${this.baseClass}--hovered` : "";
-    return `${this.baseClass} ${hoverClass} ${className}`.trim();
+    
+    return `${baseClasses} ${this.baseClass} ${hoverClass} ${className}`.trim();
   }
 
   protected renderContent(): React.ReactNode {
@@ -50,12 +69,18 @@ class StatCard extends BaseCard<StatCardProps, StatCardState> {
   }
 
   render(): React.ReactNode {
-    const { tooltip } = this.props;
+    const { tooltip, ariaLabel } = this.props;
+    const cardAttrs = this.getCardAttributes();
+    
     const cardContent = (
       <div
+        {...cardAttrs}
         className={this.getClasses()}
         onMouseEnter={this.handleMouseEnter}
         onMouseLeave={this.handleMouseLeave}
+        onMouseDown={this.handleMouseDown}
+        onMouseUp={this.handleMouseUp}
+        aria-label={ariaLabel}
       >
         {this.renderContent()}
       </div>

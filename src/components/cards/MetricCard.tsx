@@ -16,6 +16,14 @@ interface MetricCardProps extends BaseCardProps {
   ariaLabel?: string;
 }
 
+// Set default BaseCard props for MetricCard
+const defaultMetricCardProps: Partial<BaseCardProps> = {
+  variant: "elevated",
+  padding: "md",
+  shadow: "lg",
+  hoverable: true,
+};
+
 interface MetricCardState {
   isHovered: boolean;
 }
@@ -27,12 +35,22 @@ interface MetricCardState {
 class MetricCard extends BaseCard<MetricCardProps, MetricCardState> {
   protected baseClass: string = "metricCard";
 
+  constructor(props: MetricCardProps) {
+    super({
+      ...defaultMetricCardProps,
+      ...props,
+    } as MetricCardProps);
+  }
 
   protected getClasses(): string {
     const { variant = "primary", className = "" } = this.props;
+    
+    // Use BaseCard's getClasses and add MetricCard specific classes
+    const baseClasses = super.getClasses();
     const variantClass = `${this.baseClass}--${variant}`;
     const hoverClass = this.state.isHovered ? `${this.baseClass}--hovered` : "";
-    return `${this.baseClass} ${variantClass} ${hoverClass} ${className}`.trim();
+    
+    return `${baseClasses} ${this.baseClass} ${variantClass} ${hoverClass} ${className}`.trim();
   }
 
   protected renderContent(): React.ReactNode {
@@ -58,14 +76,18 @@ class MetricCard extends BaseCard<MetricCardProps, MetricCardState> {
 
   render(): React.ReactNode {
     const { ariaLabel, label } = this.props;
+    const cardAttrs = this.getCardAttributes();
 
     return (
       <div
+        {...cardAttrs}
         className={this.getClasses()}
         role="region"
         aria-label={ariaLabel || label}
         onMouseEnter={this.handleMouseEnter}
         onMouseLeave={this.handleMouseLeave}
+        onMouseDown={this.handleMouseDown}
+        onMouseUp={this.handleMouseUp}
       >
         {this.renderContent()}
       </div>

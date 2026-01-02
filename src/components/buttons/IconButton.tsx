@@ -7,8 +7,8 @@ import React from "react";
 import { BaseButton, BaseButtonProps } from "../base/BaseButton";
 import "../../styles/IconButton.css";
 
-interface IconButtonProps extends Omit<BaseButtonProps, "children"> {
-  variant?: "default" | "primary" | "secondary" | "ghost" | "danger";
+interface IconButtonProps extends Omit<BaseButtonProps, "children" | "iconPosition"> {
+  variant?: "primary" | "secondary" | "outline" | "ghost" | "danger";
   icon: React.ReactNode;
   ariaLabel: string;
   tooltip?: string;
@@ -17,6 +17,7 @@ interface IconButtonProps extends Omit<BaseButtonProps, "children"> {
 interface IconButtonState {
   isPressed: boolean;
   isFocused: boolean;
+  ripples: Array<{ id: number; x: number; y: number }>;
 }
 
 /**
@@ -26,31 +27,35 @@ interface IconButtonState {
 class IconButton extends BaseButton<IconButtonProps, IconButtonState> {
   protected baseClass: string = "iconBtn";
 
-
-  protected getClasses(): string {
-    const { variant = "default", size = "md", className = "" } = this.props;
-    const variantClass = `${this.baseClass}--${variant}`;
-    const sizeClass = `${this.baseClass}--${size}`;
-    const pressedClass = this.state.isPressed ? `${this.baseClass}--pressed` : "";
-    const focusedClass = this.state.isFocused ? `${this.baseClass}--focused` : "";
-
-    return `${this.baseClass} ${variantClass} ${sizeClass} ${pressedClass} ${focusedClass} ${className}`.trim();
+  constructor(props: IconButtonProps) {
+    super({
+      ...props,
+      iconPosition: "only", // IconButton always uses icon-only mode
+    } as IconButtonProps);
   }
 
-  protected renderIcon(): React.ReactNode {
-    return <span className={`${this.baseClass}__icon`}>{this.props.icon}</span>;
+  protected getClasses(): string {
+    const { variant = "ghost", className = "" } = this.props;
+    
+    // Use BaseButton's getClasses and add IconButton specific classes
+    const baseClasses = super.getClasses();
+    const variantClass = `${this.baseClass}--${variant}`;
+    
+    return `${baseClasses} ${this.baseClass} ${variantClass} ${className}`.trim();
   }
 
   render(): React.ReactNode {
-    const { ariaLabel, tooltip, onMouseDown, onMouseUp, onFocus, onBlur } = this.props;
+    const { ariaLabel, tooltip, onMouseDown, onMouseUp, onFocus, onBlur, disabled, isLoading, ...restProps } = this.props;
 
     return (
       <button
+        {...restProps}
         className={this.getClasses()}
+        disabled={disabled || isLoading}
         aria-label={ariaLabel}
         title={tooltip || ariaLabel}
         onMouseDown={(e) => {
-          this.handleMouseDown();
+          this.handleMouseDown(e);
           if (onMouseDown) onMouseDown(e);
         }}
         onMouseUp={(e) => {
@@ -65,9 +70,10 @@ class IconButton extends BaseButton<IconButtonProps, IconButtonState> {
           this.handleBlur();
           if (onBlur) onBlur(e);
         }}
-        {...this.props}
       >
-        {this.renderIcon()}
+        {this.renderRipples()}
+        {this.renderSpinner()}
+        {!isLoading && this.renderIcon()}
       </button>
     );
   }
