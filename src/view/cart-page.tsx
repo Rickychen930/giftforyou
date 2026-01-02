@@ -2,6 +2,7 @@
  * Cart Page View
  * Pure presentation component - no business logic
  * OOP-based class component following SOLID principles
+ * Enhanced with Container & Section components for consistent layout
  */
 
 import React, { Component } from "react";
@@ -14,6 +15,8 @@ import EmptyState from "../components/common/EmptyState";
 import CartItemCard from "../components/common/CartItemCard";
 import SummaryCard from "../components/common/SummaryCard";
 import { ShoppingCartIcon, DeleteIcon, ArrowLeftIcon } from "../components/icons";
+import Section from "../components/layout/Section";
+import Container from "../components/layout/Container";
 
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
 
@@ -40,11 +43,11 @@ class CartPageView extends Component<CartPageViewProps> {
    */
   private renderLoading(): React.ReactNode {
     return (
-      <section className="cartPage">
-        <div className="cartPage__container">
+      <Section variant="gradient" padding="lg" className="cartPage">
+        <Container variant="default" padding="md">
           <div className="cartPage__loading">Memuat keranjang...</div>
-        </div>
-      </section>
+        </Container>
+      </Section>
     );
   }
 
@@ -53,8 +56,8 @@ class CartPageView extends Component<CartPageViewProps> {
    */
   private renderEmpty(): React.ReactNode {
     return (
-      <section className="cartPage">
-        <div className="cartPage__container">
+      <Section variant="gradient" padding="lg" className="cartPage">
+        <Container variant="default" padding="md">
           <h1 className="cartPage__title">Keranjang Belanja</h1>
           <EmptyState
             title="Keranjang Kosong"
@@ -63,8 +66,8 @@ class CartPageView extends Component<CartPageViewProps> {
             actionPath="/collection"
             icon={<ShoppingCartIcon width={64} height={64} style={{ opacity: 0.3 }} />}
           />
-        </div>
-      </section>
+        </Container>
+      </Section>
     );
   }
 
@@ -86,8 +89,8 @@ class CartPageView extends Component<CartPageViewProps> {
     const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
     return (
-      <section className="cartPage">
-        <div className="cartPage__container">
+      <Section variant="gradient" padding="lg" className="cartPage">
+        <Container variant="default" padding="md">
           <div className="cartPage__header">
             <h1 className="cartPage__title">Keranjang Belanja</h1>
             <LuxuryButton
@@ -158,8 +161,8 @@ class CartPageView extends Component<CartPageViewProps> {
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </Container>
+      </Section>
     );
   }
 
