@@ -45,3 +45,24 @@
   }
 }
 
+@media (max-width: 640px) {
+  .catalogResetBtn {
+    padding: 0.45rem 0.8rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .catalogResetBtn {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .catalogResetBtn {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.7rem;
+  }
+}
+

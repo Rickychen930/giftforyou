@@ -49,7 +49,7 @@ export const INITIAL_BOUQUET_CATALOG_PAGE_STATE: BouquetCatalogPageState = {
   selectedCollections: [],
   sortBy: "",
   currentPage: 1,
-  itemsPerPage: 9,
+  itemsPerPage: 24,
   collectionNameFilter: "",
   searchQuery: "",
   loading: true,

@@ -26,6 +26,7 @@ interface CatalogSearchState {
  */
 class CatalogSearch extends Component<CatalogSearchProps, CatalogSearchState> {
   private baseClass: string = "catalog-search";
+  private searchTimeout?: ReturnType<typeof setTimeout>;
 
   constructor(props: CatalogSearchProps) {
     super(props);
@@ -41,8 +42,30 @@ class CatalogSearch extends Component<CatalogSearchProps, CatalogSearchState> {
   }
 
   private handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    this.setState({ query: e.target.value });
+    const newQuery = e.target.value;
+    this.setState({ query: newQuery });
+    
+    // Real-time search with debounce for better UX
+    if (this.props.onSearch) {
+      // Clear previous timeout
+      if (this.searchTimeout) {
+        clearTimeout(this.searchTimeout);
+      }
+      
+      // Set new timeout for debounced search
+      this.searchTimeout = setTimeout(() => {
+        if (this.props.onSearch) {
+          this.props.onSearch(newQuery.trim());
+        }
+      }, 300); // 300ms debounce
+    }
   };
+
+  componentWillUnmount(): void {
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+  }
 
   private handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();

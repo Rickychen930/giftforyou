@@ -17,6 +17,12 @@
   overflow-x: clip;
   position: relative;
   isolation: isolate;
+  background: 
+    radial-gradient(2000px 1000px at 10% 10%, rgba(212, 140, 156, 0.08), transparent 60%),
+    radial-gradient(1800px 900px at 90% 20%, rgba(168, 213, 186, 0.06), transparent 60%),
+    radial-gradient(1500px 750px at 50% 50%, rgba(255, 255, 255, 0.04), transparent 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%),
+    var(--gradient-elegant-surface);
 }
 
 .catalog-page::before {
@@ -56,25 +62,60 @@
 .catalog-page__summary {
   max-width: var(--container-max);
   margin: 0 auto var(--space-6);
-  padding: clamp(var(--space-5), 2.5vw, var(--space-7)) clamp(var(--space-4), 3vw, var(--space-6));
-  background: var(--gradient-elegant-surface);
-  border: var(--border-luxury);
-  border-color: var(--brand-rose-border);
+  padding: clamp(var(--space-6), 3vw, var(--space-8)) clamp(var(--space-5), 3.5vw, var(--space-7));
+  background: 
+    linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 245, 247, 0.98) 50%, rgba(255, 255, 255, 0.95) 100%),
+    radial-gradient(ellipse 1200px 600px at 50% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  border: 2px solid;
+  border-image: linear-gradient(135deg, rgba(212, 140, 156, 0.3), rgba(184, 134, 11, 0.2), rgba(168, 213, 186, 0.3)) 1;
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-luxury-lg), var(--shadow-elegant);
-  backdrop-filter: var(--backdrop-blur-lg);
-  -webkit-backdrop-filter: var(--backdrop-blur-lg);
+  box-shadow: 
+    0 8px 32px rgba(212, 140, 156, 0.12),
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+    var(--shadow-luxury-lg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   display: flex;
-  gap: var(--space-4);
+  gap: var(--space-5);
   align-items: flex-start;
   flex-direction: column;
-  transition: var(--transition-elegant);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+}
+
+.catalog-page__summary::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.6s ease;
+  z-index: 0;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .catalog-page__summary:hover {
-    box-shadow: var(--shadow-luxury-xl), var(--shadow-luxury-gold);
-    border-color: var(--border-luxury-gold);
+    box-shadow: 
+      0 12px 48px rgba(212, 140, 156, 0.18),
+      0 6px 24px rgba(0, 0, 0, 0.12),
+      0 0 0 1px rgba(255, 255, 255, 0.3) inset,
+      0 0 40px rgba(184, 134, 11, 0.15),
+      var(--shadow-luxury-xl);
+    border-image: linear-gradient(135deg, rgba(212, 140, 156, 0.5), rgba(184, 134, 11, 0.4), rgba(168, 213, 186, 0.5)) 1;
+    transform: translateY(-2px);
+  }
+
+  .catalog-page__summary:hover::before {
+    left: 100%;
   }
 }
 
@@ -100,23 +141,17 @@
 .catalog-page__layout {
   display: flex;
   flex-direction: column;
-  gap: clamp(var(--space-8), 4vw, var(--space-12));
+  gap: clamp(var(--space-6), 3vw, var(--space-10));
   align-items: stretch;
   position: relative;
+  animation: fadeInLayout 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  opacity: 0;
 }
 
-.catalog-page__results {
-  min-height: 300px;
-  width: 100%;
-  position: relative;
-  animation: fadeInUp var(--transition-slow) ease-out;
-  scroll-margin-top: 7.25rem;
-}
-
-@keyframes fadeInUp {
+@keyframes fadeInLayout {
   from {
     opacity: 0;
-    transform: translateY(var(--space-5));
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -124,10 +159,36 @@
   }
 }
 
+.catalog-page__results {
+  min-height: 300px;
+  width: 100%;
+  position: relative;
+  animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  scroll-margin-top: 7.25rem;
+  opacity: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(var(--space-6), 3vw, var(--space-8));
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
 /* Responsive: Mobile-first approach */
 @media (max-width: 860px) {
   .catalog-page__summary {
     flex-direction: column;
+    padding: clamp(var(--space-5), 2.5vw, var(--space-6)) clamp(var(--space-4), 3vw, var(--space-5));
   }
 
   .catalog-page__summary-actions {
@@ -140,11 +201,79 @@
   .catalog-page {
     padding: var(--space-12) 0 var(--space-16);
   }
+
+  .catalog-page__layout {
+    gap: clamp(var(--space-6), 3vw, var(--space-8));
+  }
+}
+
+@media (max-width: 640px) {
+  .catalog-page__summary {
+    padding: var(--space-5) var(--space-4);
+    gap: var(--space-4);
+  }
+
+  .catalog-page__results {
+    scroll-margin-top: 6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .catalog-page__summary {
+    padding: var(--space-4);
+    gap: var(--space-3);
+  }
+}
+
+@media (max-width: 360px) {
+  .catalog-page__summary {
+    padding: var(--space-3);
+  }
 }
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .catalog-page__results {
+  .catalog-page__results,
+  .catalog-page__layout {
     animation: none !important;
+    opacity: 1;
+  }
+
+  .catalog-page__summary::before {
+    animation: none !important;
+  }
+}
+
+/* Touch devices optimization */
+@media (hover: none) and (pointer: coarse) {
+  .catalog-page__summary:hover {
+    transform: none;
+  }
+
+  .catalog-page__summary::before {
+    animation: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .catalog-page__summary {
+    border-image: linear-gradient(135deg, rgba(212, 140, 156, 0.6), rgba(184, 134, 11, 0.5)) 1;
+  }
+}
+
+/* Large desktop devices (1200px and above) */
+@media (min-width: 1200px) {
+  .catalog-page {
+    background: 
+      radial-gradient(2200px 1100px at 8% 8%, rgba(212, 140, 156, 0.1), transparent 58%),
+      radial-gradient(2000px 1000px at 92% 18%, rgba(168, 213, 186, 0.08), transparent 58%),
+      radial-gradient(1700px 850px at 50% 50%, rgba(255, 255, 255, 0.05), transparent 68%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0%, transparent 100%),
+      var(--gradient-elegant-surface);
+  }
+
+  .catalog-page__summary {
+    padding: clamp(var(--space-7), 3.5vw, var(--space-9)) clamp(var(--space-6), 4vw, var(--space-8));
   }
 }

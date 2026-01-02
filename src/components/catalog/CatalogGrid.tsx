@@ -35,8 +35,8 @@ class CatalogGrid extends Component<CatalogGridProps, CatalogGridState> {
 
     return (
       <Grid
-        minColumnWidth="sm"
-        gap="lg"
+        minColumnWidth="xs"
+        gap="md"
         className={`${this.baseClass} ${className}`}
         ariaLabel={ariaLabel || `Menampilkan ${bouquets.length} bouquet`}
       >

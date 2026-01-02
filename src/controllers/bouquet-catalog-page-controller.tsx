@@ -731,6 +731,7 @@ class BouquetCatalogController extends BaseController<
         onClearCollectionNameFilter={this.clearCollectionNameFilter}
         onSearchChange={this.setSearchQuery}
         onPageChange={(page) => this.setState({ currentPage: page })}
+        onItemsPerPageChange={(itemsPerPage) => this.setState({ itemsPerPage, currentPage: 1 })}
         onScrollToResults={this.scrollToResults}
         loading={this.state.loading}
         error={this.state.error}

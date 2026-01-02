@@ -183,3 +183,33 @@
   }
 }
 
+@media (max-width: 480px) {
+  .catalog-empty {
+    padding: 2.5rem 1.25rem;
+  }
+
+  .catalog-empty__filters {
+    padding: 1.25rem;
+  }
+
+  .catalog-empty__chip {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.8rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .catalog-empty {
+    padding: 2rem 1rem;
+  }
+
+  .catalog-empty__filters {
+    padding: 1rem;
+  }
+
+  .catalog-empty__chip {
+    font-size: 0.75rem;
+    padding: 0.45rem 0.7rem;
+  }
+}
+

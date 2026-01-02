@@ -23,6 +23,7 @@ import CatalogEmpty from "../components/catalog/CatalogEmpty";
 import CatalogSkeleton from "../components/catalog/CatalogSkeleton";
 import CatalogActiveFilters from "../components/catalog/CatalogActiveFilters";
 import CatalogResetButton from "../components/catalog/CatalogResetButton";
+import CatalogViewControls from "../components/catalog/CatalogViewControls";
 
 type Range = [number, number];
 
@@ -57,6 +58,7 @@ interface BouquetCatalogPageViewProps {
   onClearAll: () => void;
   onSortChange: (value: string) => void;
   onPageChange: (page: number) => void;
+  onItemsPerPageChange: (itemsPerPage: number) => void;
 
   onClearSearchQuery: () => void;
   onClearCollectionNameFilter: () => void;
@@ -151,6 +153,7 @@ class BouquetCatalogPageView extends Component<BouquetCatalogPageViewProps> {
       onClearAll,
       onSortChange,
       onPageChange,
+      onItemsPerPageChange,
       onClearSearchQuery,
       onSearchChange,
     } = this.props;
@@ -211,6 +214,12 @@ class BouquetCatalogPageView extends Component<BouquetCatalogPageViewProps> {
                 <CatalogSkeleton count={skeletonCount} showLoadingState />
               ) : bouquets.length > 0 ? (
                 <>
+                  <CatalogViewControls
+                    itemsPerPage={itemsPerPage}
+                    totalItems={total}
+                    onItemsPerPageChange={onItemsPerPageChange}
+                    disabled={loading}
+                  />
                   <CatalogGrid
                     bouquets={bouquets}
                     ariaLabel={`Menampilkan ${bouquets.length} dari ${total} bouquet`}

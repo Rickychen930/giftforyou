@@ -111,10 +111,31 @@
   width: 50%;
 }
 
+@media (max-width: 640px) {
+  .catalog-skeleton__grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
 @media (max-width: 480px) {
   .catalog-skeleton__grid {
     grid-template-columns: 1fr;
     gap: 1.25rem;
+  }
+
+  .catalog-skeleton__loading {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .catalog-skeleton__grid {
+    gap: 1rem;
+  }
+
+  .catalog-skeleton__loading {
+    padding: 1.25rem;
   }
 }
 
