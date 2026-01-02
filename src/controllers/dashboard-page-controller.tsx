@@ -636,7 +636,7 @@ class DashboardController extends BaseController<BaseControllerProps, State> {
         if (bouquetsRes.ok) {
           const bouquets = await bouquetsRes.json();
           this.setState((prev) => ({
-            bouquets: normalizeBouquets(bouquets),
+            bouquets: Array.isArray(bouquets) ? normalizeBouquets(bouquets) : [],
           }));
         }
       } catch {
