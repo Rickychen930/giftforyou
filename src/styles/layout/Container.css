@@ -1,0 +1,162 @@
+/**
+ * Container Component Styles
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ * Foundation for all page layouts
+ */
+
+@import "../design-system.css";
+
+/* =========================================================
+   Base Container Styles
+   ========================================================= */
+.container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+}
+
+/* =========================================================
+   Variants (Max-width)
+   ========================================================= */
+
+/* Narrow - For forms, focused content */
+.container--narrow {
+  max-width: 640px;
+}
+
+/* Default - Standard content width */
+.container--default {
+  max-width: var(--container-max);
+}
+
+/* Wide - For wide content */
+.container--wide {
+  max-width: 1400px;
+}
+
+/* Full - No max-width constraint */
+.container--full {
+  max-width: none;
+}
+
+/* =========================================================
+   Padding Variants
+   ========================================================= */
+
+/* No Padding */
+.container--padding-none {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Small Padding */
+.container--padding-sm {
+  padding-left: var(--layout-padding-mobile);
+  padding-right: var(--layout-padding-mobile);
+}
+
+/* Medium Padding (Default) */
+.container--padding-md {
+  padding-left: var(--layout-padding-mobile);
+  padding-right: var(--layout-padding-mobile);
+}
+
+/* Large Padding */
+.container--padding-lg {
+  padding-left: var(--layout-padding-mobile);
+  padding-right: var(--layout-padding-mobile);
+}
+
+/* =========================================================
+   Responsive Design (Mobile-first)
+   ========================================================= */
+
+/* Small screens and up (≥ 640px) */
+@media (min-width: 640px) {
+  .container--padding-sm {
+    padding-left: var(--layout-padding-tablet);
+    padding-right: var(--layout-padding-tablet);
+  }
+
+  .container--padding-md {
+    padding-left: var(--layout-padding-tablet);
+    padding-right: var(--layout-padding-tablet);
+  }
+
+  .container--padding-lg {
+    padding-left: var(--layout-padding-tablet);
+    padding-right: var(--layout-padding-tablet);
+  }
+}
+
+/* Medium screens and up (≥ 768px) */
+@media (min-width: 768px) {
+  .container--padding-sm {
+    padding-left: var(--layout-padding-desktop);
+    padding-right: var(--layout-padding-desktop);
+  }
+
+  .container--padding-md {
+    padding-left: var(--layout-padding-desktop);
+    padding-right: var(--layout-padding-desktop);
+  }
+
+  .container--padding-lg {
+    padding-left: var(--layout-padding-desktop);
+    padding-right: var(--layout-padding-desktop);
+  }
+}
+
+/* Large screens and up (≥ 1024px) */
+@media (min-width: 1024px) {
+  .container--narrow {
+    max-width: 768px;
+  }
+}
+
+/* Extra large screens (≥ 1280px) */
+@media (min-width: 1280px) {
+  .container--narrow {
+    max-width: 896px;
+  }
+}
+
+/* =========================================================
+   Utility Classes
+   ========================================================= */
+
+/* Center content */
+.container--center {
+  text-align: center;
+}
+
+/* Flex container */
+.container--flex {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  .container--flex {
+    flex-direction: row;
+  }
+}
+
+/* Grid container */
+.container--grid {
+  display: grid;
+  gap: var(--gap-md);
+}
+
+/* =========================================================
+   Legacy Support
+   ========================================================= */
+
+/* Support for existing .container class in design-system.css */
+.container-base {
+  /* Alias for default container */
+  composes: container container--default container--padding-md;
+}
+

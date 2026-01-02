@@ -1,0 +1,150 @@
+/**
+ * Section Component Styles
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ * Consistent section spacing
+ */
+
+@import "../design-system.css";
+
+/* =========================================================
+   Base Section Styles
+   ========================================================= */
+.section {
+  position: relative;
+  width: 100%;
+  isolation: isolate;
+}
+
+/* =========================================================
+   Variants (Background)
+   ========================================================= */
+
+/* Default - Transparent */
+.section--default {
+  background: transparent;
+}
+
+/* Gradient - Brand gradient background */
+.section--gradient {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 240, 244, 0.55) 0%,
+    rgba(248, 244, 240, 0.65) 100%
+  );
+  position: relative;
+}
+
+.section--gradient::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 10% 20%, rgba(212, 140, 156, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 90% 80%, rgba(168, 213, 186, 0.06) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.section--gradient > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Glass - Glass morphism effect */
+.section--glass {
+  background: var(--backdrop-glass-sm);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
+}
+
+/* Dark - Dark background variant */
+.section--dark {
+  background: var(--ink-900);
+  color: var(--neutral-0);
+}
+
+/* =========================================================
+   Padding Variants
+   ========================================================= */
+
+/* No Padding */
+.section--padding-none {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* Small Padding */
+.section--padding-sm {
+  padding-top: var(--section-spacing-mobile);
+  padding-bottom: var(--section-spacing-mobile);
+}
+
+/* Medium Padding (Default) */
+.section--padding-md {
+  padding-top: var(--section-spacing-mobile);
+  padding-bottom: var(--section-spacing-mobile);
+}
+
+/* Large Padding */
+.section--padding-lg {
+  padding-top: clamp(var(--space-12), 5vw, var(--space-16));
+  padding-bottom: clamp(var(--space-12), 5vw, var(--space-16));
+}
+
+/* Extra Large Padding */
+.section--padding-xl {
+  padding-top: clamp(var(--space-16), 6vw, var(--space-24));
+  padding-bottom: clamp(var(--space-16), 6vw, var(--space-24));
+}
+
+/* =========================================================
+   Responsive Design (Mobile-first)
+   ========================================================= */
+
+/* Small screens and up (≥ 640px) */
+@media (min-width: 640px) {
+  .section--padding-sm {
+    padding-top: var(--section-spacing-tablet);
+    padding-bottom: var(--section-spacing-tablet);
+  }
+
+  .section--padding-md {
+    padding-top: var(--section-spacing-tablet);
+    padding-bottom: var(--section-spacing-tablet);
+  }
+}
+
+/* Medium screens and up (≥ 768px) */
+@media (min-width: 768px) {
+  .section--padding-sm {
+    padding-top: var(--section-spacing-desktop);
+    padding-bottom: var(--section-spacing-desktop);
+  }
+
+  .section--padding-md {
+    padding-top: var(--section-spacing-desktop);
+    padding-bottom: var(--section-spacing-desktop);
+  }
+}
+
+/* =========================================================
+   Section Dividers
+   ========================================================= */
+.section--divider-top {
+  border-top: 1px solid var(--border-1);
+}
+
+.section--divider-bottom {
+  border-bottom: 1px solid var(--border-1);
+}
+
+/* =========================================================
+   Reduced Motion Support
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .section--gradient::before {
+    animation: none !important;
+  }
+}
+
