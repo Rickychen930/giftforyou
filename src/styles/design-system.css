@@ -16,6 +16,7 @@
   --space-2: 0.5rem;    /* 8px */
   --space-2-5: 0.625rem; /* 10px */
   --space-3: 0.75rem;   /* 12px */
+  --space-3-5: 0.875rem; /* 14px */
   --space-4: 1rem;      /* 16px */
   --space-4-5: 1.125rem; /* 18px */
   --space-5: 1.25rem;   /* 20px */
@@ -26,8 +27,12 @@
   --space-12: 3rem;     /* 48px */
   --space-14: 3.5rem;   /* 56px */
   --space-16: 4rem;     /* 64px */
+  --space-18: 4.5rem;   /* 72px */
   --space-20: 5rem;     /* 80px */
+  --space-22-5: 5.625rem; /* 90px */
   --space-24: 6rem;     /* 96px */
+  --space-30: 7.5rem;   /* 120px */
+  --space-32: 8rem;     /* 128px */
 
   /* =========================================================
      TYPOGRAPHY SYSTEM
@@ -214,7 +219,7 @@
   --card-border-hover: 1px solid var(--border-2);
 
   /* =========================================================
-     GRADIENT SYSTEM (Luxury)
+     GRADIENT SYSTEM (Luxury & Elegant)
      ========================================================= */
   --gradient-brand: linear-gradient(135deg, var(--brand-rose-500) 0%, var(--brand-rose-600) 50%, var(--brand-rose-700) 100%);
   --gradient-brand-light: linear-gradient(135deg, var(--brand-rose-300) 0%, var(--brand-rose-500) 100%);
@@ -224,6 +229,95 @@
   
   --gradient-surface: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%);
   --gradient-overlay: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+  --gradient-divider: linear-gradient(90deg, transparent 0%, rgba(212, 140, 156, 0.2) 50%, transparent 100%);
+
+  /* =========================================================
+     LUXURY & ELEGANT COLORS (Premium Palette)
+     ========================================================= */
+  /* Gold/Amber accents for luxury feel */
+  --luxury-gold-50: #fffbeb;
+  --luxury-gold-100: #fef3c7;
+  --luxury-gold-200: #fde68a;
+  --luxury-gold-300: #fcd34d;
+  --luxury-gold-400: #fbbf24;
+  --luxury-gold-500: #f59e0b;
+  --luxury-gold-600: #d97706;
+  --luxury-gold-700: #b45309;
+  
+  /* Elegant neutral palette */
+  --elegant-black: #1a1a1a;
+  --elegant-charcoal: #2d2d2d;
+  --elegant-gray: #4a4a4a;
+  --elegant-light-gray: #e5e5e5;
+  --elegant-white: #ffffff;
+  --elegant-cream: #faf9f6;
+  
+  /* Premium gradients */
+  --gradient-luxury-gold: linear-gradient(135deg, var(--luxury-gold-400) 0%, var(--luxury-gold-600) 100%);
+  --gradient-luxury-rose: linear-gradient(135deg, var(--brand-rose-500) 0%, var(--luxury-gold-400) 100%);
+  --gradient-elegant-surface: linear-gradient(180deg, var(--elegant-white) 0%, var(--elegant-cream) 100%);
+  
+  /* Luxury shadows */
+  --shadow-luxury-sm: 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  --shadow-luxury-md: 0 4px 16px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  --shadow-luxury-lg: 0 8px 32px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  --shadow-luxury-xl: 0 16px 64px rgba(0, 0, 0, 0.20), 0 0 0 1px rgba(0, 0, 0, 0.10);
+  --shadow-luxury-gold: 0 8px 24px rgba(245, 158, 11, 0.25), 0 0 0 1px rgba(245, 158, 11, 0.10);
+  
+  /* Premium borders */
+  --border-luxury: 1.5px solid rgba(0, 0, 0, 0.08);
+  --border-luxury-gold: 1.5px solid rgba(245, 158, 11, 0.20);
+  --border-elegant: 1px solid rgba(0, 0, 0, 0.06);
+
+  /* =========================================================
+     BRAND BORDER COLORS (Luxury)
+     ========================================================= */
+  --brand-rose-border: rgba(212, 140, 156, 0.15);
+  --brand-rose-border-2: rgba(212, 140, 156, 0.25);
+  --brand-green-border: rgba(168, 213, 186, 0.15);
+  --brand-sage-600: #6fa889;
+  --brand-rose-400: #e89aaa;
+
+  /* =========================================================
+     BORDER WIDTH SYSTEM
+     ========================================================= */
+  --border-width-1: 1px;
+  --border-width-2: 2px;
+  --border-width-base: 1px;
+
+  /* =========================================================
+     BORDER BRAND VARIANTS
+     ========================================================= */
+  --border-brand-subtle: rgba(212, 140, 156, 0.12);
+  --border-brand-strong: rgba(212, 140, 156, 0.3);
+
+  /* =========================================================
+     OPACITY SYSTEM
+     ========================================================= */
+  --opacity-strong: 0.9;
+  --opacity-medium: 0.7;
+  --opacity-weak: 0.5;
+
+  /* =========================================================
+     SIZE SYSTEM (Icons, Avatars, etc.)
+     ========================================================= */
+  --size-6: 1.5rem;      /* 24px */
+  --size-7: 1.75rem;     /* 28px */
+  --size-8: 2rem;        /* 32px */
+  --size-9: 2.25rem;     /* 36px */
+  --size-10: 2.5rem;     /* 40px */
+  --size-11: 2.75rem;    /* 44px */
+  --size-12: 3rem;       /* 48px */
+  --size-14: 3.5rem;     /* 56px */
+  --size-16: 4rem;       /* 64px */
+  --size-62-5: 62.5rem;  /* 1000px */
+
+  /* =========================================================
+     ANIMATION SPEED
+     ========================================================= */
+  --animation-speed-base: 300ms;
+  --animation-speed-fast: 200ms;
+  --animation-speed-slow: 500ms;
 
   /* =========================================================
      BACKDROP FILTER (Glass Morphism)
@@ -263,6 +357,7 @@
   --whatsapp-border: rgba(37, 211, 102, 0.3);
   --whatsapp-border-hover: rgba(37, 211, 102, 0.5);
   --whatsapp-shadow: 0 4px 16px rgba(37, 211, 102, 0.3);
+  --shadow-green-md: 0 8px 24px rgba(16, 185, 129, 0.25);
   
   --call-color: #3b82f6;
   --call-bg: rgba(59, 130, 246, 0.08);

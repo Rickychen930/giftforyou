@@ -7,15 +7,17 @@
 
 @import "design-system.css";
 
-.google-maps-reviews-section {
+/* Main section container */
+.googleMapsReviews {
   padding: clamp(var(--space-16), 7vw, var(--space-24)) var(--space-6);
   background: var(--gradient-surface);
   position: relative;
   overflow: hidden;
   z-index: var(--z-base);
+  isolation: isolate;
 }
 
-.google-maps-reviews-section::before {
+.googleMapsReviews::before {
   content: "";
   position: absolute;
   top: 0;
@@ -29,14 +31,14 @@
   z-index: 0;
 }
 
-.google-maps-reviews-container {
-  max-width: 1400px;
+.googleMapsReviews__container {
+  max-width: var(--container-max);
   margin: 0 auto;
   position: relative;
   z-index: var(--z-base);
 }
 
-.google-maps-reviews-header {
+.googleMapsReviews__header {
   text-align: center;
   margin-bottom: var(--space-12);
   display: flex;
@@ -45,16 +47,16 @@
   gap: var(--space-6);
 }
 
-.google-maps-reviews-header-content {
+.googleMapsReviews__header-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-4);
 }
 
-.google-maps-reviews-icon-wrapper {
-  width: 64px;
-  height: 64px;
+.googleMapsReviews__icon-wrapper {
+  width: var(--size-16);
+  height: var(--size-16);
   border-radius: var(--radius-xl);
   background: var(--gradient-brand-soft);
   display: flex;
@@ -65,16 +67,16 @@
   box-shadow: var(--shadow-md);
 }
 
-.google-maps-reviews-title {
+.googleMapsReviews__title {
   font-size: clamp(var(--font-size-2xl), 5vw, var(--font-size-4xl));
   font-weight: var(--font-weight-black);
   color: var(--ink-900);
   margin: 0;
   line-height: var(--line-height-tight);
-  letter-spacing: -0.02em;
+  letter-spacing: var(--letter-spacing-tight);
 }
 
-.google-maps-reviews-subtitle {
+.googleMapsReviews__subtitle {
   font-size: clamp(var(--font-size-base), 2.5vw, var(--font-size-lg));
   color: var(--ink-600);
   margin: 0;
@@ -84,32 +86,28 @@
 
 
 /* Reviews horizontal scroll - Infinite auto scroll */
-.google-maps-reviews-scroll-container {
+.googleMapsReviews__reviews {
   position: relative;
-  overflow: hidden;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-6);
   margin-bottom: var(--space-12);
-  padding: var(--space-4) 0;
-  mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    black 5%,
-    black 95%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    black 5%,
-    black 95%,
-    transparent 100%
-  );
 }
 
-.google-maps-reviews-scroll {
-  display: flex;
-  gap: var(--space-6);
-  animation: scrollInfinite 60s linear infinite;
-  will-change: transform;
+@media (min-width: 1024px) {
+  .googleMapsReviews__reviews {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Remove old animation that's no longer used */
+@keyframes scrollInfinite {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.333%);
+  }
 }
 
 @keyframes scrollInfinite {
@@ -128,72 +126,57 @@
   }
 }
 
-.google-maps-review-card {
+.googleMapsReviews__review {
   background: var(--neutral-0);
   border-radius: var(--radius-xl);
   padding: var(--space-8);
   box-shadow: var(--shadow-md);
-  transition: all var(--animation-speed-base) cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--transition-slow);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  border: var(--border-width-2) solid rgba(0, 0, 0, 0.05);
-  flex: 0 0 380px;
-  min-width: 0;
-  max-width: 380px;
+  border: var(--border-width-2) solid var(--border-1);
+  position: relative;
+  isolation: isolate;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .google-maps-review-card:hover {
+  .googleMapsReviews__review:hover {
     transform: translateY(calc(var(--space-1) * -1));
     box-shadow: var(--shadow-xl);
     border-color: var(--brand-green-border);
   }
 }
 
-.google-maps-review-header {
+.googleMapsReviews__reviewHeader {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: var(--space-4);
 }
 
-.google-maps-review-author {
+.googleMapsReviews__reviewAuthor {
   display: flex;
   align-items: center;
   gap: var(--space-4);
   flex: 1;
 }
 
-.google-maps-review-author-photo,
-.google-maps-review-author-photo-placeholder {
-  width: 48px;
-  height: 48px;
+.googleMapsReviews__reviewPhoto {
+  width: var(--size-12);
+  height: var(--size-12);
   border-radius: var(--radius-full);
   object-fit: cover;
   flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
 }
 
-.google-maps-review-author-photo-placeholder {
-  background: linear-gradient(
-    135deg,
-    var(--brand-sage-400) 0%,
-    var(--brand-rose-400) 100%
-  );
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--neutral-0);
-  font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-xl);
-}
-
-.google-maps-review-author-info {
+.googleMapsReviews__reviewAuthor-info {
   flex: 1;
   min-width: 0;
 }
 
-.google-maps-review-author-name {
+.googleMapsReviews__reviewName {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-bold);
   color: var(--ink-900);
@@ -201,21 +184,21 @@
   line-height: var(--line-height-tight);
 }
 
-.google-maps-review-rating {
+.googleMapsReviews__reviewRating {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--space-1);
   color: #fbbf24;
 }
 
-.google-maps-review-time {
+.googleMapsReviews__reviewTime {
   font-size: var(--font-size-sm);
   color: var(--ink-500);
   white-space: nowrap;
   flex-shrink: 0;
 }
 
-.google-maps-review-text {
+.googleMapsReviews__reviewText {
   font-size: var(--font-size-sm);
   color: var(--ink-700);
   line-height: var(--line-height-relaxed);
@@ -223,12 +206,12 @@
   margin-top: var(--space-2);
 }
 
-.google-maps-reviews-footer {
+.googleMapsReviews__footer {
   text-align: center;
   margin-top: var(--space-8);
 }
 
-.google-maps-reviews-show-more-btn {
+.googleMapsReviews__link {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -239,12 +222,12 @@
   border-radius: var(--radius-full);
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-base);
-  cursor: pointer;
-  transition: all var(--transition-slow) cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  transition: all var(--transition-slow);
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .google-maps-reviews-show-more-btn:hover {
+  .googleMapsReviews__link:hover {
     background: var(--brand-sage-500);
     color: var(--neutral-0);
     transform: translateY(-2px);
@@ -252,11 +235,16 @@
   }
 }
 
-.google-maps-reviews-show-more-btn:active {
+.googleMapsReviews__link:active {
   transform: translateY(0);
 }
 
-.google-maps-reviews-empty {
+.googleMapsReviews__link:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.googleMapsReviews__empty {
   text-align: center;
   padding: var(--space-16) var(--space-8);
   color: var(--ink-600);
@@ -264,37 +252,44 @@
 }
 
 /* Responsive adjustments */
+@media (max-width: 1024px) {
+  .googleMapsReviews__reviews {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 767px) {
-  .google-maps-reviews-section {
+  .googleMapsReviews {
     padding: var(--space-12) var(--space-4);
   }
 
-  .google-maps-reviews-header {
+  .googleMapsReviews__header {
     margin-bottom: var(--space-8);
   }
 
-  .google-maps-review-card {
-    flex: 0 0 320px;
-    max-width: 320px;
+  .googleMapsReviews__reviews {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .googleMapsReviews__review {
     padding: var(--space-6);
   }
 
-  .google-maps-review-header {
+  .googleMapsReviews__reviewHeader {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .google-maps-review-time {
+  .googleMapsReviews__reviewTime {
     align-self: flex-end;
   }
 }
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .google-maps-reviews-scroll,
-  .google-maps-review-card,
-  .google-maps-reviews-show-more-btn {
-    animation: none;
+  .googleMapsReviews__review,
+  .googleMapsReviews__link {
     transition: none;
   }
 }

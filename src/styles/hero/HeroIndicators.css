@@ -1,3 +1,4 @@
+@import "../design-system.css";
 @import "../colors.css";
 
 /* =========================================================
@@ -9,29 +10,25 @@
 
 .hero-indicators {
   position: absolute;
-  bottom: 20px !important;
+  bottom: var(--space-5) !important;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 15;
+  z-index: var(--z-dropdown);
   display: flex;
-  gap: 10px;
-  padding: 10px 20px;
-  border-radius: 999px;
+  gap: var(--space-2-5);
+  padding: var(--space-2-5) var(--space-5);
+  border-radius: var(--radius-full);
   background: linear-gradient(
     135deg,
     rgba(0, 0, 0, 0.35) 0%,
     rgba(0, 0, 0, 0.25) 100%
   );
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.3),
-    0 2px 8px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
+  border: var(--border-width-1) solid rgba(255, 255, 255, 0.12);
+  box-shadow: var(--shadow-luxury-md);
   list-style: none;
   margin: 0;
-  padding: 10px 20px;
 }
 
 .hero-indicators__dot {
@@ -39,27 +36,27 @@
   border: none;
   background: transparent;
   opacity: 1;
-  width: 28px;
-  height: 28px;
+  width: var(--size-7);
+  height: var(--size-7);
   margin: 0 !important;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all var(--transition-elegant);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   padding: 0;
   position: relative;
 }
 
 .hero-indicators__dot::after {
   content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: var(--radius-full);
   background: rgba(255, 255, 255, 0.55);
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transition: all var(--transition-elegant);
+  box-shadow: var(--shadow-sm);
   display: block;
 }
 
@@ -74,14 +71,14 @@
 }
 
 .hero-indicators__dot--active {
-  width: 44px;
+  width: var(--size-11);
 }
 
 .hero-indicators__dot--active::after {
-  width: 28px;
-  height: 8px;
-  background: linear-gradient(90deg, #ffffff, rgba(255, 255, 255, 0.95));
-  border-radius: 999px;
+  width: var(--size-7);
+  height: var(--space-2);
+  background: linear-gradient(90deg, var(--neutral-0), rgba(255, 255, 255, 0.95));
+  border-radius: var(--radius-full);
   box-shadow: 
     0 2px 10px rgba(255, 255, 255, 0.4),
     0 0 8px rgba(212, 140, 156, 0.5);
@@ -102,8 +99,8 @@
 }
 
 .hero-indicators__dot:focus-visible {
-  outline: 3px solid rgba(212, 140, 156, 0.6);
-  outline-offset: 3px;
+  outline: var(--focus-ring-width) solid var(--brand-rose-500);
+  outline-offset: var(--focus-ring-offset);
   background: rgba(255, 255, 255, 0.15);
 }
 
@@ -114,48 +111,48 @@
 /* Mobile */
 @media (max-width: 768px) {
   .hero-slider__pagination {
-    bottom: 16px !important;
+    bottom: var(--space-4) !important;
   }
 
   .hero-indicators {
-    padding: 10px 16px;
-    gap: 8px;
+    padding: var(--space-2-5) var(--space-4);
+    gap: var(--space-2);
     background: rgba(0, 0, 0, 0.35);
   }
 
   .hero-indicators__dot {
-    width: 10px;
-    height: 10px;
+    width: var(--space-2-5);
+    height: var(--space-2-5);
   }
 
   .hero-indicators__dot::after {
-    width: 6px;
-    height: 6px;
+    width: var(--space-1-5);
+    height: var(--space-1-5);
   }
 
   .hero-indicators__dot--active {
-    width: 36px;
+    width: var(--size-9);
   }
 
   .hero-indicators__dot--active::after {
-    width: 20px;
-    height: 6px;
+    width: var(--space-5);
+    height: var(--space-1-5);
   }
 }
 
 @media (max-width: 480px) {
   .hero-indicators {
-    padding: 8px 12px;
-    gap: 6px;
+    padding: var(--space-2) var(--space-3);
+    gap: var(--space-1-5);
   }
 
   .hero-indicators__dot {
-    width: 8px;
-    height: 8px;
+    width: var(--space-2);
+    height: var(--space-2);
   }
 
   .hero-indicators__dot--active {
-    width: 32px;
+    width: var(--space-8);
   }
 }
 
