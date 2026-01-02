@@ -156,6 +156,8 @@ class CustomerLoginPageView extends Component<CustomerLoginPageViewProps> {
                   <label className="customerAuthForm__checkbox">
                     <input
                       type="checkbox"
+                      id="login-remember-me"
+                      name="rememberMe"
                       checked={formData.rememberMe}
                       onChange={(e) => onFormChange("rememberMe", e.target.checked)}
                       disabled={isLoading}

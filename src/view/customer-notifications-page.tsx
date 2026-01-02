@@ -88,6 +88,8 @@ class CustomerNotificationsPageView extends Component<CustomerNotificationsPageV
               <label className="customerNotifications__option">
                 <input
                   type="checkbox"
+                  id="notifications-email-orders"
+                  name="email.orders"
                   checked={settings.email.orders}
                   onChange={(e) => onSettingChange("email", "orders", e.target.checked)}
                 />
@@ -96,6 +98,8 @@ class CustomerNotificationsPageView extends Component<CustomerNotificationsPageV
               <label className="customerNotifications__option">
                 <input
                   type="checkbox"
+                  id="notifications-email-promotions"
+                  name="email.promotions"
                   checked={settings.email.promotions}
                   onChange={(e) => onSettingChange("email", "promotions", e.target.checked)}
                 />
@@ -104,6 +108,8 @@ class CustomerNotificationsPageView extends Component<CustomerNotificationsPageV
               <label className="customerNotifications__option">
                 <input
                   type="checkbox"
+                  id="notifications-email-updates"
+                  name="email.updates"
                   checked={settings.email.updates}
                   onChange={(e) => onSettingChange("email", "updates", e.target.checked)}
                 />
@@ -123,6 +129,8 @@ class CustomerNotificationsPageView extends Component<CustomerNotificationsPageV
               <label className="customerNotifications__option">
                 <input
                   type="checkbox"
+                  id="notifications-push-orders"
+                  name="push.orders"
                   checked={settings.push.orders}
                   onChange={(e) => onSettingChange("push", "orders", e.target.checked)}
                 />
@@ -131,6 +139,8 @@ class CustomerNotificationsPageView extends Component<CustomerNotificationsPageV
               <label className="customerNotifications__option">
                 <input
                   type="checkbox"
+                  id="notifications-push-promotions"
+                  name="push.promotions"
                   checked={settings.push.promotions}
                   onChange={(e) => onSettingChange("push", "promotions", e.target.checked)}
                 />
@@ -139,6 +149,8 @@ class CustomerNotificationsPageView extends Component<CustomerNotificationsPageV
               <label className="customerNotifications__option">
                 <input
                   type="checkbox"
+                  id="notifications-push-updates"
+                  name="push.updates"
                   checked={settings.push.updates}
                   onChange={(e) => onSettingChange("push", "updates", e.target.checked)}
                 />
@@ -158,6 +170,8 @@ class CustomerNotificationsPageView extends Component<CustomerNotificationsPageV
               <label className="customerNotifications__option">
                 <input
                   type="checkbox"
+                  id="notifications-sms-orders"
+                  name="sms.orders"
                   checked={settings.sms.orders}
                   onChange={(e) => onSettingChange("sms", "orders", e.target.checked)}
                 />
@@ -166,6 +180,8 @@ class CustomerNotificationsPageView extends Component<CustomerNotificationsPageV
               <label className="customerNotifications__option">
                 <input
                   type="checkbox"
+                  id="notifications-sms-promotions"
+                  name="sms.promotions"
                   checked={settings.sms.promotions}
                   onChange={(e) => onSettingChange("sms", "promotions", e.target.checked)}
                 />

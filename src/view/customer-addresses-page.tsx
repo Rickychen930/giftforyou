@@ -196,6 +196,8 @@ class CustomerAddressesPageView extends Component<CustomerAddressesPageViewProps
                 <label className="customerAddresses__checkbox">
                   <input
                     type="checkbox"
+                    id="address-is-default"
+                    name="isDefault"
                     checked={formData.isDefault}
                     onChange={(e) => onFormChange("isDefault", e.target.checked)}
                   />
