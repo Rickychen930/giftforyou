@@ -1,50 +1,53 @@
 /**
- * Form Field Styles
- * Luxury and responsive form field styling
+ * Form Field Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
  */
+
+@import "design-system.css";
 
 .formField {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--gap-sm);
 }
 
 .formField__label {
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: #1f2937;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--ink-900);
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--space-1);
+  line-height: var(--line-height-normal);
 }
 
 .formField__required {
-  color: #ef4444;
-  font-weight: 700;
+  color: var(--error-color);
+  font-weight: var(--font-weight-bold);
 }
 
 .formField__hint {
-  font-size: 0.875rem;
-  color: #6b7280;
-  line-height: 1.5;
+  font-size: var(--font-size-xs);
+  color: var(--ink-600);
+  line-height: var(--line-height-normal);
 }
 
 .formField__error {
-  font-size: 0.875rem;
-  color: #ef4444;
-  font-weight: 500;
-  line-height: 1.5;
+  font-size: var(--font-size-xs);
+  color: var(--error-text);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
 }
 
-/* Responsive */
+/* Responsive: Mobile-first approach */
 @media (max-width: 768px) {
   .formField__label {
-    font-size: 0.875rem;
+    font-size: var(--font-size-xs);
   }
 
   .formField__hint,
   .formField__error {
-    font-size: 0.8125rem;
+    font-size: var(--font-size-xs);
   }
 }
-

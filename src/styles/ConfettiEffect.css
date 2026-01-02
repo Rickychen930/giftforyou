@@ -1,4 +1,11 @@
-@import "colors.css";
+/**
+ * Confetti Effect Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ * Fully responsive on all devices: mobile, tablet, desktop
+ */
+
+@import "design-system.css";
 
 .confettiContainer {
   position: fixed;
@@ -7,20 +14,20 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 9999;
+  z-index: var(--z-confetti);
   overflow: hidden;
 }
 
 .confettiParticle {
   position: absolute;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  top: -10px;
-  animation: confettiFall linear forwards;
+  width: var(--size-2-5);
+  height: var(--size-2-5);
+  border-radius: var(--radius-full);
+  top: var(--space-neg-2-5);
+  animation: confettiFall var(--animation-speed-slow) linear forwards;
   box-shadow: 
-    0 0 6px rgba(0, 0, 0, 0.3),
-    0 0 12px currentColor;
+    0 0 var(--space-1-5) rgba(0, 0, 0, 0.3),
+    0 0 var(--space-3) currentColor;
 }
 
 @keyframes confettiFall {
@@ -48,7 +55,7 @@
     opacity: 1;
   }
   100% {
-    transform: translateY(100vh) translateX(-100px) rotate(720deg) scale(0.5);
+    transform: translateY(100vh) translateX(var(--space-neg-25)) rotate(720deg) scale(0.5);
     opacity: 0;
   }
 }
@@ -59,8 +66,24 @@
     opacity: 1;
   }
   100% {
-    transform: translateY(100vh) translateX(100px) rotate(720deg) scale(0.5);
+    transform: translateY(100vh) translateX(var(--space-25)) rotate(720deg) scale(0.5);
     opacity: 0;
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .confettiParticle {
+    width: var(--size-2);
+    height: var(--size-2);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .confettiParticle {
+    animation: none !important;
+    opacity: 0 !important;
   }
 }
 

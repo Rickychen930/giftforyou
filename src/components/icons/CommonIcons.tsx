@@ -151,6 +151,16 @@ export const MailIcon: React.FC<Omit<IconProps, "children">> = (props) => (
 );
 
 /**
+ * Location Icons
+ */
+export const LocationIcon: React.FC<Omit<IconProps, "children">> = (props) => (
+  <Icon {...props}>
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="12" cy="10" r="3" strokeLinecap="round" strokeLinejoin="round" />
+  </Icon>
+);
+
+/**
  * User Icons
  */
 export const UserIcon: React.FC<Omit<IconProps, "children">> = (props) => (
@@ -162,6 +172,12 @@ export const UserIcon: React.FC<Omit<IconProps, "children">> = (props) => (
 export const UsersIcon: React.FC<Omit<IconProps, "children">> = (props) => (
   <Icon {...props}>
     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" strokeLinejoin="round" />
+  </Icon>
+);
+
+export const UserPlusIcon: React.FC<Omit<IconProps, "children">> = (props) => (
+  <Icon {...props}>
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M13 7a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM20 8v6M23 11h-6" strokeLinecap="round" strokeLinejoin="round" />
   </Icon>
 );
 
@@ -184,3 +200,107 @@ export const CollectionIcon: React.FC<Omit<IconProps, "children">> = (props) => 
   </Icon>
 );
 
+/**
+ * Shopping/Cart Icons
+ */
+export const ShoppingCartIcon: React.FC<Omit<IconProps, "children">> = (props) => (
+  <Icon {...props}>
+    <path d="M9 2L7 6H2v2h1l1 10h12l1-10h1V6h-5L15 2H9zM9 4h6l1 2H8l1-2zm1 4v8h2V8h-2zm4 0v8h2V8h-2z" strokeLinecap="round" strokeLinejoin="round" />
+  </Icon>
+);
+
+/**
+ * Orders/List Icons
+ */
+export const OrdersIcon: React.FC<Omit<IconProps, "children">> = (props) => (
+  <Icon {...props}>
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 8 0 4 4 0 0 0-8 0zM22 11l-4-4m0 0l-4 4m4-4v12" strokeLinecap="round" strokeLinejoin="round" />
+  </Icon>
+);
+
+export const FileTextIcon: React.FC<Omit<IconProps, "children">> = (props) => (
+  <Icon {...props}>
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" strokeLinecap="round" strokeLinejoin="round" />
+  </Icon>
+);
+
+/**
+ * Grid/Layout Icons
+ */
+export const GridIcon: React.FC<Omit<IconProps, "children">> = (props) => (
+  <Icon {...props}>
+    <rect x="3" y="3" width="7" height="7" strokeLinecap="round" strokeLinejoin="round" />
+    <rect x="14" y="3" width="7" height="7" strokeLinecap="round" strokeLinejoin="round" />
+    <rect x="14" y="14" width="7" height="7" strokeLinecap="round" strokeLinejoin="round" />
+    <rect x="3" y="14" width="7" height="7" strokeLinecap="round" strokeLinejoin="round" />
+  </Icon>
+);
+
+/**
+ * Heart/Favorite Icon
+ */
+export const HeartIcon: React.FC<Omit<IconProps, "children">> = (props) => (
+  <Icon {...props} fill="none">
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" strokeLinecap="round" strokeLinejoin="round" />
+  </Icon>
+);
+
+/**
+ * Logout Icon
+ */
+export const LogoutIcon: React.FC<Omit<IconProps, "children">> = (props) => (
+  <Icon {...props}>
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
+  </Icon>
+);
+
+/**
+ * Settings Icon
+ */
+export const SettingsIcon: React.FC<Omit<IconProps, "children">> = (props) => (
+  <Icon {...props}>
+    <circle cx="12" cy="12" r="3" />
+    <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24" strokeLinecap="round" />
+  </Icon>
+);
+
+/**
+ * Lock/Security Icons
+ */
+export const LockIcon: React.FC<Omit<IconProps, "children">> = (props) => (
+  <Icon {...props}>
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" strokeLinecap="round" strokeLinejoin="round" />
+  </Icon>
+);
+
+export const BellIcon: React.FC<Omit<IconProps, "children">> = (props) => (
+  <Icon {...props}>
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" strokeLinecap="round" strokeLinejoin="round" />
+  </Icon>
+);
+
+export const ShieldIcon: React.FC<Omit<IconProps, "children">> = (props) => (
+  <Icon {...props}>
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" strokeLinecap="round" strokeLinejoin="round" />
+  </Icon>
+);
+
+/**
+ * Box/Package Icon
+ */
+export const PackageIcon: React.FC<Omit<IconProps, "children">> = (props) => (
+  <Icon {...props}>
+    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" strokeLinecap="round" strokeLinejoin="round" />
+  </Icon>
+);
+
+/**
+ * Chevron Right Icon
+ */
+export const ChevronRightIcon: React.FC<Omit<IconProps, "children">> = (props) => (
+  <Icon {...props}>
+    <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
+  </Icon>
+);

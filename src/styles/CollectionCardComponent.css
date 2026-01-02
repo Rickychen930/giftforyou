@@ -1,4 +1,11 @@
-@import "colors.css";
+/**
+ * Collection Card Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ * Fully responsive on all devices: mobile, tablet, desktop
+ */
+
+@import "design-system.css";
 
 /* =========================
    Collection Card Component
@@ -9,57 +16,60 @@
   width: 100%;
   position: relative;
   box-sizing: border-box;
-  padding: clamp(2rem, 3vw, 2.5rem);
-  border-radius: 28px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.99) 0%,
-    rgba(255, 255, 255, 0.97) 50%,
-    rgba(255, 255, 255, 0.99) 100%
-  );
-  border: 2px solid rgba(212, 140, 156, 0.12);
+  padding: clamp(var(--space-8), 3vw, var(--space-10));
+  border-radius: var(--radius-2xl);
+  background: var(--gradient-surface);
+  border: var(--border-width-2) solid var(--brand-rose-border);
   box-shadow: 
-    0 20px 60px rgba(0, 0, 0, 0.06),
-    0 8px 24px rgba(0, 0, 0, 0.04),
-    0 2px 8px rgba(0, 0, 0, 0.02),
+    var(--shadow-xl),
+    var(--shadow-lg),
+    var(--shadow-sm),
     0 0 0 1px rgba(255, 255, 255, 0.9) inset,
-    0 0 0 1px rgba(212, 140, 156, 0.08) inset;
-  backdrop-filter: blur(30px) saturate(200%);
-  -webkit-backdrop-filter: blur(30px) saturate(200%);
+    0 0 0 1px var(--brand-rose-border) inset;
+  backdrop-filter: var(--backdrop-blur-lg) saturate(200%);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg) saturate(200%);
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--transition-slow) cubic-bezier(0.4, 0, 0.2, 1);
   isolation: isolate;
 
   /* Prevent Safari from "reflowing" the page on hover/scroll effects */
   contain: layout paint;
   transform: translateZ(0);
 
-  animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: slideIn var(--animation-speed-base) cubic-bezier(0.4, 0, 0.2, 1) forwards;
   opacity: 0;
 }
 
-.collectionCard:hover {
-  transform: translateY(-6px) translateZ(0);
-  box-shadow: 
-    0 32px 80px rgba(0, 0, 0, 0.1),
-    0 16px 40px rgba(0, 0, 0, 0.06),
-    0 4px 16px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(255, 255, 255, 0.95) inset,
-    0 0 0 1px rgba(212, 140, 156, 0.15) inset;
-  border-color: rgba(212, 140, 156, 0.3);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 1) 0%,
-    rgba(255, 255, 255, 0.98) 50%,
-    rgba(255, 255, 255, 1) 100%
-  );
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-2-5));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .collectionCard:hover {
+    transform: translateY(calc(var(--space-1-5) * -1)) translateZ(0);
+    box-shadow: 
+      var(--shadow-2xl),
+      var(--shadow-xl),
+      var(--shadow-md),
+      0 0 0 1px rgba(255, 255, 255, 0.95) inset,
+      0 0 0 1px var(--brand-rose-border-2) inset;
+    border-color: var(--brand-rose-border-2);
+    background: var(--gradient-surface);
+  }
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .collectionCard {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    background: var(--cc-surface-strong);
+    background: var(--gradient-surface);
   }
 }
 
@@ -67,16 +77,6 @@
   box-sizing: border-box;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 
 
@@ -85,17 +85,17 @@
   content: "";
   position: absolute;
   inset: 0 0 auto 0;
-  height: 2px;
+  height: var(--border-width-2);
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(212, 140, 156, 0.3) 20%,
-    rgba(212, 140, 156, 0.5) 50%,
-    rgba(168, 213, 186, 0.4) 80%,
+    var(--brand-rose-border-2) 20%,
+    var(--brand-rose-500) 50%,
+    var(--brand-green-border) 80%,
     transparent 100%
   );
   opacity: 1;
-  z-index: 1;
+  z-index: var(--z-base);
 }
 
 /* Subtle inner glow */
@@ -103,12 +103,12 @@
   content: "";
   position: absolute;
   inset: 0;
-  border-radius: 28px;
+  border-radius: var(--radius-2xl);
   padding: 1px;
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.6) 0%,
-    rgba(212, 140, 156, 0.1) 50%,
+    var(--brand-rose-border) 50%,
     rgba(255, 255, 255, 0.6) 100%
   );
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -125,12 +125,12 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 1.5rem;
-  margin-bottom: 1.75rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid rgba(212, 140, 156, 0.08);
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-6);
+  border-bottom: var(--border-width-1) solid var(--brand-rose-border);
   position: relative;
-  z-index: 1;
+  z-index: var(--z-base);
 }
 
 .collectionCard__headerActions {
@@ -141,8 +141,8 @@
 }
 
 .collectionCard__ctaBtn--small {
-  padding: 0.65rem 1rem;
-  font-size: 0.9rem;
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
 }
 
 .collectionCard__heading {
@@ -153,19 +153,19 @@
 .collectionCard__titleRow {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-3);
   flex-wrap: wrap;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-2);
 }
 
 .collectionCard__title {
   margin: 0;
-  font-size: clamp(1.6rem, 2.6vw, 2rem);
-  font-weight: 950;
+  font-size: clamp(var(--font-size-xl), 2.6vw, var(--font-size-2xl));
+  font-weight: var(--font-weight-black);
   letter-spacing: -0.03em;
   background: linear-gradient(
     135deg,
-    var(--welcome-color-title) 0%,
+    var(--ink-900) 0%,
     rgba(0, 0, 0, 0.9) 40%,
     var(--brand-rose-600) 70%,
     var(--brand-sage-500) 100%
@@ -176,7 +176,7 @@
   color: transparent; /* Fallback for browsers that don't support background-clip */
   display: inline-block; /* Required for background-clip to work */
   font-family: "Playfair Display", Georgia, serif;
-  line-height: 1.15;
+  line-height: var(--line-height-tight);
   text-wrap: balance;
   position: relative;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
@@ -185,26 +185,21 @@
 .collectionCard__count {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 0.9rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 850;
+  gap: var(--space-1-5);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-extrabold);
   letter-spacing: 0.03em;
-  background: linear-gradient(
-    135deg,
-    rgba(212, 140, 156, 0.15) 0%,
-    rgba(212, 140, 156, 0.1) 50%,
-    rgba(168, 213, 186, 0.12) 100%
-  );
+  background: var(--gradient-brand-soft);
   color: var(--brand-rose-700);
-  border: 1.5px solid rgba(212, 140, 156, 0.25);
+  border: var(--border-width-2) solid var(--brand-rose-border-2);
   box-shadow: 
-    0 2px 8px rgba(212, 140, 156, 0.1),
+    var(--shadow-brand-sm),
     0 0 0 1px rgba(255, 255, 255, 0.5) inset;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
+  transition: all var(--transition-slow) ease;
 }
 
 .collectionCard__count::before {
@@ -214,14 +209,14 @@
 }
 
 .collectionCard__description {
-  margin: 0.75rem 0 0;
-  color: var(--welcome-color-text);
+  margin: var(--space-3) 0 0;
+  color: var(--ink-700);
   opacity: 0.88;
-  font-size: 1rem;
-  line-height: 1.75;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
   max-width: 75ch;
   text-wrap: pretty;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   letter-spacing: 0.01em;
 }
 
@@ -229,62 +224,57 @@
    Empty state
 ========================= */
 .collectionCard__empty {
-  padding: 2.5rem 1.6rem;
+  padding: var(--space-10) var(--space-6);
   text-align: center;
-  border-radius: 16px;
-  background: var(--cc-empty-bg);
-  border: 1px dashed var(--cc-border-strong);
-  color: var(--cc-muted);
+  border-radius: var(--radius-lg);
+  background: var(--gradient-surface);
+  border: var(--border-width-1) dashed var(--brand-rose-border-2);
+  color: var(--ink-600);
 }
 
 .collectionCard__emptyIcon {
-  margin: 0 auto 1rem;
+  margin: 0 auto var(--space-4);
   color: var(--brand-rose-500);
   opacity: 0.6;
 }
 
 .collectionCard__emptyTitle {
-  margin: 0 0 0.5rem;
-  font-size: 1.1rem;
-  font-weight: 950;
-  color: var(--cc-text);
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-black);
+  color: var(--ink-900);
 }
 
 .collectionCard__emptyText {
   margin: 0;
-  line-height: 1.65;
-  font-size: 0.95rem;
+  line-height: var(--line-height-relaxed);
+  font-size: var(--font-size-sm);
 }
 
 .collectionCard__emptyActions {
   display: flex;
   justify-content: center;
-  margin-top: 1.25rem;
+  margin-top: var(--space-5);
 }
 
 .collectionCard__ctaBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.9rem 1.5rem;
-  border-radius: 999px;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-full);
   text-decoration: none;
-  font-weight: 950;
-  font-size: 0.9rem;
+  font-weight: var(--font-weight-black);
+  font-size: var(--font-size-sm);
   letter-spacing: 0.02em;
-  color: #fff;
-  background: linear-gradient(
-    135deg,
-    var(--brand-rose-600) 0%,
-    var(--brand-rose-500) 50%,
-    var(--brand-rose-600) 100%
-  );
+  color: var(--neutral-0);
+  background: var(--gradient-brand);
   box-shadow: 
-    0 4px 16px rgba(212, 140, 156, 0.3),
-    0 2px 8px rgba(212, 140, 156, 0.2),
+    var(--shadow-brand-md),
+    var(--shadow-brand-sm),
     0 0 0 1px rgba(255, 255, 255, 0.2) inset;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--transition-slow) cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
@@ -300,15 +290,15 @@
     rgba(255, 255, 255, 0.15) 100%
   );
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--transition-slow) ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .collectionCard__ctaBtn:hover {
     transform: translateY(-2px);
     box-shadow: 
-      0 8px 24px rgba(212, 140, 156, 0.4),
-      0 4px 12px rgba(212, 140, 156, 0.3),
+      var(--shadow-brand-lg),
+      var(--shadow-brand-md),
       0 0 0 1px rgba(255, 255, 255, 0.3) inset;
     filter: saturate(1.1) brightness(1.05);
   }
@@ -320,7 +310,7 @@
   .collectionCard:hover .collectionCard__count {
     transform: scale(1.05);
     box-shadow: 
-      0 4px 12px rgba(212, 140, 156, 0.15),
+      var(--shadow-brand-sm),
       0 0 0 1px rgba(255, 255, 255, 0.6) inset;
   }
 }
@@ -330,8 +320,8 @@
 }
 
 .collectionCard__ctaBtn:focus-visible {
-  outline: 3px solid rgba(212, 140, 156, 0.35);
-  outline-offset: 3px;
+  outline: var(--space-1) solid var(--brand-rose-border-2);
+  outline-offset: var(--space-1);
 }
 
 /* =========================
@@ -344,7 +334,7 @@
 .collectionCard__previewGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 /* Collection context styling - BouquetCard already uses bouquetCard class */
@@ -356,24 +346,24 @@
 .collectionCard__footer {
   display: flex;
   justify-content: center;
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(212, 140, 156, 0.08);
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: var(--border-width-1) solid var(--brand-rose-border);
   position: relative;
-  z-index: 1;
+  z-index: var(--z-base);
 }
 
 @media (min-width: 720px) {
   .collectionCard__previewGrid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1.15rem;
+    gap: var(--space-4);
   }
 }
 
 @media (min-width: 1024px) {
   .collectionCard__previewGrid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1.15rem;
+    gap: var(--space-4);
   }
 }
 
@@ -399,12 +389,12 @@
 
 .collectionCard__scrollWrap::before {
   left: 0;
-  background: linear-gradient(90deg, var(--cc-surface-fade-edge), transparent);
+  background: linear-gradient(90deg, var(--gradient-surface), transparent);
 }
 
 .collectionCard__scrollWrap::after {
   right: 0;
-  background: linear-gradient(270deg, var(--cc-surface-fade-edge), transparent);
+  background: linear-gradient(270deg, var(--gradient-surface), transparent);
 }
 
 /* Navigation Buttons */
@@ -412,11 +402,11 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 3;
+  z-index: var(--z-dropdown);
   
   width: 44px;
   height: 44px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   border: none;
   
   display: flex;
@@ -424,15 +414,15 @@
   justify-content: center;
   
   background: rgba(255, 255, 255, 0.95);
-  border: 1px solid var(--cc-border);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  border: var(--border-width-1) solid var(--brand-rose-border);
+  box-shadow: var(--shadow-lg);
   
-  color: var(--cc-brand-wine);
+  color: var(--brand-rose-700);
   cursor: pointer;
   
-  transition: all 0.25s ease;
+  transition: all var(--transition-fast) ease;
   opacity: 0;
-  animation: fadeIn 0.3s ease forwards;
+  animation: fadeIn var(--transition-slow) ease forwards;
 }
 
 @keyframes fadeIn {
@@ -440,11 +430,13 @@
   to { opacity: 1; }
 }
 
-.collectionCard__navBtn:hover {
-  background: var(--brand-rose-500);
-  color: white;
-  box-shadow: 0 12px 28px rgba(212, 140, 156, 0.35);
-  transform: translateY(-50%) scale(1.08);
+@media (hover: hover) and (pointer: fine) {
+  .collectionCard__navBtn:hover {
+    background: var(--brand-rose-500);
+    color: var(--neutral-0);
+    box-shadow: var(--shadow-brand-lg);
+    transform: translateY(-50%) scale(1.08);
+  }
 }
 
 @media (hover: none), (pointer: coarse) {
@@ -458,16 +450,16 @@
 }
 
 .collectionCard__navBtn:focus-visible {
-  outline: 3px solid rgba(212, 140, 156, 0.35);
-  outline-offset: 3px;
+  outline: var(--space-1) solid var(--brand-rose-border-2);
+  outline-offset: var(--space-1);
 }
 
 .collectionCard__navBtn--left {
-  left: 12px;
+  left: var(--space-3);
 }
 
 .collectionCard__navBtn--right {
-  right: 12px;
+  right: var(--space-3);
 }
 
 /* Scroll container */
@@ -475,11 +467,11 @@
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(245px, 265px);
-  gap: 1.1rem;
+  gap: var(--space-4);
 
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 0.25rem 0.25rem 1.2rem;
+  padding: var(--space-1) var(--space-1) var(--space-5);
 
   /* Prevent Safari/OS "auto" scrollbars from causing layout shifts */
   scrollbar-gutter: stable;
@@ -489,7 +481,7 @@
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
 
-  /* Extra guard: Safari sometimes “leaks” vertical overflow when children transform */
+  /* Extra guard: Safari sometimes "leaks" vertical overflow when children transform */
   overflow-y: hidden;
 }
 
@@ -536,10 +528,10 @@
 /* Progress Indicator */
 .collectionCard__progress {
   position: relative;
-  height: 3px;
+  height: var(--space-1);
   background: rgba(0, 0, 0, 0.04);
-  border-radius: 999px;
-  margin-top: 0.75rem;
+  border-radius: var(--radius-full);
+  margin-top: var(--space-3);
   overflow: hidden;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
 }
@@ -550,8 +542,8 @@
   top: 0;
   height: 100%;
   background: linear-gradient(90deg, var(--brand-rose-500), var(--brand-sage-400));
-  border-radius: 999px;
-  transition: width 0.2s ease;
+  border-radius: var(--radius-full);
+  transition: width var(--transition-fast) ease;
   box-shadow: 0 0 10px rgba(212, 140, 156, 0.3);
 }
 
@@ -559,19 +551,19 @@
    Bouquet Card (Enhanced)
 ========================= */
 .bouquetCard {
-  border-radius: 16px;
-  background: var(--cc-surface-strong);
-  border: 1px solid var(--cc-border);
+  border-radius: var(--radius-lg);
+  background: var(--gradient-surface);
+  border: var(--border-width-1) solid var(--brand-rose-border);
   overflow: hidden;
-  box-shadow: var(--cc-card-shadow);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-slow) cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
 
   display: flex;
   flex-direction: column;
   min-height: 100%;
 
-  animation: scaleIn 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: scaleIn var(--animation-speed-base) cubic-bezier(0.4, 0, 0.2, 1) forwards;
   opacity: 0;
 }
 
@@ -732,7 +724,7 @@
   font-size: 1.05rem;
   font-weight: 950;
   letter-spacing: -0.01em;
-  color: var(--cc-text);
+  color: var(--ink-900);
   line-height: 1.4;
   word-break: break-word;
   text-wrap: balance;
@@ -858,11 +850,11 @@
   font-weight: 950;
   letter-spacing: 0.3px;
 
-  background: linear-gradient(135deg, var(--cc-brand-pink) 0%, var(--cc-brand-pink2) 100%);
-  background-color: var(--cc-brand-pink);
-  color: var(--cc-btn-text);
+  background: var(--gradient-brand);
+  background-color: var(--brand-rose-500);
+  color: var(--neutral-0);
 
-  box-shadow: var(--cc-btn-shadow);
+  box-shadow: var(--shadow-brand-md);
   border: 1px solid rgba(0, 0, 0, 0.04);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   
@@ -875,7 +867,7 @@
 .bouquetCard__btn:visited,
 .bouquetCard__btn:active,
 .bouquetCard__btn:focus-visible {
-  color: var(--cc-btn-text);
+  color: var(--neutral-0);
 }
 
 .bouquetCard__btn::before {
@@ -912,7 +904,7 @@
 
   .bouquetCard:hover {
     transform: translateY(-3px);
-    box-shadow: var(--cc-card-shadow-hover);
+    box-shadow: var(--shadow-lg);
     border-color: rgba(212, 140, 156, 0.25);
   }
 
@@ -945,7 +937,7 @@
 
   .bouquetCard__btn:hover {
     transform: translateY(-2px);
-    box-shadow: var(--cc-btn-shadow-hover);
+    box-shadow: var(--shadow-brand-lg);
     filter: saturate(1.04) brightness(1.03);
   }
 
@@ -1225,3 +1217,4 @@
     transform: none !important;
   }
 }
+

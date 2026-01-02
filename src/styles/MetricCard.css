@@ -1,35 +1,57 @@
 /**
- * Metric Card Styles
- * Luxury and responsive metric card styling
+ * Metric Card Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
  */
+
+@import "design-system.css";
 
 .metricCard {
   position: relative;
-  padding: 1.5rem;
-  border-radius: 1rem;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: var(--card-padding-md);
+  border-radius: var(--radius-lg);
+  background: var(--gradient-surface);
+  border: var(--card-border);
+  transition: var(--transition-all);
   overflow: hidden;
 }
 
+.metricCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-brand-soft);
+  opacity: 0;
+  transition: var(--transition-opacity);
+  pointer-events: none;
+}
+
 .metricCard:hover {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--card-shadow-hover);
   transform: translateY(-2px);
-  border-color: rgba(139, 92, 246, 0.2);
+  border-color: var(--border-2);
+}
+
+.metricCard:hover::before {
+  opacity: 0.1;
+}
+
+.metricCard:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring), var(--card-shadow-hover);
 }
 
 .metricCard__icon {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
+  top: var(--space-4);
+  right: var(--space-4);
   width: 3rem;
   height: 3rem;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0.3;
-  transition: opacity 0.2s ease;
+  transition: var(--transition-opacity);
 }
 
 .metricCard:hover .metricCard__icon {
@@ -42,36 +64,36 @@
 }
 
 .metricCard__label {
-  font-size: 0.875rem;
-  color: #6b7280;
-  font-weight: 500;
-  margin: 0 0 0.5rem 0;
-  line-height: 1.4;
+  font-size: var(--font-size-sm);
+  color: var(--ink-600);
+  font-weight: var(--font-weight-medium);
+  margin: 0 0 var(--space-2) 0;
+  line-height: var(--line-height-normal);
 }
 
 .metricCard__value {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 0.25rem 0;
-  line-height: 1.2;
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--ink-900);
+  margin: 0 0 var(--space-1) 0;
+  line-height: var(--line-height-tight);
 }
 
 .metricCard__note {
-  font-size: 0.8125rem;
-  color: #9ca3af;
+  font-size: var(--font-size-xs);
+  color: var(--gray-400);
   margin: 0;
-  line-height: 1.4;
+  line-height: var(--line-height-normal);
 }
 
 /* Variants */
 .metricCard--primary {
   background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border-color: rgba(59, 130, 246, 0.2);
+  border-color: var(--info-border);
 }
 
 .metricCard--primary .metricCard__value {
-  color: #3b82f6;
+  color: var(--info-color);
 }
 
 .metricCard--info {
@@ -85,117 +107,56 @@
 
 .metricCard--success {
   background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-  border-color: rgba(16, 185, 129, 0.2);
+  border-color: var(--success-border);
 }
 
 .metricCard--success .metricCard__value {
-  color: #10b981;
+  color: var(--success-color);
 }
 
 .metricCard--warning {
   background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-  border-color: rgba(245, 158, 11, 0.2);
+  border-color: var(--warning-border);
 }
 
 .metricCard--warning .metricCard__value {
-  color: #f59e0b;
+  color: var(--warning-color);
 }
 
-.metricCard--featured {
-  background: linear-gradient(135deg, #fdf4ff 0%, #f3e8ff 100%);
-  border-color: rgba(139, 92, 246, 0.2);
+.metricCard--error {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border-color: var(--error-border);
 }
 
-.metricCard--featured .metricCard__value {
-  color: #8b5cf6;
+.metricCard--error .metricCard__value {
+  color: var(--error-color);
 }
 
-.metricCard--revenue {
-  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-  border-color: rgba(16, 185, 129, 0.3);
-}
-
-.metricCard--revenue .metricCard__value {
-  color: #059669;
-}
-
-.metricCard--orders {
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border-color: rgba(59, 130, 246, 0.3);
-}
-
-.metricCard--orders .metricCard__value {
-  color: #2563eb;
-}
-
-.metricCard--customers {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border-color: rgba(14, 165, 233, 0.3);
-}
-
-.metricCard--customers .metricCard__value {
-  color: #0284c7;
-}
-
-.metricCard--pending {
-  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-  border-color: rgba(245, 158, 11, 0.3);
-}
-
-.metricCard--pending .metricCard__value {
-  color: #d97706;
-}
-
-.metricCard--visits {
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-  border-color: rgba(16, 185, 129, 0.3);
-}
-
-.metricCard--visits .metricCard__value {
-  color: #059669;
-}
-
-.metricCard--bouquets {
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border-color: rgba(59, 130, 246, 0.3);
-}
-
-.metricCard--bouquets .metricCard__value {
-  color: #2563eb;
-}
-
-.metricCard--collections {
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-  border-color: rgba(16, 185, 129, 0.3);
-}
-
-.metricCard--collections .metricCard__value {
-  color: #059669;
-}
-
-/* Responsive */
+/* Responsive: Mobile-first approach */
 @media (max-width: 768px) {
   .metricCard {
-    padding: 1.25rem;
+    padding: var(--card-padding-sm);
+  }
+
+  .metricCard__value {
+    font-size: var(--font-size-3xl);
   }
 
   .metricCard__icon {
     width: 2.5rem;
     height: 2.5rem;
-    top: 0.75rem;
-    right: 0.75rem;
-  }
-
-  .metricCard__value {
-    font-size: 1.75rem;
-  }
-
-  .metricCard__label {
-    font-size: 0.8125rem;
-  }
-
-  .metricCard__note {
-    font-size: 0.75rem;
+    top: var(--space-3);
+    right: var(--space-3);
   }
 }
 
+@media (max-width: 640px) {
+  .metricCard__value {
+    font-size: var(--font-size-2xl);
+  }
+
+  .metricCard__icon {
+    width: 2rem;
+    height: 2rem;
+  }
+}

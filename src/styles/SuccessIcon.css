@@ -1,26 +1,18 @@
 /**
- * Success Icon Styles
- * Luxury animated success checkmark
+ * Success Icon Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ * Fully responsive on all devices: mobile, tablet, desktop
  */
+
+@import "design-system.css";
 
 .successIcon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #10b981;
-  animation: successIconPulse 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.successIcon__circle {
-  stroke-dasharray: 62.83;
-  stroke-dashoffset: 62.83;
-  animation: successIconCircle 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-.successIcon__check {
-  stroke-dasharray: 8;
-  stroke-dashoffset: 8;
-  animation: successIconCheck 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
+  color: var(--success-color);
+  animation: successIconPulse var(--animation-speed-base) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes successIconPulse {
@@ -37,10 +29,22 @@
   }
 }
 
+.successIcon__circle {
+  stroke-dasharray: 62.83;
+  stroke-dashoffset: 62.83;
+  animation: successIconCircle var(--animation-speed-base) cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
 @keyframes successIconCircle {
   to {
     stroke-dashoffset: 0;
   }
+}
+
+.successIcon__check {
+  stroke-dasharray: 8;
+  stroke-dashoffset: 8;
+  animation: successIconCheck var(--animation-speed-base) cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
 }
 
 @keyframes successIconCheck {
@@ -49,3 +53,28 @@
   }
 }
 
+/* Responsive */
+@media (max-width: 640px) {
+  .successIcon {
+    transform: scale(0.9);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .successIcon,
+  .successIcon__circle,
+  .successIcon__check {
+    animation: none !important;
+  }
+
+  .successIcon {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .successIcon__circle,
+  .successIcon__check {
+    stroke-dashoffset: 0;
+  }
+}

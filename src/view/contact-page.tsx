@@ -11,6 +11,7 @@ import { STORE_PROFILE } from "../config/store-profile";
 import { CONTACT_INFO, SOCIAL_MEDIA, BUSINESS_HOURS } from "../constants/app-constants";
 import { SocialIcon } from "../components/icons/SocialIcons";
 import { PhoneIcon, EmailIcon, ClockIcon } from "../components/icons/UIIcons";
+import { LocationIcon } from "../components/icons";
 import ContactInfoItem from "../components/common/ContactInfoItem";
 import FormField from "../components/common/FormField";
 import AlertMessage from "../components/common/AlertMessage";
@@ -74,12 +75,7 @@ class ContactPageView extends Component<ContactPageViewProps> {
                   value={BUSINESS_HOURS.compact}
                 />
                 <ContactInfoItem
-                  icon={
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  }
+                  icon={<LocationIcon width={24} height={24} />}
                   label="Lokasi"
                   value={`${STORE_PROFILE.location.streetAddress}, ${STORE_PROFILE.location.subLocality}, ${STORE_PROFILE.location.locality}`}
                 />

@@ -1,11 +1,32 @@
-@import "colors.css";
-@import "luxury-enhancements.css";
+/**
+ * Order History Page Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ * Fully responsive on all devices: mobile, tablet, desktop
+ * 
+ * Note: OrderHistoryCard and EmptyState have their own CSS files
+ */
+
+@import "design-system.css";
 
 .ohPage {
-  padding: clamp(4rem, 7vw, 6rem) clamp(1rem, 3vw, 1.5rem) clamp(5rem, 8vw, 6.5rem);
+  padding: clamp(var(--space-16), 7vw, var(--space-24)) clamp(var(--space-4), 3vw, var(--space-6)) clamp(var(--space-20), 8vw, 6.5rem);
   background: linear-gradient(135deg, var(--brand-sage-50) 0%, var(--brand-rose-50) 100%);
   min-height: 100vh;
   color: var(--ink-800);
+  position: relative;
+  overflow: hidden;
+}
+
+.ohPage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(212, 140, 156, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(168, 213, 186, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .ohPage--loading {
@@ -15,303 +36,110 @@
 }
 
 .ohContainer {
-  max-width: 900px;
+  max-width: var(--container-lg);
   width: 100%;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
 .ohHeader {
   text-align: center;
-  margin-bottom: 3rem;
-  animation: fadeIn 0.6s ease-out;
+  margin-bottom: var(--space-12);
+  animation: fadeIn var(--transition-slow) ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .ohHeader__title {
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 950;
+  font-size: clamp(var(--font-size-4xl), 4vw, var(--font-size-5xl));
+  font-weight: var(--font-weight-black);
   color: var(--ink-900);
-  margin: 0 0 0.75rem;
-  font-family: "Playfair Display", Georgia, serif;
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-family-heading);
+  background: var(--gradient-heading);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: var(--line-height-tight);
 }
 
 .ohHeader__subtitle {
-  font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+  font-size: clamp(var(--font-size-base), 1.5vw, var(--font-size-lg));
   color: var(--ink-600);
   margin: 0;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-normal);
 }
 
 .ohList {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--space-6);
 }
 
-.ohCard {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
-  border: 1.5px solid rgba(212, 140, 156, 0.2);
-  border-radius: 20px;
-  padding: 1.5rem;
-  box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.06),
-    0 4px 12px rgba(0, 0, 0, 0.04);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.ohCard:hover {
-  transform: translateY(-2px);
-  box-shadow: 
-    0 12px 32px rgba(0, 0, 0, 0.08),
-    0 6px 16px rgba(0, 0, 0, 0.06);
-  border-color: rgba(212, 140, 156, 0.3);
-}
-
-.ohCard__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(212, 140, 156, 0.15);
-}
-
-.ohCard__title {
-  font-size: 1.2rem;
-  font-weight: 900;
-  color: var(--ink-900);
-  margin: 0 0 0.25rem;
-}
-
-.ohCard__date {
-  font-size: 0.9rem;
-  color: var(--ink-600);
-  margin: 0;
-  font-weight: 600;
-}
-
-.ohCard__price {
-  font-size: 1.3rem;
-  font-weight: 950;
-  color: var(--brand-green-700);
-}
-
-.ohCard__details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1.25rem;
-}
-
-.ohCard__detail {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-}
-
-.ohCard__label {
-  font-size: 0.9rem;
-  color: var(--ink-600);
-  font-weight: 700;
-  min-width: 100px;
-}
-
-.ohCard__value {
-  font-size: 0.9rem;
-  color: var(--ink-800);
-  font-weight: 800;
-  text-align: right;
-  flex: 1;
-}
-
-.ohCard__actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.ohCard__actionGroup {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
-}
-
-.ohCard__btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  border-radius: 12px;
-  font-weight: 800;
-  font-size: 0.9rem;
-  text-decoration: none;
-  border: 1.5px solid transparent;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-}
-
-.ohCard__btn--primary {
-  background: linear-gradient(
-    135deg,
-    var(--brand-green-500) 0%,
-    var(--brand-green-600) 50%,
-    var(--brand-green-700) 100%
-  );
-  color: #fff;
-  box-shadow: 
-    0 4px 12px rgba(16, 185, 129, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
-}
-
-.ohCard__btn--primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 
-    0 6px 16px rgba(16, 185, 129, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.3) inset;
-}
-
-.ohCard__btn--primary {
-  width: 100%;
-}
-
-.ohCard__btn--secondary,
-.ohCard__btn--cart {
-  min-width: 44px;
-  flex: 0 0 auto;
-  padding: 0.75rem;
-}
-
-.ohCard__btn--secondary {
-  background: linear-gradient(
-    135deg,
-    rgba(212, 140, 156, 0.1) 0%,
-    rgba(168, 213, 186, 0.08) 100%
-  );
-  border-color: rgba(212, 140, 156, 0.3);
-  color: var(--ink-800);
-}
-
-.ohCard__btn--secondary:hover {
-  transform: translateY(-1px);
-  border-color: var(--brand-rose-500);
-  background: linear-gradient(
-    135deg,
-    rgba(212, 140, 156, 0.15) 0%,
-    rgba(168, 213, 186, 0.12) 100%
-  );
-}
-
-.ohCard__btn--cart {
-  background: linear-gradient(
-    135deg,
-    rgba(168, 213, 186, 0.1) 0%,
-    rgba(148, 193, 166, 0.08) 100%
-  );
-  border-color: rgba(168, 213, 186, 0.3);
-  color: var(--brand-sage-600);
-}
-
-.ohCard__btn--cart:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(168, 213, 186, 0.15) 0%,
-    rgba(148, 193, 166, 0.12) 100%
-  );
-  border-color: rgba(168, 213, 186, 0.4);
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 4px 12px rgba(168, 213, 186, 0.2);
-}
-
+/* Empty state wrapper - EmptyState component has own CSS */
 .ohEmpty {
-  text-align: center;
-  padding: 4rem 2rem;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
-  border: 1.5px solid rgba(212, 140, 156, 0.2);
-  border-radius: 24px;
-  box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.06),
-    0 4px 12px rgba(0, 0, 0, 0.04);
+  /* EmptyState component styling is in EmptyState.css */
+  /* This class is only used for className prop */
 }
 
-.ohEmpty__icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-}
-
-.ohEmpty__title {
-  font-size: 1.8rem;
-  font-weight: 950;
-  color: var(--ink-900);
-  margin: 0 0 0.75rem;
-  font-family: "Playfair Display", Georgia, serif;
-}
-
-.ohEmpty__text {
-  font-size: 1rem;
-  color: var(--ink-600);
-  margin: 0 0 2rem;
-  font-weight: 700;
-}
-
-.ohEmpty__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1rem 1.5rem;
-  border-radius: 999px;
-  font-weight: 900;
-  text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
+/* Footer */
 .ohFooter {
-  margin-top: 3rem;
+  margin-top: var(--space-12);
   text-align: center;
 }
 
 .ohFooter__link {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--gap-sm);
   color: var(--brand-rose-600);
   text-decoration: none;
-  font-weight: 800;
-  font-size: 0.95rem;
-  transition: all 0.2s ease;
+  font-weight: var(--font-weight-extrabold);
+  font-size: var(--font-size-base);
+  transition: var(--transition-all);
 }
 
-.ohFooter__link:hover {
-  color: var(--brand-rose-700);
-  transform: translateX(-4px);
+@media (hover: hover) and (pointer: fine) {
+  .ohFooter__link:hover {
+    color: var(--brand-rose-700);
+    transform: translateX(-4px);
+  }
 }
 
+.ohFooter__link:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset-sm);
+}
+
+/* Loading */
 .ohLoading {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  padding: 3rem;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 20px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  gap: var(--space-4);
+  padding: var(--space-12);
+  background: var(--backdrop-glass-md);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
 }
 
 .ohSpinner {
   width: 40px;
   height: 40px;
-  border: 4px solid rgba(212, 140, 156, 0.2);
-  border-top: 4px solid var(--brand-rose-500);
-  border-radius: 50%;
+  border: var(--border-2);
+  border-top-color: var(--brand-rose-500);
+  border-radius: var(--radius-full);
   animation: spin 1s linear infinite;
 }
 
@@ -320,19 +148,37 @@
   100% { transform: rotate(360deg); }
 }
 
+/* Responsive: Mobile-first approach */
 @media (max-width: 768px) {
-  .ohCard__header {
-    flex-direction: column;
-    gap: 0.75rem;
+  .ohPage {
+    padding: clamp(var(--space-12), 5vw, var(--space-16)) var(--space-4);
   }
 
-  .ohCard__actions {
-    flex-direction: column;
+  .ohHeader {
+    margin-bottom: var(--space-8);
   }
 
-  .ohCard__btn {
-    width: 100%;
-    justify-content: center;
+  .ohList {
+    gap: var(--space-5);
+  }
+
+  .ohFooter {
+    margin-top: var(--space-8);
   }
 }
 
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .ohHeader,
+  .ohSpinner {
+    animation: none !important;
+  }
+
+  .ohFooter__link {
+    transition: none !important;
+  }
+
+  .ohFooter__link:hover {
+    transform: none;
+  }
+}

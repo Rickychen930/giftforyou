@@ -1,127 +1,154 @@
 /**
- * Order History Card Styles
- * Luxury and responsive order history card styling
+ * Order History Card Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ * Fully responsive on all devices: mobile, tablet, desktop
+ * 
+ * Note: StatusBadge, LuxuryButton, and IconButton have their own CSS files
  */
 
-.orderHistoryCard {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border-radius: 1rem;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  padding: 1.5rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+@import "design-system.css";
+
+.ohCard {
+  background: var(--backdrop-glass-md);
+  border: var(--border-2);
+  border-color: var(--border-brand-subtle);
+  border-radius: var(--radius-xl);
+  padding: clamp(var(--space-6), 3vw, var(--space-8));
+  box-shadow: var(--card-shadow);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
+  transition: var(--transition-all);
+  position: relative;
+  overflow: hidden;
 }
 
-.orderHistoryCard:hover {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.05);
-  transform: translateY(-4px);
-  border-color: rgba(139, 92, 246, 0.3);
+@media (hover: hover) and (pointer: fine) {
+  .ohCard:hover {
+    transform: translateY(var(--space-neg-1));
+    box-shadow: var(--card-shadow-hover);
+    border-color: var(--border-brand-strong);
+  }
 }
 
-.orderHistoryCard__header {
+.ohCard__header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-5);
+  border-bottom: var(--border-1);
+  border-color: var(--border-brand-subtle);
 }
 
-.orderHistoryCard__info {
-  flex: 1;
-  min-width: 0;
-}
-
-.orderHistoryCard__title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 0 0 0.5rem 0;
-  line-height: 1.4;
-}
-
-.orderHistoryCard__date {
-  font-size: 0.875rem;
-  color: #6b7280;
+.ohCard__title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-black);
+  color: var(--ink-900);
   margin: 0;
+  font-family: var(--font-family-heading);
+  background: var(--gradient-heading);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: var(--line-height-tight);
 }
 
-.orderHistoryCard__price {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #8b5cf6;
-  flex-shrink: 0;
-  margin-left: 1rem;
-}
-
-.orderHistoryCard__details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-}
-
-.orderHistoryCard__detail {
-  display: flex;
-  gap: 0.75rem;
-  font-size: 0.9375rem;
-}
-
-.orderHistoryCard__label {
-  font-weight: 600;
-  color: #6b7280;
-  min-width: 6rem;
+.ohCard__status {
   flex-shrink: 0;
 }
 
-.orderHistoryCard__value {
-  color: #1f2937;
-  flex: 1;
-  word-break: break-word;
-}
-
-.orderHistoryCard__actions {
+.ohCard__body {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
 }
 
-.orderHistoryCard__btn {
-  width: 100%;
-}
-
-.orderHistoryCard__actionGroup {
+.ohCard__info {
   display: flex;
-  gap: 0.5rem;
-  justify-content: center;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
-.orderHistoryCard__btn--secondary {
+.ohCard__infoRow {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  padding: 0;
+  gap: var(--space-4);
+  padding: var(--space-2) 0;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .orderHistoryCard {
-    padding: 1.25rem;
+.ohCard__infoLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--ink-600);
+}
+
+.ohCard__infoValue {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--ink-900);
+  text-align: right;
+}
+
+.ohCard__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: var(--border-1);
+  border-color: var(--border-brand-subtle);
+}
+
+/* Responsive: Mobile-first approach */
+@media (max-width: 640px) {
+  .ohCard {
+    padding: var(--space-5);
+    border-radius: var(--radius-lg);
   }
 
-  .orderHistoryCard__header {
+  .ohCard__header {
     flex-direction: column;
-    gap: 0.75rem;
+    align-items: flex-start;
+    gap: var(--space-3);
   }
 
-  .orderHistoryCard__price {
-    margin-left: 0;
-    align-self: flex-start;
+  .ohCard__body {
+    gap: var(--space-3);
   }
 
-  .orderHistoryCard__label {
-    min-width: 5rem;
+  .ohCard__infoRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+
+  .ohCard__infoValue {
+    text-align: left;
+  }
+
+  .ohCard__footer {
+    flex-direction: column;
+    width: 100%;
   }
 }
 
+/* Touch devices optimization */
+@media (hover: none) and (pointer: coarse) {
+  .ohCard:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .ohCard {
+    transition: none !important;
+  }
+
+  .ohCard:hover {
+    transform: none !important;
+  }
+}

@@ -1,83 +1,144 @@
-@import "colors.css";
+/**
+ * Customer Card Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ */
+
+@import "design-system.css";
 
 .customerCard {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%);
-  border: 1.5px solid rgba(212, 140, 156, 0.2);
-  border-radius: 20px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--gradient-surface);
+  border: 1.5px solid var(--border-2);
+  border-radius: var(--radius-lg);
+  padding: var(--card-padding-md);
+  box-shadow: var(--card-shadow);
+  transition: var(--transition-all);
   cursor: pointer;
-  backdrop-filter: blur(15px);
+  backdrop-filter: var(--backdrop-blur-lg);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.customerCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-brand-soft);
+  opacity: 0;
+  transition: var(--transition-opacity);
+  pointer-events: none;
 }
 
 .customerCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  border-color: rgba(212, 140, 156, 0.35);
+  box-shadow: var(--card-shadow-hover);
+  border-color: var(--border-3);
+}
+
+.customerCard:hover::before {
+  opacity: 1;
 }
 
 .customerCard:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 4px rgba(212, 140, 156, 0.2), 0 8px 24px rgba(0, 0, 0, 0.1);
-  border-color: rgba(212, 140, 156, 0.4);
+  box-shadow: var(--focus-ring), var(--card-shadow-hover);
+  border-color: var(--border-3);
 }
 
 .customerCard__header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1.25rem;
-  gap: 1rem;
+  margin-bottom: var(--space-5);
+  gap: var(--gap-md);
+  position: relative;
+  z-index: 1;
 }
 
 .customerCard__info {
   flex: 1;
+  min-width: 0;
 }
 
 .customerCard__name {
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
   color: var(--ink-900);
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 var(--space-2) 0;
+  line-height: var(--line-height-tight);
 }
 
 .customerCard__phone {
-  font-size: 0.95rem;
+  font-size: var(--font-size-sm);
   color: var(--ink-600);
   margin: 0;
+  line-height: var(--line-height-normal);
 }
 
 .customerCard__badges {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--gap-sm);
   flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 .customerCard__stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(212, 140, 156, 0.1);
+  gap: var(--gap-md);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-1);
+  position: relative;
+  z-index: 1;
 }
 
 .customerCard__stat {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--space-1);
 }
 
 .customerCard__statLabel {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--ink-500);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 600;
+  letter-spacing: var(--letter-spacing-wide);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-normal);
 }
 
 .customerCard__statValue {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
   color: var(--ink-900);
+  line-height: var(--line-height-tight);
+}
+
+/* Responsive: Mobile-first approach */
+@media (max-width: 768px) {
+  .customerCard {
+    padding: var(--card-padding-sm);
+    border-radius: var(--radius-md);
+  }
+
+  .customerCard__header {
+    flex-direction: column;
+    gap: var(--gap-sm);
+  }
+
+  .customerCard__stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--gap-sm);
+  }
+}
+
+@media (max-width: 640px) {
+  .customerCard__stats {
+    grid-template-columns: 1fr;
+  }
+
+  .customerCard__name {
+    font-size: var(--font-size-lg);
+  }
 }

@@ -13,6 +13,7 @@ import LuxuryButton from "../components/buttons/LuxuryButton";
 import EmptyState from "../components/common/EmptyState";
 import CartItemCard from "../components/common/CartItemCard";
 import SummaryCard from "../components/common/SummaryCard";
+import { ShoppingCartIcon, DeleteIcon, ArrowLeftIcon } from "../components/icons";
 
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
 
@@ -60,18 +61,7 @@ class CartPageView extends Component<CartPageViewProps> {
             description="Mulai tambahkan bouquet favorit Anda ke keranjang"
             actionLabel="Jelajahi Koleksi"
             actionPath="/collection"
-            icon={
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M9 2L7 6H2v2h1l1 10h12l1-10h1V6h-5L15 2H9zM9 4h6l1 2H8l1-2zm1 4v8h2V8h-2zm4 0v8h2V8h-2z"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  opacity="0.3"
-                />
-              </svg>
-            }
+            icon={<ShoppingCartIcon width={64} height={64} style={{ opacity: 0.3 }} />}
           />
         </div>
       </section>
@@ -105,17 +95,7 @@ class CartPageView extends Component<CartPageViewProps> {
               size="sm"
               onClick={onClearCart}
               className="cartPage__clearBtn"
-              icon={
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              }
+              icon={<DeleteIcon width={16} height={16} />}
               iconPosition="left"
             >
               Kosongkan
@@ -172,15 +152,7 @@ class CartPageView extends Component<CartPageViewProps> {
                   Lanjutkan ke Checkout
                 </LuxuryButton>
                 <Link to="/collection" className="cartSummary__continueLink">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M19 12H5M12 19l-7-7 7-7"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  <ArrowLeftIcon width={16} height={16} />
                   Lanjutkan Belanja
                 </Link>
               </div>

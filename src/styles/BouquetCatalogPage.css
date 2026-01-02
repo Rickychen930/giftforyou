@@ -1,23 +1,19 @@
-@import "colors.css";
-@import "catalog/CatalogHeader.css";
-@import "catalog/CatalogSearch.css";
-@import "catalog/CatalogFilters.css";
-@import "catalog/CatalogGrid.css";
-@import "catalog/CatalogPagination.css";
-@import "catalog/CatalogEmpty.css";
-@import "catalog/CatalogSkeleton.css";
-@import "catalog/CatalogActiveFilters.css";
+/**
+ * Bouquet Catalog Page Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ * Fully responsive on all devices: mobile, tablet, desktop
+ * 
+ * Note: CatalogHeader, CatalogSearch, CatalogFilters, CatalogGrid, CatalogPagination,
+ * CatalogEmpty, CatalogSkeleton, CatalogActiveFilters, and CatalogResetButton have
+ * their own CSS files in src/styles/catalog/
+ */
 
-/* =========================================================
-   BOUQUET CATALOG PAGE - Luxury & Elegant Design
-   ========================================================= */
+@import "design-system.css";
 
 .catalog-page {
-  padding: clamp(4rem, 7vw, 6rem) 0 clamp(5rem, 8vw, 6.5rem);
-  background:
-    radial-gradient(1200px 650px at 8% 8%, rgba(212, 140, 156, 0.12), transparent 65%),
-    radial-gradient(1200px 650px at 96% 20%, rgba(168, 213, 186, 0.12), transparent 65%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 248, 255, 0.96) 100%);
+  padding: clamp(var(--space-16), 7vw, var(--space-24)) 0 clamp(var(--space-20), 8vw, 6.5rem);
+  background: var(--gradient-surface);
   color: var(--ink-900);
   overflow-x: clip;
   position: relative;
@@ -30,9 +26,9 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(212, 140, 156, 0.3), transparent);
-  opacity: 0.8;
+  height: var(--border-width-1);
+  background: var(--gradient-divider);
+  opacity: var(--opacity-strong);
   z-index: 1;
 }
 
@@ -43,38 +39,31 @@
 }
 
 .catalog-page__error {
-  max-width: var(--max);
-  margin: 2rem auto;
-  padding: 2rem;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.95));
-  border: 1.5px solid rgba(239, 68, 68, 0.2);
-  border-radius: 16px;
-  color: #dc2626;
-  font-weight: 700;
+  max-width: var(--container-max);
+  margin: var(--space-8) auto;
+  padding: var(--space-8);
+  background: var(--error-bg);
+  border: var(--error-border);
+  border-radius: var(--radius-lg);
+  color: var(--error-color);
+  font-weight: var(--font-weight-bold);
   text-align: center;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--card-shadow);
 }
 
 .catalog-page__summary {
-  max-width: var(--max);
-  margin: 0 auto 1.5rem;
-  padding: clamp(1.25rem, 2.5vw, 1.75rem) clamp(1rem, 3vw, 1.5rem);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
-  border: 1.5px solid rgba(212, 140, 156, 0.15);
-  border-radius: 20px;
-  box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.06),
-    0 4px 16px rgba(0, 0, 0, 0.04),
-    0 2px 8px rgba(0, 0, 0, 0.03),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  max-width: var(--container-max);
+  margin: 0 auto var(--space-6);
+  padding: clamp(var(--space-5), 2.5vw, var(--space-7)) clamp(var(--space-4), 3vw, var(--space-6));
+  background: var(--backdrop-glass-md);
+  border: var(--border-2);
+  border-color: var(--border-brand-subtle);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: var(--backdrop-blur-lg);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg);
   display: flex;
-  gap: 1rem;
+  gap: var(--space-4);
   align-items: flex-start;
   flex-direction: column;
 }
@@ -90,65 +79,18 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.75rem;
+  gap: var(--gap-md);
   flex-shrink: 0;
 }
 
-.catalog-page__clear-btn {
-  border: 1.5px solid rgba(212, 140, 156, 0.25);
-  cursor: pointer;
-  padding: 0.55rem 1rem;
-  border-radius: 999px;
-  font-weight: 900;
-  font-size: 0.85rem;
-  color: var(--brand-rose-600);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.9) 100%
-  );
-  box-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  min-height: 40px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.catalog-page__clear-btn:focus-visible {
-  outline: 2px solid rgba(212, 140, 156, 0.35);
-  outline-offset: 2px;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .catalog-page__clear-btn:hover {
-    transform: translateY(-2px);
-    border-color: rgba(212, 140, 156, 0.35);
-    background: linear-gradient(
-      135deg,
-      rgba(212, 140, 156, 0.1) 0%,
-      rgba(212, 140, 156, 0.05) 100%
-    );
-    box-shadow: 
-      0 4px 12px rgba(0, 0, 0, 0.08),
-      0 0 0 1px rgba(255, 255, 255, 0.9) inset;
-    color: var(--brand-rose-700);
-  }
-}
-
 .catalog-page__layout {
-  max-width: var(--max);
+  max-width: var(--container-max);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: clamp(2rem, 4vw, 3rem);
+  gap: clamp(var(--space-8), 4vw, var(--space-12));
   align-items: stretch;
-  padding: 0 clamp(1rem, 3vw, 1.5rem);
+  padding: 0 clamp(var(--space-4), 3vw, var(--space-6));
   position: relative;
 }
 
@@ -156,14 +98,14 @@
   min-height: 300px;
   width: 100%;
   position: relative;
-  animation: fadeInUp 0.6s ease-out;
+  animation: fadeInUp var(--transition-slow) ease-out;
   scroll-margin-top: 7.25rem;
 }
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(var(--space-5));
   }
   to {
     opacity: 1;
@@ -171,6 +113,7 @@
   }
 }
 
+/* Responsive: Mobile-first approach */
 @media (max-width: 860px) {
   .catalog-page__summary {
     flex-direction: column;
@@ -182,6 +125,13 @@
   }
 }
 
+@media (max-width: 768px) {
+  .catalog-page {
+    padding: var(--space-12) 0 var(--space-16);
+  }
+}
+
+/* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   .catalog-page__results {
     animation: none !important;

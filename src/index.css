@@ -2,6 +2,9 @@
    Premium Global Styles & Luxury Enhancements
    ========================================================= */
 
+/* Import Design System (must come first for variables) */
+@import "./styles/design-system.css";
+
 body {
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',

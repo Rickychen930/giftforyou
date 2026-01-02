@@ -1,105 +1,76 @@
-@import "colors.css";
+/**
+ * Urgency Indicator Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ * Fully responsive on all devices: mobile, tablet, desktop
+ */
+
+@import "design-system.css";
 
 .urgencyIndicator {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 0.9rem;
-  border-radius: 10px;
-  font-size: 0.9rem;
-  font-weight: 800;
-  animation: urgencyPulse 2s ease-in-out infinite;
-  border: 1.5px solid;
-}
-
-.urgencyIndicator--high {
-  background: linear-gradient(
-    135deg,
-    rgba(239, 68, 68, 0.15) 0%,
-    rgba(220, 38, 38, 0.1) 100%
-  );
-  border-color: rgba(239, 68, 68, 0.4);
-  color: #dc2626;
-  box-shadow: 
-    0 4px 12px rgba(239, 68, 68, 0.2),
-    0 0 0 1px rgba(239, 68, 68, 0.1) inset;
-}
-
-.urgencyIndicator--medium {
-  background: linear-gradient(
-    135deg,
-    rgba(245, 158, 11, 0.15) 0%,
-    rgba(217, 119, 6, 0.1) 100%
-  );
-  border-color: rgba(245, 158, 11, 0.4);
-  color: #d97706;
-  box-shadow: 
-    0 4px 12px rgba(245, 158, 11, 0.15),
-    0 0 0 1px rgba(245, 158, 11, 0.1) inset;
-}
-
-.urgencyIndicator--low {
-  background: linear-gradient(
-    135deg,
-    rgba(59, 130, 246, 0.15) 0%,
-    rgba(37, 99, 235, 0.1) 100%
-  );
-  border-color: rgba(59, 130, 246, 0.4);
-  color: #2563eb;
-  box-shadow: 
-    0 4px 12px rgba(59, 130, 246, 0.1),
-    0 0 0 1px rgba(59, 130, 246, 0.1) inset;
+  gap: var(--gap-xs);
+  padding: var(--space-1-5) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-wider);
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: var(--transition-all);
 }
 
 .urgencyIndicator__icon {
-  font-size: 1.1rem;
-  line-height: 1;
-  animation: urgencyIconPulse 1.5s ease-in-out infinite;
+  width: var(--size-4);
+  height: var(--size-4);
+  flex-shrink: 0;
 }
 
-.urgencyIndicator__text {
-  line-height: 1.4;
-}
-
-@keyframes urgencyPulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.02);
-    opacity: 0.95;
-  }
-}
-
-@keyframes urgencyIconPulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.15);
-  }
-}
-
-/* High urgency - more aggressive animation */
 .urgencyIndicator--high {
-  animation: urgencyPulseHigh 1.5s ease-in-out infinite;
+  background: var(--error-bg);
+  border: var(--error-border);
+  color: var(--error-color);
+  box-shadow: var(--shadow-error-sm);
 }
 
-@keyframes urgencyPulseHigh {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-    box-shadow: 
-      0 4px 12px rgba(239, 68, 68, 0.2),
-      0 0 0 1px rgba(239, 68, 68, 0.1) inset;
+.urgencyIndicator--medium {
+  background: var(--warning-bg);
+  border: var(--warning-border);
+  color: var(--warning-color);
+  box-shadow: var(--shadow-warning-sm);
+}
+
+.urgencyIndicator--low {
+  background: var(--info-bg);
+  border: var(--info-border);
+  color: var(--info-color);
+  box-shadow: var(--shadow-info-sm);
+}
+
+.urgencyIndicator--none {
+  background: var(--success-bg);
+  border: var(--success-border);
+  color: var(--success-color);
+  box-shadow: var(--shadow-success-sm);
+}
+
+/* Responsive: Mobile-first approach */
+@media (max-width: 640px) {
+  .urgencyIndicator {
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--font-size-xs);
   }
-  50% {
-    transform: scale(1.03);
-    opacity: 0.9;
-    box-shadow: 
-      0 6px 16px rgba(239, 68, 68, 0.3),
-      0 0 0 2px rgba(239, 68, 68, 0.2) inset;
+
+  .urgencyIndicator__icon {
+    width: var(--size-3-5);
+    height: var(--size-3-5);
   }
 }
 
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .urgencyIndicator {
+    transition: none !important;
+  }
+}

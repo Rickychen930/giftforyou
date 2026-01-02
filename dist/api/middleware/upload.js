@@ -3,8 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.upload = void 0;
-exports.saveUploadedImage = saveUploadedImage;
+exports.saveUploadedImage = exports.upload = void 0;
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
@@ -60,7 +59,7 @@ const allowedExt = new Set([
 const storage = multer_1.default.memoryStorage();
 exports.upload = (0, multer_1.default)({
     storage,
-    limits: { fileSize: 8 * 1024 * 1024 }, // 8MB
+    limits: { fileSize: 8 * 1024 * 1024 },
     fileFilter: (_req, file, cb) => {
         const ext = path_1.default.extname(file.originalname).toLowerCase();
         // ✅ FIX: Allow by mimetype OR extension (Safari sometimes sends empty/incorrect mimetypes)
@@ -266,4 +265,5 @@ async function saveUploadedImage(file, retries = 2) {
         throw err; // Re-throw to be handled by caller
     }
 }
+exports.saveUploadedImage = saveUploadedImage;
 //# sourceMappingURL=upload.js.map

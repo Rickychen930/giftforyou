@@ -1,36 +1,35 @@
-@import "colors.css";
+/**
+ * Bouquet Edit Form Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ * Fully responsive on all devices: mobile, tablet, desktop
+ * 
+ * Note: SectionHeader, DropdownWithModal, and BouquetEditor have their own CSS files
+ */
 
-/* Bouquet Edit Form - Luxury Design */
+@import "design-system.css";
+
 .bouquetEditForm {
   width: 100%;
-  max-width: 1400px;
+  max-width: var(--container-max);
   margin: 0 auto;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.99) 0%,
-    rgba(255, 255, 255, 0.97) 50%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
-  border: 2px solid rgba(212, 140, 156, 0.18);
-  border-radius: 28px;
-  box-shadow: 
-    0 32px 80px rgba(0, 0, 0, 0.1),
-    0 16px 40px rgba(0, 0, 0, 0.06),
-    0 8px 20px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset,
-    0 0 0 2px rgba(212, 140, 156, 0.05) inset;
-  padding: clamp(2.5rem, 5vw, 3.5rem);
+  padding: clamp(var(--space-10), 5vw, var(--space-14));
+  background: var(--backdrop-glass-lg);
+  border: var(--border-2);
+  border-color: var(--border-brand-subtle);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: var(--backdrop-blur-xl);
+  -webkit-backdrop-filter: var(--backdrop-blur-xl);
   overflow: hidden;
   position: relative;
-  backdrop-filter: blur(28px) saturate(200%);
-  -webkit-backdrop-filter: blur(28px) saturate(200%);
-  animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: fadeInUp var(--transition-smooth) cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px) scale(0.98);
+    transform: translateY(var(--space-5)) scale(0.98);
   }
   to {
     opacity: 1;
@@ -39,80 +38,20 @@
 }
 
 .bouquetEditForm__header {
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-8);
   position: relative;
   z-index: 1;
 }
 
-.bouquetEditForm__backBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  margin-bottom: 1.5rem;
-  border: 2px solid rgba(212, 140, 156, 0.25);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--brand-rose-600);
-  font-size: 0.95rem;
-  font-weight: 800;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-.bouquetEditForm__backBtn:hover {
-  background: var(--brand-rose-600);
-  color: #fff;
-  border-color: var(--brand-rose-600);
-  transform: translateX(-4px);
-}
-
-.bouquetEditForm__headerContent {
-  text-align: left;
-}
-
-.bouquetEditForm__title {
-  margin: 0;
-  font-size: clamp(2rem, 4vw, 2.5rem);
-  font-weight: 950;
-  letter-spacing: -0.025em;
-  background: linear-gradient(
-    135deg,
-    var(--brand-rose-500) 0%,
-    var(--brand-rose-700) 50%,
-    var(--brand-wine-700) 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1.25;
-  font-family: "Playfair Display", Georgia, serif;
-  filter: drop-shadow(0 2px 4px rgba(212, 140, 156, 0.2));
-}
-
-.bouquetEditForm__subtitle {
-  margin: 0.75rem 0 0;
-  color: var(--ink-620);
-  line-height: 1.7;
-  font-size: clamp(0.95rem, 1.5vw, 1.05rem);
-  max-width: 75ch;
-}
-
 .bouquetEditForm__collectionSelector {
-  margin-bottom: 2rem;
-  padding: 1.5rem;
-  background: linear-gradient(
-    135deg,
-    rgba(212, 140, 156, 0.08) 0%,
-    rgba(255, 255, 255, 0.05) 100%
-  );
-  border: 2px solid rgba(212, 140, 156, 0.2);
-  border-radius: 16px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  margin-bottom: var(--space-8);
+  padding: var(--space-6);
+  background: var(--gradient-surface-subtle);
+  border: var(--border-2);
+  border-color: var(--border-brand-subtle);
+  border-radius: var(--radius-lg);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
   position: relative;
   z-index: 1;
 }
@@ -120,20 +59,21 @@
 .bouquetEditForm__collectionLabel {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--gap-md);
 }
 
 .bouquetEditForm__collectionLabelText {
-  font-size: 0.95rem;
-  font-weight: 850;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-extrabold);
   color: var(--ink-800);
 }
 
 .bouquetEditForm__collectionHint {
-  margin: 0.5rem 0 0;
-  font-size: 0.85rem;
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-size-sm);
   color: var(--ink-500);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-relaxed);
 }
 
 .bouquetEditForm__formWrapper {
@@ -141,15 +81,21 @@
   z-index: 1;
 }
 
-/* Responsive */
+/* Responsive: Mobile-first approach */
 @media (max-width: 767px) {
   .bouquetEditForm {
-    padding: 1.5rem;
-    border-radius: 20px;
+    padding: var(--space-6);
+    border-radius: var(--radius-xl);
   }
 
   .bouquetEditForm__collectionSelector {
-    padding: 1.25rem;
+    padding: var(--space-5);
   }
 }
 
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .bouquetEditForm {
+    animation: none !important;
+  }
+}

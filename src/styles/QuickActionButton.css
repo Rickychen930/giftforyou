@@ -1,46 +1,74 @@
 /**
- * Quick Action Button Styles
- * Luxury and responsive quick action button styling
+ * Quick Action Button Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
  */
+
+@import "design-system.css";
 
 .quickActionBtn {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  padding: 1.25rem 1rem;
-  border: 2px solid rgba(0, 0, 0, 0.1);
-  border-radius: 0.75rem;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  color: #1f2937;
+  gap: var(--space-3);
+  padding: var(--card-padding-sm);
+  border: 2px solid var(--border-1);
+  border-radius: var(--radius-md);
+  background: var(--gradient-surface);
+  color: var(--ink-900);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--transition-all);
   text-align: center;
   min-width: 120px;
+  position: relative;
+  overflow: hidden;
+}
+
+.quickActionBtn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-brand-soft);
+  opacity: 0;
+  transition: var(--transition-opacity);
+  pointer-events: none;
 }
 
 .quickActionBtn:hover {
-  border-color: #8b5cf6;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-color: var(--tab-color);
+  background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 15px rgba(139, 92, 246, 0.1);
+  box-shadow: var(--shadow-md), 0 10px 15px rgba(139, 92, 246, 0.1);
+}
+
+.quickActionBtn:hover::before {
+  opacity: 0.1;
 }
 
 .quickActionBtn:active {
   transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
+}
+
+.quickActionBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .quickActionBtn--primary {
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-  color: #ffffff;
-  border-color: #8b5cf6;
+  background: linear-gradient(135deg, var(--tab-color) 0%, var(--tab-color-hover) 100%);
+  color: var(--neutral-0);
+  border-color: var(--tab-color);
+}
+
+.quickActionBtn--primary::before {
+  background: linear-gradient(135deg, var(--tab-color-hover) 0%, #6d28d9 100%);
 }
 
 .quickActionBtn--primary:hover {
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 15px rgba(139, 92, 246, 0.3);
+  background: linear-gradient(135deg, var(--tab-color-hover) 0%, #6d28d9 100%);
+  box-shadow: var(--shadow-lg), 0 10px 15px rgba(139, 92, 246, 0.3);
 }
 
 .quickActionBtn__icon {
@@ -49,15 +77,17 @@
   justify-content: center;
   width: 2.5rem;
   height: 2.5rem;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md);
   background: rgba(139, 92, 246, 0.1);
-  color: #8b5cf6;
-  transition: all 0.2s ease;
+  color: var(--tab-color);
+  transition: var(--transition-all);
+  position: relative;
+  z-index: 1;
 }
 
 .quickActionBtn--primary .quickActionBtn__icon {
   background: rgba(255, 255, 255, 0.2);
-  color: #ffffff;
+  color: var(--neutral-0);
 }
 
 .quickActionBtn:hover .quickActionBtn__icon {
@@ -70,17 +100,19 @@
 }
 
 .quickActionBtn__label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  line-height: 1.4;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-normal);
+  position: relative;
+  z-index: 1;
 }
 
-/* Responsive */
+/* Responsive: Mobile-first approach */
 @media (max-width: 768px) {
   .quickActionBtn {
-    padding: 1rem 0.75rem;
+    padding: var(--space-4) var(--space-3);
     min-width: 100px;
-    gap: 0.5rem;
+    gap: var(--gap-sm);
   }
 
   .quickActionBtn__icon {
@@ -89,7 +121,19 @@
   }
 
   .quickActionBtn__label {
-    font-size: 0.8125rem;
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: 640px) {
+  .quickActionBtn {
+    padding: var(--space-3) var(--space-2);
+    min-width: 90px;
+  }
+
+  .quickActionBtn__icon {
+    width: 1.75rem;
+    height: 1.75rem;
   }
 }
 

@@ -13,6 +13,7 @@ import type { Collection } from "../../models/domain/collection";
 import "../../styles/CollectionListView.css";
 import SectionHeader from "../../components/common/SectionHeader";
 import EmptyState from "../../components/common/EmptyState";
+import { CollectionIcon, CheckIcon, CloseIcon, EditIcon, DeleteIcon, SpinnerIcon } from "../../components/icons";
 
 interface Props {
   collections: Collection[];
@@ -183,25 +184,7 @@ class CollectionListView extends Component<Props, CollectionListViewState> {
       <EmptyState
         title="Tidak ada koleksi"
         description="Belum ada koleksi yang dibuat."
-        icon={
-          <svg
-            width="64"
-            height="64"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-          >
-            <path
-              d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              opacity="0.3"
-            />
-          </svg>
-        }
+        icon={<CollectionIcon width={64} height={64} style={{ opacity: 0.3 }} />}
         className={`${this.baseClass}__empty`}
       />
     );
@@ -255,22 +238,7 @@ class CollectionListView extends Component<Props, CollectionListViewState> {
                   disabled={saving}
                   aria-label="Simpan"
                 >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M20 6L9 17l-5-5"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  <CheckIcon width={16} height={16} />
                 </button>
                 <button
                   type="button"
@@ -283,22 +251,7 @@ class CollectionListView extends Component<Props, CollectionListViewState> {
                   disabled={saving}
                   aria-label="Batal"
                 >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M18 6L6 18M6 6l12 12"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  <CloseIcon width={16} height={16} />
                 </button>
               </div>
             </div>
@@ -325,29 +278,7 @@ class CollectionListView extends Component<Props, CollectionListViewState> {
                   aria-label={`Edit nama koleksi ${collection.name}`}
                   title="Edit nama"
                 >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  <EditIcon width={18} height={18} />
                 </button>
                 {this.props.onCollectionDelete && (
                   <button
@@ -359,42 +290,9 @@ class CollectionListView extends Component<Props, CollectionListViewState> {
                     title="Hapus"
                   >
                     {isDeleting ? (
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        aria-hidden="true"
-                        className="spinning"
-                      >
-                        <circle
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeDasharray="31.416"
-                          strokeDashoffset="31.416"
-                        />
-                      </svg>
+                      <SpinnerIcon width={18} height={18} className="spinning" />
                     ) : (
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        aria-hidden="true"
-                      >
-                        <path
-                          d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m4 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                      <DeleteIcon width={18} height={18} />
                     )}
                   </button>
                 )}

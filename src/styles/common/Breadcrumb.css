@@ -1,20 +1,27 @@
-@import "../colors.css";
+/**
+ * Breadcrumb Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ */
+
+@import "../design-system.css";
 
 .breadcrumb {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: clamp(1.5rem, 3vw, 2rem);
-  font-size: clamp(0.85rem, 1.2vw, 0.95rem);
+  gap: var(--gap-sm);
+  margin-bottom: clamp(var(--space-6), 3vw, var(--space-8));
+  font-size: clamp(var(--font-size-xs), 1.2vw, var(--font-size-sm));
   flex-wrap: wrap;
 }
 
 .breadcrumb__link {
   color: var(--ink-600);
   text-decoration: none;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  font-weight: 600;
+  transition: var(--transition-all);
+  font-weight: var(--font-weight-semibold);
   position: relative;
+  line-height: var(--line-height-normal);
 }
 
 .breadcrumb__link::after {
@@ -25,7 +32,7 @@
   width: 0;
   height: 2px;
   background: linear-gradient(90deg, var(--brand-rose-500), var(--brand-rose-600));
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width var(--transition-base);
 }
 
 .breadcrumb__link:hover {
@@ -36,28 +43,36 @@
   width: 100%;
 }
 
+.breadcrumb__link:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-xs);
+}
+
 .breadcrumb__text {
   color: var(--ink-600);
+  font-weight: var(--font-weight-normal);
 }
 
 .breadcrumb__separator {
-  color: var(--ink-400);
+  color: var(--icon-muted);
   user-select: none;
   opacity: 0.6;
 }
 
 .breadcrumb__current {
   color: var(--ink-900);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
+/* Responsive: Mobile-first approach */
 @media (max-width: 767px) {
   .breadcrumb {
-    font-size: 0.8rem;
+    font-size: var(--font-size-xs);
+    gap: var(--gap-xs);
   }
 }
-

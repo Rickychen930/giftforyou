@@ -1,15 +1,19 @@
 /**
- * Tab Navigation Styles
- * Luxury and responsive tab navigation styling
+ * Tab Navigation Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
  */
+
+@import "design-system.css";
 
 .tabNavigation {
   display: flex;
-  gap: 0.5rem;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+  gap: var(--gap-sm);
+  border-bottom: 2px solid var(--border-1);
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  position: relative;
 }
 
 .tabNavigation::-webkit-scrollbar {
@@ -19,30 +23,53 @@
 .tabNavigation__tab {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.875rem 1.25rem;
+  gap: var(--gap-sm);
+  padding: var(--btn-padding-md);
   border: none;
   background: transparent;
-  color: #6b7280;
-  font-size: 0.9375rem;
-  font-weight: 600;
+  color: var(--tab-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   margin-bottom: -2px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--transition-all);
   white-space: nowrap;
   position: relative;
 }
 
+.tabNavigation__tab::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--tab-bg);
+  opacity: 0;
+  transition: var(--transition-opacity);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  pointer-events: none;
+}
+
 .tabNavigation__tab:hover {
-  color: #8b5cf6;
-  background: rgba(139, 92, 246, 0.05);
+  color: var(--tab-color-hover);
+}
+
+.tabNavigation__tab:hover::before {
+  opacity: 1;
+}
+
+.tabNavigation__tab:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .tabNavigation__tab--active {
-  color: #8b5cf6;
-  border-bottom-color: #8b5cf6;
-  background: rgba(139, 92, 246, 0.05);
+  color: var(--tab-text-active);
+  border-bottom-color: var(--tab-border);
+}
+
+.tabNavigation__tab--active::before {
+  opacity: 1;
+  background: var(--tab-bg);
 }
 
 .tabNavigation__icon {
@@ -51,31 +78,34 @@
   justify-content: center;
   width: 1.125rem;
   height: 1.125rem;
+  flex-shrink: 0;
 }
 
 .tabNavigation__label {
   flex: 1;
+  min-width: 0;
 }
 
 .tabNavigation__shortcut {
-  font-size: 0.75rem;
-  color: #9ca3af;
-  padding: 0.125rem 0.375rem;
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 0.25rem;
+  font-size: var(--font-size-xs);
+  color: var(--gray-400);
+  padding: var(--space-1) 0.375rem;
+  background: var(--gray-bg);
+  border-radius: var(--radius-xs);
   font-family: monospace;
+  font-weight: var(--font-weight-medium);
 }
 
 .tabNavigation__tab--active .tabNavigation__shortcut {
-  color: #8b5cf6;
-  background: rgba(139, 92, 246, 0.1);
+  color: var(--tab-color);
+  background: var(--tab-bg-hover);
 }
 
-/* Responsive */
+/* Responsive: Mobile-first approach */
 @media (max-width: 768px) {
   .tabNavigation__tab {
-    padding: 0.75rem 1rem;
-    font-size: 0.875rem;
+    padding: var(--btn-padding-sm);
+    font-size: var(--font-size-xs);
   }
 
   .tabNavigation__shortcut {
@@ -83,3 +113,13 @@
   }
 }
 
+@media (max-width: 640px) {
+  .tabNavigation {
+    gap: var(--gap-xs);
+  }
+
+  .tabNavigation__tab {
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--font-size-xs);
+  }
+}

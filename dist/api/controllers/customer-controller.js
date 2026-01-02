@@ -1,8 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCustomers = getCustomers;
-exports.createCustomer = createCustomer;
-exports.getCustomerById = getCustomerById;
+exports.getCustomerById = exports.createCustomer = exports.getCustomers = void 0;
 const customer_model_1 = require("../../models/customer-model");
 const validation_1 = require("../../utils/validation");
 async function getCustomers(req, res) {
@@ -35,6 +33,7 @@ async function getCustomers(req, res) {
         res.status(500).json({ message: "Failed to get customers", error: err instanceof Error ? err.message : "Unknown error" });
     }
 }
+exports.getCustomers = getCustomers;
 async function createCustomer(req, res) {
     try {
         const buyerName = (0, validation_1.normalizeString)(req.body?.buyerName, "", 120);
@@ -81,6 +80,7 @@ async function createCustomer(req, res) {
         res.status(500).json({ message: "Failed to create customer", error: err instanceof Error ? err.message : "Unknown error" });
     }
 }
+exports.createCustomer = createCustomer;
 async function getCustomerById(req, res) {
     try {
         const id = (0, validation_1.normalizeString)(req.params?.id, "", 64);
@@ -100,4 +100,5 @@ async function getCustomerById(req, res) {
         res.status(500).json({ message: "Failed to get customer" });
     }
 }
+exports.getCustomerById = getCustomerById;
 //# sourceMappingURL=customer-controller.js.map

@@ -1,4 +1,11 @@
-@import "colors.css";
+/**
+ * Share Button Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ * Fully responsive on all devices: mobile, tablet, desktop
+ */
+
+@import "design-system.css";
 
 .share-button {
   position: relative;
@@ -8,51 +15,61 @@
 .share-button__trigger {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  background: rgba(255, 255, 255, 0.9);
-  border: 2px solid rgba(212, 140, 156, 0.2);
-  border-radius: 999px;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  background: var(--backdrop-glass-sm);
+  border: var(--border-2);
+  border-color: var(--border-brand-subtle);
+  border-radius: var(--radius-full);
   color: var(--ink-700);
-  font-weight: 800;
-  font-size: 0.9rem;
+  font-weight: var(--font-weight-extrabold);
+  font-size: var(--font-size-sm);
   cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  transition: var(--transition-all);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
+  box-shadow: var(--shadow-xs);
 }
 
-.share-button__trigger:hover {
-  background: rgba(212, 140, 156, 0.1);
-  border-color: var(--brand-rose-400);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(212, 140, 156, 0.2);
+@media (hover: hover) and (pointer: fine) {
+  .share-button__trigger:hover {
+    background: var(--brand-rose-50);
+    border-color: var(--border-brand-strong);
+    transform: translateY(var(--space-neg-1));
+    box-shadow: var(--shadow-md);
+  }
 }
 
 .share-button__trigger:active {
   transform: translateY(0);
 }
 
+.share-button__trigger:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset-sm);
+}
+
 .share-button__menu {
   position: absolute;
-  top: calc(100% + 0.5rem);
+  top: calc(100% + var(--space-2));
   right: 0;
-  min-width: 180px;
-  background: rgba(255, 255, 255, 0.98);
-  border: 2px solid rgba(212, 140, 156, 0.2);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  padding: 0.5rem;
-  z-index: 1000;
-  animation: slideDown 0.2s ease;
+  min-width: var(--size-45);
+  background: var(--backdrop-glass-lg);
+  border: var(--border-2);
+  border-color: var(--border-brand-subtle);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-2xl);
+  backdrop-filter: var(--backdrop-blur-lg);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg);
+  padding: var(--space-2);
+  z-index: var(--z-dropdown);
+  animation: slideDown var(--transition-base);
 }
 
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(var(--space-neg-2-5));
   }
   to {
     opacity: 1;
@@ -64,28 +81,38 @@
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   background: transparent;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   color: var(--ink-700);
-  font-weight: 700;
-  font-size: 0.9rem;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: var(--transition-all);
   text-align: left;
 }
 
-.share-button__item:hover {
-  background: rgba(212, 140, 156, 0.1);
-  color: var(--brand-rose-700);
+@media (hover: hover) and (pointer: fine) {
+  .share-button__item:hover {
+    background: var(--brand-rose-50);
+    color: var(--brand-rose-700);
+  }
+}
+
+.share-button__item:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset-sm);
 }
 
 .share-button__item svg {
   flex-shrink: 0;
+  width: var(--size-4);
+  height: var(--size-4);
 }
 
+/* Responsive */
 @media (max-width: 768px) {
   .share-button__menu {
     right: auto;
@@ -93,3 +120,25 @@
   }
 }
 
+/* Touch devices optimization */
+@media (hover: none) and (pointer: coarse) {
+  .share-button__trigger:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .share-button__trigger,
+  .share-button__item {
+    transition: none !important;
+  }
+
+  .share-button__menu {
+    animation: none !important;
+  }
+
+  .share-button__trigger:hover {
+    transform: none !important;
+  }
+}

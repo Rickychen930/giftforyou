@@ -45,6 +45,8 @@
     "src/models/cart-page-model.ts",
     "src/models/favorites-page-model.ts",
     "src/models/checkout-page-model.ts",
+    "src/models/bouquet-editor-model.ts",
+    "src/models/bouquet-uploader-model.ts",
     "node_modules"
   ]
 }

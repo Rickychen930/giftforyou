@@ -1,10 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateBody = void 0;
-exports.sanitizeString = sanitizeString;
-exports.isValidEmail = isValidEmail;
-exports.isStrongPassword = isStrongPassword;
-exports.isValidUsername = isValidUsername;
+exports.validateBody = exports.isValidUsername = exports.isStrongPassword = exports.isValidEmail = exports.sanitizeString = void 0;
 /**
  * Input sanitization and validation utilities
  */
@@ -21,6 +17,7 @@ function sanitizeString(input) {
         .replace(/javascript:/gi, "") // Remove javascript: protocol
         .replace(/on\w+=/gi, ""); // Remove event handlers
 }
+exports.sanitizeString = sanitizeString;
 /**
  * Validate email format
  */
@@ -28,6 +25,7 @@ function isValidEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email) && email.length <= 254; // RFC 5321
 }
+exports.isValidEmail = isValidEmail;
 /**
  * Validate password strength
  * Requirements:
@@ -62,6 +60,7 @@ function isStrongPassword(password) {
         errors,
     };
 }
+exports.isStrongPassword = isStrongPassword;
 /**
  * Validate username
  */
@@ -80,6 +79,7 @@ function isValidUsername(username) {
     }
     return { valid: true };
 }
+exports.isValidUsername = isValidUsername;
 /**
  * Middleware to validate request body
  */

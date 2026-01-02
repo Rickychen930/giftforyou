@@ -1,4 +1,11 @@
-@import "colors.css";
+/**
+ * Image Lightbox Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ * Fully responsive on all devices: mobile, tablet, desktop
+ */
+
+@import "design-system.css";
 
 .image-lightbox {
   position: fixed;
@@ -6,15 +13,15 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 9999;
+  z-index: var(--z-modal);
   background: rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: var(--backdrop-blur-lg);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
-  animation: fadeIn 0.3s ease;
+  padding: var(--space-8);
+  animation: fadeIn var(--transition-base);
 }
 
 @keyframes fadeIn {
@@ -33,7 +40,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
+  gap: var(--space-6);
 }
 
 .image-lightbox__close {
@@ -47,19 +54,26 @@
   justify-content: center;
   background: rgba(255, 255, 255, 0.1);
   border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  color: white;
+  border-radius: var(--radius-full);
+  color: var(--neutral-0);
   cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  transition: var(--transition-all);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
   z-index: 1;
 }
 
-.image-lightbox__close:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.4);
-  transform: scale(1.1);
+@media (hover: hover) and (pointer: fine) {
+  .image-lightbox__close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: scale(1.1);
+  }
+}
+
+.image-lightbox__close:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
 }
 
 .image-lightbox__image-wrapper {
@@ -69,7 +83,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 20px;
+  border-radius: var(--radius-xl);
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   background: rgba(255, 255, 255, 0.05);
@@ -98,37 +112,46 @@
 
 .image-lightbox__actions {
   display: flex;
-  gap: 1rem;
+  gap: var(--space-4);
   align-items: center;
 }
 
 .image-lightbox__action-btn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  gap: var(--gap-sm);
+  padding: var(--btn-padding-md);
   background: rgba(255, 255, 255, 0.1);
   border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 999px;
-  color: white;
+  border-radius: var(--radius-full);
+  color: var(--neutral-0);
   text-decoration: none;
-  font-weight: 700;
-  font-size: 0.9rem;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  transition: var(--transition-all);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
-.image-lightbox__action-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.4);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+@media (hover: hover) and (pointer: fine) {
+  .image-lightbox__action-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
 }
 
-@media (max-width: 768px) {
+.image-lightbox__action-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive: Mobile-first approach */
+/* Mobile devices (up to 640px) */
+@media (max-width: 640px) {
   .image-lightbox {
-    padding: 1rem;
+    padding: var(--space-4);
   }
 
   .image-lightbox__close {
@@ -144,5 +167,59 @@
   .image-lightbox__image {
     max-height: 70vh;
   }
+
+  .image-lightbox__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .image-lightbox__action-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
+/* Tablet devices (641px to 968px) */
+@media (min-width: 641px) and (max-width: 968px) {
+  .image-lightbox {
+    padding: var(--space-6);
+  }
+}
+
+/* Desktop devices (969px and above) */
+@media (min-width: 969px) {
+  .image-lightbox {
+    padding: var(--space-8);
+  }
+}
+
+/* Touch devices optimization */
+@media (hover: none) and (pointer: coarse) {
+  .image-lightbox__close {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .image-lightbox__close:active {
+    transform: scale(0.95);
+  }
+
+  .image-lightbox__action-btn {
+    min-height: 44px;
+  }
+
+  .image-lightbox__action-btn:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .image-lightbox {
+    animation: none;
+  }
+
+  .image-lightbox__image {
+    animation: none;
+  }
+}

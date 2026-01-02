@@ -1,56 +1,88 @@
 /**
- * Category Filter Styles
- * Luxury and responsive category filter styling
+ * Category Filter Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
  */
+
+@import "design-system.css";
 
 .categoryFilter {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 .categoryFilter__button {
-  padding: 0.625rem 1.25rem;
-  border: 2px solid rgba(0, 0, 0, 0.1);
-  border-radius: 2rem;
-  background: #ffffff;
-  color: #6b7280;
-  font-size: 0.9375rem;
-  font-weight: 600;
+  padding: var(--space-2-5) var(--space-5);
+  border: 2px solid var(--input-border);
+  border-radius: var(--radius-full);
+  background: var(--input-bg);
+  color: var(--ink-600);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--transition-all);
   white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.categoryFilter__button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--tab-bg);
+  opacity: 0;
+  transition: var(--transition-opacity);
+  pointer-events: none;
 }
 
 .categoryFilter__button:hover {
-  border-color: #8b5cf6;
-  color: #8b5cf6;
-  background: rgba(139, 92, 246, 0.05);
+  border-color: var(--input-border-focus);
+  color: var(--tab-color);
   transform: translateY(-1px);
 }
 
+.categoryFilter__button:hover::before {
+  opacity: 1;
+}
+
+.categoryFilter__button:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
 .categoryFilter__button--active {
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-  color: #ffffff;
-  border-color: #8b5cf6;
-  box-shadow: 0 4px 6px rgba(139, 92, 246, 0.3);
+  background: linear-gradient(135deg, var(--tab-color) 0%, var(--tab-color-hover) 100%);
+  color: var(--neutral-0);
+  border-color: var(--tab-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.categoryFilter__button--active::before {
+  opacity: 0;
 }
 
 .categoryFilter__button--active:hover {
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  background: linear-gradient(135deg, var(--tab-color-hover) 0%, #6d28d9 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(139, 92, 246, 0.4);
+  box-shadow: var(--shadow-md);
 }
 
-/* Responsive */
+/* Responsive: Mobile-first approach */
 @media (max-width: 768px) {
   .categoryFilter {
-    gap: 0.5rem;
+    gap: var(--gap-sm);
   }
 
   .categoryFilter__button {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--font-size-xs);
   }
 }
 
+@media (max-width: 640px) {
+  .categoryFilter {
+    gap: var(--gap-xs);
+  }
+}

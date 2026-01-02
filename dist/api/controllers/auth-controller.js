@@ -15,31 +15,18 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createUser = createUser;
-exports.loginUser = loginUser;
-exports.googleLogin = googleLogin;
-exports.refreshToken = refreshToken;
+exports.refreshToken = exports.googleLogin = exports.loginUser = exports.createUser = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const user_model_1 = require("../../models/user-model");
@@ -137,7 +124,7 @@ async function createUser(req, res) {
             username,
             email,
             password: hashed,
-            role: "customer", // Default to customer, admin should be created via seed
+            role: "customer",
             isActive: true,
         });
         // Create customer profile if fullName and phoneNumber provided
@@ -149,7 +136,7 @@ async function createUser(req, res) {
                 await CustomerModel.create({
                     buyerName: fullName,
                     phoneNumber: phoneNumber,
-                    address: "", // Can be filled later
+                    address: "",
                     userId: user._id.toString(), // Link to user
                 });
             }
@@ -166,6 +153,7 @@ async function createUser(req, res) {
         res.status(500).json({ error: "Registration failed" });
     }
 }
+exports.createUser = createUser;
 async function loginUser(req, res) {
     try {
         // Apply rate limiting
@@ -249,6 +237,7 @@ async function loginUser(req, res) {
         res.status(500).json({ error: "Login failed" });
     }
 }
+exports.loginUser = loginUser;
 /**
  * Refresh token endpoint
  */
@@ -292,7 +281,7 @@ async function googleLogin(req, res) {
                 user = await user_model_1.UserModel.create({
                     username: uniqueUsername,
                     email,
-                    password: "", // No password for OAuth users
+                    password: "",
                     role: "customer",
                     isActive: true,
                 });
@@ -301,7 +290,7 @@ async function googleLogin(req, res) {
                     const { CustomerModel } = await Promise.resolve().then(() => __importStar(require("../../models/customer-model")));
                     await CustomerModel.create({
                         buyerName: name,
-                        phoneNumber: "", // Can be filled later
+                        phoneNumber: "",
                         address: "",
                         userId: user._id.toString(),
                     });
@@ -341,6 +330,7 @@ async function googleLogin(req, res) {
         res.status(500).json({ error: "Google login failed" });
     }
 }
+exports.googleLogin = googleLogin;
 async function refreshToken(req, res) {
     try {
         const { refreshToken: token } = req.body;
@@ -386,4 +376,5 @@ async function refreshToken(req, res) {
         res.status(500).json({ error: "Token refresh failed" });
     }
 }
+exports.refreshToken = refreshToken;
 //# sourceMappingURL=auth-controller.js.map

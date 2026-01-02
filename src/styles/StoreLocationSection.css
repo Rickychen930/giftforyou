@@ -1,186 +1,206 @@
-@import "colors.css";
+/**
+ * Store Location Section Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ * Fully responsive on all devices: mobile, tablet, desktop
+ * 
+ * Note: SectionHeader has its own CSS file
+ */
 
-/* =========================================================
-   STORE LOCATION SECTION - Luxury & Elegant Design
-   ========================================================= */
+@import "design-system.css";
 
-.store-location {
+.storeLocation {
   position: relative;
-  width: 100%;
   min-height: auto;
-  padding: clamp(3rem, 6vw, 5rem) 0;
-  background:
-    radial-gradient(1400px 700px at 8% 0%, rgba(212, 140, 156, 0.08), transparent 65%),
-    radial-gradient(1200px 700px at 94% 6%, rgba(168, 213, 186, 0.08), transparent 65%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 248, 255, 0.96) 100%);
-  border-top: 1px solid rgba(212, 140, 156, 0.15);
+  padding: clamp(var(--space-20), 8vw, var(--space-24)) 0;
+  background: var(--gradient-surface);
+  border-top: var(--border-2);
   overflow: hidden;
-  z-index: 1;
+  isolation: isolate;
+  z-index: var(--z-base);
 }
 
-.store-location::before {
+.storeLocation::before {
   content: "";
   position: absolute;
   inset: 0 0 auto 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(212, 140, 156, 0.35), transparent);
-  opacity: 0.9;
-  pointer-events: none;
+  height: var(--border-width-2);
+  background: var(--gradient-divider);
+  opacity: var(--opacity-strong);
+  z-index: var(--z-base);
 }
 
-/* =========================================================
-   CONTAINER
-   ========================================================= */
-
-.store-location__container {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 1400px;
+.storeLocation__container {
+  max-width: var(--container-max);
   margin: 0 auto;
-  padding: 0 clamp(1rem, 3vw, 2rem);
-  box-sizing: border-box;
+  padding: 0 clamp(var(--space-4), 3vw, var(--space-6));
 }
 
-/* =========================================================
-   INFO PANEL
-   ========================================================= */
+.storeLocation__content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(var(--space-8), 5vw, var(--space-12));
+  align-items: start;
+  margin-top: var(--space-8);
+}
 
-.store-location__info {
-  position: relative;
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.98) 0%, 
-    rgba(252, 244, 248, 0.96) 100%);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  padding: clamp(2rem, 4vw, 3rem) clamp(1.5rem, 3vw, 2.5rem);
-  border-radius: 24px;
-  border: 1.5px solid rgba(212, 140, 156, 0.15);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.06),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+.storeLocation__info {
   display: flex;
   flex-direction: column;
-  gap: clamp(1.5rem, 3vw, 2rem);
+  gap: var(--space-6);
 }
 
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .store-location__info {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    background: rgba(255, 255, 255, 0.98);
+.storeLocation__details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.storeLocation__detail {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--backdrop-glass-sm);
+  border: var(--border-1);
+  border-color: var(--border-brand-subtle);
+  border-radius: var(--radius-lg);
+  transition: var(--transition-all);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .storeLocation__detail:hover {
+    background: var(--backdrop-glass-md);
+    border-color: var(--border-brand-strong);
+    transform: translateX(var(--space-1));
   }
 }
 
-.store-location__kicker {
-  margin: 0;
-  font-size: 0.85rem;
-  font-weight: 800;
+.storeLocation__detailIcon {
+  width: var(--size-6);
+  height: var(--size-6);
   color: var(--brand-rose-600);
+  flex-shrink: 0;
+  margin-top: var(--space-1);
+}
+
+.storeLocation__detailContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.storeLocation__detailLabel {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--ink-600);
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  opacity: 0.9;
+  letter-spacing: var(--letter-spacing-wider);
 }
 
-.store-location__title {
-  margin: 0;
-  font-size: clamp(1.75rem, 4vw, 2.5rem);
-  font-weight: 950;
-  line-height: 1.2;
+.storeLocation__detailValue {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
   color: var(--ink-900);
-  font-family: "Playfair Display", Georgia, serif;
-  background: linear-gradient(
-    135deg,
-    var(--ink-900) 0%,
-    var(--brand-rose-700) 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  position: relative;
+  line-height: var(--line-height-relaxed);
 }
 
-.store-location__title::after {
-  content: "";
-  position: absolute;
-  bottom: -0.5rem;
-  left: 0;
-  width: 60px;
-  height: 3px;
-  background: linear-gradient(90deg, var(--brand-rose-500), var(--brand-rose-600));
-  border-radius: 2px;
+.storeLocation__map {
+  width: 100%;
+  height: 400px;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  border: var(--border-2);
+  border-color: var(--border-brand-subtle);
 }
 
-/* =========================================================
-   CARDS GRID
-   ========================================================= */
-
-.store-location__cards {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: clamp(1.25rem, 2.5vw, 1.75rem);
-  margin-top: 0.5rem;
+.storeLocation__map iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
 }
 
-@media (min-width: 768px) {
-  .store-location__cards {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.storeLocation__actions {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  flex-wrap: wrap;
 }
 
-@media (min-width: 1024px) {
-  .store-location__cards {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-/* =========================================================
-   RESPONSIVE DESIGN
-   ========================================================= */
-
+/* Responsive: Mobile-first approach */
 @media (max-width: 1024px) {
-  .store-location {
-    padding: clamp(2.5rem, 5vw, 3.5rem) 0;
+  .storeLocation {
+    padding: clamp(var(--space-16), 5vw, var(--space-18)) 0;
   }
 
-  .store-location__info {
-    padding: clamp(1.5rem, 3vw, 2rem) clamp(1.25rem, 2.5vw, 2rem);
-    border-radius: 20px;
+  .storeLocation__content {
+    gap: var(--space-8);
   }
 }
 
 @media (max-width: 768px) {
-  .store-location {
-    padding: 2rem 0;
+  .storeLocation {
+    padding: var(--space-14) 0;
   }
 
-  .store-location__info {
-    padding: 1.5rem 1.25rem;
-    border-radius: 16px;
+  .storeLocation__container {
+    padding: 0 var(--space-4);
   }
 
-  .store-location__title {
-    font-size: 1.5rem;
+  .storeLocation__content {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+
+  .storeLocation__map {
+    order: -1;
+    height: 300px;
+    border-radius: var(--radius-lg);
+  }
+
+  .storeLocation__actions {
+    flex-direction: column;
   }
 }
 
-@media (max-width: 480px) {
-  .store-location__container {
-    padding: 0 1rem;
+@media (max-width: 640px) {
+  .storeLocation {
+    padding: var(--space-12) 0;
   }
 
-  .store-location__info {
-    padding: 1.25rem 1rem;
+  .storeLocation__info {
+    gap: var(--space-4);
+  }
+
+  .storeLocation__details {
+    gap: var(--space-3);
+  }
+
+  .storeLocation__detail {
+    padding: var(--space-3);
+  }
+
+  .storeLocation__map {
+    height: 250px;
   }
 }
 
-/* =========================================================
-   ACCESSIBILITY
-   ========================================================= */
+/* Touch devices optimization */
+@media (hover: none) and (pointer: coarse) {
+  .storeLocation__detail:active {
+    transform: scale(0.98);
+  }
+}
 
+/* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .store-location * {
+  .storeLocation__detail {
     transition: none !important;
-    animation: none !important;
+  }
+
+  .storeLocation__detail:hover {
+    transform: none !important;
   }
 }

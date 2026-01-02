@@ -1,115 +1,243 @@
-/* Delivery Time Slot Styles */
+/**
+ * Delivery Time Slot Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ * Responsive on all devices: mobile, tablet, desktop
+ */
+
+@import "design-system.css";
+
 .deliveryTimeSlot {
-  margin-top: 1rem;
+  margin-top: var(--space-4);
+  width: 100%;
 }
 
 .deliveryTimeSlot__label {
   display: block;
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
   color: var(--ink-700);
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-3);
 }
 
 .deliveryTimeSlot__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 0.75rem;
+  gap: var(--space-3);
+  width: 100%;
 }
 
 .deliveryTimeSlot__option {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.875rem 1rem;
-  background: rgba(255, 255, 255, 0.8);
-  border: 2px solid rgba(212, 140, 156, 0.15);
-  border-radius: 12px;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--input-bg);
+  border: 2px solid var(--input-border);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--transition-all);
   position: relative;
   text-align: left;
+  min-height: 60px;
+}
+
+.deliveryTimeSlot__option::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-brand-soft);
+  opacity: 0;
+  transition: var(--transition-opacity);
+  border-radius: inherit;
+  pointer-events: none;
 }
 
 .deliveryTimeSlot__option:hover:not(:disabled) {
-  border-color: rgba(212, 140, 156, 0.3);
+  border-color: var(--input-border-focus);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(212, 140, 156, 0.15);
-  background: rgba(255, 255, 255, 0.95);
+  box-shadow: var(--shadow-sm);
+  background: var(--backdrop-glass-sm);
+}
+
+.deliveryTimeSlot__option:hover:not(:disabled)::before {
+  opacity: 0.1;
+}
+
+.deliveryTimeSlot__option:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-color: var(--input-border-focus);
 }
 
 .deliveryTimeSlot__option--selected {
-  background: linear-gradient(135deg, rgba(212, 140, 156, 0.12) 0%, rgba(168, 213, 186, 0.08) 100%);
+  background: var(--gradient-brand-soft);
   border-color: var(--brand-rose-500);
-  box-shadow: 0 4px 16px rgba(212, 140, 156, 0.2);
+  box-shadow: var(--shadow-sm);
+}
+
+.deliveryTimeSlot__option--selected::before {
+  opacity: 0.15;
 }
 
 .deliveryTimeSlot__option--unavailable {
   opacity: 0.5;
   cursor: not-allowed;
-  background: rgba(239, 68, 68, 0.05);
-  border-color: rgba(239, 68, 68, 0.2);
+  background: var(--error-bg);
+  border-color: var(--error-border);
 }
 
 .deliveryTimeSlot__option:disabled {
   cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .deliveryTimeSlot__icon {
-  font-size: 1.5rem;
+  font-size: var(--font-size-xl);
   flex-shrink: 0;
+  color: var(--brand-rose-600);
+  position: relative;
+  z-index: 1;
+}
+
+.deliveryTimeSlot__option--unavailable .deliveryTimeSlot__icon {
+  color: var(--error-color);
 }
 
 .deliveryTimeSlot__content {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--space-1);
   flex: 1;
   min-width: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .deliveryTimeSlot__labelText {
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
   color: var(--ink-900);
+  line-height: var(--line-height-tight);
 }
 
 .deliveryTimeSlot__time {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--ink-600);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-normal);
 }
 
 .deliveryTimeSlot__check {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  width: 24px;
-  height: 24px;
+  top: var(--space-2);
+  right: var(--space-2);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--brand-rose-500);
-  color: white;
-  border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(212, 140, 156, 0.3);
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: var(--brand-rose-600);
+  color: var(--neutral-0);
+  opacity: 0;
+  transition: var(--transition-opacity);
+  z-index: 2;
 }
 
-.deliveryTimeSlot__hint {
-  font-size: 0.75rem;
-  color: var(--ink-500);
-  margin-top: 0.75rem;
-  line-height: 1.5;
+.deliveryTimeSlot__option--selected .deliveryTimeSlot__check {
+  opacity: 1;
 }
 
-.deliveryTimeSlot__unavailable {
-  padding: 1rem;
-  background: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: 12px;
-  color: #dc2626;
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-align: center;
+/* Responsive: Mobile-first approach */
+/* Mobile devices (up to 640px) */
+@media (max-width: 640px) {
+  .deliveryTimeSlot {
+    margin-top: var(--space-3);
+  }
+
+  .deliveryTimeSlot__label {
+    font-size: var(--font-size-xs);
+    margin-bottom: var(--space-2);
+  }
+
+  .deliveryTimeSlot__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+  }
+
+  .deliveryTimeSlot__option {
+    padding: var(--space-2-5) var(--space-3);
+    min-height: 56px;
+    gap: var(--space-2);
+  }
+
+  .deliveryTimeSlot__icon {
+    font-size: var(--font-size-lg);
+  }
+
+  .deliveryTimeSlot__labelText {
+    font-size: var(--font-size-xs);
+  }
+
+  .deliveryTimeSlot__time {
+    font-size: 0.65rem;
+  }
+
+  .deliveryTimeSlot__check {
+    width: 20px;
+    height: 20px;
+    top: var(--space-1-5);
+    right: var(--space-1-5);
+  }
 }
 
+/* Tablet devices (641px to 968px) */
+@media (min-width: 641px) and (max-width: 968px) {
+  .deliveryTimeSlot__grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--space-2-5);
+  }
+
+  .deliveryTimeSlot__option {
+    padding: var(--space-2-5) var(--space-3);
+    min-height: 58px;
+  }
+}
+
+/* Desktop devices (969px and above) */
+@media (min-width: 969px) {
+  .deliveryTimeSlot__grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .deliveryTimeSlot__option {
+    padding: var(--space-3) var(--space-4);
+    min-height: 64px;
+  }
+
+  .deliveryTimeSlot__option:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+/* Large desktop devices (1200px and above) */
+@media (min-width: 1200px) {
+  .deliveryTimeSlot__grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+/* Touch devices optimization */
+@media (hover: none) and (pointer: coarse) {
+  .deliveryTimeSlot__option {
+    min-height: 60px;
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .deliveryTimeSlot__option:active:not(:disabled) {
+    transform: scale(0.98);
+    background: var(--backdrop-glass-sm);
+  }
+}

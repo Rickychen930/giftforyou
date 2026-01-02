@@ -1,0 +1,466 @@
+/**
+ * Design System - Comprehensive CSS Variables
+ * Luxury, DRY, Efficient, Responsive
+ * Single source of truth for all design tokens
+ */
+
+@import "colors.css";
+
+:root {
+  /* =========================================================
+     SPACING SYSTEM (8px base unit for consistency)
+     ========================================================= */
+  --space-0: 0;
+  --space-1: 0.25rem;   /* 4px */
+  --space-1-5: 0.375rem; /* 6px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-2-5: 0.625rem; /* 10px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+  --space-20: 5rem;     /* 80px */
+  --space-24: 6rem;     /* 96px */
+
+  /* =========================================================
+     TYPOGRAPHY SYSTEM
+     ========================================================= */
+  --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-family-heading: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  
+  --font-size-xs: 0.75rem;      /* 12px */
+  --font-size-sm: 0.875rem;     /* 14px */
+  --font-size-base: 1rem;       /* 16px */
+  --font-size-lg: 1.125rem;     /* 18px */
+  --font-size-xl: 1.25rem;      /* 20px */
+  --font-size-2xl: 1.5rem;      /* 24px */
+  --font-size-3xl: 1.875rem;    /* 30px */
+  --font-size-4xl: 2.25rem;     /* 36px */
+  --font-size-5xl: 3rem;        /* 48px */
+  
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 900;
+  
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+
+  /* =========================================================
+     BORDER RADIUS SYSTEM
+     ========================================================= */
+  --radius-none: 0;
+  --radius-sm: 0.375rem;    /* 6px */
+  --radius-base: 0.5rem;    /* 8px */
+  --radius-md: 0.75rem;     /* 12px */
+  --radius-lg: 1rem;        /* 16px */
+  --radius-xl: 1.5rem;      /* 24px */
+  --radius-2xl: 2rem;       /* 32px */
+  --radius-full: 9999px;
+
+  /* =========================================================
+     SHADOWS SYSTEM (Enhanced Luxury)
+     ========================================================= */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-base: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.10);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.14);
+  --shadow-2xl: 0 24px 72px rgba(0, 0, 0, 0.16);
+  
+  /* Luxury brand shadows */
+  --shadow-brand-sm: 0 4px 12px rgba(212, 140, 156, 0.20);
+  --shadow-brand-md: 0 8px 24px rgba(212, 140, 156, 0.30);
+  --shadow-brand-lg: 0 12px 32px rgba(212, 140, 156, 0.35);
+  --shadow-brand-xl: 0 20px 60px rgba(212, 140, 156, 0.40);
+  
+  /* Green shadows for primary actions */
+  --shadow-green-sm: 0 4px 12px rgba(16, 185, 129, 0.25);
+  --shadow-green-md: 0 8px 24px rgba(16, 185, 129, 0.35);
+  --shadow-green-lg: 0 12px 32px rgba(16, 185, 129, 0.40);
+  
+  /* Inner shadows for depth */
+  --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-inner-lg: inset 0 4px 8px rgba(0, 0, 0, 0.08);
+
+  /* =========================================================
+     TRANSITIONS & ANIMATIONS
+     ========================================================= */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slower: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Luxury transitions */
+  --transition-elegant: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 500ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --transition-smooth: 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  
+  /* Common transition values */
+  --transition-all: all var(--transition-base);
+  --transition-colors: color var(--transition-base), background-color var(--transition-base), border-color var(--transition-base);
+  --transition-transform: transform var(--transition-base);
+  --transition-opacity: opacity var(--transition-base);
+  --transition-shadow: box-shadow var(--transition-base);
+
+  /* =========================================================
+     Z-INDEX SCALE
+     ========================================================= */
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+  --z-toast: 1080;
+
+  /* =========================================================
+     RESPONSIVE BREAKPOINTS (Mobile-first)
+     ========================================================= */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+
+  /* =========================================================
+     CONTAINER SIZES
+     ========================================================= */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1536px;
+  --container-max: 1200px; /* From existing design */
+
+  /* =========================================================
+     LAYOUT SPACING
+     ========================================================= */
+  --layout-padding-mobile: var(--space-4);
+  --layout-padding-tablet: var(--space-6);
+  --layout-padding-desktop: var(--space-8);
+  
+  --section-spacing-mobile: var(--space-8);
+  --section-spacing-tablet: var(--space-12);
+  --section-spacing-desktop: var(--space-16);
+
+  /* =========================================================
+     GRID GAPS
+     ========================================================= */
+  --gap-xs: var(--space-2);
+  --gap-sm: var(--space-3);
+  --gap-md: var(--space-4);
+  --gap-lg: var(--space-6);
+  --gap-xl: var(--space-8);
+  --gap-2xl: var(--space-12);
+
+  /* =========================================================
+     BUTTON SIZES (Standardized)
+     ========================================================= */
+  --btn-padding-sm: var(--space-2) var(--space-4);
+  --btn-padding-md: var(--space-3) var(--space-6);
+  --btn-padding-lg: var(--space-4) var(--space-8);
+  
+  --btn-height-sm: 2rem;      /* 32px */
+  --btn-height-md: 2.5rem;    /* 40px */
+  --btn-height-lg: 3rem;      /* 48px */
+
+  --btn-font-size-sm: var(--font-size-sm);
+  --btn-font-size-md: var(--font-size-base);
+  --btn-font-size-lg: var(--font-size-lg);
+
+  /* =========================================================
+     INPUT SIZES (Standardized)
+     ========================================================= */
+  --input-padding-sm: var(--space-2) var(--space-3);
+  --input-padding-md: var(--space-3) var(--space-4);
+  --input-padding-lg: var(--space-4) var(--space-5);
+  
+  --input-height-sm: 2rem;      /* 32px */
+  --input-height-md: 2.5rem;    /* 40px */
+  --input-height-lg: 3rem;      /* 48px */
+
+  /* =========================================================
+     CARD STYLES (Standardized)
+     ========================================================= */
+  --card-padding-sm: var(--space-4);
+  --card-padding-md: var(--space-6);
+  --card-padding-lg: var(--space-8);
+  
+  --card-radius: var(--radius-md);
+  --card-shadow: var(--shadow-md);
+  --card-shadow-hover: var(--shadow-lg);
+  
+  --card-border: 1px solid var(--border-1);
+  --card-border-hover: 1px solid var(--border-2);
+
+  /* =========================================================
+     GRADIENT SYSTEM (Luxury)
+     ========================================================= */
+  --gradient-brand: linear-gradient(135deg, var(--brand-rose-500) 0%, var(--brand-rose-600) 50%, var(--brand-rose-700) 100%);
+  --gradient-brand-light: linear-gradient(135deg, var(--brand-rose-300) 0%, var(--brand-rose-500) 100%);
+  --gradient-brand-soft: linear-gradient(135deg, rgba(212, 140, 156, 0.12) 0%, rgba(168, 213, 186, 0.12) 100%);
+  
+  --gradient-green: linear-gradient(135deg, var(--brand-green-500) 0%, var(--brand-green-600) 50%, var(--brand-green-700) 100%);
+  
+  --gradient-surface: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%);
+  --gradient-overlay: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+
+  /* =========================================================
+     BACKDROP FILTER (Glass Morphism)
+     ========================================================= */
+  --backdrop-blur-sm: blur(8px) saturate(150%);
+  --backdrop-blur-md: blur(12px) saturate(180%);
+  --backdrop-blur-lg: blur(20px) saturate(180%);
+  --backdrop-blur-xl: blur(30px) saturate(200%);
+  
+  --backdrop-glass-sm: rgba(255, 255, 255, 0.85);
+  --backdrop-glass-md: rgba(255, 255, 255, 0.90);
+  --backdrop-glass-lg: rgba(255, 255, 255, 0.95);
+
+  /* =========================================================
+     FOCUS STATES (Accessibility)
+     ========================================================= */
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 2px;
+  --focus-ring-color: rgba(212, 140, 156, 0.5);
+  --focus-ring: 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
+  --focus-ring-offset: 0 0 0 calc(var(--focus-ring-width) + var(--focus-ring-offset)) var(--focus-ring-color);
+
+  /* =========================================================
+     SCROLLBAR STYLING (Luxury)
+     ========================================================= */
+  --scrollbar-width: 8px;
+  --scrollbar-track: rgba(0, 0, 0, 0.05);
+  --scrollbar-thumb: rgba(212, 140, 156, 0.3);
+  --scrollbar-thumb-hover: rgba(212, 140, 156, 0.5);
+
+  /* =========================================================
+     ACTION COLORS (WhatsApp, Call, etc.)
+     ========================================================= */
+  --whatsapp-color: #25d366;
+  --whatsapp-bg: rgba(37, 211, 102, 0.08);
+  --whatsapp-bg-hover: rgba(37, 211, 102, 0.15);
+  --whatsapp-border: rgba(37, 211, 102, 0.3);
+  --whatsapp-border-hover: rgba(37, 211, 102, 0.5);
+  --whatsapp-shadow: 0 4px 16px rgba(37, 211, 102, 0.3);
+  
+  --call-color: #3b82f6;
+  --call-bg: rgba(59, 130, 246, 0.08);
+  --call-bg-hover: rgba(59, 130, 246, 0.15);
+  --call-border: rgba(59, 130, 246, 0.3);
+  --call-border-hover: rgba(59, 130, 246, 0.5);
+  --call-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+
+  /* =========================================================
+     STATUS/GRAyscale COLORS (Standardized)
+     ========================================================= */
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+
+  --gray-bg: rgba(107, 114, 128, 0.08);
+  --gray-bg-hover: rgba(107, 114, 128, 0.15);
+  --gray-border: rgba(107, 114, 128, 0.3);
+  --gray-border-hover: rgba(107, 114, 128, 0.5);
+  --gray-shadow: 0 4px 16px rgba(107, 114, 128, 0.3);
+
+  /* =========================================================
+     INFO COLORS (Blue)
+     ========================================================= */
+  --info-color: #3b82f6;
+  --info-bg: rgba(59, 130, 246, 0.10);
+  --info-bg-strong: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  --info-border: rgba(59, 130, 246, 0.2);
+  --info-text: #1e40af;
+
+  /* =========================================================
+     WARNING COLORS (Enhanced)
+     ========================================================= */
+  --warning-color: #f59e0b;
+  --warning-bg-strong: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  --warning-text: #92400e;
+
+  /* =========================================================
+     SUCCESS COLORS (Enhanced)
+     ========================================================= */
+  --success-color: var(--brand-green-500);
+  --success-bg-strong: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+
+  /* =========================================================
+     ERROR COLORS (Enhanced)
+     ========================================================= */
+  --error-color: #ef4444;
+  --error-bg-strong: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+
+  /* =========================================================
+     ICON COLORS (Standardized)
+     ========================================================= */
+  --icon-default: var(--ink-600);
+  --icon-muted: var(--ink-500);
+  --icon-brand: var(--brand-rose-600);
+
+  /* =========================================================
+     TAB/NAVIGATION COLORS (Purple/Indigo)
+     ========================================================= */
+  --tab-color: #8b5cf6;
+  --tab-color-hover: #7c3aed;
+  --tab-bg: rgba(139, 92, 246, 0.05);
+  --tab-bg-hover: rgba(139, 92, 246, 0.1);
+  --tab-border: var(--tab-color);
+  --tab-text: var(--ink-600);
+  --tab-text-active: var(--tab-color);
+
+  /* =========================================================
+     INPUT/SEARCH COLORS (Standardized)
+     ========================================================= */
+  --input-bg: #ffffff;
+  --input-border: rgba(0, 0, 0, 0.1);
+  --input-border-focus: var(--tab-color);
+  --input-text: var(--ink-900);
+  --input-placeholder: var(--gray-400);
+  --input-shadow-focus: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  --input-icon: var(--ink-600);
+  --input-icon-focus: var(--tab-color);
+
+  /* =========================================================
+     BUTTON VARIANTS (Additional)
+     ========================================================= */
+  --btn-primary-color: var(--tab-color);
+  --btn-primary-color-hover: var(--tab-color-hover);
+  --btn-primary-bg: var(--tab-bg);
+  --btn-primary-bg-hover: var(--tab-bg-hover);
+  
+  --btn-secondary-color: #6366f1;
+  --btn-secondary-color-hover: #4f46e5;
+  --btn-secondary-bg: rgba(99, 102, 241, 0.1);
+  
+  --btn-danger-color: var(--error-color);
+  --btn-danger-color-hover: #dc2626;
+  --btn-danger-bg: rgba(239, 68, 68, 0.1);
+  
+  --btn-ghost-color: var(--ink-600);
+  --btn-ghost-color-hover: var(--ink-700);
+  --btn-ghost-bg: rgba(0, 0, 0, 0.05);
+}
+
+/* =========================================================
+   RESPONSIVE UTILITIES (Media Query Helpers)
+   ========================================================= */
+
+/* Mobile-first: Styles apply to all sizes by default */
+/* Use these for responsive overrides */
+
+/* Small screens and up (640px+) */
+@media (min-width: 640px) {
+  :root {
+    --layout-padding: var(--layout-padding-tablet);
+    --section-spacing: var(--section-spacing-tablet);
+  }
+}
+
+/* Medium screens and up (768px+) */
+@media (min-width: 768px) {
+  :root {
+    --layout-padding: var(--layout-padding-desktop);
+    --section-spacing: var(--section-spacing-desktop);
+  }
+}
+
+/* Large screens and up (1024px+) */
+@media (min-width: 1024px) {
+  .container {
+    max-width: var(--container-xl);
+  }
+}
+
+/* =========================================================
+   UTILITY CLASSES (Common Patterns - DRY)
+   ========================================================= */
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--layout-padding-mobile);
+  padding-right: var(--layout-padding-mobile);
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding-left: var(--layout-padding-tablet);
+    padding-right: var(--layout-padding-tablet);
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding-left: var(--layout-padding-desktop);
+    padding-right: var(--layout-padding-desktop);
+  }
+}
+
+/* Screen Reader Only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Scrollbar Styling */
+.scrollbar-custom {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+.scrollbar-custom::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: var(--radius-full);
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: var(--radius-full);
+  transition: background var(--transition-base);
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+

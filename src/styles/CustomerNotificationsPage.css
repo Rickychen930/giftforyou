@@ -1,15 +1,16 @@
-@import "colors.css";
-@import "luxury-enhancements.css";
+/**
+ * Customer Notifications Page Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ * Fully responsive on all devices: mobile, tablet, desktop
+ */
+
+@import "design-system.css";
 
 .customerNotifications {
   min-height: 100vh;
-  padding: clamp(4rem, 7vw, 6rem) clamp(1rem, 3vw, 1.5rem) clamp(5rem, 8vw, 6.5rem);
-  background: linear-gradient(
-    135deg,
-    var(--brand-sage-50) 0%,
-    var(--brand-rose-50) 50%,
-    var(--brand-sage-100) 100%
-  );
+  padding: clamp(var(--space-8), 7vw, var(--space-24)) clamp(var(--space-4), 3vw, var(--space-6));
+  background: var(--gradient-surface);
   position: relative;
   overflow: hidden;
 }
@@ -35,19 +36,19 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  padding: 3rem;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 20px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  gap: var(--space-4);
+  padding: var(--space-12);
+  background: var(--backdrop-glass-md);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--card-shadow);
 }
 
 .customerNotifications__spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid rgba(212, 140, 156, 0.2);
+  border: 4px solid var(--border-1);
   border-top: 4px solid var(--brand-rose-500);
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   animation: spin 1s linear infinite;
 }
 
@@ -65,92 +66,107 @@
 }
 
 .customerNotifications__header {
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-8);
 }
 
 .customerNotifications__back {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  gap: var(--gap-sm);
+  margin-bottom: var(--space-6);
   color: var(--brand-rose-600);
   text-decoration: none;
-  font-weight: 800;
-  font-size: 0.95rem;
-  transition: all 0.2s ease;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  transition: var(--transition-base);
 }
 
-.customerNotifications__back:hover {
-  color: var(--brand-rose-700);
-  transform: translateX(-4px);
+@media (hover: hover) and (pointer: fine) {
+  .customerNotifications__back:hover {
+    color: var(--brand-rose-700);
+    transform: translateX(-4px);
+  }
+}
+
+.customerNotifications__back:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .customerNotifications__title {
-  font-size: clamp(2rem, 4vw, 2.5rem);
-  font-weight: 950;
+  font-size: clamp(var(--font-size-4xl), 4vw, var(--font-size-5xl));
+  font-weight: var(--font-weight-black);
   color: var(--ink-900);
-  margin: 0 0 0.5rem;
-  font-family: "Playfair Display", Georgia, serif;
-  background: linear-gradient(
-    135deg,
-    var(--brand-rose-700) 0%,
-    var(--brand-green-700) 100%
-  );
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-serif, "Playfair Display", Georgia, serif);
+  background: linear-gradient(135deg, var(--brand-rose-700) 0%, var(--brand-green-700) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  line-height: var(--line-height-tight);
 }
 
 .customerNotifications__subtitle {
-  font-size: clamp(0.95rem, 1.5vw, 1.05rem);
+  font-size: clamp(var(--font-size-sm), 1.5vw, var(--font-size-base));
   color: var(--ink-600);
   margin: 0;
-  font-weight: 700;
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-normal);
 }
 
 .customerNotifications__success {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 1.25rem;
-  border-radius: 12px;
-  margin-bottom: 1.5rem;
-  font-size: 0.9rem;
-  font-weight: 700;
-  background: linear-gradient(
-    135deg,
-    rgba(16, 185, 129, 0.1) 0%,
-    rgba(5, 150, 105, 0.08) 100%
-  );
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: var(--brand-green-700);
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-6);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  background: var(--success-bg);
+  border: 1px solid var(--success-border);
+  color: var(--success-color);
   animation: slideInDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .customerNotifications__card {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
-  border: 1.5px solid rgba(212, 140, 156, 0.2);
-  border-radius: 24px;
-  padding: 2.5rem;
-  box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.06),
-    0 4px 12px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset,
-    0 0 30px rgba(212, 140, 156, 0.03);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  background: var(--backdrop-glass-md);
+  border: var(--border-2) solid var(--border-2);
+  border-radius: var(--radius-xl);
+  padding: var(--space-10);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
   animation: fadeInScale 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   overflow: hidden;
 }
 
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .customerNotifications__section {
-  margin-bottom: 2.5rem;
-  padding-bottom: 2rem;
+  margin-bottom: var(--space-10);
+  padding-bottom: var(--space-8);
   border-bottom: 1px solid rgba(212, 140, 156, 0.15);
 }
 
@@ -163,48 +179,43 @@
 .customerNotifications__sectionTitle {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  font-size: 1.2rem;
-  font-weight: 950;
+  gap: var(--space-3);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-black);
   color: var(--ink-900);
-  margin: 0 0 1.5rem;
-  font-family: "Playfair Display", Georgia, serif;
+  margin: 0 0 var(--space-6);
+  font-family: var(--font-serif, "Playfair Display", Georgia, serif);
 }
 
 .customerNotifications__sectionTitle svg {
   color: var(--brand-rose-600);
+  flex-shrink: 0;
 }
 
 .customerNotifications__options {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .customerNotifications__option {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem;
+  gap: var(--space-3);
+  padding: var(--space-4);
   border: 1px solid rgba(212, 140, 156, 0.15);
-  border-radius: 12px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.5) 0%,
-    rgba(255, 255, 255, 0.3) 100%
-  );
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.3) 100%);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--transition-all);
 }
 
-.customerNotifications__option:hover {
-  border-color: rgba(212, 140, 156, 0.3);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.8) 0%,
-    rgba(255, 255, 255, 0.6) 100%
-  );
-  transform: translateX(4px);
+@media (hover: hover) and (pointer: fine) {
+  .customerNotifications__option:hover {
+    border-color: rgba(212, 140, 156, 0.3);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
+    transform: translateX(4px);
+  }
 }
 
 .customerNotifications__option input[type="checkbox"] {
@@ -212,19 +223,81 @@
   height: 20px;
   cursor: pointer;
   accent-color: var(--brand-rose-500);
+  flex-shrink: 0;
 }
 
 .customerNotifications__option span {
-  font-size: 0.95rem;
-  font-weight: 800;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
   color: var(--ink-800);
   flex: 1;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* Responsive: Mobile-first approach */
+/* Mobile devices (up to 640px) */
+@media (max-width: 640px) {
+  .customerNotifications {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .customerNotifications__header {
+    margin-bottom: var(--space-6);
+  }
+
   .customerNotifications__card {
-    padding: 1.5rem;
+    padding: var(--space-6);
+  }
+
+  .customerNotifications__section {
+    margin-bottom: var(--space-8);
+    padding-bottom: var(--space-6);
   }
 }
 
+/* Tablet devices (641px to 968px) */
+@media (min-width: 641px) and (max-width: 968px) {
+  .customerNotifications__card {
+    padding: var(--space-8);
+  }
+}
+
+/* Desktop devices (969px and above) */
+@media (min-width: 969px) {
+  .customerNotifications__card {
+    padding: var(--space-10);
+  }
+}
+
+/* Touch devices optimization */
+@media (hover: none) and (pointer: coarse) {
+  .customerNotifications__option {
+    min-height: 44px;
+  }
+
+  .customerNotifications__option:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .customerNotifications__card {
+    animation: none;
+  }
+
+  .customerNotifications__spinner {
+    animation: none;
+  }
+
+  .customerNotifications__success {
+    animation: none;
+  }
+
+  .customerNotifications__option {
+    transition: none;
+  }
+
+  .customerNotifications__option:hover {
+    transform: none;
+  }
+}

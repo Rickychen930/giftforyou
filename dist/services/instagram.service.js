@@ -1,8 +1,7 @@
 "use strict";
 // src/services/instagram.service.ts
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getInstagramPosts = getInstagramPosts;
-exports.getInstagramProfile = getInstagramProfile;
+exports.getInstagramProfile = exports.getInstagramPosts = void 0;
 const api_1 = require("../config/api");
 /**
  * Fetch Instagram posts from backend API
@@ -43,6 +42,7 @@ async function getInstagramPosts(limit = 10, signal) {
         return [];
     }
 }
+exports.getInstagramPosts = getInstagramPosts;
 /**
  * Get Instagram username/profile info
  */
@@ -68,4 +68,5 @@ async function getInstagramProfile(signal) {
         return null;
     }
 }
+exports.getInstagramProfile = getInstagramProfile;
 //# sourceMappingURL=instagram.service.js.map

@@ -15,6 +15,7 @@ import AlertMessage from "../components/common/AlertMessage";
 import FormField from "../components/common/FormField";
 import IconButton from "../components/common/IconButton";
 import LuxuryButton from "../components/buttons/LuxuryButton";
+import { UserPlusIcon, EditIcon, DeleteIcon, CheckCircleIcon, LocationIcon } from "../components/icons";
 import type {
   Address,
   AddressFormData,
@@ -217,12 +218,7 @@ class CustomerAddressesPageView extends Component<CustomerAddressesPageViewProps
                   isLoading={isSaving}
                   className={`customerAddresses__saveBtn ${isSaving ? "customerAddresses__saveBtn--loading" : ""}`}
                   disabled={isSaving}
-                  icon={
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                    </svg>
-                  }
+                  icon={<CheckCircleIcon width={20} height={20} />}
                   iconPosition="left"
                 >
                   {isSaving ? "Menyimpan..." : "Simpan"}
@@ -239,12 +235,7 @@ class CustomerAddressesPageView extends Component<CustomerAddressesPageViewProps
               description="Tambahkan alamat pengiriman untuk mempermudah proses checkout"
               actionLabel="Tambah Alamat Pertama"
               onAction={onShowForm}
-              icon={
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeWidth="2" opacity="0.3"/>
-                  <circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="2" opacity="0.3"/>
-                </svg>
-              }
+              icon={<LocationIcon width={64} height={64} style={{ opacity: 0.3 }} />}
             />
           ) : (
             addresses.map((address) => (
@@ -262,12 +253,7 @@ class CustomerAddressesPageView extends Component<CustomerAddressesPageViewProps
                         variant="secondary"
                         size="md"
                         onClick={() => onSetDefault(address._id!)}
-                        icon={
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                            <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                          </svg>
-                        }
+                        icon={<CheckCircleIcon width={18} height={18} />}
                         ariaLabel="Jadikan default"
                         tooltip="Jadikan default"
                         className="customerAddresses__actionBtn"
@@ -277,12 +263,7 @@ class CustomerAddressesPageView extends Component<CustomerAddressesPageViewProps
                       variant="secondary"
                       size="md"
                       onClick={() => onEdit(address)}
-                      icon={
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      }
+                      icon={<EditIcon width={18} height={18} />}
                       ariaLabel="Edit"
                       tooltip="Edit"
                       className="customerAddresses__actionBtn"
@@ -291,11 +272,7 @@ class CustomerAddressesPageView extends Component<CustomerAddressesPageViewProps
                       variant="danger"
                       size="md"
                       onClick={() => onDelete(address._id!)}
-                      icon={
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                          <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      }
+                      icon={<DeleteIcon width={18} height={18} />}
                       ariaLabel="Hapus"
                       tooltip="Hapus"
                       className="customerAddresses__actionBtn customerAddresses__actionBtn--danger"

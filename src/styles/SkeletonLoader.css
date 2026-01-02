@@ -1,4 +1,10 @@
-@import "colors.css";
+/**
+ * Skeleton Loader Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ */
+
+@import "design-system.css";
 
 .skeletonLoader {
   background: linear-gradient(
@@ -10,6 +16,7 @@
   background-size: 200% 100%;
   position: relative;
   overflow: hidden;
+  border-radius: var(--radius-sm);
 }
 
 .skeletonLoader--animated {
@@ -28,7 +35,7 @@
 .skeletonLoader--text {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--gap-sm);
 }
 
 .skeletonLoader__line {
@@ -39,22 +46,18 @@
     rgba(212, 140, 156, 0.1) 100%
   );
   background-size: 200% 100%;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   height: 1rem;
 }
 
 .skeletonLoader--card {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
-  border: 1.5px solid rgba(212, 140, 156, 0.15);
-  border-radius: 16px;
+  background: var(--backdrop-glass-md);
+  border: 1.5px solid var(--border-2);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.05),
-    0 2px 6px rgba(0, 0, 0, 0.03);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
 }
 
 .skeletonLoader__header {
@@ -70,5 +73,26 @@
 }
 
 .skeletonLoader__content {
-  padding: 1.5rem;
+  padding: var(--card-padding-md);
+}
+
+/* Responsive: Mobile-first approach */
+@media (max-width: 768px) {
+  .skeletonLoader__header {
+    height: 150px;
+  }
+
+  .skeletonLoader__content {
+    padding: var(--card-padding-sm);
+  }
+}
+
+@media (max-width: 640px) {
+  .skeletonLoader__header {
+    height: 120px;
+  }
+
+  .skeletonLoader__content {
+    padding: var(--space-3);
+  }
 }

@@ -1,8 +1,7 @@
 "use strict";
 // src/controllers/instagram-controller.ts
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getInstagramPosts = getInstagramPosts;
-exports.getInstagramProfile = getInstagramProfile;
+exports.getInstagramProfile = exports.getInstagramPosts = void 0;
 /**
  * Get Instagram posts
  * This will integrate with Instagram Basic Display API or Graph API
@@ -100,6 +99,7 @@ async function getInstagramPosts(req, res) {
         });
     }
 }
+exports.getInstagramPosts = getInstagramPosts;
 /**
  * Get Instagram profile information
  */
@@ -159,4 +159,5 @@ async function getInstagramProfile(req, res) {
         });
     }
 }
+exports.getInstagramProfile = getInstagramProfile;
 //# sourceMappingURL=instagram-controller.js.map

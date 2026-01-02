@@ -1,86 +1,151 @@
-@import "colors.css";
+/**
+ * Quick Actions Bar Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ */
+
+@import "design-system.css";
 
 .quickActionsBar {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: var(--gap-md);
+  margin-bottom: var(--space-6);
   flex-wrap: wrap;
 }
 
 .quickActionsBar__action {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem;
-  border-radius: 14px;
-  font-weight: 600;
-  font-size: 0.95rem;
+  gap: var(--space-3);
+  padding: var(--btn-padding-md);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
   text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--transition-all);
   border: 2px solid transparent;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
+  background: var(--backdrop-glass-sm);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.quickActionsBar__action::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: var(--transition-opacity);
+  pointer-events: none;
+}
+
+.quickActionsBar__action:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.quickActionsBar__action:hover::before {
+  opacity: 1;
+}
+
+.quickActionsBar__action:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .quickActionsBar__action--whatsapp {
-  color: #25d366;
-  border-color: rgba(37, 211, 102, 0.3);
-  background: rgba(37, 211, 102, 0.08);
+  color: var(--whatsapp-color);
+  border-color: var(--whatsapp-border);
+  background: var(--whatsapp-bg);
+}
+
+.quickActionsBar__action--whatsapp::before {
+  background: var(--whatsapp-bg-hover);
 }
 
 .quickActionsBar__action--whatsapp:hover {
-  background: rgba(37, 211, 102, 0.15);
-  border-color: rgba(37, 211, 102, 0.5);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(37, 211, 102, 0.3);
+  background: var(--whatsapp-bg-hover);
+  border-color: var(--whatsapp-border-hover);
+  box-shadow: var(--whatsapp-shadow);
 }
 
 .quickActionsBar__action--call {
-  color: #3b82f6;
-  border-color: rgba(59, 130, 246, 0.3);
-  background: rgba(59, 130, 246, 0.08);
+  color: var(--call-color);
+  border-color: var(--call-border);
+  background: var(--call-bg);
+}
+
+.quickActionsBar__action--call::before {
+  background: var(--call-bg-hover);
 }
 
 .quickActionsBar__action--call:hover {
-  background: rgba(59, 130, 246, 0.15);
-  border-color: rgba(59, 130, 246, 0.5);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+  background: var(--call-bg-hover);
+  border-color: var(--call-border-hover);
+  box-shadow: var(--call-shadow);
 }
 
 .quickActionsBar__action--orders {
   color: var(--brand-rose-700);
-  border-color: rgba(212, 140, 156, 0.3);
+  border-color: var(--border-2);
   background: rgba(212, 140, 156, 0.08);
+}
+
+.quickActionsBar__action--orders::before {
+  background: rgba(212, 140, 156, 0.15);
 }
 
 .quickActionsBar__action--orders:hover {
   background: rgba(212, 140, 156, 0.15);
-  border-color: rgba(212, 140, 156, 0.5);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(212, 140, 156, 0.3);
+  border-color: var(--border-3);
+  box-shadow: var(--shadow-brand-sm);
 }
 
 .quickActionsBar__action--default {
   color: var(--ink-700);
-  border-color: rgba(107, 114, 128, 0.3);
-  background: rgba(107, 114, 128, 0.08);
+  border-color: var(--gray-border);
+  background: var(--gray-bg);
+}
+
+.quickActionsBar__action--default::before {
+  background: var(--gray-bg-hover);
 }
 
 .quickActionsBar__action--default:hover {
-  background: rgba(107, 114, 128, 0.15);
-  border-color: rgba(107, 114, 128, 0.5);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(107, 114, 128, 0.3);
+  background: var(--gray-bg-hover);
+  border-color: var(--gray-border-hover);
+  box-shadow: var(--gray-shadow);
 }
 
 .quickActionsBar__actionIcon {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .quickActionsBar__actionLabel {
   white-space: nowrap;
+}
+
+/* Responsive: Mobile-first approach */
+@media (max-width: 640px) {
+  .quickActionsBar {
+    gap: var(--gap-sm);
+    margin-bottom: var(--space-4);
+  }
+
+  .quickActionsBar__action {
+    padding: var(--btn-padding-sm);
+    font-size: var(--font-size-xs);
+    flex: 1;
+    min-width: 0;
+    justify-content: center;
+  }
+
+  .quickActionsBar__actionLabel {
+    font-size: var(--font-size-xs);
+  }
 }

@@ -1,4 +1,11 @@
-@import "colors.css";
+/**
+ * Header Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ * Fully responsive on all devices: mobile, tablet, desktop
+ */
+
+@import "design-system.css";
 @import "header/HeaderBrand.css";
 @import "header/HeaderNavigation.css";
 @import "header/HeaderDropdown.css";
@@ -12,17 +19,17 @@
 .header {
   position: sticky;
   top: 0;
-  z-index: 1000;
-  background: linear-gradient(180deg, #ffffff 0%, #fefefe 100%);
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.04), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  z-index: var(--z-sticky);
+  background: var(--gradient-surface);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-all);
+  backdrop-filter: var(--backdrop-blur-lg);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg);
 }
 
 .header--scrolled {
-  box-shadow: 0 6px 40px rgba(0, 0, 0, 0.1), 0 2px 0 rgba(255, 255, 255, 0.9) inset;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%);
+  box-shadow: var(--shadow-md);
+  background: var(--backdrop-glass-md);
 }
 
 /* =========================================================
@@ -35,8 +42,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 2rem;
-  padding: 1.15rem 1.5rem;
+  gap: var(--space-8);
+  padding: 1.15rem var(--space-6);
   position: relative;
 }
 
@@ -56,7 +63,7 @@
 .header__right {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-3);
   flex-shrink: 0;
 }
 
@@ -68,8 +75,8 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
   z-index: 1400;
   cursor: pointer;
   touch-action: none;
@@ -81,13 +88,12 @@
   }
 }
 
-/* =========================================================
-   RESPONSIVE DESIGN
-   ========================================================= */
-
-@media (max-width: 980px) {
+/* Responsive: Mobile-first approach */
+/* Mobile devices (up to 640px) */
+@media (max-width: 640px) {
   .header__container {
-    padding: 0.85rem 1.25rem;
+    padding: var(--space-3) var(--space-4);
+    gap: var(--space-4);
     overflow: visible;
   }
 
@@ -98,48 +104,88 @@
     right: 0;
     top: 100%;
     pointer-events: none;
-    z-index: 1500;
+  }
+
+  .header__right {
+    gap: var(--space-2);
   }
 }
 
-@media (max-width: 640px) {
+/* Tablet devices (641px to 968px) */
+@media (min-width: 641px) and (max-width: 968px) {
   .header__container {
-    padding: 0.75rem 1rem;
-    gap: 0.75rem;
+    padding: 0.85rem var(--space-5);
+    gap: var(--space-6);
+  }
+
+  .header__center {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    pointer-events: none;
   }
 }
 
-@media (max-width: 400px) {
+/* Desktop devices (969px to 980px) */
+@media (min-width: 969px) and (max-width: 980px) {
   .header__container {
-    padding: 0.65rem 0.85rem;
-    gap: 0.5rem;
+    padding: 0.85rem var(--space-5);
+    overflow: visible;
+  }
+
+  .header__center {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    pointer-events: none;
   }
 }
 
-/* =========================================================
-   PRINT STYLES
-   ========================================================= */
+/* Large desktop devices (981px and above) */
+@media (min-width: 981px) {
+  .header__container {
+    padding: 1.15rem var(--space-6);
+  }
 
-@media print {
-  .header {
+  .header__center {
+    display: flex;
     position: static;
-    box-shadow: none;
-  }
-
-  .header-actions__hamburger,
-  .header-actions__btn,
-  .header-search__overlay {
-    display: none;
+    pointer-events: auto;
   }
 }
 
-/* =========================================================
-   ACCESSIBILITY
-   ========================================================= */
+/* Extra large desktop devices (1200px and above) */
+@media (min-width: 1200px) {
+  .header__container {
+    padding: var(--space-4-5) var(--space-8);
+  }
 
+  .header__right {
+    gap: var(--space-4);
+  }
+}
+
+/* Touch devices optimization */
+@media (hover: none) and (pointer: coarse) {
+  .header__container {
+    padding: var(--space-4) var(--space-5);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .header {
+    border-bottom: 2px solid var(--border-3);
+  }
+}
+
+/* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .header * {
-    transition: none !important;
-    animation: none !important;
+  .header {
+    transition: none;
   }
 }

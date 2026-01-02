@@ -14,6 +14,7 @@ import BackLink from "../components/common/BackLink";
 import AlertMessage from "../components/common/AlertMessage";
 import FormField from "../components/common/FormField";
 import LuxuryButton from "../components/buttons/LuxuryButton";
+import { CheckCircleIcon } from "../components/icons";
 import type {
   ProfileUser,
   ProfileFormData,
@@ -195,12 +196,7 @@ class CustomerProfilePageView extends Component<CustomerProfilePageViewProps> {
                 isLoading={isSaving}
                 className={`customerProfile__saveBtn ${isSaving ? "customerProfile__saveBtn--loading" : ""}`}
                 disabled={isSaving}
-                icon={
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                  </svg>
-                }
+                icon={<CheckCircleIcon width={20} height={20} />}
                 iconPosition="left"
               >
                 {isSaving ? "Menyimpan..." : "Simpan Perubahan"}

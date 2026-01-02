@@ -1,5 +1,11 @@
-@import "colors.css";
-@import "luxury-enhancements.css";
+/**
+ * Luxury Tooltip Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ * Fully responsive on all devices: mobile, tablet, desktop
+ */
+
+@import "design-system.css";
 
 .luxuryTooltip__trigger {
   display: inline-block;
@@ -8,15 +14,15 @@
 
 .luxuryTooltip {
   position: absolute;
-  z-index: 10001;
+  z-index: var(--z-tooltip);
   pointer-events: none;
-  animation: tooltipFadeIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: tooltipFadeIn var(--transition-base) cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes tooltipFadeIn {
   from {
     opacity: 0;
-    transform: scale(0.9) translateY(-4px);
+    transform: scale(0.9) translateY(var(--space-neg-1));
   }
   to {
     opacity: 1;
@@ -30,21 +36,20 @@
     rgba(30, 30, 30, 0.98) 0%,
     rgba(20, 20, 20, 0.95) 100%
   );
-  color: #fff;
-  padding: 0.625rem 0.875rem;
-  border-radius: 10px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  line-height: 1.4;
+  color: var(--neutral-0);
+  padding: var(--space-2-5) var(--space-3-5);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-normal);
   box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.3),
-    0 4px 12px rgba(0, 0, 0, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.1) inset,
-    0 0 20px rgba(212, 140, 156, 0.2);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+    var(--shadow-lg),
+    0 0 0 var(--border-width-1) rgba(255, 255, 255, 0.1) inset,
+    0 0 var(--space-5) rgba(212, 140, 156, 0.2);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
   white-space: nowrap;
-  max-width: 250px;
+  max-width: var(--size-62-5);
 }
 
 .luxuryTooltip__arrow {
@@ -55,34 +60,57 @@
 }
 
 .luxuryTooltip__arrow--top {
-  bottom: -6px;
+  bottom: var(--space-neg-1-5);
   left: 50%;
   transform: translateX(-50%);
-  border-width: 6px 6px 0 6px;
+  border-width: var(--space-1-5) var(--space-1-5) 0 var(--space-1-5);
   border-color: rgba(30, 30, 30, 0.98) transparent transparent transparent;
 }
 
 .luxuryTooltip__arrow--bottom {
-  top: -6px;
+  top: var(--space-neg-1-5);
   left: 50%;
   transform: translateX(-50%);
-  border-width: 0 6px 6px 6px;
+  border-width: 0 var(--space-1-5) var(--space-1-5) var(--space-1-5);
   border-color: transparent transparent rgba(30, 30, 30, 0.98) transparent;
 }
 
 .luxuryTooltip__arrow--left {
-  right: -6px;
+  right: var(--space-neg-1-5);
   top: 50%;
   transform: translateY(-50%);
-  border-width: 6px 0 6px 6px;
+  border-width: var(--space-1-5) 0 var(--space-1-5) var(--space-1-5);
   border-color: transparent transparent transparent rgba(30, 30, 30, 0.98);
 }
 
 .luxuryTooltip__arrow--right {
-  left: -6px;
+  left: var(--space-neg-1-5);
   top: 50%;
   transform: translateY(-50%);
-  border-width: 6px 6px 6px 0;
+  border-width: var(--space-1-5) var(--space-1-5) var(--space-1-5) 0;
   border-color: transparent rgba(30, 30, 30, 0.98) transparent transparent;
 }
 
+/* Responsive */
+@media (max-width: 640px) {
+  .luxuryTooltip__content {
+    font-size: var(--font-size-xs);
+    padding: var(--space-2) var(--space-3);
+    max-width: var(--size-50);
+    white-space: normal;
+  }
+}
+
+/* Touch devices optimization */
+@media (hover: none) and (pointer: coarse) {
+  .luxuryTooltip {
+    display: none;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .luxuryTooltip {
+    animation: none !important;
+  }
+}

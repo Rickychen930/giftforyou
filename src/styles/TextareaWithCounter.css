@@ -1,100 +1,123 @@
 /**
- * Textarea With Counter Styles
- * Luxury and responsive textarea with counter styling
+ * Textarea With Counter Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
  */
+
+@import "design-system.css";
 
 .textareaWithCounter {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--gap-sm);
 }
 
 .textareaWithCounter__textarea {
   width: 100%;
-  padding: 0.875rem 1rem;
-  border: 2px solid rgba(0, 0, 0, 0.1);
-  border-radius: 0.75rem;
-  font-size: 1rem;
+  padding: var(--input-padding-md);
+  border: 2px solid var(--input-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
   font-family: inherit;
-  background: #ffffff;
-  color: #1f2937;
+  background: var(--input-bg);
+  color: var(--input-text);
   resize: vertical;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  line-height: 1.6;
+  transition: var(--transition-all);
+  line-height: var(--line-height-relaxed);
+  font-weight: var(--font-weight-normal);
 }
 
 .textareaWithCounter__textarea:focus {
   outline: none;
-  border-color: #8b5cf6;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-}
-
-.textareaWithCounter__textarea--error {
-  border-color: #ef4444;
-}
-
-.textareaWithCounter__textarea--error:focus {
-  border-color: #ef4444;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  border-color: var(--input-border-focus);
+  box-shadow: var(--input-shadow-focus);
 }
 
 .textareaWithCounter__textarea::placeholder {
-  color: #9ca3af;
+  color: var(--input-placeholder);
+  font-weight: var(--font-weight-normal);
+}
+
+.textareaWithCounter__textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--gray-50);
+}
+
+.textareaWithCounter__textarea--error {
+  border-color: var(--error-color);
+}
+
+.textareaWithCounter__textarea--error:focus {
+  border-color: var(--error-color);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
 
 .textareaWithCounter__footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  gap: var(--gap-md);
 }
 
 .textareaWithCounter__hint {
-  font-size: 0.875rem;
-  color: #6b7280;
-  line-height: 1.5;
+  font-size: var(--font-size-sm);
+  color: var(--ink-600);
+  line-height: var(--line-height-normal);
   flex: 1;
 }
 
 .textareaWithCounter__counter {
-  font-size: 0.875rem;
-  color: #6b7280;
-  font-weight: 500;
+  font-size: var(--font-size-sm);
+  color: var(--ink-600);
+  font-weight: var(--font-weight-medium);
   white-space: nowrap;
-  transition: color 0.2s ease;
+  transition: var(--transition-color);
 }
 
 .textareaWithCounter__counter--near {
-  color: #f59e0b;
+  color: var(--warning-color);
 }
 
 .textareaWithCounter__counter--limit {
-  color: #ef4444;
-  font-weight: 700;
+  color: var(--error-color);
+  font-weight: var(--font-weight-bold);
 }
 
 .textareaWithCounter__error {
-  font-size: 0.875rem;
-  color: #ef4444;
-  font-weight: 500;
-  line-height: 1.5;
+  font-size: var(--font-size-sm);
+  color: var(--error-text);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
 }
 
-/* Responsive */
+/* Responsive: Mobile-first approach */
 @media (max-width: 768px) {
   .textareaWithCounter__textarea {
-    padding: 0.75rem 0.875rem;
-    font-size: 0.9375rem;
+    padding: var(--input-padding-sm);
+    font-size: var(--font-size-sm);
   }
 
   .textareaWithCounter__footer {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.5rem;
+    gap: var(--gap-sm);
   }
 
   .textareaWithCounter__counter {
-    font-size: 0.8125rem;
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: 640px) {
+  .textareaWithCounter__textarea {
+    font-size: var(--font-size-sm);
+    padding: var(--space-3);
+  }
+
+  .textareaWithCounter__hint,
+  .textareaWithCounter__error {
+    font-size: var(--font-size-xs);
   }
 }
 

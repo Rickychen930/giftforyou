@@ -1,18 +1,31 @@
 /**
- * Alert Message Styles
- * Luxury and responsive alert message styling
+ * Alert Message Component
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
  */
+
+@import "design-system.css";
 
 .alertMessage {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 1.25rem;
-  border-radius: 0.75rem;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  line-height: 1.5;
-  animation: alertMessageSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+  animation: alertMessageSlideIn var(--transition-slow);
+  position: relative;
+  overflow: hidden;
+}
+
+.alertMessage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.1;
+  pointer-events: none;
 }
 
 .alertMessage__icon {
@@ -24,47 +37,69 @@
 
 .alertMessage__message {
   flex: 1;
+  min-width: 0;
 }
 
 /* Variants */
 .alertMessage--success {
-  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-  color: #065f46;
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  background: var(--success-bg-strong);
+  color: var(--success-text);
+  border: 1px solid var(--success-border);
+}
+
+.alertMessage--success::before {
+  background: var(--success-bg);
 }
 
 .alertMessage--success .alertMessage__icon {
-  color: #10b981;
+  color: var(--success-color);
 }
 
 .alertMessage--error {
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-  color: #991b1b;
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: var(--error-bg-strong);
+  color: var(--error-text);
+  border: 1px solid var(--error-border);
+}
+
+.alertMessage--error::before {
+  background: var(--error-bg);
 }
 
 .alertMessage--error .alertMessage__icon {
-  color: #ef4444;
+  color: var(--error-color);
 }
 
 .alertMessage--warning {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  color: #92400e;
-  border: 1px solid rgba(245, 158, 11, 0.2);
+  background: var(--warning-bg-strong);
+  color: var(--warning-text);
+  border: 1px solid var(--warning-border);
+}
+
+.alertMessage--warning::before {
+  background: var(--warning-bg);
 }
 
 .alertMessage--warning .alertMessage__icon {
-  color: #f59e0b;
+  color: var(--warning-color);
 }
 
 .alertMessage--info {
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  color: #1e40af;
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  background: var(--info-bg-strong);
+  color: var(--info-text);
+  border: 1px solid var(--info-border);
+}
+
+.alertMessage--info::before {
+  background: var(--info-bg);
 }
 
 .alertMessage--info .alertMessage__icon {
-  color: #3b82f6;
+  color: var(--info-color);
+}
+
+.alertMessage:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 @keyframes alertMessageSlideIn {
@@ -78,11 +113,24 @@
   }
 }
 
-/* Responsive */
+/* Responsive: Mobile-first approach */
 @media (max-width: 768px) {
   .alertMessage {
-    padding: 0.875rem 1rem;
-    font-size: 0.875rem;
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--font-size-xs);
+    gap: var(--gap-sm);
+  }
+}
+
+@media (max-width: 640px) {
+  .alertMessage {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  .alertMessage__icon {
+    align-self: flex-start;
   }
 }
 
