@@ -2,6 +2,7 @@
  * Customer Login Page View
  * Pure presentation component - no business logic
  * OOP-based class component following SOLID principles
+ * Luxury, Elegant, Clean UI/UX Design
  */
 
 import React, { Component } from "react";
@@ -50,26 +51,41 @@ class CustomerLoginPageView extends Component<CustomerLoginPageViewProps> {
 
     return (
       <section className="customerAuthPage">
+        {/* Animated Background Layers */}
         <div className="customerAuthPage__background">
           <div className="customerAuthPage__gradient"></div>
+          <div className="customerAuthPage__pattern"></div>
         </div>
 
+        {/* Main Container */}
         <div className="customerAuthPage__container">
           <div className="customerAuthCard">
+            {/* Decorative Elements */}
+            <div className="customerAuthCard__ornament customerAuthCard__ornament--top"></div>
+            <div className="customerAuthCard__ornament customerAuthCard__ornament--bottom"></div>
+
+            {/* Header Section */}
             <div className="customerAuthCard__header">
-              <Link to="/" className="customerAuthCard__logo">
-                <img
-                  src={STORE_PROFILE.brand.logoPath}
-                  alt={STORE_PROFILE.brand.displayName}
-                  loading="eager"
-                />
+              <Link to="/" className="customerAuthCard__logo" aria-label="Kembali ke beranda">
+                <div className="customerAuthCard__logoWrapper">
+                  <img
+                    src={STORE_PROFILE.brand.logoPath}
+                    alt={STORE_PROFILE.brand.displayName}
+                    loading="eager"
+                    className="customerAuthCard__logoImage"
+                  />
+                  <div className="customerAuthCard__logoGlow"></div>
+                </div>
               </Link>
-              <h1 className="customerAuthCard__title">Masuk ke Akun</h1>
+              <h1 className="customerAuthCard__title">
+                <span className="customerAuthCard__titleText">Masuk ke Akun</span>
+              </h1>
               <p className="customerAuthCard__subtitle">
                 Selamat datang kembali! Masuk untuk melanjutkan belanja
               </p>
             </div>
 
+            {/* Alert Messages */}
             {registered && (
               <AlertMessage
                 variant="success"
@@ -86,6 +102,7 @@ class CustomerLoginPageView extends Component<CustomerLoginPageViewProps> {
               />
             )}
 
+            {/* Login Form */}
             <form className="customerAuthForm" onSubmit={onFormSubmit} noValidate>
               <FormField
                 label="Username atau Email"
@@ -93,17 +110,26 @@ class CustomerLoginPageView extends Component<CustomerLoginPageViewProps> {
                 htmlFor="login-username"
                 className="customerAuthForm__group"
               >
-                <input
-                  type="text"
-                  id="login-username"
-                  name="username"
-                  className="customerAuthForm__input"
-                  value={formData.username}
-                  onChange={(e) => onFormChange("username", e.target.value)}
-                  placeholder="Masukkan username atau email"
-                  autoComplete="username"
-                  autoFocus
-                />
+                <div className="customerAuthForm__inputWrapper">
+                  <div className="customerAuthForm__inputIcon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <input
+                    type="text"
+                    id="login-username"
+                    name="username"
+                    className="customerAuthForm__input"
+                    value={formData.username}
+                    onChange={(e) => onFormChange("username", e.target.value)}
+                    placeholder="Masukkan username atau email"
+                    autoComplete="username"
+                    autoFocus
+                    disabled={isLoading || googleLoading}
+                  />
+                </div>
               </FormField>
 
               <FormField
@@ -112,27 +138,35 @@ class CustomerLoginPageView extends Component<CustomerLoginPageViewProps> {
                 htmlFor="login-password"
                 className="customerAuthForm__group"
               >
-                <PasswordInput
-                  id="login-password"
-                  name="password"
-                  className="customerAuthForm__input"
-                  value={formData.password}
-                  onChange={(e) => onFormChange("password", e.target.value)}
-                  placeholder="Masukkan password"
-                  autoComplete="current-password"
-                  showPassword={showPassword}
-                  onToggleVisibility={() => onFormChange("showPassword", !showPassword)}
-                />
+                <div className="customerAuthForm__inputWrapper customerAuthForm__inputWrapper--password">
+                  <PasswordInput
+                    id="login-password"
+                    name="password"
+                    className="customerAuthForm__input"
+                    value={formData.password}
+                    onChange={(e) => onFormChange("password", e.target.value)}
+                    placeholder="Masukkan password"
+                    autoComplete="current-password"
+                    showPassword={showPassword}
+                    onToggleVisibility={() => onFormChange("showPassword", !showPassword)}
+                    disabled={isLoading || googleLoading}
+                  />
+                </div>
                 <div className="customerAuthForm__actions">
                   <label className="customerAuthForm__checkbox">
                     <input
                       type="checkbox"
                       checked={formData.rememberMe}
                       onChange={(e) => onFormChange("rememberMe", e.target.checked)}
+                      disabled={isLoading}
                     />
                     <span>Ingat saya</span>
                   </label>
-                  <Link to="/customer/forgot-password" className="customerAuthForm__forgotLink">
+                  <Link 
+                    to="/customer/forgot-password" 
+                    className="customerAuthForm__forgotLink"
+                    tabIndex={isLoading ? -1 : 0}
+                  >
                     Lupa password?
                   </Link>
                 </div>
@@ -144,7 +178,7 @@ class CustomerLoginPageView extends Component<CustomerLoginPageViewProps> {
                 size="md"
                 isLoading={isLoading}
                 className={`customerAuthForm__submit ${isLoading ? "customerAuthForm__submit--loading" : ""}`}
-                disabled={isLoading}
+                disabled={isLoading || googleLoading}
                 icon={
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -156,10 +190,12 @@ class CustomerLoginPageView extends Component<CustomerLoginPageViewProps> {
               </LuxuryButton>
             </form>
 
+            {/* Divider */}
             <div className="customerAuthCard__divider">
-              <span>atau</span>
+              <span className="customerAuthCard__dividerText">atau</span>
             </div>
 
+            {/* Social Login */}
             <div className="customerAuthCard__social">
               <button
                 type="button"
@@ -167,6 +203,7 @@ class CustomerLoginPageView extends Component<CustomerLoginPageViewProps> {
                 onClick={onGoogleSignIn}
                 disabled={googleLoading || isLoading}
                 aria-busy={googleLoading}
+                aria-label="Masuk dengan Google"
               >
                 {googleLoading ? (
                   <>
@@ -192,10 +229,15 @@ class CustomerLoginPageView extends Component<CustomerLoginPageViewProps> {
               </button>
             </div>
 
+            {/* Footer */}
             <div className="customerAuthCard__footer">
-              <p>
+              <p className="customerAuthCard__footerText">
                 Belum punya akun?{" "}
-                <Link to="/customer/register" className="customerAuthCard__link">
+                <Link 
+                  to="/customer/register" 
+                  className="customerAuthCard__link"
+                  tabIndex={isLoading ? -1 : 0}
+                >
                   Daftar sekarang
                 </Link>
               </p>
