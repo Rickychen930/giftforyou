@@ -334,33 +334,28 @@
 }
 
 /* =========================
-   Preview grid (easier browsing)
-   Now uses BouquetCardGrid component for efficient display
+   Preview Wrap (Horizontal Scroll)
+   Now uses BouquetCardHorizontalScroll component for efficient display
 ========================= */
 .collectionCard__previewWrap {
   position: relative;
   width: 100%;
   margin-top: var(--space-6);
+  overflow: hidden;
 }
 
-/* BouquetCardGrid integration */
-.collectionCard__previewWrap .bouquet-card-grid {
+/* BouquetCardHorizontalScroll integration */
+.collectionCard__previewWrap .bouquet-card-horizontal-scroll {
   width: 100%;
-}
-
-.collectionCard__previewWrap .bouquet-card-grid__grid {
-  /* Responsive grid handled by BouquetCardGrid component */
-  gap: clamp(var(--space-4), 2vw, var(--space-6));
-  /* Ensure cards are evenly distributed */
-  grid-auto-rows: minmax(auto, 1fr);
 }
 
 /* Collection context styling - BouquetCard already uses bouquetCard class */
 .collectionCard__previewWrap .bouquetCard {
   /* Already styled with luxury design */
   animation-delay: 0s;
-  /* Ensure consistent card height in grid */
+  /* Ensure consistent card height */
   height: 100%;
+  min-height: 100%;
 }
 
 .collectionCard__footer {
@@ -373,19 +368,8 @@
   z-index: var(--z-base);
 }
 
-/* Responsive grid is now handled by BouquetCardGrid component */
-/* These media queries are kept for backward compatibility if needed */
-@media (min-width: 720px) {
-  .collectionCard__previewWrap .bouquet-card-grid__grid {
-    gap: var(--space-4);
-  }
-}
-
-@media (min-width: 1024px) {
-  .collectionCard__previewWrap .bouquet-card-grid__grid {
-    gap: var(--space-5);
-  }
-}
+/* Horizontal scroll is now handled by BouquetCardHorizontalScroll component */
+/* Responsive adjustments handled by component */
 
 /* =========================
    Horizontal scroller with navigation
@@ -1214,10 +1198,7 @@
     padding-top: 1rem;
   }
 
-  .collectionCard__previewWrap .bouquet-card-grid__grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-3);
-  }
+  /* Horizontal scroll handled by BouquetCardHorizontalScroll component */
 }
 
 /* Reduced motion support */

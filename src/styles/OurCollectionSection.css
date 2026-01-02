@@ -139,7 +139,7 @@
 .ourCollection__grid {
   display: flex;
   flex-direction: column;
-  gap: clamp(var(--space-7), 3.25vw, var(--space-10-5));
+  gap: clamp(var(--space-8), 4vw, var(--space-12));
   width: 100%;
 }
 
@@ -153,6 +153,8 @@
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-luxury-lg);
   transition: all var(--transition-elegant);
+  position: relative;
+  z-index: 1;
 }
 
 @media (hover: hover) and (pointer: fine) {

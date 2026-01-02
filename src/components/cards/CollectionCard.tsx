@@ -7,7 +7,7 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import "../../styles/CollectionCardComponent.css";
 import type { BouquetCardProps } from "./BouquetCard";
-import BouquetCardGrid from "../collections/BouquetCardGrid";
+import BouquetCardHorizontalScroll from "../collections/BouquetCardHorizontalScroll";
 
 export interface CollectionContainerProps {
   id: string;
@@ -36,8 +36,8 @@ class CollectionCard extends Component<CollectionContainerProps, CollectionCardS
   }
 
   private getPreviewBouquets(): BouquetCardProps[] {
-    // Show more bouquets for better user experience
-    return this.getValidBouquets().slice(0, 12);
+    // Show all bouquets in horizontal scroll for better UX
+    return this.getValidBouquets();
   }
 
   private getBrowseHref(): string {
@@ -143,28 +143,27 @@ class CollectionCard extends Component<CollectionContainerProps, CollectionCardS
           this.renderEmptyState()
         ) : (
           <div className={`${this.baseClass}__previewWrap`}>
-            <BouquetCardGrid
+            <BouquetCardHorizontalScroll
               bouquets={previewBouquets}
-              maxVisible={previewBouquets.length}
               loading={false}
+              showNavigation={true}
+              showIndicators={previewBouquets.length > 4}
               onBouquetClick={(bouquetId) => {
                 // Optional: Handle bouquet click
                 console.log("Bouquet clicked:", bouquetId);
               }}
             />
 
-            {validBouquets.length > previewBouquets.length && (
-              <div className={`${this.baseClass}__footer`}>
-                <Link
-                  to={browseHref}
-                  className={`${this.baseClass}__ctaBtn`}
-                  aria-label={`Lihat semua bouquet di koleksi ${name}`}
-                  title="Lihat semua"
-                >
-                  Lihat semua ({validBouquets.length})
-                </Link>
-              </div>
-            )}
+            <div className={`${this.baseClass}__footer`}>
+              <Link
+                to={browseHref}
+                className={`${this.baseClass}__ctaBtn`}
+                aria-label={`Lihat semua bouquet di koleksi ${name}`}
+                title="Lihat semua"
+              >
+                Lihat semua ({validBouquets.length})
+              </Link>
+            </div>
           </div>
         )}
       </section>

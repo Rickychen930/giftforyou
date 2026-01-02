@@ -1,0 +1,399 @@
+/**
+ * Bouquet Card Horizontal Scroll Styles
+ * Luxury & Elegant horizontal scroll for bouquet cards
+ * Effective, clean, and fully responsive
+ */
+
+@import "../design-system.css";
+
+.bouquet-card-horizontal-scroll {
+  width: 100%;
+  position: relative;
+  isolation: isolate;
+}
+
+.bouquet-card-horizontal-scroll__wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.bouquet-card-horizontal-scroll__container {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--brand-rose-300) transparent;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  padding: var(--space-2) 0;
+  margin: 0 calc(var(--space-4) * -1);
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+  /* Enable smooth scrolling on all devices */
+  scroll-snap-type: x proximity;
+}
+
+.bouquet-card-horizontal-scroll__container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.bouquet-card-horizontal-scroll__container::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: var(--radius-full);
+}
+
+.bouquet-card-horizontal-scroll__container::-webkit-scrollbar-thumb {
+  background: var(--brand-rose-300);
+  border-radius: var(--radius-full);
+  transition: background var(--transition-base);
+}
+
+.bouquet-card-horizontal-scroll__container::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-rose-500);
+}
+
+.bouquet-card-horizontal-scroll__scroll {
+  display: flex;
+  gap: clamp(var(--space-4), 2vw, var(--space-6));
+  width: max-content;
+  padding-bottom: var(--space-2);
+}
+
+.bouquet-card-horizontal-scroll__item {
+  flex: 0 0 auto;
+  width: clamp(240px, 20vw, 280px);
+  min-width: 240px;
+  max-width: 280px;
+  /* Enable scroll snap for better UX */
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
+}
+
+/* Navigation Buttons */
+.bouquet-card-horizontal-scroll__nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: clamp(var(--size-10), 3vw, var(--size-12));
+  height: clamp(var(--size-10), 3vw, var(--size-12));
+  border-radius: var(--radius-full);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
+  color: var(--luxury-gold-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-elegant) cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 
+    var(--shadow-luxury-md),
+    var(--shadow-luxury-sm),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  backdrop-filter: var(--backdrop-blur-lg) saturate(190%);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg) saturate(190%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bouquet-card-horizontal-scroll__wrapper:hover .bouquet-card-horizontal-scroll__nav-btn {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.bouquet-card-horizontal-scroll__nav-btn:hover {
+  transform: translateY(-50%) scale(1.1);
+  border-color: var(--border-luxury-gold);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-700);
+  box-shadow: 
+    var(--shadow-luxury-xl),
+    var(--shadow-luxury-lg),
+    var(--shadow-luxury-md),
+    0 0 0 1px rgba(255, 255, 255, 1) inset,
+    0 0 20px var(--overlay-luxury-gold);
+}
+
+.bouquet-card-horizontal-scroll__nav-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.bouquet-card-horizontal-scroll__nav-btn--prev {
+  left: var(--space-2);
+}
+
+.bouquet-card-horizontal-scroll__nav-btn--next {
+  right: var(--space-2);
+}
+
+.bouquet-card-horizontal-scroll__nav-btn svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.bouquet-card-horizontal-scroll__nav-btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--brand-rose-500);
+  outline-offset: var(--focus-ring-offset);
+  opacity: 1;
+}
+
+/* Indicators */
+.bouquet-card-horizontal-scroll__indicators {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  padding: 0 var(--space-4);
+}
+
+.bouquet-card-horizontal-scroll__indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--brand-rose-300);
+  cursor: pointer;
+  transition: all var(--transition-elegant);
+  padding: 0;
+  opacity: 0.5;
+}
+
+.bouquet-card-horizontal-scroll__indicator:hover {
+  opacity: 0.8;
+  transform: scale(1.2);
+  background: var(--brand-rose-500);
+}
+
+.bouquet-card-horizontal-scroll__indicator--active {
+  opacity: 1;
+  background: var(--brand-rose-600);
+  width: 24px;
+  border-radius: var(--radius-full);
+}
+
+.bouquet-card-horizontal-scroll__indicator:focus-visible {
+  outline: var(--focus-ring-width) solid var(--brand-rose-500);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Skeleton Loading */
+.bouquet-card-horizontal-scroll__skeleton {
+  flex: 0 0 auto;
+  width: clamp(240px, 20vw, 280px);
+  min-width: 240px;
+  max-width: 280px;
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-luxury-sm);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.bouquet-card-horizontal-scroll__skeleton-image {
+  aspect-ratio: 3 / 4;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.06) 25%,
+    rgba(0, 0, 0, 0.10) 50%,
+    rgba(0, 0, 0, 0.06) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.bouquet-card-horizontal-scroll__skeleton-body {
+  padding: var(--space-4);
+}
+
+.bouquet-card-horizontal-scroll__skeleton-title {
+  height: 20px;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.06) 25%,
+    rgba(0, 0, 0, 0.10) 50%,
+    rgba(0, 0, 0, 0.06) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-2);
+  width: 80%;
+}
+
+.bouquet-card-horizontal-scroll__skeleton-price {
+  height: 18px;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.06) 25%,
+    rgba(0, 0, 0, 0.10) 50%,
+    rgba(0, 0, 0, 0.06) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+  width: 60%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .bouquet-card-horizontal-scroll__item {
+    width: clamp(220px, 22vw, 260px);
+    min-width: 220px;
+    max-width: 260px;
+  }
+
+  .bouquet-card-horizontal-scroll__nav-btn {
+    width: var(--size-10);
+    height: var(--size-10);
+  }
+
+  .bouquet-card-horizontal-scroll__nav-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .bouquet-card-horizontal-scroll__container {
+    margin: 0 calc(var(--space-3) * -1);
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
+
+  .bouquet-card-horizontal-scroll__item {
+    width: clamp(200px, 28vw, 240px);
+    min-width: 200px;
+    max-width: 240px;
+  }
+
+  .bouquet-card-horizontal-scroll__scroll {
+    gap: var(--space-4);
+  }
+
+  .bouquet-card-horizontal-scroll__nav-btn {
+    width: var(--size-9);
+    height: var(--size-9);
+    opacity: 0.9;
+  }
+
+  .bouquet-card-horizontal-scroll__wrapper:hover .bouquet-card-horizontal-scroll__nav-btn {
+    opacity: 0.9;
+  }
+}
+
+@media (max-width: 640px) {
+  .bouquet-card-horizontal-scroll__container {
+    margin: 0 calc(var(--space-2) * -1);
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+  }
+
+  .bouquet-card-horizontal-scroll__item {
+    width: clamp(180px, 35vw, 220px);
+    min-width: 180px;
+    max-width: 220px;
+  }
+
+  .bouquet-card-horizontal-scroll__scroll {
+    gap: var(--space-3);
+  }
+
+  .bouquet-card-horizontal-scroll__nav-btn {
+    width: var(--size-8);
+    height: var(--size-8);
+    opacity: 1;
+  }
+
+  .bouquet-card-horizontal-scroll__nav-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .bouquet-card-horizontal-scroll__nav-btn--prev {
+    left: var(--space-1);
+  }
+
+  .bouquet-card-horizontal-scroll__nav-btn--next {
+    right: var(--space-1);
+  }
+
+  .bouquet-card-horizontal-scroll__indicators {
+    margin-top: var(--space-3);
+  }
+}
+
+@media (max-width: 480px) {
+  .bouquet-card-horizontal-scroll__item {
+    width: clamp(160px, 40vw, 200px);
+    min-width: 160px;
+    max-width: 200px;
+  }
+
+  .bouquet-card-horizontal-scroll__nav-btn {
+    display: none; /* Hide on very small screens, use native scroll */
+  }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .bouquet-card-horizontal-scroll__nav-btn {
+    opacity: 0.7;
+  }
+
+  .bouquet-card-horizontal-scroll__wrapper:hover .bouquet-card-horizontal-scroll__nav-btn {
+    opacity: 0.7;
+  }
+
+  .bouquet-card-horizontal-scroll__container {
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+
+  .bouquet-card-horizontal-scroll__item {
+    scroll-snap-align: start;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .bouquet-card-horizontal-scroll__container {
+    scroll-behavior: auto;
+  }
+
+  .bouquet-card-horizontal-scroll__nav-btn,
+  .bouquet-card-horizontal-scroll__indicator {
+    transition: none !important;
+  }
+
+  .bouquet-card-horizontal-scroll__skeleton,
+  .bouquet-card-horizontal-scroll__skeleton-image,
+  .bouquet-card-horizontal-scroll__skeleton-title,
+  .bouquet-card-horizontal-scroll__skeleton-price {
+    animation: none;
+  }
+}
+
