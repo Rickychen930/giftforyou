@@ -1670,9 +1670,6 @@
     font-size: var(--font-size-sm);
     line-height: 1.4;
   }
-    transition: none;
-    animation: none;
-  }
 
   .becDirtyIndicator {
     animation: none;
