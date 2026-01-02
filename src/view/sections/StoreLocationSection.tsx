@@ -15,7 +15,6 @@ import { storeData } from "../../models/store-model";
 import StoreAddressCard from "../../components/store-location/StoreAddressCard";
 import StoreContactCard from "../../components/store-location/StoreContactCard";
 import StoreHoursCard from "../../components/store-location/StoreHoursCard";
-import StoreSocialLinks from "../../components/store-location/StoreSocialLinks";
 import SectionHeader from "../../components/common/SectionHeader";
 import Container from "../../components/layout/Container";
 
@@ -50,14 +49,14 @@ class StoreLocationSection extends Component<StoreLocationSectionProps, StoreLoc
     return (
       <section className={this.baseClass} id="Location">
         <Container variant="default" padding="md" className={`${this.baseClass}__container`}>
-          <div className={`${this.baseClass}__info`} aria-labelledby="store-location-title">
-            <SectionHeader
-              eyebrow="Toko & Kontak"
-              title="Kunjungi Toko Kami di Cirebon"
-              className={`${this.baseClass}__header`}
-              titleId="store-location-title"
-            />
+          <SectionHeader
+            eyebrow="Toko & Kontak"
+            title="Kunjungi Toko Kami di Cirebon"
+            className={`${this.baseClass}__header`}
+            titleId="store-location-title"
+          />
 
+          <div className={`${this.baseClass}__content`} aria-labelledby="store-location-title">
             <div className={`${this.baseClass}__cards`}>
               <StoreAddressCard
                 name={name}
@@ -70,17 +69,12 @@ class StoreLocationSection extends Component<StoreLocationSectionProps, StoreLoc
                 phone={phone}
                 email={email}
                 whatsappUrl={social?.whatsapp}
+                instagram={social?.instagram}
+                tiktok={social?.tiktok}
               />
 
               <StoreHoursCard hours={hours} />
             </div>
-
-            {social && (social.instagram || social.tiktok) && (
-              <StoreSocialLinks
-                instagram={social.instagram}
-                tiktok={social.tiktok}
-              />
-            )}
           </div>
         </Container>
       </section>

@@ -7,11 +7,14 @@ import React, { Component } from "react";
 import "../../styles/store-location/StoreContactCard.css";
 import StoreLocationCard from "./StoreLocationCard";
 import { PhoneIcon, EmailIcon } from "../icons/UIIcons";
+import { SocialIcon } from "../icons/SocialIcons";
 
 export interface StoreContactCardProps {
   phone: string;
   email: string;
   whatsappUrl?: string;
+  instagram?: string;
+  tiktok?: string;
 }
 
 interface StoreContactCardState {
@@ -46,8 +49,9 @@ class StoreContactCard extends Component<StoreContactCardProps, StoreContactCard
   }
 
   render(): React.ReactNode {
-    const { phone, email, whatsappUrl } = this.props;
+    const { phone, email, whatsappUrl, instagram, tiktok } = this.props;
     const phoneForTel = this.getPhoneForTel();
+    const hasSocialLinks = instagram || tiktok;
 
     return (
       <StoreLocationCard icon={this.renderContactIcon()} title="Hubungi Kami" variant="contact">
@@ -82,6 +86,36 @@ class StoreContactCard extends Component<StoreContactCardProps, StoreContactCard
             </svg>
             Chat lewat WhatsApp
           </a>
+        )}
+
+        {hasSocialLinks && (
+          <div className={`${this.baseClass}__social`}>
+            <p className={`${this.baseClass}__social-label`}>Follow Us</p>
+            <div className={`${this.baseClass}__social-links`}>
+              {instagram && (
+                <a
+                  href={instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${this.baseClass}__social-link ${this.baseClass}__social-link--instagram`}
+                  aria-label="Follow us on Instagram"
+                >
+                  <SocialIcon name="Instagram" className={`${this.baseClass}__social-icon`} />
+                </a>
+              )}
+              {tiktok && (
+                <a
+                  href={tiktok}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${this.baseClass}__social-link ${this.baseClass}__social-link--tiktok`}
+                  aria-label="Follow us on TikTok"
+                >
+                  <SocialIcon name="TikTok" className={`${this.baseClass}__social-icon`} />
+                </a>
+              )}
+            </div>
+          </div>
         )}
       </StoreLocationCard>
     );

@@ -1,0 +1,186 @@
+/**
+ * Store Map Styles
+ * Luxury & Elegant map display
+ * Fully responsive
+ */
+
+@import "../design-system.css";
+
+.store-map {
+  width: 100%;
+  position: relative;
+  isolation: isolate;
+}
+
+.store-map__title {
+  margin: 0 0 var(--space-4);
+  font-size: clamp(var(--font-size-lg), 2vw, var(--font-size-xl));
+  font-weight: var(--font-weight-black);
+  color: var(--ink-900);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.store-map__container {
+  position: relative;
+  width: 100%;
+  height: clamp(300px, 40vh, 500px);
+  border-radius: var(--radius-2xl);
+  box-shadow: 
+    var(--shadow-luxury-xl),
+    var(--shadow-luxury-lg),
+    var(--shadow-elegant);
+  overflow: hidden;
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
+  isolation: isolate;
+}
+
+.store-map__container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.1) 0%,
+    rgba(168, 213, 186, 0.08) 50%,
+    rgba(212, 140, 156, 0.1) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity var(--transition-elegant);
+}
+
+.store-map:hover .store-map__container::before {
+  opacity: 1;
+}
+
+/* Skeleton Loading */
+.store-map__skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.06) 0%,
+    rgba(0, 0, 0, 0.03) 50%,
+    rgba(0, 0, 0, 0.06) 100%
+  );
+  z-index: 2;
+  overflow: hidden;
+}
+
+.store-map__skeleton-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: mapShimmer var(--animation-speed-slow) ease-in-out infinite;
+}
+
+@keyframes mapShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.store-map__iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+  opacity: 0;
+  transition: opacity var(--animation-speed-base) ease;
+  position: relative;
+  z-index: 1;
+}
+
+.store-map__iframe.is-loaded {
+  opacity: 1;
+}
+
+.store-map__directions-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-xl);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
+  color: var(--luxury-gold-600);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+  transition: all var(--transition-elegant);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
+  box-shadow: var(--shadow-luxury-sm);
+  justify-content: center;
+  width: 100%;
+}
+
+.store-map__directions-btn:hover {
+  border-color: var(--border-luxury-gold);
+  transform: translateY(calc(var(--space-1) * -1));
+  box-shadow: 
+    var(--shadow-luxury-gold),
+    var(--shadow-luxury-md);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-700);
+}
+
+.store-map__directions-btn svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.store-map__directions-btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--brand-rose-500);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .store-map__container {
+    height: clamp(250px, 35vh, 400px);
+    border-radius: var(--radius-xl);
+  }
+
+  .store-map__directions-btn {
+    padding: var(--space-2-5) var(--space-4);
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: 640px) {
+  .store-map__container {
+    height: clamp(200px, 30vh, 350px);
+    border-radius: var(--radius-lg);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .store-map__skeleton-shimmer,
+  .store-map__iframe {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .store-map__directions-btn:hover {
+    transform: none;
+  }
+}
+

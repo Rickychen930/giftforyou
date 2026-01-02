@@ -3,16 +3,85 @@
 
 .store-hours-card__time {
   margin: 0;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--ink-700);
+  font-size: clamp(var(--font-size-sm), 1.2vw, var(--font-size-base));
+  font-weight: var(--font-weight-bold);
+  color: var(--ink-800);
   line-height: var(--line-height-relaxed);
-  padding: var(--space-1) 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-width-1) solid transparent;
+  transition: all var(--transition-elegant);
+  position: relative;
+}
+
+.store-hours-card__time::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: var(--gradient-brand);
+  border-radius: var(--radius-full);
+  opacity: 0;
+  transition: opacity var(--transition-elegant);
+}
+
+.store-hours-card__time:hover {
+  background: var(--gradient-brand-soft);
+  border-color: var(--brand-rose-border);
+  transform: translateX(var(--space-1));
+  box-shadow: var(--shadow-luxury-sm);
+}
+
+.store-hours-card__time:hover::before {
+  opacity: 1;
 }
 
 .store-hours-card__time--closed {
   color: var(--ink-500);
   opacity: var(--opacity-medium);
   font-style: italic;
+  background: transparent;
+}
+
+.store-hours-card__time--closed:hover {
+  background: rgba(0, 0, 0, 0.02);
+  transform: none;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .store-hours-card__time {
+    font-size: var(--font-size-sm);
+    padding: var(--space-1-5) var(--space-2);
+  }
+}
+
+@media (max-width: 480px) {
+  .store-hours-card__time {
+    font-size: var(--font-size-xs);
+    padding: var(--space-1) var(--space-1-5);
+  }
+}
+
+@media (max-width: 360px) {
+  .store-hours-card__time {
+    font-size: 0.75rem;
+    padding: var(--space-1) var(--space-1-5);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .store-hours-card__time {
+    transition: none !important;
+  }
+
+  .store-hours-card__time:hover {
+    transform: none;
+  }
 }
 
