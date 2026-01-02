@@ -2103,7 +2103,7 @@
   background: linear-gradient(
     135deg,
     var(--warning-text) 0%,
-    rgba(245, 158, 11, 0.9) 100%
+    rgba(192, 120, 136, 0.9) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

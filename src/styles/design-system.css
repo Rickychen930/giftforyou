@@ -235,16 +235,16 @@
   /* =========================================================
      LUXURY & ELEGANT COLORS (Premium Palette)
      ========================================================= */
-  /* Gold/Amber accents for luxury feel */
-  --luxury-gold-50: #fffbeb;
-  --luxury-gold-100: #fef3c7;
-  --luxury-gold-200: #fde68a;
-  --luxury-gold-300: #fcd34d;
-  --luxury-gold-400: #fbbf24;
-  --luxury-gold-500: #f59e0b;
-  --luxury-gold-600: #d97706;
-  --luxury-gold-700: #b45309;
-  --luxury-gold-800: #92400e;
+  /* Rose accents for luxury feel (harmonious with brand palette) */
+  --luxury-gold-50: #fef7f7;
+  --luxury-gold-100: #fce8eb;
+  --luxury-gold-200: #f8d1d7;
+  --luxury-gold-300: #f3b6c3;
+  --luxury-gold-400: #e89aaa;
+  --luxury-gold-500: #d48c9c;
+  --luxury-gold-600: #c07888;
+  --luxury-gold-700: #803d4d;
+  --luxury-gold-800: #6b3240;
   
   /* Elegant neutral palette */
   --elegant-black: #1a1a1a;
@@ -256,10 +256,10 @@
   --elegant-ivory: #fefefe;
   --elegant-pearl: #f8f8f8;
   
-  /* Premium gold gradients */
-  --gradient-luxury-gold: linear-gradient(135deg, var(--luxury-gold-400) 0%, var(--luxury-gold-600) 100%);
-  --gradient-luxury-gold-subtle: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(217, 119, 6, 0.10) 100%);
-  --gradient-luxury-rose: linear-gradient(135deg, var(--brand-rose-500) 0%, var(--luxury-gold-400) 100%);
+  /* Premium rose gradients (harmonious with brand palette) */
+  --gradient-luxury-gold: linear-gradient(135deg, var(--brand-rose-400) 0%, var(--brand-rose-600) 100%);
+  --gradient-luxury-gold-subtle: linear-gradient(135deg, rgba(212, 140, 156, 0.15) 0%, rgba(192, 120, 136, 0.10) 100%);
+  --gradient-luxury-rose: linear-gradient(135deg, var(--brand-rose-500) 0%, var(--brand-sage-500) 100%);
   --gradient-elegant-surface: linear-gradient(180deg, var(--elegant-white) 0%, var(--elegant-cream) 100%);
   --gradient-luxury-black: linear-gradient(135deg, var(--elegant-black) 0%, var(--elegant-charcoal) 100%);
   --gradient-luxury-elegant: linear-gradient(135deg, var(--elegant-white) 0%, var(--elegant-cream) 50%, var(--elegant-pearl) 100%);
@@ -269,26 +269,26 @@
   --shadow-luxury-md: 0 4px 16px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.06);
   --shadow-luxury-lg: 0 8px 32px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.08);
   --shadow-luxury-xl: 0 16px 64px rgba(0, 0, 0, 0.20), 0 0 0 1px rgba(0, 0, 0, 0.10);
-  --shadow-luxury-gold: 0 8px 24px rgba(245, 158, 11, 0.25), 0 0 0 1px rgba(245, 158, 11, 0.10);
-  --shadow-luxury-gold-lg: 0 12px 40px rgba(245, 158, 11, 0.30), 0 0 0 1px rgba(245, 158, 11, 0.15);
+  --shadow-luxury-gold: 0 8px 24px rgba(212, 140, 156, 0.25), 0 0 0 1px rgba(212, 140, 156, 0.10);
+  --shadow-luxury-gold-lg: 0 12px 40px rgba(212, 140, 156, 0.30), 0 0 0 1px rgba(212, 140, 156, 0.15);
   --shadow-elegant: 0 4px 20px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
   
   /* Premium borders */
   --border-luxury: 1.5px solid rgba(0, 0, 0, 0.08);
-  --border-luxury-gold: 1.5px solid rgba(245, 158, 11, 0.20);
-  --border-luxury-gold-strong: 1.5px solid rgba(245, 158, 11, 0.35);
+  --border-luxury-gold: 1.5px solid rgba(212, 140, 156, 0.20);
+  --border-luxury-gold-strong: 1.5px solid rgba(192, 120, 136, 0.35);
   --border-elegant: 1px solid rgba(0, 0, 0, 0.06);
   --border-elegant-strong: 1px solid rgba(0, 0, 0, 0.12);
   
-  /* Luxury typography colors */
-  --text-luxury-gold: var(--luxury-gold-600);
-  --text-luxury-gold-light: var(--luxury-gold-500);
+  /* Luxury typography colors (rose-based) */
+  --text-luxury-gold: var(--brand-rose-600);
+  --text-luxury-gold-light: var(--brand-rose-500);
   --text-elegant-black: var(--elegant-black);
   --text-elegant-charcoal: var(--elegant-charcoal);
   
-  /* Luxury background overlays */
-  --overlay-luxury-gold: rgba(245, 158, 11, 0.05);
-  --overlay-luxury-gold-strong: rgba(245, 158, 11, 0.10);
+  /* Luxury background overlays (rose-based) */
+  --overlay-luxury-gold: rgba(212, 140, 156, 0.05);
+  --overlay-luxury-gold-strong: rgba(212, 140, 156, 0.10);
   --overlay-elegant: rgba(0, 0, 0, 0.02);
 
   /* =========================================================
