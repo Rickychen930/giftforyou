@@ -156,12 +156,14 @@ class HeaderNavigation extends Component<HeaderNavigationProps, HeaderNavigation
         </NavLink>
 
         {isCollections && (!isMobile || collectionsOpen) && (
-          <HeaderDropdown
-            collectionNames={collectionNames}
-            typeNames={typeNames}
-            onNavigate={onNavigate}
-            onClose={onCollectionsClose}
-          />
+          <>
+            <HeaderDropdown
+              collectionNames={collectionNames}
+              typeNames={typeNames}
+              onNavigate={onNavigate}
+              onClose={onCollectionsClose}
+            />
+          </>
         )}
       </li>
     );

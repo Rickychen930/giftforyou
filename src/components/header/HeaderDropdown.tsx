@@ -1,12 +1,13 @@
 /**
  * Header Dropdown Component (OOP)
+ * Wrapper component that uses the new HeaderMegaMenu
+ * Maintains backward compatibility while using elegant mega menu
  * Class-based component following SOLID principles
  */
 
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
 import "../../styles/header/HeaderDropdown.css";
-import { COLLECTION_SUGGESTIONS } from "../../constants/app-constants";
+import HeaderMegaMenu, { type CollectionItem } from "./HeaderMegaMenu";
 
 export interface HeaderDropdownProps {
   collectionNames?: string[];
@@ -21,88 +22,65 @@ interface HeaderDropdownState {
 
 /**
  * Header Dropdown Component
- * Class-based component for header collections dropdown menu
+ * Wrapper that transforms collection names into CollectionItem format
+ * and uses HeaderMegaMenu for elegant display
  */
 class HeaderDropdown extends Component<HeaderDropdownProps, HeaderDropdownState> {
   private baseClass: string = "header-dropdown";
 
-  private getCollectionSuggestions(): string[] {
+  /**
+   * Transform collection names into CollectionItem format
+   * Marks first few as featured for better visual hierarchy
+   */
+  private getCollectionItems(): CollectionItem[] {
     const { collectionNames = [] } = this.props;
-    return collectionNames.length > 0
-      ? collectionNames
-      : Array.from(COLLECTION_SUGGESTIONS);
+    
+    // Collection icons mapping for better visual appeal
+    const iconMap: Record<string, string> = {
+      "Best Sellers": "⭐",
+      "Wedding Collection": "💍",
+      "Sympathy Flowers": "🕊️",
+      "New Edition": "✨",
+      "Featured": "🌟",
+      "Special Occasions": "🎉",
+    };
+
+    return collectionNames.map((name, index) => ({
+      name,
+      icon: iconMap[name] || "🌸",
+      description: this.getCollectionDescription(name),
+      featured: index < 3, // First 3 are featured
+    }));
   }
 
-  private getTypeSuggestions(): string[] {
-    const { typeNames = [] } = this.props;
-    return typeNames.length > 0 ? typeNames : ["Orchid", "Mixed"];
-  }
-
-  private handleLinkClick = (): void => {
-    const { onNavigate, onClose } = this.props;
-    onNavigate?.();
-    onClose?.();
-  };
-
-  private renderTypeLink(type: string): React.ReactNode {
-    return (
-      <li key={type}>
-        <Link
-          to={`/collection?type=${encodeURIComponent(type)}`}
-          onClick={this.handleLinkClick}
-          className={`${this.baseClass}__link`}
-          role="menuitem"
-        >
-          <span className={`${this.baseClass}__icon`}>🏷️</span>
-          <span>{type}</span>
-        </Link>
-      </li>
-    );
-  }
-
-  private renderCollectionLink(collection: string): React.ReactNode {
-    return (
-      <li key={collection}>
-        <Link
-          to={`/collection?name=${encodeURIComponent(collection)}`}
-          onClick={this.handleLinkClick}
-          className={`${this.baseClass}__link`}
-          role="menuitem"
-        >
-          <span className={`${this.baseClass}__icon`}>🌸</span>
-          <span>{collection}</span>
-        </Link>
-      </li>
-    );
+  /**
+   * Get description for collection based on name
+   */
+  private getCollectionDescription(name: string): string {
+    const descriptions: Record<string, string> = {
+      "Best Sellers": "Pilihan terlaris",
+      "Wedding Collection": "Untuk hari bahagia",
+      "Sympathy Flowers": "Ungkapan duka cita",
+      "New Edition": "Koleksi terbaru",
+      "Featured": "Pilihan unggulan",
+      "Special Occasions": "Untuk momen spesial",
+    };
+    return descriptions[name] || "";
   }
 
   render(): React.ReactNode {
-    const typeSuggestions = this.getTypeSuggestions();
-    const collectionSuggestions = this.getCollectionSuggestions();
+    const { typeNames, onNavigate, onClose } = this.props;
+    const collections = this.getCollectionItems();
 
     return (
-      <div
-        className={this.baseClass}
-        id="collections-dropdown"
-        aria-label="Menu koleksi"
-        role="menu"
-      >
-        <div className={`${this.baseClass}__header`}>
-          <h3>Koleksi Kami</h3>
-          <p>Dirangkai dengan sepenuh hati</p>
-        </div>
-
-        <div className={`${this.baseClass}__header`} style={{ marginTop: "0.75rem" }}>
-          <h3>Berdasarkan Tipe</h3>
-          <p>Filter cepat untuk katalog</p>
-        </div>
-        <ul className={`${this.baseClass}__grid`}>
-          {typeSuggestions.map((type) => this.renderTypeLink(type))}
-        </ul>
-
-        <ul className={`${this.baseClass}__grid`}>
-          {collectionSuggestions.map((collection) => this.renderCollectionLink(collection))}
-        </ul>
+      <div className={this.baseClass} id="collections-dropdown" aria-label="Menu koleksi">
+        <HeaderMegaMenu
+          collections={collections}
+          typeNames={typeNames}
+          onNavigate={onNavigate}
+          onClose={onClose}
+          maxCollections={6}
+        />
       </div>
     );
   }
