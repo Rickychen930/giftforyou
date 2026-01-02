@@ -1,0 +1,253 @@
+/**
+ * Grid Component Styles
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ * Foundation for all grid layouts
+ */
+
+@import "../design-system.css";
+
+/* =========================================================
+   Base Grid Styles
+   ========================================================= */
+.grid {
+  display: grid;
+  width: 100%;
+}
+
+/* =========================================================
+   Gap Variants
+   ========================================================= */
+.grid--gap-none {
+  gap: 0;
+}
+
+.grid--gap-xs {
+  gap: var(--gap-xs);
+}
+
+.grid--gap-sm {
+  gap: var(--gap-sm);
+}
+
+.grid--gap-md {
+  gap: var(--gap-md);
+}
+
+.grid--gap-lg {
+  gap: var(--gap-lg);
+}
+
+.grid--gap-xl {
+  gap: var(--gap-xl);
+}
+
+/* =========================================================
+   Min Column Width Variants (Auto-fit)
+   ========================================================= */
+
+/* Extra Small - 200px min */
+.grid--min-xs {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+/* Small - 280px min (default) */
+.grid--min-sm {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* Medium - 320px min */
+.grid--min-md {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+/* Large - 360px min */
+.grid--min-lg {
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+}
+
+/* Extra Large - 400px min */
+.grid--min-xl {
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+}
+
+/* 2XL - 480px min */
+.grid--min-2xl {
+  grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+}
+
+/* =========================================================
+   Fixed Columns
+   ========================================================= */
+.grid--cols-1 {
+  grid-template-columns: repeat(1, 1fr);
+}
+
+.grid--cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid--cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid--cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.grid--cols-5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.grid--cols-6 {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+/* =========================================================
+   Responsive Design (Mobile-first)
+   ========================================================= */
+
+/* Mobile: Base styles already mobile-first (1 column) */
+
+/* Small screens and up (≥ 640px) */
+@media (min-width: 640px) {
+  .grid--min-xs {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  .grid--min-sm {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .grid--min-md {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+
+  .grid--min-lg {
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  }
+
+  .grid--min-xl {
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  }
+
+  .grid--min-2xl {
+    grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+  }
+
+  /* Fixed columns responsive */
+  .grid--cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid--cols-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid--cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Medium screens and up (≥ 768px) */
+@media (min-width: 768px) {
+  .grid--cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .grid--cols-4 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .grid--cols-5 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .grid--cols-6 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Large screens and up (≥ 1024px) */
+@media (min-width: 1024px) {
+  .grid--cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .grid--cols-5 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .grid--cols-6 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Extra large screens (≥ 1280px) */
+@media (min-width: 1280px) {
+  .grid--cols-5 {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .grid--cols-6 {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* =========================================================
+   Utility Classes
+   ========================================================= */
+
+/* Auto-fill (fills available space) */
+.grid--auto-fill {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+/* Equal height items */
+.grid--equal-height {
+  align-items: stretch;
+}
+
+.grid--equal-height > * {
+  height: 100%;
+}
+
+/* Center items */
+.grid--center {
+  justify-items: center;
+}
+
+/* Stretch items */
+.grid--stretch {
+  justify-items: stretch;
+}
+
+/* =========================================================
+   Luxury Enhancements
+   ========================================================= */
+
+/* Smooth transitions for grid items */
+.grid > * {
+  transition: var(--transition-transform), var(--transition-opacity);
+}
+
+/* Hover effect for grid items */
+@media (hover: hover) and (pointer: fine) {
+  .grid > *:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* =========================================================
+   Reduced Motion Support
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .grid > * {
+    transition: none !important;
+  }
+
+  .grid > *:hover {
+    transform: none !important;
+  }
+}
+
