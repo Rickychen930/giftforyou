@@ -32,7 +32,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 0;
-  border-bottom: 1px solid rgba(212, 140, 156, 0.1);
+  border-bottom: var(--border-luxury-subtle);
 }
 
 .price-summary__item:last-child {
@@ -51,7 +51,8 @@
 .price-summary__item--total {
   padding: 1rem 0 0;
   margin-top: 0.75rem;
-  border-top: 2px solid rgba(212, 140, 156, 0.2);
+  border-top: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-bottom: none;
 }
 
@@ -100,20 +101,25 @@
   gap: 0.75rem;
   padding: 0.875rem;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.6);
-  border: 1.5px solid rgba(212, 140, 156, 0.1);
-  transition: all 0.2s ease;
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  transition: var(--transition-elegant);
+  box-shadow: var(--shadow-luxury-sm);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
 .price-summary__quick-item:hover {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(212, 140, 156, 0.2);
+  background: var(--gradient-luxury-gold-subtle);
+  border-color: var(--border-luxury-gold);
   transform: translateX(4px);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
 }
 
 .price-summary__quick-item svg {
   flex-shrink: 0;
-  color: var(--brand-rose-500);
+  color: var(--luxury-gold-600);
 }
 
 .price-summary__quick-label {
@@ -136,7 +142,7 @@
   flex-direction: column;
   gap: 0.5rem;
   padding-top: 0.75rem;
-  border-top: 1px solid rgba(212, 140, 156, 0.1);
+  border-top: var(--border-luxury-subtle);
 }
 
 .price-summary__progress-bar {
@@ -149,9 +155,10 @@
 
 .price-summary__progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--brand-rose-500), var(--brand-rose-600));
+  background: var(--gradient-luxury-gold);
   border-radius: 4px;
-  transition: width 0.3s ease;
+  transition: width var(--transition-elegant);
+  box-shadow: var(--shadow-luxury-gold);
 }
 
 .price-summary__progress-text {

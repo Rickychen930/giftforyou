@@ -44,9 +44,9 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--gradient-brand-soft);
+  background: var(--gradient-luxury-gold-subtle);
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--transition-elegant);
 }
 
 .hero-play-pause svg {

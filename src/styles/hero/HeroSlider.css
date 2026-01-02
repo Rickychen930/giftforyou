@@ -51,22 +51,24 @@ html {
 .hero-slider__kicker {
   padding: var(--space-2-5) var(--space-4);
   border-radius: var(--radius-full);
-  background: var(--backdrop-glass-md);
-  border: var(--border-width-1) solid rgba(255, 255, 255, 0.3);
+  background: var(--gradient-luxury-gold-subtle);
+  border: var(--border-luxury-gold);
   backdrop-filter: var(--backdrop-blur-md);
   -webkit-backdrop-filter: var(--backdrop-blur-md);
   font-weight: var(--font-weight-black);
   letter-spacing: var(--letter-spacing-wider);
   text-transform: uppercase;
   font-size: var(--font-size-xs);
-  color: var(--ink-900);
-  box-shadow: var(--shadow-luxury-md);
+  color: var(--luxury-gold-700);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
   transition: all var(--transition-elegant);
 }
 
 .hero-slider__kicker:hover {
   transform: translateY(calc(var(--space-1) * -1));
-  box-shadow: var(--shadow-luxury-lg);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-md);
+  background: var(--gradient-luxury-gold);
+  color: var(--elegant-white);
 }
 
 /* Skip link for accessibility */

@@ -7,20 +7,24 @@
 @import "design-system.css";
 
 .helpSection {
-  background: var(--info-bg-strong);
+  background: var(--gradient-elegant-surface);
   border-radius: var(--radius-lg);
   padding: var(--card-padding-md);
-  border: 1px solid var(--info-border);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   margin-top: var(--space-8);
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-luxury-md), var(--shadow-elegant);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
 }
 
 .helpSection::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--gradient-brand-soft);
+  background: var(--gradient-luxury-gold-subtle);
   opacity: 0.1;
   pointer-events: none;
 }
@@ -30,18 +34,28 @@
   align-items: center;
   gap: var(--space-3);
   font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-black);
   margin: 0 0 var(--space-3) 0;
-  color: var(--ink-900);
   position: relative;
   z-index: 1;
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .helpSection__icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--tab-color);
+  color: var(--luxury-gold-600);
 }
 
 .helpSection__text {

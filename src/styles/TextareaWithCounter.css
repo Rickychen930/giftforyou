@@ -15,22 +15,27 @@
 .textareaWithCounter__textarea {
   width: 100%;
   padding: var(--input-padding-md);
-  border: 2px solid var(--input-border);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-md);
   font-size: var(--font-size-base);
   font-family: inherit;
-  background: var(--input-bg);
+  background: var(--gradient-elegant-surface);
   color: var(--input-text);
   resize: vertical;
-  transition: var(--transition-all);
+  transition: var(--transition-elegant);
   line-height: var(--line-height-relaxed);
-  font-weight: var(--font-weight-normal);
+  font-weight: var(--font-weight-medium);
+  box-shadow: var(--shadow-luxury-sm);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
 .textareaWithCounter__textarea:focus {
   outline: none;
-  border-color: var(--input-border-focus);
-  box-shadow: var(--input-shadow-focus);
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
+  background: var(--gradient-elegant-surface-hover);
 }
 
 .textareaWithCounter__textarea::placeholder {

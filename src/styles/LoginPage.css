@@ -26,11 +26,12 @@
   max-width: 440px;
   padding: var(--space-9);
   border-radius: var(--radius-xl);
-  background: var(--login-card-bg);
-  border: 1px solid var(--login-card-border);
-  backdrop-filter: var(--backdrop-blur-sm);
-  -webkit-backdrop-filter: var(--backdrop-blur-sm);
-  box-shadow: var(--login-card-shadow);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  backdrop-filter: var(--backdrop-blur-lg);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg);
+  box-shadow: var(--shadow-luxury-xl), var(--shadow-elegant);
   animation: loginFadeUp 0.6s ease both;
 }
 
@@ -63,7 +64,18 @@
   margin: 0;
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-black);
-  color: var(--login-text);
+  font-family: var(--font-family-heading);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   line-height: var(--line-height-tight);
 }
 
@@ -103,17 +115,22 @@
 .loginField input {
   padding: var(--input-padding-md);
   border-radius: var(--radius-md);
-  border: 1px solid var(--login-input-border);
-  background: var(--login-input-bg);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
   font-size: var(--font-size-base);
-  transition: var(--transition-all);
-  color: var(--login-text);
+  transition: var(--transition-elegant);
+  color: var(--ink-800);
+  box-shadow: var(--shadow-luxury-sm);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
 .loginField input:focus {
   outline: none;
-  border-color: var(--login-focus-border);
-  box-shadow: var(--login-focus-ring);
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
+  background: var(--gradient-elegant-surface-hover);
 }
 
 .loginField input:disabled {
@@ -126,21 +143,22 @@
   width: 100%;
   margin-top: var(--space-6);
   padding: var(--btn-padding-md);
-  border: none;
+  border: var(--border-luxury-gold);
   border-radius: var(--radius-full);
-  color: var(--login-on-brand);
+  color: var(--elegant-white);
   font-weight: var(--font-weight-black);
   font-size: var(--font-size-base);
   cursor: pointer;
-  background: linear-gradient(90deg, var(--login-brand-1), var(--login-brand-2));
-  box-shadow: var(--login-btn-shadow);
-  transition: var(--transition-all);
+  background: var(--gradient-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
+  transition: var(--transition-elegant);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .loginButton:hover {
     transform: translateY(-2px);
-    box-shadow: var(--login-btn-shadow-hover);
+    box-shadow: var(--shadow-luxury-gold-xl), var(--shadow-luxury-gold-lg);
+    background: var(--gradient-luxury-gold-hover);
   }
 }
 

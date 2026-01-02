@@ -18,8 +18,9 @@
   align-items: center;
   gap: var(--gap-md);
   padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--border-1);
-  transition: var(--transition-all);
+  border-bottom: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  transition: var(--transition-elegant);
 }
 
 .keyValueList__row:last-child {
@@ -27,7 +28,7 @@
 }
 
 .keyValueList__row:hover {
-  border-bottom-color: var(--border-2);
+  border-bottom-color: var(--border-luxury-gold);
 }
 
 .keyValueList__key {
@@ -57,8 +58,18 @@
 
 .keyValueList__value {
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--ink-900);
+  font-weight: var(--font-weight-bold);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   text-align: right;
   flex-shrink: 0;
   word-break: break-word;

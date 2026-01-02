@@ -53,11 +53,11 @@
 
 .orderSummaryModal__content {
   position: relative;
-  background: var(--backdrop-glass-md);
+  background: var(--gradient-elegant-surface);
   backdrop-filter: var(--backdrop-blur-md);
   -webkit-backdrop-filter: var(--backdrop-blur-md);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xl);
+  box-shadow: var(--shadow-luxury-xl), var(--shadow-elegant);
   max-width: 600px;
   width: 100%;
   max-height: 90vh;
@@ -65,7 +65,8 @@
   display: flex;
   flex-direction: column;
   animation: modalSlideUp var(--transition-slower) cubic-bezier(0.34, 1.56, 0.64, 1);
-  border: 1px solid var(--border-2);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   z-index: 1;
 }
 
@@ -92,13 +93,19 @@
 
 .orderSummaryModal__title {
   font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--ink-900);
+  font-weight: var(--font-weight-black);
   margin: 0;
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  background: linear-gradient(135deg, var(--brand-rose-700) 0%, var(--brand-sage-500) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

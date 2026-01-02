@@ -13,8 +13,9 @@
   position: relative;
   min-height: auto;
   padding: clamp(var(--space-20), 8vw, var(--space-24)) 0;
-  background: var(--gradient-surface);
-  border-top: var(--border-2);
+  background: var(--gradient-elegant-surface);
+  border-top: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   overflow: hidden;
   isolation: isolate;
   z-index: var(--z-base);
@@ -87,35 +88,48 @@
   flex-direction: column;
   gap: var(--space-3);
   padding: var(--space-6);
-  background: var(--backdrop-glass-md);
-  border: var(--border-1);
-  border-color: var(--border-brand-subtle);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--card-shadow);
-  transition: var(--transition-all);
+  box-shadow: var(--shadow-luxury-md), var(--shadow-elegant);
+  transition: var(--transition-elegant);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .aboutUs__feature:hover {
     transform: translateY(var(--space-neg-1));
-    box-shadow: var(--card-shadow-hover);
-    border-color: var(--border-brand-strong);
+    box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-lg);
+    border-color: var(--border-luxury-gold);
+    background: var(--gradient-luxury-gold-subtle);
   }
 }
 
 .aboutUs__featureIcon {
   width: var(--size-10);
   height: var(--size-10);
-  color: var(--brand-rose-600);
+  color: var(--luxury-gold-600);
   flex-shrink: 0;
 }
 
 .aboutUs__featureTitle {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-black);
-  color: var(--ink-900);
   margin: 0;
   font-family: var(--font-family-heading);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .aboutUs__featureDescription {

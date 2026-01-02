@@ -13,8 +13,9 @@
   position: relative;
   min-height: auto;
   padding: clamp(var(--space-20), 8vw, var(--space-24)) 0;
-  background: var(--gradient-surface);
-  border-top: var(--border-2);
+  background: var(--gradient-elegant-surface);
+  border-top: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   overflow: hidden;
   isolation: isolate;
   z-index: var(--z-base);
@@ -65,25 +66,29 @@
   align-items: flex-start;
   gap: var(--space-3);
   padding: var(--space-4);
-  background: var(--backdrop-glass-sm);
-  border: var(--border-1);
-  border-color: var(--border-brand-subtle);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-lg);
-  transition: var(--transition-all);
+  transition: var(--transition-elegant);
+  box-shadow: var(--shadow-luxury-sm);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .storeLocation__detail:hover {
-    background: var(--backdrop-glass-md);
-    border-color: var(--border-brand-strong);
+    background: var(--gradient-luxury-gold-subtle);
+    border-color: var(--border-luxury-gold);
     transform: translateX(var(--space-1));
+    box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
   }
 }
 
 .storeLocation__detailIcon {
   width: var(--size-6);
   height: var(--size-6);
-  color: var(--brand-rose-600);
+  color: var(--luxury-gold-600);
   flex-shrink: 0;
   margin-top: var(--space-1);
 }
@@ -114,9 +119,10 @@
   width: 100%;
   height: 400px;
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-luxury-lg);
+  box-shadow: var(--shadow-luxury-lg), var(--shadow-elegant);
   overflow: hidden;
-  border: var(--border-width-2) solid var(--border-brand-subtle);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
 }
 
 .storeLocation__map iframe {

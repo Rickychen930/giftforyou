@@ -12,17 +12,18 @@
   gap: var(--gap-sm);
   padding: var(--btn-padding-sm);
   border-radius: var(--radius-md);
-  border: 1.5px solid var(--border-2);
-  background: var(--gradient-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
   color: var(--ink-700);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   font-family: inherit;
   cursor: pointer;
-  transition: var(--transition-all);
+  transition: var(--transition-elegant);
   backdrop-filter: var(--backdrop-blur-md);
   -webkit-backdrop-filter: var(--backdrop-blur-md);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-luxury-sm);
   position: relative;
   overflow: hidden;
 }
@@ -31,33 +32,35 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--gradient-brand-soft);
+  background: var(--gradient-luxury-gold-subtle);
   opacity: 0;
-  transition: var(--transition-opacity);
+  transition: var(--transition-elegant);
   pointer-events: none;
 }
 
 .copy-button:hover {
-  border-color: var(--brand-rose-500);
-  color: var(--brand-rose-600);
+  border-color: var(--border-luxury-gold);
+  color: var(--luxury-gold-700);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  background: var(--backdrop-glass-md);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
+  background: var(--gradient-luxury-gold-subtle);
 }
 
 .copy-button:hover::before {
-  opacity: 0.1;
+  opacity: 1;
 }
 
 .copy-button--copied {
-  background: linear-gradient(135deg, rgba(168, 213, 186, 0.2), rgba(168, 213, 186, 0.15));
-  border-color: rgba(168, 213, 186, 0.4);
+  background: var(--gradient-green-subtle);
+  border-color: var(--brand-green-border);
   color: var(--brand-green-700);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .copy-button--copied:hover {
-  background: linear-gradient(135deg, rgba(168, 213, 186, 0.25), rgba(168, 213, 186, 0.2));
-  border-color: rgba(168, 213, 186, 0.5);
+  background: var(--gradient-green-subtle);
+  border-color: var(--brand-green-border);
+  box-shadow: var(--shadow-luxury-md);
 }
 
 .copy-button svg {

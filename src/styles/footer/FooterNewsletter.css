@@ -23,15 +23,16 @@
   max-width: 100%;
   width: 100%;
   padding: var(--space-3) var(--space-4);
-  border: var(--border-width-1-5) solid var(--brand-rose-border);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-xl);
-  background: var(--gradient-surface);
+  background: var(--gradient-elegant-surface);
   color: var(--ink-900);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   font-family: inherit;
   transition: all var(--transition-elegant);
-  box-shadow: var(--shadow-inner-sm);
+  box-shadow: var(--shadow-luxury-sm);
   box-sizing: border-box;
   backdrop-filter: var(--backdrop-blur-md);
   -webkit-backdrop-filter: var(--backdrop-blur-md);
@@ -44,24 +45,24 @@
 
 .footer-newsletter__input:focus {
   outline: none;
-  border-color: var(--brand-rose-border-2);
-  box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring);
-  background: var(--neutral-0);
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
+  background: var(--gradient-elegant-surface-hover);
 }
 
 .footer-newsletter__button {
   flex: 0 0 auto;
   padding: var(--space-3) var(--space-5);
-  border: none;
+  border: var(--border-luxury-gold-strong);
   border-radius: var(--radius-xl);
-  background: var(--gradient-brand);
-  color: var(--neutral-0);
+  background: var(--gradient-luxury-gold);
+  color: var(--elegant-white);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-black);
   font-family: inherit;
   cursor: pointer;
   transition: all var(--transition-elegant);
-  box-shadow: var(--shadow-luxury-md);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
   white-space: nowrap;
   box-sizing: border-box;
   letter-spacing: var(--letter-spacing-wide);
@@ -75,13 +76,14 @@
   inset: 0;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--transition-elegant);
 }
 
 .footer-newsletter__button:hover {
   transform: translateY(calc(var(--space-1) * -1));
-  box-shadow: var(--shadow-luxury-lg);
-  background: var(--gradient-brand);
+  box-shadow: var(--shadow-luxury-gold-xl), var(--shadow-luxury-gold-lg);
+  background: var(--gradient-luxury-gold-strong);
+  filter: brightness(1.05) saturate(1.1);
 }
 
 .footer-newsletter__button:hover::before {

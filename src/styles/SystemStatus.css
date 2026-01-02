@@ -10,12 +10,12 @@
 @import "design-system.css";
 
 .systemStatus {
-  background: var(--backdrop-glass-md);
-  border: var(--border-2);
-  border-color: var(--border-brand-subtle);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-xl);
   padding: clamp(var(--space-6), 3vw, var(--space-8));
-  box-shadow: var(--card-shadow);
+  box-shadow: var(--shadow-luxury-lg), var(--shadow-elegant);
   backdrop-filter: var(--backdrop-blur-md);
   -webkit-backdrop-filter: var(--backdrop-blur-md);
 }
@@ -34,10 +34,16 @@
 .systemStatus__title {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-black);
-  color: var(--ink-900);
   margin: 0;
   font-family: var(--font-family-heading);
-  background: var(--gradient-heading);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -61,18 +67,20 @@
   justify-content: space-between;
   gap: var(--space-4);
   padding: var(--space-4);
-  background: var(--backdrop-glass-sm);
-  border: var(--border-1);
-  border-color: var(--border-brand-subtle);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-md);
-  transition: var(--transition-all);
+  transition: var(--transition-elegant);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .systemStatus__item:hover {
-    background: var(--backdrop-glass-md);
-    border-color: var(--border-brand-strong);
+    background: var(--gradient-luxury-gold-subtle);
+    border-color: var(--border-luxury-gold);
     transform: translateX(var(--space-1));
+    box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
   }
 }
 
@@ -87,7 +95,7 @@
 .systemStatus__itemIcon {
   width: var(--size-5);
   height: var(--size-5);
-  color: var(--brand-rose-600);
+  color: var(--luxury-gold-600);
   flex-shrink: 0;
 }
 
@@ -128,21 +136,27 @@
 }
 
 .systemStatus__statusBadge--online {
-  background: var(--success-bg);
-  border: var(--success-border);
+  background: var(--gradient-green-subtle);
+  border: var(--border-luxury);
+  border-color: var(--brand-green-border);
   color: var(--success-color);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .systemStatus__statusBadge--offline {
-  background: var(--error-bg);
-  border: var(--error-border);
+  background: var(--gradient-red-subtle);
+  border: var(--border-luxury);
+  border-color: var(--brand-red-border);
   color: var(--error-color);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .systemStatus__statusBadge--warning {
-  background: var(--warning-bg);
-  border: var(--warning-border);
+  background: var(--gradient-orange-subtle);
+  border: var(--border-luxury);
+  border-color: var(--brand-orange-border);
   color: var(--warning-color);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .systemStatus__empty {

@@ -25,14 +25,18 @@
 }
 
 .header-search__modal {
-  background: var(--neutral-0);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-xl);
   padding: var(--space-10);
   max-width: 700px;
   width: 90%;
-  box-shadow: var(--shadow-xl);
+  box-shadow: var(--shadow-luxury-xl), var(--shadow-elegant);
   position: relative;
   animation: modalSlide var(--transition-slower) cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: var(--backdrop-blur-lg);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg);
 }
 
 @keyframes modalSlide {
@@ -53,22 +57,23 @@
   width: 48px;
   height: 48px;
   border-radius: var(--radius-full);
-  border: none;
-  background: var(--backdrop-glass-md);
-  color: var(--ink-900);
+  border: var(--border-luxury-gold);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-700);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--transition-base);
+  transition: all var(--transition-elegant);
   z-index: 100;
-  box-shadow: var(--shadow-base);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-sm);
 }
 
 .header-search__close:hover {
-  background: var(--brand-rose-500);
-  color: var(--neutral-0);
+  background: var(--gradient-luxury-gold);
+  color: var(--elegant-white);
   transform: rotate(90deg);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-md);
 }
 
 .header-search__form {
@@ -95,20 +100,24 @@
 .header-search__input {
   width: 100%;
   padding: var(--space-5) var(--space-5) var(--space-5) var(--space-14);
-  border: 2px solid var(--border-2);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-md);
   font-size: var(--font-size-lg);
   color: var(--ink-900);
   font-family: inherit;
-  transition: all var(--transition-base);
-  background: var(--surface-4);
+  transition: all var(--transition-elegant);
+  background: var(--gradient-elegant-surface);
+  box-shadow: var(--shadow-luxury-sm);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
 .header-search__input:focus {
   outline: none;
-  border-color: var(--brand-rose-500);
-  box-shadow: var(--focus-ring);
-  background: var(--neutral-0);
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
+  background: var(--gradient-elegant-surface-hover);
 }
 
 .header-search__input::placeholder {
@@ -117,22 +126,23 @@
 
 .header-search__submit {
   padding: var(--space-5) var(--space-10);
-  background: var(--gradient-brand-light);
-  color: var(--neutral-0);
-  border: none;
+  background: var(--gradient-luxury-gold);
+  color: var(--elegant-white);
+  border: var(--border-luxury-gold-strong);
   border-radius: var(--radius-md);
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-base);
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition: all var(--transition-elegant);
   font-family: inherit;
   letter-spacing: var(--letter-spacing-wide);
-  box-shadow: var(--shadow-brand-md);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
 }
 
 .header-search__submit:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-brand-lg);
+  box-shadow: var(--shadow-luxury-gold-xl), var(--shadow-luxury-gold-lg);
+  filter: brightness(1.05) saturate(1.1);
 }
 
 .header-search__suggestions {
@@ -157,22 +167,25 @@
 
 .header-search__suggestion-tag {
   padding: var(--space-2-5) var(--space-5);
-  background: var(--gradient-brand-soft);
-  border: 1px solid var(--border-2);
+  background: var(--gradient-luxury-gold-subtle);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-full);
-  color: var(--ink-900);
+  color: var(--luxury-gold-700);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-elegant);
   font-family: inherit;
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .header-search__suggestion-tag:hover {
-  background: var(--brand-rose-500);
-  color: var(--neutral-0);
-  border-color: var(--brand-rose-500);
+  background: var(--gradient-luxury-gold);
+  color: var(--elegant-white);
+  border-color: var(--border-luxury-gold-strong);
   transform: translateY(-2px);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-md);
 }
 
 .header-search__close:focus-visible,

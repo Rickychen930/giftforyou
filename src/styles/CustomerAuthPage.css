@@ -15,7 +15,7 @@
   padding: clamp(var(--space-8), 4vw, var(--space-16)) clamp(var(--space-4), 3vw, var(--space-6));
   position: relative;
   overflow: hidden;
-  background: var(--gradient-brand-soft);
+  background: var(--gradient-elegant-surface);
 }
 
 .customerAuthPage__background {
@@ -55,15 +55,12 @@
 }
 
 .customerAuthCard {
-  background: var(--gradient-surface);
-  border: var(--border-width-2) solid var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-2xl);
   padding: clamp(var(--space-10), 5vw, var(--space-14));
-  box-shadow: 
-    var(--shadow-xl),
-    var(--shadow-lg),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset,
-    0 0 40px var(--brand-rose-border);
+  box-shadow: var(--shadow-luxury-xl), var(--shadow-elegant);
   backdrop-filter: var(--backdrop-blur-lg);
   -webkit-backdrop-filter: var(--backdrop-blur-lg);
   animation: fadeInScale var(--transition-slower) cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -133,13 +130,15 @@
 .customerAuthCard__title {
   font-size: clamp(var(--font-size-2xl), 4vw, var(--font-size-4xl));
   font-weight: var(--font-weight-black);
-  color: var(--ink-900);
   margin: 0 0 var(--space-2);
-  font-family: "Playfair Display", Georgia, serif;
+  font-family: var(--font-family-heading);
   background: linear-gradient(
     135deg,
-    var(--brand-rose-700) 0%,
-    var(--brand-green-700) 100%
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

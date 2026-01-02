@@ -34,11 +34,11 @@
   width: 90%;
   max-width: 600px;
   max-height: 80vh;
-  background: var(--backdrop-glass-lg);
-  border: var(--border-2);
-  border-color: var(--border-brand-subtle);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-2xl);
+  box-shadow: var(--shadow-luxury-xl), var(--shadow-elegant);
   z-index: var(--z-modal);
   backdrop-filter: var(--backdrop-blur-lg);
   -webkit-backdrop-filter: var(--backdrop-blur-lg);
@@ -73,7 +73,14 @@
   margin: 0;
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-black);
-  background: var(--gradient-heading);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -84,22 +91,25 @@
   width: var(--size-9);
   height: var(--size-9);
   border-radius: var(--radius-md);
-  border: var(--border-1);
-  border-color: var(--border-brand-subtle);
-  background: var(--backdrop-glass-sm);
-  color: var(--brand-rose-700);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-700);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: var(--transition-all);
+  transition: var(--transition-elegant);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .activityLog__close:hover {
-    background: var(--backdrop-glass-md);
-    border-color: var(--border-brand-strong);
+    background: var(--gradient-luxury-gold);
+    color: var(--elegant-white);
+    border-color: var(--border-luxury-gold-strong);
     transform: scale(1.05);
+    box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-md);
   }
 }
 
@@ -141,17 +151,19 @@
   gap: var(--space-4);
   padding: var(--space-4);
   border-radius: var(--radius-lg);
-  border: var(--border-1);
-  border-color: var(--border-brand-subtle);
-  background: var(--backdrop-glass-sm);
-  transition: var(--transition-all);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
+  transition: var(--transition-elegant);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .activityLog__item:hover {
-    background: var(--backdrop-glass-md);
-    border-color: var(--border-brand-strong);
-    box-shadow: var(--shadow-md);
+    background: var(--gradient-luxury-gold-subtle);
+    border-color: var(--border-luxury-gold);
+    box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
+    transform: translateY(-2px);
   }
 }
 
@@ -164,8 +176,9 @@
   border-radius: var(--radius-md);
   font-size: var(--font-size-xl);
   flex-shrink: 0;
-  background: var(--brand-rose-50);
-  color: var(--brand-rose-700);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-700);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .activityLog__itemContent {
@@ -185,7 +198,10 @@
 
 .activityLog__itemAction {
   font-weight: var(--font-weight-bold);
-  color: var(--brand-rose-700);
+  background: var(--gradient-luxury-gold);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   font-size: var(--font-size-sm);
   text-transform: capitalize;
 }

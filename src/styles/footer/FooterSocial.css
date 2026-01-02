@@ -30,8 +30,9 @@
   width: var(--size-11);
   height: var(--size-11);
   border-radius: var(--radius-full);
-  border: var(--border-width-2) solid var(--brand-rose-border);
-  background: var(--gradient-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
   color: var(--ink-700);
   text-decoration: none;
   transition: all var(--transition-elegant);
@@ -42,9 +43,10 @@
 
 .footer-social__icon:hover {
   transform: translateY(calc(var(--space-1) * -1)) scale(1.1);
-  box-shadow: var(--shadow-luxury-md);
-  border-color: var(--brand-rose-border-2);
-  background: var(--gradient-surface);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
+  border-color: var(--border-luxury-gold);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-700);
 }
 
 .footer-social__icon--instagram:hover {

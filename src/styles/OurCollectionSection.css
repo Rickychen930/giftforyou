@@ -12,12 +12,9 @@
   position: relative;
   min-height: auto;
   padding: clamp(var(--space-20), 8vw, var(--space-24)) 0;
-  background:
-    radial-gradient(1400px 700px at 8% 4%, var(--brand-rose-border), transparent 70%),
-    radial-gradient(1400px 750px at 96% 16%, var(--brand-green-border), transparent 70%),
-    radial-gradient(1000px 500px at 50% 50%, rgba(255, 255, 255, 0.08), transparent 80%),
-    var(--gradient-surface);
-  border-top: var(--border-width-2) solid var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
+  border-top: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   overflow: hidden;
   isolation: isolate;
   z-index: 1;
@@ -79,16 +76,17 @@
   letter-spacing: var(--letter-spacing-tight);
   background: linear-gradient(
     135deg,
-    var(--ink-900) 0%,
-    rgba(0, 0, 0, 0.9) 40%,
-    var(--brand-rose-600) 70%,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
     var(--brand-sage-500) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   opacity: 0;
-  font-family: "Playfair Display", Georgia, serif;
+  font-family: var(--font-family-heading);
   line-height: var(--line-height-tight);
   text-wrap: balance;
   position: relative;

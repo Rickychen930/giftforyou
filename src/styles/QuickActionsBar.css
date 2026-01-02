@@ -22,28 +22,32 @@
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-sm);
   text-decoration: none;
-  transition: var(--transition-all);
-  border: 2px solid transparent;
+  transition: var(--transition-elegant);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   cursor: pointer;
-  background: var(--backdrop-glass-sm);
+  background: var(--gradient-elegant-surface);
   backdrop-filter: var(--backdrop-blur-md);
   -webkit-backdrop-filter: var(--backdrop-blur-md);
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .quickActionsBar__action::before {
   content: "";
   position: absolute;
   inset: 0;
+  background: var(--gradient-luxury-gold-subtle);
   opacity: 0;
-  transition: var(--transition-opacity);
+  transition: var(--transition-elegant);
   pointer-events: none;
 }
 
 .quickActionsBar__action:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
+  border-color: var(--border-luxury-gold);
 }
 
 .quickActionsBar__action:hover::before {
@@ -88,19 +92,19 @@
 }
 
 .quickActionsBar__action--orders {
-  color: var(--brand-rose-700);
-  border-color: var(--border-2);
-  background: rgba(212, 140, 156, 0.08);
+  color: var(--luxury-gold-700);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-luxury-gold-subtle);
 }
 
 .quickActionsBar__action--orders::before {
-  background: rgba(212, 140, 156, 0.15);
+  background: var(--gradient-luxury-gold-subtle);
 }
 
 .quickActionsBar__action--orders:hover {
-  background: rgba(212, 140, 156, 0.15);
-  border-color: var(--border-3);
-  box-shadow: var(--shadow-brand-sm);
+  background: var(--gradient-luxury-gold-subtle);
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
 }
 
 .quickActionsBar__action--default {

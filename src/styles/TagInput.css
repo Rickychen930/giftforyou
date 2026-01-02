@@ -15,13 +15,14 @@
   flex-wrap: wrap;
   gap: var(--gap-md);
   padding: clamp(var(--input-padding-md), 1.4vw, var(--input-padding-lg)) clamp(var(--space-4), 1.6vw, var(--space-5));
-  border: 2px solid var(--border-2);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-md);
-  background: var(--gradient-surface);
+  background: var(--gradient-elegant-surface);
   min-height: 52px;
-  transition: var(--transition-all);
+  transition: var(--transition-elegant);
   box-shadow: 
-    var(--shadow-sm),
+    var(--shadow-luxury-sm),
     0 0 0 1px rgba(255, 255, 255, 0.8) inset;
   backdrop-filter: var(--backdrop-blur-sm);
   -webkit-backdrop-filter: var(--backdrop-blur-sm);
@@ -32,23 +33,23 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--gradient-brand-soft);
+  background: var(--gradient-luxury-gold-subtle);
   opacity: 0;
-  transition: var(--transition-opacity);
+  transition: var(--transition-elegant);
   border-radius: inherit;
   pointer-events: none;
 }
 
 .tagInput__container:focus-within {
-  border-color: var(--brand-rose-600);
+  border-color: var(--border-luxury-gold);
   box-shadow: 
-    var(--focus-ring),
-    var(--shadow-md),
+    var(--shadow-luxury-gold),
+    var(--shadow-luxury-md),
     0 0 0 1px rgba(255, 255, 255, 0.9) inset;
 }
 
 .tagInput__container:focus-within::before {
-  opacity: 0.1;
+  opacity: 1;
 }
 
 .tagInput__tag {
@@ -57,20 +58,16 @@
   gap: var(--gap-sm);
   padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-base);
-  background: linear-gradient(
-    135deg,
-    rgba(212, 140, 156, 0.15) 0%,
-    rgba(255, 255, 255, 0.1) 50%,
-    rgba(212, 140, 156, 0.1) 100%
-  );
-  border: 1.5px solid var(--border-2);
-  color: var(--brand-rose-700);
+  background: var(--gradient-luxury-gold-subtle);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  color: var(--luxury-gold-700);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-extrabold);
   cursor: pointer;
-  transition: var(--transition-all);
+  transition: var(--transition-elegant);
   box-shadow: 
-    var(--shadow-sm),
+    var(--shadow-luxury-sm),
     0 0 0 1px rgba(255, 255, 255, 0.8) inset;
   backdrop-filter: var(--backdrop-blur-sm);
   -webkit-backdrop-filter: var(--backdrop-blur-sm);
@@ -81,29 +78,26 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--gradient-brand-soft);
+  background: var(--gradient-luxury-gold-subtle);
   opacity: 0;
-  transition: var(--transition-opacity);
+  transition: var(--transition-elegant);
   border-radius: inherit;
   pointer-events: none;
 }
 
 .tagInput__tag:hover {
   transform: translateY(-2px) scale(1.05);
-  border-color: var(--border-3);
-  background: linear-gradient(
-    135deg,
-    rgba(212, 140, 156, 0.2) 0%,
-    rgba(255, 255, 255, 0.15) 50%,
-    rgba(212, 140, 156, 0.15) 100%
-  );
+  border-color: var(--border-luxury-gold);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-600);
   box-shadow: 
-    var(--shadow-md),
+    var(--shadow-luxury-gold),
+    var(--shadow-luxury-md),
     0 0 0 1px rgba(255, 255, 255, 0.9) inset;
 }
 
 .tagInput__tag:hover::before {
-  opacity: 0.15;
+  opacity: 1;
 }
 
 .tagInput__tag svg {
@@ -139,12 +133,13 @@
   top: calc(100% + var(--space-2));
   left: 0;
   right: 0;
-  background: var(--backdrop-glass-lg);
+  background: var(--gradient-elegant-surface);
   backdrop-filter: var(--backdrop-blur-lg);
   -webkit-backdrop-filter: var(--backdrop-blur-lg);
-  border: 2px solid var(--border-2);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-luxury-xl), var(--shadow-elegant);
   max-height: 200px;
   overflow-y: auto;
   z-index: 1000;
@@ -166,13 +161,14 @@
 }
 
 .tagInput__suggestion:hover {
-  background: var(--btn-ghost-bg);
-  color: var(--brand-rose-600);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-700);
 }
 
 .tagInput__suggestion--active {
-  background: var(--tab-bg);
-  color: var(--brand-rose-600);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-700);
+  border-color: var(--border-luxury-gold);
 }
 
 /* Responsive: Mobile-first approach */

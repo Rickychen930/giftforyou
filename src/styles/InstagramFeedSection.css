@@ -9,7 +9,7 @@
 
 .instagram-feed-section {
   padding: var(--space-20) var(--space-6);
-  background: var(--gradient-surface);
+  background: var(--gradient-elegant-surface);
   position: relative;
   overflow: hidden;
 }
@@ -55,22 +55,35 @@
   width: 64px;
   height: 64px;
   border-radius: var(--radius-xl);
-  background: var(--gradient-brand-soft);
+  background: var(--gradient-luxury-gold-subtle);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--brand-rose-600);
+  color: var(--luxury-gold-600);
   margin-bottom: var(--space-2);
-  box-shadow: var(--shadow-brand-md);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
 }
 
 .instagram-feed-title {
   font-size: clamp(var(--font-size-2xl), 5vw, var(--font-size-4xl));
   font-weight: var(--font-weight-black);
-  color: var(--ink-900);
   margin: 0;
   line-height: var(--line-height-tight);
   letter-spacing: -0.02em;
+  font-family: var(--font-family-heading);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .instagram-feed-subtitle {
@@ -86,26 +99,22 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-7);
-  background: var(--gradient-brand);
-  color: var(--neutral-0);
+  background: var(--gradient-luxury-gold);
+  color: var(--elegant-white);
   border-radius: var(--radius-full);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-black);
   font-size: var(--font-size-sm);
   text-decoration: none;
-  transition: all var(--transition-slow) cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-brand-md);
-  border: var(--border-width-2) solid transparent;
+  transition: var(--transition-elegant);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
+  border: var(--border-luxury-gold);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .instagram-feed-follow-btn:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-brand-lg);
-    background: linear-gradient(
-      135deg,
-      var(--brand-rose-600) 0%,
-      var(--brand-rose-700) 100%
-    );
+    box-shadow: var(--shadow-luxury-gold-xl), var(--shadow-luxury-gold-lg);
+    background: var(--gradient-luxury-gold-hover);
   }
 }
 
@@ -146,24 +155,29 @@
   border-radius: var(--radius-xl);
   overflow: hidden;
   cursor: pointer;
-  background: var(--neutral-0);
-  box-shadow: var(--shadow-md);
-  transition: all var(--animation-speed-base) cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  box-shadow: var(--shadow-luxury-md), var(--shadow-elegant);
+  transition: var(--transition-elegant);
   display: flex;
   flex-direction: column;
   aspect-ratio: 1;
   -webkit-tap-highlight-color: transparent;
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
 .instagram-post-card:focus-visible {
-  outline: var(--space-1) solid var(--brand-rose-border-2);
+  outline: var(--space-1) solid var(--border-luxury-gold);
   outline-offset: var(--space-1);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .instagram-post-card:hover {
     transform: translateY(calc(var(--space-2) * -1)) scale(1.02);
-    box-shadow: var(--shadow-xl);
+    box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-xl);
+    border-color: var(--border-luxury-gold);
   }
 }
 

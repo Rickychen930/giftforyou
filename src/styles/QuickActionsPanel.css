@@ -10,12 +10,12 @@
 @import "design-system.css";
 
 .quickActionsPanel {
-  background: var(--backdrop-glass-md);
-  border: var(--border-2);
-  border-color: var(--border-brand-subtle);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-xl);
   padding: clamp(var(--space-6), 3vw, var(--space-8));
-  box-shadow: var(--card-shadow);
+  box-shadow: var(--shadow-luxury-lg), var(--shadow-elegant);
   backdrop-filter: var(--backdrop-blur-md);
   -webkit-backdrop-filter: var(--backdrop-blur-md);
 }
@@ -34,10 +34,16 @@
 .quickActionsPanel__title {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-black);
-  color: var(--ink-900);
   margin: 0;
   font-family: var(--font-family-heading);
-  background: var(--gradient-heading);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -61,22 +67,23 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-4);
-  background: var(--backdrop-glass-sm);
-  border: var(--border-1);
-  border-color: var(--border-brand-subtle);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-lg);
-  transition: var(--transition-all);
+  transition: var(--transition-elegant);
   cursor: pointer;
   text-decoration: none;
   color: inherit;
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .quickActionsPanel__item:hover {
-    background: var(--backdrop-glass-md);
-    border-color: var(--border-brand-strong);
+    background: var(--gradient-luxury-gold-subtle);
+    border-color: var(--border-luxury-gold);
     transform: translateY(var(--space-neg-1));
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
   }
 }
 
@@ -91,7 +98,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--brand-rose-600);
+  color: var(--luxury-gold-600);
   flex-shrink: 0;
 }
 

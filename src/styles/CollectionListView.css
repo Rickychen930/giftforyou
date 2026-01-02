@@ -11,15 +11,11 @@
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  background: var(--gradient-surface);
-  border: var(--border-width-2) solid var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-2xl);
-  box-shadow: 
-    var(--shadow-2xl),
-    var(--shadow-xl),
-    var(--shadow-lg),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset,
-    0 0 0 2px var(--brand-rose-border) inset;
+  box-shadow: var(--shadow-luxury-xl), var(--shadow-elegant);
   padding: clamp(var(--space-10), 5vw, var(--space-14));
   overflow: hidden;
   position: relative;
@@ -86,15 +82,17 @@
   letter-spacing: var(--letter-spacing-tight);
   background: linear-gradient(
     135deg,
-    var(--brand-rose-500) 0%,
-    var(--brand-rose-700) 50%,
-    var(--brand-wine-700) 100%
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   line-height: var(--line-height-tight);
-  font-family: "Playfair Display", Georgia, serif;
+  font-family: var(--font-family-heading);
   filter: drop-shadow(0 2px 4px var(--brand-rose-border));
 }
 
@@ -113,16 +111,14 @@
 }
 
 .collectionListView__card {
-  background: var(--gradient-surface);
-  border: var(--border-width-2) solid var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-xl);
   padding: var(--space-6);
   cursor: pointer;
-  transition: all var(--transition-slower) cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 
-    var(--shadow-lg),
-    var(--shadow-md),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  transition: var(--transition-elegant);
+  box-shadow: var(--shadow-luxury-md), var(--shadow-elegant);
   backdrop-filter: var(--backdrop-blur-md);
   -webkit-backdrop-filter: var(--backdrop-blur-md);
   display: flex;
@@ -150,12 +146,9 @@
 @media (hover: hover) and (pointer: fine) {
   .collectionListView__card:hover {
     transform: translateY(calc(var(--space-1) * -1)) scale(1.02);
-    border-color: var(--brand-rose-border-2);
-    box-shadow: 
-      var(--shadow-xl),
-      var(--shadow-lg),
-      0 0 0 1px rgba(255, 255, 255, 0.9) inset,
-      0 0 0 2px var(--brand-rose-border-2);
+    border-color: var(--border-luxury-gold);
+    box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-xl);
+    background: var(--gradient-luxury-gold-subtle);
   }
 
   .collectionListView__card:hover::before {

@@ -14,33 +14,38 @@
 
 .categoryFilter__button {
   padding: var(--space-2-5) var(--space-5);
-  border: 2px solid var(--input-border);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-full);
-  background: var(--input-bg);
+  background: var(--gradient-elegant-surface);
   color: var(--ink-600);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: var(--transition-all);
+  transition: var(--transition-elegant);
   white-space: nowrap;
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-luxury-sm);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
 .categoryFilter__button::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--tab-bg);
+  background: var(--gradient-luxury-gold-subtle);
   opacity: 0;
-  transition: var(--transition-opacity);
+  transition: var(--transition-elegant);
   pointer-events: none;
 }
 
 .categoryFilter__button:hover {
-  border-color: var(--input-border-focus);
-  color: var(--tab-color);
+  border-color: var(--border-luxury-gold);
+  color: var(--luxury-gold-700);
   transform: translateY(-1px);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
 }
 
 .categoryFilter__button:hover::before {
@@ -49,14 +54,14 @@
 
 .categoryFilter__button:focus-visible {
   outline: none;
-  box-shadow: var(--focus-ring);
+  box-shadow: var(--focus-ring), var(--shadow-luxury-md);
 }
 
 .categoryFilter__button--active {
-  background: linear-gradient(135deg, var(--tab-color) 0%, var(--tab-color-hover) 100%);
-  color: var(--neutral-0);
-  border-color: var(--tab-border);
-  box-shadow: var(--shadow-sm);
+  background: var(--gradient-luxury-gold);
+  color: var(--elegant-white);
+  border-color: var(--border-luxury-gold-strong);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
 }
 
 .categoryFilter__button--active::before {
@@ -64,9 +69,9 @@
 }
 
 .categoryFilter__button--active:hover {
-  background: linear-gradient(135deg, var(--tab-color-hover) 0%, #6d28d9 100%);
+  background: var(--gradient-luxury-gold-strong);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-luxury-gold-xl), var(--shadow-luxury-gold-lg);
 }
 
 /* Responsive: Mobile-first approach */

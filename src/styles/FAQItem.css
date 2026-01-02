@@ -7,41 +7,46 @@
 @import "design-system.css";
 
 .faqItem {
-  background: var(--gradient-surface);
+  background: var(--gradient-elegant-surface);
   border-radius: var(--radius-lg);
-  border: var(--card-border);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   overflow: hidden;
-  transition: var(--transition-all);
+  transition: var(--transition-elegant);
   margin-bottom: var(--space-4);
   position: relative;
+  box-shadow: var(--shadow-luxury-md), var(--shadow-elegant);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
 .faqItem::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--gradient-brand-soft);
+  background: var(--gradient-luxury-gold-subtle);
   opacity: 0;
-  transition: var(--transition-opacity);
+  transition: var(--transition-elegant);
   pointer-events: none;
 }
 
 .faqItem:hover {
-  box-shadow: var(--card-shadow-hover);
-  border-color: var(--border-2);
+  box-shadow: var(--shadow-luxury-lg), var(--shadow-luxury-gold);
+  border-color: var(--border-luxury-gold);
+  transform: translateY(-2px);
 }
 
 .faqItem:hover::before {
-  opacity: 0.05;
+  opacity: 1;
 }
 
 .faqItem--open {
-  border-color: var(--border-3);
-  box-shadow: var(--card-shadow-hover);
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-md);
 }
 
 .faqItem--open::before {
-  opacity: 0.1;
+  opacity: 1;
 }
 
 .faqItem__question {
@@ -70,8 +75,18 @@
 
 .faqItem__questionText {
   font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  color: var(--ink-900);
+  font-weight: var(--font-weight-bold);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   flex: 1;
   margin-right: var(--space-4);
   line-height: var(--line-height-normal);

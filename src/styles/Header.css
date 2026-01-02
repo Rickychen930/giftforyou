@@ -21,36 +21,27 @@
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
-  background: linear-gradient(
-    135deg,
-    var(--backdrop-glass-lg) 0%,
-    rgba(254, 245, 247, 0.98) 50%,
-    var(--backdrop-glass-lg) 100%
-  );
+  background: var(--gradient-elegant-surface);
   box-shadow: 
-    var(--shadow-sm),
-    var(--shadow-inner),
+    var(--shadow-luxury-md),
+    var(--shadow-elegant),
     0 0 40px rgba(212, 140, 156, 0.05);
   transition: all var(--transition-elegant);
   backdrop-filter: var(--backdrop-blur-lg);
   -webkit-backdrop-filter: var(--backdrop-blur-lg);
-  border-bottom: 1px solid var(--border-2);
+  border-bottom: var(--border-luxury);
+  border-color: var(--brand-rose-border);
 }
 
 .header--scrolled {
   box-shadow: 
-    var(--shadow-md),
-    var(--shadow-inner-lg),
+    var(--shadow-luxury-lg),
+    var(--shadow-luxury-gold),
     0 0 60px rgba(212, 140, 156, 0.08);
-  background: linear-gradient(
-    135deg,
-    var(--backdrop-glass-lg) 0%,
-    rgba(254, 245, 247, 0.99) 50%,
-    var(--backdrop-glass-lg) 100%
-  );
+  background: var(--gradient-elegant-surface);
   backdrop-filter: var(--backdrop-blur-xl);
   -webkit-backdrop-filter: var(--backdrop-blur-xl);
-  border-bottom-color: var(--border-3);
+  border-bottom-color: var(--border-luxury-gold);
 }
 
 /* =========================================================

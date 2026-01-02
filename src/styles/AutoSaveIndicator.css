@@ -12,11 +12,12 @@
   bottom: clamp(var(--space-6), 3vw, var(--space-8));
   right: clamp(var(--space-6), 3vw, var(--space-8));
   z-index: var(--z-toast);
-  background: var(--backdrop-glass-md);
-  border: var(--border-2);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-md);
   padding: var(--space-2-5) var(--space-4);
-  box-shadow: var(--card-shadow);
+  box-shadow: var(--shadow-luxury-md), var(--shadow-elegant);
   backdrop-filter: var(--backdrop-blur-md);
   -webkit-backdrop-filter: var(--backdrop-blur-md);
   animation: slideInUp var(--transition-base) cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -47,17 +48,14 @@
 }
 
 .autoSaveIndicator--saving .autoSaveIndicator__content svg {
-  color: var(--brand-rose-600);
+  color: var(--luxury-gold-600);
 }
 
 .autoSaveIndicator--saved {
   color: var(--brand-green-700);
-  border-color: rgba(16, 185, 129, 0.3);
-  background: linear-gradient(
-    135deg,
-    rgba(240, 253, 250, 0.98) 0%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
+  border-color: var(--brand-green-border);
+  background: var(--gradient-green-subtle);
+  box-shadow: var(--shadow-luxury-md), var(--shadow-elegant);
 }
 
 .autoSaveIndicator__spinner {

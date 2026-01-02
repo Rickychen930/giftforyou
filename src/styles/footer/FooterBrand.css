@@ -40,13 +40,23 @@
 .footer-brand__name {
   font-weight: var(--font-weight-black);
   letter-spacing: var(--letter-spacing-tight);
-  color: var(--ink-900);
   font-size: var(--font-size-lg);
   line-height: var(--line-height-tight);
   margin-bottom: var(--space-1);
   font-family: var(--font-family-playfair);
   word-break: break-word;
   overflow-wrap: break-word;
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .footer-brand__tagline {

@@ -8,7 +8,7 @@
 
 .contact-page {
   min-height: 100vh;
-  background: var(--gradient-surface);
+  background: var(--gradient-elegant-surface);
   padding: clamp(var(--space-8), 5vw, var(--space-16)) var(--space-4);
 }
 
@@ -26,9 +26,13 @@
   font-size: clamp(var(--font-size-4xl), 4vw, var(--font-size-5xl));
   font-weight: var(--font-weight-black);
   margin-bottom: var(--space-4);
+  font-family: var(--font-family-heading);
   background: linear-gradient(
     135deg,
-    var(--brand-rose-600) 0%,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
     var(--brand-sage-500) 100%
   );
   -webkit-background-clip: text;
@@ -67,14 +71,15 @@
 }
 
 .contact-info-card {
-  background: var(--backdrop-glass-md);
-  border: 2px solid var(--border-2);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-xl);
   padding: var(--space-10);
   backdrop-filter: var(--backdrop-blur-md);
   -webkit-backdrop-filter: var(--backdrop-blur-md);
-  box-shadow: var(--card-shadow);
-  transition: var(--transition-all);
+  box-shadow: var(--shadow-luxury-lg), var(--shadow-elegant);
+  transition: var(--transition-elegant);
   position: relative;
   overflow: hidden;
 }
@@ -83,19 +88,20 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--gradient-brand-soft);
+  background: var(--gradient-luxury-gold-subtle);
   opacity: 0;
-  transition: var(--transition-opacity);
+  transition: var(--transition-elegant);
   pointer-events: none;
 }
 
 .contact-info-card:hover {
-  box-shadow: var(--card-shadow-hover);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-xl);
   transform: translateY(-2px);
+  border-color: var(--border-luxury-gold);
 }
 
 .contact-info-card:hover::before {
-  opacity: 0.1;
+  opacity: 1;
 }
 
 .contact-info-title {
@@ -149,7 +155,7 @@
 
 .contact-info-item__icon {
   flex-shrink: 0;
-  color: var(--brand-rose-600);
+  color: var(--luxury-gold-600);
   position: relative;
   z-index: 1;
 }
@@ -176,13 +182,14 @@
 
 /* Contact Form */
 .contact-form-card {
-  background: var(--backdrop-glass-md);
-  border: 2px solid var(--border-2);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-xl);
   padding: var(--space-10);
   backdrop-filter: var(--backdrop-blur-md);
   -webkit-backdrop-filter: var(--backdrop-blur-md);
-  box-shadow: var(--card-shadow);
+  box-shadow: var(--shadow-luxury-lg), var(--shadow-elegant);
   position: relative;
   overflow: hidden;
 }
@@ -191,7 +198,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--gradient-brand-soft);
+  background: var(--gradient-luxury-gold-subtle);
   opacity: 0.05;
   pointer-events: none;
 }

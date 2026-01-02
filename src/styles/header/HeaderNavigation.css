@@ -56,11 +56,11 @@
   transform: translateX(-50%) scaleX(0);
   width: 65%;
   height: 2.5px;
-  background: linear-gradient(90deg, var(--brand-rose-500), var(--brand-sage-400));
+  background: var(--gradient-luxury-gold);
   border-radius: var(--radius-sm);
   transition: transform var(--transition-elegant);
   box-shadow: 
-    var(--shadow-brand-sm),
+    var(--shadow-luxury-gold),
     0 0 12px rgba(212, 140, 156, 0.2);
 }
 
@@ -78,9 +78,9 @@
 }
 
 .header-navigation__link.is-active {
-  color: var(--brand-wine-700);
-  background: var(--gradient-brand-soft);
-  box-shadow: var(--shadow-brand-sm);
+  color: var(--luxury-gold-700);
+  background: var(--gradient-luxury-gold-subtle);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-sm);
 }
 
 .header-navigation__link.is-active::before {
@@ -145,17 +145,20 @@
     width: calc(100% - 2rem);
     max-width: 520px;
     margin: 0.85rem auto 0;
-    background: var(--neutral-0);
-    border: 1px solid var(--border-2);
+    background: var(--gradient-elegant-surface);
+    border: var(--border-luxury);
+    border-color: var(--brand-rose-border);
     border-radius: var(--radius-xl);
     padding: var(--space-4);
-    box-shadow: var(--shadow-2xl);
+    box-shadow: var(--shadow-luxury-xl), var(--shadow-elegant);
     animation: mobileMenuSlide 0.22s ease-out;
     max-height: calc(100vh - 96px - env(safe-area-inset-top));
     overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    backdrop-filter: var(--backdrop-blur-lg);
+    -webkit-backdrop-filter: var(--backdrop-blur-lg);
   }
 
   @supports (height: 100dvh) {

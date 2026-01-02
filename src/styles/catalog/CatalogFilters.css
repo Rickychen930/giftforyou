@@ -10,21 +10,25 @@
 
 .catalog-filters__summary {
   padding: 0.85rem 1.25rem;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.95));
-  border: 1.5px solid rgba(212, 140, 156, 0.2);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: 12px;
   font-weight: 800;
   font-size: 0.9rem;
-  color: var(--brand-rose-600);
+  color: var(--luxury-gold-600);
   cursor: pointer;
   list-style: none;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: var(--transition-elegant);
+  box-shadow: var(--shadow-luxury-sm);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
 .catalog-filters__summary:hover {
-  border-color: rgba(212, 140, 156, 0.3);
-  box-shadow: 0 4px 12px rgba(212, 140, 156, 0.15);
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
+  background: var(--gradient-luxury-gold-subtle);
 }
 
 .catalog-filters__summary::-webkit-details-marker {
@@ -34,10 +38,13 @@
 .catalog-filters__body {
   margin-top: 1rem;
   padding: 1.25rem;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.95));
-  border: 1.5px solid rgba(212, 140, 156, 0.15);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-luxury-md), var(--shadow-elegant);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
 }
 
 .catalog-filters__desktop {
@@ -54,15 +61,14 @@
   }
 
   .catalog-filters__panel {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.95));
-    border: 1.5px solid rgba(212, 140, 156, 0.15);
+    background: var(--gradient-elegant-surface);
+    border: var(--border-luxury);
+    border-color: var(--brand-rose-border);
     border-radius: 20px;
     padding: 1.5rem;
-    box-shadow: 
-      0 8px 24px rgba(0, 0, 0, 0.06),
-      0 0 0 1px rgba(255, 255, 255, 0.9) inset;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-luxury-lg), var(--shadow-elegant);
+    backdrop-filter: var(--backdrop-blur-lg);
+    -webkit-backdrop-filter: var(--backdrop-blur-lg);
   }
 }
 

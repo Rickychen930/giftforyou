@@ -32,52 +32,56 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  background: var(--input-bg);
-  border: 2px solid var(--input-border);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: var(--transition-all);
+  transition: var(--transition-elegant);
   position: relative;
   text-align: left;
   min-height: 60px;
+  box-shadow: var(--shadow-luxury-sm);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
 .deliveryTimeSlot__option::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--gradient-brand-soft);
+  background: var(--gradient-luxury-gold-subtle);
   opacity: 0;
-  transition: var(--transition-opacity);
+  transition: var(--transition-elegant);
   border-radius: inherit;
   pointer-events: none;
 }
 
 .deliveryTimeSlot__option:hover:not(:disabled) {
-  border-color: var(--input-border-focus);
+  border-color: var(--border-luxury-gold);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
-  background: var(--backdrop-glass-sm);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
+  background: var(--gradient-luxury-gold-subtle);
 }
 
 .deliveryTimeSlot__option:hover:not(:disabled)::before {
-  opacity: 0.1;
+  opacity: 1;
 }
 
 .deliveryTimeSlot__option:focus-visible {
   outline: none;
-  box-shadow: var(--focus-ring);
-  border-color: var(--input-border-focus);
+  box-shadow: var(--focus-ring), var(--shadow-luxury-md);
+  border-color: var(--border-luxury-gold);
 }
 
 .deliveryTimeSlot__option--selected {
-  background: var(--gradient-brand-soft);
-  border-color: var(--brand-rose-500);
-  box-shadow: var(--shadow-sm);
+  background: var(--gradient-luxury-gold-subtle);
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-md);
 }
 
 .deliveryTimeSlot__option--selected::before {
-  opacity: 0.15;
+  opacity: 1;
 }
 
 .deliveryTimeSlot__option--unavailable {
@@ -138,11 +142,12 @@
   width: 24px;
   height: 24px;
   border-radius: var(--radius-full);
-  background: var(--brand-rose-600);
-  color: var(--neutral-0);
+  background: var(--gradient-luxury-gold);
+  color: var(--elegant-white);
   opacity: 0;
-  transition: var(--transition-opacity);
+  transition: var(--transition-elegant);
   z-index: 2;
+  box-shadow: var(--shadow-luxury-gold);
 }
 
 .deliveryTimeSlot__option--selected .deliveryTimeSlot__check {

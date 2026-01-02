@@ -13,7 +13,7 @@
   width: var(--size-4-5);
   height: var(--size-4-5);
   flex-shrink: 0;
-  color: var(--brand-rose-600);
+  color: var(--luxury-gold-600);
   opacity: var(--opacity-medium);
 }
 
@@ -40,7 +40,7 @@
 }
 
 .store-contact-card__item:hover a {
-  color: var(--brand-rose-600);
+  color: var(--luxury-gold-600);
 }
 
 .store-contact-card__item:hover a::after {

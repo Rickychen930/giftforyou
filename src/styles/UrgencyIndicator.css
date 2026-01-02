@@ -28,31 +28,35 @@
 }
 
 .urgencyIndicator--high {
-  background: var(--error-bg);
-  border: var(--error-border);
+  background: var(--gradient-red-subtle);
+  border: var(--border-luxury);
+  border-color: var(--brand-red-border);
   color: var(--error-color);
-  box-shadow: var(--shadow-error-sm);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .urgencyIndicator--medium {
-  background: var(--warning-bg);
-  border: var(--warning-border);
+  background: var(--gradient-orange-subtle);
+  border: var(--border-luxury);
+  border-color: var(--brand-orange-border);
   color: var(--warning-color);
-  box-shadow: var(--shadow-warning-sm);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .urgencyIndicator--low {
-  background: var(--info-bg);
-  border: var(--info-border);
+  background: var(--gradient-blue-subtle);
+  border: var(--border-luxury);
+  border-color: var(--brand-blue-border);
   color: var(--info-color);
-  box-shadow: var(--shadow-info-sm);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .urgencyIndicator--none {
-  background: var(--success-bg);
-  border: var(--success-border);
+  background: var(--gradient-green-subtle);
+  border: var(--border-luxury);
+  border-color: var(--brand-green-border);
   color: var(--success-color);
-  box-shadow: var(--shadow-success-sm);
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 /* Responsive: Mobile-first approach */

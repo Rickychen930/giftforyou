@@ -10,11 +10,21 @@
 .footer-contact__title {
   font-weight: var(--font-weight-black);
   font-size: var(--font-size-base);
-  color: var(--ink-900);
   margin: 0 0 var(--space-1) 0;
   letter-spacing: var(--letter-spacing-wider);
   text-transform: uppercase;
   line-height: var(--line-height-tight);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .footer-contact__group {
@@ -42,9 +52,10 @@
 }
 
 .footer-contact__item:hover {
-  background: var(--gradient-brand-soft);
-  color: var(--brand-rose-600);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-700);
   transform: translateX(var(--space-1));
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .footer-contact__item:focus-visible {

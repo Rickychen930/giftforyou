@@ -14,12 +14,12 @@
   z-index: var(--z-toast);
   min-width: 300px;
   max-width: 500px;
-  background: var(--backdrop-glass-lg);
-  border: var(--border-2);
-  border-color: var(--border-brand-subtle);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-lg);
   padding: var(--space-4) var(--space-5);
-  box-shadow: var(--shadow-xl);
+  box-shadow: var(--shadow-luxury-lg), var(--shadow-elegant);
   backdrop-filter: var(--backdrop-blur-lg);
   -webkit-backdrop-filter: var(--backdrop-blur-lg);
   display: flex;
@@ -40,23 +40,27 @@
 }
 
 .toast--success {
-  border-color: var(--success-border-strong);
-  background: var(--success-bg);
+  border-color: var(--brand-green-border);
+  background: var(--gradient-green-subtle);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
 }
 
 .toast--error {
-  border-color: var(--error-border-strong);
-  background: var(--error-bg);
+  border-color: var(--brand-red-border);
+  background: var(--gradient-red-subtle);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
 }
 
 .toast--warning {
-  border-color: var(--warning-border-strong);
-  background: var(--warning-bg);
+  border-color: var(--brand-orange-border);
+  background: var(--gradient-orange-subtle);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
 }
 
 .toast--info {
-  border-color: var(--info-border-strong);
-  background: var(--info-bg);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
 }
 
 .toast__icon {
@@ -123,8 +127,9 @@
 
 @media (hover: hover) and (pointer: fine) {
   .toast__close:hover {
-    background: var(--backdrop-glass-sm);
-    color: var(--ink-900);
+    background: var(--gradient-luxury-gold-subtle);
+    color: var(--luxury-gold-700);
+    box-shadow: var(--shadow-luxury-sm);
   }
 }
 

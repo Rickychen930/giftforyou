@@ -10,7 +10,7 @@
 /* Main section container */
 .googleMapsReviews {
   padding: clamp(var(--space-16), 7vw, var(--space-24)) var(--space-6);
-  background: var(--gradient-surface);
+  background: var(--gradient-elegant-surface);
   position: relative;
   overflow: hidden;
   z-index: var(--z-base);
@@ -58,22 +58,35 @@
   width: var(--size-16);
   height: var(--size-16);
   border-radius: var(--radius-xl);
-  background: var(--gradient-brand-soft);
+  background: var(--gradient-green-subtle);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--brand-sage-600);
+  color: var(--brand-green-700);
   margin-bottom: var(--space-2);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
+  border: var(--border-luxury);
+  border-color: var(--brand-green-border);
 }
 
 .googleMapsReviews__title {
   font-size: clamp(var(--font-size-2xl), 5vw, var(--font-size-4xl));
   font-weight: var(--font-weight-black);
-  color: var(--ink-900);
   margin: 0;
   line-height: var(--line-height-tight);
   letter-spacing: var(--letter-spacing-tight);
+  font-family: var(--font-family-heading);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .googleMapsReviews__subtitle {
@@ -116,24 +129,27 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-4) var(--space-8);
-  background: transparent;
-  color: var(--brand-sage-600);
-  border: var(--border-width-2) solid var(--brand-sage-500);
+  background: var(--gradient-green-subtle);
+  color: var(--brand-green-700);
+  border: var(--border-luxury);
+  border-color: var(--brand-green-border);
   border-radius: var(--radius-full);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-black);
   font-size: var(--font-size-base);
   text-decoration: none;
-  transition: all var(--transition-elegant);
+  transition: var(--transition-elegant);
   box-shadow: var(--shadow-luxury-sm);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .googleMapsReviews__link:hover {
     background: var(--gradient-green);
-    color: var(--neutral-0);
+    color: var(--elegant-white);
     transform: translateY(calc(var(--space-1) * -1));
-    box-shadow: var(--shadow-green-md);
-    border-color: var(--brand-green-600);
+    box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
+    border-color: var(--brand-green-border);
   }
 }
 

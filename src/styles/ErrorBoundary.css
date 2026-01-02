@@ -15,7 +15,13 @@
   min-height: 400px;
   padding: var(--space-8);
   text-align: center;
-  background: var(--gradient-surface);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-luxury-lg), var(--shadow-elegant);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
 }
 
 .errorBoundary__icon {
@@ -29,10 +35,16 @@
 .errorBoundary__title {
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-black);
-  color: var(--ink-900);
   margin: 0 0 var(--space-2) 0;
   font-family: var(--font-family-heading);
-  background: var(--gradient-heading);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -53,16 +65,18 @@
   max-width: var(--text-width-xl);
   margin-bottom: var(--space-6);
   padding: var(--space-4);
-  background: var(--error-bg);
-  border: var(--border-1);
-  border-color: var(--error-border);
+  background: var(--gradient-red-subtle);
+  border: var(--border-luxury);
+  border-color: var(--brand-red-border);
   border-radius: var(--radius-lg);
   font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);
   color: var(--error-color);
   text-align: left;
   overflow-x: auto;
-  box-shadow: var(--shadow-error-sm);
+  box-shadow: var(--shadow-luxury-sm);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
 .errorBoundary__actions {
@@ -83,32 +97,35 @@
 }
 
 .errorBoundary__button--primary {
-  background: var(--gradient-brand);
-  color: var(--neutral-0);
-  border-color: transparent;
-  box-shadow: var(--shadow-brand-sm);
+  background: var(--gradient-luxury-gold);
+  color: var(--elegant-white);
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .errorBoundary__button--primary:hover {
-    background: var(--gradient-brand-hover);
-    box-shadow: var(--shadow-brand-md);
+    background: var(--gradient-luxury-gold-hover);
+    box-shadow: var(--shadow-luxury-gold-xl), var(--shadow-luxury-gold-lg);
     transform: translateY(var(--space-neg-1));
   }
 }
 
 .errorBoundary__button--secondary {
-  background: var(--backdrop-glass-sm);
+  background: var(--gradient-elegant-surface);
   color: var(--ink-700);
-  border-color: var(--border-brand-subtle);
-  box-shadow: var(--shadow-xs);
+  border-color: var(--brand-rose-border);
+  box-shadow: var(--shadow-luxury-sm);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .errorBoundary__button--secondary:hover {
-    background: var(--backdrop-glass-md);
-    border-color: var(--border-brand-strong);
-    box-shadow: var(--shadow-md);
+    background: var(--gradient-luxury-gold-subtle);
+    border-color: var(--border-luxury-gold);
+    color: var(--luxury-gold-700);
+    box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
     transform: translateY(var(--space-neg-1));
   }
 }

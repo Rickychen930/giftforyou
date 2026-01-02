@@ -69,16 +69,22 @@
 
 .header-brand__name {
   font-family: "Playfair Display", serif;
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-black);
   font-size: var(--font-size-3xl);
   letter-spacing: var(--letter-spacing-wide);
-  color: var(--brand-wine-700);
   line-height: var(--line-height-tight);
-  background: linear-gradient(135deg, var(--brand-wine-700) 0%, var(--brand-rose-500) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  transition: all var(--transition-base);
+  transition: all var(--transition-elegant);
 }
 
 @media (hover: hover) and (pointer: fine) {

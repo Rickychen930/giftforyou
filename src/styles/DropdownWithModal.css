@@ -20,17 +20,18 @@
   justify-content: space-between;
   gap: var(--space-3);
   padding: clamp(var(--space-3), 1.4vw, var(--space-4)) clamp(var(--space-4), 1.6vw, var(--space-4));
-  border: var(--border-width-2) solid var(--brand-rose-border-2);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-lg);
-  background: var(--gradient-surface);
+  background: var(--gradient-elegant-surface);
   color: var(--ink-900);
   font-size: clamp(var(--font-size-sm), 1.2vw, var(--font-size-sm));
   font-weight: var(--font-weight-bold);
   font-family: inherit;
   cursor: pointer;
-  transition: all var(--transition-slow) cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all var(--transition-elegant);
   box-shadow: 
-    var(--shadow-sm),
+    var(--shadow-luxury-sm),
     0 0 0 1px rgba(255, 255, 255, 0.8) inset;
   backdrop-filter: var(--backdrop-blur-sm);
   -webkit-backdrop-filter: var(--backdrop-blur-sm);
@@ -39,10 +40,11 @@
 
 @media (hover: hover) and (pointer: fine) {
   .dropdownWithModal__trigger:hover:not(:disabled) {
-    border-color: var(--brand-rose-border-2);
-    background: rgba(255, 255, 255, 1);
+    border-color: var(--border-luxury-gold);
+    background: var(--gradient-elegant-surface-hover);
     box-shadow: 
-      var(--shadow-md),
+      var(--shadow-luxury-gold),
+      var(--shadow-luxury-md),
       0 0 0 1px rgba(255, 255, 255, 0.9) inset;
     transform: translateY(-1px);
   }
@@ -50,20 +52,18 @@
 
 .dropdownWithModal__trigger:focus-visible {
   outline: none;
-  border-color: var(--brand-rose-600);
+  border-color: var(--border-luxury-gold);
   box-shadow: 
-    0 0 0 var(--space-1) var(--brand-rose-border),
-    var(--shadow-brand-md),
-    var(--shadow-sm),
+    var(--shadow-luxury-gold),
+    var(--shadow-luxury-md),
     0 0 0 1px rgba(255, 255, 255, 0.9) inset;
 }
 
 .dropdownWithModal__trigger.is-open {
-  border-color: var(--brand-rose-600);
+  border-color: var(--border-luxury-gold);
   box-shadow: 
-    0 0 0 var(--space-1) var(--brand-rose-border),
-    var(--shadow-brand-md),
-    var(--shadow-sm),
+    var(--shadow-luxury-gold),
+    var(--shadow-luxury-md),
     0 0 0 1px rgba(255, 255, 255, 0.9) inset;
 }
 
@@ -104,12 +104,13 @@
   left: 0;
   right: 0;
   z-index: var(--z-modal);
-  background: var(--gradient-surface);
-  border: var(--border-width-2) solid var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-lg);
   box-shadow: 
-    var(--shadow-xl),
-    var(--shadow-lg),
+    var(--shadow-luxury-xl),
+    var(--shadow-elegant),
     0 0 0 1px rgba(255, 255, 255, 0.9) inset;
   backdrop-filter: var(--backdrop-blur-lg) saturate(180%);
   -webkit-backdrop-filter: var(--backdrop-blur-lg) saturate(180%);
@@ -150,13 +151,14 @@
 
 @media (hover: hover) and (pointer: fine) {
   .dropdownWithModal__option:hover {
-    background: var(--gradient-brand-soft);
+    background: var(--gradient-luxury-gold-subtle);
+    color: var(--luxury-gold-700);
   }
 }
 
 .dropdownWithModal__option.is-selected {
-  background: var(--gradient-brand-soft);
-  color: var(--brand-rose-700);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-700);
   font-weight: var(--font-weight-extrabold);
 }
 
@@ -230,12 +232,13 @@
 .dropdownWithModal__modal {
   width: 100%;
   max-width: 480px;
-  background: var(--gradient-surface);
-  border: var(--border-width-2) solid var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: var(--radius-2xl);
   box-shadow: 
-    var(--shadow-2xl),
-    var(--shadow-xl),
+    var(--shadow-luxury-xl),
+    var(--shadow-elegant),
     0 0 0 1px rgba(255, 255, 255, 0.9) inset;
   backdrop-filter: var(--backdrop-blur-lg) saturate(200%);
   -webkit-backdrop-filter: var(--backdrop-blur-lg) saturate(200%);
@@ -268,8 +271,11 @@
   font-weight: var(--font-weight-black);
   background: linear-gradient(
     135deg,
-    var(--brand-rose-600) 0%,
-    var(--brand-wine-700) 100%
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -373,10 +379,12 @@
 }
 
 .dropdownWithModal__modalBtn--submit {
-  background: var(--gradient-brand);
-  color: var(--neutral-0);
+  background: var(--gradient-luxury-gold);
+  color: var(--elegant-white);
+  border: var(--border-luxury-gold-strong);
   box-shadow: 
-    var(--shadow-brand-md),
+    var(--shadow-luxury-gold-lg),
+    var(--shadow-luxury-gold),
     0 0 0 1px rgba(255, 255, 255, 0.2) inset;
 }
 
@@ -384,8 +392,10 @@
   .dropdownWithModal__modalBtn--submit:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 
-      var(--shadow-brand-lg),
+      var(--shadow-luxury-gold-xl),
+      var(--shadow-luxury-gold-lg),
       0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+    filter: brightness(1.05) saturate(1.1);
   }
 }
 

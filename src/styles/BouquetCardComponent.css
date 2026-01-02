@@ -11,7 +11,8 @@
 .bouquetCard {
   border-radius: var(--radius-xl);
   background: var(--gradient-elegant-surface);
-  border: var(--border-elegant) solid var(--brand-rose-border);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   overflow: hidden;
   box-shadow: 
     var(--shadow-luxury-md),
@@ -576,7 +577,7 @@
   height: 44px;
   border: none;
   border-radius: var(--radius-md);
-  background: var(--gradient-surface);
+  background: var(--gradient-elegant-surface);
   color: var(--ink-700);
   cursor: pointer;
   transition: all var(--transition-slow) cubic-bezier(0.4, 0, 0.2, 1);
