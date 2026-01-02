@@ -1,4 +1,4 @@
-@import "../colors.css";
+@import "../design-system.css";
 
 .header-navigation {
   flex: 1 1 auto;
@@ -24,15 +24,15 @@
 .header-navigation__link {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.85rem 1.4rem;
-  border-radius: 10px;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-base);
   text-decoration: none;
   color: var(--ink-900);
-  font-weight: 600;
-  font-size: 0.96rem;
-  letter-spacing: 0.025em;
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base);
+  letter-spacing: var(--letter-spacing-wide);
+  transition: all var(--transition-slow);
   position: relative;
   white-space: nowrap;
   background: transparent;
@@ -42,25 +42,25 @@
   content: "";
   position: absolute;
   inset: 0;
-  border-radius: 10px;
-  background: linear-gradient(135deg, rgba(212, 140, 156, 0.06), rgba(168, 213, 186, 0.04));
+  border-radius: var(--radius-base);
+  background: var(--gradient-brand-soft);
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--transition-base);
 }
 
 .header-navigation__link::after {
   content: "";
   position: absolute;
-  bottom: 6px;
+  bottom: var(--space-1-5);
   left: 50%;
   transform: translateX(-50%) scaleX(0);
   width: 65%;
   height: 2.5px;
   background: linear-gradient(90deg, var(--brand-rose-500), var(--brand-sage-400));
-  border-radius: 2px;
+  border-radius: var(--radius-sm);
   transition: transform var(--transition-elegant);
   box-shadow: 
-    0 2px 8px rgba(212, 140, 156, 0.3),
+    var(--shadow-brand-sm),
     0 0 12px rgba(212, 140, 156, 0.2);
 }
 
@@ -79,8 +79,8 @@
 
 .header-navigation__link.is-active {
   color: var(--brand-wine-700);
-  background: linear-gradient(135deg, rgba(212, 140, 156, 0.1), rgba(168, 213, 186, 0.08));
-  box-shadow: 0 4px 12px rgba(212, 140, 156, 0.15);
+  background: var(--gradient-brand-soft);
+  box-shadow: var(--shadow-brand-sm);
 }
 
 .header-navigation__link.is-active::before {
@@ -92,7 +92,7 @@
 }
 
 .header-navigation__dropdown-arrow {
-  transition: transform 0.3s ease;
+  transition: transform var(--transition-base);
   color: var(--brand-rose-500);
 }
 
@@ -145,11 +145,11 @@
     width: calc(100% - 2rem);
     max-width: 520px;
     margin: 0.85rem auto 0;
-    background: #ffffff;
-    border: 1px solid rgba(212, 140, 156, 0.15);
-    border-radius: 18px;
-    padding: 1rem;
-    box-shadow: 0 24px 72px rgba(0, 0, 0, 0.16);
+    background: var(--neutral-0);
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius-xl);
+    padding: var(--space-4);
+    box-shadow: var(--shadow-2xl);
     animation: mobileMenuSlide 0.22s ease-out;
     max-height: calc(100vh - 96px - env(safe-area-inset-top));
     overflow-y: auto;

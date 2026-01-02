@@ -84,9 +84,17 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
   }
 
   private cleanupIntersectionObserver(): void {
-    if (this.intersectionObserver && this.sectionRef.current) {
-      this.intersectionObserver.unobserve(this.sectionRef.current);
-      this.intersectionObserver.disconnect();
+    try {
+      if (this.intersectionObserver) {
+        if (this.sectionRef.current) {
+          this.intersectionObserver.unobserve(this.sectionRef.current);
+        }
+        this.intersectionObserver.disconnect();
+        this.intersectionObserver = null;
+      }
+    } catch (error) {
+      console.warn("Error during intersection observer cleanup:", error);
+      // Ensure observer is null even if cleanup fails
       this.intersectionObserver = null;
     }
   }

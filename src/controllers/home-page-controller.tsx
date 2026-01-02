@@ -147,23 +147,44 @@ export class HomePageController extends Component<
 
   /**
    * Initialize luxury enhancements (animations, lazy loading)
+   * Optimized with proper error handling
    */
   private initializeLuxuryEnhancements(): void {
-    this.fadeObserver = observeFadeIn(".fade-in");
-    this.revealObserver = revealOnScroll();
-    this.imageObserver = lazyLoadImages();
+    try {
+      // Cleanup existing observers first to prevent duplicates
+      this.cleanupLuxuryEnhancements();
+      
+      // Initialize observers with error handling
+      this.fadeObserver = observeFadeIn(".fade-in");
+      this.revealObserver = revealOnScroll();
+      this.imageObserver = lazyLoadImages();
+    } catch (error) {
+      console.warn("Failed to initialize luxury enhancements:", error);
+      // Continue execution even if enhancements fail
+    }
   }
 
   /**
    * Cleanup luxury enhancements
+   * Proper cleanup to prevent memory leaks
    */
   private cleanupLuxuryEnhancements(): void {
-    this.fadeObserver?.disconnect();
-    this.revealObserver?.disconnect();
-    this.imageObserver?.disconnect();
-    this.fadeObserver = null;
-    this.revealObserver = null;
-    this.imageObserver = null;
+    try {
+      if (this.fadeObserver) {
+        this.fadeObserver.disconnect();
+        this.fadeObserver = null;
+      }
+      if (this.revealObserver) {
+        this.revealObserver.disconnect();
+        this.revealObserver = null;
+      }
+      if (this.imageObserver) {
+        this.imageObserver.disconnect();
+        this.imageObserver = null;
+      }
+    } catch (error) {
+      console.warn("Error during luxury enhancements cleanup:", error);
+    }
   }
 
   /**
@@ -178,22 +199,36 @@ export class HomePageController extends Component<
 
   /**
    * Component lifecycle: Update
+   * Optimized to only re-initialize when necessary
    */
   componentDidUpdate(
     _prevProps: HomePageControllerProps,
     prevState: HomePageControllerState
   ): void {
-    // Re-initialize luxury enhancements when data changes
-    if (
-      prevState.data.loadState !== this.state.data.loadState ||
-      prevState.data.collections.length !== this.state.data.collections.length
-    ) {
-      // Cleanup old observers
+    const { data } = this.state;
+    const prevData = prevState.data;
+    
+    // Only re-initialize luxury enhancements when data successfully loads
+    const dataChanged = 
+      prevData.loadState !== data.loadState ||
+      prevData.collections.length !== data.collections.length;
+    
+    const shouldReinitialize = 
+      dataChanged && 
+      data.loadState === "success" && 
+      data.collections.length > 0;
+    
+    if (shouldReinitialize) {
+      // Cleanup old observers first
       this.cleanupLuxuryEnhancements();
-      // Re-initialize with new data
-      setTimeout(() => {
-        this.initializeLuxuryEnhancements();
-      }, 100);
+      
+      // Re-initialize with new data after a short delay to ensure DOM is ready
+      // Use requestAnimationFrame for better performance
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          this.initializeLuxuryEnhancements();
+        }, 150);
+      });
     }
   }
 

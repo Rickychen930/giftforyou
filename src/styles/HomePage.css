@@ -23,6 +23,7 @@ section {
 
 /* =========================================================
    HOME PAGE CONTAINER - Luxury & Elegant Design
+   Premium glass morphism with elegant transitions
    ========================================================= */
 
 .Home-page-container {
@@ -30,9 +31,17 @@ section {
   display: flex;
   flex-direction: column;
   position: relative;
-  background: var(--gradient-surface);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(254, 245, 247, 0.95) 20%,
+    rgba(255, 255, 255, 0.98) 40%,
+    rgba(248, 250, 252, 0.95) 60%,
+    rgba(255, 255, 255, 0.98) 100%
+  );
   min-height: 100vh;
   overflow-x: hidden;
+  isolation: isolate;
 }
 
 /* Smooth section spacing with visual separation */
@@ -53,14 +62,15 @@ section {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    var(--border-2) 20%,
-    var(--border-3) 50%,
-    var(--border-3) 50%,
-    var(--border-2) 80%,
+    rgba(212, 140, 156, 0.1) 20%,
+    rgba(212, 140, 156, 0.2) 50%,
+    rgba(168, 213, 186, 0.2) 50%,
+    rgba(168, 213, 186, 0.1) 80%,
     transparent 100%
   );
-  opacity: 0.8;
+  opacity: 0.9;
   z-index: 1;
+  box-shadow: 0 0 20px rgba(212, 140, 156, 0.1);
 }
 
 /* Enhanced spacing between sections */
@@ -89,18 +99,22 @@ section {
   position: relative;
 }
 
-/* Luxury background pattern overlay (subtle) */
+/* Luxury background pattern overlay (subtle) - Enhanced */
 .Home-page-container::before {
   content: "";
   position: fixed;
   inset: 0;
   background-image: 
-    radial-gradient(circle at 20% 30%, rgba(212, 140, 156, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(168, 213, 186, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.02) 0%, transparent 70%);
+    radial-gradient(circle at 20% 30%, rgba(212, 140, 156, 0.04) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(168, 213, 186, 0.04) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 70%),
+    radial-gradient(circle at 10% 80%, rgba(212, 140, 156, 0.02) 0%, transparent 40%),
+    radial-gradient(circle at 90% 20%, rgba(168, 213, 186, 0.02) 0%, transparent 40%);
   pointer-events: none;
   z-index: 0;
-  animation: subtleFloat 20s ease-in-out infinite;
+  animation: subtleFloat 25s ease-in-out infinite;
+  backdrop-filter: blur(0.5px);
+  -webkit-backdrop-filter: blur(0.5px);
 }
 
 @keyframes subtleFloat {
@@ -116,8 +130,9 @@ section {
 
 /* Smooth fade-in for sections - Enhanced luxury animation */
 .Home-page-container > .section {
-  animation: fadeInSection 0.8s ease-out forwards;
+  animation: fadeInSection 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   opacity: 0;
+  will-change: opacity, transform;
 }
 
 .Home-page-container > .section:nth-child(1) {
@@ -139,11 +154,11 @@ section {
 @keyframes fadeInSection {
   from {
     opacity: 0;
-    transform: translateY(var(--space-4));
+    transform: translateY(30px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -191,12 +206,27 @@ section {
 /* Responsive: Mobile-first approach */
 /* Mobile devices (up to 640px) */
 @media (max-width: 640px) {
+  .Home-page-container {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.99) 0%,
+      rgba(254, 245, 247, 0.97) 30%,
+      rgba(255, 255, 255, 0.99) 60%,
+      rgba(248, 250, 252, 0.97) 100%
+    );
+  }
+
   section {
     scroll-margin-top: var(--space-20);
   }
 
   .Home-page-container > .section:not(:first-child)::before {
     width: 95%;
+    height: 0.5px;
+  }
+
+  .Home-page-container > .section {
+    animation-duration: 0.8s;
   }
 
   .home-state {
@@ -208,6 +238,11 @@ section {
 @media (min-width: 641px) and (max-width: 968px) {
   .Home-page-container > .section:not(:first-child)::before {
     width: 92%;
+    height: 0.75px;
+  }
+
+  .Home-page-container > .section {
+    animation-duration: 0.9s;
   }
 }
 
@@ -215,13 +250,36 @@ section {
 @media (min-width: 969px) {
   .Home-page-container > .section:not(:first-child)::before {
     width: min(90%, 1200px);
+    height: 1px;
+  }
+
+  .Home-page-container > .section {
+    animation-duration: 1s;
   }
 }
 
 /* Large desktop devices (1200px and above) */
 @media (min-width: 1200px) {
+  .Home-page-container {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.98) 0%,
+      rgba(254, 245, 247, 0.96) 15%,
+      rgba(255, 255, 255, 0.98) 30%,
+      rgba(248, 250, 252, 0.96) 50%,
+      rgba(255, 255, 255, 0.98) 70%,
+      rgba(254, 245, 247, 0.96) 85%,
+      rgba(255, 255, 255, 0.98) 100%
+    );
+  }
+
   section {
     scroll-margin-top: 128px;
+  }
+
+  .Home-page-container > .section:not(:first-child)::before {
+    width: min(88%, 1400px);
+    box-shadow: 0 0 30px rgba(212, 140, 156, 0.15);
   }
 }
 
