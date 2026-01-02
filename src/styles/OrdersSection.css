@@ -234,22 +234,17 @@
 .ordersSelect {
   width: 100%;
   border-radius: 14px;
-  border: 1.5px solid rgba(212, 140, 156, 0.15);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
-  color: var(--dash-text-main);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
+  color: var(--elegant-black);
   padding: 0.85rem 1rem;
   outline: none;
-  box-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.03),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-luxury-sm);
+  transition: var(--transition-elegant);
   font-size: 0.9rem;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
 .ordersInput::placeholder,
@@ -280,22 +275,18 @@
 .ordersInput:hover,
 .ordersTextarea:hover,
 .ordersSelect:hover {
-  border-color: rgba(212, 140, 156, 0.25);
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.05),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
+  background: var(--gradient-luxury-gold-subtle);
   transform: translateY(-1px);
 }
 
 .ordersInput:focus,
 .ordersTextarea:focus,
 .ordersSelect:focus {
-  border-color: var(--dash-brand-pink);
-  background: rgba(255, 255, 255, 1);
-  box-shadow: 
-    0 0 0 3px rgba(212, 140, 156, 0.15),
-    0 4px 12px rgba(0, 0, 0, 0.05),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  border-color: var(--border-luxury-gold-strong);
+  background: var(--gradient-elegant-surface);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-focus), 0 4px 12px rgba(0, 0, 0, 0.05);
   transform: translateY(-1px);
 }
 
@@ -435,42 +426,33 @@
 
 .ordersBtn {
   border-radius: 999px;
-  border: 1.5px solid rgba(212, 140, 156, 0.15);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.9) 100%
-  );
-  color: var(--dash-text-main);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-700);
   padding: 0.7rem 1.1rem;
   font-size: 0.88rem;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.06),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-luxury-sm);
+  transition: var(--transition-elegant);
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   min-height: 40px;
   position: relative;
   overflow: hidden;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
 .ordersBtn::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(212, 140, 156, 0.1) 0%,
-    rgba(212, 140, 156, 0.05) 100%
-  );
+  background: var(--gradient-luxury-gold-subtle);
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--transition-elegant);
 }
 
 .ordersBtn:hover:not(:disabled)::before {
@@ -479,10 +461,10 @@
 
 .ordersBtn:hover:not(:disabled) {
   transform: translateY(-2px);
-  border-color: rgba(212, 140, 156, 0.25);
-  box-shadow: 
-    0 8px 20px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-600);
 }
 
 .ordersBtn:focus-visible {
@@ -852,8 +834,11 @@
   letter-spacing: -0.01em;
   background: linear-gradient(
     135deg,
-    var(--dash-brand-pink) 0%,
-    var(--dash-brand-pink-2) 100%
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -907,18 +892,13 @@
 .ordersList__filters {
   margin: 1rem 0;
   padding: 1rem;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.9) 100%
-  );
-  border: 1.5px solid rgba(212, 140, 156, 0.12);
+  background: var(--gradient-luxury-gold-subtle);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   border-radius: 16px;
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-luxury-md), var(--shadow-luxury-sm);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
 .ordersFilters {
@@ -946,38 +926,30 @@
 
 .ordersFilterSelect {
   border-radius: 12px;
-  border: 1.5px solid rgba(212, 140, 156, 0.15);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
-  color: var(--dash-text-main);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
+  color: var(--elegant-black);
   padding: 0.6rem 0.85rem;
   font-size: 0.85rem;
   font-weight: 700;
   outline: none;
-  box-shadow: 
-    0 2px 6px rgba(0, 0, 0, 0.03),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-luxury-sm);
+  transition: var(--transition-elegant);
   cursor: pointer;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
 .ordersFilterSelect:hover {
-  border-color: rgba(212, 140, 156, 0.25);
-  box-shadow: 
-    0 4px 10px rgba(0, 0, 0, 0.05),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
+  background: var(--gradient-luxury-gold-subtle);
 }
 
 .ordersFilterSelect:focus {
-  border-color: var(--dash-brand-pink);
-  box-shadow: 
-    0 0 0 3px rgba(212, 140, 156, 0.15),
-    0 4px 10px rgba(0, 0, 0, 0.05);
+  border-color: var(--border-luxury-gold-strong);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-focus), 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .ordersSortGroup {
@@ -1159,24 +1131,18 @@
 .ordersCard {
   width: 100%;
   text-align: left;
-  border: 1.5px solid rgba(212, 140, 156, 0.15);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
   border-radius: 20px;
   padding: 1.25rem;
   cursor: pointer;
   color: inherit;
   position: relative;
-  box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.06),
-    0 2px 8px rgba(0, 0, 0, 0.03),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-luxury-lg), var(--shadow-luxury-md), var(--shadow-elegant);
+  transition: var(--transition-elegant);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
   overflow: hidden;
 }
 
@@ -1297,13 +1263,9 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(212, 140, 156, 0.03) 0%,
-    transparent 50%
-  );
+  background: var(--gradient-luxury-gold-subtle);
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--transition-elegant);
   pointer-events: none;
   z-index: 0;
 }
@@ -1314,11 +1276,8 @@
 
 .ordersCard:hover {
   transform: translateY(-2px);
-  box-shadow: 
-    0 12px 32px rgba(0, 0, 0, 0.1),
-    0 4px 12px rgba(0, 0, 0, 0.05),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
-  border-color: rgba(212, 140, 156, 0.25);
+  box-shadow: var(--shadow-luxury-xl), var(--shadow-luxury-gold-lg), var(--shadow-elegant);
+  border-color: var(--border-luxury-gold);
 }
 
 .ordersCard:focus-visible {
@@ -1327,18 +1286,10 @@
 }
 
 .ordersCard.is-selected {
-  background: linear-gradient(
-    135deg,
-    rgba(212, 140, 156, 0.08) 0%,
-    rgba(255, 255, 255, 0.98) 50%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
-  border-color: var(--dash-brand-pink);
+  background: var(--gradient-luxury-gold-subtle);
+  border: var(--border-luxury-gold-strong);
   border-width: 2px;
-  box-shadow: 
-    0 12px 40px rgba(212, 140, 156, 0.2),
-    0 4px 16px rgba(0, 0, 0, 0.08),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  box-shadow: var(--shadow-luxury-xl), var(--shadow-luxury-gold-lg), var(--shadow-elegant);
   transform: translateY(-2px);
   filter: saturate(1.05);
 }
@@ -1364,15 +1315,8 @@
   bottom: 12px;
   width: 4px;
   border-radius: 999px;
-  background: linear-gradient(
-    180deg,
-    var(--dash-brand-pink) 0%,
-    var(--dash-brand-pink-2) 50%,
-    rgba(160, 76, 92, 0.9) 100%
-  );
-  box-shadow: 
-    0 0 12px rgba(212, 140, 156, 0.5),
-    0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+  background: var(--gradient-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold), 0 0 0 1px rgba(255, 255, 255, 0.3) inset;
   z-index: 2;
 }
 
@@ -1395,8 +1339,11 @@
   font-size: 15px;
   background: linear-gradient(
     135deg,
-    var(--dash-text-main) 0%,
-    rgba(0, 0, 0, 0.85) 100%
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1442,11 +1389,7 @@
   font-size: 17px;
   font-weight: 900;
   letter-spacing: 0.01em;
-  background: linear-gradient(
-    135deg,
-    var(--dash-text-main) 0%,
-    rgba(0, 0, 0, 0.85) 100%
-  );
+  background: var(--gradient-luxury-gold);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1825,28 +1768,22 @@
   font-weight: 800;
   padding: 0.35rem 0.75rem;
   border-radius: 999px;
-  border: 1.5px solid;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.9) 100%
-  );
-  color: var(--dash-text-main);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-700);
   white-space: nowrap;
-  box-shadow: 
-    0 2px 6px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  transition: all 0.2s ease;
+  box-shadow: var(--shadow-luxury-sm);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
+  transition: var(--transition-elegant);
   letter-spacing: 0.01em;
 }
 
 .ordersChip:hover {
   transform: translateY(-1px);
-  box-shadow: 
-    0 4px 10px rgba(0, 0, 0, 0.06),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
+  border-color: var(--border-luxury-gold);
 }
 
 .ordersChip--muted {
@@ -2092,18 +2029,13 @@
 .ordersStatCard {
   padding: 1rem;
   border-radius: 14px;
-  border: 1.5px solid rgba(212, 140, 156, 0.12);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.9) 100%
-  );
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  background: var(--gradient-elegant-surface);
+  box-shadow: var(--shadow-luxury-lg), var(--shadow-luxury-md);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
+  transition: var(--transition-elegant);
   position: relative;
   overflow: hidden;
 }
@@ -2115,14 +2047,9 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(
-    90deg,
-    rgba(212, 140, 156, 0.4),
-    rgba(212, 140, 156, 0.6),
-    rgba(212, 140, 156, 0.4)
-  );
+  background: var(--gradient-luxury-gold);
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--transition-elegant);
 }
 
 .ordersStatCard:hover::before {
@@ -2131,10 +2058,8 @@
 
 .ordersStatCard:hover {
   transform: translateY(-2px);
-  box-shadow: 
-    0 8px 20px rgba(0, 0, 0, 0.08),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
-  border-color: rgba(212, 140, 156, 0.25);
+  box-shadow: var(--shadow-luxury-xl), var(--shadow-luxury-gold-lg);
+  border-color: var(--border-luxury-gold);
 }
 
 .ordersStatCard__label {
@@ -2151,8 +2076,11 @@
   font-weight: 950;
   background: linear-gradient(
     135deg,
-    var(--dash-text-main) 0%,
-    rgba(0, 0, 0, 0.85) 100%
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -2195,11 +2123,7 @@
 
 .ordersStatCard--revenue .ordersStatCard__value {
   font-size: 1.25rem;
-  background: linear-gradient(
-    135deg,
-    var(--dash-brand-pink) 0%,
-    var(--dash-brand-pink-2) 100%
-  );
+  background: var(--gradient-luxury-gold);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
