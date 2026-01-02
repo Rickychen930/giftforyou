@@ -42,9 +42,7 @@
 }
 
 .ourCollection__container {
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: 0 clamp(var(--space-4), 3vw, var(--space-6));
+  /* Container component handles max-width, margin, and padding */
 }
 
 /* ===== Header with Fade-in Animation ===== */

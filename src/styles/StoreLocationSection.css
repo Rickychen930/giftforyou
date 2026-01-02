@@ -31,9 +31,7 @@
 }
 
 .storeLocation__container {
-  max-width: var(--container-max);
-  margin: 0 auto;
-  padding: 0 clamp(var(--space-4), 3vw, var(--space-6));
+  /* Container component handles max-width, margin, and padding */
 }
 
 .storeLocation__content {

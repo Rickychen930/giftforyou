@@ -17,6 +17,7 @@ import StoreContactCard from "../../components/store-location/StoreContactCard";
 import StoreHoursCard from "../../components/store-location/StoreHoursCard";
 import StoreSocialLinks from "../../components/store-location/StoreSocialLinks";
 import SectionHeader from "../../components/common/SectionHeader";
+import Container from "../../components/layout/Container";
 
 interface StoreLocationSectionProps {
   data?: StoreData;
@@ -31,7 +32,7 @@ interface StoreLocationSectionState {
  * Class-based component for store location section
  */
 class StoreLocationSection extends Component<StoreLocationSectionProps, StoreLocationSectionState> {
-  private baseClass: string = "store-location";
+  private baseClass: string = "storeLocation";
 
   render(): React.ReactNode {
     const { data = storeData } = this.props;
@@ -48,7 +49,7 @@ class StoreLocationSection extends Component<StoreLocationSectionProps, StoreLoc
 
     return (
       <section className={this.baseClass} id="Location">
-        <div className={`${this.baseClass}__container`}>
+        <Container variant="default" padding="md" className={`${this.baseClass}__container`}>
           <div className={`${this.baseClass}__info`} aria-labelledby="store-location-title">
             <SectionHeader
               eyebrow="Toko & Kontak"
@@ -81,7 +82,7 @@ class StoreLocationSection extends Component<StoreLocationSectionProps, StoreLoc
               />
             )}
           </div>
-        </div>
+        </Container>
       </section>
     );
   }

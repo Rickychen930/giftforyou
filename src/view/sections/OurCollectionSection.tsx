@@ -17,6 +17,7 @@ import SkeletonLoader from "../../components/common/SkeletonLoader";
 import EmptyState from "../../components/common/EmptyState";
 import AlertMessage from "../../components/common/AlertMessage";
 import SectionHeader from "../../components/common/SectionHeader";
+import Container from "../../components/layout/Container";
 
 interface OurCollectionViewProps {
   items: Collection[];
@@ -253,7 +254,7 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
         id="OurCollection"
         aria-labelledby="ourCollection-title"
       >
-        <div className={`${this.baseClass}__container`}>
+        <Container variant="default" padding="md" className={`${this.baseClass}__container`}>
           <SectionHeader
             eyebrow="Pilihan terbaik untuk setiap momen"
             title="Koleksi Kami"
@@ -289,7 +290,7 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
               ))}
             </div>
           )}
-        </div>
+        </Container>
       </section>
     );
   }
