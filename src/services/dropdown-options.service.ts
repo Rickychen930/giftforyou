@@ -41,7 +41,10 @@ async function fetchCollections(signal?: AbortSignal): Promise<string[]> {
       }
     }
   } catch (err) {
-    console.warn("Failed to fetch collections:", err);
+    // Don't log AbortError - it's expected during component cleanup
+    if (!(err instanceof DOMException && err.name === "AbortError")) {
+      console.warn("Failed to fetch collections:", err);
+    }
   }
   return [];
 }
@@ -72,7 +75,10 @@ async function fetchTypes(signal?: AbortSignal): Promise<string[]> {
       }
     }
   } catch (err) {
-    console.warn("Failed to fetch types:", err);
+    // Don't log AbortError - it's expected during component cleanup
+    if (!(err instanceof DOMException && err.name === "AbortError")) {
+      console.warn("Failed to fetch types:", err);
+    }
   }
   return [];
 }
@@ -102,7 +108,10 @@ async function fetchOccasions(signal?: AbortSignal): Promise<string[]> {
       }
     }
   } catch (err) {
-    console.warn("Failed to fetch occasions:", err);
+    // Don't log AbortError - it's expected during component cleanup
+    if (!(err instanceof DOMException && err.name === "AbortError")) {
+      console.warn("Failed to fetch occasions:", err);
+    }
   }
   return [];
 }
@@ -132,7 +141,10 @@ async function fetchFlowers(signal?: AbortSignal): Promise<string[]> {
       }
     }
   } catch (err) {
-    console.warn("Failed to fetch flowers:", err);
+    // Don't log AbortError - it's expected during component cleanup
+    if (!(err instanceof DOMException && err.name === "AbortError")) {
+      console.warn("Failed to fetch flowers:", err);
+    }
   }
   return [];
 }

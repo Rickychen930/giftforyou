@@ -1,155 +1,446 @@
 /**
- * Error Boundary Component
- * Luxury, DRY, Efficient, Responsive
+ * Error Boundary Component Styles
+ * Luxury, Elegant, Clean UI/UX
  * Uses design-system.css variables
  * Fully responsive on all devices: mobile, tablet, desktop
  */
 
 @import "design-system.css";
+@import "colors.css";
 
+/* =========================================================
+   Main Container
+   ========================================================= */
 .errorBoundary {
+  min-height: 100vh;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 400px;
-  padding: var(--space-8);
+  padding: var(--space-5);
+  background: linear-gradient(
+    135deg,
+    var(--neutral-50) 0%,
+    var(--neutral-100) 50%,
+    rgba(212, 140, 156, 0.05) 100%
+  );
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated background pattern */
+.errorBoundary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(212, 140, 156, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(143, 196, 163, 0.08) 0%, transparent 50%);
+  animation: backgroundShift 20s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes backgroundShift {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+/* Container wrapper */
+.errorBoundary__container {
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+  z-index: 1;
+}
+
+/* =========================================================
+   Card
+   ========================================================= */
+.errorBoundary__card {
+  width: 100%;
+  padding: var(--space-10) var(--space-8);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(255, 255, 255, 0.95) 100%
+  );
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 2px solid rgba(212, 140, 156, 0.2);
+  border-radius: var(--radius-2xl);
+  box-shadow: 
+    0 32px 96px rgba(0, 0, 0, 0.12),
+    0 16px 48px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset,
+    0 0 200px rgba(212, 140, 156, 0.1);
   text-align: center;
-  background: var(--gradient-elegant-surface);
-  border: var(--border-luxury);
-  border-color: var(--brand-rose-border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-luxury-lg), var(--shadow-elegant);
-  backdrop-filter: var(--backdrop-blur-md);
-  -webkit-backdrop-filter: var(--backdrop-blur-md);
+  animation: slideUpFade 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Decorative gradient overlay */
+.errorBoundary__card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--brand-rose-500) 0%,
+    var(--brand-rose-600) 50%,
+    var(--brand-sage-500) 100%
+  );
+  opacity: 0.8;
+}
+
+/* =========================================================
+   Icon
+   ========================================================= */
+.errorBoundary__icon-wrapper {
+  margin-bottom: var(--space-6);
+  display: flex;
+  justify-content: center;
+  animation: iconPulse 2s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
 }
 
 .errorBoundary__icon {
-  width: var(--size-16);
-  height: var(--size-16);
-  color: var(--error-color);
-  margin-bottom: var(--space-4);
-  opacity: var(--opacity-strong);
+  width: 80px;
+  height: 80px;
+  color: var(--brand-rose-600);
+  filter: drop-shadow(0 4px 12px rgba(212, 140, 156, 0.3));
 }
 
+/* =========================================================
+   Typography
+   ========================================================= */
 .errorBoundary__title {
-  font-size: var(--font-size-2xl);
+  margin: 0 0 var(--space-4) 0;
+  font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-black);
-  margin: 0 0 var(--space-2) 0;
   font-family: var(--font-family-heading);
   background: linear-gradient(
     135deg,
-    var(--elegant-black) 0%,
-    var(--elegant-charcoal) 25%,
-    var(--brand-rose-600) 60%,
-    var(--luxury-gold-600) 80%,
+    var(--ink-900) 0%,
+    var(--brand-rose-600) 50%,
     var(--brand-sage-500) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 .errorBoundary__message {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  color: var(--ink-700);
   margin: 0 0 var(--space-6) 0;
-  max-width: var(--text-width-lg);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--ink-700);
   line-height: var(--line-height-relaxed);
+  max-width: 100%;
 }
 
+/* =========================================================
+   Error ID
+   ========================================================= */
+.errorBoundary__error-id {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-6);
+  background: rgba(212, 140, 156, 0.1);
+  border: 1px solid rgba(212, 140, 156, 0.2);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+}
+
+.errorBoundary__error-id-label {
+  color: var(--ink-620);
+  font-weight: var(--font-weight-medium);
+}
+
+.errorBoundary__error-id-value {
+  color: var(--brand-rose-700);
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-bold);
+  background: rgba(255, 255, 255, 0.5);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-base);
+}
+
+/* =========================================================
+   Error Details (Development)
+   ========================================================= */
 .errorBoundary__details {
   width: 100%;
-  max-width: var(--text-width-xl);
-  margin-bottom: var(--space-6);
-  padding: var(--space-4);
-  background: var(--gradient-red-subtle);
-  border: var(--border-luxury);
-  border-color: var(--brand-red-border);
-  border-radius: var(--radius-lg);
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-sm);
-  color: var(--error-color);
+  margin: var(--space-6) 0;
   text-align: left;
-  overflow-x: auto;
-  box-shadow: var(--shadow-luxury-sm);
-  backdrop-filter: var(--backdrop-blur-sm);
-  -webkit-backdrop-filter: var(--backdrop-blur-sm);
+  border: 1px solid rgba(212, 140, 156, 0.2);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow: hidden;
 }
 
+.errorBoundary__details-summary {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--ink-700);
+  cursor: pointer;
+  user-select: none;
+  background: rgba(212, 140, 156, 0.05);
+  transition: var(--transition-colors);
+  list-style: none;
+}
+
+.errorBoundary__details-summary:hover {
+  background: rgba(212, 140, 156, 0.1);
+}
+
+.errorBoundary__details-summary::-webkit-details-marker {
+  display: none;
+}
+
+.errorBoundary__details-content {
+  padding: var(--space-4);
+  margin: 0;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--ink-700);
+  background: rgba(255, 255, 255, 0.8);
+  overflow-x: auto;
+  line-height: var(--line-height-relaxed);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* =========================================================
+   Actions
+   ========================================================= */
 .errorBoundary__actions {
   display: flex;
-  gap: var(--space-3);
   flex-wrap: wrap;
+  gap: var(--space-3);
   justify-content: center;
+  margin-bottom: var(--space-6);
 }
 
+/* =========================================================
+   Buttons
+   ========================================================= */
 .errorBoundary__button {
-  padding: var(--btn-padding-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-6);
   border-radius: var(--radius-full);
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-base);
-  transition: var(--transition-all);
+  transition: var(--transition-elegant);
   cursor: pointer;
-  border: var(--border-2);
+  border: 2px solid transparent;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  min-width: 140px;
+  box-shadow: var(--shadow-md);
 }
 
+.errorBoundary__button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: var(--transition-opacity);
+}
+
+.errorBoundary__button:hover::before {
+  opacity: 1;
+}
+
+.errorBoundary__button:focus-visible {
+  outline: 3px solid rgba(212, 140, 156, 0.4);
+  outline-offset: 2px;
+}
+
+.errorBoundary__button-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Primary Button */
 .errorBoundary__button--primary {
-  background: var(--gradient-luxury-gold);
-  color: var(--elegant-white);
-  border-color: var(--border-luxury-gold);
-  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
+  background: linear-gradient(
+    135deg,
+    var(--brand-rose-500) 0%,
+    var(--brand-rose-600) 100%
+  );
+  color: var(--neutral-0);
+  border-color: var(--brand-rose-600);
+  box-shadow: 
+    0 8px 24px rgba(212, 140, 156, 0.3),
+    0 4px 12px rgba(212, 140, 156, 0.2);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .errorBoundary__button--primary:hover {
-    background: var(--gradient-luxury-gold-hover);
-    box-shadow: var(--shadow-luxury-gold-xl), var(--shadow-luxury-gold-lg);
-    transform: translateY(var(--space-neg-1));
+    transform: translateY(-2px);
+    box-shadow: 
+      0 12px 32px rgba(212, 140, 156, 0.4),
+      0 6px 16px rgba(212, 140, 156, 0.3);
   }
 }
 
+.errorBoundary__button--primary:active {
+  transform: translateY(0);
+}
+
+/* Secondary Button */
 .errorBoundary__button--secondary {
-  background: var(--gradient-elegant-surface);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
   color: var(--ink-700);
-  border-color: var(--brand-rose-border);
-  box-shadow: var(--shadow-luxury-sm);
-  backdrop-filter: var(--backdrop-blur-sm);
-  -webkit-backdrop-filter: var(--backdrop-blur-sm);
+  border-color: rgba(212, 140, 156, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .errorBoundary__button--secondary:hover {
-    background: var(--gradient-luxury-gold-subtle);
-    border-color: var(--border-luxury-gold);
-    color: var(--luxury-gold-700);
-    box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
-    transform: translateY(var(--space-neg-1));
+    background: linear-gradient(
+      135deg,
+      rgba(212, 140, 156, 0.1) 0%,
+      rgba(212, 140, 156, 0.05) 100%
+    );
+    border-color: var(--brand-rose-500);
+    color: var(--brand-rose-700);
+    transform: translateY(-2px);
+    box-shadow: 
+      0 8px 24px rgba(212, 140, 156, 0.2),
+      0 4px 12px rgba(212, 140, 156, 0.1);
   }
 }
 
-.errorBoundary__button:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: var(--focus-ring-offset);
+/* Tertiary Button */
+.errorBoundary__button--tertiary {
+  background: transparent;
+  color: var(--ink-700);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: none;
 }
 
-/* Responsive */
-@media (max-width: 640px) {
+@media (hover: hover) and (pointer: fine) {
+  .errorBoundary__button--tertiary:hover {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+  }
+}
+
+/* =========================================================
+   Help Text
+   ========================================================= */
+.errorBoundary__help {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--ink-620);
+  line-height: var(--line-height-relaxed);
+}
+
+/* =========================================================
+   Responsive Design
+   ========================================================= */
+
+/* Tablet */
+@media (max-width: 768px) {
   .errorBoundary {
-    padding: var(--space-6);
-    min-height: 300px;
+    padding: var(--space-4);
+  }
+
+  .errorBoundary__card {
+    padding: var(--space-8) var(--space-6);
   }
 
   .errorBoundary__icon {
-    width: var(--size-12);
-    height: var(--size-12);
-    margin-bottom: var(--space-3);
+    width: 64px;
+    height: 64px;
+  }
+
+  .errorBoundary__title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .errorBoundary__message {
+    font-size: var(--font-size-base);
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .errorBoundary {
+    padding: var(--space-3);
+  }
+
+  .errorBoundary__card {
+    padding: var(--space-6) var(--space-4);
+    border-radius: var(--radius-xl);
+  }
+
+  .errorBoundary__icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .errorBoundary__icon-wrapper {
+    margin-bottom: var(--space-4);
   }
 
   .errorBoundary__title {
     font-size: var(--font-size-xl);
+    margin-bottom: var(--space-3);
   }
 
   .errorBoundary__message {
@@ -157,36 +448,113 @@
     margin-bottom: var(--space-4);
   }
 
-  .errorBoundary__details {
-    font-size: var(--font-size-xs);
-    padding: var(--space-3);
+  .errorBoundary__error-id {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
     margin-bottom: var(--space-4);
+    width: 100%;
   }
 
   .errorBoundary__actions {
     flex-direction: column;
     width: 100%;
+    gap: var(--space-2);
   }
 
   .errorBoundary__button {
     width: 100%;
+    min-width: unset;
+    padding: var(--space-3-5) var(--space-5);
+  }
+
+  .errorBoundary__help {
+    font-size: var(--font-size-xs);
   }
 }
 
-/* Touch devices optimization */
+/* Small Mobile */
+@media (max-width: 375px) {
+  .errorBoundary__card {
+    padding: var(--space-5) var(--space-3);
+  }
+
+  .errorBoundary__title {
+    font-size: var(--font-size-lg);
+  }
+}
+
+/* =========================================================
+   Touch Device Optimizations
+   ========================================================= */
 @media (hover: none) and (pointer: coarse) {
+  .errorBoundary__button {
+    min-height: 44px; /* Minimum touch target size */
+  }
+
   .errorBoundary__button:active {
+    transform: scale(0.98);
+  }
+
+  .errorBoundary__button--primary:active {
     transform: scale(0.98);
   }
 }
 
-/* Reduced motion support */
+/* =========================================================
+   Reduced Motion Support
+   ========================================================= */
 @media (prefers-reduced-motion: reduce) {
+  .errorBoundary__card {
+    animation: none;
+  }
+
+  .errorBoundary__icon-wrapper {
+    animation: none;
+  }
+
+  .errorBoundary::before {
+    animation: none;
+  }
+
   .errorBoundary__button {
-    transition: none !important;
+    transition: none;
   }
 
   .errorBoundary__button:hover {
     transform: none !important;
   }
 }
+
+/* =========================================================
+   High Contrast Mode Support
+   ========================================================= */
+@media (prefers-contrast: high) {
+  .errorBoundary__card {
+    border-width: 3px;
+    border-color: var(--ink-900);
+  }
+
+  .errorBoundary__button {
+    border-width: 3px;
+  }
+}
+
+/* =========================================================
+   Print Styles
+   ========================================================= */
+@media print {
+  .errorBoundary {
+    background: white;
+  }
+
+  .errorBoundary__card {
+    box-shadow: none;
+    border: 1px solid var(--ink-900);
+  }
+
+  .errorBoundary__actions {
+    display: none;
+  }
+}
+

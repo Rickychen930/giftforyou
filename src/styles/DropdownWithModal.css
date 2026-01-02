@@ -1,122 +1,188 @@
 /**
  * Dropdown with Modal Component
- * Luxury, DRY, Efficient, Responsive
+ * Luxury, Elegant, Clean UI/UX
  * Uses design-system.css variables
  * Fully responsive on all devices: mobile, tablet, desktop
  */
 
 @import "design-system.css";
+@import "colors.css";
 
-/* Dropdown with Modal - Luxury Design */
+/* =========================================================
+   Dropdown Container
+   ========================================================= */
 .dropdownWithModal {
   position: relative;
   width: 100%;
 }
 
+/* =========================================================
+   Trigger Button
+   ========================================================= */
 .dropdownWithModal__trigger {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: clamp(var(--space-3), 1.4vw, var(--space-4)) clamp(var(--space-4), 1.6vw, var(--space-4));
-  border: var(--border-luxury);
-  border-color: var(--brand-rose-border);
+  padding: clamp(var(--space-3-5), 1.4vw, var(--space-4)) clamp(var(--space-4), 1.6vw, var(--space-5));
+  border: 2px solid rgba(212, 140, 156, 0.25);
   border-radius: var(--radius-lg);
-  background: var(--gradient-elegant-surface);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
   color: var(--ink-900);
-  font-size: clamp(var(--font-size-sm), 1.2vw, var(--font-size-sm));
+  font-size: clamp(var(--font-size-sm), 1.2vw, var(--font-size-base));
   font-weight: var(--font-weight-bold);
   font-family: inherit;
   cursor: pointer;
-  transition: all var(--transition-elegant);
+  transition: all var(--transition-elegant) cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 
-    var(--shadow-luxury-sm),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
-  backdrop-filter: var(--backdrop-blur-sm);
-  -webkit-backdrop-filter: var(--backdrop-blur-sm);
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+
+.dropdownWithModal__trigger::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.05) 0%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity var(--transition-base) ease;
+  pointer-events: none;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .dropdownWithModal__trigger:hover:not(:disabled) {
-    border-color: var(--border-luxury-gold);
-    background: var(--gradient-elegant-surface-hover);
+    border-color: var(--brand-rose-500);
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(255, 255, 255, 0.98) 100%
+    );
     box-shadow: 
-      var(--shadow-luxury-gold),
-      var(--shadow-luxury-md),
-      0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+      0 4px 16px rgba(212, 140, 156, 0.2),
+      0 2px 8px rgba(0, 0, 0, 0.06),
+      0 0 0 1px rgba(255, 255, 255, 1) inset;
     transform: translateY(-1px);
+  }
+
+  .dropdownWithModal__trigger:hover:not(:disabled)::before {
+    opacity: 1;
   }
 }
 
 .dropdownWithModal__trigger:focus-visible {
   outline: none;
-  border-color: var(--border-luxury-gold);
+  border-color: var(--brand-rose-500);
   box-shadow: 
-    var(--shadow-luxury-gold),
-    var(--shadow-luxury-md),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+    0 0 0 4px rgba(212, 140, 156, 0.15),
+    0 6px 20px rgba(212, 140, 156, 0.25),
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 1) inset;
+  transform: translateY(-1px);
 }
 
 .dropdownWithModal__trigger.is-open {
-  border-color: var(--border-luxury-gold);
+  border-color: var(--brand-rose-500);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0.98) 100%
+  );
   box-shadow: 
-    var(--shadow-luxury-gold),
-    var(--shadow-luxury-md),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+    0 0 0 4px rgba(212, 140, 156, 0.15),
+    0 6px 20px rgba(212, 140, 156, 0.25),
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 1) inset;
 }
 
 .dropdownWithModal__trigger.has-error {
-  border-color: var(--error-border);
+  border-color: var(--error-color);
+  background: linear-gradient(
+    135deg,
+    rgba(220, 38, 38, 0.05) 0%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
 }
 
 .dropdownWithModal__trigger:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
+/* =========================================================
+   Value & Placeholder
+   ========================================================= */
 .dropdownWithModal__value {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: var(--font-weight-semibold);
 }
 
 .dropdownWithModal__placeholder {
-  color: var(--ink-400);
+  color: var(--ink-500);
   opacity: 0.7;
+  font-weight: var(--font-weight-medium);
 }
 
+/* =========================================================
+   Icon
+   ========================================================= */
 .dropdownWithModal__icon {
   flex-shrink: 0;
-  transition: transform var(--transition-slow) ease;
+  width: 20px;
+  height: 20px;
+  transition: transform var(--transition-elegant) cubic-bezier(0.4, 0, 0.2, 1);
   color: var(--brand-rose-600);
+  filter: drop-shadow(0 1px 2px rgba(212, 140, 156, 0.2));
 }
 
 .dropdownWithModal__trigger.is-open .dropdownWithModal__icon {
   transform: rotate(180deg);
+  color: var(--brand-rose-700);
 }
 
+/* =========================================================
+   Dropdown Menu
+   ========================================================= */
 .dropdownWithModal__menu {
   position: absolute;
   top: calc(100% + var(--space-2));
   left: 0;
   right: 0;
   z-index: var(--z-modal);
-  background: var(--gradient-elegant-surface);
-  border: var(--border-luxury);
-  border-color: var(--brand-rose-border);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(255, 255, 255, 0.95) 100%
+  );
+  border: 2px solid rgba(212, 140, 156, 0.2);
   border-radius: var(--radius-lg);
   box-shadow: 
-    var(--shadow-luxury-xl),
-    var(--shadow-elegant),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
-  backdrop-filter: var(--backdrop-blur-lg) saturate(180%);
-  -webkit-backdrop-filter: var(--backdrop-blur-lg) saturate(180%);
+    0 32px 96px rgba(0, 0, 0, 0.12),
+    0 16px 48px rgba(212, 140, 156, 0.15),
+    0 8px 24px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.95) inset;
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
   max-height: 300px;
   overflow-y: auto;
-  animation: dropdownFadeIn var(--transition-slow) cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: dropdownFadeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   isolation: isolate;
 }
 
@@ -131,92 +197,246 @@
   }
 }
 
+/* Custom Scrollbar */
+.dropdownWithModal__menu::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dropdownWithModal__menu::-webkit-scrollbar-track {
+  background: rgba(212, 140, 156, 0.05);
+  border-radius: 4px;
+}
+
+.dropdownWithModal__menu::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.4),
+    rgba(212, 140, 156, 0.6)
+  );
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.dropdownWithModal__menu::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.6),
+    rgba(212, 140, 156, 0.8)
+  );
+  background-clip: padding-box;
+}
+
+/* =========================================================
+   Option Item
+   ========================================================= */
 .dropdownWithModal__option {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-3-5) var(--space-4);
   border: none;
   background: transparent;
   color: var(--ink-900);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-semibold);
   font-family: inherit;
   cursor: pointer;
   transition: all var(--transition-fast) ease;
   text-align: left;
+  position: relative;
+  border-radius: var(--radius-base);
+  margin: var(--space-1);
+}
+
+.dropdownWithModal__option::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.1) 0%,
+    rgba(212, 140, 156, 0.05) 100%
+  );
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity var(--transition-fast) ease;
+  pointer-events: none;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .dropdownWithModal__option:hover {
-    background: var(--gradient-luxury-gold-subtle);
-    color: var(--luxury-gold-700);
+    background: linear-gradient(
+      135deg,
+      rgba(212, 140, 156, 0.12) 0%,
+      rgba(212, 140, 156, 0.08) 100%
+    );
+    color: var(--brand-rose-700);
+    transform: translateX(4px);
+  }
+
+  .dropdownWithModal__option:hover::before {
+    opacity: 1;
   }
 }
 
 .dropdownWithModal__option.is-selected {
-  background: var(--gradient-luxury-gold-subtle);
-  color: var(--luxury-gold-700);
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.15) 0%,
+    rgba(212, 140, 156, 0.1) 100%
+  );
+  color: var(--brand-rose-700);
   font-weight: var(--font-weight-extrabold);
+  box-shadow: 
+    0 2px 8px rgba(212, 140, 156, 0.15),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
+.dropdownWithModal__option.is-selected::before {
+  opacity: 1;
+}
+
+/* =========================================================
+   Add New Button
+   ========================================================= */
 .dropdownWithModal__addNew {
-  width: 100%;
+  width: calc(100% - var(--space-2));
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  margin-top: var(--space-2);
-  border: var(--border-width-2) dashed var(--brand-rose-border-2);
+  padding: var(--space-3-5) var(--space-4);
+  margin: var(--space-2);
+  border: 2px dashed rgba(212, 140, 156, 0.4);
   border-radius: var(--radius-md);
-  background: var(--gradient-brand-soft);
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.08) 0%,
+    rgba(212, 140, 156, 0.05) 100%
+  );
   color: var(--brand-rose-600);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-extrabold);
   font-family: inherit;
   cursor: pointer;
-  transition: all var(--transition-slow) cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all var(--transition-elegant) cubic-bezier(0.34, 1.56, 0.64, 1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(212, 140, 156, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.dropdownWithModal__addNew::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.15) 0%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity var(--transition-base) ease;
+  pointer-events: none;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .dropdownWithModal__addNew:hover {
     border-color: var(--brand-rose-500);
-    background: var(--gradient-brand-soft);
-    transform: scale(1.02);
+    background: linear-gradient(
+      135deg,
+      rgba(212, 140, 156, 0.15) 0%,
+      rgba(212, 140, 156, 0.1) 100%
+    );
+    color: var(--brand-rose-700);
+    transform: scale(1.02) translateY(-1px);
+    box-shadow: 
+      0 4px 16px rgba(212, 140, 156, 0.2),
+      0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .dropdownWithModal__addNew:hover::before {
+    opacity: 1;
   }
 }
 
+.dropdownWithModal__addNew:active {
+  transform: scale(1) translateY(0);
+}
+
+/* =========================================================
+   Empty State
+   ========================================================= */
 .dropdownWithModal__empty {
-  padding: var(--space-6);
+  padding: var(--space-8) var(--space-6);
   text-align: center;
   color: var(--ink-500);
   font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  font-style: italic;
 }
 
+/* =========================================================
+   Error Message
+   ========================================================= */
 .dropdownWithModal__error {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
   margin-top: var(--space-2);
-  color: var(--error-text);
+  color: var(--error-color);
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--space-2) var(--space-3);
+  background: linear-gradient(
+    135deg,
+    rgba(220, 38, 38, 0.08) 0%,
+    rgba(220, 38, 38, 0.05) 100%
+  );
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
+  animation: slideInError 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Modal */
+.dropdownWithModal__error::before {
+  content: "⚠";
+  font-size: 1.1em;
+  flex-shrink: 0;
+}
+
+@keyframes slideInError {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================================================
+   Modal Overlay
+   ========================================================= */
 .dropdownWithModal__overlay {
   position: fixed;
   inset: 0;
   z-index: var(--z-modal);
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: var(--backdrop-blur-sm);
-  -webkit-backdrop-filter: var(--backdrop-blur-sm);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px) saturate(180%);
+  -webkit-backdrop-filter: blur(8px) saturate(180%);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--space-4);
-  animation: overlayFadeIn var(--transition-slow) ease;
+  animation: overlayFadeIn 0.3s ease;
   isolation: isolate;
 }
 
@@ -229,21 +449,44 @@
   }
 }
 
+/* =========================================================
+   Modal
+   ========================================================= */
 .dropdownWithModal__modal {
   width: 100%;
   max-width: 480px;
-  background: var(--gradient-elegant-surface);
-  border: var(--border-luxury);
-  border-color: var(--brand-rose-border);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(255, 255, 255, 0.95) 100%
+  );
+  border: 2px solid rgba(212, 140, 156, 0.2);
   border-radius: var(--radius-2xl);
   box-shadow: 
-    var(--shadow-luxury-xl),
-    var(--shadow-elegant),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
-  backdrop-filter: var(--backdrop-blur-lg) saturate(200%);
-  -webkit-backdrop-filter: var(--backdrop-blur-lg) saturate(200%);
-  animation: modalSlideIn var(--animation-speed-base) cubic-bezier(0.34, 1.56, 0.64, 1);
+    0 32px 96px rgba(0, 0, 0, 0.25),
+    0 16px 48px rgba(212, 140, 156, 0.2),
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.95) inset,
+    0 0 200px rgba(212, 140, 156, 0.1);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   overflow: hidden;
+  position: relative;
+}
+
+.dropdownWithModal__modal::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--brand-rose-500) 0%,
+    var(--brand-rose-600) 50%,
+    var(--brand-sage-500) 100%
+  );
+  opacity: 0.8;
 }
 
 @keyframes modalSlideIn {
@@ -257,12 +500,20 @@
   }
 }
 
+/* =========================================================
+   Modal Header
+   ========================================================= */
 .dropdownWithModal__modalHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: var(--space-6) var(--space-8);
-  border-bottom: var(--border-width-2) solid var(--brand-rose-border);
+  border-bottom: 2px solid rgba(212, 140, 156, 0.15);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.3) 100%
+  );
 }
 
 .dropdownWithModal__modalTitle {
@@ -271,38 +522,71 @@
   font-weight: var(--font-weight-black);
   background: linear-gradient(
     135deg,
-    var(--elegant-black) 0%,
-    var(--elegant-charcoal) 25%,
-    var(--brand-rose-600) 60%,
-    var(--luxury-gold-600) 80%,
-    var(--brand-sage-500) 100%
+    var(--ink-900) 0%,
+    var(--ink-800) 20%,
+    var(--brand-rose-600) 50%,
+    var(--brand-sage-500) 80%,
+    var(--ink-900) 100%
   );
+  background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  letter-spacing: -0.02em;
+  animation: gradientShift 8s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .dropdownWithModal__modalClose {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border: none;
-  border-radius: var(--radius-base);
-  background: var(--gradient-brand-soft);
+  width: 40px;
+  height: 40px;
+  border: 2px solid rgba(212, 140, 156, 0.2);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.8) 100%
+  );
   color: var(--ink-700);
   cursor: pointer;
-  transition: all var(--transition-fast) ease;
+  transition: all var(--transition-elegant) ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .dropdownWithModal__modalClose:hover {
-    background: var(--gradient-brand-soft);
-    transform: scale(1.1);
+    background: linear-gradient(
+      135deg,
+      rgba(212, 140, 156, 0.1) 0%,
+      rgba(212, 140, 156, 0.05) 100%
+    );
+    border-color: var(--brand-rose-500);
+    color: var(--brand-rose-700);
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 4px 12px rgba(212, 140, 156, 0.2);
   }
 }
 
+.dropdownWithModal__modalClose:active {
+  transform: scale(1) rotate(90deg);
+}
+
+/* =========================================================
+   Modal Body
+   ========================================================= */
 .dropdownWithModal__modalBody {
   padding: var(--space-8);
 }
@@ -317,74 +601,140 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-extrabold);
   color: var(--ink-800);
+  letter-spacing: -0.01em;
 }
 
 .dropdownWithModal__modalInput {
   width: 100%;
-  padding: var(--space-3) var(--space-4);
-  border: var(--border-width-2) solid var(--brand-rose-border-2);
-  border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.9);
+  padding: var(--space-3-5) var(--space-4);
+  border: 2px solid rgba(212, 140, 156, 0.25);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
   color: var(--ink-900);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-semibold);
   font-family: inherit;
-  transition: all var(--transition-slow) ease;
+  transition: all var(--transition-elegant) ease;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
 }
 
 .dropdownWithModal__modalInput:focus {
   outline: none;
-  border-color: var(--brand-rose-600);
-  background: rgba(255, 255, 255, 1);
+  border-color: var(--brand-rose-500);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0.98) 100%
+  );
   box-shadow: 
-    0 0 0 var(--space-1) var(--brand-rose-border),
-    var(--shadow-md);
+    0 0 0 4px rgba(212, 140, 156, 0.15),
+    0 6px 20px rgba(212, 140, 156, 0.25),
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 1) inset;
+  transform: translateY(-1px);
 }
 
 .dropdownWithModal__modalHint {
   font-size: var(--font-size-xs);
   color: var(--ink-500);
   font-weight: var(--font-weight-semibold);
+  margin-top: var(--space-1);
+  padding-left: var(--space-1);
 }
 
+/* =========================================================
+   Modal Footer
+   ========================================================= */
 .dropdownWithModal__modalFooter {
   display: flex;
   gap: var(--space-3);
   padding: var(--space-6) var(--space-8);
-  border-top: var(--border-width-2) solid var(--brand-rose-border);
+  border-top: 2px solid rgba(212, 140, 156, 0.15);
   justify-content: flex-end;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0.5) 100%
+  );
 }
 
 .dropdownWithModal__modalBtn {
-  padding: var(--space-3) var(--space-7);
+  padding: var(--space-3-5) var(--space-7);
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-extrabold);
   font-family: inherit;
   cursor: pointer;
-  transition: all var(--transition-slow) cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all var(--transition-elegant) cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+  min-height: 44px;
+}
+
+.dropdownWithModal__modalBtn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity var(--transition-base) ease;
+  pointer-events: none;
 }
 
 .dropdownWithModal__modalBtn--cancel {
-  background: rgba(0, 0, 0, 0.05);
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.05) 0%,
+    rgba(0, 0, 0, 0.03) 100%
+  );
   color: var(--ink-700);
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .dropdownWithModal__modalBtn--cancel:hover {
-    background: rgba(0, 0, 0, 0.1);
+    background: linear-gradient(
+      135deg,
+      rgba(0, 0, 0, 0.1) 0%,
+      rgba(0, 0, 0, 0.05) 100%
+    );
+    border-color: rgba(0, 0, 0, 0.2);
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .dropdownWithModal__modalBtn--cancel:hover::before {
+    opacity: 1;
   }
 }
 
 .dropdownWithModal__modalBtn--submit {
-  background: var(--gradient-luxury-gold);
-  color: var(--elegant-white);
-  border: var(--border-luxury-gold-strong);
+  background: linear-gradient(
+    135deg,
+    var(--brand-rose-500) 0%,
+    var(--brand-rose-600) 100%
+  );
+  color: var(--neutral-0);
+  border: 2px solid var(--brand-rose-600);
   box-shadow: 
-    var(--shadow-luxury-gold-lg),
-    var(--shadow-luxury-gold),
+    0 8px 24px rgba(212, 140, 156, 0.3),
+    0 4px 12px rgba(212, 140, 156, 0.2),
     0 0 0 1px rgba(255, 255, 255, 0.2) inset;
 }
 
@@ -392,23 +742,35 @@
   .dropdownWithModal__modalBtn--submit:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 
-      var(--shadow-luxury-gold-xl),
-      var(--shadow-luxury-gold-lg),
+      0 12px 32px rgba(212, 140, 156, 0.4),
+      0 6px 16px rgba(212, 140, 156, 0.3),
       0 0 0 1px rgba(255, 255, 255, 0.3) inset;
     filter: brightness(1.05) saturate(1.1);
   }
+
+  .dropdownWithModal__modalBtn--submit:hover:not(:disabled)::before {
+    opacity: 1;
+  }
+}
+
+.dropdownWithModal__modalBtn--submit:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .dropdownWithModal__modalBtn--submit:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
-/* Responsive */
+/* =========================================================
+   Responsive Design
+   ========================================================= */
 @media (max-width: 767px) {
   .dropdownWithModal__modal {
     max-width: 100%;
     margin: var(--space-4);
+    border-radius: var(--radius-xl);
   }
 
   .dropdownWithModal__modalHeader,
@@ -416,9 +778,36 @@
   .dropdownWithModal__modalFooter {
     padding: var(--space-5) var(--space-6);
   }
+
+  .dropdownWithModal__modalTitle {
+    font-size: var(--font-size-lg);
+  }
+
+  .dropdownWithModal__modalBtn {
+    padding: var(--space-3) var(--space-5);
+    font-size: var(--font-size-xs);
+  }
 }
 
-/* Reduced motion support */
+@media (max-width: 640px) {
+  .dropdownWithModal__trigger {
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--font-size-sm);
+  }
+
+  .dropdownWithModal__menu {
+    max-height: 250px;
+  }
+
+  .dropdownWithModal__option {
+    padding: var(--space-3) var(--space-3-5);
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* =========================================================
+   Reduced Motion Support
+   ========================================================= */
 @media (prefers-reduced-motion: reduce) {
   .dropdownWithModal__trigger,
   .dropdownWithModal__icon,
@@ -428,9 +817,54 @@
   .dropdownWithModal__overlay,
   .dropdownWithModal__modal,
   .dropdownWithModal__modalClose,
+  .dropdownWithModal__modalBtn,
+  .dropdownWithModal__modalTitle {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .dropdownWithModal__trigger:hover:not(:disabled),
+  .dropdownWithModal__option:hover,
+  .dropdownWithModal__addNew:hover,
+  .dropdownWithModal__modalBtn:hover:not(:disabled) {
+    transform: none !important;
+  }
+}
+
+/* =========================================================
+   Touch Device Optimizations
+   ========================================================= */
+@media (hover: none) and (pointer: coarse) {
+  .dropdownWithModal__trigger,
+  .dropdownWithModal__option,
+  .dropdownWithModal__addNew,
   .dropdownWithModal__modalBtn {
-    animation: none;
-    transition: none;
+    min-height: 44px;
+  }
+
+  .dropdownWithModal__trigger:active:not(:disabled),
+  .dropdownWithModal__option:active,
+  .dropdownWithModal__addNew:active,
+  .dropdownWithModal__modalBtn:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+}
+
+/* =========================================================
+   High Contrast Mode Support
+   ========================================================= */
+@media (prefers-contrast: high) {
+  .dropdownWithModal__trigger,
+  .dropdownWithModal__menu,
+  .dropdownWithModal__modal {
+    border-width: 3px;
+    border-color: var(--ink-900);
+  }
+
+  .dropdownWithModal__modalTitle {
+    -webkit-text-fill-color: var(--ink-900);
+    background: none;
+    color: var(--ink-900);
   }
 }
 
