@@ -70,21 +70,31 @@
 }
 
 .iconBtn--primary {
-  color: var(--btn-primary-color);
+  color: var(--luxury-gold-700);
+  background: var(--gradient-luxury-gold-subtle);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
 }
 
 .iconBtn--primary:hover {
-  color: var(--btn-primary-color-hover);
-  background: var(--btn-primary-bg);
+  color: var(--luxury-gold-600);
+  background: var(--gradient-luxury-gold-subtle);
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-sm);
 }
 
 .iconBtn--secondary {
-  color: var(--btn-secondary-color);
+  color: var(--brand-rose-600);
+  background: var(--gradient-luxury-gold-subtle);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
 }
 
 .iconBtn--secondary:hover {
-  color: var(--btn-secondary-color-hover);
-  background: var(--btn-secondary-bg);
+  color: var(--brand-rose-700);
+  background: var(--gradient-luxury-gold-subtle);
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-sm);
 }
 
 .iconBtn--ghost {

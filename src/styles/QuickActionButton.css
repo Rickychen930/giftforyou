@@ -58,25 +58,33 @@
   width: 2.5rem;
   height: 2.5rem;
   border-radius: var(--radius-md);
-  background: rgba(139, 92, 246, 0.1);
-  color: var(--tab-color);
-  transition: var(--transition-all);
+  background: var(--gradient-luxury-gold-subtle);
+  color: var(--luxury-gold-700);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  transition: var(--transition-elegant);
   position: relative;
   z-index: 1;
+  box-shadow: var(--shadow-luxury-sm);
 }
 
 .quickActionBtn--primary .quickActionBtn__icon {
-  background: rgba(255, 255, 255, 0.2);
-  color: var(--neutral-0);
+  background: var(--gradient-luxury-gold);
+  color: var(--elegant-white);
+  border: var(--border-luxury-gold-strong);
+  box-shadow: var(--shadow-luxury-gold);
 }
 
 .quickActionBtn:hover .quickActionBtn__icon {
   transform: scale(1.1);
-  background: rgba(139, 92, 246, 0.2);
+  background: var(--gradient-luxury-gold-subtle);
+  border-color: var(--border-luxury-gold);
+  box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
 }
 
 .quickActionBtn--primary:hover .quickActionBtn__icon {
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--gradient-luxury-gold-strong);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-xl);
 }
 
 .quickActionBtn__label {

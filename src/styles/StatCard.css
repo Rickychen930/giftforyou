@@ -10,30 +10,34 @@
   display: flex;
   align-items: center;
   gap: var(--gap-md);
-  background: var(--gradient-surface);
+  background: var(--gradient-elegant-surface);
   border-radius: var(--radius-lg);
   padding: var(--card-padding-sm);
-  box-shadow: var(--card-shadow);
-  border: var(--card-border);
-  transition: var(--transition-all);
+  box-shadow: var(--shadow-luxury-md), var(--shadow-elegant);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  transition: var(--transition-elegant);
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
 }
 
 .statCard::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--gradient-brand-soft);
+  background: var(--gradient-luxury-gold-subtle);
   opacity: 0;
-  transition: var(--transition-opacity);
+  transition: var(--transition-elegant);
   pointer-events: none;
 }
 
 .statCard:hover {
-  box-shadow: var(--card-shadow-hover);
+  box-shadow: var(--shadow-luxury-xl), var(--shadow-luxury-gold-lg);
   transform: translateY(-2px);
+  border-color: var(--border-luxury-gold);
 }
 
 .statCard:hover::before {
@@ -102,8 +106,18 @@
 .statCard__value {
   margin: 0;
   font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--ink-900);
+  font-weight: var(--font-weight-black);
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--elegant-charcoal) 25%,
+    var(--brand-rose-600) 60%,
+    var(--luxury-gold-600) 80%,
+    var(--brand-sage-500) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   line-height: var(--line-height-tight);
 }
 
