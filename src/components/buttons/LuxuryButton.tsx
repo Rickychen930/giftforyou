@@ -14,6 +14,7 @@ interface LuxuryButtonProps extends BaseButtonProps {
 interface LuxuryButtonState {
   isPressed: boolean;
   isFocused: boolean;
+  ripples: Array<{ id: number; x: number; y: number }>;
 }
 
 /**

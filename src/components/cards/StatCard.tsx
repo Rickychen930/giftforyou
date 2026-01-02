@@ -26,6 +26,7 @@ const defaultStatCardProps: Partial<BaseCardProps> = {
 
 interface StatCardState {
   isHovered: boolean;
+  isPressed: boolean;
 }
 
 /**

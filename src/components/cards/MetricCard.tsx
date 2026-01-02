@@ -7,12 +7,14 @@ import React from "react";
 import { BaseCard, BaseCardProps } from "../base/BaseCard";
 import "../../styles/MetricCard.css";
 
-interface MetricCardProps extends BaseCardProps {
+export type MetricCardVariant = "primary" | "info" | "success" | "warning" | "featured" | "revenue" | "orders" | "customers" | "pending" | "visits" | "bouquets" | "collections";
+
+export interface MetricCardProps extends Omit<BaseCardProps, "variant"> {
   label: string;
   value: React.ReactNode;
   note?: string;
   icon?: React.ReactNode;
-  variant?: "primary" | "info" | "success" | "warning" | "featured" | "revenue" | "orders" | "customers" | "pending" | "visits" | "bouquets" | "collections";
+  variant?: MetricCardVariant;
   ariaLabel?: string;
 }
 
@@ -26,24 +28,31 @@ const defaultMetricCardProps: Partial<BaseCardProps> = {
 
 interface MetricCardState {
   isHovered: boolean;
+  isPressed: boolean;
 }
 
 /**
  * Metric Card Component
  * Class-based component extending BaseCard
+ * Note: We use type assertion to allow MetricCardVariant while satisfying BaseCardProps constraint
  */
-class MetricCard extends BaseCard<MetricCardProps, MetricCardState> {
+class MetricCard extends BaseCard<BaseCardProps & Omit<MetricCardProps, "variant">, MetricCardState> {
+  // Type-safe access to variant as MetricCardVariant
+  protected get metricVariant(): MetricCardVariant | undefined {
+    return (this.props as unknown as MetricCardProps).variant;
+  }
   protected baseClass: string = "metricCard";
 
   constructor(props: MetricCardProps) {
     super({
       ...defaultMetricCardProps,
       ...props,
-    } as MetricCardProps);
+    } as BaseCardProps & Omit<MetricCardProps, "variant">);
   }
 
   protected getClasses(): string {
-    const { variant = "primary", className = "" } = this.props;
+    const variant = this.metricVariant ?? "primary";
+    const { className = "" } = this.props;
     
     // Use BaseCard's getClasses and add MetricCard specific classes
     const baseClasses = super.getClasses();

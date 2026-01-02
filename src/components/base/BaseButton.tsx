@@ -46,7 +46,7 @@ export abstract class BaseButton<P extends BaseButtonProps = BaseButtonProps, S 
       isPressed: false,
       isFocused: false,
       ripples: [],
-    } as S;
+    } as unknown as S;
   }
 
   /**

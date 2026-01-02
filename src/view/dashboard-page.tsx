@@ -11,7 +11,7 @@ import { formatMs, formatBytes } from "../utils/performance-monitor";
 import type { ActiveTab } from "../models/dashboard-page-model";
 import type { DashboardPageViewProps } from "./dashboard-page.types";
 import TabNavigation from "../components/common/TabNavigation";
-import MetricCard from "../components/common/MetricCard";
+import MetricCard, { type MetricCardProps } from "../components/common/MetricCard";
 import QuickActionButton from "../components/common/QuickActionButton";
 import KeyValueList from "../components/common/KeyValueList";
 import AlertMessage from "../components/common/AlertMessage";
@@ -159,14 +159,21 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
           const value = config.getValue(metrics);
           const note = config.getNote?.(metrics);
 
+          // Type assertion needed because MetricCard accepts MetricCardVariant internally
+          // but extends BaseCard which expects CardVariant
+          const props: MetricCardProps = {
+            label: config.label,
+            value: value,
+            variant: config.variant,
+            icon: Icon ? <Icon /> : null,
+            note: note,
+          };
+
+          const MetricCardAny = MetricCard as any;
           return (
-            <MetricCard
+            <MetricCardAny
               key={config.label}
-              label={config.label}
-              value={value}
-              variant={config.variant}
-              icon={Icon ? <Icon /> : null}
-              note={note}
+              {...props}
             />
           );
         })}

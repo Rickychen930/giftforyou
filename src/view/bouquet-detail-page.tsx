@@ -308,6 +308,7 @@ class BouquetDetailPageView extends Component<BouquetDetailPageViewProps> {
             </div>
           </div>
         )}
+      </Container>
     </Section>
     );
   }
