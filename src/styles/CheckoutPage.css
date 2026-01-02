@@ -8,20 +8,15 @@
 @import "design-system.css";
 
 .checkoutPage {
+  /* Section component handles padding and background */
   min-height: 100vh;
-  padding: var(--space-8) var(--space-4);
-  background: var(--gradient-brand-soft);
+  position: relative;
 }
 
 .checkoutPage--loading {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.checkoutPage__container {
-  max-width: var(--container-max);
-  margin: 0 auto;
 }
 
 .checkoutPage__header {

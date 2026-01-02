@@ -2,6 +2,7 @@
  * Checkout Page View
  * Pure presentation component - no business logic
  * OOP-based class component following SOLID principles
+ * Enhanced with Container & Section components for consistent layout
  */
 
 import React, { Component } from "react";
@@ -21,6 +22,8 @@ import FormField from "../components/common/FormField";
 import RadioGroup from "../components/common/RadioGroup";
 import TextareaWithCounter from "../components/inputs/TextareaWithCounter";
 import SummaryCard from "../components/common/SummaryCard";
+import Section from "../components/layout/Section";
+import Container from "../components/layout/Container";
 
 const FALLBACK_IMAGE = "/images/placeholder-bouquet.jpg";
 
@@ -71,15 +74,15 @@ class CheckoutPageView extends Component<CheckoutPageViewProps> {
    */
   private renderLoading(): React.ReactNode {
     return (
-      <section className="checkoutPage checkoutPage--loading">
-        <div className="checkoutPage__container">
+      <Section variant="gradient" padding="lg" className="checkoutPage checkoutPage--loading">
+        <Container variant="default" padding="md">
           <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
             <SkeletonLoader variant="card" />
             <SkeletonLoader variant="card" />
             <SkeletonLoader variant="card" />
           </div>
-        </div>
-      </section>
+        </Container>
+      </Section>
     );
   }
 
@@ -124,8 +127,8 @@ class CheckoutPageView extends Component<CheckoutPageViewProps> {
     const minDate = getDefaultDate();
 
   return (
-    <section className="checkoutPage">
-      <div className="checkoutPage__container">
+    <Section variant="gradient" padding="lg" className="checkoutPage">
+      <Container variant="default" padding="md">
         <div className="checkoutPage__header">
           <h1 className="checkoutPage__title">Checkout</h1>
           <p className="checkoutPage__subtitle">
@@ -395,7 +398,7 @@ class CheckoutPageView extends Component<CheckoutPageViewProps> {
             </div>
           </div>
         </div>
-      </div>
+      </Container>
 
       {/* Order Summary Preview Modal */}
       <OrderSummaryModal
@@ -414,7 +417,7 @@ class CheckoutPageView extends Component<CheckoutPageViewProps> {
         total={grandTotal}
         isSubmitting={isSubmitting}
       />
-    </section>
+    </Section>
     );
   }
 }
