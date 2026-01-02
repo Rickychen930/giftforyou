@@ -44,7 +44,6 @@
   position: absolute;
   inset: 0;
   background: var(--gradient-brand-soft);
-  );
   opacity: 0;
   transition: opacity 0.3s ease;
 }
