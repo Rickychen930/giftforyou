@@ -83,23 +83,24 @@
 }
 
 .bouquet-detail-page__order-card {
-  background: var(--backdrop-glass-lg);
+  background: var(--gradient-elegant-surface);
   border-radius: var(--radius-2xl);
-  border: var(--border-2);
-  border-color: var(--border-brand-subtle);
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
   backdrop-filter: var(--backdrop-blur-lg);
   -webkit-backdrop-filter: var(--backdrop-blur-lg);
-  box-shadow: var(--card-shadow), var(--shadow-inner-light);
+  box-shadow: var(--shadow-luxury-lg), var(--shadow-elegant);
   padding: clamp(var(--space-6), 3vw, var(--space-8));
-  transition: var(--transition-all);
+  transition: var(--transition-elegant);
   min-width: 0;
   width: 100%;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .bouquet-detail-page__order-card:hover {
-    box-shadow: var(--card-shadow-hover), var(--shadow-inner-light-hover);
-    transform: translateY(var(--space-neg-0-5));
+    box-shadow: var(--shadow-luxury-xl), var(--shadow-luxury-gold-lg);
+    transform: translateY(calc(var(--space-1) * -1));
+    border-color: var(--border-luxury-gold);
   }
 }
 
@@ -113,13 +114,13 @@
   margin-top: var(--space-6);
   border-radius: var(--radius-lg);
   border: none;
-  background: var(--gradient-brand);
-  color: var(--neutral-0);
+  background: var(--gradient-luxury-gold);
+  color: var(--elegant-white);
   font-weight: var(--font-weight-black);
   font-size: clamp(var(--font-size-base), 1.5vw, var(--font-size-lg));
   cursor: pointer;
-  transition: var(--transition-all);
-  box-shadow: var(--shadow-brand-md), var(--shadow-inner);
+  transition: var(--transition-elegant);
+  box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold);
   position: relative;
   overflow: hidden;
 }
@@ -141,9 +142,9 @@
   }
 
   .bouquet-detail-page__order-btn:hover {
-    transform: translateY(var(--space-neg-1)) scale(1.02);
+    transform: translateY(calc(var(--space-1) * -1)) scale(1.02);
     filter: saturate(1.15) brightness(1.08);
-    box-shadow: var(--shadow-brand-lg), var(--shadow-inner-lg);
+    box-shadow: var(--shadow-luxury-gold-lg), var(--shadow-luxury-gold), 0 0 30px var(--overlay-luxury-gold-strong);
   }
 }
 
@@ -271,20 +272,20 @@
 }
 
 .bouquet-detail-page__modal {
-  background: var(--backdrop-glass-lg);
+  background: var(--gradient-elegant-surface);
   border-radius: var(--radius-2xl);
   max-width: 600px;
   width: 100%;
   max-height: calc(100vh - var(--space-8));
   overflow: hidden;
-  box-shadow: var(--shadow-2xl);
+  box-shadow: var(--shadow-luxury-xl), var(--shadow-luxury-gold-lg);
   backdrop-filter: var(--backdrop-blur-xl);
   -webkit-backdrop-filter: var(--backdrop-blur-xl);
   animation: modalSlideUp var(--transition-smooth) cubic-bezier(0.34, 1.56, 0.64, 1);
   display: flex;
   flex-direction: column;
-  border: var(--border-2);
-  border-color: var(--border-brand-subtle);
+  border: var(--border-luxury);
+  border-color: var(--border-luxury-gold);
 }
 
 @keyframes modalSlideUp {
@@ -403,15 +404,15 @@
 }
 
 .bouquet-detail-page__modal-btn--primary {
-  background: var(--gradient-brand);
-  color: var(--neutral-0);
-  box-shadow: var(--shadow-brand-md);
+  background: var(--gradient-luxury-gold);
+  color: var(--elegant-white);
+  box-shadow: var(--shadow-luxury-gold-lg);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .bouquet-detail-page__modal-btn--primary:hover:not(.bouquet-detail-page__modal-btn--disabled) {
-    transform: translateY(var(--space-neg-0-5));
-    box-shadow: var(--shadow-brand-lg);
+    transform: translateY(calc(var(--space-1) * -1));
+    box-shadow: var(--shadow-luxury-gold-lg), 0 0 20px var(--overlay-luxury-gold-strong);
   }
 }
 

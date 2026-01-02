@@ -75,7 +75,14 @@
 .price-summary__value--total {
   font-size: 1.5rem;
   font-weight: 950;
-  background: linear-gradient(135deg, var(--brand-rose-600), var(--brand-wine-700));
+  background: linear-gradient(
+    135deg,
+    var(--elegant-black) 0%,
+    var(--brand-wine-700) 35%,
+    var(--luxury-gold-600) 65%,
+    var(--brand-rose-600) 90%,
+    var(--luxury-gold-500) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
