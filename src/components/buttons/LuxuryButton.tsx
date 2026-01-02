@@ -37,15 +37,16 @@ class LuxuryButton extends BaseButton<LuxuryButtonProps, LuxuryButtonState> {
   }
 
   render(): React.ReactNode {
-    const { disabled, isLoading, onClick, onMouseDown, onMouseUp, onFocus, onBlur } = this.props;
+    const { disabled, isLoading, onClick, onMouseDown, onMouseUp, onFocus, onBlur, ...restProps } = this.props;
 
     return (
       <button
+        {...restProps}
         className={this.getClasses()}
         disabled={disabled || isLoading}
         onClick={onClick}
         onMouseDown={(e) => {
-          this.handleMouseDown();
+          this.handleMouseDown(e);
           if (onMouseDown) onMouseDown(e);
         }}
         onMouseUp={(e) => {
@@ -60,8 +61,8 @@ class LuxuryButton extends BaseButton<LuxuryButtonProps, LuxuryButtonState> {
           this.handleBlur();
           if (onBlur) onBlur(e);
         }}
-        {...this.props}
       >
+        {this.renderRipples()}
         {this.renderSpinner()}
         {!isLoading && this.renderIcon()}
         {this.renderContent()}

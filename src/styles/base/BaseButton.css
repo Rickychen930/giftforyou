@@ -1,0 +1,475 @@
+/**
+ * Base Button Component Styles
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ * Foundation for all button components
+ */
+
+@import "../design-system.css";
+
+/* =========================================================
+   Base Button Styles
+   ========================================================= */
+.baseBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-sm);
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-semibold);
+  font-family: inherit;
+  font-size: var(--btn-font-size-md);
+  line-height: var(--line-height-tight);
+  cursor: pointer;
+  transition: var(--transition-all);
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  will-change: transform, box-shadow;
+  isolation: isolate;
+}
+
+.baseBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.baseBtn:disabled,
+.baseBtn--disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* =========================================================
+   Size Variants
+   ========================================================= */
+.baseBtn--sm {
+  padding: var(--btn-padding-sm);
+  min-height: var(--btn-height-sm);
+  font-size: var(--btn-font-size-sm);
+  border-radius: var(--radius-base);
+}
+
+.baseBtn--md {
+  padding: var(--btn-padding-md);
+  min-height: var(--btn-height-md);
+  font-size: var(--btn-font-size-md);
+}
+
+.baseBtn--lg {
+  padding: var(--btn-padding-lg);
+  min-height: var(--btn-height-lg);
+  font-size: var(--btn-font-size-lg);
+  border-radius: var(--radius-lg);
+}
+
+/* Icon Only Button */
+.baseBtn--icon-only {
+  aspect-ratio: 1;
+  padding: var(--space-2);
+}
+
+.baseBtn--icon-only.baseBtn--sm {
+  padding: var(--space-1-5);
+  min-width: var(--btn-height-sm);
+}
+
+.baseBtn--icon-only.baseBtn--md {
+  padding: var(--space-2);
+  min-width: var(--btn-height-md);
+}
+
+.baseBtn--icon-only.baseBtn--lg {
+  padding: var(--space-3);
+  min-width: var(--btn-height-lg);
+}
+
+/* Full Width */
+.baseBtn--full-width {
+  width: 100%;
+}
+
+/* =========================================================
+   Variant: Primary (Green - Success/Action)
+   ========================================================= */
+.baseBtn--primary {
+  background: var(--gradient-green);
+  color: var(--neutral-0);
+  box-shadow: var(--shadow-green-md);
+  border-color: transparent;
+}
+
+.baseBtn--primary:hover:not(.baseBtn--disabled) {
+  transform: translateY(-2px);
+  filter: saturate(1.1) brightness(1.05);
+  box-shadow: var(--shadow-green-lg);
+}
+
+.baseBtn--primary:active:not(.baseBtn--disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-green-sm);
+}
+
+/* =========================================================
+   Variant: Secondary (Brand Rose)
+   ========================================================= */
+.baseBtn--secondary {
+  background: var(--gradient-brand);
+  color: var(--neutral-0);
+  box-shadow: var(--shadow-brand-md);
+  border-color: transparent;
+}
+
+.baseBtn--secondary:hover:not(.baseBtn--disabled) {
+  transform: translateY(-2px);
+  filter: saturate(1.1) brightness(1.05);
+  box-shadow: var(--shadow-brand-lg);
+}
+
+.baseBtn--secondary:active:not(.baseBtn--disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-brand-sm);
+}
+
+/* =========================================================
+   Variant: Outline
+   ========================================================= */
+.baseBtn--outline {
+  background: var(--surface-1);
+  color: var(--ink-900);
+  border-color: var(--border-3);
+  box-shadow: var(--shadow-sm);
+}
+
+.baseBtn--outline:hover:not(.baseBtn--disabled) {
+  background: var(--surface-2);
+  border-color: var(--brand-rose-500);
+  color: var(--brand-rose-600);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.baseBtn--outline:active:not(.baseBtn--disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+/* =========================================================
+   Variant: Ghost
+   ========================================================= */
+.baseBtn--ghost {
+  background: transparent;
+  color: var(--ink-700);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.baseBtn--ghost:hover:not(.baseBtn--disabled) {
+  background: var(--surface-2);
+  color: var(--ink-900);
+  transform: translateY(-1px);
+}
+
+.baseBtn--ghost:active:not(.baseBtn--disabled) {
+  transform: translateY(0);
+  background: var(--surface-3);
+}
+
+/* =========================================================
+   Variant: Gradient
+   ========================================================= */
+.baseBtn--gradient {
+  background: var(--gradient-brand);
+  color: var(--neutral-0);
+  border-color: transparent;
+  box-shadow: var(--shadow-brand-md);
+  position: relative;
+}
+
+.baseBtn--gradient::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-brand-light);
+  opacity: 0;
+  transition: var(--transition-opacity);
+  z-index: 0;
+}
+
+.baseBtn--gradient:hover:not(.baseBtn--disabled)::before {
+  opacity: 1;
+}
+
+.baseBtn--gradient:hover:not(.baseBtn--disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-brand-lg);
+}
+
+.baseBtn--gradient > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* =========================================================
+   Variant: Danger
+   ========================================================= */
+.baseBtn--danger {
+  background: linear-gradient(135deg, var(--error-color) 0%, #dc2626 100%);
+  color: var(--neutral-0);
+  border-color: transparent;
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+}
+
+.baseBtn--danger:hover:not(.baseBtn--disabled) {
+  transform: translateY(-2px);
+  filter: saturate(1.1) brightness(1.05);
+  box-shadow: 0 12px 32px rgba(239, 68, 68, 0.5);
+}
+
+.baseBtn--danger:active:not(.baseBtn--disabled) {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+/* =========================================================
+   Variant: Success
+   ========================================================= */
+.baseBtn--success {
+  background: var(--gradient-green);
+  color: var(--neutral-0);
+  border-color: transparent;
+  box-shadow: var(--shadow-green-md);
+}
+
+.baseBtn--success:hover:not(.baseBtn--disabled) {
+  transform: translateY(-2px);
+  filter: saturate(1.1) brightness(1.05);
+  box-shadow: var(--shadow-green-lg);
+}
+
+.baseBtn--success:active:not(.baseBtn--disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-green-sm);
+}
+
+/* =========================================================
+   Shine Effect (Luxury Enhancement)
+   ========================================================= */
+.baseBtn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.6s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.baseBtn:hover:not(.baseBtn--disabled)::after {
+  left: 100%;
+}
+
+/* =========================================================
+   Ripple Effect
+   ========================================================= */
+.baseBtn__ripples {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.baseBtn__ripple {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  transform: translate(-50%, -50%) scale(0);
+  animation: ripple-animation 600ms ease-out;
+  pointer-events: none;
+}
+
+@keyframes ripple-animation {
+  to {
+    transform: translate(-50%, -50%) scale(10);
+    opacity: 0;
+  }
+}
+
+/* =========================================================
+   Loading State
+   ========================================================= */
+.baseBtn--loading {
+  pointer-events: none;
+  position: relative;
+  color: transparent;
+}
+
+.baseBtn--loading::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.baseBtn__spinner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 1em;
+  height: 1em;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* =========================================================
+   Icon Styles
+   ========================================================= */
+.baseBtn__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: var(--transition-transform);
+}
+
+.baseBtn__icon--left {
+  order: -1;
+}
+
+.baseBtn__icon--right {
+  order: 1;
+}
+
+.baseBtn__icon--only {
+  margin: 0;
+}
+
+.baseBtn:hover:not(.baseBtn--disabled) .baseBtn__icon {
+  transform: scale(1.1);
+}
+
+/* =========================================================
+   Content Styles
+   ========================================================= */
+.baseBtn__content {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-xs);
+  position: relative;
+  z-index: 1;
+}
+
+/* =========================================================
+   Pressed State
+   ========================================================= */
+.baseBtn--pressed {
+  transform: scale(0.98);
+}
+
+/* =========================================================
+   Focused State
+   ========================================================= */
+.baseBtn--focused {
+  box-shadow: var(--focus-ring), var(--shadow-md);
+}
+
+/* =========================================================
+   Responsive Design (Mobile-first)
+   ========================================================= */
+
+/* Mobile: Base styles already mobile-first */
+
+/* Tablet and up (≥ 768px) */
+@media (min-width: 768px) {
+  .baseBtn--sm {
+    padding: var(--space-2-5) var(--space-5);
+  }
+
+  .baseBtn--md {
+    padding: var(--space-3) var(--space-6);
+  }
+
+  .baseBtn--lg {
+    padding: var(--space-4) var(--space-10);
+  }
+}
+
+/* Desktop and up (≥ 1024px) */
+@media (min-width: 1024px) {
+  .baseBtn:hover:not(.baseBtn--disabled) {
+    transform: translateY(-3px);
+  }
+}
+
+/* =========================================================
+   Reduced Motion Support
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .baseBtn,
+  .baseBtn::after,
+  .baseBtn__ripple,
+  .baseBtn__icon {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .baseBtn:hover:not(.baseBtn--disabled) {
+    transform: none !important;
+  }
+
+  .baseBtn__ripple {
+    display: none;
+  }
+}
+
+/* =========================================================
+   Touch Device Optimizations
+   ========================================================= */
+@media (hover: none) and (pointer: coarse) {
+  .baseBtn {
+    min-height: 44px; /* Touch-friendly minimum */
+  }
+
+  .baseBtn--sm {
+    min-height: 40px;
+  }
+
+  .baseBtn--lg {
+    min-height: 48px;
+  }
+
+  /* Remove hover effects on touch devices */
+  .baseBtn:hover:not(.baseBtn--disabled) {
+    transform: none;
+  }
+
+  .baseBtn:hover:not(.baseBtn--disabled)::after {
+    left: -100%;
+  }
+}
+

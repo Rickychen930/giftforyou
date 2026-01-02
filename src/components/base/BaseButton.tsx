@@ -2,22 +2,31 @@
  * Base Button Component (Abstract)
  * OOP Base Class for all button components
  * Follows SOLID principles
+ * Enhanced with luxury variants, ripple effect, and responsive design
  */
 
 import React, { Component } from "react";
+import "../../styles/base/BaseButton.css";
 
-export interface BaseButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: string;
-  size?: "sm" | "md" | "lg";
+export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "gradient" | "danger" | "success";
+export type ButtonSize = "sm" | "md" | "lg";
+export type ButtonIconPosition = "left" | "right" | "only";
+
+export interface BaseButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "variant"> {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
   isLoading?: boolean;
   icon?: React.ReactNode;
-  iconPosition?: "left" | "right";
+  iconPosition?: ButtonIconPosition;
   children?: React.ReactNode;
+  fullWidth?: boolean;
+  ripple?: boolean;
 }
 
 export interface BaseButtonState {
   isPressed: boolean;
   isFocused: boolean;
+  ripples: Array<{ id: number; x: number; y: number }>;
 }
 
 /**
@@ -29,11 +38,14 @@ export abstract class BaseButton<P extends BaseButtonProps = BaseButtonProps, S 
   
   protected baseClass: string = "baseBtn";
 
+  private rippleIdCounter: number = 0;
+
   constructor(props: P) {
     super(props);
     this.state = {
       isPressed: false,
       isFocused: false,
+      ripples: [],
     } as S;
   }
 
@@ -42,22 +54,60 @@ export abstract class BaseButton<P extends BaseButtonProps = BaseButtonProps, S 
    * Override in child classes for custom styling
    */
   protected getClasses(): string {
-    const { variant = "default", size = "md", isLoading, className = "", disabled } = this.props;
+    const { 
+      variant = "primary", 
+      size = "md", 
+      isLoading, 
+      className = "", 
+      disabled,
+      fullWidth = false,
+      icon,
+      iconPosition = "left"
+    } = this.props;
+    
     const variantClass = `${this.baseClass}--${variant}`;
     const sizeClass = `${this.baseClass}--${size}`;
     const loadingClass = isLoading ? `${this.baseClass}--loading` : "";
     const disabledClass = disabled || isLoading ? `${this.baseClass}--disabled` : "";
     const pressedClass = this.state.isPressed ? `${this.baseClass}--pressed` : "";
     const focusedClass = this.state.isFocused ? `${this.baseClass}--focused` : "";
+    const fullWidthClass = fullWidth ? `${this.baseClass}--full-width` : "";
+    const iconOnlyClass = icon && iconPosition === "only" ? `${this.baseClass}--icon-only` : "";
 
-    return `${this.baseClass} ${variantClass} ${sizeClass} ${loadingClass} ${disabledClass} ${pressedClass} ${focusedClass} ${className}`.trim();
+    return `${this.baseClass} ${variantClass} ${sizeClass} ${loadingClass} ${disabledClass} ${pressedClass} ${focusedClass} ${fullWidthClass} ${iconOnlyClass} ${className}`.trim();
   }
 
   /**
    * Handle button press (for accessibility)
    */
-  protected handleMouseDown = (): void => {
+  protected handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>): void => {
     this.setState({ isPressed: true });
+    
+    // Ripple effect
+    const { ripple = true } = this.props;
+    if (ripple && !this.props.disabled && !this.props.isLoading) {
+      const button = e.currentTarget;
+      const rect = button.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      const newRipple = {
+        id: this.rippleIdCounter++,
+        x,
+        y,
+      };
+      
+      this.setState((prevState) => ({
+        ripples: [...prevState.ripples, newRipple],
+      }));
+      
+      // Remove ripple after animation
+      setTimeout(() => {
+        this.setState((prevState) => ({
+          ripples: prevState.ripples.filter((r) => r.id !== newRipple.id),
+        }));
+      }, 600);
+    }
   };
 
   protected handleMouseUp = (): void => {
@@ -117,12 +167,40 @@ export abstract class BaseButton<P extends BaseButtonProps = BaseButtonProps, S 
   }
 
   /**
+   * Render ripple effects
+   */
+  protected renderRipples(): React.ReactNode {
+    const { ripples } = this.state;
+    if (ripples.length === 0) return null;
+
+    return (
+      <span className={`${this.baseClass}__ripples`}>
+        {ripples.map((ripple) => (
+          <span
+            key={ripple.id}
+            className={`${this.baseClass}__ripple`}
+            style={{
+              left: `${ripple.x}px`,
+              top: `${ripple.y}px`,
+            }}
+          />
+        ))}
+      </span>
+    );
+  }
+
+  /**
    * Render icon
    * Override in child classes for custom icon rendering
    */
   protected renderIcon(): React.ReactNode {
-    const { icon, iconPosition = "left", isLoading } = this.props;
+    const { icon, iconPosition = "left", isLoading, children } = this.props;
     if (!icon || isLoading) return null;
+
+    // Icon only mode
+    if (iconPosition === "only") {
+      return <span className={`${this.baseClass}__icon ${this.baseClass}__icon--only`}>{icon}</span>;
+    }
 
     const iconClass = `${this.baseClass}__icon ${this.baseClass}__icon--${iconPosition}`;
     return <span className={iconClass}>{icon}</span>;
@@ -133,7 +211,14 @@ export abstract class BaseButton<P extends BaseButtonProps = BaseButtonProps, S 
    * Override in child classes for custom content
    */
   protected renderContent(): React.ReactNode {
-    return <span className={`${this.baseClass}__content`}>{this.props.children}</span>;
+    const { children, icon, iconPosition = "left" } = this.props;
+    
+    // Don't render content if icon-only
+    if (icon && iconPosition === "only") {
+      return null;
+    }
+    
+    return <span className={`${this.baseClass}__content`}>{children}</span>;
   }
 
   /**
