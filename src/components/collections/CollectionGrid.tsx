@@ -36,6 +36,16 @@ export class CollectionGrid extends Component<CollectionGridProps, CollectionGri
   private intersectionObserver: IntersectionObserver | null = null;
   private readonly INITIAL_VISIBLE = 3;
   private readonly LOAD_MORE_THRESHOLD = 0.8;
+  // Cache for prepared collections to avoid recalculation
+  private preparedCollectionsCache: {
+    key: string;
+    result: Array<{
+      id: string;
+      name: string;
+      description: string;
+      bouquets: CollectionContainerProps["bouquets"];
+    }>;
+  } | null = null;
 
   constructor(props: CollectionGridProps) {
     super(props);
@@ -44,6 +54,22 @@ export class CollectionGrid extends Component<CollectionGridProps, CollectionGri
       isIntersecting: false,
     };
     this.containerRef = React.createRef();
+  }
+
+  /**
+   * Prevent unnecessary re-renders when props haven't changed
+   */
+  shouldComponentUpdate(nextProps: CollectionGridProps, nextState: CollectionGridState): boolean {
+    const { collections, loading } = this.props;
+    const { visibleCollections, isIntersecting } = this.state;
+
+    return (
+      nextProps.loading !== loading ||
+      nextProps.collections.length !== collections.length ||
+      nextProps.collections !== collections ||
+      nextState.visibleCollections !== visibleCollections ||
+      nextState.isIntersecting !== isIntersecting
+    );
   }
 
   componentDidMount(): void {

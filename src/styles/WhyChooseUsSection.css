@@ -1,0 +1,153 @@
+/**
+ * Why Choose Us Section Styles
+ * Luxury, elegant, and trust-building
+ */
+
+@import "design-system.css";
+
+.whyChooseUs {
+  position: relative;
+  padding: clamp(var(--space-32), 8vw, var(--space-48)) 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(254, 245, 247, 0.99) 25%,
+    rgba(255, 255, 255, 0.98) 50%,
+    rgba(250, 252, 251, 0.99) 75%,
+    rgba(255, 255, 255, 0.98) 100%
+  );
+  border-top: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.whyChooseUs__container {
+  position: relative;
+  z-index: 1;
+}
+
+.whyChooseUs__header {
+  text-align: center;
+  margin-bottom: clamp(var(--space-32), 6vw, var(--space-48));
+}
+
+.whyChooseUs__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: clamp(var(--space-24), 4vw, var(--space-32));
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.whyChooseUs__benefit {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(254, 245, 247, 0.98) 100%
+  );
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  border-radius: var(--radius-2xl);
+  padding: clamp(var(--space-24), 4vw, var(--space-32));
+  text-align: center;
+  box-shadow: 
+    var(--shadow-luxury-md),
+    var(--shadow-elegant),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  backdrop-filter: var(--backdrop-blur-md) saturate(180%);
+  -webkit-backdrop-filter: var(--backdrop-blur-md) saturate(180%);
+  transition: all var(--transition-elegant);
+  opacity: 0;
+  transform: translateY(30px);
+  will-change: opacity, transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.whyChooseUs__benefit--visible {
+  animation: fadeInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0) translateZ(0);
+  }
+}
+
+.whyChooseUs__benefitIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto var(--space-16);
+  background: var(--gradient-primary);
+  border-radius: var(--radius-full);
+  color: var(--color-white);
+  box-shadow: var(--shadow-luxury-md);
+  transition: all var(--transition-elegant);
+}
+
+.whyChooseUs__benefitTitle {
+  font-size: clamp(var(--font-size-lg), 2.5vw, var(--font-size-xl));
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-8);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.whyChooseUs__benefitDescription {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .whyChooseUs__benefit:hover {
+    transform: translateY(-8px) scale(1.02) translateZ(0);
+    box-shadow: 
+      var(--shadow-luxury-xl),
+      var(--shadow-luxury-lg),
+      0 0 0 1px rgba(255, 255, 255, 0.95) inset;
+    border-color: var(--border-luxury-gold);
+  }
+
+  .whyChooseUs__benefit:hover .whyChooseUs__benefitIcon {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: var(--shadow-luxury-lg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .whyChooseUs {
+    padding: clamp(var(--space-24), 6vw, var(--space-32)) 0;
+  }
+
+  .whyChooseUs__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-20);
+  }
+
+  .whyChooseUs__benefit {
+    padding: var(--space-24);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .whyChooseUs__benefit {
+    animation: none !important;
+    opacity: 1;
+    transform: none !important;
+  }
+
+  .whyChooseUs__benefit:hover {
+    transform: none !important;
+  }
+}
+

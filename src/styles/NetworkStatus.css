@@ -1,0 +1,41 @@
+/**
+ * Network Status Styles
+ * Luxury, elegant, and non-intrusive
+ */
+
+.networkStatus {
+  position: fixed;
+  top: var(--space-20);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  max-width: 500px;
+  width: calc(100% - var(--space-40));
+  animation: slideDown 0.3s ease-out;
+  pointer-events: none;
+}
+
+.networkStatus__message {
+  pointer-events: auto;
+  box-shadow: var(--shadow-luxury-lg);
+  border-radius: var(--radius-lg);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .networkStatus {
+    top: var(--space-16);
+    width: calc(100% - var(--space-32));
+  }
+}
+

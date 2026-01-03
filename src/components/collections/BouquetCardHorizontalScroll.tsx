@@ -54,6 +54,24 @@ export class BouquetCardHorizontalScroll extends Component<
     this.scrollContainerRef = React.createRef();
   }
 
+  /**
+   * Prevent unnecessary re-renders when props haven't changed
+   */
+  shouldComponentUpdate(nextProps: BouquetCardHorizontalScrollProps, nextState: BouquetCardHorizontalScrollState): boolean {
+    const { bouquets, loading } = this.props;
+    const { canScrollLeft, canScrollRight, currentIndex, scrollPosition } = this.state;
+
+    return (
+      nextProps.loading !== loading ||
+      nextProps.bouquets.length !== bouquets.length ||
+      nextProps.bouquets !== bouquets ||
+      nextState.canScrollLeft !== canScrollLeft ||
+      nextState.canScrollRight !== canScrollRight ||
+      nextState.currentIndex !== currentIndex ||
+      nextState.scrollPosition !== scrollPosition
+    );
+  }
+
   componentDidMount(): void {
     // Use requestAnimationFrame to ensure DOM is fully rendered
     requestAnimationFrame(() => {

@@ -1570,6 +1570,7 @@ class DashboardController extends BaseController<BaseControllerProps, State> {
 
   /**
    * Calculate metrics for overview
+   * Optimized with single-pass filtering for better performance
    */
   private calculateOverviewMetrics = () => {
     const bouquets = this.state.bouquets ?? [];
@@ -1585,51 +1586,70 @@ class DashboardController extends BaseController<BaseControllerProps, State> {
     const uniqueVisitors30d = Number(insights?.uniqueVisitors30d ?? 0);
     const uniqueVisitorsAvailable = Boolean(insights?.uniqueVisitorsAvailable);
 
+    // Single-pass optimization: calculate all metrics in one loop
     const bouquetNameById = new Map<string, string>();
+    let readyCount = 0;
+    let preorderCount = 0;
+    let featuredCount = 0;
+    let newEditionCount = 0;
+    let missingImageCount = 0;
+    let missingCollectionCount = 0;
+    let zeroQtyReadyCount = 0;
+    let totalReadyUnits = 0;
+    const priced: number[] = [];
+    const collectionCounts = new Map<string, number>();
+
+    // Single pass through bouquets array
     for (const b of bouquets) {
+      // Build bouquet name map
       const id = (b._id ?? "").toString();
       const name = (b.name ?? "").toString().trim();
       if (id && name) bouquetNameById.set(id, name);
+
+      // Count by status (single pass)
+      if (b.status === "ready") {
+        readyCount++;
+        const qty = typeof b.quantity === "number" ? b.quantity : 0;
+        totalReadyUnits += qty;
+        if (qty === 0) zeroQtyReadyCount++;
+      } else if (b.status === "preorder") {
+        preorderCount++;
+      }
+
+      // Count featured and new edition
+      if (Boolean(b.isFeatured)) featuredCount++;
+      if (Boolean(b.isNewEdition)) newEditionCount++;
+
+      // Count missing data
+      if (!(b.image ?? "").trim()) missingImageCount++;
+      if (!(b.collectionName ?? "").trim()) missingCollectionCount++;
+
+      // Collect valid prices
+      const price = typeof b.price === "number" ? b.price : Number(b.price);
+      if (Number.isFinite(price) && price > 0) {
+        priced.push(price);
+      }
+
+      // Count collections
+      const collectionKey = (b.collectionName ?? "").trim() || "Tanpa koleksi";
+      collectionCounts.set(collectionKey, (collectionCounts.get(collectionKey) ?? 0) + 1);
     }
 
-    const formatHour = (h: number) => `${String(h).padStart(2, "0")}.00`;
-    const labelBouquet = (id: string) =>
-      bouquetNameById.get(id) ?? (id ? `ID ${id.slice(0, 10)}` : "—");
-
-    const readyCount = bouquets.filter((b) => b.status === "ready").length;
-    const preorderCount = bouquets.filter((b) => b.status === "preorder").length;
-    const featuredCount = bouquets.filter((b) => Boolean(b.isFeatured)).length;
-    const newEditionCount = bouquets.filter((b) => Boolean(b.isNewEdition)).length;
-
-    const missingImageCount = bouquets.filter((b) => !(b.image ?? "").trim()).length;
-    const missingCollectionCount = bouquets.filter(
-      (b) => !(b.collectionName ?? "").trim()
-    ).length;
-    const zeroQtyReadyCount = bouquets.filter(
-      (b) => b.status === "ready" && (typeof b.quantity === "number" ? b.quantity : 0) === 0
-    ).length;
-
-    const totalReadyUnits = bouquets
-      .filter((b) => b.status === "ready")
-      .reduce((sum, b) => sum + (typeof b.quantity === "number" ? b.quantity : 0), 0);
-
-    const priced = bouquets
-      .map((b) => (typeof b.price === "number" ? b.price : Number(b.price)))
-      .filter((n) => Number.isFinite(n) && n > 0);
+    // Calculate price metrics
     const priceMin = priced.length ? Math.min(...priced) : 0;
     const priceMax = priced.length ? Math.max(...priced) : 0;
     const priceAvg = priced.length
       ? Math.round(priced.reduce((a, b) => a + b, 0) / priced.length)
       : 0;
 
-    const collectionCounts = new Map<string, number>();
-    for (const b of bouquets) {
-      const key = (b.collectionName ?? "").trim() || "Tanpa koleksi";
-      collectionCounts.set(key, (collectionCounts.get(key) ?? 0) + 1);
-    }
+    // Sort and slice top collections
     const topCollections = Array.from(collectionCounts.entries())
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
       .slice(0, 6);
+
+    const formatHour = (h: number) => `${String(h).padStart(2, "0")}.00`;
+    const labelBouquet = (id: string) =>
+      bouquetNameById.get(id) ?? (id ? `ID ${id.slice(0, 10)}` : "—");
 
     return {
       readyCount,

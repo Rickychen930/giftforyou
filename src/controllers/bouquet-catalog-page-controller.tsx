@@ -36,6 +36,18 @@ class BouquetCatalogController extends BaseController<
   BouquetCatalogControllerProps,
   BouquetCatalogPageState & BaseControllerState
 > {
+  // Cache for filtered bouquets to avoid recalculation
+  private filteredBouquetsCache: { 
+    key: string; 
+    result: Bouquet[] 
+  } | null = null;
+  
+  // Cache for sorted bouquets
+  private sortedBouquetsCache: {
+    key: string;
+    result: Bouquet[];
+  } | null = null;
+
   constructor(props: BouquetCatalogControllerProps) {
     super(props);
     this.state = {
@@ -69,15 +81,21 @@ class BouquetCatalogController extends BaseController<
       }
     }
 
-    // Apply SEO when filters change
-    if (
+    // Clear cache when filters change
+    const filtersChanged = 
       prevState.selectedTypes !== this.state.selectedTypes ||
       prevState.selectedSizes !== this.state.selectedSizes ||
       prevState.priceRange !== this.state.priceRange ||
       prevState.sortBy !== this.state.sortBy ||
       prevState.searchQuery !== this.state.searchQuery ||
-      prevState.collectionNameFilter !== this.state.collectionNameFilter
-    ) {
+      prevState.collectionNameFilter !== this.state.collectionNameFilter ||
+      prevState.selectedCollections !== this.state.selectedCollections ||
+      prevState.bouquets !== this.state.bouquets;
+
+    if (filtersChanged) {
+      // Clear caches when filters change
+      this.filteredBouquetsCache = null;
+      this.sortedBouquetsCache = null;
       this.applySeo();
     }
 
@@ -454,6 +472,9 @@ class BouquetCatalogController extends BaseController<
     this.setState({ priceRange: range, currentPage: 1 });
   };
 
+  /**
+   * Get filtered bouquets with memoization for performance
+   */
   private getFilteredBouquets(): Bouquet[] {
     const {
       bouquets,
@@ -466,46 +487,99 @@ class BouquetCatalogController extends BaseController<
     } = this.state;
     const [min, max] = priceRange;
 
+    // Create cache key from filter state
+    const cacheKey = JSON.stringify({
+      bouquetsLength: bouquets.length,
+      priceRange,
+      selectedTypes: selectedTypes.sort().join(","),
+      selectedSizes: selectedSizes.sort().join(","),
+      selectedCollections: selectedCollections.sort().join(","),
+      collectionNameFilter,
+      searchQuery,
+    });
+
+    // Return cached result if available
+    if (this.filteredBouquetsCache?.key === cacheKey) {
+      return this.filteredBouquetsCache.result;
+    }
+
+    // Pre-compute normalized values outside filter loop
     const collectionNeedle = collectionNameFilter.trim().toLowerCase();
     const queryNeedle = searchQuery.trim().toLowerCase();
-
     const selectedCollectionsNormalized = selectedCollections
       .map((v) => v.trim())
       .filter(Boolean);
+    const selectedTypesSet = new Set(selectedTypes);
+    const selectedSizesSet = new Set(selectedSizes);
+    const selectedCollectionsSet = new Set(selectedCollectionsNormalized);
 
-    return bouquets.filter((b) => {
-      const priceOk = b.price >= min && b.price <= max;
-      const typeOk =
-        selectedTypes.length === 0 || selectedTypes.includes(b.type ?? "");
-      const sizeOk =
-        selectedSizes.length === 0 || selectedSizes.includes(b.size ?? "");
+    // Filter with optimized checks
+    const result = bouquets.filter((b) => {
+      // Early exit for price check (most common filter)
+      if (b.price < min || b.price > max) return false;
 
+      // Type check with Set for O(1) lookup
+      if (selectedTypes.length > 0 && !selectedTypesSet.has(b.type ?? "")) {
+        return false;
+      }
+
+      // Size check with Set for O(1) lookup
+      if (selectedSizes.length > 0 && !selectedSizesSet.has(b.size ?? "")) {
+        return false;
+      }
+
+      // Collection check
       const collectionName = (b.collectionName ?? "").trim();
-      const collectionOk =
-        selectedCollectionsNormalized.length > 0
-          ? selectedCollectionsNormalized.includes(collectionName)
-          : !collectionNeedle || collectionName.toLowerCase() === collectionNeedle;
+      if (selectedCollectionsSet.size > 0) {
+        if (!selectedCollectionsSet.has(collectionName)) return false;
+      } else if (collectionNeedle && collectionName.toLowerCase() !== collectionNeedle) {
+        return false;
+      }
 
-      const queryOk =
-        !queryNeedle ||
-        [
+      // Search query check (most expensive, do last)
+      if (queryNeedle) {
+        const searchFields = [
           b.name,
           b.description,
           b.type,
           b.size,
           b.collectionName,
-        ]
-          .filter(isNonEmptyString)
-          .some((v) => v.toLowerCase().includes(queryNeedle));
+        ].filter(isNonEmptyString);
+        
+        if (!searchFields.some((v) => v.toLowerCase().includes(queryNeedle))) {
+          return false;
+        }
+      }
 
-      return priceOk && typeOk && sizeOk && collectionOk && queryOk;
+      return true;
     });
+
+    // Cache the result
+    this.filteredBouquetsCache = { key: cacheKey, result };
+    return result;
   }
 
+  /**
+   * Get sorted bouquets with memoization for performance
+   */
   private getSortedBouquets(list: Bouquet[]): Bouquet[] {
     const { sortBy } = this.state;
 
-    return [...list].sort((a, b) => {
+    // Create cache key
+    const cacheKey = `${list.length}-${sortBy}-${list.map(b => b._id).join(",")}`;
+
+    // Return cached result if available
+    if (this.sortedBouquetsCache?.key === cacheKey) {
+      return this.sortedBouquetsCache.result;
+    }
+
+    // Only sort if needed
+    if (!sortBy || sortBy === "") {
+      this.sortedBouquetsCache = { key: cacheKey, result: list };
+      return list;
+    }
+
+    const result = [...list].sort((a, b) => {
       switch (sortBy) {
         case "price-asc":
           return a.price - b.price;
@@ -519,6 +593,10 @@ class BouquetCatalogController extends BaseController<
           return 0;
       }
     });
+
+    // Cache the result
+    this.sortedBouquetsCache = { key: cacheKey, result };
+    return result;
   }
 
   /**

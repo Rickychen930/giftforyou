@@ -4,7 +4,7 @@
  * Separated into methods for better organization
  */
 
-import React, { Component } from "react";
+import React, { Component, Suspense, lazy } from "react";
 import "../styles/DashboardPage.css";
 import type { ActiveTab } from "../models/dashboard-page-model";
 import type { DashboardPageViewProps } from "./dashboard-page.types";
@@ -46,20 +46,46 @@ import {
 import { DASHBOARD_TABS } from "./dashboard-page.static";
 import { SKELETON_COUNTS } from "./dashboard-page.constants";
 import { DASHBOARD_STYLES } from "./dashboard-page.styles";
-import BouquetUploader from "./sections/dashboard-uploader-section";
-import BouquetEditorSection from "./sections/Bouquet-editor-section";
-import HeroSliderEditorSection from "./sections/HeroSliderEditorSection";
-import OrdersSection from "./sections/orders-section";
-import CustomersSection from "./sections/customers-section";
-import OverviewSection from "./sections/OverviewSection";
-import NotificationsCenter from "../components/modals/NotificationsCenter";
-import InventoryManager from "../components/modals/InventoryManager";
-import AnalyticsDashboard from "../components/AnalyticsDashboard";
-import QuickActionsPanel from "../components/modals/QuickActionsPanel";
-import DashboardSearch from "../components/modals/DashboardSearch";
-import ActivityLog from "../components/modals/ActivityLog";
-import SystemStatus from "../components/modals/SystemStatus";
 import { QUICK_ACTIONS } from "./dashboard-page.constants";
+
+// Lazy load dashboard sections for better performance
+const OverviewSection = lazy(() => import("./sections/OverviewSection"));
+const BouquetUploader = lazy(() => import("./sections/dashboard-uploader-section"));
+const BouquetEditorSection = lazy(() => import("./sections/Bouquet-editor-section"));
+const HeroSliderEditorSection = lazy(() => import("./sections/HeroSliderEditorSection"));
+const OrdersSection = lazy(() => import("./sections/orders-section"));
+const CustomersSection = lazy(() => import("./sections/customers-section"));
+
+// Lazy load modals
+const NotificationsCenter = lazy(() => import("../components/modals/NotificationsCenter"));
+const InventoryManager = lazy(() => import("../components/modals/InventoryManager"));
+const AnalyticsDashboard = lazy(() => import("../components/AnalyticsDashboard"));
+const QuickActionsPanel = lazy(() => import("../components/modals/QuickActionsPanel"));
+const DashboardSearch = lazy(() => import("../components/modals/DashboardSearch"));
+const ActivityLog = lazy(() => import("../components/modals/ActivityLog"));
+const SystemStatus = lazy(() => import("../components/modals/SystemStatus"));
+
+// Loading fallback for dashboard sections
+const DashboardSectionLoader: React.FC = () => (
+  <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "200px" }}>
+    <div
+      style={{
+        width: "40px",
+        height: "40px",
+        border: "3px solid #f3f3f3",
+        borderTop: "3px solid #3498db",
+        borderRadius: "50%",
+        animation: "spin 0.8s linear infinite",
+      }}
+    />
+    <style>{`
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `}</style>
+  </div>
+);
 
 /**
  * Icon map for dynamic icon rendering
@@ -136,6 +162,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
   /**
    * Render metrics overview section
    * Refactored to use OverviewSection component (SOLID, DRY)
+   * Wrapped with Suspense for lazy loading
    */
   private renderMetrics = (): React.ReactNode => {
     const {
@@ -157,28 +184,31 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
     } = this.props;
 
     return (
-      <OverviewSection
-        overviewMetrics={overviewMetrics}
-        overviewText={overviewText}
-        insightsError={insightsError}
-        visitorsCount={visitorsCount}
-        bouquets={bouquets}
-        collectionsCount={collectionsCount}
-        salesMetrics={salesMetrics}
-        salesError={salesError}
-        insights={insights}
-        viewState={viewState}
-        onSetActiveTab={onSetActiveTab}
-        onCopyOverview={onCopyOverview}
-        onReloadDashboard={onReloadDashboard}
-        onToggleShow={onToggleShow}
-        onExport={onExport}
-      />
+      <Suspense fallback={<DashboardSectionLoader />}>
+        <OverviewSection
+          overviewMetrics={overviewMetrics}
+          overviewText={overviewText}
+          insightsError={insightsError}
+          visitorsCount={visitorsCount}
+          bouquets={bouquets}
+          collectionsCount={collectionsCount}
+          salesMetrics={salesMetrics}
+          salesError={salesError}
+          insights={insights}
+          viewState={viewState}
+          onSetActiveTab={onSetActiveTab}
+          onCopyOverview={onCopyOverview}
+          onReloadDashboard={onReloadDashboard}
+          onToggleShow={onToggleShow}
+          onExport={onExport}
+        />
+      </Suspense>
     );
   };
 
   /**
    * Render main content based on active tab
+   * Wrapped with Suspense for lazy loading
    */
   private renderMainContent = (): React.ReactNode => {
     const { viewState, bouquets, collections, onUpdate, onUpload, onDuplicate, onDelete, onHeroSaved, onSetActiveTab, onUpdateCollectionName, onMoveBouquet, onDeleteCollection } = this.props;
@@ -189,52 +219,68 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
         return this.renderMetrics();
 
       case "orders":
-        return <OrdersSection bouquets={bouquets} />;
+        return (
+          <Suspense fallback={<DashboardSectionLoader />}>
+            <OrdersSection bouquets={bouquets} />
+          </Suspense>
+        );
 
       case "customers":
         return (
-          <CustomersSection
-            onSelectCustomer={() => {
-              onSetActiveTab("orders");
-            }}
-          />
+          <Suspense fallback={<DashboardSectionLoader />}>
+            <CustomersSection
+              onSelectCustomer={() => {
+                onSetActiveTab("orders");
+              }}
+            />
+          </Suspense>
         );
 
       case "upload":
-        return <BouquetUploader onUpload={onUpload} />;
+        return (
+          <Suspense fallback={<DashboardSectionLoader />}>
+            <BouquetUploader onUpload={onUpload} />
+          </Suspense>
+        );
 
       case "edit":
         return (
-          <BouquetEditorSection
-            bouquets={bouquets}
-            onSave={onUpdate}
-            onDuplicate={onDuplicate}
-            onDelete={onDelete}
-            collections={collections}
-            onUpdateCollection={onUpdateCollectionName}
-            onMoveBouquet={onMoveBouquet}
-            onDeleteCollection={onDeleteCollection}
-          />
+          <Suspense fallback={<DashboardSectionLoader />}>
+            <BouquetEditorSection
+              bouquets={bouquets}
+              onSave={onUpdate}
+              onDuplicate={onDuplicate}
+              onDelete={onDelete}
+              collections={collections}
+              onUpdateCollection={onUpdateCollectionName}
+              onMoveBouquet={onMoveBouquet}
+              onDeleteCollection={onDeleteCollection}
+            />
+          </Suspense>
         );
 
       case "hero":
         return (
-          <HeroSliderEditorSection
-            collections={collections}
-            onSaved={onHeroSaved}
-          />
+          <Suspense fallback={<DashboardSectionLoader />}>
+            <HeroSliderEditorSection
+              collections={collections}
+              onSaved={onHeroSaved}
+            />
+          </Suspense>
         );
 
       case "analytics":
         return (
-          <AnalyticsDashboard
-            isOpen={true}
-            onClose={() => {
-              onSetActiveTab("overview");
-            }}
-            period="30d"
-            inline={true}
-          />
+          <Suspense fallback={<DashboardSectionLoader />}>
+            <AnalyticsDashboard
+              isOpen={true}
+              onClose={() => {
+                onSetActiveTab("overview");
+              }}
+              period="30d"
+              inline={true}
+            />
+          </Suspense>
         );
 
       default:
@@ -343,12 +389,13 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
 
   /**
    * Render modals and overlays
+   * Wrapped with Suspense for lazy loading
    */
   private renderModals = (): React.ReactNode => {
     const { viewState, onToggleShow, onSetActiveTab } = this.props;
 
     return (
-      <>
+      <Suspense fallback={null}>
         <NotificationsCenter
           isOpen={viewState.showNotifications}
           onClose={() => onToggleShow("showNotifications")}
@@ -406,7 +453,7 @@ class DashboardPageView extends Component<DashboardPageViewProps> {
           isOpen={viewState.showSystemStatus}
           onClose={() => onToggleShow("showSystemStatus")}
         />
-      </>
+      </Suspense>
     );
   };
 

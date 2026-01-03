@@ -7,8 +7,24 @@
 
 @import "design-system.css";
 
+/* Smooth scrolling with reduced motion support */
 html {
   scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 section {
@@ -18,6 +34,35 @@ section {
 @media (max-width: 768px) {
   section {
     scroll-margin-top: var(--space-22-5);
+  }
+}
+
+/* Section loader styles */
+.section-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-12);
+  min-height: 200px;
+  padding: var(--space-32);
+}
+
+/* Focus management for better keyboard navigation */
+.Home-page-container:focus-within {
+  outline: none;
+}
+
+.Home-page-container [tabindex="-1"]:focus {
+  outline: none;
+}
+
+/* Touch optimization for mobile */
+@media (hover: none) and (pointer: coarse) {
+  .Home-page-container button,
+  .Home-page-container a {
+    min-height: 44px;
+    min-width: 44px;
   }
 }
 
@@ -47,6 +92,9 @@ section {
   position: relative;
   transition: opacity var(--transition-elegant), transform var(--transition-elegant);
   will-change: opacity, transform;
+  transform: translateZ(0); /* GPU acceleration */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 /* Elegant section dividers - Enhanced with luxury styling */
@@ -92,31 +140,52 @@ section {
   z-index: 1;
 }
 
-/* Collections section styling */
+/* Collections section styling - Enhanced luxury */
 .Home-page__collections {
   position: relative;
   z-index: 1;
   background: 
-    linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, transparent 50%),
+    radial-gradient(ellipse 2000px 800px at 50% 0%, rgba(212, 140, 156, 0.06) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
     var(--gradient-elegant-surface);
+  padding-top: clamp(var(--space-40), 7vw, var(--space-56));
+  padding-bottom: clamp(var(--space-40), 7vw, var(--space-56));
 }
 
-/* Location section styling */
+/* Why Choose Us section styling - Premium trust section */
+.Home-page__whyChooseUs {
+  position: relative;
+  z-index: 1;
+  background: 
+    radial-gradient(ellipse 1800px 700px at 50% 50%, rgba(168, 213, 186, 0.05) 0%, transparent 65%),
+    linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.02) 50%, transparent 100%),
+    var(--gradient-elegant-surface);
+  padding-top: clamp(var(--space-48), 8vw, var(--space-64));
+  padding-bottom: clamp(var(--space-48), 8vw, var(--space-64));
+}
+
+/* Location section styling - Contact section */
 .Home-page__location {
   position: relative;
   z-index: 1;
   background: 
+    radial-gradient(ellipse 1600px 600px at 30% 50%, rgba(184, 134, 11, 0.04) 0%, transparent 60%),
     linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.015) 50%, transparent 100%),
     var(--gradient-elegant-surface);
+  padding-top: clamp(var(--space-32), 6vw, var(--space-48));
+  padding-bottom: clamp(var(--space-32), 6vw, var(--space-48));
 }
 
-/* Reviews section styling */
+/* Reviews section styling - Social proof with glass morphism */
 .Home-page__reviews {
   position: relative;
   z-index: 1;
   background: 
+    radial-gradient(ellipse 2000px 800px at 70% 50%, rgba(212, 140, 156, 0.05) 0%, transparent 60%),
     linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.02) 50%),
     var(--gradient-elegant-surface);
+  padding-top: clamp(var(--space-40), 7vw, var(--space-56));
+  padding-bottom: clamp(var(--space-40), 7vw, var(--space-56));
 }
 
 /* Luxury background pattern overlay (subtle) - Enhanced */
@@ -170,11 +239,14 @@ section {
   }
 }
 
-/* Smooth fade-in for sections - Enhanced luxury animation */
+/* Smooth fade-in for sections - Enhanced luxury animation with GPU acceleration */
 .Home-page-container > .section {
   animation: fadeInSection 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
   opacity: 0;
   will-change: opacity, transform;
+  transform: translateZ(0); /* GPU acceleration */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .Home-page-container > .section:nth-child(1) {
@@ -192,6 +264,27 @@ section {
 
 .Home-page-container > .section:nth-child(4) {
   animation-delay: 0.6s;
+}
+
+.Home-page-container > .section:nth-child(5) {
+  animation-delay: 0.8s;
+}
+
+/* Better section spacing for visual hierarchy */
+.Home-page-container > .section + .section {
+  margin-top: 0;
+}
+
+/* Hero slider loader */
+.hero-slider-loader {
+  width: 100%;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-16);
+  padding: var(--space-32);
 }
 
 @keyframes fadeInSection {

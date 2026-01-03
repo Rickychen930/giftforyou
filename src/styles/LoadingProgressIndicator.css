@@ -1,0 +1,134 @@
+/**
+ * Loading Progress Indicator Styles
+ * Luxury, elegant, and non-intrusive
+ */
+
+@import "design-system.css";
+
+.loadingProgress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10001; /* Above everything */
+  height: 3px;
+  background: transparent;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.3s ease-out;
+  will-change: opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.loadingProgress--complete {
+  opacity: 0;
+}
+
+.loadingProgress__bar {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(212, 140, 156, 0.1) 0%,
+    rgba(168, 213, 186, 0.1) 100%
+  );
+  overflow: hidden;
+}
+
+.loadingProgress__fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--brand-rose-500) 0%,
+    var(--brand-rose-600) 25%,
+    var(--luxury-gold-500) 50%,
+    var(--brand-sage-500) 75%,
+    var(--brand-sage-600) 100%
+  );
+  box-shadow: 
+    0 0 10px rgba(212, 140, 156, 0.5),
+    0 0 20px rgba(168, 213, 186, 0.3);
+  will-change: width;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.loadingProgress__glow {
+  position: absolute;
+  top: 0;
+  width: 20px;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 100%
+  );
+  transform: translateX(-50%);
+  animation: shimmer 1.5s ease-in-out infinite;
+  will-change: left;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.loadingProgress__percentage {
+  position: absolute;
+  top: 8px;
+  right: var(--space-16);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--brand-rose-600);
+  background: rgba(255, 255, 255, 0.95);
+  padding: var(--space-4) var(--space-8);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-elegant);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
+  opacity: 0;
+  animation: fadeInDown 0.3s ease-out 0.2s forwards;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .loadingProgress__fill {
+    transition: width 0.3s ease-out;
+  }
+
+  .loadingProgress__glow {
+    animation: none;
+  }
+
+  .loadingProgress__percentage {
+    animation: none;
+    opacity: 1;
+  }
+}
+

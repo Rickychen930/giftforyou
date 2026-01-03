@@ -27,9 +27,25 @@ interface CollectionCardState {
 /**
  * Collection Card Component
  * Class-based component for collection card display
+ * Optimized with shouldComponentUpdate to prevent unnecessary re-renders
  */
 class CollectionCard extends Component<CollectionContainerProps, CollectionCardState> {
   private baseClass: string = "collectionCard";
+
+  /**
+   * Prevent unnecessary re-renders when props haven't changed
+   */
+  shouldComponentUpdate(nextProps: CollectionContainerProps): boolean {
+    const { id, name, description, bouquets } = this.props;
+
+    return (
+      nextProps.id !== id ||
+      nextProps.name !== name ||
+      nextProps.description !== description ||
+      nextProps.bouquets.length !== bouquets.length ||
+      nextProps.bouquets !== bouquets
+    );
+  }
 
   private getValidBouquets(): BouquetCardProps[] {
     return Array.isArray(this.props.bouquets) ? this.props.bouquets : [];

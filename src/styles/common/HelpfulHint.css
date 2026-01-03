@@ -1,0 +1,125 @@
+/**
+ * Helpful Hint Styles
+ * Luxury, elegant, and non-intrusive
+ */
+
+@import "../design-system.css";
+
+.helpfulHint {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-12);
+  padding: var(--space-12) var(--space-16);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(254, 245, 247, 0.98) 100%
+  );
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-luxury-sm);
+  backdrop-filter: var(--backdrop-blur-sm);
+  -webkit-backdrop-filter: var(--backdrop-blur-sm);
+  transition: all var(--transition-elegant);
+  position: relative;
+}
+
+.helpfulHint__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  color: var(--brand-rose-600);
+  margin-top: 2px;
+}
+
+.helpfulHint__message {
+  flex: 1;
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.helpfulHint__dismiss {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-elegant);
+  padding: 0;
+}
+
+.helpfulHint__dismiss:hover {
+  background: rgba(212, 140, 156, 0.1);
+  color: var(--brand-rose-600);
+}
+
+.helpfulHint__dismiss:focus-visible {
+  outline: 2px solid var(--brand-rose-500);
+  outline-offset: 2px;
+}
+
+/* Variants */
+.helpfulHint--info {
+  border-color: var(--brand-rose-border);
+}
+
+.helpfulHint--info .helpfulHint__icon {
+  color: var(--brand-rose-600);
+}
+
+.helpfulHint--tip {
+  border-color: var(--brand-green-border);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(250, 252, 251, 0.98) 100%
+  );
+}
+
+.helpfulHint--tip .helpfulHint__icon {
+  color: var(--brand-sage-600);
+}
+
+.helpfulHint--note {
+  border-color: var(--luxury-gold-border);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 251, 240, 0.98) 100%
+  );
+}
+
+.helpfulHint--note .helpfulHint__icon {
+  color: var(--luxury-gold-600);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .helpfulHint {
+    padding: var(--space-10) var(--space-12);
+    gap: var(--space-10);
+  }
+
+  .helpfulHint__icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .helpfulHint__message {
+    font-size: var(--font-size-xs);
+  }
+}
+

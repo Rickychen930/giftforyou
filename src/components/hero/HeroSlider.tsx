@@ -185,24 +185,43 @@ class HeroSlider extends Component<HeroSliderProps, HeroSliderState> {
     return this.props.content ?? defaultContent;
   }
 
+  /**
+   * Setup intersection observer with throttled state updates
+   */
   private setupIntersectionObserver(): void {
     if (!this.heroRef.current || !this.state.swiperInstance) return;
+
+    let lastVisibilityState: boolean | null = null;
+    let throttleTimeout: NodeJS.Timeout | null = null;
 
     this.intersectionObserver = new IntersectionObserver(
       (entries) => {
         const isIntersecting = entries[0]?.isIntersecting ?? true;
-        this.setState({ isVisible: isIntersecting });
-
-        const { swiperInstance, isPlaying } = this.state;
-        if (swiperInstance?.autoplay) {
-          if (isIntersecting && isPlaying) {
-            requestAnimationFrame(() => {
-              swiperInstance.autoplay?.start();
-            });
-          } else if (!isIntersecting) {
-            swiperInstance.autoplay.stop();
-          }
+        
+        // Throttle state updates to prevent excessive re-renders
+        if (throttleTimeout) {
+          clearTimeout(throttleTimeout);
         }
+
+        throttleTimeout = setTimeout(() => {
+          // Only update state if visibility actually changed
+          if (lastVisibilityState !== isIntersecting) {
+            this.setState({ isVisible: isIntersecting });
+            lastVisibilityState = isIntersecting;
+
+            const { swiperInstance, isPlaying } = this.state;
+            if (swiperInstance?.autoplay) {
+              if (isIntersecting && isPlaying) {
+                requestAnimationFrame(() => {
+                  swiperInstance.autoplay?.start();
+                });
+              } else if (!isIntersecting) {
+                swiperInstance.autoplay.stop();
+              }
+            }
+          }
+          throttleTimeout = null;
+        }, 100); // Throttle to 100ms
       },
       {
         threshold: 0.3,
@@ -271,24 +290,37 @@ class HeroSlider extends Component<HeroSliderProps, HeroSliderState> {
     window.addEventListener("keydown", this.keyboardHandler, { passive: false });
   }
 
+  /**
+   * Start progress tracking with throttled updates for better performance
+   * Only updates state every ~100ms instead of every frame
+   */
   private startProgressTracking(): void {
     this.stopProgressTracking();
     const { autoplayDelay = 6000 } = this.props;
     this.progressIsActive = true;
     this.progressStartTime = Date.now();
+    let lastUpdateTime = 0;
+    const UPDATE_INTERVAL = 100; // Update every 100ms instead of every frame
 
     const updateProgress = () => {
       if (!this.progressIsActive) return;
 
-      const elapsed = Date.now() - this.progressStartTime;
+      const now = Date.now();
+      const elapsed = now - this.progressStartTime;
       const progress = Math.min((elapsed / autoplayDelay) * 100, 100);
-      this.setState({ transitionProgress: progress });
+
+      // Throttle state updates to reduce re-renders
+      if (now - lastUpdateTime >= UPDATE_INTERVAL || progress >= 100) {
+        this.setState({ transitionProgress: progress });
+        lastUpdateTime = now;
+      }
 
       if (progress < 100 && this.progressIsActive) {
         this.progressAnimationFrame = requestAnimationFrame(updateProgress);
       } else if (this.progressIsActive) {
         this.setState({ transitionProgress: 0 });
         this.progressStartTime = Date.now();
+        lastUpdateTime = Date.now();
         this.progressAnimationFrame = requestAnimationFrame(updateProgress);
       }
     };
@@ -333,29 +365,55 @@ class HeroSlider extends Component<HeroSliderProps, HeroSliderState> {
     swiperInstance.on("autoplayStop", this.autoplayStopHandler);
   }
 
+  /**
+   * Optimized image preloading
+   * Only preload first slide immediately (above the fold)
+   * Other slides preload after initial render using requestIdleCallback
+   */
   private preloadImages(): void {
     const data = this.getData();
     if (data.slides.length === 0) return;
 
     this.cleanupPreloadImages();
 
-    const maxPreload = Math.min(2, data.slides.length);
-
-    for (let i = 0; i < maxPreload; i++) {
-      const slide = data.slides[i];
+    // Preload first slide immediately (critical, above the fold)
+    if (data.slides.length > 0) {
+      const firstSlide = data.slides[0];
       const img = new Image();
       img.onerror = () => {
         if (process.env.NODE_ENV === "development") {
-          console.warn(`Failed to preload image: ${slide.image}`);
+          console.warn(`Failed to preload image: ${firstSlide.image}`);
         }
       };
-      img.src = slide.image.startsWith("/uploads/") ? `${API_BASE}${slide.image}` : slide.image;
+      const imageUrl = firstSlide.image.startsWith("/uploads/") 
+        ? `${API_BASE}${firstSlide.image}` 
+        : firstSlide.image;
+      img.src = imageUrl;
       this.preloadedImages.push(img);
     }
 
-    if (data.slides.length > maxPreload) {
+    // Preload second slide after a short delay (next likely to be viewed)
+    if (data.slides.length > 1) {
       setTimeout(() => {
-        for (let i = maxPreload; i < data.slides.length; i++) {
+        const secondSlide = data.slides[1];
+        const img = new Image();
+        img.onerror = () => {
+          if (process.env.NODE_ENV === "development") {
+            console.warn(`Failed to preload image: ${secondSlide.image}`);
+          }
+        };
+        const imageUrl = secondSlide.image.startsWith("/uploads/") 
+          ? `${API_BASE}${secondSlide.image}` 
+          : secondSlide.image;
+        img.src = imageUrl;
+        this.preloadedImages.push(img);
+      }, 500);
+    }
+
+    // Preload remaining slides in background using requestIdleCallback
+    if (data.slides.length > 2) {
+      const preloadRemaining = () => {
+        for (let i = 2; i < data.slides.length; i++) {
           const slide = data.slides[i];
           const img = new Image();
           img.onerror = () => {
@@ -363,12 +421,19 @@ class HeroSlider extends Component<HeroSliderProps, HeroSliderState> {
               console.warn(`Failed to preload image: ${slide.image}`);
             }
           };
-          img.src = slide.image.startsWith("/uploads/")
-            ? `${process.env.REACT_APP_API_BASE || ""}${slide.image}`
+          const imageUrl = slide.image.startsWith("/uploads/")
+            ? `${API_BASE}${slide.image}`
             : slide.image;
+          img.src = imageUrl;
           this.preloadedImages.push(img);
         }
-      }, 1000);
+      };
+
+      if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+        window.requestIdleCallback(preloadRemaining, { timeout: 3000 });
+      } else {
+        setTimeout(preloadRemaining, 2000);
+      }
     }
   }
 
@@ -407,10 +472,20 @@ class HeroSlider extends Component<HeroSliderProps, HeroSliderState> {
     }
   };
 
+  /**
+   * Handle image load with optimization to prevent excessive state updates
+   */
   private handleImageLoad = (slideId: string): void => {
-    this.setState((prevState) => ({
-      imageLoadStates: { ...prevState.imageLoadStates, [slideId]: true },
-    }));
+    // Use functional setState and check if update is needed
+    this.setState((prevState) => {
+      // Only update if state actually changed
+      if (prevState.imageLoadStates[slideId]) {
+        return null; // No update needed
+      }
+      return {
+        imageLoadStates: { ...prevState.imageLoadStates, [slideId]: true },
+      };
+    });
   };
 
   private handleImageError = (slideId: string, e: React.SyntheticEvent<HTMLImageElement>): void => {

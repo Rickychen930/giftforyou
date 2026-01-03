@@ -14,8 +14,15 @@ import {
 } from "../models/home-page-model";
 import { getCollections } from "../services/collection.service";
 import { API_BASE } from "../config/api";
+import { apiCache } from "../utils/api-cache";
 import { BaseController, type BaseControllerProps, type BaseControllerState, type SeoConfig } from "./base/BaseController";
 import HomePageView from "../view/home-page";
+
+const HERO_CACHE_KEY = "hero-content";
+const HERO_CACHE_TTL = 10 * 60 * 1000; // 10 minutes (hero content changes less frequently)
+
+// Request deduplication for hero content
+let pendingHeroRequest: Promise<HeroSliderContent | null> | null = null;
 
 interface HomePageControllerProps extends BaseControllerProps {
   // Add any props if needed in the future
@@ -52,33 +59,59 @@ export class HomePageController extends BaseController<
   }
 
   /**
-   * Fetch hero slider content from API
+   * Fetch hero slider content from API with caching and request deduplication
    */
   private async fetchHeroContent(): Promise<HeroSliderContent | null> {
     if (!this.abortController) return null;
 
-    try {
-      const response = await this.safeFetch(`${API_BASE}/api/hero-slider/home`);
-      if (!response || !response.ok) return null;
-
-      const text = await response.text();
-      const data = this.safeJsonParse<HeroSliderContent | null>(text, null);
-
-      // Validate data structure
-      const hasSlides =
-        data &&
-        typeof data === "object" &&
-        Array.isArray((data as any).slides) &&
-        (data as any).slides.length > 0;
-
-      return hasSlides ? (data as HeroSliderContent) : null;
-    } catch (err: unknown) {
-      if (err instanceof DOMException && err.name === "AbortError") {
-        return null;
-      }
-      console.error("Failed to fetch hero content:", err);
-      return null;
+    // Check cache first
+    const cached = apiCache.get<HeroSliderContent>(HERO_CACHE_KEY);
+    if (cached) {
+      return cached;
     }
+
+    // If there's a pending request, return it instead of making a new one
+    if (pendingHeroRequest) {
+      return pendingHeroRequest;
+    }
+
+    // Create the request promise
+    pendingHeroRequest = (async () => {
+      try {
+        const response = await this.safeFetch(`${API_BASE}/api/hero-slider/home`);
+        if (!response || !response.ok) return null;
+
+        const text = await response.text();
+        const data = this.safeJsonParse<HeroSliderContent | null>(text, null);
+
+        // Validate data structure
+        const hasSlides =
+          data &&
+          typeof data === "object" &&
+          Array.isArray((data as any).slides) &&
+          (data as any).slides.length > 0;
+
+        const result = hasSlides ? (data as HeroSliderContent) : null;
+
+        // Cache the result if valid
+        if (result) {
+          apiCache.set(HERO_CACHE_KEY, result, HERO_CACHE_TTL);
+        }
+
+        return result;
+      } catch (err: unknown) {
+        if (err instanceof DOMException && err.name === "AbortError") {
+          return null;
+        }
+        console.error("Failed to fetch hero content:", err);
+        return null;
+      } finally {
+        // Clear pending request after completion
+        pendingHeroRequest = null;
+      }
+    })();
+
+    return pendingHeroRequest;
   }
 
   /**
@@ -98,7 +131,8 @@ export class HomePageController extends BaseController<
   }
 
   /**
-   * Load all homepage data
+   * Load all homepage data with progressive loading
+   * Hero content loads first (above the fold), then collections
    */
   private async loadData(): Promise<void> {
     this.setLoading(true);
@@ -111,21 +145,67 @@ export class HomePageController extends BaseController<
     }));
 
     try {
-      // Fetch hero content and collections in parallel
-      const [heroContent, collections] = await Promise.all([
-        this.fetchHeroContent(),
-        this.fetchCollections(),
-      ]);
-
-      this.setState({
+      // Progressive loading: Hero first (above the fold), then collections
+      // This improves perceived performance
+      const heroContent = await this.fetchHeroContent();
+      
+      // Update state with hero content immediately
+      this.setState((prevState) => ({
         data: {
-          collections,
+          ...prevState.data,
           heroContent,
-          loadState: "success",
-          errorMessage: "",
+          loadState: heroContent ? "loading" : "success", // Keep loading if hero loaded, wait for collections
         },
-        loading: false,
-      });
+      }));
+
+      // Load collections in background (below the fold)
+      // Use requestIdleCallback for better performance if available
+      const loadCollections = async () => {
+        try {
+          const collections = await this.fetchCollections();
+          this.setState((prevState) => ({
+            data: {
+              ...prevState.data,
+              collections,
+              loadState: "success",
+              errorMessage: "",
+            },
+            loading: false,
+          }));
+        } catch (err: unknown) {
+          if (err instanceof DOMException && err.name === "AbortError") {
+            return;
+          }
+          // Collections error doesn't block the page
+          console.warn("Failed to load collections:", err);
+          this.setState((prevState) => ({
+            data: {
+              ...prevState.data,
+              collections: [],
+              loadState: prevState.data.heroContent ? "success" : "error",
+              errorMessage: prevState.data.heroContent ? "" : this.handleError(err, "Failed to load homepage data"),
+            },
+            loading: false,
+          }));
+        }
+      };
+
+      // Load collections immediately after hero (small delay for better UX)
+      if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+        window.requestIdleCallback(() => {
+          void loadCollections();
+        }, { timeout: 100 });
+      } else {
+        // Fallback: small delay to let hero render first
+        setTimeout(() => {
+          void loadCollections();
+        }, 50);
+      }
+
+      // If hero failed, still try to load collections
+      if (!heroContent) {
+        await loadCollections();
+      }
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === "AbortError") {
         return;
@@ -138,6 +218,7 @@ export class HomePageController extends BaseController<
           loadState: "error",
           errorMessage: this.handleError(err, "Failed to load homepage data"),
         },
+        loading: false,
       }));
     }
   }

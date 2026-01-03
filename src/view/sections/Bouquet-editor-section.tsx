@@ -459,7 +459,7 @@ export default class BouquetEditorSection extends Component<Props, State> {
     if (this.props.onDelete) {
       try {
         await this.props.onDelete(bouquetId);
-        // Update local state
+        // Update local state - remove deleted bouquet
         this.setState((prev) => {
           const updatedBouquets = prev.bouquets.filter((b) => b._id !== bouquetId);
           const updatedCollections = prev.collections.map((c) => ({
@@ -469,18 +469,24 @@ export default class BouquetEditorSection extends Component<Props, State> {
             ),
           }));
           
-          // If we're in bouquet-edit view and deleted the current bouquet, go back
+          // If we're in bouquet-edit view and deleted the current bouquet, navigate back
           if (prev.currentView === "bouquet-edit" && prev.selectedBouquet?._id === bouquetId) {
+            // Find the collection that contained this bouquet
+            const deletedBouquetCollection = prev.collections.find((c) =>
+              (c.bouquets as Bouquet[]).some((b) => b._id === bouquetId)
+            );
+            
             return {
               ...prev,
               bouquets: updatedBouquets,
               collections: updatedCollections,
-              currentView: "collection-detail",
+              currentView: deletedBouquetCollection ? "collection-detail" : "collections",
+              selectedCollectionId: deletedBouquetCollection?._id ?? null,
               selectedBouquet: null,
             };
           }
           
-          // If we're in collection detail view and the collection is now empty, go back
+          // If we're in collection detail view and the collection is now empty, go back to collections
           if (prev.currentView === "collection-detail") {
             const collection = updatedCollections.find(
               (c) => c._id === prev.selectedCollectionId
@@ -516,21 +522,28 @@ export default class BouquetEditorSection extends Component<Props, State> {
     if (this.props.onDuplicate) {
       try {
         await this.props.onDuplicate(bouquetId);
-        // Update local state with new props instead of reloading
-        // This preserves the current view
-        this.setState((prev) => ({
-          bouquets: this.props.bouquets ?? prev.bouquets,
-          // Update collections with new bouquets without full reload
-          collections: prev.collections.map((c) => {
-            const updatedBouquets = (this.props.bouquets ?? []).filter(
+        // Reload bouquets from props to get the newly duplicated bouquet
+        // This preserves the current view while updating data
+        this.setState((prev) => {
+          const updatedBouquets = this.props.bouquets ?? prev.bouquets;
+          
+          // Update collections with new bouquets
+          const updatedCollections = prev.collections.map((c) => {
+            const collectionBouquets = updatedBouquets.filter(
               (b) => b.collectionName === c.name
             );
             return {
               ...c,
-              bouquets: updatedBouquets,
+              bouquets: collectionBouquets,
             };
-          }),
-        }));
+          });
+          
+          return {
+            bouquets: updatedBouquets,
+            collections: updatedCollections,
+            // Stay in current view
+          };
+        });
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error("Failed to duplicate bouquet:", err);
@@ -552,28 +565,35 @@ export default class BouquetEditorSection extends Component<Props, State> {
         );
         
         if (existingBouquet) {
-          // Extract all fields from formData
-          const name = String(formData.get("name") ?? existingBouquet.name ?? "");
-          const description = String(formData.get("description") ?? existingBouquet.description ?? "");
+          // Extract all fields from formData with proper type handling
+          const name = String(formData.get("name") ?? existingBouquet.name ?? "").trim();
+          const description = String(formData.get("description") ?? existingBouquet.description ?? "").trim();
           const price = Number(formData.get("price")) || existingBouquet.price || 0;
-          const type = String(formData.get("type") ?? existingBouquet.type ?? "");
+          const type = String(formData.get("type") ?? existingBouquet.type ?? "").trim();
           const size = String(formData.get("size") ?? existingBouquet.size ?? "Medium");
           const status = String(formData.get("status") ?? existingBouquet.status ?? "ready");
-          const collectionName = String(formData.get("collectionName") ?? existingBouquet.collectionName ?? "");
+          const collectionName = String(formData.get("collectionName") ?? existingBouquet.collectionName ?? "").trim();
           const quantity = Number(formData.get("quantity")) || existingBouquet.quantity || 0;
           const occasionsText = String(formData.get("occasions") ?? "");
           const flowersText = String(formData.get("flowers") ?? "");
           const isNewEdition = String(formData.get("isNewEdition") ?? "false") === "true";
           const isFeatured = String(formData.get("isFeatured") ?? "false") === "true";
           const customPenandaText = String(formData.get("customPenanda") ?? "");
-          const careInstructions = String(formData.get("careInstructions") ?? existingBouquet.careInstructions ?? "");
+          const careInstructions = String(formData.get("careInstructions") ?? existingBouquet.careInstructions ?? "").trim();
 
-          // Parse arrays from comma-separated strings
-          const occasions = occasionsText ? occasionsText.split(",").map(s => s.trim()).filter(Boolean) : (existingBouquet.occasions || []);
-          const flowers = flowersText ? flowersText.split(",").map(s => s.trim()).filter(Boolean) : (existingBouquet.flowers || []);
-          const customPenanda = customPenandaText ? customPenandaText.split(",").map(s => s.trim()).filter(Boolean) : (existingBouquet.customPenanda || []);
+          // Parse arrays from comma-separated strings with proper validation
+          const occasions = occasionsText 
+            ? occasionsText.split(",").map(s => s.trim()).filter(Boolean) 
+            : (Array.isArray(existingBouquet.occasions) ? existingBouquet.occasions : []);
+          const flowers = flowersText 
+            ? flowersText.split(",").map(s => s.trim()).filter(Boolean) 
+            : (Array.isArray(existingBouquet.flowers) ? existingBouquet.flowers : []);
+          const customPenanda = customPenandaText 
+            ? customPenandaText.split(",").map(s => s.trim()).filter(Boolean) 
+            : (Array.isArray(existingBouquet.customPenanda) ? existingBouquet.customPenanda : []);
 
-          // Get image URL - if new image was uploaded, it will be in the response or we keep existing
+          // Image URL - keep existing unless server updates it (handled by parent refresh)
+          // For now, keep existing image URL
           const image = existingBouquet.image ?? "";
 
           const updated: Bouquet = {
@@ -592,7 +612,7 @@ export default class BouquetEditorSection extends Component<Props, State> {
             isFeatured,
             customPenanda,
             careInstructions,
-            image, // Keep existing image URL unless updated by server
+            image, // Keep existing image URL - server will update if new image uploaded
           };
 
           // Update state WITHOUT navigating back - stay in edit view for better UX
@@ -607,7 +627,7 @@ export default class BouquetEditorSection extends Component<Props, State> {
             );
 
             const updatedCollections = prev.collections.map((c) => {
-              // Remove from old collection if moved
+              // Remove from old collection if moved to different collection
               if (oldCollection && c._id === oldCollection._id && oldCollection.name !== collectionName) {
                 return {
                   ...c,
@@ -620,26 +640,26 @@ export default class BouquetEditorSection extends Component<Props, State> {
                   (b) => b._id === bouquetId
                 );
                 if (existingIndex >= 0) {
-                  // Update existing
-                  const updatedBouquets = [...(c.bouquets as Bouquet[])];
-                  updatedBouquets[existingIndex] = updated;
-                  return { ...c, bouquets: updatedBouquets };
+                  // Update existing bouquet in collection
+                  const collectionBouquets = [...(c.bouquets as Bouquet[])];
+                  collectionBouquets[existingIndex] = updated;
+                  return { ...c, bouquets: collectionBouquets };
                 } else {
-                  // Add to collection
+                  // Add to collection (bouquet moved here)
                   return {
                     ...c,
                     bouquets: [...(c.bouquets as Bouquet[]), updated],
                   };
                 }
               }
-              // Update bouquet in collection if it exists there
+              // Update bouquet in any collection where it exists
               const bouquetIndex = (c.bouquets as Bouquet[]).findIndex(
                 (b) => b._id === bouquetId
               );
               if (bouquetIndex >= 0) {
-                const updatedBouquets = [...(c.bouquets as Bouquet[])];
-                updatedBouquets[bouquetIndex] = updated;
-                return { ...c, bouquets: updatedBouquets };
+                const collectionBouquets = [...(c.bouquets as Bouquet[])];
+                collectionBouquets[bouquetIndex] = updated;
+                return { ...c, bouquets: collectionBouquets };
               }
               return c;
             });

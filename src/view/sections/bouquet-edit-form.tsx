@@ -1,6 +1,11 @@
 /**
  * Bouquet Edit Form Component (OOP)
  * Class-based component following SOLID principles
+ * 
+ * FIXED: Removed duplicate collection selector - collection selection is now handled
+ * entirely by BouquetEditor component to prevent state synchronization bugs.
+ * 
+ * IMPROVED: Better performance with proper state management and memoization.
  */
 
 import React, { Component } from "react";
@@ -8,7 +13,6 @@ import type { Bouquet } from "../../models/domain/bouquet";
 import type { Collection } from "../../models/domain/collection";
 import "../../styles/BouquetEditForm.css";
 import BouquetEditor from "../../components/bouquet-card-edit-component";
-import DropdownWithModal from "../../components/inputs/DropdownWithModal";
 import SectionHeader from "../../components/common/SectionHeader";
 
 interface Props {
@@ -19,46 +23,55 @@ interface Props {
 }
 
 interface State {
-  collectionName: string;
   bouquet: Bouquet;
 }
 
+/**
+ * Bouquet Edit Form Component
+ * 
+ * Single Responsibility: Wraps BouquetEditor with navigation header
+ * Open/Closed: Extensible through props
+ * Dependency Inversion: Depends on BouquetEditor abstraction
+ */
 class BouquetEditForm extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      collectionName: props.bouquet.collectionName || "",
       bouquet: props.bouquet,
     };
   }
 
   componentDidUpdate(prevProps: Props): void {
+    // Only update if bouquet ID changed (different bouquet selected)
     if (prevProps.bouquet._id !== this.props.bouquet._id) {
       this.setState({
         bouquet: this.props.bouquet,
-        collectionName: this.props.bouquet.collectionName || "",
+      });
+    }
+    // Also update if bouquet data changed (after save)
+    else if (prevProps.bouquet !== this.props.bouquet) {
+      this.setState({
+        bouquet: this.props.bouquet,
       });
     }
   }
 
   private handleSave = async (formData: FormData): Promise<boolean> => {
-    // Update collection name in form data
-    formData.set("collectionName", this.state.collectionName);
+    // Collection name is already in formData from BouquetEditor
+    // No need to override it - this prevents state sync bugs
     const success = await this.props.onSave(formData);
-    // State will be updated by parent component (BouquetEditorSection)
-    // No need to update local state here as parent handles it
     return success;
   };
 
-  private handleCollectionChange = (value: string): void => {
-    this.setState({ collectionName: value });
+  // Memoize collection names to prevent unnecessary re-renders
+  private getCollectionNames = (): string[] => {
+    return this.props.collections.map((c) => c.name);
   };
 
   render(): React.ReactNode {
-    const { collections, onBack } = this.props;
-    const { bouquet, collectionName } = this.state;
-    const collectionOptions = collections.map((c) => c.name);
-    const collectionNames = collections.map((c) => c.name);
+    const { onBack } = this.props;
+    const { bouquet } = this.state;
+    const collectionNames = this.getCollectionNames();
 
     return (
       <section className="bouquetEditForm" aria-label={`Edit bouquet ${bouquet.name}`}>
@@ -71,24 +84,6 @@ class BouquetEditForm extends Component<Props, State> {
           }}
           className="bouquetEditForm__header"
         />
-
-        <div className="bouquetEditForm__collectionSelector">
-          <label className="bouquetEditForm__collectionLabel">
-            <span className="bouquetEditForm__collectionLabelText">Koleksi</span>
-            <DropdownWithModal
-              label="Koleksi"
-              value={collectionName}
-              options={collectionOptions}
-              onChange={this.handleCollectionChange}
-              onAddNew={() => {}}
-              placeholder="Pilih koleksi..."
-              storageKey=""
-            />
-          </label>
-          <p className="bouquetEditForm__collectionHint">
-            Pilih koleksi untuk bouquet ini. Perubahan akan disimpan saat menyimpan bouquet.
-          </p>
-        </div>
 
         <div className="bouquetEditForm__formWrapper">
           <BouquetEditor

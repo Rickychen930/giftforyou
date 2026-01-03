@@ -183,7 +183,7 @@ class GoogleMapsReviewsSection extends Component<
   }
 
   render(): React.ReactNode {
-    const { placeName = "GiftForYou.idn" } = this.props;
+    const { placeName = "GiftForYou.idn", placeId } = this.props;
     const reviews = this.getSortedReviews(); // Use all reviews for auto-scroll
 
     return (
@@ -192,7 +192,7 @@ class GoogleMapsReviewsSection extends Component<
           <SectionHeader
             eyebrow="Testimoni Pelanggan"
             title="Ulasan Google Maps"
-            subtitle={`Lihat apa yang pelanggan katakan tentang ${placeName}`}
+            subtitle={`Dengarkan pengalaman nyata dari pelanggan ${placeName}. Setiap ulasan adalah bukti komitmen kami untuk memberikan pelayanan terbaik.`}
             className={`${this.baseClass}__header`}
             titleId="reviews-title"
           />
@@ -214,10 +214,14 @@ class GoogleMapsReviewsSection extends Component<
 
           <div className={`${this.baseClass}__footer`}>
             <a
-              href={`https://www.google.com/maps/place/?q=place_id:${this.props.placeId || ""}`}
+              href={placeId 
+                ? `https://www.google.com/maps/place/?q=place_id:${placeId}`
+                : `https://www.google.com/maps/search/${encodeURIComponent(placeName)}`
+              }
               target="_blank"
               rel="noopener noreferrer"
               className={`${this.baseClass}__link`}
+              aria-label={`Lihat semua ulasan ${placeName} di Google Maps`}
             >
               Lihat semua ulasan di Google Maps →
             </a>

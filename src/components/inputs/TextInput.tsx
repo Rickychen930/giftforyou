@@ -23,7 +23,10 @@ export interface TextInputProps {
   className?: string;
   showCharacterCount?: boolean;
   autoComplete?: string;
-  type?: "text" | "email" | "tel" | "url" | "search";
+  type?: "text" | "email" | "tel" | "url" | "search" | "number";
+  min?: number;
+  max?: number;
+  step?: number;
 }
 
 export interface TextInputState {
@@ -91,6 +94,9 @@ class TextInput extends Component<TextInputProps, TextInputState> {
       ariaDescribedBy,
       autoComplete,
       type = "text",
+      min,
+      max,
+      step,
     } = this.props;
 
     return (
@@ -106,6 +112,9 @@ class TextInput extends Component<TextInputProps, TextInputState> {
           required={required}
           maxLength={maxLength}
           minLength={minLength}
+          min={min}
+          max={max}
+          step={step}
           aria-required={required}
           aria-invalid={ariaInvalid}
           aria-describedby={ariaDescribedBy}

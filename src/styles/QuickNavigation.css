@@ -1,0 +1,174 @@
+/**
+ * Quick Navigation Styles
+ * Luxury, elegant, and non-intrusive sticky navigation
+ */
+
+@import "design-system.css";
+
+.quickNavigation {
+  position: fixed;
+  top: 50%;
+  right: var(--space-8);
+  transform: translateY(-50%);
+  z-index: 9996; /* Below WhatsApp (9998) and Scroll to Top (9997) */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  animation: slideInRight 0.3s ease-out;
+  pointer-events: none;
+}
+
+.quickNavigation__container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(254, 245, 247, 0.98) 100%
+  );
+  border: var(--border-luxury);
+  border-color: var(--brand-rose-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  box-shadow: 
+    var(--shadow-luxury-lg),
+    var(--shadow-elegant),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  backdrop-filter: var(--backdrop-blur-lg) saturate(180%);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg) saturate(180%);
+  pointer-events: auto;
+}
+
+.quickNavigation__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-10) var(--space-12);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-lg);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-elegant);
+  text-align: left;
+  white-space: nowrap;
+  min-width: 120px;
+  will-change: transform, background-color;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.quickNavigation__item:hover {
+  background: linear-gradient(135deg, rgba(212, 140, 156, 0.1), rgba(168, 213, 186, 0.1));
+  color: var(--color-text-primary);
+  transform: translateX(-4px) translateZ(0);
+}
+
+.quickNavigation__item--active {
+  background: var(--gradient-primary);
+  color: var(--color-white);
+  box-shadow: var(--shadow-luxury-md);
+}
+
+.quickNavigation__item--active:hover {
+  background: var(--gradient-primary);
+  color: var(--color-white);
+  transform: translateX(-4px) scale(1.02) translateZ(0);
+}
+
+.quickNavigation__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.quickNavigation__label {
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+/* Mobile: Hide on small screens, show as bottom bar */
+@media (max-width: 1024px) {
+  .quickNavigation {
+    top: auto;
+    bottom: calc(var(--space-24) + 56px + var(--space-8)); /* Above WhatsApp button */
+    right: var(--space-8);
+    transform: none;
+    flex-direction: row;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .quickNavigation::-webkit-scrollbar {
+    display: none;
+  }
+
+  .quickNavigation__container {
+    flex-direction: row;
+    gap: var(--space-4);
+    padding: var(--space-6);
+  }
+
+  .quickNavigation__item {
+    min-width: auto;
+    padding: var(--space-8) var(--space-12);
+    white-space: nowrap;
+  }
+
+  .quickNavigation__item:hover {
+    transform: translateY(-2px) translateZ(0);
+  }
+
+  .quickNavigation__item--active:hover {
+    transform: translateY(-2px) scale(1.02) translateZ(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .quickNavigation {
+    bottom: calc(var(--space-20) + 52px + var(--space-8));
+    right: var(--space-6);
+  }
+
+  .quickNavigation__item {
+    padding: var(--space-6) var(--space-10);
+    font-size: var(--font-size-xs);
+  }
+
+  .quickNavigation__icon {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .quickNavigation {
+    animation: none;
+  }
+
+  .quickNavigation__item:hover {
+    transform: none;
+  }
+}
+

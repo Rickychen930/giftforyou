@@ -52,6 +52,7 @@ class StoreLocationSection extends Component<StoreLocationSectionProps, StoreLoc
           <SectionHeader
             eyebrow="Toko & Kontak"
             title="Kunjungi Toko Kami di Cirebon"
+            subtitle="Kami siap melayani Anda dengan senyuman. Kunjungi toko kami atau hubungi melalui kontak di bawah untuk konsultasi dan pemesanan."
             className={`${this.baseClass}__header`}
             titleId="store-location-title"
           />

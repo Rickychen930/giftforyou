@@ -7,7 +7,14 @@
 @import "design-system.css";
 
 .skeletonLoader {
-  background: var(--gradient-luxury-gold-subtle);
+  background: linear-gradient(
+    90deg,
+    rgba(212, 140, 156, 0.08) 0%,
+    rgba(212, 140, 156, 0.12) 25%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(168, 213, 186, 0.12) 75%,
+    rgba(212, 140, 156, 0.08) 100%
+  );
   background-size: 200% 100%;
   position: relative;
   overflow: hidden;
@@ -15,12 +22,14 @@
   border: var(--border-luxury);
   border-color: var(--brand-rose-border);
   box-shadow: var(--shadow-luxury-sm);
+  will-change: background-position;
 }
 
 .skeletonLoader--animated {
-  animation: skeletonShimmer 1.5s ease-in-out infinite;
+  animation: skeletonShimmer 2s ease-in-out infinite;
 }
 
+/* Improved shimmer effect with luxury gradient */
 @keyframes skeletonShimmer {
   0% {
     background-position: -200% 0;
@@ -30,6 +39,13 @@
   }
 }
 
+/* GPU acceleration for smoother animation */
+.skeletonLoader--animated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
 .skeletonLoader--text {
   display: flex;
   flex-direction: column;
@@ -37,10 +53,19 @@
 }
 
 .skeletonLoader__line {
-  background: var(--gradient-luxury-gold-subtle);
+  background: linear-gradient(
+    90deg,
+    rgba(212, 140, 156, 0.08) 0%,
+    rgba(212, 140, 156, 0.12) 25%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(168, 213, 186, 0.12) 75%,
+    rgba(212, 140, 156, 0.08) 100%
+  );
   background-size: 200% 100%;
   border-radius: var(--radius-xs);
   height: 1rem;
+  will-change: background-position;
+  transform: translateZ(0);
 }
 
 .skeletonLoader--card {

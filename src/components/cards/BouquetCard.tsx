@@ -56,6 +56,7 @@ interface BouquetCardState {
 class BouquetCardInternal extends Component<BouquetCardProps & Partial<WithRouterProps>, BouquetCardState> {
   private baseClass: string = "bouquetCard";
   private imageRef: React.RefObject<HTMLImageElement>;
+  private intersectionObserver: IntersectionObserver | null = null;
 
   constructor(props: BouquetCardProps & Partial<WithRouterProps>) {
     super(props);
@@ -69,14 +70,102 @@ class BouquetCardInternal extends Component<BouquetCardProps & Partial<WithRoute
   }
 
   componentDidMount(): void {
-    this.checkImageLoad();
+    this.setupLazyImageLoading();
     this.checkFavoriteStatus();
   }
 
   componentDidUpdate(prevProps: BouquetCardProps & Partial<WithRouterProps>): void {
     if (prevProps.image !== this.props.image || prevProps._id !== this.props._id) {
-      this.checkImageLoad();
+      this.setupLazyImageLoading();
       this.checkFavoriteStatus();
+    }
+  }
+
+  componentWillUnmount(): void {
+    this.cleanupIntersectionObserver();
+  }
+
+  /**
+   * Prevent unnecessary re-renders when props haven't changed
+   */
+  shouldComponentUpdate(nextProps: BouquetCardProps & Partial<WithRouterProps>, nextState: BouquetCardState): boolean {
+    const { _id, image, name, price, status } = this.props;
+    const { imageLoaded, imageError, isFavorited, showQuickActions } = this.state;
+
+    return (
+      nextProps._id !== _id ||
+      nextProps.image !== image ||
+      nextProps.name !== name ||
+      nextProps.price !== price ||
+      nextProps.status !== status ||
+      nextState.imageLoaded !== imageLoaded ||
+      nextState.imageError !== imageError ||
+      nextState.isFavorited !== isFavorited ||
+      nextState.showQuickActions !== showQuickActions
+    );
+  }
+
+  /**
+   * Setup lazy image loading with Intersection Observer
+   */
+  /**
+   * Setup lazy image loading with Intersection Observer
+   * Only loads image when it's about to be visible
+   */
+  private setupLazyImageLoading(): void {
+    this.cleanupIntersectionObserver();
+
+    // If image is already loaded, skip observer
+    if (this.state.imageLoaded) {
+      return;
+    }
+
+    // Use requestAnimationFrame to ensure DOM is ready
+    requestAnimationFrame(() => {
+      const imageElement = this.imageRef.current || 
+        (document.querySelector(`[data-bouquet-id="${this.props._id}"]`) as HTMLImageElement);
+      
+      if (!imageElement) {
+        // If element not found, load immediately as fallback
+        this.checkImageLoad();
+        return;
+      }
+
+      // Only setup observer if image has data-src (not loaded yet)
+      if (imageElement.dataset.src) {
+        this.intersectionObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                // Load the image
+                const img = entry.target as HTMLImageElement;
+                if (img.dataset.src) {
+                  img.src = img.dataset.src;
+                  img.removeAttribute("data-src");
+                  this.checkImageLoad();
+                }
+                this.cleanupIntersectionObserver();
+              }
+            });
+          },
+          {
+            rootMargin: "50px", // Start loading 50px before visible
+            threshold: 0.01,
+          }
+        );
+
+        this.intersectionObserver.observe(imageElement);
+      } else {
+        // Image src already set, just check load
+        this.checkImageLoad();
+      }
+    });
+  }
+
+  private cleanupIntersectionObserver(): void {
+    if (this.intersectionObserver) {
+      this.intersectionObserver.disconnect();
+      this.intersectionObserver = null;
     }
   }
 
@@ -218,7 +307,7 @@ class BouquetCardInternal extends Component<BouquetCardProps & Partial<WithRoute
   }
 
   render(): React.ReactNode {
-    const { name, price, status, customPenanda = [], isNewEdition = false, isFeatured = false } =
+    const { _id, name, price, status, customPenanda = [], isNewEdition = false, isFeatured = false } =
       this.props;
     const { imageLoaded, imageError, isFavorited, showQuickActions } = this.state;
     const imageUrl = this.getImageUrl();
@@ -245,6 +334,8 @@ class BouquetCardInternal extends Component<BouquetCardProps & Partial<WithRoute
             imageError={imageError}
             onImageLoad={this.handleImageLoad}
             onImageError={this.handleImageError}
+            imageRef={this.imageRef}
+            bouquetId={_id}
           />
 
           {/* Badges - Using reusable BouquetCardBadges component */}

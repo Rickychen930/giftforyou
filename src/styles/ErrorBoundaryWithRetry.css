@@ -1,0 +1,69 @@
+/**
+ * Error Boundary with Retry Styles
+ * Luxury, elegant, and accessible
+ */
+
+.errorBoundaryWithRetry {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-40);
+  min-height: 300px;
+  text-align: center;
+  gap: var(--space-20);
+}
+
+.errorBoundaryWithRetry__alert {
+  max-width: 600px;
+  width: 100%;
+}
+
+.errorBoundaryWithRetry__actions {
+  display: flex;
+  gap: var(--space-12);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.errorBoundaryWithRetry__retryButton {
+  padding: var(--space-12) var(--space-24);
+  background: var(--gradient-primary);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-elegant);
+  min-height: 44px;
+  min-width: 120px;
+}
+
+.errorBoundaryWithRetry__retryButton:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-elegant);
+}
+
+.errorBoundaryWithRetry__retryButton:active {
+  transform: translateY(0);
+}
+
+.errorBoundaryWithRetry__retryButton:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.errorBoundaryWithRetry__maxRetries {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-8);
+}
+
+@media (max-width: 768px) {
+  .errorBoundaryWithRetry {
+    padding: var(--space-24);
+    min-height: 200px;
+  }
+}
+

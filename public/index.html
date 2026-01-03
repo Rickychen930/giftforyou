@@ -35,10 +35,21 @@
     <meta property="og:url" content="https://giftforyou-idn.cloud/" />
     <meta property="og:image" content="%PUBLIC_URL%/images/logo.png" />
 
+    <!-- DNS prefetch for external resources -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    
+    <!-- Preconnect for critical resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Font loading optimization - load asynchronously -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@600;700;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@600;700;900&display=swap" rel="stylesheet"></noscript>
+    
+    <!-- Preload critical images -->
+    <link rel="preload" href="%PUBLIC_URL%/images/welcome-image.jpeg" as="image" type="image/jpeg">
+    <link rel="preload" href="%PUBLIC_URL%/images/logo.png" as="image" type="image/png">
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/icon-png.png" />
     <!--
       manifest.json provides metadata used when your web app is installed on a

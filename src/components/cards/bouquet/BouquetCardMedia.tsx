@@ -15,8 +15,10 @@ export interface BouquetCardMediaProps {
   detailHref: string;
   imageLoaded: boolean;
   imageError: boolean;
-  onImageLoad: () => void;
-  onImageError: (e: React.SyntheticEvent<HTMLImageElement>) => void;
+  onImageLoad?: () => void;
+  onImageError?: (e: React.SyntheticEvent<HTMLImageElement>) => void;
+  imageRef?: RefObject<HTMLImageElement>;
+  bouquetId?: string;
 }
 
 interface BouquetCardMediaState {
@@ -38,8 +40,11 @@ export class BouquetCardMedia extends Component<BouquetCardMediaProps, BouquetCa
   }
 
   render(): React.ReactNode {
-    const { imageUrl, imageAlt, detailHref, imageLoaded, imageError, onImageLoad, onImageError } =
+    const { imageUrl, imageAlt, detailHref, imageLoaded, imageError, onImageLoad, onImageError, imageRef, bouquetId } =
       this.props;
+
+    // Use provided ref or internal ref
+    const imgRef = imageRef || this.imageRef;
 
     return (
       <div className={this.baseClass}>
@@ -54,8 +59,10 @@ export class BouquetCardMedia extends Component<BouquetCardMediaProps, BouquetCa
             </div>
           )}
           <img
-            ref={this.imageRef}
-            src={imageUrl}
+            ref={imgRef}
+            data-bouquet-id={bouquetId}
+            src={imageLoaded ? imageUrl : undefined}
+            data-src={!imageLoaded ? imageUrl : undefined}
             alt={imageAlt}
             className={`${this.baseClass}__image ${imageLoaded ? "is-loaded" : ""} ${imageError ? "is-error" : ""}`}
             loading="lazy"

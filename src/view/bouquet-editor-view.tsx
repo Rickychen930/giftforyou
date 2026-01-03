@@ -19,6 +19,7 @@ import DropdownWithModal from "../components/inputs/DropdownWithModal";
 import TagInput from "../components/inputs/TagInput";
 import FormField from "../components/inputs/FormField";
 import TextInput from "../components/inputs/TextInput";
+import NumberInput from "../components/inputs/NumberInput";
 import PriceInput from "../components/inputs/PriceInput";
 import TextareaInput from "../components/inputs/TextareaInput";
 import StatusSelect from "../components/inputs/StatusSelect";
@@ -273,31 +274,36 @@ class BouquetEditorView extends Component<Props> {
   private renderImageSection(): React.ReactNode {
     const { state, getters } = this.getControllerState();
     const { previewUrl } = getters;
-    const { imageDimensions } = state;
+    const { imageDimensions, isImageLoading } = state;
 
     return (
       <div className="becImage">
-        {previewUrl ? (
+        {isImageLoading ? (
+          <div className="becImage__loading" aria-label="Memuat gambar">
+            <div className="becSpinner"></div>
+            <span>Memproses gambar...</span>
+          </div>
+        ) : previewUrl ? (
           <img
             src={previewUrl}
-            alt={state.form.name}
+            alt={state.form.name || "Bouquet"}
             loading="lazy"
             onLoad={(e) => {
               const img = e.currentTarget;
-                if (
-                  img.naturalWidth &&
-                  img.naturalHeight &&
-                  !imageDimensions
-                ) {
-                  const controller = this.props.controller;
-                  controller.setState((prev) => ({
-                    ...prev,
-                    imageDimensions: {
-                      width: img.naturalWidth,
-                      height: img.naturalHeight,
-                    },
-                  }));
-                }
+              if (
+                img.naturalWidth &&
+                img.naturalHeight &&
+                !imageDimensions
+              ) {
+                const controller = this.props.controller;
+                controller.setState((prev) => ({
+                  ...prev,
+                  imageDimensions: {
+                    width: img.naturalWidth,
+                    height: img.naturalHeight,
+                  },
+                }));
+              }
             }}
             onError={(e) => {
               e.currentTarget.onerror = null;
@@ -418,6 +424,11 @@ class BouquetEditorView extends Component<Props> {
   }
 
   // ==================== Form Fields ====================
+  // Memoize collection names to prevent unnecessary recalculations
+  private getCollectionNames = (collections: string[]): string[] => {
+    return collections;
+  };
+
   private renderFormFields(): React.ReactNode {
     const { state, handlers } = this.getControllerState();
     const {
@@ -431,6 +442,11 @@ class BouquetEditorView extends Component<Props> {
       flowerOptions,
     } = state;
     const { collections } = this.props.controller.props;
+    
+    // Memoize merged collection options
+    const allCollectionOptions = [
+      ...new Set([...collectionOptions, ...this.getCollectionNames(collections)]),
+    ];
 
     return (
       <div className="becGrid">
@@ -567,14 +583,43 @@ class BouquetEditorView extends Component<Props> {
           }
         />
 
+        {/* Quantity Field */}
+        <FormField
+          label="Stok"
+          error={
+            touchedFields.has("quantity") && fieldErrors.quantity
+              ? fieldErrors.quantity
+              : undefined
+          }
+          htmlFor="bec-quantity"
+        >
+          <NumberInput
+            id="bec-quantity"
+            name="quantity"
+            value={form.quantity}
+            onChange={handlers.handleTextChange}
+            placeholder="0"
+            min={0}
+            step={1}
+            disabled={saving}
+            ariaInvalid={
+              touchedFields.has("quantity") && fieldErrors.quantity
+                ? "true"
+                : "false"
+            }
+            ariaDescribedBy={
+              touchedFields.has("quantity") && fieldErrors.quantity
+                ? "bec-quantity-error"
+                : undefined
+            }
+          />
+        </FormField>
+
         {/* Collection Field */}
         <DropdownWithModal
           label="Koleksi"
           value={form.collectionName}
-          options={[
-            ...collectionOptions,
-            ...collections.filter((c) => !collectionOptions.includes(c)),
-          ]}
+          options={allCollectionOptions}
           onChange={(value) => {
             const error = validateField("collectionName", value);
             this.props.controller.setState((prev) => {
@@ -1032,9 +1077,11 @@ class BouquetEditorView extends Component<Props> {
   // ==================== Footer Section ====================
   private renderFooter(): React.ReactNode {
     const { state, handlers, getters } = this.getControllerState();
-    const { saving } = state;
+    const { saving, isImageLoading } = state;
     const { validationError } = getters;
     const { canSave, isDirty } = getters;
+    
+    const isDisabled = !canSave || !isDirty || saving || isImageLoading;
 
     return (
       <div className="becFooter">
@@ -1042,25 +1089,29 @@ class BouquetEditorView extends Component<Props> {
           type="button"
           className="becSave"
           onClick={handlers.handleSave}
-          disabled={!canSave || !isDirty || saving}
+          disabled={isDisabled}
           title={
             saving
               ? "Menyimpan..."
-              : validationError
-                ? validationError
-                : !isDirty
-                  ? "Tidak ada perubahan"
-                  : "Simpan perubahan (Ctrl+S)"
+              : isImageLoading
+                ? "Menunggu gambar selesai diproses..."
+                : validationError
+                  ? validationError
+                  : !isDirty
+                    ? "Tidak ada perubahan"
+                    : "Simpan perubahan (Ctrl+S)"
           }
-          aria-busy={saving}
+          aria-busy={saving || isImageLoading}
           aria-label={
             saving
               ? "Menyimpan perubahan"
-              : validationError
-                ? `Tidak dapat menyimpan: ${validationError}`
-                : !isDirty
-                  ? "Tidak ada perubahan untuk disimpan"
-                  : "Simpan perubahan bouquet"
+              : isImageLoading
+                ? "Menunggu gambar selesai diproses"
+                : validationError
+                  ? `Tidak dapat menyimpan: ${validationError}`
+                  : !isDirty
+                    ? "Tidak ada perubahan untuk disimpan"
+                    : "Simpan perubahan bouquet"
           }
         >
           {saving ? (
@@ -1077,6 +1128,7 @@ class BouquetEditorView extends Component<Props> {
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
                 style={{ flexShrink: 0 }}
+                aria-hidden="true"
               >
                 <path
                   d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16L21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z"
@@ -1111,10 +1163,25 @@ class BouquetEditorView extends Component<Props> {
   // ==================== Main Render ====================
   render(): React.ReactNode {
     const { state } = this.getControllerState();
-    const { form } = state;
+    const { form, saving, isImageLoading } = state;
+    
+    // Early return optimization - don't render if critical data missing
+    if (!form._id) {
+      return (
+        <article className="becCard" aria-label="Loading bouquet">
+          <div className="becBody">
+            <div className="becAlert">Memuat data bouquet...</div>
+          </div>
+        </article>
+      );
+    }
 
     return (
-      <article className="becCard" aria-label={`Edit bouquet ${form.name}`}>
+      <article 
+        className="becCard" 
+        aria-label={`Edit bouquet ${form.name || "tanpa nama"}`}
+        aria-busy={saving || isImageLoading}
+      >
         {this.renderHeader()}
         {this.renderDeleteModal()}
         {this.renderImageSection()}

@@ -1,0 +1,23 @@
+/**
+ * Section Wrapper Styles
+ * Luxury, elegant, and consistent section styling
+ */
+
+@import "../design-system.css";
+
+.sectionWrapper {
+  position: relative;
+  isolation: isolate;
+}
+
+.section-wrapper-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-12);
+  min-height: 200px;
+  padding: var(--space-32);
+  background: transparent;
+}
+

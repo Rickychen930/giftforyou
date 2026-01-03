@@ -39,11 +39,22 @@ type RawBouquet = Bouquet & {
 /**
  * Our Collection Section Component
  * Class-based component for our collection section
+ * Optimized with shouldComponentUpdate to prevent unnecessary re-renders
  */
 class OurCollectionSection extends Component<OurCollectionViewProps, OurCollectionSectionState> {
   private baseClass: string = "ourCollection";
   private sectionRef: RefObject<HTMLElement>;
   private intersectionObserver: IntersectionObserver | null;
+  // Cache for prepared collections to avoid recalculation
+  private preparedCollectionsCache: {
+    key: string;
+    result: Array<{
+      id: string;
+      name: string;
+      description: string;
+      bouquets: BouquetCardProps[];
+    }>;
+  } | null = null;
 
   constructor(props: OurCollectionViewProps) {
     super(props);
@@ -52,6 +63,29 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
     };
     this.sectionRef = React.createRef();
     this.intersectionObserver = null;
+  }
+
+  /**
+   * Prevent unnecessary re-renders when props haven't changed
+   * Optimizes performance by avoiding re-renders when data is the same
+   */
+  shouldComponentUpdate(nextProps: OurCollectionViewProps, nextState: OurCollectionSectionState): boolean {
+    const { items, loading, errorMessage } = this.props;
+    const { isVisible } = this.state;
+
+    // Clear cache if items changed
+    if (nextProps.items !== items || nextProps.items.length !== items.length) {
+      this.preparedCollectionsCache = null;
+    }
+
+    // Only re-render if props or visibility state changed
+    return (
+      nextProps.loading !== loading ||
+      nextProps.errorMessage !== errorMessage ||
+      nextProps.items.length !== items.length ||
+      nextProps.items !== items ||
+      nextState.isVisible !== isVisible
+    );
   }
 
   componentDidMount(): void {
@@ -147,6 +181,9 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
       .filter((b): b is BouquetCardProps => Boolean(b));
   }
 
+  /**
+   * Prepare collections with memoization for performance
+   */
   private prepareCollections(): Array<{
     id: string;
     name: string;
@@ -154,7 +191,23 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
     bouquets: BouquetCardProps[];
   }> {
     const { items } = this.props;
-    return (items ?? [])
+    
+    // Create cache key from items
+    const cacheKey = JSON.stringify({
+      length: items.length,
+      ids: items.map((c) => {
+        const anyC = c as unknown as { _id?: string; id?: string; name?: string };
+        return anyC?._id ?? anyC?.id ?? anyC?.name ?? "";
+      }).join(","),
+    });
+
+    // Return cached result if available
+    if (this.preparedCollectionsCache?.key === cacheKey) {
+      return this.preparedCollectionsCache.result;
+    }
+
+    // Prepare collections
+    const result = (items ?? [])
       .map((c) => {
         const anyC = c as unknown as { _id?: string; id?: string; name?: string };
         const id = anyC?._id ?? anyC?.id ?? anyC?.name ?? "";
@@ -169,6 +222,10 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
       })
       .filter((c) => Boolean(c.id) && Boolean(c.name))
       .filter((c) => c.bouquets.length > 0);
+
+    // Cache the result
+    this.preparedCollectionsCache = { key: cacheKey, result };
+    return result;
   }
 
   private renderCollectionSkeleton(): React.ReactNode {
@@ -197,32 +254,46 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
     );
   }
 
-  /**
-   * Render error state
-   */
-  private renderErrorState(): React.ReactNode {
-    const { errorMessage } = this.props;
-    return (
-      <AlertMessage
-        variant="error"
-        message={`Gagal memuat koleksi. ${errorMessage || "Silakan refresh halaman."}`}
-        className={`${this.baseClass}__error`}
-      />
-    );
-  }
+      /**
+       * Render error state with retry option
+       */
+      private renderErrorState(): React.ReactNode {
+        const { errorMessage } = this.props;
+        return (
+          <div className={`${this.baseClass}__error`} role="alert" aria-live="polite">
+            <AlertMessage
+              variant="error"
+              message={`Gagal memuat koleksi. ${errorMessage || "Silakan refresh halaman."}`}
+              className={`${this.baseClass}__errorMessage`}
+            />
+            <div className={`${this.baseClass}__errorActions`}>
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className={`${this.baseClass}__retryBtn`}
+                aria-label="Coba lagi memuat koleksi"
+              >
+                Coba Lagi
+              </button>
+            </div>
+          </div>
+        );
+      }
 
   /**
-   * Render empty state
+   * Render empty state with better messaging and CTA
    */
   private renderEmptyState(): React.ReactNode {
     return (
       <EmptyState
-        title="Belum ada koleksi"
-        description="Silakan cek kembali — koleksi baru akan ditambahkan secara berkala."
+        title="Koleksi Segera Hadir"
+        description="Kami sedang mempersiapkan koleksi terbaik untuk Anda. Silakan hubungi kami untuk informasi lebih lanjut atau cek kembali nanti."
+        actionLabel="Hubungi Kami"
+        actionPath="/contact"
         icon={
           <svg
-            width="48"
-            height="48"
+            width="64"
+            height="64"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -243,6 +314,13 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
               strokeLinecap="round"
               strokeLinejoin="round"
               opacity="0.3"
+            />
+            <path
+              d="M12 12V12.01"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </svg>
         }
@@ -267,7 +345,7 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
           <SectionHeader
             eyebrow="Pilihan terbaik untuk setiap momen"
             title="Koleksi Kami"
-            subtitle="Bouquet dan gift arrangement pilihan untuk perayaan, kejutan, dan keseharian yang lebih elegan."
+            subtitle="Jelajahi berbagai bouquet dan gift arrangement premium kami. Setiap koleksi dirancang khusus untuk membuat momen Anda lebih berkesan dan berkesan."
             className={`${this.baseClass}__header`}
             titleId="ourCollection-title"
           />

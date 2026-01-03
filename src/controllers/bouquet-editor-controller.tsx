@@ -114,8 +114,17 @@ export class BouquetEditorController extends BaseController<Props, State> {
   }
 
   componentDidUpdate(prevProps: Props, prevState: State): void {
+    // Reset form when bouquet changes (different bouquet selected)
     if (prevProps.bouquet._id !== this.props.bouquet._id) {
       this.resetFormFromBouquet();
+    }
+    // Also update form when bouquet data changes (after save from parent)
+    else if (prevProps.bouquet !== this.props.bouquet) {
+      // Only update if form is not dirty to prevent overwriting user changes
+      const { isDirty } = this.getValidationState();
+      if (!isDirty) {
+        this.resetFormFromBouquet();
+      }
     }
     
     // Update quick actions listeners when showQuickActions changes
@@ -191,9 +200,14 @@ export class BouquetEditorController extends BaseController<Props, State> {
       URL.revokeObjectURL(this.previewRef);
     }
 
-    // Clear timeouts
+    // Clear all timeouts
     if (this.saveStatusTimeout) {
       window.clearTimeout(this.saveStatusTimeout);
+      this.saveStatusTimeout = null;
+    }
+    if (this.validationDebounceTimeout) {
+      clearTimeout(this.validationDebounceTimeout);
+      this.validationDebounceTimeout = null;
     }
     // Note: AbortController cleanup is handled by BaseController
   };
@@ -286,16 +300,17 @@ export class BouquetEditorController extends BaseController<Props, State> {
   }
 
   // ==================== Form Handlers ====================
+  private validationDebounceTimeout: NodeJS.Timeout | null = null;
 
   handleTextChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     const { name, value } = e.target;
 
-    // Mark field as touched
+    // Mark field as touched immediately for better UX
     this.setState((prev) => ({
       touchedFields: new Set([...prev.touchedFields, name]),
     }));
 
-    // Calculate new value
+    // Calculate new value with optimized logic
     const newValue =
       name === "price"
         ? (() => {
@@ -303,22 +318,52 @@ export class BouquetEditorController extends BaseController<Props, State> {
             if (!Number.isFinite(num) || num < 0) return 0;
             return num;
           })()
-        : value;
+        : name === "quantity"
+          ? (() => {
+              const num = Number(value);
+              if (!Number.isFinite(num) || num < 0) return 0;
+              return Math.max(0, Math.trunc(num));
+            })()
+          : value;
 
-    // Validate field
-    const error = validateField(name, newValue);
-    this.setState((prev) => {
-      const newErrors = { ...prev.fieldErrors };
-      if (error) {
-        newErrors[name] = error;
-      } else {
-        delete newErrors[name];
+    // Update form state immediately (optimistic update)
+    this.setState((prev) => ({
+      form: { ...prev.form, [name]: newValue } as FormState,
+    }));
+
+    // Debounce validation for better performance (except for critical fields)
+    const needsImmediateValidation = name === "name" || name === "price" || name === "size";
+    
+    if (needsImmediateValidation) {
+      // Immediate validation for critical fields
+      const error = validateField(name, newValue);
+      this.setState((prev) => {
+        const newErrors = { ...prev.fieldErrors };
+        if (error) {
+          newErrors[name] = error;
+        } else {
+          delete newErrors[name];
+        }
+        return { fieldErrors: newErrors };
+      });
+    } else {
+      // Debounced validation for non-critical fields
+      if (this.validationDebounceTimeout) {
+        clearTimeout(this.validationDebounceTimeout);
       }
-      return {
-        form: { ...prev.form, [name]: newValue } as FormState,
-        fieldErrors: newErrors,
-      };
-    });
+      this.validationDebounceTimeout = setTimeout(() => {
+        const error = validateField(name, newValue);
+        this.setState((prev) => {
+          const newErrors = { ...prev.fieldErrors };
+          if (error) {
+            newErrors[name] = error;
+          } else {
+            delete newErrors[name];
+          }
+          return { fieldErrors: newErrors };
+        });
+      }, 300);
+    }
   };
 
   handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
@@ -367,7 +412,7 @@ export class BouquetEditorController extends BaseController<Props, State> {
       return;
     }
 
-    // Check file size (8MB limit)
+    // Check file size (8MB limit) - early validation for better UX
     const maxSize = 8 * 1024 * 1024;
     if (selectedFile.size > maxSize) {
       this.setSaveStatus("error", "Ukuran file maksimal 8MB. Silakan pilih file yang lebih kecil.");
@@ -379,13 +424,22 @@ export class BouquetEditorController extends BaseController<Props, State> {
       return;
     }
 
-    this.setState({ isImageLoading: true, saveStatus: "idle", saveMessage: "" });
+    // Optimistic UI update - show loading immediately
+    this.setState({ 
+      isImageLoading: true, 
+      saveStatus: "idle", 
+      saveMessage: "",
+      // Clear previous errors
+      fieldErrors: {},
+    });
 
     try {
-      // Compress image if it's large
+      // Process image with optimized performance
+      // Compress image if it's large (optimize for performance)
       let processedFile = selectedFile;
       let dimensions: { width: number; height: number } | null = null;
       
+      // Only compress if file is larger than 2MB to save processing time
       if (selectedFile.size > 2 * 1024 * 1024) {
         try {
           const result = await compressImage(selectedFile);
@@ -397,6 +451,51 @@ export class BouquetEditorController extends BaseController<Props, State> {
             console.warn("Image compression failed, using original:", compressError);
           }
           // Continue with original file if compression fails
+          // Try to get dimensions from original file
+          try {
+            const img = new Image();
+            const tempUrl = URL.createObjectURL(selectedFile);
+            await new Promise<void>((resolve, reject) => {
+              img.onload = () => {
+                dimensions = { width: img.naturalWidth, height: img.naturalHeight };
+                URL.revokeObjectURL(tempUrl);
+                resolve();
+              };
+              img.onerror = () => {
+                URL.revokeObjectURL(tempUrl);
+                reject(new Error("Failed to load image"));
+              };
+              img.src = tempUrl;
+            });
+          } catch (dimError) {
+            // Dimensions not critical, continue without them
+            if (process.env.NODE_ENV === "development") {
+              console.warn("Failed to get image dimensions:", dimError);
+            }
+          }
+        }
+      } else {
+        // For smaller files, get dimensions without compression for faster processing
+        try {
+          const img = new Image();
+          const tempUrl = URL.createObjectURL(selectedFile);
+          await new Promise<void>((resolve, reject) => {
+            img.onload = () => {
+              dimensions = { width: img.naturalWidth, height: img.naturalHeight };
+              URL.revokeObjectURL(tempUrl);
+              resolve();
+            };
+            img.onerror = () => {
+              URL.revokeObjectURL(tempUrl);
+              reject(new Error("Failed to load image"));
+            };
+            img.src = tempUrl;
+          });
+        } catch (dimError) {
+          // Dimensions not critical, continue without them
+          if (process.env.NODE_ENV === "development") {
+            console.warn("Failed to get image dimensions:", dimError);
+          }
         }
       }
 
@@ -414,6 +513,7 @@ export class BouquetEditorController extends BaseController<Props, State> {
         file: processedFile,
         preview: objectUrl,
         imageDimensions: dimensions,
+        isImageLoading: false,
       });
     } catch (err) {
       // Error processing image - log in development only
@@ -421,13 +521,15 @@ export class BouquetEditorController extends BaseController<Props, State> {
         console.error("Error processing image:", err);
       }
       this.setSaveStatus("error", "Gagal memproses gambar. Silakan coba file lain.");
-      this.setState({ file: null });
+      this.setState({ 
+        file: null,
+        isImageLoading: false,
+      });
       // Cleanup any blob URL that might have been created
       if (this.previewRef && this.previewRef.startsWith("blob:")) {
         URL.revokeObjectURL(this.previewRef);
+        this.previewRef = this.props.bouquet.image ?? "";
       }
-    } finally {
-      this.setState({ isImageLoading: false });
     }
   };
 
@@ -474,24 +576,29 @@ export class BouquetEditorController extends BaseController<Props, State> {
   // ==================== Save/Delete/Duplicate Handlers ====================
 
   handleSave = async (): Promise<void> => {
-    // Prevent double submission
-    if (this.state.saving) {
+    // Prevent double submission or save during image processing
+    if (this.state.saving || this.state.isImageLoading) {
       return;
     }
 
     const { validationError, isDirty } = this.getValidationState();
 
     if (validationError) {
-      // Scroll to first error with optimized behavior
+      // Scroll to first error with optimized behavior using requestAnimationFrame
       const firstErrorField = Object.keys(this.state.fieldErrors)[0];
       if (firstErrorField) {
+        // Use requestAnimationFrame for smooth scrolling
         requestAnimationFrame(() => {
-          const errorElement = document.querySelector(`[name="${firstErrorField}"]`) as HTMLElement;
+          const errorElement = document.querySelector(
+            `[name="${firstErrorField}"], #${firstErrorField}-error, [aria-describedby*="${firstErrorField}"]`
+          ) as HTMLElement;
           if (errorElement) {
             errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
-            // Focus after scroll completes
+            // Focus after scroll completes for better accessibility
             setTimeout(() => {
-              errorElement.focus();
+              if (errorElement.tagName === "INPUT" || errorElement.tagName === "TEXTAREA" || errorElement.tagName === "SELECT") {
+                errorElement.focus();
+              }
             }, 300);
           }
         });
@@ -499,7 +606,10 @@ export class BouquetEditorController extends BaseController<Props, State> {
       return;
     }
 
-    if (!isDirty) return;
+    if (!isDirty) {
+      this.setSaveStatus("idle", "Tidak ada perubahan untuk disimpan.");
+      return;
+    }
 
     try {
       this.setState({ saving: true });
@@ -512,17 +622,31 @@ export class BouquetEditorController extends BaseController<Props, State> {
       });
 
       const result = await Promise.race([savePromise, timeoutPromise]);
+      
+      // Handle save result
       if (typeof result === "boolean") {
         if (result) {
-          // Update initialForm to reflect saved state - prevents false "dirty" state
-          // Clear file after successful save
+          // Save successful - update initialForm to reflect saved state
+          // This prevents false "dirty" state after save
+          const savedForm = { ...this.state.form };
+          
+          // Cleanup blob URL if file was uploaded
+          if (this.state.file && this.previewRef && this.previewRef.startsWith("blob:")) {
+            URL.revokeObjectURL(this.previewRef);
+            // Update preview to use saved image URL (will be updated by parent)
+            this.previewRef = this.props.bouquet.image ?? "";
+          }
+          
           this.setState((prev) => ({
-            form: prev.form, // Keep current form state
-            initialForm: prev.form, // Update initialForm to match current form
-            file: null,
+            form: savedForm, // Keep current form state
+            initialForm: savedForm, // Update initialForm to match current form
+            file: null, // Clear file after successful save
+            preview: this.props.bouquet.image ?? prev.preview, // Use saved image
             imageDimensions: null,
             saving: false,
+            fieldErrors: {}, // Clear any validation errors
           }));
+          
           // Show success message - STAY IN EDIT VIEW (don't auto-navigate)
           this.setSaveStatus(
             "success",
@@ -531,16 +655,26 @@ export class BouquetEditorController extends BaseController<Props, State> {
         } else {
           // IMPORTANT: Reset saving state on failure to allow retry
           this.setState({ saving: false });
-          this.setSaveStatus("error", "Gagal menyimpan. Coba lagi.");
+          this.setSaveStatus("error", "Gagal menyimpan. Silakan periksa koneksi dan coba lagi.");
         }
       } else {
-        // Update initialForm to reflect saved state
+        // Void return - assume success
+        const savedForm = { ...this.state.form };
+        
+        // Cleanup blob URL if file was uploaded
+        if (this.state.file && this.previewRef && this.previewRef.startsWith("blob:")) {
+          URL.revokeObjectURL(this.previewRef);
+          this.previewRef = this.props.bouquet.image ?? "";
+        }
+        
         this.setState((prev) => ({
-          form: prev.form, // Keep current form state
-          initialForm: prev.form, // Update initialForm to match current form
+          form: savedForm,
+          initialForm: savedForm,
           saving: false,
           file: null,
+          preview: this.props.bouquet.image ?? prev.preview,
           imageDimensions: null,
+          fieldErrors: {},
         }));
         this.setSaveStatus("success", "Perubahan tersimpan.");
       }
