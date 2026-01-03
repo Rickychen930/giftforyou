@@ -7,13 +7,14 @@ import "../styles/DashboardUploaderSection.css";
 import type { BouquetUploaderController } from "../controllers/bouquet-uploader-controller";
 import {
   formatBytes,
-  formatPricePreview,
-  getCharacterCountClass,
   validateField,
 } from "../models/bouquet-uploader-model";
 import DropdownWithModal from "../components/inputs/DropdownWithModal";
 import TagInput from "../components/inputs/TagInput";
 import FormField from "../components/inputs/FormField";
+import TextInput from "../components/inputs/TextInput";
+import PriceInput from "../components/inputs/PriceInput";
+import TextareaInput from "../components/inputs/TextareaInput";
 
 interface Props {
   controller: BouquetUploaderController;
@@ -184,7 +185,7 @@ class BouquetUploaderView extends Component<Props> {
           }
           htmlFor="uploader-name"
         >
-          <input
+          <TextInput
             id="uploader-name"
             name="name"
             value={name}
@@ -192,22 +193,17 @@ class BouquetUploaderView extends Component<Props> {
             placeholder="mis., Orchid Elegance"
             disabled={isFormDisabled}
             required
-            aria-required="true"
-            aria-invalid={
+            maxLength={100}
+            ariaInvalid={
               touchedFields.has("name") && fieldErrors.name ? "true" : "false"
             }
-            aria-describedby={
+            ariaDescribedBy={
               touchedFields.has("name") && fieldErrors.name
                 ? "name-error"
                 : undefined
             }
-            maxLength={100}
+            showCharacterCount
           />
-          <span
-            className={`uploader__fieldHint ${getCharacterCountClass(name.length, 100)}`}
-          >
-            {name.length}/100
-          </span>
         </FormField>
 
         {/* Price Field */}
@@ -221,40 +217,28 @@ class BouquetUploaderView extends Component<Props> {
           }
           htmlFor="uploader-price"
         >
-          <div className="uploader__priceInputWrapper">
-            <input
-              id="uploader-price"
-              name="price"
-              type="number"
-              value={price || ""}
-              onChange={handlers.handleTextChange}
-              placeholder="0"
-              disabled={isFormDisabled}
-              required
-              min={0}
-              step="any"
-              aria-required="true"
-              aria-invalid={
-                touchedFields.has("price") && fieldErrors.price
-                  ? "true"
-                  : "false"
-              }
-              aria-describedby={
-                touchedFields.has("price") && fieldErrors.price
-                  ? "price-error"
-                  : undefined
-              }
-              className="uploader__priceInput"
-            />
-          </div>
-          {price > 0 && (
-            <span
-              className="uploader__fieldHint"
-              style={{ color: "var(--brand-rose-500)", fontWeight: 700 }}
-            >
-              {formatPricePreview(price)}
-            </span>
-          )}
+          <PriceInput
+            id="uploader-price"
+            name="price"
+            value={price}
+            onChange={handlers.handleTextChange}
+            placeholder="0"
+            disabled={isFormDisabled}
+            required
+            min={0}
+            step="any"
+            ariaInvalid={
+              touchedFields.has("price") && fieldErrors.price
+                ? "true"
+                : "false"
+            }
+            ariaDescribedBy={
+              touchedFields.has("price") && fieldErrors.price
+                ? "price-error"
+                : undefined
+            }
+            showPreview
+          />
         </FormField>
 
         {/* Status Field */}
@@ -414,7 +398,7 @@ class BouquetUploaderView extends Component<Props> {
           htmlFor="uploader-description"
           className="uploader__field--full"
         >
-          <textarea
+          <TextareaInput
             id="uploader-description"
             name="description"
             value={description}
@@ -423,22 +407,18 @@ class BouquetUploaderView extends Component<Props> {
             placeholder="Deskripsi singkat..."
             disabled={isFormDisabled}
             maxLength={500}
-            aria-invalid={
+            ariaInvalid={
               touchedFields.has("description") && fieldErrors.description
                 ? "true"
                 : "false"
             }
-            aria-describedby={
+            ariaDescribedBy={
               touchedFields.has("description") && fieldErrors.description
                 ? "description-error"
                 : undefined
             }
+            showCharacterCount
           />
-          <div
-            className={`uploader__fieldHint ${getCharacterCountClass(description.length, 500)}`}
-          >
-            {description.length}/500 karakter
-          </div>
         </FormField>
 
         {/* Occasions Field */}
@@ -553,7 +533,7 @@ class BouquetUploaderView extends Component<Props> {
           htmlFor="uploader-care"
           className="uploader__field--full"
         >
-          <textarea
+          <TextareaInput
             id="uploader-care"
             name="careInstructions"
             value={careInstructions}
@@ -562,24 +542,20 @@ class BouquetUploaderView extends Component<Props> {
             placeholder="Tips perawatan (opsional)"
             disabled={isFormDisabled}
             maxLength={300}
-            aria-invalid={
+            ariaInvalid={
               touchedFields.has("careInstructions") &&
               fieldErrors.careInstructions
                 ? "true"
                 : "false"
             }
-            aria-describedby={
+            ariaDescribedBy={
               touchedFields.has("careInstructions") &&
               fieldErrors.careInstructions
                 ? "careInstructions-error"
                 : undefined
             }
+            showCharacterCount
           />
-          <div
-            className={`uploader__fieldHint ${getCharacterCountClass(careInstructions.length, 300)}`}
-          >
-            {careInstructions.length}/300 karakter
-          </div>
         </FormField>
 
         {/* Image Upload Field */}
