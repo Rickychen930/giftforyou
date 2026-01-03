@@ -1458,7 +1458,7 @@
     height: 100vh;
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 1000;
+    z-index: 99998; /* Below header (99999) but above other content */
     box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
   }
 
@@ -2060,7 +2060,7 @@
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  z-index: 999;
+  z-index: 99997; /* Below header (99999) and sidebar (99998) */
   opacity: 0;
   transition: opacity 0.3s ease;
 }

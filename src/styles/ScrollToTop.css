@@ -63,10 +63,31 @@
 /* Responsive: Mobile-first approach */
 @media (max-width: 768px) {
   .scroll-to-top {
-    bottom: calc(var(--space-20) + 56px + var(--space-8)); /* Position above WhatsApp button */
-    right: var(--space-6);
+    bottom: calc(16px + 56px + 12px); /* Position above WhatsApp button: bottom (16px) + WhatsApp height (56px) + gap (12px) */
+    right: 16px;
     width: 48px;
     height: 48px;
+  }
+}
+
+@media (max-width: 640px) {
+  .scroll-to-top {
+    bottom: calc(16px + 52px + 12px); /* Position above WhatsApp button: bottom (16px) + WhatsApp height (52px) + gap (12px) */
+    right: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .scroll-to-top {
+    bottom: calc(12px + 52px + 10px); /* Position above WhatsApp button: bottom (12px) + WhatsApp height (52px) + gap (10px) */
+    right: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .scroll-to-top {
+    bottom: calc(12px + 48px + 8px); /* Position above WhatsApp button: bottom (12px) + WhatsApp height (48px) + gap (8px) */
+    right: 12px;
   }
 }
 

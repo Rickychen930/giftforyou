@@ -34,6 +34,7 @@ import {
   readTabFromLocation,
   writeTabToLocation,
 } from "../models/dashboard-page-model";
+import { initializeFormState, buildFormData } from "../models/bouquet-editor-model";
 import { BaseController, type BaseControllerProps, type BaseControllerState } from "./base/BaseController";
 
 interface State extends BaseControllerState {
@@ -193,6 +194,67 @@ class DashboardController extends BaseController<BaseControllerProps, State> {
   }
 
   // Using centralized normalizer from utils
+
+  /**
+   * Refresh bouquets list from server
+   * Used after delete/update/duplicate operations to ensure data is fresh
+   */
+  private refreshBouquets = async (): Promise<void> => {
+    try {
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+        ...this.getAuthHeaders(),
+      };
+
+      const bouquetsRes = await this.safeFetch(`${API_BASE}/api/bouquets`, {
+        method: "GET",
+        headers,
+      });
+
+      if (!bouquetsRes) {
+        return; // Request was aborted
+      }
+
+      if (bouquetsRes.status === 401) {
+        throw new Error("Unauthorized. Please login again.");
+      }
+
+      if (!bouquetsRes.ok) {
+        const bouquetsText = await bouquetsRes.text();
+        let errorMessage = `Failed to refresh bouquets (${bouquetsRes.status})`;
+        
+        if (bouquetsText.includes("<!DOCTYPE html>") || bouquetsText.includes("<html")) {
+          errorMessage = "Endpoint /api/bouquets tidak tersedia. Pastikan server berjalan dan route dikonfigurasi dengan benar.";
+        } else {
+          try {
+            const errorData = JSON.parse(bouquetsText);
+            errorMessage = errorData.error || errorData.message || errorMessage;
+          } catch {
+            errorMessage = bouquetsText.length > 200 
+              ? `${errorMessage}: ${bouquetsText.substring(0, 200)}...` 
+              : `${errorMessage}: ${bouquetsText}`;
+          }
+        }
+        throw new Error(errorMessage);
+      }
+
+      const bouquetsText = await bouquetsRes.text();
+      const bouquetsJson: unknown = this.safeJsonParse<unknown[]>(bouquetsText, []);
+      const bouquets: Bouquet[] = Array.isArray(bouquetsJson)
+        ? normalizeBouquets(bouquetsJson)
+        : [];
+
+      this.setState((prev) => ({
+        bouquets,
+      }));
+    } catch (err: unknown) {
+      const anyErr = err as any;
+      if (anyErr?.name === "AbortError") return;
+      
+      // Don't show error for refresh failures - just log it
+      console.warn("Failed to refresh bouquets:", err);
+    }
+  };
 
   private loadDashboard = async (): Promise<void> => {
     this.setLoading(true);
@@ -555,6 +617,9 @@ class DashboardController extends BaseController<BaseControllerProps, State> {
   };
 
   private onUpload = async (formData: FormData): Promise<boolean> => {
+    // Clear any previous errors before starting
+    this.setError(null);
+    
     try {
       const res = await fetch(`${API_BASE}/api/bouquets`, {
         method: "POST",
@@ -625,24 +690,11 @@ class DashboardController extends BaseController<BaseControllerProps, State> {
         // Response might not be JSON, that's okay
       }
 
-      // Update local state instead of full reload for better performance
-      // Only reload bouquets, not full dashboard
-      try {
-        const bouquetsRes = await fetch(`${API_BASE}/api/bouquets`, {
-          headers: {
-            ...this.getAuthHeaders(),
-          },
-        });
-        if (bouquetsRes.ok) {
-          const bouquets = await bouquetsRes.json();
-          this.setState((prev) => ({
-            bouquets: Array.isArray(bouquets) ? normalizeBouquets(bouquets) : [],
-          }));
-        }
-      } catch {
-        // If fetch fails, silently continue - upload was successful
-      }
+      // Refresh bouquets from server to ensure data is up to date
+      await this.refreshBouquets();
       
+      // Clear error on success
+      this.setError(null);
       return true;
     } catch (e) {
       const errorMessage = e instanceof Error 
@@ -659,6 +711,9 @@ class DashboardController extends BaseController<BaseControllerProps, State> {
   };
 
   private onUpdate = async (formData: FormData): Promise<boolean> => {
+    // Clear any previous errors before starting
+    this.setError(null);
+    
     try {
       const id = String(formData.get("_id") ?? "");
       if (!id) throw new Error("Missing bouquet id for update.");
@@ -727,6 +782,11 @@ class DashboardController extends BaseController<BaseControllerProps, State> {
         // Editor section will handle local state update
       }
       
+      // Refresh bouquets from server to ensure data is up to date
+      await this.refreshBouquets();
+      
+      // Clear error on success
+      this.setError(null);
       return true;
     } catch (e) {
       this.setState({
@@ -737,6 +797,9 @@ class DashboardController extends BaseController<BaseControllerProps, State> {
   };
 
   private onDuplicate = async (bouquetId: string): Promise<void> => {
+    // Clear any previous errors before starting
+    this.setError(null);
+    
     try {
       // Fetch the bouquet to duplicate
       const res = await fetch(`${API_BASE}/api/bouquets/${bouquetId}`, {
@@ -780,48 +843,48 @@ class DashboardController extends BaseController<BaseControllerProps, State> {
         throw new Error("Invalid bouquet data received");
       }
       
-      // Type assertion for bouquet data
-      const bouquet = bouquetData as {
-        name?: string;
-        description?: string;
-        price?: number;
-        type?: string;
-        size?: string;
-        status?: string;
-        collectionName?: string;
-        quantity?: number;
-        occasions?: string[] | string;
-        flowers?: string[] | string;
-        isNewEdition?: boolean;
-        isFeatured?: boolean;
-        customPenanda?: string[] | string;
-        careInstructions?: string;
-      };
+      // Use normalizeBouquet from utils to ensure all fields are properly normalized
+      // This handles all edge cases and ensures type safety
+      const normalizedBouquet = normalizeBouquet(bouquetData);
       
-      // Create a new FormData with the bouquet data, but without _id
-      const formData = new FormData();
-      formData.append("name", `${bouquet.name || "Bouquet"} (Copy)`);
-      formData.append("description", bouquet.description ?? "");
-      formData.append("price", String(bouquet.price ?? 0));
-      formData.append("type", bouquet.type ?? "");
-      formData.append("size", bouquet.size ?? "Medium");
-      formData.append("status", bouquet.status ?? "ready");
-      formData.append("collectionName", bouquet.collectionName ?? "");
-      formData.append("quantity", String(bouquet.quantity ?? 0));
-      formData.append("occasions", Array.isArray(bouquet.occasions) ? bouquet.occasions.join(",") : (typeof bouquet.occasions === "string" ? bouquet.occasions : ""));
-      formData.append("flowers", Array.isArray(bouquet.flowers) ? bouquet.flowers.join(",") : (typeof bouquet.flowers === "string" ? bouquet.flowers : ""));
-      formData.append("isNewEdition", String(Boolean(bouquet.isNewEdition)));
-      formData.append("isFeatured", String(Boolean(bouquet.isFeatured)));
-      formData.append("customPenanda", Array.isArray(bouquet.customPenanda) ? bouquet.customPenanda.join(",") : (typeof bouquet.customPenanda === "string" ? bouquet.customPenanda : ""));
-      formData.append("careInstructions", bouquet.careInstructions ?? "");
+      // Validate that normalization was successful
+      if (!normalizedBouquet) {
+        throw new Error("Bouquet data tidak lengkap. Pastikan nama dan data lainnya tersedia.");
+      }
+      
+      // Additional validation: ensure name exists (normalizeBouquet already checks this, but double-check for clarity)
+      if (!normalizedBouquet.name || normalizedBouquet.name.trim().length === 0) {
+        throw new Error("Bouquet data tidak lengkap. Pastikan nama tersedia.");
+      }
+      
+      // Use initializeFormState to properly initialize form data
+      // This ensures all fields are properly formatted and validated
+      const formState = initializeFormState(normalizedBouquet);
+      
+      // Update name to indicate it's a copy
+      formState.name = `${formState.name} (Copy)`;
+      
+      // Build FormData using the proper function to ensure all fields are correctly formatted
+      const formData = buildFormData(formState, null);
+      
+      // Remove _id from FormData since this is a new bouquet
+      formData.delete("_id");
 
       // Upload as new bouquet
       await this.onUpload(formData);
+      
+      // Refresh bouquets from server to include the new duplicated bouquet
+      await this.refreshBouquets();
+      
+      // Clear error on success
+      this.setError(null);
     } catch (e) {
+      const errorMsg = e instanceof Error ? e.message : "Duplicate failed.";
       this.setState({
-        errorMessage: e instanceof Error ? e.message : "Duplicate failed.",
+        errorMessage: errorMsg,
       });
-      throw e;
+      // Don't re-throw to prevent unhandled promise rejection
+      // Error is already set in state and will be displayed
     }
   };
 
@@ -839,11 +902,12 @@ class DashboardController extends BaseController<BaseControllerProps, State> {
         throw new Error(`Delete failed (${res.status}): ${t}`);
       }
 
-      // Update local state instead of full reload for better performance
-      // This prevents unnecessary refreshes that reset the editor view
-      this.setState((prev) => ({
-        bouquets: prev.bouquets.filter((b) => b._id !== bouquetId),
-      }));
+      // Refresh bouquets from server to ensure data is up to date
+      // This ensures the editor always has the latest data
+      await this.refreshBouquets();
+      
+      // Clear error on success
+      this.setError(null);
     } catch (e) {
       this.setState({
         errorMessage: e instanceof Error ? e.message : "Delete failed.",

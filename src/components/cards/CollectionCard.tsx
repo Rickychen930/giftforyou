@@ -154,8 +154,8 @@ class CollectionCard extends Component<CollectionContainerProps, CollectionCardS
               showNavigation={true}
               showIndicators={previewBouquets.length > 4}
               onBouquetClick={(bouquetId) => {
-                // Optional: Handle bouquet click
-                console.log("Bouquet clicked:", bouquetId);
+                // Optional: Handle bouquet click - navigation handled by BouquetCard component
+                // Can be extended for analytics tracking if needed
               }}
             />
 

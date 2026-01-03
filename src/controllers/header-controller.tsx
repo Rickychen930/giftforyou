@@ -16,7 +16,6 @@ import {
 import { BaseController, type BaseControllerProps, type BaseControllerState } from "./base/BaseController";
 import HeaderView from "../view/header";
 import type { NavItem } from "../components/header/HeaderNavigation";
-import { setupClickOutside } from "../utils/click-outside-utils";
 
 interface HeaderControllerProps extends BaseControllerProps {
   location: Location;
@@ -163,10 +162,13 @@ export class HeaderController extends BaseController<
   /**
    * Schedule collections close
    */
-  private scheduleCollectionsClose = (delayMs = 180): void => {
+  private scheduleCollectionsClose = (delayMs = 250): void => {
     this.cancelCollectionsClose();
     this.collectionsCloseTimer = window.setTimeout(() => {
-      this.setState({ collectionsOpen: false });
+      // Only close if still open and not in mobile mode
+      if (this.state.collectionsOpen && !this.state.mobileOpen) {
+        this.setState({ collectionsOpen: false });
+      }
       this.collectionsCloseTimer = null;
     }, delayMs);
   };
@@ -229,6 +231,10 @@ export class HeaderController extends BaseController<
   handleCollectionsOpen = (): void => {
     this.cancelCollectionsClose();
     this.setState({ collectionsOpen: true });
+    // Cancel any pending close when explicitly opening
+    if (this.collectionsCloseTimer) {
+      this.cancelCollectionsClose();
+    }
   };
 
   /**
@@ -236,15 +242,29 @@ export class HeaderController extends BaseController<
    */
   handleCollectionsClose = (): void => {
     if (this.state.mobileOpen) return;
-    this.scheduleCollectionsClose(180);
+    // Increase delay to prevent accidental closes when moving mouse
+    this.scheduleCollectionsClose(250);
   };
 
   /**
    * Handle collections click outside
    */
-  private handleCollectionsClickOutside = (): void => {
+  private handleCollectionsClickOutside = (event: MouseEvent | TouchEvent): void => {
     if (this.state.mobileOpen) return;
-    this.handleCollectionsClose();
+    
+    // Check if click is on a link inside the dropdown - don't close immediately
+    const target = event.target as HTMLElement;
+    const isDropdownLink = target.closest(".header-dropdown") || 
+                          target.closest(".header-mega-menu") ||
+                          target.closest("a[href]");
+    
+    if (isDropdownLink) {
+      // User clicked a link - close after a short delay to allow navigation
+      this.scheduleCollectionsClose(100);
+    } else {
+      // Click outside - close normally
+      this.handleCollectionsClose();
+    }
   };
 
   /**
@@ -259,11 +279,33 @@ export class HeaderController extends BaseController<
 
     // Setup new listener if collections is open and not mobile
     if (this.state.collectionsOpen && !this.state.mobileOpen && this.collectionsItemRef.current) {
-      this.collectionsClickOutsideCleanup = setupClickOutside(
-        this.collectionsItemRef.current,
-        this.handleCollectionsClickOutside,
-        true
-      );
+      // Create a custom handler that checks both the nav item and dropdown
+      const customHandler = (event: MouseEvent | TouchEvent): void => {
+        const target = event.target as Node;
+        const navItem = this.collectionsItemRef.current;
+        const dropdown = document.querySelector(".header-dropdown") || 
+                        document.querySelector("#collections-dropdown");
+        
+        // Check if click is inside nav item or dropdown
+        const isInsideNavItem = navItem && navItem.contains(target);
+        const isInsideDropdown = dropdown && dropdown.contains(target);
+        
+        if (!isInsideNavItem && !isInsideDropdown) {
+          this.handleCollectionsClickOutside(event);
+        }
+      };
+      
+      // Setup listener manually to have more control
+      const mousedownListener = (e: MouseEvent) => customHandler(e);
+      const touchstartListener = (e: TouchEvent) => customHandler(e);
+      
+      document.addEventListener("mousedown", mousedownListener, true);
+      document.addEventListener("touchstart", touchstartListener, { passive: true, capture: true });
+      
+      this.collectionsClickOutsideCleanup = () => {
+        document.removeEventListener("mousedown", mousedownListener, true);
+        document.removeEventListener("touchstart", touchstartListener, true);
+      };
     }
   }
 

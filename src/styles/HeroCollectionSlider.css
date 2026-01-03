@@ -16,10 +16,10 @@
   margin: 0;
   padding: 0;
   margin-bottom: 0;
-  isolation: isolate;
+  /* Removed isolation: isolate to prevent stacking context issues with header dropdown */
   scroll-margin-top: 0;
   contain: layout style paint;
-  z-index: 2;
+  z-index: 1; /* Lower z-index to ensure header dropdown (z-index: 10000) is above */
 }
 
 /* Smooth scroll behavior */

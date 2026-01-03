@@ -3,11 +3,6 @@
  * Class-based component following SOLID principles
  */
 
-/**
- * Our Collection Section Component (OOP)
- * Class-based component following SOLID principles
- */
-
 import React, { Component, RefObject } from "react";
 import "../../styles/OurCollectionSection.css";
 import type { BouquetCardProps } from "../../components/cards/CollectionCard";
@@ -15,7 +10,7 @@ import type { Collection } from "../../models/domain/collection";
 import type { Bouquet } from "../../models/domain/bouquet";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 import EmptyState from "../../components/common/EmptyState";
-import AlertMessage from "../../components/common/AlertMessage";
+import ErrorDisplay from "../../components/common/ErrorDisplay";
 import SectionHeader from "../../components/common/SectionHeader";
 import Container from "../../components/layout/Container";
 import CollectionGrid from "../../components/collections/CollectionGrid";
@@ -254,31 +249,25 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
     );
   }
 
-      /**
-       * Render error state with retry option
-       */
-      private renderErrorState(): React.ReactNode {
-        const { errorMessage } = this.props;
-        return (
-          <div className={`${this.baseClass}__error`} role="alert" aria-live="polite">
-            <AlertMessage
-              variant="error"
-              message={`Gagal memuat koleksi. ${errorMessage || "Silakan refresh halaman."}`}
-              className={`${this.baseClass}__errorMessage`}
-            />
-            <div className={`${this.baseClass}__errorActions`}>
-              <button
-                type="button"
-                onClick={() => window.location.reload()}
-                className={`${this.baseClass}__retryBtn`}
-                aria-label="Coba lagi memuat koleksi"
-              >
-                Coba Lagi
-              </button>
-            </div>
-          </div>
-        );
-      }
+  /**
+   * Render error state with retry option
+   * Uses reusable ErrorDisplay component following OOP/MVC principles
+   */
+  private renderErrorState(): React.ReactNode {
+    const { errorMessage } = this.props;
+    
+    return (
+      <ErrorDisplay
+        severity="error"
+        title="Gagal Memuat Koleksi"
+        message={errorMessage || "Terjadi kesalahan saat memuat koleksi. Silakan coba lagi."}
+        showRetry={true}
+        onRetry={() => window.location.reload()}
+        retryLabel="Coba Lagi"
+        maxWidth="820px"
+      />
+    );
+  }
 
   /**
    * Render empty state with better messaging and CTA
@@ -368,8 +357,8 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
               collections={prepared}
               loading={false}
               onCollectionClick={(collectionId) => {
-                // Optional: Handle collection click
-                console.log("Collection clicked:", collectionId);
+                // Optional: Handle collection click - can be extended for analytics or navigation
+                // Currently handled by CollectionCard's internal Link component
               }}
             />
           )}

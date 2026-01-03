@@ -1,30 +1,38 @@
 /**
  * Floating WhatsApp Button Styles
  * Luxury, elegant, and always accessible
+ * Smooth animations with luxury design
  */
 
 @import "design-system.css";
 
 .floatingWhatsApp {
   position: fixed;
-  bottom: var(--space-24);
-  right: var(--space-24);
-  z-index: 9998;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
   display: flex;
   align-items: center;
-  gap: var(--space-8);
-  padding: var(--space-12) var(--space-20);
-  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  background: linear-gradient(
+    135deg,
+    #25D366 0%,
+    #20BA5A 50%,
+    #128C7E 100%
+  );
   color: var(--color-white);
-  border: none;
+  border: 2px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--radius-full);
   box-shadow: 
-    0 8px 24px rgba(37, 211, 102, 0.4),
-    0 4px 12px rgba(37, 211, 102, 0.3),
+    0 8px 24px rgba(37, 211, 102, 0.35),
+    0 4px 12px rgba(37, 211, 102, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset,
     var(--shadow-luxury-lg);
   cursor: pointer;
-  transition: all var(--transition-elegant);
-  font-weight: 600;
+  transition: all var(--transition-elegant) cubic-bezier(0.34, 1.56, 0.64, 1);
+  font-weight: var(--font-weight-bold);
   font-size: var(--font-size-base);
   min-height: 56px;
   min-width: 56px;
@@ -32,6 +40,11 @@
   transform: translateZ(0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  isolation: isolate;
+  overflow: visible;
+  font-family: var(--font-family-base);
+  letter-spacing: var(--letter-spacing-normal);
+  margin: 0;
 }
 
 .floatingWhatsApp__icon {
@@ -41,80 +54,143 @@
   width: 28px;
   height: 28px;
   flex-shrink: 0;
+  transition: transform var(--transition-elegant);
+  z-index: 1;
 }
 
 .floatingWhatsApp__label {
   display: none;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-normal);
+  white-space: nowrap;
+  z-index: 1;
+  transition: opacity var(--transition-elegant);
 }
 
 .floatingWhatsApp__ripple {
   position: absolute;
-  inset: -8px;
+  inset: -12px;
   border-radius: var(--radius-full);
-  background: rgba(37, 211, 102, 0.3);
+  background: radial-gradient(
+    circle,
+    rgba(37, 211, 102, 0.4) 0%,
+    rgba(37, 211, 102, 0.2) 50%,
+    transparent 100%
+  );
   opacity: 0;
-  animation: ripple 2s ease-out infinite;
+  animation: ripple 3s ease-out infinite;
   pointer-events: none;
-}
-
-.floatingWhatsApp--pulse .floatingWhatsApp__ripple {
-  animation: ripple 2s ease-out infinite;
+  z-index: 0;
 }
 
 @keyframes ripple {
   0% {
-    transform: scale(0.8);
-    opacity: 0.8;
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.3;
   }
   100% {
-    transform: scale(1.4);
+    transform: scale(1.5);
     opacity: 0;
   }
 }
 
 @media (hover: hover) and (pointer: fine) {
   .floatingWhatsApp:hover {
-    transform: translateY(-4px) scale(1.05) translateZ(0);
+    transform: translateY(-6px) scale(1.08) translateZ(0);
     box-shadow: 
-      0 12px 32px rgba(37, 211, 102, 0.5),
-      0 6px 16px rgba(37, 211, 102, 0.4),
+      0 16px 40px rgba(37, 211, 102, 0.5),
+      0 8px 20px rgba(37, 211, 102, 0.4),
+      0 0 0 2px rgba(255, 255, 255, 0.2) inset,
       var(--shadow-luxury-xl);
+    background: linear-gradient(
+      135deg,
+      #2FE576 0%,
+      #25D366 50%,
+      #20BA5A 100%
+    );
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .floatingWhatsApp:hover .floatingWhatsApp__icon {
+    transform: scale(1.1) rotate(5deg);
   }
 
   .floatingWhatsApp:hover .floatingWhatsApp__label {
     display: block;
+    opacity: 1;
+  }
+
+  .floatingWhatsApp:hover .floatingWhatsApp__ripple {
+    animation-duration: 2s;
   }
 }
 
 .floatingWhatsApp:active {
-  transform: translateY(-2px) scale(1.02) translateZ(0);
+  transform: translateY(-2px) scale(1.05) translateZ(0);
+  box-shadow: 
+    0 4px 16px rgba(37, 211, 102, 0.4),
+    0 2px 8px rgba(37, 211, 102, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.15) inset,
+    var(--shadow-luxury-md);
 }
 
 .floatingWhatsApp:focus-visible {
   outline: none;
   box-shadow: 
-    0 0 0 3px rgba(37, 211, 102, 0.3),
+    0 0 0 4px rgba(37, 211, 102, 0.25),
+    0 0 0 8px rgba(37, 211, 102, 0.15),
     0 8px 24px rgba(37, 211, 102, 0.4),
     var(--shadow-luxury-lg);
 }
 
-/* Mobile: Show label on larger screens */
+/* Show label on larger screens */
 @media (min-width: 640px) {
   .floatingWhatsApp__label {
     display: block;
   }
 }
 
-/* Responsive positioning */
+/* Desktop - Standard positioning */
+@media (min-width: 1025px) {
+  .floatingWhatsApp {
+    bottom: 24px;
+    right: 24px;
+    min-height: 64px;
+    padding: var(--space-4) var(--space-6);
+  }
+
+  .floatingWhatsApp__icon {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* Tablet devices (769px to 1024px) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .floatingWhatsApp {
+    bottom: 20px;
+    right: 20px;
+    min-height: 60px;
+    padding: var(--space-3-5) var(--space-5);
+  }
+
+  .floatingWhatsApp__icon {
+    width: 26px;
+    height: 26px;
+  }
+}
+
+/* Mobile devices (up to 768px) */
 @media (max-width: 768px) {
   .floatingWhatsApp {
-    bottom: var(--space-20);
-    right: var(--space-20);
-    min-height: 52px;
-    min-width: 52px;
-    padding: var(--space-10) var(--space-16);
+    bottom: 16px; /* Fixed position at bottom */
+    right: 16px;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    min-height: 56px;
   }
 
   .floatingWhatsApp__icon {
@@ -123,17 +199,55 @@
   }
 }
 
+/* Small mobile devices (up to 640px) */
 @media (max-width: 640px) {
   .floatingWhatsApp {
-    bottom: var(--space-16);
-    right: var(--space-16);
-    min-height: 48px;
-    min-width: 48px;
-    padding: var(--space-8) var(--space-12);
+    bottom: 16px; /* Fixed position at bottom */
+    right: 16px;
+    gap: var(--space-1-5);
+    padding: var(--space-2-5) var(--space-3);
+    min-height: 52px;
   }
 
   .floatingWhatsApp__label {
     display: none;
+  }
+
+  .floatingWhatsApp__icon {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+/* Extra small mobile devices (up to 480px) */
+@media (max-width: 480px) {
+  .floatingWhatsApp {
+    bottom: 12px; /* Fixed position at bottom */
+    right: 12px;
+    min-height: 52px;
+    min-width: 52px;
+    padding: var(--space-2) var(--space-2-5);
+  }
+
+  .floatingWhatsApp__icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* Very small mobile devices (up to 360px) */
+@media (max-width: 360px) {
+  .floatingWhatsApp {
+    bottom: 12px; /* Fixed position at bottom */
+    right: 12px;
+    min-height: 48px;
+    min-width: 48px;
+    padding: var(--space-2);
+  }
+
+  .floatingWhatsApp__icon {
+    width: 18px;
+    height: 18px;
   }
 }
 

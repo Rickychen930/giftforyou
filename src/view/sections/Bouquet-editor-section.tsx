@@ -80,19 +80,41 @@ export default class BouquetEditorSection extends Component<Props, State> {
       // Just update local state with new props without reloading
       // This preserves the current view
       if (this.props.bouquets !== prevProps.bouquets) {
-        this.setState((prev) => ({
-          bouquets: this.props.bouquets ?? [],
-          // Update bouquets in collections without reloading
-          collections: prev.collections.map((c) => {
-            const updatedBouquets = (this.props.bouquets ?? []).filter(
-              (b) => b.collectionName === c.name
-            );
-            return {
-              ...c,
-              bouquets: updatedBouquets,
-            };
-          }),
-        }));
+        this.setState((prev) => {
+          const newBouquets = this.props.bouquets ?? [];
+          
+          // Check if selectedBouquet still exists in the new bouquets list
+          // If not, clear it to prevent showing stale data
+          let selectedBouquet = prev.selectedBouquet;
+          if (selectedBouquet) {
+            const stillExists = newBouquets.some((b) => b._id === selectedBouquet?._id);
+            if (!stillExists) {
+              // Selected bouquet was deleted, clear selection
+              selectedBouquet = null;
+            } else {
+              // Update selectedBouquet with latest data from props
+              const updatedBouquet = newBouquets.find((b) => b._id === selectedBouquet?._id);
+              if (updatedBouquet) {
+                selectedBouquet = updatedBouquet;
+              }
+            }
+          }
+          
+          return {
+            bouquets: newBouquets,
+            selectedBouquet,
+            // Update bouquets in collections without reloading
+            collections: prev.collections.map((c) => {
+              const updatedBouquets = newBouquets.filter(
+                (b) => b.collectionName === c.name
+              );
+              return {
+                ...c,
+                bouquets: updatedBouquets,
+              };
+            }),
+          };
+        });
       }
     }
   }
@@ -458,10 +480,21 @@ export default class BouquetEditorSection extends Component<Props, State> {
   private handleBouquetDelete = async (bouquetId: string): Promise<void> => {
     if (this.props.onDelete) {
       try {
+        // Check if we're deleting the currently selected bouquet
+        const isDeletingSelected = this.state.selectedBouquet?._id === bouquetId;
+        const wasInEditView = this.state.currentView === "bouquet-edit";
+        
+        // Call delete - this will refresh bouquets in parent controller
         await this.props.onDelete(bouquetId);
-        // Update local state - remove deleted bouquet
+        
+        // Wait a bit for props to update (controller refreshes bouquets)
+        // Then update local state based on props
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Update local state - use props.bouquets as source of truth
         this.setState((prev) => {
-          const updatedBouquets = prev.bouquets.filter((b) => b._id !== bouquetId);
+          // Use props.bouquets if available (already refreshed by controller), otherwise filter locally
+          const updatedBouquets = this.props.bouquets ?? prev.bouquets.filter((b) => b._id !== bouquetId);
           const updatedCollections = prev.collections.map((c) => ({
             ...c,
             bouquets: (c.bouquets as Bouquet[]).filter(
@@ -469,9 +502,9 @@ export default class BouquetEditorSection extends Component<Props, State> {
             ),
           }));
           
-          // If we're in bouquet-edit view and deleted the current bouquet, navigate back
-          if (prev.currentView === "bouquet-edit" && prev.selectedBouquet?._id === bouquetId) {
-            // Find the collection that contained this bouquet
+          // If we deleted the selected bouquet, navigate back
+          if (isDeletingSelected && wasInEditView) {
+            // Find the collection that contained this bouquet (before deletion)
             const deletedBouquetCollection = prev.collections.find((c) =>
               (c.bouquets as Bouquet[]).some((b) => b._id === bouquetId)
             );
@@ -503,11 +536,17 @@ export default class BouquetEditorSection extends Component<Props, State> {
             }
           }
           
-          // Otherwise, just update state and stay in current view
+          // Clear selectedBouquet if it was deleted
+          const selectedBouquet = prev.selectedBouquet && 
+            updatedBouquets.some((b) => b._id === prev.selectedBouquet?._id)
+            ? prev.selectedBouquet
+            : null;
+          
           return {
             ...prev,
             bouquets: updatedBouquets,
             collections: updatedCollections,
+            selectedBouquet,
           };
         });
       } catch (err) {

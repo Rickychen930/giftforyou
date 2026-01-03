@@ -40,8 +40,25 @@ export class BouquetCardHorizontalScroll extends Component<
   private scrollTimeout: number | null = null;
   private resizeObserver: ResizeObserver | null = null;
   private readonly SCROLL_DEBOUNCE = 150;
-  private readonly CARD_WIDTH = 280; // Base card width in pixels
-  private readonly CARD_GAP = 24; // Gap between cards
+  // Dynamic card width calculation - responsive to viewport
+  private getCardWidth(): number {
+    if (typeof window === "undefined") return 280;
+    const viewportWidth = window.innerWidth;
+    // Match CSS clamp values: clamp(240px, 20vw, 280px)
+    if (viewportWidth <= 640) return 240; // Mobile
+    if (viewportWidth <= 1024) return Math.max(240, Math.min(280, viewportWidth * 0.2)); // Tablet
+    return 280; // Desktop
+  }
+  
+  private getCardGap(): number {
+    if (typeof window === "undefined") return 24;
+    const viewportWidth = window.innerWidth;
+    // Match CSS gap: clamp(var(--space-4), 2vw, var(--space-6))
+    // --space-4 = 16px, --space-6 = 24px
+    if (viewportWidth <= 640) return 16; // Mobile
+    if (viewportWidth <= 1024) return Math.max(16, Math.min(24, viewportWidth * 0.02)); // Tablet
+    return 24; // Desktop
+  }
 
   constructor(props: BouquetCardHorizontalScrollProps) {
     super(props);
@@ -166,7 +183,7 @@ export class BouquetCardHorizontalScroll extends Component<
     if (!container) return;
 
     const scrollLeft = container.scrollLeft;
-    const cardWidth = this.CARD_WIDTH + this.CARD_GAP;
+    const cardWidth = this.getCardWidth() + this.getCardGap();
     const index = Math.round(scrollLeft / cardWidth);
 
     this.setState({ currentIndex: index });
@@ -176,7 +193,7 @@ export class BouquetCardHorizontalScroll extends Component<
     const container = this.scrollContainerRef.current;
     if (!container) return;
 
-    const scrollAmount = this.CARD_WIDTH + this.CARD_GAP;
+    const scrollAmount = this.getCardWidth() + this.getCardGap();
     const currentScroll = container.scrollLeft;
     const targetScroll =
       direction === "left"
@@ -193,7 +210,7 @@ export class BouquetCardHorizontalScroll extends Component<
     const container = this.scrollContainerRef.current;
     if (!container) return;
 
-    const cardWidth = this.CARD_WIDTH + this.CARD_GAP;
+    const cardWidth = this.getCardWidth() + this.getCardGap();
     const targetScroll = index * cardWidth;
 
     container.scrollTo({
@@ -276,7 +293,7 @@ export class BouquetCardHorizontalScroll extends Component<
     if (!container) return null;
 
     const { scrollLeft, clientWidth } = container;
-    const cardWidth = this.CARD_WIDTH + this.CARD_GAP;
+    const cardWidth = this.getCardWidth() + this.getCardGap();
     const visibleCards = Math.max(1, Math.floor(clientWidth / cardWidth));
     const totalPages = Math.ceil(bouquets.length / visibleCards);
     const currentPage = Math.min(

@@ -310,6 +310,80 @@
   border: var(--border-width-1) solid var(--brand-rose-border);
 }
 
+/* ===== Error State (DEPRECATED - Use ErrorDisplay component instead) ===== */
+/* Note: These styles are kept for backward compatibility but are no longer used.
+   The component now uses the reusable ErrorDisplay component. */
+.ourCollection__error {
+  max-width: 820px;
+  width: 100%;
+  margin: 0 auto;
+  padding: clamp(var(--space-10), 3vw, var(--space-12)) clamp(var(--space-6), 2vw, var(--space-8));
+  text-align: center;
+  background: linear-gradient(
+    135deg,
+    rgba(239, 68, 68, 0.08) 0%,
+    rgba(255, 255, 255, 0.95) 100%
+  );
+  border: var(--border-luxury);
+  border-color: rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-2xl);
+  box-shadow: 
+    var(--shadow-luxury-lg),
+    var(--shadow-luxury-md),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  backdrop-filter: var(--backdrop-blur-md) saturate(180%);
+  -webkit-backdrop-filter: var(--backdrop-blur-md) saturate(180%);
+  color: var(--error-text);
+  opacity: 0;
+  animation: fadeInUp 0.6s ease 0.2s forwards;
+  position: relative;
+  overflow: hidden;
+}
+
+.ourCollection__error::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(239, 68, 68, 0.4) 20%,
+    rgba(239, 68, 68, 0.5) 50%,
+    rgba(239, 68, 68, 0.4) 80%,
+    transparent
+  );
+  z-index: 1;
+}
+
+.ourCollection__errorIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-18);
+  height: var(--size-18);
+  border-radius: var(--radius-lg);
+  margin: 0 auto var(--space-3);
+  background: rgba(220, 38, 38, 0.10);
+  border: var(--border-width-1) solid var(--error-border);
+}
+
+.ourCollection__errorTitle {
+  margin: 0 0 0.6rem;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-black);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--error-text);
+}
+
+.ourCollection__errorText {
+  margin: 0;
+  line-height: var(--line-height-relaxed);
+  color: rgba(153, 27, 27, 0.92);
+}
+
 /* ===== Empty State with Icon - Luxury & Elegant ===== */
 .ourCollection__empty {
   max-width: 760px;
@@ -383,78 +457,6 @@
   font-size: var(--font-size-base);
   color: var(--ink-600);
   line-height: var(--line-height-relaxed);
-}
-
-/* ===== Error State - Luxury & Elegant ===== */
-.ourCollection__error {
-  max-width: 820px;
-  width: 100%;
-  margin: 0 auto;
-  padding: clamp(var(--space-10), 3vw, var(--space-12)) clamp(var(--space-6), 2vw, var(--space-8));
-  text-align: center;
-  background: linear-gradient(
-    135deg,
-    rgba(239, 68, 68, 0.08) 0%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
-  border: var(--border-luxury);
-  border-color: rgba(239, 68, 68, 0.3);
-  border-radius: var(--radius-2xl);
-  box-shadow: 
-    var(--shadow-luxury-lg),
-    var(--shadow-luxury-md),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
-  backdrop-filter: var(--backdrop-blur-md) saturate(180%);
-  -webkit-backdrop-filter: var(--backdrop-blur-md) saturate(180%);
-  color: var(--error-text);
-  opacity: 0;
-  animation: fadeInUp 0.6s ease 0.2s forwards;
-  position: relative;
-  overflow: hidden;
-}
-
-.ourCollection__error::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(239, 68, 68, 0.4) 20%,
-    rgba(239, 68, 68, 0.5) 50%,
-    rgba(239, 68, 68, 0.4) 80%,
-    transparent
-  );
-  z-index: 1;
-}
-
-.ourCollection__errorIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--size-18);
-  height: var(--size-18);
-  border-radius: var(--radius-lg);
-  margin: 0 auto var(--space-3);
-  background: rgba(220, 38, 38, 0.10);
-  border: var(--border-width-1) solid var(--error-border);
-}
-
-.ourCollection__errorTitle {
-  margin: 0 0 0.6rem;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-black);
-  letter-spacing: var(--letter-spacing-tight);
-  color: var(--error-text);
-}
-
-.ourCollection__errorText {
-  margin: 0;
-  line-height: var(--line-height-relaxed);
-  color: rgba(153, 27, 27, 0.92);
 }
 
 /* ===== Animations ===== */
