@@ -21,6 +21,8 @@ import FormField from "../components/inputs/FormField";
 import TextInput from "../components/inputs/TextInput";
 import PriceInput from "../components/inputs/PriceInput";
 import TextareaInput from "../components/inputs/TextareaInput";
+import StatusSelect from "../components/inputs/StatusSelect";
+import ToggleGroup, { type ToggleOption } from "../components/common/ToggleGroup";
 import { validateField } from "../models/bouquet-editor-model";
 
 interface Props {
@@ -491,9 +493,6 @@ class BouquetEditorView extends Component<Props> {
           />
         </FormField>
 
-        {/* Quantity Field */}
-        {this.renderQuantityField()}
-
         {/* Type Field */}
         <DropdownWithModal
           label="Tipe"
@@ -549,17 +548,24 @@ class BouquetEditorView extends Component<Props> {
         />
 
         {/* Status Field */}
-        <FormField label="Status" htmlFor="bec-status">
-          <select
-            id="bec-status"
-            name="status"
-            value={form.status}
-            onChange={handlers.handleSelectChange}
-          >
-            <option value="ready">Siap</option>
-            <option value="preorder">Preorder</option>
-          </select>
-        </FormField>
+        <StatusSelect
+          label="Status"
+          value={form.status}
+          onChange={(value) => {
+            this.props.controller.setState((prev) => ({
+              form: { ...prev.form, status: value } as typeof prev.form,
+              touchedFields: new Set([...prev.touchedFields, "status"]),
+            }));
+          }}
+          disabled={saving}
+          id="bec-status"
+          name="status"
+          error={
+            touchedFields.has("status") && fieldErrors.status
+              ? fieldErrors.status
+              : undefined
+          }
+        />
 
         {/* Collection Field */}
         <DropdownWithModal
@@ -750,121 +756,41 @@ class BouquetEditorView extends Component<Props> {
     );
   }
 
-  private renderQuantityField(): React.ReactNode {
-    const { state, handlers } = this.getControllerState();
-    const { form, fieldErrors, touchedFields, saving, stockLevelOptions } =
-      state;
-
-    return (
-      <FormField
-        label="Stok"
-        error={
-          touchedFields.has("quantity") && fieldErrors.quantity
-            ? fieldErrors.quantity
-            : undefined
-        }
-        htmlFor="bec-quantity"
-      >
-        <div style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start" }}>
-          <div style={{ flex: 1 }}>
-            <DropdownWithModal
-              label=""
-              value={form.quantity > 0 ? String(form.quantity) : ""}
-              options={stockLevelOptions}
-              onChange={(value) => {
-                const num = parseInt(value, 10);
-                if (!isNaN(num) && num >= 0) {
-                  const error = validateField("quantity", num);
-                  this.props.controller.setState((prev) => {
-                    const newErrors = { ...prev.fieldErrors };
-                    if (error) {
-                      newErrors.quantity = error;
-                    } else {
-                      delete newErrors.quantity;
-                    }
-                    return {
-                      form: { ...prev.form, quantity: num } as typeof prev.form,
-                      touchedFields: new Set([...prev.touchedFields, "quantity"]),
-                      fieldErrors: newErrors,
-                    };
-                  });
-                }
-              }}
-              onAddNew={() => {}}
-              placeholder="Pilih atau masukkan"
-              disabled={saving}
-              error={
-                touchedFields.has("quantity") && fieldErrors.quantity
-                  ? fieldErrors.quantity
-                  : undefined
-              }
-              storageKey="uploader_stock_levels"
-            />
-          </div>
-          <span
-            style={{
-              alignSelf: "center",
-              color: "var(--ink-500)",
-              fontSize: "0.85rem",
-              fontWeight: 700,
-            }}
-          >
-            atau
-          </span>
-          <input
-            id="bec-quantity"
-            name="quantity"
-            type="number"
-            min={0}
-            step={1}
-            value={form.quantity || ""}
-            onChange={handlers.handleTextChange}
-            placeholder="Manual"
-            style={{ width: "120px" }}
-            aria-invalid={
-              touchedFields.has("quantity") && fieldErrors.quantity
-                ? "true"
-                : "false"
-            }
-            aria-describedby={
-              touchedFields.has("quantity") && fieldErrors.quantity
-                ? "bec-quantity-error"
-                : undefined
-            }
-          />
-        </div>
-      </FormField>
-    );
-  }
-
   private renderFlagsSection(): React.ReactNode {
-    const { state, handlers } = this.getControllerState();
-    const { form } = state;
+    const { state } = this.getControllerState();
+    const { form, saving } = state;
+
+    const toggleOptions: ToggleOption[] = [
+      {
+        name: "isNewEdition",
+        label: "Edisi baru",
+        checked: form.isNewEdition,
+        disabled: saving,
+        "aria-label": "Tandai sebagai edisi baru",
+      },
+      {
+        name: "isFeatured",
+        label: "Unggulan",
+        checked: form.isFeatured,
+        disabled: saving,
+        "aria-label": "Tandai sebagai unggulan",
+      },
+    ];
 
     return (
       <div className="becField becField--full">
-        <span className="becLabel">Penanda</span>
-        <div className="becToggles" role="group" aria-label="Penanda bouquet">
-          <label className="becToggle">
-            <input
-              type="checkbox"
-              name="isNewEdition"
-              checked={form.isNewEdition}
-              onChange={handlers.handleToggleChange}
-            />
-            <span>Edisi baru</span>
-          </label>
-
-          <label className="becToggle">
-            <input
-              type="checkbox"
-              name="isFeatured"
-              checked={form.isFeatured}
-              onChange={handlers.handleToggleChange}
-            />
-            <span>Unggulan</span>
-          </label>
-        </div>
+        <ToggleGroup
+          label="Penanda"
+          options={toggleOptions}
+          onChange={(name, checked) => {
+            this.props.controller.setState((prev) => ({
+              form: { ...prev.form, [name]: checked } as typeof prev.form,
+            }));
+          }}
+          disabled={saving}
+          className="becToggles"
+          aria-label="Penanda bouquet"
+        />
       </div>
     );
   }

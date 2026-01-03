@@ -303,13 +303,7 @@ export class BouquetEditorController extends BaseController<Props, State> {
             if (!Number.isFinite(num) || num < 0) return 0;
             return num;
           })()
-        : name === "quantity"
-          ? (() => {
-              const num = Number(value);
-              if (!Number.isFinite(num) || num < 0) return 0;
-              return Math.max(0, Math.trunc(num));
-            })()
-          : value;
+        : value;
 
     // Validate field
     const error = validateField(name, newValue);
@@ -331,6 +325,7 @@ export class BouquetEditorController extends BaseController<Props, State> {
     const { name, value } = e.target;
     this.setState((prev) => ({
       form: { ...prev.form, [name]: value } as FormState,
+      touchedFields: new Set([...prev.touchedFields, name]),
     }));
   };
 

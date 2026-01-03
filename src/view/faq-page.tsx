@@ -11,7 +11,7 @@ import "../styles/FAQPage.css";
 import type { FAQItem, FAQCategory } from "../models/faq-page-model";
 import { STORE_PROFILE } from "../config/store-profile";
 import FAQItemComponent from "../components/common/FAQItem";
-import SearchInput from "../components/common/SearchInput";
+import LuxurySearchInput from "../components/common/LuxurySearchInput";
 import CategoryFilter from "../components/common/CategoryFilter";
 import HelpSection from "../components/common/HelpSection";
 import WhatsAppButton from "../components/common/WhatsAppButton";
@@ -67,7 +67,7 @@ class FAQPageView extends Component<FAQPageViewProps> {
 
           <div className="faq-page__controls reveal-on-scroll">
             <div className="faq-page__search-wrapper">
-              <SearchInput
+              <LuxurySearchInput
                 placeholder="Cari pertanyaan..."
                 value={searchQuery}
                 onSearchChange={onSearchChange}

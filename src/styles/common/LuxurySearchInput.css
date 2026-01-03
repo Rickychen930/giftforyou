@@ -1,0 +1,248 @@
+/**
+ * Luxury Search Input Component
+ * Reusable search input with luxury styling
+ * Similar to catalog-search but can be used anywhere
+ * Luxury, elegant, UI/UX clean, effective
+ * Uses design-system.css variables
+ * Fully responsive on all devices: mobile, tablet, desktop
+ */
+
+@import "../design-system.css";
+@import "../colors.css";
+
+.luxurySearchInput {
+  width: 100%;
+}
+
+.luxurySearchInput__form {
+  width: 100%;
+}
+
+.luxurySearchInput__wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.luxurySearchInput__icon {
+  position: absolute;
+  left: clamp(0.85rem, 2vw, 1rem);
+  color: var(--brand-rose-500);
+  opacity: 0.8;
+  pointer-events: none;
+  z-index: 1;
+  flex-shrink: 0;
+  width: clamp(18px, 2.2vw, 20px);
+  height: clamp(18px, 2.2vw, 20px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.luxurySearchInput__input {
+  width: 100%;
+  padding: clamp(0.85rem, 2.5vw, 0.95rem) clamp(1rem, 2.5vw, 1.25rem) clamp(0.85rem, 2.5vw, 0.95rem) clamp(3rem, 7vw, 3.5rem);
+  border: 2px solid rgba(212, 140, 156, 0.3);
+  border-radius: 999px;
+  background: 
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(254, 245, 247, 0.98) 100%),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  color: var(--ink-900);
+  font-size: clamp(0.9rem, 2vw, 0.95rem);
+  font-weight: var(--font-weight-bold);
+  font-family: inherit;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-sizing: border-box;
+  box-shadow: 
+    0 4px 16px rgba(212, 140, 156, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+}
+
+.luxurySearchInput__input::placeholder {
+  color: var(--ink-500);
+  opacity: 0.7;
+  font-weight: var(--font-weight-medium);
+}
+
+.luxurySearchInput__input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .luxurySearchInput__input:hover {
+    border-color: rgba(212, 140, 156, 0.4);
+    background: 
+      linear-gradient(135deg, rgba(255, 255, 255, 0.99) 0%, rgba(254, 245, 247, 0.99) 100%),
+      radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+    box-shadow: 
+      0 5px 20px rgba(212, 140, 156, 0.12),
+      0 3px 10px rgba(0, 0, 0, 0.07),
+      0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+  }
+}
+
+.luxurySearchInput__input:focus {
+  outline: none;
+  border-color: rgba(212, 140, 156, 0.5);
+  background: 
+    linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(254, 245, 247, 1) 100%),
+    radial-gradient(circle at 50% 50%, rgba(184, 134, 11, 0.08) 0%, transparent 70%);
+  box-shadow: 
+    0 6px 24px rgba(212, 140, 156, 0.18),
+    0 3px 12px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.3) inset,
+    0 0 30px rgba(184, 134, 11, 0.15);
+  transform: translateY(-1px);
+}
+
+.luxurySearchInput--focused .luxurySearchInput__icon {
+  color: var(--brand-rose-600);
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.luxurySearchInput__clear {
+  position: absolute;
+  right: clamp(0.65rem, 1.5vw, 0.75rem);
+  width: clamp(28px, 3.5vw, 36px);
+  height: clamp(28px, 3.5vw, 36px);
+  border: 2px solid rgba(212, 140, 156, 0.3);
+  background: 
+    linear-gradient(135deg, rgba(255, 240, 244, 0.95) 0%, rgba(254, 245, 247, 0.95) 100%),
+    radial-gradient(circle at 50% 50%, rgba(184, 134, 11, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  color: var(--brand-rose-500);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 1;
+  flex-shrink: 0;
+  box-shadow: 
+    0 2px 8px rgba(212, 140, 156, 0.15),
+    0 1px 4px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+  backdrop-filter: blur(8px) saturate(180%);
+  -webkit-backdrop-filter: blur(8px) saturate(180%);
+  padding: 0;
+  margin: 0;
+}
+
+.luxurySearchInput__clear:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--brand-rose-500) 0%, var(--brand-rose-600) 100%);
+  color: white;
+  transform: scale(1.12) rotate(90deg);
+  box-shadow: 
+    0 4px 16px rgba(212, 140, 156, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+    0 0 20px rgba(212, 140, 156, 0.25);
+  border-color: rgba(212, 140, 156, 0.5);
+}
+
+.luxurySearchInput__clear:active:not(:disabled) {
+  transform: scale(1.05) rotate(90deg);
+}
+
+.luxurySearchInput__clear:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.luxurySearchInput__clear:focus-visible {
+  outline: 2px solid rgba(212, 140, 156, 0.35);
+  outline-offset: 2px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .luxurySearchInput__input {
+    padding: clamp(0.85rem, 2vw, 0.9rem) clamp(0.9rem, 2vw, 1rem) clamp(0.85rem, 2vw, 0.9rem) clamp(2.75rem, 6vw, 3rem);
+    font-size: clamp(0.85rem, 1.8vw, 0.9rem);
+  }
+
+  .luxurySearchInput__icon {
+    left: clamp(0.75rem, 1.8vw, 0.85rem);
+    width: clamp(16px, 2vw, 18px);
+    height: clamp(16px, 2vw, 18px);
+  }
+
+  .luxurySearchInput__clear {
+    right: clamp(0.55rem, 1.3vw, 0.65rem);
+    width: clamp(28px, 3vw, 32px);
+    height: clamp(28px, 3vw, 32px);
+  }
+}
+
+@media (max-width: 640px) {
+  .luxurySearchInput__input {
+    padding: 0.85rem 1rem 0.85rem 3rem;
+    font-size: 0.9rem;
+  }
+
+  .luxurySearchInput__icon {
+    left: 0.85rem;
+    width: 18px;
+    height: 18px;
+  }
+
+  .luxurySearchInput__clear {
+    right: 0.65rem;
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .luxurySearchInput__input {
+    padding: 0.75rem 0.9rem 0.75rem 2.75rem;
+    font-size: 0.85rem;
+  }
+
+  .luxurySearchInput__icon {
+    left: 0.75rem;
+    width: 16px;
+    height: 16px;
+  }
+
+  .luxurySearchInput__clear {
+    right: 0.55rem;
+    width: 28px;
+    height: 28px;
+  }
+}
+
+@media (max-width: 360px) {
+  .luxurySearchInput__input {
+    padding: 0.7rem 0.8rem 0.7rem 2.5rem;
+    font-size: 0.8rem;
+  }
+
+  .luxurySearchInput__icon {
+    left: 0.7rem;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .luxurySearchInput__input,
+  .luxurySearchInput__icon,
+  .luxurySearchInput__clear {
+    transition: none !important;
+  }
+
+  .luxurySearchInput__input:focus {
+    transform: none;
+  }
+
+  .luxurySearchInput__clear:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
