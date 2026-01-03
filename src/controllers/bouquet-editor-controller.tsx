@@ -200,17 +200,25 @@ export class BouquetEditorController extends BaseController<Props, State> {
 
   private setupKeyboardShortcuts = (): void => {
     this.keyboardShortcutHandler = (e: KeyboardEvent): void => {
+      // Prevent shortcuts when typing in inputs/textarea (except Ctrl+S)
+      const target = e.target as HTMLElement;
+      const isInput = target.tagName === "INPUT" || target.tagName === "TEXTAREA";
+      
       const { canSave, isDirty } = this.getValidationState();
       
-      // Ctrl/Cmd + S to save
+      // Ctrl/Cmd + S to save (always works, even in inputs)
       if ((e.ctrlKey || e.metaKey) && e.key === "s") {
         e.preventDefault();
         if (canSave && isDirty) {
           this.handleSave();
+        } else if (!isDirty) {
+          // Show feedback when no changes to save
+          this.setSaveStatus("idle", "Tidak ada perubahan untuk disimpan.");
         }
       }
-      // Escape to reset changes
-      if (e.key === "Escape" && isDirty) {
+      // Escape to reset changes (only when not in input/textarea)
+      if (e.key === "Escape" && isDirty && !isInput) {
+        e.preventDefault();
         if (window.confirm("Apakah Anda yakin ingin membatalkan perubahan?")) {
           this.resetForm();
         }
@@ -479,14 +487,19 @@ export class BouquetEditorController extends BaseController<Props, State> {
     const { validationError, isDirty } = this.getValidationState();
 
     if (validationError) {
-      // Scroll to first error
+      // Scroll to first error with optimized behavior
       const firstErrorField = Object.keys(this.state.fieldErrors)[0];
       if (firstErrorField) {
-        const errorElement = document.querySelector(`[name="${firstErrorField}"]`);
-        if (errorElement) {
-          errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
-          (errorElement as HTMLElement).focus();
-        }
+        requestAnimationFrame(() => {
+          const errorElement = document.querySelector(`[name="${firstErrorField}"]`) as HTMLElement;
+          if (errorElement) {
+            errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
+            // Focus after scroll completes
+            setTimeout(() => {
+              errorElement.focus();
+            }, 300);
+          }
+        });
       }
       return;
     }
@@ -506,12 +519,15 @@ export class BouquetEditorController extends BaseController<Props, State> {
       const result = await Promise.race([savePromise, timeoutPromise]);
       if (typeof result === "boolean") {
         if (result) {
+          // Update initialForm to reflect saved state - prevents false "dirty" state
           // Clear file after successful save
-          this.setState({
+          this.setState((prev) => ({
+            form: prev.form, // Keep current form state
+            initialForm: prev.form, // Update initialForm to match current form
             file: null,
             imageDimensions: null,
             saving: false,
-          });
+          }));
           // Show success message - STAY IN EDIT VIEW (don't auto-navigate)
           this.setSaveStatus(
             "success",
@@ -523,12 +539,15 @@ export class BouquetEditorController extends BaseController<Props, State> {
           this.setSaveStatus("error", "Gagal menyimpan. Coba lagi.");
         }
       } else {
-        this.setSaveStatus("success", "Perubahan tersimpan.");
-        this.setState({
+        // Update initialForm to reflect saved state
+        this.setState((prev) => ({
+          form: prev.form, // Keep current form state
+          initialForm: prev.form, // Update initialForm to match current form
           saving: false,
           file: null,
           imageDimensions: null,
-        });
+        }));
+        this.setSaveStatus("success", "Perubahan tersimpan.");
       }
     } catch (err) {
       console.error("Save error:", err);
@@ -538,13 +557,15 @@ export class BouquetEditorController extends BaseController<Props, State> {
       this.setState({ saving: false });
       this.setSaveStatus("error", errorMessage);
 
-      // Scroll to error message
-      setTimeout(() => {
-        const messageEl = document.querySelector(".becSaveNote.is-show");
-        if (messageEl) {
-          messageEl.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      }, 100);
+      // Scroll to error message with optimized behavior
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          const messageEl = document.querySelector(".becSaveNote.is-show");
+          if (messageEl) {
+            messageEl.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }, 100);
+      });
     }
   };
 

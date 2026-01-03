@@ -7,7 +7,6 @@ import "../styles/BouquetCardEditComponent.css";
 import type { BouquetEditorController } from "../controllers/bouquet-editor-controller";
 import {
   formatPrice,
-  formatPricePreview,
   formatBytes,
   getCharacterCountClass,
   FALLBACK_IMAGE,
@@ -19,6 +18,9 @@ import {
 import DropdownWithModal from "../components/inputs/DropdownWithModal";
 import TagInput from "../components/inputs/TagInput";
 import FormField from "../components/inputs/FormField";
+import TextInput from "../components/inputs/TextInput";
+import PriceInput from "../components/inputs/PriceInput";
+import TextareaInput from "../components/inputs/TextareaInput";
 import { validateField } from "../models/bouquet-editor-model";
 
 interface Props {
@@ -415,7 +417,7 @@ class BouquetEditorView extends Component<Props> {
 
   // ==================== Form Fields ====================
   private renderFormFields(): React.ReactNode {
-    const { state, handlers, refs } = this.getControllerState();
+    const { state, handlers } = this.getControllerState();
     const {
       form,
       fieldErrors,
@@ -440,28 +442,24 @@ class BouquetEditorView extends Component<Props> {
           }
           htmlFor="bec-name"
         >
-          <input
-            ref={refs.nameInputRef}
+          <TextInput
             id="bec-name"
             name="name"
             value={form.name}
             onChange={handlers.handleTextChange}
             placeholder="Nama bouquet"
             autoComplete="off"
-            aria-invalid={
+            maxLength={100}
+            ariaInvalid={
               touchedFields.has("name") && fieldErrors.name ? "true" : "false"
             }
-            aria-describedby={
+            ariaDescribedBy={
               touchedFields.has("name") && fieldErrors.name
                 ? "bec-name-error"
                 : undefined
             }
+            showCharacterCount
           />
-          <span
-            className={`becHint ${getCharacterCountClass(form.name.length, 100)}`}
-          >
-            {form.name.length}/100
-          </span>
         </FormField>
 
         {/* Price Field */}
@@ -474,31 +472,23 @@ class BouquetEditorView extends Component<Props> {
           }
           htmlFor="bec-price"
         >
-          <input
+          <PriceInput
             id="bec-price"
             name="price"
-            type="number"
+            value={form.price}
+            onChange={handlers.handleTextChange}
             min={0}
             step={1000}
-            value={form.price || ""}
-            onChange={handlers.handleTextChange}
-            aria-invalid={
+            ariaInvalid={
               touchedFields.has("price") && fieldErrors.price ? "true" : "false"
             }
-            aria-describedby={
+            ariaDescribedBy={
               touchedFields.has("price") && fieldErrors.price
                 ? "bec-price-error"
                 : undefined
             }
+            showPreview
           />
-          {form.price > 0 && (
-            <span
-              className="becHint"
-              style={{ color: "var(--brand-rose-500)", fontWeight: 700 }}
-            >
-              {formatPricePreview(form.price)}
-            </span>
-          )}
         </FormField>
 
         {/* Quantity Field */}
@@ -623,29 +613,26 @@ class BouquetEditorView extends Component<Props> {
           htmlFor="bec-description"
           className="becField--full"
         >
-          <textarea
+          <TextareaInput
             id="bec-description"
             name="description"
             value={form.description}
             onChange={handlers.handleTextChange}
-            rows={3}
+            rows={4}
             placeholder="Deskripsi singkat bouquet"
-            aria-invalid={
+            maxLength={500}
+            ariaInvalid={
               touchedFields.has("description") && fieldErrors.description
                 ? "true"
                 : "false"
             }
-            aria-describedby={
+            ariaDescribedBy={
               touchedFields.has("description") && fieldErrors.description
                 ? "bec-description-error"
                 : undefined
             }
+            showCharacterCount
           />
-          <span
-            className={`becHint ${getCharacterCountClass(form.description.length, 500)}`}
-          >
-            {form.description.length}/500
-          </span>
         </FormField>
 
         {/* Occasions Field */}
@@ -733,31 +720,28 @@ class BouquetEditorView extends Component<Props> {
           htmlFor="bec-care"
           className="becField--full"
         >
-          <textarea
+          <TextareaInput
             id="bec-care"
             name="careInstructions"
             value={form.careInstructions}
             onChange={handlers.handleTextChange}
             rows={3}
             placeholder="Tips perawatan (opsional) untuk pelanggan"
-            aria-invalid={
+            maxLength={300}
+            ariaInvalid={
               touchedFields.has("careInstructions") &&
               fieldErrors.careInstructions
                 ? "true"
                 : "false"
             }
-            aria-describedby={
+            ariaDescribedBy={
               touchedFields.has("careInstructions") &&
               fieldErrors.careInstructions
                 ? "bec-care-error"
                 : undefined
             }
+            showCharacterCount
           />
-          <span
-            className={`becHint ${getCharacterCountClass(form.careInstructions.length, 300)}`}
-          >
-            {form.careInstructions.length}/300
-          </span>
         </FormField>
 
         {/* Image Upload Field */}

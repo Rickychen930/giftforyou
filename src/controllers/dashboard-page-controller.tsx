@@ -676,19 +676,24 @@ class DashboardController extends BaseController<BaseControllerProps, State> {
         throw new Error(`Update failed (${res.status}): ${t}`);
       }
 
-      // Fetch updated bouquet from server to ensure data is in sync
-      // This ensures we have the latest data from database (including image URL if changed)
+      // Optimized: Try to parse response from update first (faster, no extra fetch)
+      // Only fetch if response doesn't contain updated bouquet data
       try {
-        const updatedBouquetRes = await fetch(`${API_BASE}/api/bouquets/${id}`, {
-          headers: {
-            ...this.getAuthHeaders(),
-          },
-        });
+        // Try to read response body first (non-destructive check)
+        const responseText = await res.clone().text();
+        let updateResponse: { bouquet?: unknown } | null = null;
         
-        if (updatedBouquetRes.ok) {
-          const updatedBouquet = await updatedBouquetRes.json();
-          // Update local state with fresh data from server
-          const normalized = normalizeBouquet(updatedBouquet);
+        if (responseText.trim()) {
+          try {
+            updateResponse = JSON.parse(responseText);
+          } catch {
+            // Response is not JSON, proceed to fetch
+          }
+        }
+        
+        if (updateResponse?.bouquet) {
+          // Use data from update response (fastest path)
+          const normalized = normalizeBouquet(updateResponse.bouquet);
           if (normalized) {
             this.setState((prev) => ({
               bouquets: prev.bouquets.map((b) =>
@@ -697,10 +702,17 @@ class DashboardController extends BaseController<BaseControllerProps, State> {
             }));
           }
         } else {
-          // If fetch fails, try to parse response from update
-          const updateResponse = await res.json().catch(() => null);
-          if (updateResponse?.bouquet) {
-            const normalized = normalizeBouquet(updateResponse.bouquet);
+          // Only fetch if update response doesn't have bouquet data
+          // This is optimized to avoid unnecessary network calls
+          const updatedBouquetRes = await fetch(`${API_BASE}/api/bouquets/${id}`, {
+            headers: {
+              ...this.getAuthHeaders(),
+            },
+          });
+          
+          if (updatedBouquetRes.ok) {
+            const updatedBouquet = await updatedBouquetRes.json();
+            const normalized = normalizeBouquet(updatedBouquet);
             if (normalized) {
               this.setState((prev) => ({
                 bouquets: prev.bouquets.map((b) =>
@@ -711,22 +723,8 @@ class DashboardController extends BaseController<BaseControllerProps, State> {
           }
         }
       } catch (fetchErr) {
-        // If fetch fails, try to parse response from update
-        try {
-          const updateResponse = await res.json().catch(() => null);
-          if (updateResponse?.bouquet) {
-            const normalized = normalizeBouquet(updateResponse.bouquet);
-            if (normalized) {
-              this.setState((prev) => ({
-                bouquets: prev.bouquets.map((b) =>
-                  b._id === id ? normalized : b
-                ),
-              }));
-            }
-          }
-        } catch {
-          // If all fails, silently continue - update was successful
-        }
+        // If all fails, silently continue - update was successful
+        // Editor section will handle local state update
       }
       
       return true;

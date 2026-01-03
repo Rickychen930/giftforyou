@@ -553,48 +553,55 @@
   transform: none;
 }
 
-.becField input,
+.becField input:not(.textInput__input):not(.priceInput__input):not(.textareaInput__textarea),
 .becField select,
-.becField textarea {
-  border: 1.5px solid rgba(212, 140, 156, 0.3);
-  border-radius: var(--radius-lg);
-  padding: clamp(var(--space-3-5), 1.4vw, var(--space-4)) clamp(var(--space-4), 1.6vw, var(--space-5));
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  color: var(--ink-800);
-  font-size: clamp(var(--font-size-sm), 1.2vw, var(--font-size-base));
+.becField textarea:not(.textareaInput__textarea) {
+  border: 2px solid rgba(212, 140, 156, 0.2);
+  border-radius: var(--radius-xl);
+  padding: clamp(var(--space-4), 1.5vw, var(--space-5)) clamp(var(--space-4), 1.8vw, var(--space-6));
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  color: var(--ink-900);
+  font-size: clamp(var(--font-size-sm), 1.3vw, var(--font-size-base));
   font-weight: var(--font-weight-medium);
-  transition: all var(--transition-slow) cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   width: 100%;
   box-sizing: border-box;
   -webkit-appearance: none;
   appearance: none;
   box-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+    0 2px 8px rgba(0, 0, 0, 0.03),
+    0 0 0 1px rgba(255, 255, 255, 0.5) inset,
+    0 1px 2px rgba(0, 0, 0, 0.02);
   font-family: inherit;
+  letter-spacing: 0.01em;
+  line-height: 1.5;
 }
 
 .becField select {
-  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath fill='%234a4a4a' d='M7 10L2 5h10z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right var(--space-4) center;
-  padding-right: var(--space-10);
+  background-position: right 1.25rem center;
+  background-size: 14px 14px;
+  padding-right: 2.75rem;
   cursor: pointer;
 }
 
-.becField textarea {
+.becField textarea:not(.textareaInput__textarea) {
   resize: vertical;
-  min-height: 92px;
-  line-height: var(--line-height-relaxed);
+  min-height: 140px;
+  line-height: 1.6;
   font-family: inherit;
+  padding-top: clamp(var(--space-4), 1.5vw, var(--space-5));
+  padding-bottom: clamp(var(--space-4), 1.5vw, var(--space-5));
 }
 
-.becField input::placeholder,
-.becField textarea::placeholder {
-  color: var(--ink-400);
-  opacity: 1;
+.becField input:not(.textInput__input):not(.priceInput__input):not(.textareaInput__textarea)::placeholder,
+.becField textarea:not(.textareaInput__textarea)::placeholder {
+  color: var(--ink-500);
+  opacity: 0.65;
+  font-weight: var(--font-weight-normal);
 }
 
 .becToggles {
@@ -642,15 +649,37 @@
     background: rgba(212, 140, 156, 0.08);
   }
 
-  .becField input:hover,
+  .becField input:not(.textInput__input):not(.priceInput__input):not(.textareaInput__textarea):hover,
   .becField select:hover,
-  .becField textarea:hover {
-    border-color: rgba(212, 140, 156, 0.5);
-    background: rgba(255, 255, 255, 0.95);
+  .becField textarea:not(.textareaInput__textarea):hover {
+    border-color: rgba(212, 140, 156, 0.35);
+    background: rgba(255, 255, 255, 0.92);
     box-shadow: 
-      0 4px 12px rgba(0, 0, 0, 0.06),
+      0 4px 12px rgba(0, 0, 0, 0.04),
+      0 0 0 1px rgba(255, 255, 255, 0.7) inset;
+  }
+
+  .becField input:not(.textInput__input):not(.priceInput__input):not(.textareaInput__textarea):focus,
+  .becField select:focus,
+  .becField textarea:not(.textareaInput__textarea):focus {
+    outline: none;
+    border-color: rgba(184, 134, 11, 0.5);
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 
+      0 0 0 3px rgba(184, 134, 11, 0.1),
+      0 4px 16px rgba(212, 140, 156, 0.15),
+      0 2px 8px rgba(0, 0, 0, 0.04),
       0 0 0 1px rgba(255, 255, 255, 0.9) inset;
-    transform: translateY(-1px);
+  }
+
+  .becField input:not(.textInput__input):not(.priceInput__input):not(.textareaInput__textarea):disabled,
+  .becField select:disabled,
+  .becField textarea:not(.textareaInput__textarea):disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    background: rgba(248, 250, 252, 0.7);
+    border-color: rgba(212, 140, 156, 0.15);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
   }
 }
 
