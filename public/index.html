@@ -43,9 +43,20 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
-    <!-- Font loading optimization - load asynchronously -->
+    <!-- Font loading optimization - load asynchronously with font-display swap -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@600;700;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@600;700;900&display=swap" rel="stylesheet"></noscript>
+    <style>
+      /* Font display optimization */
+      @font-face {
+        font-family: 'Inter';
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Playfair Display';
+        font-display: swap;
+      }
+    </style>
     
     <!-- Preload critical images -->
     <link rel="preload" href="%PUBLIC_URL%/images/welcome-image.jpeg" as="image" type="image/jpeg">
