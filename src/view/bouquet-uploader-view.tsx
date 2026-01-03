@@ -8,6 +8,7 @@ import type { BouquetUploaderController } from "../controllers/bouquet-uploader-
 import {
   formatBytes,
   validateField,
+  getCharacterCountClass,
 } from "../models/bouquet-uploader-model";
 import DropdownWithModal from "../components/inputs/DropdownWithModal";
 import TagInput from "../components/inputs/TagInput";
@@ -105,32 +106,41 @@ class BouquetUploaderView extends Component<Props> {
                     type="button"
                     onClick={() => {
                       const { refs } = this.getControllerState();
-                      if (field === "customPenanda") {
-                        const penandaSection = refs.formRef.current?.querySelector(
-                          ".uploader__customPenanda"
-                        ) as HTMLElement;
-                        if (penandaSection) {
-                          penandaSection.scrollIntoView({
-                            behavior: "smooth",
-                            block: "center",
-                          });
-                          const input = penandaSection.querySelector(
-                            ".uploader__penandaInput"
+                      // Optimize: Use requestAnimationFrame for smoother scroll
+                      requestAnimationFrame(() => {
+                        if (field === "customPenanda") {
+                          const penandaSection = refs.formRef.current?.querySelector(
+                            ".uploader__customPenanda"
                           ) as HTMLElement;
-                          input?.focus();
+                          if (penandaSection) {
+                            penandaSection.scrollIntoView({
+                              behavior: "smooth",
+                              block: "center",
+                            });
+                            // Focus after scroll completes
+                            setTimeout(() => {
+                              const input = penandaSection.querySelector(
+                                ".uploader__penandaInput"
+                              ) as HTMLInputElement;
+                              input?.focus();
+                            }, 300);
+                          }
+                        } else {
+                          const fieldEl = refs.formRef.current?.querySelector(
+                            `[name="${field}"]`
+                          ) as HTMLElement;
+                          if (fieldEl) {
+                            fieldEl.scrollIntoView({
+                              behavior: "smooth",
+                              block: "center",
+                            });
+                            // Focus after scroll completes
+                            setTimeout(() => {
+                              fieldEl.focus();
+                            }, 300);
+                          }
                         }
-                      } else {
-                        const fieldEl = refs.formRef.current?.querySelector(
-                          `[name="${field}"]`
-                        ) as HTMLElement;
-                        if (fieldEl) {
-                          fieldEl.scrollIntoView({
-                            behavior: "smooth",
-                            block: "center",
-                          });
-                          fieldEl.focus();
-                        }
-                      }
+                      });
                     }}
                   >
                     {error}
