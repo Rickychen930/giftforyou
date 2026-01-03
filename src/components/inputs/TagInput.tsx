@@ -280,12 +280,15 @@ class TagInput extends Component<TagInputProps, TagInputState> {
               <span>Nama Tag</span>
               <input
                 type="text"
+                id={`${this.baseClass}-modal-input`}
+                name="tagInputModal"
                 value={newTag}
                 onChange={this.handleNewTagChange}
                 placeholder="Masukkan nama tag"
                 maxLength={maxLength}
                 className={`${this.baseClass}__modalInput`}
                 autoFocus
+                autoComplete="off"
               />
               <div className={`${this.baseClass}__modalHint`}>
                 {newTag.length}/{maxLength} karakter
@@ -340,6 +343,8 @@ class TagInput extends Component<TagInputProps, TagInputState> {
                 <input
                   ref={this.inputRef}
                   type="text"
+                  id={`${this.baseClass}-input-${this.props.label.toLowerCase().replace(/\s+/g, '-')}`}
+                  name={`tagInput-${this.props.label.toLowerCase().replace(/\s+/g, '-')}`}
                   className={`${this.baseClass}__input`}
                   value={inputValue}
                   onChange={this.handleInputChange}
@@ -349,6 +354,7 @@ class TagInput extends Component<TagInputProps, TagInputState> {
                   maxLength={maxLength}
                   aria-label={`Input tag ${this.props.label.toLowerCase()}`}
                   aria-invalid={!!error}
+                  autoComplete="off"
                 />
 
                 {availableTags.length > 0 && (
