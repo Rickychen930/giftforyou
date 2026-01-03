@@ -1,50 +1,80 @@
 /**
  * Why Choose Us Section Styles
- * Luxury, elegant, and trust-building
+ * Luxury, DRY, Efficient, Responsive
+ * Uses design-system.css variables
+ * Fully responsive on all devices: mobile, tablet, desktop
  */
 
 @import "design-system.css";
+@import "luxury-enhancements.css";
 
+/* =========================================================
+   Main Section Container
+   ========================================================= */
 .whyChooseUs {
   position: relative;
   padding: clamp(var(--space-32), 8vw, var(--space-48)) 0;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(254, 245, 247, 0.99) 25%,
-    rgba(255, 255, 255, 0.98) 50%,
-    rgba(250, 252, 251, 0.99) 75%,
-    rgba(255, 255, 255, 0.98) 100%
-  );
+  background: var(--gradient-elegant-surface);
   border-top: var(--border-luxury);
   border-color: var(--brand-rose-border);
   overflow: hidden;
   isolation: isolate;
+  z-index: 1;
+}
+
+.whyChooseUs::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: clamp(1px, 0.15vw, 2px);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(212, 140, 156, 0.3) 20%,
+    rgba(212, 140, 156, 0.6) 50%,
+    rgba(212, 140, 156, 0.3) 80%,
+    transparent 100%
+  );
+  z-index: 1;
 }
 
 .whyChooseUs__container {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
+/* =========================================================
+   Header
+   ========================================================= */
 .whyChooseUs__header {
   text-align: center;
-  margin-bottom: clamp(var(--space-32), 6vw, var(--space-48));
+  margin-bottom: clamp(var(--space-24), 5vw, var(--space-40));
 }
 
+/* =========================================================
+   Benefits Grid
+   ========================================================= */
 .whyChooseUs__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: clamp(var(--space-24), 4vw, var(--space-32));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: clamp(var(--space-20), 4vw, var(--space-32));
   max-width: 1200px;
   margin: 0 auto;
+  position: relative;
+  z-index: 2;
 }
 
+/* =========================================================
+   Benefit Card
+   ========================================================= */
 .whyChooseUs__benefit {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(254, 245, 247, 0.98) 100%
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(254, 245, 247, 0.95) 50%,
+    rgba(255, 255, 255, 0.98) 100%
   );
   border: var(--border-luxury);
   border-color: var(--brand-rose-border);
@@ -58,16 +88,33 @@
   backdrop-filter: var(--backdrop-blur-md) saturate(180%);
   -webkit-backdrop-filter: var(--backdrop-blur-md) saturate(180%);
   transition: all var(--transition-elegant);
+  position: relative;
+  overflow: hidden;
   opacity: 0;
   transform: translateY(30px);
-  will-change: opacity, transform;
+  will-change: transform, opacity, box-shadow;
   transform: translateZ(0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
 
+.whyChooseUs__benefit::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-brand-soft);
+  opacity: 0;
+  transition: opacity var(--transition-elegant);
+  pointer-events: none;
+  z-index: 0;
+}
+
 .whyChooseUs__benefit--visible {
   animation: fadeInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.whyChooseUs__benefit--visible::after {
+  will-change: auto;
 }
 
 @keyframes fadeInUp {
@@ -77,77 +124,276 @@
   }
 }
 
+/* =========================================================
+   Benefit Icon
+   ========================================================= */
 .whyChooseUs__benefitIcon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 64px;
-  height: 64px;
-  margin: 0 auto var(--space-16);
-  background: var(--gradient-primary);
-  border-radius: var(--radius-full);
-  color: var(--color-white);
-  box-shadow: var(--shadow-luxury-md);
+  width: clamp(56px, 7vw, 72px);
+  height: clamp(56px, 7vw, 72px);
+  margin: 0 auto clamp(var(--space-12), 2vw, var(--space-16));
+  background: var(--gradient-luxury-gold-subtle);
+  border: 2px solid rgba(212, 140, 156, 0.2);
+  border-radius: var(--radius-xl);
+  color: var(--brand-rose-600);
+  box-shadow: 
+    var(--shadow-luxury-md),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
   transition: all var(--transition-elegant);
+  position: relative;
+  z-index: 1;
+  will-change: transform;
 }
 
+/* =========================================================
+   Benefit Title
+   ========================================================= */
 .whyChooseUs__benefitTitle {
   font-size: clamp(var(--font-size-lg), 2.5vw, var(--font-size-xl));
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  margin: 0 0 var(--space-8);
+  font-weight: var(--font-weight-black);
+  color: var(--elegant-black);
+  margin: 0 0 clamp(var(--space-6), 1.2vw, var(--space-8));
   letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-tight);
+  font-family: var(--font-family-heading);
+  position: relative;
+  z-index: 1;
+  text-wrap: balance;
 }
 
+/* =========================================================
+   Benefit Description
+   ========================================================= */
 .whyChooseUs__benefitDescription {
-  font-size: var(--font-size-base);
+  font-size: clamp(var(--font-size-sm), 1.4vw, var(--font-size-base));
   line-height: var(--line-height-relaxed);
   color: var(--color-text-secondary);
   margin: 0;
+  position: relative;
+  z-index: 1;
+  text-wrap: pretty;
 }
 
+/* =========================================================
+   Hover Effects (Desktop only)
+   ========================================================= */
 @media (hover: hover) and (pointer: fine) {
   .whyChooseUs__benefit:hover {
-    transform: translateY(-8px) scale(1.02) translateZ(0);
+    transform: translateY(calc(var(--space-2) * -1)) scale(1.02) translateZ(0);
     box-shadow: 
       var(--shadow-luxury-xl),
-      var(--shadow-luxury-lg),
+      var(--shadow-luxury-gold-lg),
+      0 0 40px rgba(212, 140, 156, 0.15),
       0 0 0 1px rgba(255, 255, 255, 0.95) inset;
     border-color: var(--border-luxury-gold);
   }
 
+  .whyChooseUs__benefit:hover::before {
+    opacity: 0.4;
+  }
+
   .whyChooseUs__benefit:hover .whyChooseUs__benefitIcon {
-    transform: scale(1.1) rotate(5deg);
-    box-shadow: var(--shadow-luxury-lg);
+    transform: scale(1.1) rotate(5deg) translateZ(0);
+    box-shadow: 
+      var(--shadow-luxury-lg),
+      var(--shadow-luxury-gold),
+      0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+    border-color: var(--border-luxury-gold);
+    color: var(--brand-rose-700);
   }
 }
 
-/* Responsive */
+/* =========================================================
+   Responsive Design - Luxury & Elegant
+   ========================================================= */
+
+/* Tablet devices (769px to 1024px) */
+@media (max-width: 1024px) {
+  .whyChooseUs {
+    padding: clamp(var(--space-24), 6vw, var(--space-36)) 0;
+  }
+
+  .whyChooseUs__header {
+    margin-bottom: clamp(var(--space-20), 4vw, var(--space-32));
+  }
+
+  .whyChooseUs__grid {
+    gap: clamp(var(--space-16), 3vw, var(--space-24));
+  }
+
+  .whyChooseUs__benefit {
+    padding: clamp(var(--space-20), 3.5vw, var(--space-28));
+  }
+
+  .whyChooseUs__benefitIcon {
+    width: clamp(52px, 6.5vw, 64px);
+    height: clamp(52px, 6.5vw, 64px);
+    margin-bottom: clamp(var(--space-10), 1.8vw, var(--space-14));
+  }
+}
+
+/* Mobile devices (up to 768px) */
 @media (max-width: 768px) {
   .whyChooseUs {
-    padding: clamp(var(--space-24), 6vw, var(--space-32)) 0;
+    padding: clamp(var(--space-20), 5vw, var(--space-28)) 0;
+  }
+
+  .whyChooseUs::before {
+    height: clamp(1px, 0.12vw, 1.5px);
+  }
+
+  .whyChooseUs__header {
+    margin-bottom: clamp(var(--space-16), 3.5vw, var(--space-24));
   }
 
   .whyChooseUs__grid {
     grid-template-columns: 1fr;
-    gap: var(--space-20);
+    gap: clamp(var(--space-16), 3vw, var(--space-20));
+    max-width: 100%;
   }
 
   .whyChooseUs__benefit {
-    padding: var(--space-24);
+    padding: clamp(var(--space-20), 3vw, var(--space-24));
+    border-radius: var(--radius-xl);
+  }
+
+  .whyChooseUs__benefitIcon {
+    width: clamp(56px, 7vw, 64px);
+    height: clamp(56px, 7vw, 64px);
+    margin-bottom: clamp(var(--space-10), 1.5vw, var(--space-12));
+  }
+
+  .whyChooseUs__benefitTitle {
+    font-size: clamp(var(--font-size-base), 2.2vw, var(--font-size-lg));
+    margin-bottom: clamp(var(--space-4), 1vw, var(--space-6));
+  }
+
+  .whyChooseUs__benefitDescription {
+    font-size: clamp(var(--font-size-sm), 1.3vw, var(--font-size-base));
   }
 }
 
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
+/* Small mobile devices (up to 640px) */
+@media (max-width: 640px) {
+  .whyChooseUs {
+    padding: clamp(var(--space-16), 4vw, var(--space-24)) 0;
+  }
+
+  .whyChooseUs__header {
+    margin-bottom: clamp(var(--space-12), 3vw, var(--space-20));
+  }
+
+  .whyChooseUs__grid {
+    gap: clamp(var(--space-12), 2.5vw, var(--space-16));
+  }
+
   .whyChooseUs__benefit {
-    animation: none !important;
-    opacity: 1;
+    padding: clamp(var(--space-16), 2.5vw, var(--space-20));
+  }
+
+  .whyChooseUs__benefitIcon {
+    width: clamp(52px, 6.5vw, 60px);
+    height: clamp(52px, 6.5vw, 60px);
+    margin-bottom: clamp(var(--space-8), 1.3vw, var(--space-10));
+  }
+
+  .whyChooseUs__benefitTitle {
+    font-size: clamp(var(--font-size-base), 2vw, var(--font-size-lg));
+  }
+
+  .whyChooseUs__benefitDescription {
+    font-size: clamp(var(--font-size-xs), 1.2vw, var(--font-size-sm));
+  }
+}
+
+/* Extra small mobile devices (up to 480px) */
+@media (max-width: 480px) {
+  .whyChooseUs {
+    padding: clamp(var(--space-14), 3.5vw, var(--space-20)) 0;
+  }
+
+  .whyChooseUs__grid {
+    gap: clamp(var(--space-10), 2vw, var(--space-14));
+  }
+
+  .whyChooseUs__benefit {
+    padding: clamp(var(--space-14), 2vw, var(--space-18));
+  }
+
+  .whyChooseUs__benefitIcon {
+    width: clamp(48px, 6vw, 56px);
+    height: clamp(48px, 6vw, 56px);
+    margin-bottom: var(--space-8);
+  }
+
+  .whyChooseUs__benefitTitle {
+    font-size: clamp(var(--font-size-sm), 1.8vw, var(--font-size-base));
+    margin-bottom: var(--space-4);
+  }
+
+  .whyChooseUs__benefitDescription {
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* Very small mobile devices (up to 360px) */
+@media (max-width: 360px) {
+  .whyChooseUs {
+    padding: clamp(var(--space-12), 3vw, var(--space-16)) 0;
+  }
+
+  .whyChooseUs__header {
+    margin-bottom: clamp(var(--space-10), 2.5vw, var(--space-14));
+  }
+
+  .whyChooseUs__grid {
+    gap: var(--space-10);
+  }
+
+  .whyChooseUs__benefit {
+    padding: var(--space-14);
+  }
+
+  .whyChooseUs__benefitIcon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: var(--space-6);
+  }
+
+  .whyChooseUs__benefitTitle {
+    font-size: var(--font-size-sm);
+  }
+
+  .whyChooseUs__benefitDescription {
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* =========================================================
+   Reduced Motion Support
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .whyChooseUs__benefit,
+  .whyChooseUs__benefit *,
+  .whyChooseUs__benefit *::before,
+  .whyChooseUs__benefit *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .whyChooseUs__benefit {
+    opacity: 1 !important;
     transform: none !important;
   }
 
   .whyChooseUs__benefit:hover {
     transform: none !important;
   }
-}
 
+  .whyChooseUs__benefit:hover .whyChooseUs__benefitIcon {
+    transform: none !important;
+  }
+}
