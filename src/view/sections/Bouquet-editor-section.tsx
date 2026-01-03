@@ -270,9 +270,10 @@ export default class BouquetEditorSection extends Component<Props, State> {
       }
 
       // Performance: Use Map for O(1) operations
+      // Enhanced: Normalize collection names to handle case-insensitive matching
       const collectionMap = new Map<string, Bouquet[]>();
       for (const b of updatedBouquets) {
-        const name = b.collectionName || "Uncategorized";
+        const name = (b.collectionName || "Uncategorized").trim();
         const existing = collectionMap.get(name);
         if (existing) {
           existing.push(b);
@@ -282,13 +283,25 @@ export default class BouquetEditorSection extends Component<Props, State> {
       }
 
       // Update collections with new bouquets
+      // Enhanced: Always update collections to ensure bouquet count is accurate
       const updatedCollections = prev.collections.map((c) => {
-        const collectionBouquets = collectionMap.get(c.name) ?? [];
-        // Performance: Return same reference if no change
-        if (collectionBouquets.length === (c.bouquets as Bouquet[]).length &&
-            collectionBouquets.every((b, i) => b._id === (c.bouquets as Bouquet[])[i]?._id)) {
-          return c;
+        const collectionName = (c.name || "").trim();
+        // Try exact match first
+        let collectionBouquets = collectionMap.get(collectionName) ?? [];
+        
+        // If no exact match, try case-insensitive match
+        if (collectionBouquets.length === 0 && collectionName) {
+          const normalizedCollectionName = collectionName.toLowerCase();
+          for (const [bouquetCollectionName, bouquetList] of collectionMap.entries()) {
+            if (bouquetCollectionName.toLowerCase() === normalizedCollectionName) {
+              collectionBouquets = bouquetList;
+              break;
+            }
+          }
         }
+        
+        // Always update to ensure count is accurate, even if length is the same
+        // This handles cases where bouquets might have been updated
         return {
           ...c,
           bouquets: collectionBouquets,
@@ -459,9 +472,19 @@ export default class BouquetEditorSection extends Component<Props, State> {
     this.props.bouquets.forEach(b => bouquetMap.set(b._id, b));
 
     // Enhanced: Also create a map of bouquets by collectionName for fallback matching
+    // Normalize collection names (trim and handle case-insensitive matching)
     const bouquetsByCollectionName = new Map<string, Bouquet[]>();
+    const normalizedNameMap = new Map<string, string>(); // Map normalized name to original name
+    
     this.props.bouquets.forEach(b => {
-      const collectionName = b.collectionName || "Uncategorized";
+      const collectionName = (b.collectionName || "Uncategorized").trim();
+      const normalizedName = collectionName.toLowerCase();
+      
+      // Store mapping from normalized to original name
+      if (!normalizedNameMap.has(normalizedName)) {
+        normalizedNameMap.set(normalizedName, collectionName);
+      }
+      
       const existing = bouquetsByCollectionName.get(collectionName);
       if (existing) {
         existing.push(b);
@@ -473,39 +496,74 @@ export default class BouquetEditorSection extends Component<Props, State> {
     const normalized = collections.map((c) => {
       let bouquets: Bouquet[] = [];
       
+      // Enhanced: Always use collectionName matching as primary method for accuracy
+      // This ensures bouquet count is always correct regardless of API response format
+      if (c.name) {
+        const collectionName = c.name.trim();
+        // Try exact match first
+        let matchedByCollectionName = bouquetsByCollectionName.get(collectionName);
+        
+        // If no exact match, try case-insensitive match
+        if (!matchedByCollectionName || matchedByCollectionName.length === 0) {
+          const normalizedCollectionName = collectionName.toLowerCase();
+          // Find matching bouquets by checking all collection names
+          for (const [bouquetCollectionName, bouquetList] of bouquetsByCollectionName.entries()) {
+            if (bouquetCollectionName.toLowerCase() === normalizedCollectionName) {
+              matchedByCollectionName = bouquetList;
+              break;
+            }
+          }
+        }
+        
+        if (matchedByCollectionName && matchedByCollectionName.length > 0) {
+          bouquets = matchedByCollectionName;
+        }
+      }
+      
+      // Also try to get bouquets from collection references if available
+      // This helps with cases where API returns proper references
       if (Array.isArray(c.bouquets)) {
         // Check if first item is a string (ObjectId) or object (Bouquet)
         if (c.bouquets.length > 0 && typeof c.bouquets[0] === "string") {
           // Performance: Use Set for O(1) lookup and Map for O(1) retrieval
           const bouquetIds = c.bouquets as string[];
-          bouquets = bouquetIds
+          const bouquetsFromIds = bouquetIds
             .filter(id => bouquetMap.has(id))
             .map(id => bouquetMap.get(id)!)
             .filter((b): b is Bouquet => b !== undefined);
+          
+          // Merge with collectionName-matched bouquets, avoiding duplicates
+          if (bouquetsFromIds.length > 0) {
+            const existingIds = new Set(bouquets.map(b => b._id));
+            const additionalBouquets = bouquetsFromIds.filter(b => !existingIds.has(b._id));
+            if (additionalBouquets.length > 0) {
+              bouquets = [...bouquets, ...additionalBouquets];
+            }
+          }
         } else {
           // It's Bouquet[] - validate and filter
-          bouquets = (c.bouquets as unknown[]).filter(
+          const bouquetsFromArray = (c.bouquets as unknown[]).filter(
             (b): b is Bouquet =>
               typeof b === "object" && b !== null && "_id" in b && allBouquetIdsSet.has((b as Bouquet)._id)
           ) as Bouquet[];
+          
+          // Merge with collectionName-matched bouquets, avoiding duplicates
+          if (bouquetsFromArray.length > 0) {
+            const existingIds = new Set(bouquets.map(b => b._id));
+            const additionalBouquets = bouquetsFromArray.filter(b => !existingIds.has(b._id));
+            if (additionalBouquets.length > 0) {
+              bouquets = [...bouquets, ...additionalBouquets];
+            }
+          }
         }
       }
       
-      // Enhanced: If no bouquets found from collection references, try matching by collectionName
-      // This ensures bouquet count is always accurate even if API doesn't return proper references
+      // Final fallback: if still no bouquets and collection name exists, try matching again
+      // This handles edge cases where collection name might have slight variations
       if (bouquets.length === 0 && c.name) {
         const matchedByCollectionName = bouquetsByCollectionName.get(c.name);
         if (matchedByCollectionName && matchedByCollectionName.length > 0) {
           bouquets = matchedByCollectionName;
-        }
-      } else if (bouquets.length > 0) {
-        // Enhanced: Also include bouquets that match by collectionName but weren't in the reference list
-        // This handles cases where bouquet was added but collection wasn't updated
-        const matchedByCollectionName = bouquetsByCollectionName.get(c.name) || [];
-        const existingIds = new Set(bouquets.map(b => b._id));
-        const additionalBouquets = matchedByCollectionName.filter(b => !existingIds.has(b._id));
-        if (additionalBouquets.length > 0) {
-          bouquets = [...bouquets, ...additionalBouquets];
         }
       }
       
@@ -1395,12 +1453,39 @@ export default class BouquetEditorSection extends Component<Props, State> {
   };
 
   render(): React.ReactNode {
-    const { currentView, selectedCollectionId, selectedBouquet, collections } =
+    const { currentView, selectedCollectionId, selectedBouquet, collections, bouquets } =
       this.state;
 
-    const selectedCollection = collections.find(
+    // Enhanced: Find selected collection and ensure it has the latest bouquets
+    let selectedCollection = collections.find(
       (c) => c._id === selectedCollectionId
     );
+    
+    // Enhanced: If collection found, ensure it has bouquets assigned
+    if (selectedCollection) {
+      // Get bouquets from state collections (which should be normalized)
+      let collectionBouquets = (selectedCollection.bouquets as Bouquet[]) || [];
+      
+      // Fallback: If bouquets are empty or outdated, find bouquets by collectionName
+      if (collectionBouquets.length === 0 && selectedCollection.name) {
+        const collectionName = selectedCollection.name.trim();
+        collectionBouquets = bouquets.filter(b => {
+          const bouquetCollectionName = (b.collectionName || "Uncategorized").trim();
+          // Try exact match first
+          if (bouquetCollectionName === collectionName) {
+            return true;
+          }
+          // Try case-insensitive match
+          return bouquetCollectionName.toLowerCase() === collectionName.toLowerCase();
+        });
+        
+        // Update selectedCollection with found bouquets
+        selectedCollection = {
+          ...selectedCollection,
+          bouquets: collectionBouquets,
+        };
+      }
+    }
 
     // Enhanced: Add loading state handling
     if (collections.length === 0 && this.props.collections.length === 0) {
@@ -1442,11 +1527,16 @@ export default class BouquetEditorSection extends Component<Props, State> {
             </div>
           );
         }
+        
+        // Enhanced: Ensure bouquets are properly assigned to selected collection
+        // Always get bouquets from the updated selectedCollection (which should be normalized in render)
+        const collectionBouquets = (selectedCollection.bouquets as Bouquet[]) || [];
+        
         return (
           <div className="bouquetEditorSection">
             <CollectionDetailView
               collection={selectedCollection}
-              bouquets={selectedCollection.bouquets as Bouquet[]}
+              bouquets={collectionBouquets}
               allCollections={collections}
               onBack={this.handleBackToCollections}
               onBouquetSelect={this.handleBouquetSelect}
