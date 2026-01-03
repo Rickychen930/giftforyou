@@ -1666,6 +1666,61 @@
   }
 }
 
+/* Loading State */
+.becCard--loading {
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.becLoadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  width: 100%;
+  padding: var(--space-8);
+}
+
+.becLoadingText {
+  color: var(--ink-600);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base);
+  text-align: center;
+}
+
+/* Error State */
+.becCard--error {
+  min-height: 300px;
+}
+
+.becCard[data-saving="true"],
+.becCard[data-loading="true"] {
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.becCard[data-saving="true"]::after,
+.becCard[data-loading="true"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: var(--z-overlay);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Enhanced Focus States for Accessibility */
+.becCard:focus-within {
+  outline: 2px solid var(--brand-rose-500);
+  outline-offset: 4px;
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .becCard,
@@ -1695,6 +1750,15 @@
 
   .becSpinner,
   .becSaveSpinner {
+    animation: none;
+  }
+
+  .becCard {
+    animation: none;
+  }
+
+  .becCard::before,
+  .becCard::after {
     animation: none;
   }
 }

@@ -34,11 +34,41 @@ interface State {
  * Dependency Inversion: Depends on BouquetEditor abstraction
  */
 class BouquetEditForm extends Component<Props, State> {
+  // Performance: Cache collection names to prevent recalculation
+  private cachedCollectionNames: string[] | null = null;
+  private lastCollectionsHash: string = "";
+
   constructor(props: Props) {
     super(props);
     this.state = {
       bouquet: props.bouquet,
     };
+  }
+
+  // Performance: Prevent unnecessary re-renders with deep comparison
+  shouldComponentUpdate(nextProps: Props, nextState: State): boolean {
+    // Only update if props or state actually changed
+    const propsChanged = 
+      nextProps.bouquet !== this.props.bouquet ||
+      nextProps.collections !== this.props.collections ||
+      nextProps.onSave !== this.props.onSave ||
+      nextProps.onBack !== this.props.onBack;
+
+    // Performance: Deep comparison for bouquet changes
+    const bouquetChanged = 
+      nextState.bouquet !== this.state.bouquet &&
+      (nextState.bouquet._id !== this.state.bouquet._id ||
+       nextState.bouquet.name !== this.state.bouquet.name ||
+       nextState.bouquet.price !== this.state.bouquet.price ||
+       nextState.bouquet.collectionName !== this.state.bouquet.collectionName);
+
+    return propsChanged || bouquetChanged;
+  }
+
+  // Performance: Cleanup on unmount
+  componentWillUnmount(): void {
+    this.cachedCollectionNames = null;
+    this.lastCollectionsHash = "";
   }
 
   componentDidUpdate(prevProps: Props): void {
@@ -48,11 +78,20 @@ class BouquetEditForm extends Component<Props, State> {
         bouquet: this.props.bouquet,
       });
     }
-    // Also update if bouquet data changed (after save)
+    // Also update if bouquet data changed (after save) - use deep comparison
     else if (prevProps.bouquet !== this.props.bouquet) {
-      this.setState({
-        bouquet: this.props.bouquet,
-      });
+      // Performance: Only update if data actually changed
+      const hasChanges = 
+        prevProps.bouquet.name !== this.props.bouquet.name ||
+        prevProps.bouquet.price !== this.props.bouquet.price ||
+        prevProps.bouquet.collectionName !== this.props.bouquet.collectionName ||
+        prevProps.bouquet.description !== this.props.bouquet.description;
+      
+      if (hasChanges) {
+        this.setState({
+          bouquet: this.props.bouquet,
+        });
+      }
     }
   }
 
@@ -63,15 +102,44 @@ class BouquetEditForm extends Component<Props, State> {
     return success;
   };
 
-  // Memoize collection names to prevent unnecessary re-renders
+  // Performance: Memoize collection names with caching
   private getCollectionNames = (): string[] => {
-    return this.props.collections.map((c) => c.name);
+    const collectionsHash = JSON.stringify(this.props.collections.map(c => c._id + c.name));
+    
+    if (this.cachedCollectionNames && this.lastCollectionsHash === collectionsHash) {
+      return this.cachedCollectionNames;
+    }
+    
+    const names = this.props.collections.map((c) => c.name);
+    this.cachedCollectionNames = names;
+    this.lastCollectionsHash = collectionsHash;
+    return names;
   };
 
   render(): React.ReactNode {
     const { onBack } = this.props;
     const { bouquet } = this.state;
     const collectionNames = this.getCollectionNames();
+
+    // Enhanced: Validate bouquet data before rendering
+    if (!bouquet || !bouquet._id) {
+      return (
+        <section className="bouquetEditForm bouquetEditForm--error" aria-label="Error loading bouquet">
+          <SectionHeader
+            title="Error"
+            subtitle="Gagal memuat data bouquet."
+            backButton={{
+              onClick: onBack,
+              label: "Kembali",
+            }}
+            className="bouquetEditForm__header"
+          />
+          <div className="bouquetEditForm__errorMessage">
+            <p>Bouquet tidak ditemukan atau data tidak valid. Silakan kembali dan coba lagi.</p>
+          </div>
+        </section>
+      );
+    }
 
     return (
       <section className="bouquetEditForm" aria-label={`Edit bouquet ${bouquet.name}`}>

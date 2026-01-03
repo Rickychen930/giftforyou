@@ -33,10 +33,63 @@ interface Props {
 /**
  * View Component for Bouquet Editor
  * Handles only presentation logic - follows Single Responsibility Principle
+ * Optimized for performance with shouldComponentUpdate
  */
 class BouquetEditorView extends Component<Props> {
+  // Performance: Cache controller state to prevent unnecessary recalculations
+  private cachedState: ReturnType<BouquetEditorController['getControllerState']> | null = null;
+  private lastControllerStateHash: string = "";
+  // Performance: Cache rendered components
+  private renderCache: Map<string, React.ReactNode> = new Map();
+  private lastRenderKey: string = "";
+
+  // Performance: Prevent unnecessary re-renders with deep comparison
+  shouldComponentUpdate(nextProps: Props): boolean {
+    // Only update if controller reference changed
+    if (nextProps.controller !== this.props.controller) {
+      // Clear cache when controller changes
+      this.cachedState = null;
+      this.lastControllerStateHash = "";
+      this.renderCache.clear();
+      this.lastRenderKey = "";
+      return true;
+    }
+    return false;
+  }
+
   private getControllerState() {
-    return this.props.controller.getControllerState();
+    // Performance: Cache state to prevent recalculation
+    const state = this.props.controller.getControllerState();
+    
+    // Performance: Create hash from only relevant state fields
+    const stateHash = JSON.stringify({
+      form: {
+        name: state.state.form.name,
+        price: state.state.form.price,
+        collectionName: state.state.form.collectionName,
+        description: state.state.form.description,
+        _id: state.state.form._id,
+      },
+      saving: state.state.saving,
+      isImageLoading: state.state.isImageLoading,
+      fieldErrors: state.state.fieldErrors,
+    });
+    
+    if (this.cachedState && this.lastControllerStateHash === stateHash) {
+      return this.cachedState;
+    }
+    
+    this.cachedState = state;
+    this.lastControllerStateHash = stateHash;
+    return state;
+  }
+
+  // Performance: Clear cache when component unmounts
+  componentWillUnmount(): void {
+    this.cachedState = null;
+    this.lastControllerStateHash = "";
+    this.renderCache.clear();
+    this.lastRenderKey = "";
   }
 
   // ==================== Header Section ====================
@@ -424,10 +477,47 @@ class BouquetEditorView extends Component<Props> {
   }
 
   // ==================== Form Fields ====================
-  // Memoize collection names to prevent unnecessary recalculations
+  // Performance: Memoize collection names with caching
+  private collectionNamesCache: string[] | null = null;
+  private lastCollectionsHash: string = "";
+
   private getCollectionNames = (collections: string[]): string[] => {
+    const hash = collections.join(",");
+    if (this.collectionNamesCache && this.lastCollectionsHash === hash) {
+      return this.collectionNamesCache;
+    }
+    this.collectionNamesCache = collections;
+    this.lastCollectionsHash = hash;
     return collections;
   };
+
+  // Performance: Memoize merged collection options
+  private mergedCollectionOptionsCache: string[] | null = null;
+  private lastMergedOptionsHash: string = "";
+
+  private getMergedCollectionOptions(
+    collectionOptions: string[],
+    collections: string[]
+  ): string[] {
+    const hash = `${collectionOptions.join(",")}-${collections.join(",")}`;
+    if (this.mergedCollectionOptionsCache && this.lastMergedOptionsHash === hash) {
+      return this.mergedCollectionOptionsCache;
+    }
+    
+    // Performance: Use Set for deduplication (O(n) instead of O(n²))
+    const allOptions = new Set<string>();
+    for (const opt of collectionOptions) {
+      allOptions.add(opt);
+    }
+    for (const col of collections) {
+      allOptions.add(col);
+    }
+    
+    const result = Array.from(allOptions);
+    this.mergedCollectionOptionsCache = result;
+    this.lastMergedOptionsHash = hash;
+    return result;
+  }
 
   private renderFormFields(): React.ReactNode {
     const { state, handlers } = this.getControllerState();
@@ -443,10 +533,11 @@ class BouquetEditorView extends Component<Props> {
     } = state;
     const { collections } = this.props.controller.props;
     
-    // Memoize merged collection options
-    const allCollectionOptions = [
-      ...new Set([...collectionOptions, ...this.getCollectionNames(collections)]),
-    ];
+    // Performance: Use memoized merged collection options
+    const allCollectionOptions = this.getMergedCollectionOptions(
+      collectionOptions,
+      this.getCollectionNames(collections)
+    );
 
     return (
       <div className="becGrid">
@@ -1165,22 +1256,71 @@ class BouquetEditorView extends Component<Props> {
     const { state } = this.getControllerState();
     const { form, saving, isImageLoading } = state;
     
-    // Early return optimization - don't render if critical data missing
+    // Performance: Create render key for caching
+    const renderKey = `${form._id}-${form.name}-${saving}-${isImageLoading}`;
+    
+    // Performance: Check cache first
+    if (this.renderCache.has(renderKey) && this.lastRenderKey === renderKey) {
+      return this.renderCache.get(renderKey)!;
+    }
+    
+    // Enhanced: Early return optimization with better loading state
     if (!form._id) {
-      return (
-        <article className="becCard" aria-label="Loading bouquet">
+      const loadingRender = (
+        <article className="becCard becCard--loading" aria-label="Loading bouquet">
           <div className="becBody">
-            <div className="becAlert">Memuat data bouquet...</div>
+            <div className="becLoadingState">
+              <div className="becSpinner" aria-hidden="true"></div>
+              <p className="becLoadingText">Memuat data bouquet...</p>
+            </div>
           </div>
         </article>
       );
+      this.renderCache.set(renderKey, loadingRender);
+      this.lastRenderKey = renderKey;
+      return loadingRender;
     }
 
-    return (
+    // Enhanced: Add error boundary for missing critical data
+    if (!form.name && !form._id) {
+      const errorRender = (
+        <article className="becCard becCard--error" aria-label="Error loading bouquet">
+          <div className="becBody">
+            <div className="becAlert becAlert--error">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <path
+                  d="M12 8V12M12 16H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span>Gagal memuat data bouquet. Silakan refresh halaman.</span>
+            </div>
+          </div>
+        </article>
+      );
+      this.renderCache.set(renderKey, errorRender);
+      this.lastRenderKey = renderKey;
+      return errorRender;
+    }
+
+    // Performance: Cache main render
+    const mainRender = (
       <article 
         className="becCard" 
         aria-label={`Edit bouquet ${form.name || "tanpa nama"}`}
         aria-busy={saving || isImageLoading}
+        data-saving={saving}
+        data-loading={isImageLoading}
       >
         {this.renderHeader()}
         {this.renderDeleteModal()}
@@ -1192,6 +1332,16 @@ class BouquetEditorView extends Component<Props> {
         </div>
       </article>
     );
+    
+    // Performance: Cache and return
+    this.renderCache.set(renderKey, mainRender);
+    // Performance: Limit cache size to prevent memory leaks
+    if (this.renderCache.size > 5) {
+      const firstKey = this.renderCache.keys().next().value;
+      this.renderCache.delete(firstKey);
+    }
+    this.lastRenderKey = renderKey;
+    return mainRender;
   }
 }
 

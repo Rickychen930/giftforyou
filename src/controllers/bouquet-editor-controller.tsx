@@ -114,22 +114,37 @@ export class BouquetEditorController extends BaseController<Props, State> {
   }
 
   componentDidUpdate(prevProps: Props, prevState: State): void {
-    // Reset form when bouquet changes (different bouquet selected)
+    // Enhanced: Reset form when bouquet changes (different bouquet selected)
     if (prevProps.bouquet._id !== this.props.bouquet._id) {
       this.resetFormFromBouquet();
     }
-    // Also update form when bouquet data changes (after save from parent)
+    // Enhanced: Also update form when bouquet data changes (after save from parent)
     else if (prevProps.bouquet !== this.props.bouquet) {
       // Only update if form is not dirty to prevent overwriting user changes
       const { isDirty } = this.getValidationState();
       if (!isDirty) {
         this.resetFormFromBouquet();
+      } else {
+        // Enhanced: Show notification if there are unsaved changes when bouquet updates
+        // This helps prevent accidental data loss
+        if (process.env.NODE_ENV === "development") {
+          console.log("Bouquet data updated but form has unsaved changes");
+        }
       }
     }
     
-    // Update quick actions listeners when showQuickActions changes
+    // Enhanced: Update quick actions listeners when showQuickActions changes
     if (prevState.showQuickActions !== this.state.showQuickActions) {
       this.updateQuickActionsListeners();
+    }
+
+    // Enhanced: Clear validation errors when form becomes valid
+    if (prevState.fieldErrors && Object.keys(prevState.fieldErrors).length > 0) {
+      const { validationError } = this.getValidationState();
+      if (!validationError && Object.keys(this.state.fieldErrors).length > 0) {
+        // Form is now valid, clear any remaining errors
+        this.setState({ fieldErrors: {} });
+      }
     }
   }
 
@@ -407,20 +422,36 @@ export class BouquetEditorController extends BaseController<Props, State> {
   };
 
   private processImageFile = async (selectedFile: File): Promise<void> => {
-    // Prevent processing if already loading or saving
+    // Enhanced: Prevent processing if already loading or saving
     if (this.state.isImageLoading || this.state.saving) {
       return;
     }
 
-    // Check file size (8MB limit) - early validation for better UX
+    // Enhanced: Check file size (8MB limit) - early validation for better UX
     const maxSize = 8 * 1024 * 1024;
     if (selectedFile.size > maxSize) {
       this.setSaveStatus("error", "Ukuran file maksimal 8MB. Silakan pilih file yang lebih kecil.");
+      // Enhanced: Clear file input to prevent retry with same file
+      if (this.nameInputRef.current?.form) {
+        const fileInput = this.nameInputRef.current.form.querySelector('input[type="file"]') as HTMLInputElement;
+        if (fileInput) {
+          fileInput.value = "";
+        }
+      }
       return;
     }
 
+    // Enhanced: Validate file type with better error message
     if (!isAcceptableImage(selectedFile)) {
-      this.setSaveStatus("error", "File harus berupa gambar (JPG/PNG/WEBP/HEIC).");
+      const fileExtension = selectedFile.name.split('.').pop()?.toLowerCase() || 'unknown';
+      this.setSaveStatus("error", `Format file tidak didukung (${fileExtension}). Gunakan JPG, PNG, WEBP, atau HEIC.`);
+      // Enhanced: Clear file input
+      if (this.nameInputRef.current?.form) {
+        const fileInput = this.nameInputRef.current.form.querySelector('input[type="file"]') as HTMLInputElement;
+        if (fileInput) {
+          fileInput.value = "";
+        }
+      }
       return;
     }
 
@@ -576,15 +607,25 @@ export class BouquetEditorController extends BaseController<Props, State> {
   // ==================== Save/Delete/Duplicate Handlers ====================
 
   handleSave = async (): Promise<void> => {
-    // Prevent double submission or save during image processing
+    // Enhanced: Prevent double submission or save during image processing
     if (this.state.saving || this.state.isImageLoading) {
+      if (this.state.isImageLoading) {
+        this.setSaveStatus("error", "Tunggu hingga gambar selesai diproses sebelum menyimpan.");
+      }
       return;
     }
 
     const { validationError, isDirty } = this.getValidationState();
 
+    // Enhanced: Better error handling and user feedback
     if (validationError) {
-      // Scroll to first error with optimized behavior using requestAnimationFrame
+      // Enhanced: Mark all required fields as touched for better UX
+      const requiredFields = ["name", "price", "size", "collectionName"];
+      this.setState((prev) => ({
+        touchedFields: new Set([...prev.touchedFields, ...requiredFields]),
+      }));
+
+      // Enhanced: Scroll to first error with optimized behavior using requestAnimationFrame
       const firstErrorField = Object.keys(this.state.fieldErrors)[0];
       if (firstErrorField) {
         // Use requestAnimationFrame for smooth scrolling
@@ -594,18 +635,25 @@ export class BouquetEditorController extends BaseController<Props, State> {
           ) as HTMLElement;
           if (errorElement) {
             errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
-            // Focus after scroll completes for better accessibility
+            // Enhanced: Focus after scroll completes for better accessibility
             setTimeout(() => {
               if (errorElement.tagName === "INPUT" || errorElement.tagName === "TEXTAREA" || errorElement.tagName === "SELECT") {
                 errorElement.focus();
+                // Enhanced: Select text if it's an input field
+                if (errorElement instanceof HTMLInputElement && errorElement.type === "text") {
+                  errorElement.select();
+                }
               }
             }, 300);
           }
         });
       }
+      // Enhanced: Show validation error message
+      this.setSaveStatus("error", validationError);
       return;
     }
 
+    // Enhanced: Better feedback when no changes
     if (!isDirty) {
       this.setSaveStatus("idle", "Tidak ada perubahan untuk disimpan.");
       return;
@@ -615,13 +663,22 @@ export class BouquetEditorController extends BaseController<Props, State> {
       this.setState({ saving: true });
       const fd = buildFormData(this.state.form, this.state.file);
 
-      // Add timeout protection for save (30 seconds)
+      // Enhanced: Add timeout protection for save (30 seconds) with better error handling
       const savePromise = this.props.onSave(fd);
       const timeoutPromise = new Promise<boolean>((_, reject) => {
         setTimeout(() => reject(new Error("Save timeout. Silakan coba lagi.")), 30000);
       });
 
-      const result = await Promise.race([savePromise, timeoutPromise]);
+      let result: boolean | void;
+      try {
+        result = await Promise.race([savePromise, timeoutPromise]);
+      } catch (timeoutErr) {
+        // Enhanced: Handle timeout specifically
+        if (timeoutErr instanceof Error && timeoutErr.message.includes("timeout")) {
+          throw new Error("Waktu penyimpanan habis. Periksa koneksi internet dan coba lagi.");
+        }
+        throw timeoutErr;
+      }
       
       // Handle save result
       if (typeof result === "boolean") {

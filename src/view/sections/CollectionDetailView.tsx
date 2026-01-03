@@ -228,9 +228,13 @@ class DownloadPDFButton extends Component<
 /**
  * Collection Detail View Component
  * Class-based component for collection detail view
+ * Optimized for performance with shouldComponentUpdate
  */
 class CollectionDetailView extends Component<Props, CollectionDetailViewState> {
   private baseClass: string = "collectionDetailView";
+  // Performance: Cache expensive computations
+  private availableCollectionsCache: Collection[] | null = null;
+  private lastCollectionId: string = "";
 
   constructor(props: Props) {
     super(props);
@@ -242,14 +246,85 @@ class CollectionDetailView extends Component<Props, CollectionDetailViewState> {
     };
   }
 
+  // Performance: Prevent unnecessary re-renders
+  shouldComponentUpdate(nextProps: Props, nextState: CollectionDetailViewState): boolean {
+    // Only update if props or state actually changed
+    const propsChanged = 
+      nextProps.collection !== this.props.collection ||
+      nextProps.bouquets !== this.props.bouquets ||
+      nextProps.allCollections !== this.props.allCollections ||
+      nextProps.onBack !== this.props.onBack ||
+      nextProps.onBouquetSelect !== this.props.onBouquetSelect ||
+      nextProps.onBouquetMove !== this.props.onBouquetMove ||
+      nextProps.onBouquetDelete !== this.props.onBouquetDelete ||
+      nextProps.onBouquetDuplicate !== this.props.onBouquetDuplicate;
+
+    const stateChanged = 
+      nextState.movingBouquetId !== this.state.movingBouquetId ||
+      nextState.deletingBouquetId !== this.state.deletingBouquetId ||
+      nextState.duplicatingBouquetId !== this.state.duplicatingBouquetId ||
+      nextState.showMoveModal !== this.state.showMoveModal;
+
+    return propsChanged || stateChanged;
+  }
+
+  // Performance: Memoize available collections
   private getAvailableCollections(): Collection[] {
-    return this.props.allCollections.filter((c) => c._id !== this.props.collection._id);
+    const currentCollectionId = this.props.collection._id;
+    if (this.availableCollectionsCache && this.lastCollectionId === currentCollectionId) {
+      return this.availableCollectionsCache;
+    }
+    
+    const available = this.props.allCollections.filter((c) => c._id !== currentCollectionId);
+    this.availableCollectionsCache = available;
+    this.lastCollectionId = currentCollectionId;
+    return available;
   }
 
   private handleMove = async (bouquetId: string, targetCollectionId: string): Promise<void> => {
+    // Enhanced: Validate inputs
+    if (!bouquetId || !targetCollectionId) {
+      alert("Data tidak valid untuk operasi pindah.");
+      return;
+    }
+
+    // Enhanced: Check if bouquet exists
+    const bouquet = this.props.bouquets.find((b) => b._id === bouquetId);
+    if (!bouquet) {
+      alert("Bouquet tidak ditemukan.");
+      return;
+    }
+
+    // Enhanced: Check if target collection exists
+    const targetCollection = this.props.allCollections.find((c) => c._id === targetCollectionId);
+    if (!targetCollection) {
+      alert("Koleksi tujuan tidak ditemukan.");
+      return;
+    }
+
+    // Enhanced: Prevent moving to same collection
+    if (this.props.collection._id === targetCollectionId) {
+      alert("Bouquet sudah berada di koleksi ini.");
+      this.setState({ showMoveModal: null });
+      return;
+    }
+
+    // Enhanced: Prevent concurrent operations
+    if (this.state.movingBouquetId || this.state.deletingBouquetId || this.state.duplicatingBouquetId) {
+      alert("Tunggu hingga operasi sebelumnya selesai.");
+      return;
+    }
+
     this.setState({ movingBouquetId: bouquetId });
     try {
-      const success = await this.props.onBouquetMove(bouquetId, targetCollectionId);
+      // Enhanced: Add timeout protection
+      const movePromise = this.props.onBouquetMove(bouquetId, targetCollectionId);
+      const timeoutPromise = new Promise<boolean>((_, reject) => 
+        setTimeout(() => reject(new Error("Operasi pindah timeout")), 30000)
+      );
+
+      const success = await Promise.race([movePromise, timeoutPromise]);
+      
       if (success) {
         this.setState({ showMoveModal: null });
       } else {
@@ -257,15 +332,36 @@ class CollectionDetailView extends Component<Props, CollectionDetailViewState> {
       }
     } catch (err) {
       console.error("Failed to move bouquet:", err);
-      alert("Terjadi kesalahan saat memindahkan bouquet. Silakan coba lagi.");
+      const errorMessage = err instanceof Error 
+        ? (err.message.includes("timeout") ? "Operasi pindah timeout. Silakan coba lagi." : err.message)
+        : "Terjadi kesalahan saat memindahkan bouquet. Silakan coba lagi.";
+      alert(errorMessage);
     } finally {
       this.setState({ movingBouquetId: null });
     }
   };
 
   private handleDelete = async (bouquetId: string): Promise<void> => {
-    const bouquetName =
-      this.props.bouquets.find((b) => b._id === bouquetId)?.name || "bouquet ini";
+    // Enhanced: Validate input
+    if (!bouquetId) {
+      alert("Data tidak valid untuk operasi hapus.");
+      return;
+    }
+
+    // Enhanced: Check if bouquet exists
+    const bouquet = this.props.bouquets.find((b) => b._id === bouquetId);
+    if (!bouquet) {
+      alert("Bouquet tidak ditemukan.");
+      return;
+    }
+
+    // Enhanced: Prevent concurrent operations
+    if (this.state.movingBouquetId || this.state.deletingBouquetId || this.state.duplicatingBouquetId) {
+      alert("Tunggu hingga operasi sebelumnya selesai.");
+      return;
+    }
+
+    const bouquetName = bouquet.name || "bouquet ini";
     if (
       !window.confirm(
         `Yakin ingin menghapus "${bouquetName}"? Tindakan ini tidak dapat dibatalkan.`
@@ -273,23 +369,61 @@ class CollectionDetailView extends Component<Props, CollectionDetailViewState> {
     ) {
       return;
     }
+
     this.setState({ deletingBouquetId: bouquetId });
     try {
-      await this.props.onBouquetDelete(bouquetId);
+      // Enhanced: Add timeout protection
+      const deletePromise = this.props.onBouquetDelete(bouquetId);
+      const timeoutPromise = new Promise<void>((_, reject) => 
+        setTimeout(() => reject(new Error("Operasi hapus timeout")), 30000)
+      );
+
+      await Promise.race([deletePromise, timeoutPromise]);
     } catch (err) {
       console.error("Failed to delete bouquet:", err);
-      alert("Gagal menghapus bouquet. Silakan coba lagi.");
+      const errorMessage = err instanceof Error 
+        ? (err.message.includes("timeout") ? "Operasi hapus timeout. Silakan coba lagi." : err.message)
+        : "Gagal menghapus bouquet. Silakan coba lagi.";
+      alert(errorMessage);
       this.setState({ deletingBouquetId: null });
     }
   };
 
   private handleDuplicate = async (bouquetId: string): Promise<void> => {
+    // Enhanced: Validate input
+    if (!bouquetId) {
+      alert("Data tidak valid untuk operasi duplikasi.");
+      return;
+    }
+
+    // Enhanced: Check if bouquet exists
+    const bouquet = this.props.bouquets.find((b) => b._id === bouquetId);
+    if (!bouquet) {
+      alert("Bouquet tidak ditemukan.");
+      return;
+    }
+
+    // Enhanced: Prevent concurrent operations
+    if (this.state.movingBouquetId || this.state.deletingBouquetId || this.state.duplicatingBouquetId) {
+      alert("Tunggu hingga operasi sebelumnya selesai.");
+      return;
+    }
+
     this.setState({ duplicatingBouquetId: bouquetId });
     try {
-      await this.props.onBouquetDuplicate(bouquetId);
+      // Enhanced: Add timeout protection
+      const duplicatePromise = this.props.onBouquetDuplicate(bouquetId);
+      const timeoutPromise = new Promise<void>((_, reject) => 
+        setTimeout(() => reject(new Error("Operasi duplikasi timeout")), 30000)
+      );
+
+      await Promise.race([duplicatePromise, timeoutPromise]);
     } catch (err) {
       console.error("Failed to duplicate bouquet:", err);
-      alert("Gagal menduplikasi bouquet. Silakan coba lagi.");
+      const errorMessage = err instanceof Error 
+        ? (err.message.includes("timeout") ? "Operasi duplikasi timeout. Silakan coba lagi." : err.message)
+        : "Gagal menduplikasi bouquet. Silakan coba lagi.";
+      alert(errorMessage);
       this.setState({ duplicatingBouquetId: null });
     }
   };
@@ -316,26 +450,42 @@ class CollectionDetailView extends Component<Props, CollectionDetailViewState> {
     );
   }
 
+  // Performance: Memoize bouquet card rendering
   private renderBouquetCard(bouquet: Bouquet): React.ReactNode {
     const { movingBouquetId, deletingBouquetId, duplicatingBouquetId, showMoveModal } = this.state;
     const isMoving = movingBouquetId === bouquet._id;
     const isDeleting = deletingBouquetId === bouquet._id;
     const isDuplicating = duplicatingBouquetId === bouquet._id;
     const showMove = showMoveModal === bouquet._id;
+    
+    // Performance: Cache available collections (only recalculate if collection changes)
     const availableCollections = this.getAvailableCollections();
+    
+    // Enhanced: Check if any operation is in progress (prevent concurrent operations)
+    const isAnyOperationInProgress = !!movingBouquetId || !!deletingBouquetId || !!duplicatingBouquetId;
+    const isThisBouquetOperationInProgress = isMoving || isDeleting || isDuplicating;
 
     return (
       <div key={bouquet._id} className={`${this.baseClass}__cardWrapper`}>
         <article
           className={`${this.baseClass}__card`}
-          onClick={() => this.props.onBouquetSelect(bouquet)}
+          onClick={() => {
+            // Enhanced: Prevent selection during operations
+            if (!isAnyOperationInProgress) {
+              this.props.onBouquetSelect(bouquet);
+            }
+          }}
           role="button"
           tabIndex={0}
           onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
+            if ((e.key === "Enter" || e.key === " ") && !isAnyOperationInProgress) {
               e.preventDefault();
               this.props.onBouquetSelect(bouquet);
             }
+          }}
+          style={{
+            cursor: isAnyOperationInProgress ? "wait" : "pointer",
+            opacity: isThisBouquetOperationInProgress ? 0.6 : 1,
           }}
         >
           <div className={`${this.baseClass}__cardMedia`}>
@@ -391,7 +541,13 @@ class CollectionDetailView extends Component<Props, CollectionDetailViewState> {
           <button
             type="button"
             className={`${this.baseClass}__actionBtn ${this.baseClass}__actionBtn--edit`}
-            onClick={() => this.props.onBouquetSelect(bouquet)}
+            onClick={() => {
+              // Enhanced: Prevent edit during operations
+              if (!isAnyOperationInProgress) {
+                this.props.onBouquetSelect(bouquet);
+              }
+            }}
+            disabled={isAnyOperationInProgress}
             aria-label={`Edit ${bouquet.name}`}
             title="Edit"
           >
@@ -436,9 +592,12 @@ class CollectionDetailView extends Component<Props, CollectionDetailViewState> {
                   className={`${this.baseClass}__actionBtn ${this.baseClass}__actionBtn--move`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    this.setState({ showMoveModal: bouquet._id });
+                    // Enhanced: Prevent opening move modal during other operations
+                    if (!isAnyOperationInProgress) {
+                      this.setState({ showMoveModal: bouquet._id });
+                    }
                   }}
-                  disabled={isMoving}
+                  disabled={isMoving || isAnyOperationInProgress}
                   aria-label={`Pindahkan ${bouquet.name}`}
                   title="Pindahkan"
                 >
@@ -454,9 +613,12 @@ class CollectionDetailView extends Component<Props, CollectionDetailViewState> {
             className={`${this.baseClass}__actionBtn ${this.baseClass}__actionBtn--duplicate`}
             onClick={(e) => {
               e.stopPropagation();
-              void this.handleDuplicate(bouquet._id);
+              // Enhanced: Prevent duplicate during other operations
+              if (!isAnyOperationInProgress) {
+                void this.handleDuplicate(bouquet._id);
+              }
             }}
-            disabled={isDuplicating}
+            disabled={isDuplicating || isAnyOperationInProgress}
             aria-label={`Duplikat ${bouquet.name}`}
             title="Duplikat"
           >
@@ -469,9 +631,12 @@ class CollectionDetailView extends Component<Props, CollectionDetailViewState> {
             className={`${this.baseClass}__actionBtn ${this.baseClass}__actionBtn--delete`}
             onClick={(e) => {
               e.stopPropagation();
-              void this.handleDelete(bouquet._id);
+              // Enhanced: Prevent delete during other operations
+              if (!isAnyOperationInProgress) {
+                void this.handleDelete(bouquet._id);
+              }
             }}
-            disabled={isDeleting}
+            disabled={isDeleting || isAnyOperationInProgress}
             aria-label={`Hapus ${bouquet.name}`}
             title="Hapus"
           >
