@@ -1,25 +1,28 @@
-@import "../design-system.css";
-
 /**
- * Header Dropdown Styles
+ * Header Dropdown Component Styles
+ * Luxury, Elegant, Premium Design
  * Wrapper styles for the mega menu
- * Most styling is handled by HeaderMegaMenu.css
+ * Uses design-system.css variables
  */
+
+@import "../design-system.css";
 
 .header-dropdown {
   position: absolute;
-  top: calc(100% + 20px);
+  top: calc(100% + 24px);
   left: 50%;
   transform: translateX(-50%);
   display: none;
   z-index: var(--z-dropdown);
   min-width: 0;
+  filter: drop-shadow(0 8px 32px rgba(0, 0, 0, 0.1));
 }
 
 /* Show dropdown on hover (desktop) or when open (mobile) */
 .header-navigation__item--dropdown:hover .header-dropdown,
 .header-navigation__item--dropdown:focus-within .header-dropdown {
   display: block;
+  animation: dropdownSlideLuxury var(--transition-base) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .header-navigation__item--dropdown.is-open .header-dropdown {
@@ -27,19 +30,21 @@
 }
 
 /* Animation for dropdown */
-@keyframes dropdownSlide {
+@keyframes dropdownSlideLuxury {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(-10px);
+    transform: translateX(-50%) translateY(-15px) scale(0.96);
+    filter: blur(4px);
   }
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translateX(-50%) translateY(0) scale(1);
+    filter: blur(0);
   }
 }
 
 .header-navigation__item--dropdown.is-open.is-animate .header-dropdown {
-  animation: dropdownSlide var(--transition-fast) cubic-bezier(0.4, 0, 0.2, 1);
+  animation: dropdownSlideLuxury var(--transition-fast) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Mobile Navigation Integration */
@@ -54,6 +59,7 @@
     min-width: 0;
     animation: none;
     overflow: visible;
+    filter: none;
   }
 
   /* Ensure dropdown only shows when mobile menu is open */
@@ -68,4 +74,3 @@
     animation: none !important;
   }
 }
-

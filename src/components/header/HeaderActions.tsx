@@ -6,7 +6,7 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import "../../styles/header/HeaderActions.css";
-import { SearchIcon } from "../icons/UIIcons";
+import { SearchIcon, CloseIcon } from "../icons/UIIcons";
 import { getAccessToken } from "../../utils/auth-utils";
 import { getCartCount } from "../../utils/cart";
 
@@ -93,18 +93,18 @@ class HeaderActions extends Component<HeaderActionsProps, HeaderActionsState> {
 
     return (
       <div className={this.baseClass}>
-        {/* Search */}
+        {/* Search / Close Toggle */}
         <button
-          className={`${this.baseClass}__btn ${this.baseClass}__btn--search`}
+          className={`${this.baseClass}__btn ${this.baseClass}__btn--search ${searchOpen ? "is-open" : ""}`}
           onClick={onSearchToggle}
           type="button"
-          aria-label="Cari (Ctrl+K atau Cmd+K)"
+          aria-label={searchOpen ? "Tutup pencarian" : "Cari (Ctrl+K atau Cmd+K)"}
           aria-expanded={searchOpen}
           aria-controls={searchOpen ? "search-modal" : undefined}
           ref={searchButtonRef}
-          title="Cari (Ctrl+K atau Cmd+K)"
+          title={searchOpen ? "Tutup pencarian" : "Cari (Ctrl+K atau Cmd+K)"}
         >
-          <SearchIcon />
+          {searchOpen ? <CloseIcon width={20} height={20} /> : <SearchIcon />}
         </button>
 
         {/* Cart */}

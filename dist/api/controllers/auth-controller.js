@@ -31,6 +31,7 @@ const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const user_model_1 = require("../../models/user-model");
 const input_validation_1 = require("../middleware/input-validation");
+const BaseApiController_1 = require("./base/BaseApiController");
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET || JWT_SECRET === "secretkey") {
     console.error("❌ CRITICAL: JWT_SECRET must be set in environment variables!");
@@ -57,260 +58,168 @@ function getClientId(req) {
     }
     return req.ip || req.socket.remoteAddress || "unknown";
 }
-async function createUser(req, res) {
-    try {
-        // Check if public registration is allowed
-        // Allow registration if:
-        // 1. Not in production mode, OR
-        // 2. In production but ALLOW_PUBLIC_REGISTRATION is explicitly set to "true"
-        const isProduction = process.env.NODE_ENV === "production";
-        const allowRegistration = process.env.ALLOW_PUBLIC_REGISTRATION === "true";
-        // Debug logging (both development and production for troubleshooting)
-        console.log("[Auth] Registration check:", {
-            isProduction,
-            allowRegistration,
-            ALLOW_PUBLIC_REGISTRATION: process.env.ALLOW_PUBLIC_REGISTRATION,
-            NODE_ENV: process.env.NODE_ENV,
-            timestamp: new Date().toISOString(),
-        });
-        if (isProduction && !allowRegistration) {
-            res.status(403).json({ error: "Registration is disabled" });
-            return;
-        }
-        // Also check if explicitly disabled in development
-        if (!isProduction && process.env.ALLOW_PUBLIC_REGISTRATION === "false") {
-            res.status(403).json({ error: "Registration is disabled" });
-            return;
-        }
-        const username = (0, input_validation_1.sanitizeString)(req.body.username);
-        const email = (0, input_validation_1.sanitizeString)(req.body.email).toLowerCase();
-        const password = (0, input_validation_1.sanitizeString)(req.body.password);
-        // Validate username
-        const usernameValidation = (0, input_validation_1.isValidUsername)(username);
-        if (!usernameValidation.valid) {
-            res.status(400).json({ error: usernameValidation.error });
-            return;
-        }
-        // Validate email
-        if (!(0, input_validation_1.isValidEmail)(email)) {
-            res.status(400).json({ error: "Invalid email address" });
-            return;
-        }
-        // Validate password strength
-        const passwordValidation = (0, input_validation_1.isStrongPassword)(password);
-        if (!passwordValidation.valid) {
-            res.status(400).json({
-                error: "Password does not meet requirements",
-                details: passwordValidation.errors,
-            });
-            return;
-        }
-        // Check for existing user
-        const [u1, u2] = await Promise.all([
-            user_model_1.UserModel.findOne({ username }).lean().exec(),
-            user_model_1.UserModel.findOne({ email }).lean().exec(),
-        ]);
-        if (u1) {
-            res.status(409).json({ error: "Username already exists" });
-            return;
-        }
-        if (u2) {
-            res.status(409).json({ error: "Email already exists" });
-            return;
-        }
-        // Hash password with higher cost factor for better security
-        const hashed = await bcryptjs_1.default.hash(password, 12);
-        const user = await user_model_1.UserModel.create({
-            username,
-            email,
-            password: hashed,
-            role: "customer",
-            isActive: true,
-        });
-        // Create customer profile if fullName and phoneNumber provided
-        const fullName = (0, input_validation_1.sanitizeString)(req.body.fullName || "");
-        const phoneNumber = (0, input_validation_1.sanitizeString)(req.body.phoneNumber || "");
-        if (fullName && phoneNumber) {
-            try {
-                const { CustomerModel } = await Promise.resolve().then(() => __importStar(require("../../models/customer-model")));
-                await CustomerModel.create({
-                    buyerName: fullName,
-                    phoneNumber: phoneNumber,
-                    address: "",
-                    userId: user._id.toString(), // Link to user
-                });
-            }
-            catch (err) {
-                // Customer creation is optional, don't fail registration if it fails
-                console.warn("Failed to create customer profile:", err);
-            }
-        }
-        res.status(201).json({ message: "User registered successfully" });
-    }
-    catch (err) {
-        console.error("Register failed:", err);
-        // Don't leak error details
-        res.status(500).json({ error: "Registration failed" });
-    }
-}
-exports.createUser = createUser;
-async function loginUser(req, res) {
-    try {
-        // Apply rate limiting
-        const clientId = getClientId(req);
-        const lockoutKey = `login:${clientId}`;
-        const lockout = lockoutStore.get(lockoutKey);
-        // Check if account is locked
-        if (lockout?.lockedUntil && lockout.lockedUntil > Date.now()) {
-            const remainingMinutes = Math.ceil((lockout.lockedUntil - Date.now()) / 60000);
-            res.status(429).json({
-                error: `Account temporarily locked. Try again in ${remainingMinutes} minute(s).`,
-            });
-            return;
-        }
-        const username = (0, input_validation_1.sanitizeString)(req.body.username);
-        const password = (0, input_validation_1.sanitizeString)(req.body.password);
-        if (!username || !password) {
-            res.status(400).json({ error: "Username and password are required" });
-            return;
-        }
-        // Find user
-        const user = await user_model_1.UserModel.findOne({ username }).exec();
-        // Always perform bcrypt comparison to prevent timing attacks
-        // Use a dummy hash if user doesn't exist
-        const dummyHash = "$2a$12$dummy.hash.to.prevent.timing.attacks";
-        const hashToCompare = user?.password || dummyHash;
-        const valid = await bcryptjs_1.default.compare(password, hashToCompare);
-        if (!user || !valid) {
-            // Increment failed attempts
-            const current = lockoutStore.get(lockoutKey) || { attempts: 0, lockedUntil: null };
-            current.attempts += 1;
-            if (current.attempts >= MAX_LOGIN_ATTEMPTS) {
-                current.lockedUntil = Date.now() + LOCKOUT_DURATION;
-                res.status(429).json({
-                    error: `Too many failed attempts. Account locked for 15 minutes.`,
-                });
-            }
-            else {
-                res.status(401).json({
-                    error: "Invalid credentials",
-                    remainingAttempts: MAX_LOGIN_ATTEMPTS - current.attempts,
-                });
-            }
-            lockoutStore.set(lockoutKey, current);
-            return;
-        }
-        // Reset lockout on successful login
-        lockoutStore.delete(lockoutKey);
-        if (!user.isActive) {
-            res.status(403).json({ error: "Account is inactive" });
-            return;
-        }
-        if (!JWT_SECRET) {
-            res.status(500).json({ error: "Server configuration error" });
-            return;
-        }
-        // Generate access token (short-lived for security)
-        const accessToken = jsonwebtoken_1.default.sign({ id: String(user._id), username: user.username, role: user.role }, JWT_SECRET, { expiresIn: "15m" } // Token expires in 15 minutes (for security)
-        );
-        // Generate refresh token (long-lived)
-        const refreshToken = jsonwebtoken_1.default.sign({ id: String(user._id), type: "refresh" }, JWT_SECRET, { expiresIn: "7d" });
-        // Ensure response is sent correctly
-        const responseData = {
-            token: accessToken,
-            refreshToken,
-            user: {
-                id: String(user._id),
-                username: user.username,
-                role: user.role,
-            },
-        };
-        // Log for debugging (remove in production or use proper logging)
-        if (process.env.NODE_ENV === "development") {
-            console.log("Login successful for user:", user.username);
-        }
-        res.status(200).json(responseData);
-    }
-    catch (err) {
-        console.error("Login failed:", err);
-        // Don't leak error details
-        res.status(500).json({ error: "Login failed" });
-    }
-}
-exports.loginUser = loginUser;
 /**
- * Refresh token endpoint
+ * Auth API Controller
+ * Extends BaseApiController for common functionality (SOLID, DRY)
  */
-async function googleLogin(req, res) {
-    try {
-        const { credential } = req.body;
-        if (!credential) {
-            res.status(400).json({ error: "Google credential is required" });
-            return;
-        }
-        // Decode Google JWT token
-        // Note: In production, you should verify the token with Google's API
-        // For now, we decode it (client-side already verified it with Google)
+class AuthController extends BaseApiController_1.BaseApiController {
+    /**
+     * Create user (register)
+     */
+    async createUser(req, res) {
         try {
-            // Validate JWT structure
-            const parts = credential.split(".");
-            if (parts.length !== 3) {
-                res.status(400).json({ error: "Invalid Google credential format" });
+            // Check if public registration is allowed
+            // Allow registration if:
+            // 1. Not in production mode, OR
+            // 2. In production but ALLOW_PUBLIC_REGISTRATION is explicitly set to "true"
+            const isProduction = process.env.NODE_ENV === "production";
+            const allowRegistration = process.env.ALLOW_PUBLIC_REGISTRATION === "true";
+            // Debug logging (both development and production for troubleshooting)
+            console.log("[Auth] Registration check:", {
+                isProduction,
+                allowRegistration,
+                ALLOW_PUBLIC_REGISTRATION: process.env.ALLOW_PUBLIC_REGISTRATION,
+                NODE_ENV: process.env.NODE_ENV,
+                timestamp: new Date().toISOString(),
+            });
+            if (isProduction && !allowRegistration) {
+                this.sendForbidden(res, "Registration is disabled");
                 return;
             }
-            const payload = JSON.parse(Buffer.from(parts[1], "base64").toString());
-            const email = payload.email?.toLowerCase();
-            const name = payload.name || "";
-            const googleId = payload.sub;
-            if (!email) {
-                res.status(400).json({ error: "Email not found in Google credential" });
+            // Also check if explicitly disabled in development
+            if (!isProduction && process.env.ALLOW_PUBLIC_REGISTRATION === "false") {
+                this.sendForbidden(res, "Registration is disabled");
                 return;
             }
-            // Find or create user
-            let user = await user_model_1.UserModel.findOne({ email }).exec();
-            if (!user) {
-                // Create new user from Google account
-                const username = email.split("@")[0] + "_" + googleId.slice(0, 8);
-                // Ensure username is unique
-                let uniqueUsername = username;
-                let counter = 1;
-                while (await user_model_1.UserModel.findOne({ username: uniqueUsername }).exec()) {
-                    uniqueUsername = `${username}_${counter}`;
-                    counter++;
-                }
-                user = await user_model_1.UserModel.create({
-                    username: uniqueUsername,
-                    email,
-                    password: "",
-                    role: "customer",
-                    isActive: true,
-                });
-                // Create customer profile
+            const username = (0, input_validation_1.sanitizeString)(req.body.username);
+            const email = (0, input_validation_1.sanitizeString)(req.body.email).toLowerCase();
+            const password = (0, input_validation_1.sanitizeString)(req.body.password);
+            // Validate username
+            const usernameValidation = (0, input_validation_1.isValidUsername)(username);
+            if (!usernameValidation.valid) {
+                this.sendBadRequest(res, usernameValidation.error || "Invalid username");
+                return;
+            }
+            // Validate email
+            if (!(0, input_validation_1.isValidEmail)(email)) {
+                this.sendBadRequest(res, "Invalid email address");
+                return;
+            }
+            // Validate password strength
+            const passwordValidation = (0, input_validation_1.isStrongPassword)(password);
+            if (!passwordValidation.valid) {
+                this.sendBadRequest(res, "Password does not meet requirements", passwordValidation.errors);
+                return;
+            }
+            // Check for existing user
+            const [u1, u2] = await Promise.all([
+                user_model_1.UserModel.findOne({ username }).lean().exec(),
+                user_model_1.UserModel.findOne({ email }).lean().exec(),
+            ]);
+            if (u1) {
+                this.sendConflict(res, "Username already exists");
+                return;
+            }
+            if (u2) {
+                this.sendConflict(res, "Email already exists");
+                return;
+            }
+            // Hash password with higher cost factor for better security
+            const hashed = await bcryptjs_1.default.hash(password, 12);
+            const user = await user_model_1.UserModel.create({
+                username,
+                email,
+                password: hashed,
+                role: "customer",
+                isActive: true,
+            });
+            // Create customer profile if fullName and phoneNumber provided
+            const fullName = (0, input_validation_1.sanitizeString)(req.body.fullName || "");
+            const phoneNumber = (0, input_validation_1.sanitizeString)(req.body.phoneNumber || "");
+            if (fullName && phoneNumber) {
                 try {
                     const { CustomerModel } = await Promise.resolve().then(() => __importStar(require("../../models/customer-model")));
                     await CustomerModel.create({
-                        buyerName: name,
-                        phoneNumber: "",
+                        buyerName: fullName,
+                        phoneNumber: phoneNumber,
                         address: "",
-                        userId: user._id.toString(),
+                        userId: user._id.toString(), // Link to user
                     });
                 }
                 catch (err) {
-                    console.warn("Failed to create customer profile for Google user:", err);
+                    // Customer creation is optional, don't fail registration if it fails
+                    console.warn("Failed to create customer profile:", err);
                 }
             }
-            else if (!user.isActive) {
-                res.status(403).json({ error: "Account is inactive" });
+            this.sendSuccess(res, null, "User registered successfully", 201);
+        }
+        catch (err) {
+            this.sendError(res, err instanceof Error ? err : new Error("Registration failed"));
+        }
+    }
+    /**
+     * Login user
+     */
+    async loginUser(req, res) {
+        try {
+            // Apply rate limiting
+            const clientId = this.getClientId(req);
+            const lockoutKey = `login:${clientId}`;
+            const lockout = lockoutStore.get(lockoutKey);
+            // Check if account is locked
+            if (lockout?.lockedUntil && lockout.lockedUntil > Date.now()) {
+                const remainingMinutes = Math.ceil((lockout.lockedUntil - Date.now()) / 60000);
+                this.sendRateLimit(res, `Account temporarily locked. Try again in ${remainingMinutes} minute(s).`, remainingMinutes * 60);
                 return;
             }
-            // Generate tokens
+            const username = (0, input_validation_1.sanitizeString)(req.body.username);
+            const password = (0, input_validation_1.sanitizeString)(req.body.password);
+            if (!username || !password) {
+                this.sendBadRequest(res, "Username and password are required");
+                return;
+            }
+            // Find user
+            const user = await user_model_1.UserModel.findOne({ username }).exec();
+            // Always perform bcrypt comparison to prevent timing attacks
+            // Use a dummy hash if user doesn't exist
+            const dummyHash = "$2a$12$dummy.hash.to.prevent.timing.attacks";
+            const hashToCompare = user?.password || dummyHash;
+            const valid = await bcryptjs_1.default.compare(password, hashToCompare);
+            if (!user || !valid) {
+                // Increment failed attempts
+                const current = lockoutStore.get(lockoutKey) || { attempts: 0, lockedUntil: null };
+                current.attempts += 1;
+                if (current.attempts >= MAX_LOGIN_ATTEMPTS) {
+                    current.lockedUntil = Date.now() + LOCKOUT_DURATION;
+                    this.sendRateLimit(res, "Too many failed attempts. Account locked for 15 minutes.", 15 * 60);
+                }
+                else {
+                    res.status(401).json({
+                        success: false,
+                        error: "Invalid credentials",
+                        remainingAttempts: MAX_LOGIN_ATTEMPTS - current.attempts,
+                    });
+                }
+                lockoutStore.set(lockoutKey, current);
+                return;
+            }
+            // Reset lockout on successful login
+            lockoutStore.delete(lockoutKey);
+            if (!user.isActive) {
+                this.sendForbidden(res, "Account is inactive");
+                return;
+            }
             if (!JWT_SECRET) {
-                res.status(500).json({ error: "Server configuration error" });
+                this.sendError(res, new Error("Server configuration error"), 500);
                 return;
             }
-            const accessToken = jsonwebtoken_1.default.sign({ id: String(user._id), username: user.username, role: user.role }, JWT_SECRET, { expiresIn: "15m" });
+            // Generate access token (short-lived for security)
+            const accessToken = jsonwebtoken_1.default.sign({ id: String(user._id), username: user.username, role: user.role }, JWT_SECRET, { expiresIn: "15m" } // Token expires in 15 minutes (for security)
+            );
+            // Generate refresh token (long-lived)
             const refreshToken = jsonwebtoken_1.default.sign({ id: String(user._id), type: "refresh" }, JWT_SECRET, { expiresIn: "7d" });
-            res.status(200).json({
+            // Ensure response is sent correctly
+            const responseData = {
                 token: accessToken,
                 refreshToken,
                 user: {
@@ -318,63 +227,164 @@ async function googleLogin(req, res) {
                     username: user.username,
                     role: user.role,
                 },
-            });
-        }
-        catch (decodeError) {
-            console.error("Failed to decode Google credential:", decodeError);
-            res.status(400).json({ error: "Invalid Google credential" });
-        }
-    }
-    catch (err) {
-        console.error("Google login failed:", err);
-        res.status(500).json({ error: "Google login failed" });
-    }
-}
-exports.googleLogin = googleLogin;
-async function refreshToken(req, res) {
-    try {
-        const { refreshToken: token } = req.body;
-        if (!token) {
-            res.status(400).json({ error: "Refresh token required" });
-            return;
-        }
-        if (!JWT_SECRET) {
-            res.status(500).json({ error: "Server configuration error" });
-            return;
-        }
-        try {
-            const decoded = jsonwebtoken_1.default.verify(token, JWT_SECRET);
-            if (decoded.type !== "refresh") {
-                res.status(401).json({ error: "Invalid token type" });
-                return;
+            };
+            // Log for debugging (remove in production or use proper logging)
+            if (process.env.NODE_ENV === "development") {
+                console.log("Login successful for user:", user.username);
             }
-            // Get user to verify they still exist and are active
-            const user = await user_model_1.UserModel.findById(decoded.id).exec();
-            if (!user || !user.isActive) {
-                res.status(401).json({ error: "User not found or inactive" });
-                return;
-            }
-            // Generate new access token
-            const accessToken = jsonwebtoken_1.default.sign({ id: String(user._id), username: user.username, role: user.role }, JWT_SECRET, { expiresIn: "15m" } // Token expires in 15 minutes (for security)
-            );
-            res.status(200).json({ token: accessToken });
+            this.sendSuccess(res, responseData);
         }
         catch (err) {
-            if (err instanceof jsonwebtoken_1.default.TokenExpiredError) {
-                res.status(401).json({ error: "Refresh token expired" });
-                return;
-            }
-            if (err instanceof jsonwebtoken_1.default.JsonWebTokenError) {
-                res.status(401).json({ error: "Invalid refresh token" });
-                return;
-            }
-            throw err;
+            this.sendError(res, err instanceof Error ? err : new Error("Login failed"));
         }
     }
-    catch (err) {
-        console.error("Refresh token failed:", err);
-        res.status(500).json({ error: "Token refresh failed" });
+    /**
+     * Google login
+     */
+    async googleLogin(req, res) {
+        try {
+            const { credential } = req.body;
+            if (!credential) {
+                this.sendBadRequest(res, "Google credential is required");
+                return;
+            }
+            // Decode Google JWT token
+            // Note: In production, you should verify the token with Google's API
+            // For now, we decode it (client-side already verified it with Google)
+            try {
+                // Validate JWT structure
+                const parts = credential.split(".");
+                if (parts.length !== 3) {
+                    this.sendBadRequest(res, "Invalid Google credential format");
+                    return;
+                }
+                const payload = JSON.parse(Buffer.from(parts[1], "base64").toString());
+                const email = payload.email?.toLowerCase();
+                const name = payload.name || "";
+                const googleId = payload.sub;
+                if (!email) {
+                    this.sendBadRequest(res, "Email not found in Google credential");
+                    return;
+                }
+                // Find or create user
+                let user = await user_model_1.UserModel.findOne({ email }).exec();
+                if (!user) {
+                    // Create new user from Google account
+                    const username = email.split("@")[0] + "_" + googleId.slice(0, 8);
+                    // Ensure username is unique
+                    let uniqueUsername = username;
+                    let counter = 1;
+                    while (await user_model_1.UserModel.findOne({ username: uniqueUsername }).exec()) {
+                        uniqueUsername = `${username}_${counter}`;
+                        counter++;
+                    }
+                    user = await user_model_1.UserModel.create({
+                        username: uniqueUsername,
+                        email,
+                        password: "",
+                        role: "customer",
+                        isActive: true,
+                    });
+                    // Create customer profile
+                    try {
+                        const { CustomerModel } = await Promise.resolve().then(() => __importStar(require("../../models/customer-model")));
+                        await CustomerModel.create({
+                            buyerName: name,
+                            phoneNumber: "",
+                            address: "",
+                            userId: user._id.toString(),
+                        });
+                    }
+                    catch (err) {
+                        console.warn("Failed to create customer profile for Google user:", err);
+                    }
+                }
+                else if (!user.isActive) {
+                    this.sendForbidden(res, "Account is inactive");
+                    return;
+                }
+                // Generate tokens
+                if (!JWT_SECRET) {
+                    this.sendError(res, new Error("Server configuration error"), 500);
+                    return;
+                }
+                const accessToken = jsonwebtoken_1.default.sign({ id: String(user._id), username: user.username, role: user.role }, JWT_SECRET, { expiresIn: "15m" });
+                const refreshToken = jsonwebtoken_1.default.sign({ id: String(user._id), type: "refresh" }, JWT_SECRET, { expiresIn: "7d" });
+                this.sendSuccess(res, {
+                    token: accessToken,
+                    refreshToken,
+                    user: {
+                        id: String(user._id),
+                        username: user.username,
+                        role: user.role,
+                    },
+                });
+            }
+            catch (decodeError) {
+                this.sendBadRequest(res, "Invalid Google credential");
+            }
+        }
+        catch (err) {
+            this.sendError(res, err instanceof Error ? err : new Error("Google login failed"));
+        }
+    }
+    /**
+     * Refresh token
+     */
+    async refreshToken(req, res) {
+        try {
+            const { refreshToken: token } = req.body;
+            if (!token) {
+                this.sendBadRequest(res, "Refresh token required");
+                return;
+            }
+            if (!JWT_SECRET) {
+                this.sendError(res, new Error("Server configuration error"), 500);
+                return;
+            }
+            try {
+                const decoded = jsonwebtoken_1.default.verify(token, JWT_SECRET);
+                if (decoded.type !== "refresh") {
+                    this.sendUnauthorized(res, "Invalid token type");
+                    return;
+                }
+                // Get user to verify they still exist and are active
+                const user = await user_model_1.UserModel.findById(decoded.id).exec();
+                if (!user || !user.isActive) {
+                    this.sendUnauthorized(res, "User not found or inactive");
+                    return;
+                }
+                // Generate new access token
+                const accessToken = jsonwebtoken_1.default.sign({ id: String(user._id), username: user.username, role: user.role }, JWT_SECRET, { expiresIn: "15m" } // Token expires in 15 minutes (for security)
+                );
+                this.sendSuccess(res, { token: accessToken });
+            }
+            catch (err) {
+                if (err instanceof jsonwebtoken_1.default.TokenExpiredError) {
+                    this.sendUnauthorized(res, "Refresh token expired");
+                    return;
+                }
+                if (err instanceof jsonwebtoken_1.default.JsonWebTokenError) {
+                    this.sendUnauthorized(res, "Invalid refresh token");
+                    return;
+                }
+                throw err;
+            }
+        }
+        catch (err) {
+            this.sendError(res, err instanceof Error ? err : new Error("Token refresh failed"));
+        }
     }
 }
+// Export controller instance
+const authController = new AuthController();
+// Export methods for backward compatibility
+const createUser = (req, res) => authController.createUser(req, res);
+exports.createUser = createUser;
+const loginUser = (req, res) => authController.loginUser(req, res);
+exports.loginUser = loginUser;
+const googleLogin = (req, res) => authController.googleLogin(req, res);
+exports.googleLogin = googleLogin;
+const refreshToken = (req, res) => authController.refreshToken(req, res);
 exports.refreshToken = refreshToken;
 //# sourceMappingURL=auth-controller.js.map

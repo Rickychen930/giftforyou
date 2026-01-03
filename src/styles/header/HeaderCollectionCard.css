@@ -1,61 +1,114 @@
 /**
  * Header Collection Card Styles
- * Luxury & Elegant design with smooth animations
+ * Luxury, Elegant, Premium Design
  * Responsive and accessible
+ * Uses design-system.css variables
  */
 
 @import "../design-system.css";
+
+/* =========================================================
+   COLLECTION CARD - Premium Design
+   ========================================================= */
 
 .header-collection-card {
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  padding: var(--space-4) var(--space-5);
-  background: var(--gradient-elegant-surface);
-  border: var(--border-luxury);
-  border-color: transparent;
-  border-radius: var(--radius-lg);
+  padding: var(--space-4-5) var(--space-5);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(254, 245, 247, 0.95) 100%
+  );
+  border: 1.5px solid;
+  border-color: rgba(212, 140, 156, 0.2);
+  border-radius: var(--radius-xl);
   text-decoration: none;
   color: var(--ink-900);
-  transition: all var(--transition-elegant);
+  transition: all var(--transition-elegant) cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  box-shadow: var(--shadow-luxury-sm);
-  min-height: 72px;
+  box-shadow: 
+    0 4px 16px rgba(212, 140, 156, 0.08),
+    0 2px 8px rgba(212, 140, 156, 0.05),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  min-height: 80px;
   isolation: isolate;
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
 }
 
 .header-collection-card::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--gradient-luxury-gold-subtle);
+  background: linear-gradient(
+    135deg,
+    var(--luxury-gold-500) 0%,
+    var(--luxury-gold-700) 100%
+  );
   opacity: 0;
   transition: opacity var(--transition-elegant);
   z-index: 0;
+  border-radius: var(--radius-xl);
 }
+
+.header-collection-card::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(212, 140, 156, 0.2) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity var(--transition-elegant);
+  z-index: -1;
+  filter: blur(12px);
+  border-radius: var(--radius-xl);
+}
+
+/* =========================================================
+   ICON WRAPPER - Premium Frame
+   ========================================================= */
 
 .header-collection-card__icon-wrapper {
   flex-shrink: 0;
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--gradient-brand-soft);
-  border-radius: var(--radius-md);
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.15) 0%,
+    rgba(168, 213, 186, 0.1) 100%
+  );
+  border-radius: var(--radius-lg);
   position: relative;
   z-index: 1;
-  transition: all var(--transition-elegant);
-  box-shadow: var(--shadow-luxury-sm);
+  transition: all var(--transition-elegant) cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 2px 8px rgba(212, 140, 156, 0.1),
+    0 1px 4px rgba(212, 140, 156, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  border: 1px solid;
+  border-color: rgba(212, 140, 156, 0.2);
 }
 
 .header-collection-card__icon {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   line-height: 1;
-  transition: transform var(--transition-elegant);
+  transition: transform var(--transition-elegant) cubic-bezier(0.4, 0, 0.2, 1);
   display: block;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
+
+/* =========================================================
+   CONTENT
+   ========================================================= */
 
 .header-collection-card__content {
   flex: 1 1 auto;
@@ -70,69 +123,94 @@
   font-weight: var(--font-weight-semibold);
   color: var(--ink-900);
   margin: 0 0 var(--space-1) 0;
-  transition: color var(--transition-elegant);
+  transition: all var(--transition-elegant);
   line-height: 1.3;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   word-break: break-word;
+  letter-spacing: 0.01em;
 }
 
 .header-collection-card__description {
   font-size: var(--font-size-sm);
   color: var(--ink-550);
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.5;
   transition: color var(--transition-elegant);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  letter-spacing: 0.005em;
 }
 
 .header-collection-card__arrow {
   flex-shrink: 0;
   font-size: var(--font-size-xl);
   color: var(--brand-rose-500);
-  transition: all var(--transition-elegant);
+  transition: all var(--transition-elegant) cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   z-index: 1;
   opacity: 0.6;
 }
 
-/* Hover States */
+/* =========================================================
+   HOVER STATES - Luxury Effects
+   ========================================================= */
+
 .header-collection-card:hover,
 .header-collection-card.is-hovered {
-  background: var(--gradient-luxury-gold-subtle);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 215, 0, 0.15) 0%,
+    rgba(255, 193, 7, 0.1) 100%
+  );
   border-color: var(--border-luxury-gold);
   color: var(--luxury-gold-700);
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.02);
   box-shadow: 
-    var(--shadow-luxury-gold),
-    var(--shadow-luxury-md),
-    0 0 24px rgba(212, 140, 156, 0.12);
+    0 8px 32px rgba(212, 140, 156, 0.2),
+    0 4px 16px rgba(212, 140, 156, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.95) inset,
+    0 0 40px rgba(212, 140, 156, 0.15);
 }
 
 .header-collection-card:hover::before,
 .header-collection-card.is-hovered::before {
-  opacity: 1;
+  opacity: 0.2;
+}
+
+.header-collection-card:hover::after,
+.header-collection-card.is-hovered::after {
+  opacity: 0.8;
 }
 
 .header-collection-card:hover .header-collection-card__icon-wrapper,
 .header-collection-card.is-hovered .header-collection-card__icon-wrapper {
-  background: var(--gradient-luxury-gold);
-  transform: scale(1.1) rotate(5deg);
-  box-shadow: var(--shadow-luxury-gold);
+  background: linear-gradient(
+    135deg,
+    var(--luxury-gold-600) 0%,
+    var(--luxury-gold-700) 100%
+  );
+  transform: scale(1.12) rotate(8deg);
+  box-shadow: 
+    0 4px 16px rgba(255, 193, 7, 0.3),
+    0 2px 8px rgba(255, 193, 7, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+  border-color: var(--border-luxury-gold-strong);
 }
 
 .header-collection-card:hover .header-collection-card__icon,
 .header-collection-card.is-hovered .header-collection-card__icon {
-  transform: scale(1.15);
+  transform: scale(1.2) rotate(-5deg);
+  filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.4));
 }
 
 .header-collection-card:hover .header-collection-card__title,
 .header-collection-card.is-hovered .header-collection-card__title {
   color: var(--luxury-gold-700);
+  transform: translateX(2px);
 }
 
 .header-collection-card:hover .header-collection-card__description,
@@ -142,58 +220,87 @@
 
 .header-collection-card:hover .header-collection-card__arrow,
 .header-collection-card.is-hovered .header-collection-card__arrow {
-  transform: translateX(4px);
+  transform: translateX(6px);
   opacity: 1;
   color: var(--luxury-gold-700);
+  filter: drop-shadow(0 2px 4px rgba(212, 140, 156, 0.3));
 }
 
-/* Featured State */
+/* =========================================================
+   FEATURED STATE
+   ========================================================= */
+
 .header-collection-card--featured {
-  background: var(--gradient-luxury-gold-subtle);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 215, 0, 0.2) 0%,
+    rgba(255, 193, 7, 0.15) 100%
+  );
   border-color: var(--border-luxury-gold);
   box-shadow: 
-    var(--shadow-luxury-gold),
-    var(--shadow-luxury-sm);
+    0 6px 24px rgba(255, 193, 7, 0.2),
+    0 3px 12px rgba(255, 193, 7, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset,
+    0 0 30px rgba(255, 193, 7, 0.15);
 }
 
 .header-collection-card--featured .header-collection-card__icon-wrapper {
-  background: var(--gradient-luxury-gold);
-  box-shadow: var(--shadow-luxury-gold);
+  background: linear-gradient(
+    135deg,
+    var(--luxury-gold-600) 0%,
+    var(--luxury-gold-700) 100%
+  );
+  box-shadow: 
+    0 4px 16px rgba(255, 193, 7, 0.3),
+    0 2px 8px rgba(255, 193, 7, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+  border-color: var(--border-luxury-gold-strong);
 }
 
 .header-collection-card--featured .header-collection-card__title {
   color: var(--luxury-gold-700);
 }
 
-/* Focus States */
+/* =========================================================
+   FOCUS STATES
+   ========================================================= */
+
 .header-collection-card:focus-visible {
   outline: none;
   box-shadow: 
     var(--focus-ring),
-    var(--shadow-luxury-md);
+    0 4px 16px rgba(212, 140, 156, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
   border-color: var(--border-luxury-gold);
 }
 
-/* Touch Optimization */
+/* =========================================================
+   TOUCH OPTIMIZATION
+   ========================================================= */
+
 .header-collection-card {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 
-/* Responsive Design - Tablet */
+/* =========================================================
+   RESPONSIVE: Tablet (641px - 980px)
+   ========================================================= */
+
 @media (max-width: 980px) {
   .header-collection-card {
-    min-height: 64px;
-    padding: var(--space-3) var(--space-4);
+    min-height: 72px;
+    padding: var(--space-4) var(--space-4-5);
+    gap: var(--space-3-5);
   }
 
   .header-collection-card__icon-wrapper {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
   }
 
   .header-collection-card__icon {
-    font-size: 1.35rem;
+    font-size: 1.4rem;
   }
 
   .header-collection-card__title {
@@ -205,12 +312,48 @@
   }
 }
 
-/* Responsive Design - Mobile */
+/* =========================================================
+   RESPONSIVE: Mobile (up to 640px)
+   ========================================================= */
+
 @media (max-width: 640px) {
   .header-collection-card {
-    min-height: 56px;
-    padding: var(--space-2-5) var(--space-3);
+    min-height: 64px;
+    padding: var(--space-3-5) var(--space-4);
     gap: var(--space-3);
+  }
+
+  .header-collection-card__icon-wrapper {
+    width: 44px;
+    height: 44px;
+  }
+
+  .header-collection-card__icon {
+    font-size: 1.3rem;
+  }
+
+  .header-collection-card__title {
+    font-size: var(--font-size-sm);
+  }
+
+  .header-collection-card__description {
+    display: none;
+  }
+
+  .header-collection-card__arrow {
+    font-size: var(--font-size-lg);
+  }
+}
+
+/* =========================================================
+   RESPONSIVE: Small Mobile (up to 480px)
+   ========================================================= */
+
+@media (max-width: 480px) {
+  .header-collection-card {
+    min-height: 56px;
+    padding: var(--space-3) var(--space-3-5);
+    gap: var(--space-2-5);
   }
 
   .header-collection-card__icon-wrapper {
@@ -223,32 +366,6 @@
   }
 
   .header-collection-card__title {
-    font-size: var(--font-size-sm);
-  }
-
-  .header-collection-card__description {
-    display: none; /* Hide description on small screens for cleaner UI */
-  }
-}
-
-/* Responsive Design - Small Mobile */
-@media (max-width: 480px) {
-  .header-collection-card {
-    min-height: 52px;
-    padding: var(--space-2) var(--space-2-5);
-    gap: var(--space-2);
-  }
-
-  .header-collection-card__icon-wrapper {
-    width: 36px;
-    height: 36px;
-  }
-
-  .header-collection-card__icon {
-    font-size: 1.1rem;
-  }
-
-  .header-collection-card__title {
     font-size: var(--font-size-xs);
   }
 
@@ -257,16 +374,20 @@
   }
 }
 
-/* Reduced Motion */
+/* =========================================================
+   ACCESSIBILITY & UX
+   ========================================================= */
+
 @media (prefers-reduced-motion: reduce) {
   .header-collection-card,
   .header-collection-card::before,
+  .header-collection-card::after,
   .header-collection-card__icon-wrapper,
   .header-collection-card__icon,
   .header-collection-card__title,
   .header-collection-card__description,
   .header-collection-card__arrow {
-    transition: none;
+    transition: none !important;
   }
 
   .header-collection-card:hover,
@@ -275,3 +396,10 @@
   }
 }
 
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .header-collection-card {
+    border-width: 2px;
+    background: rgba(255, 255, 255, 1);
+  }
+}

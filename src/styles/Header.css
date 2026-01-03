@@ -1,6 +1,7 @@
 /**
  * Header Component
- * Luxury, DRY, Efficient, Responsive
+ * Luxury, Elegant, Premium Design - Performance Optimized
+ * Mobile-first, Responsive, Clean UI/UX
  * Uses design-system.css variables
  * Fully responsive on all devices: mobile, tablet, desktop
  */
@@ -13,39 +14,88 @@
 @import "header/HeaderActions.css";
 
 /* =========================================================
-   HEADER - Luxury & Elegant Design
-   Premium glass morphism with elegant transitions
+   HEADER - Premium Luxury & Elegant Design (Optimized)
    ========================================================= */
 
 .header {
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
-  background: var(--gradient-elegant-surface);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(254, 245, 247, 0.99) 50%,
+    rgba(255, 255, 255, 0.98) 100%
+  );
   box-shadow: 
-    var(--shadow-luxury-md),
-    var(--shadow-elegant),
-    0 0 40px rgba(212, 140, 156, 0.05);
-  transition: all var(--transition-elegant);
-  backdrop-filter: var(--backdrop-blur-lg);
-  -webkit-backdrop-filter: var(--backdrop-blur-lg);
-  border-bottom: var(--border-luxury);
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 4px 16px rgba(212, 140, 156, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  transition: box-shadow var(--transition-base), background var(--transition-base);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1.5px solid;
   border-color: var(--brand-rose-border);
+  position: relative;
+  isolation: isolate;
+  will-change: box-shadow, background;
+}
+
+.header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.03) 0%,
+    rgba(168, 213, 186, 0.02) 50%,
+    rgba(212, 140, 156, 0.03) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.header > * {
+  position: relative;
+  z-index: 1;
+}
+
+.header--mobile-open {
+  z-index: 1700;
+}
+
+.header--search-open {
+  z-index: 1700;
 }
 
 .header--scrolled {
   box-shadow: 
-    var(--shadow-luxury-lg),
-    var(--shadow-luxury-gold),
-    0 0 60px rgba(212, 140, 156, 0.08);
-  background: var(--gradient-elegant-surface);
-  backdrop-filter: var(--backdrop-blur-xl);
-  -webkit-backdrop-filter: var(--backdrop-blur-xl);
+    0 12px 48px rgba(0, 0, 0, 0.12),
+    0 6px 24px rgba(212, 140, 156, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.95) inset;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.99) 0%,
+    rgba(254, 245, 247, 1) 50%,
+    rgba(255, 255, 255, 0.99) 100%
+  );
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom-color: var(--border-luxury-gold);
+  border-bottom-width: 2px;
+}
+
+.header--scrolled::before {
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.05) 0%,
+    rgba(255, 193, 7, 0.03) 50%,
+    rgba(168, 213, 186, 0.04) 100%
+  );
 }
 
 /* =========================================================
-   CONTAINER
+   CONTAINER - Clean Layout
    ========================================================= */
 
 .header__container {
@@ -55,15 +105,17 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-8);
-  padding: 1.15rem var(--space-6);
+  padding: 1.2rem var(--space-6);
   position: relative;
   isolation: isolate;
+  z-index: 1700;
 }
 
 .header__left {
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  z-index: 2;
 }
 
 .header__center {
@@ -71,6 +123,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 2;
 }
 
 .header__right {
@@ -78,30 +131,31 @@
   align-items: center;
   gap: var(--space-3);
   flex-shrink: 0;
+  position: relative;
+  z-index: 1700;
 }
 
 /* =========================================================
    MOBILE BACKDROP
-   Enhanced with luxury effects
    ========================================================= */
 
 .header__mobile-backdrop {
   /* Styles handled by Backdrop component */
-  /* Additional header-specific styles can be added here if needed */
 }
 
-/* Responsive: Mobile-first approach */
-/* Mobile devices (up to 640px) */
+/* =========================================================
+   RESPONSIVE: Mobile (up to 640px)
+   ========================================================= */
+
 @media (max-width: 640px) {
   .header {
     border-bottom-width: 1px;
   }
 
   .header__container {
-    padding: var(--space-3) var(--space-4);
-    gap: var(--space-4);
-    overflow: visible;
-    min-height: 64px;
+    padding: var(--space-3-5) var(--space-4);
+    gap: var(--space-3);
+    min-height: 68px;
   }
 
   .header__center {
@@ -111,6 +165,7 @@
     right: 0;
     top: 100%;
     pointer-events: none;
+    z-index: 1;
   }
 
   .header__right {
@@ -118,29 +173,14 @@
   }
 }
 
-/* Tablet devices (641px to 968px) */
+/* =========================================================
+   RESPONSIVE: Tablet (641px to 968px)
+   ========================================================= */
+
 @media (min-width: 641px) and (max-width: 968px) {
   .header__container {
-    padding: 0.85rem var(--space-5);
+    padding: 0.9rem var(--space-5);
     gap: var(--space-6);
-    min-height: 72px;
-  }
-
-  .header__center {
-    display: block;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 100%;
-    pointer-events: none;
-  }
-}
-
-/* Desktop devices (969px to 980px) */
-@media (min-width: 969px) and (max-width: 980px) {
-  .header__container {
-    padding: 0.85rem var(--space-5);
-    overflow: visible;
     min-height: 76px;
   }
 
@@ -151,14 +191,40 @@
     right: 0;
     top: 100%;
     pointer-events: none;
+    z-index: 1;
   }
 }
 
-/* Large desktop devices (981px and above) */
+/* =========================================================
+   RESPONSIVE: Desktop (969px to 980px)
+   ========================================================= */
+
+@media (min-width: 969px) and (max-width: 980px) {
+  .header__container {
+    padding: 0.9rem var(--space-5);
+    overflow: visible;
+    min-height: 80px;
+  }
+
+  .header__center {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE: Large Desktop (981px and above)
+   ========================================================= */
+
 @media (min-width: 981px) {
   .header__container {
-    padding: 1.15rem var(--space-6);
-    min-height: 80px;
+    padding: 1.2rem var(--space-6);
+    min-height: 84px;
   }
 
   .header__center {
@@ -168,11 +234,14 @@
   }
 }
 
-/* Extra large desktop devices (1200px and above) */
+/* =========================================================
+   RESPONSIVE: Extra Large Desktop (1200px and above)
+   ========================================================= */
+
 @media (min-width: 1200px) {
   .header__container {
-    padding: var(--space-4-5) var(--space-8);
-    min-height: 84px;
+    padding: 1.3rem var(--space-8);
+    min-height: 88px;
   }
 
   .header__right {
@@ -180,17 +249,25 @@
   }
 }
 
-/* Touch devices optimization */
+/* =========================================================
+   TOUCH DEVICES OPTIMIZATION
+   ========================================================= */
+
 @media (hover: none) and (pointer: coarse) {
   .header__container {
     padding: var(--space-4) var(--space-5);
   }
 }
 
+/* =========================================================
+   ACCESSIBILITY & UX
+   ========================================================= */
+
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   .header {
     border-bottom: 2px solid var(--border-3);
+    background: rgba(255, 255, 255, 1);
   }
 }
 

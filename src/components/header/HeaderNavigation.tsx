@@ -27,6 +27,7 @@ export interface HeaderNavigationProps {
   typeNames?: string[];
   onNavigate?: () => void;
   collectionsItemRef?: React.RefObject<HTMLLIElement>;
+  onCloseMobile?: (opts?: { returnFocus?: boolean }) => void;
 }
 
 interface HeaderNavigationState {

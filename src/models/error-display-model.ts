@@ -4,6 +4,8 @@
  * Follows Single Responsibility Principle
  */
 
+import type { ReactNode } from "react";
+
 /**
  * Error severity levels
  */
@@ -26,7 +28,7 @@ export interface ErrorDisplayConfig {
   title?: string;
   message: string;
   severity?: ErrorSeverity;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
   actions?: ErrorAction[];
   showRetry?: boolean;
   onRetry?: () => void;
