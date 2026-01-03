@@ -40,24 +40,71 @@ export class BouquetCardHorizontalScroll extends Component<
   private scrollTimeout: number | null = null;
   private resizeObserver: ResizeObserver | null = null;
   private readonly SCROLL_DEBOUNCE = 150;
+  // Cache viewport dimensions to avoid repeated calculations
+  private cachedViewportWidth: number = 0;
+  private cachedCardWidth: number = 280;
+  private cachedCardGap: number = 24;
+  private lastCacheUpdate: number = 0;
+  private readonly CACHE_TTL = 100; // Cache for 100ms
+
   // Dynamic card width calculation - responsive to viewport
+  // Optimized with caching to avoid repeated calculations
   private getCardWidth(): number {
     if (typeof window === "undefined") return 280;
+    
+    const now = Date.now();
     const viewportWidth = window.innerWidth;
+    
+    // Use cache if viewport hasn't changed and cache is fresh
+    if (
+      viewportWidth === this.cachedViewportWidth &&
+      now - this.lastCacheUpdate < this.CACHE_TTL
+    ) {
+      return this.cachedCardWidth;
+    }
+
+    // Update cache
+    this.cachedViewportWidth = viewportWidth;
+    this.lastCacheUpdate = now;
+
     // Match CSS clamp values: clamp(240px, 20vw, 280px)
-    if (viewportWidth <= 640) return 240; // Mobile
-    if (viewportWidth <= 1024) return Math.max(240, Math.min(280, viewportWidth * 0.2)); // Tablet
-    return 280; // Desktop
+    if (viewportWidth <= 640) {
+      this.cachedCardWidth = 240; // Mobile
+    } else if (viewportWidth <= 1024) {
+      this.cachedCardWidth = Math.max(240, Math.min(280, viewportWidth * 0.2)); // Tablet
+    } else {
+      this.cachedCardWidth = 280; // Desktop
+    }
+
+    return this.cachedCardWidth;
   }
   
   private getCardGap(): number {
     if (typeof window === "undefined") return 24;
+    
+    const now = Date.now();
     const viewportWidth = window.innerWidth;
+    
+    // Use cache if viewport hasn't changed and cache is fresh
+    if (
+      viewportWidth === this.cachedViewportWidth &&
+      now - this.lastCacheUpdate < this.CACHE_TTL
+    ) {
+      return this.cachedCardGap;
+    }
+
+    // Update cache (getCardWidth updates cachedViewportWidth and lastCacheUpdate)
     // Match CSS gap: clamp(var(--space-4), 2vw, var(--space-6))
     // --space-4 = 16px, --space-6 = 24px
-    if (viewportWidth <= 640) return 16; // Mobile
-    if (viewportWidth <= 1024) return Math.max(16, Math.min(24, viewportWidth * 0.02)); // Tablet
-    return 24; // Desktop
+    if (viewportWidth <= 640) {
+      this.cachedCardGap = 16; // Mobile
+    } else if (viewportWidth <= 1024) {
+      this.cachedCardGap = Math.max(16, Math.min(24, viewportWidth * 0.02)); // Tablet
+    } else {
+      this.cachedCardGap = 24; // Desktop
+    }
+
+    return this.cachedCardGap;
   }
 
   constructor(props: BouquetCardHorizontalScrollProps) {
@@ -73,14 +120,19 @@ export class BouquetCardHorizontalScroll extends Component<
 
   /**
    * Prevent unnecessary re-renders when props haven't changed
+   * Enhanced with edge case handling
    */
   shouldComponentUpdate(nextProps: BouquetCardHorizontalScrollProps, nextState: BouquetCardHorizontalScrollState): boolean {
     const { bouquets, loading } = this.props;
     const { canScrollLeft, canScrollRight, currentIndex, scrollPosition } = this.state;
 
+    // Edge case: handle null/undefined bouquets
+    const safeBouquets = Array.isArray(bouquets) ? bouquets : [];
+    const safeNextBouquets = Array.isArray(nextProps.bouquets) ? nextProps.bouquets : [];
+
     return (
       nextProps.loading !== loading ||
-      nextProps.bouquets.length !== bouquets.length ||
+      safeNextBouquets.length !== safeBouquets.length ||
       nextProps.bouquets !== bouquets ||
       nextState.canScrollLeft !== canScrollLeft ||
       nextState.canScrollRight !== canScrollRight ||
@@ -99,7 +151,11 @@ export class BouquetCardHorizontalScroll extends Component<
   }
 
   componentDidUpdate(prevProps: BouquetCardHorizontalScrollProps): void {
-    if (prevProps.bouquets.length !== this.props.bouquets.length) {
+    // Edge case: handle null/undefined bouquets
+    const prevBouquets = Array.isArray(prevProps.bouquets) ? prevProps.bouquets : [];
+    const currentBouquets = Array.isArray(this.props.bouquets) ? this.props.bouquets : [];
+    
+    if (prevBouquets.length !== currentBouquets.length) {
       this.updateScrollButtons();
     }
   }
@@ -109,6 +165,11 @@ export class BouquetCardHorizontalScroll extends Component<
     this.cleanupResizeObserver();
     if (this.scrollTimeout) {
       clearTimeout(this.scrollTimeout);
+      this.scrollTimeout = null;
+    }
+    if (this.resizeTimeout) {
+      clearTimeout(this.resizeTimeout);
+      this.resizeTimeout = null;
     }
   }
 
@@ -126,6 +187,8 @@ export class BouquetCardHorizontalScroll extends Component<
     container.removeEventListener("scroll", this.handleScroll);
   }
 
+  private resizeTimeout: number | null = null;
+
   private setupResizeObserver(): void {
     const container = this.scrollContainerRef.current;
     if (!container) return;
@@ -133,12 +196,16 @@ export class BouquetCardHorizontalScroll extends Component<
     // Use ResizeObserver to handle container size changes for responsive design
     if (typeof ResizeObserver !== "undefined") {
       this.resizeObserver = new ResizeObserver(() => {
-        // Debounce resize updates
-        if (this.scrollTimeout) {
-          clearTimeout(this.scrollTimeout);
+        // Debounce resize updates and clear viewport cache
+        this.cachedViewportWidth = 0;
+        if (this.resizeTimeout) {
+          clearTimeout(this.resizeTimeout);
         }
-        this.scrollTimeout = window.setTimeout(() => {
-          this.updateScrollButtons();
+        this.resizeTimeout = window.setTimeout(() => {
+          this.resizeTimeout = null;
+          requestAnimationFrame(() => {
+            this.updateScrollButtons();
+          });
         }, this.SCROLL_DEBOUNCE);
       });
       this.resizeObserver.observe(container);
@@ -157,9 +224,12 @@ export class BouquetCardHorizontalScroll extends Component<
       clearTimeout(this.scrollTimeout);
     }
 
+    // Use requestAnimationFrame for better performance than setTimeout
     this.scrollTimeout = window.setTimeout(() => {
-      this.updateScrollButtons();
-      this.updateCurrentIndex();
+      requestAnimationFrame(() => {
+        this.updateScrollButtons();
+        this.updateCurrentIndex();
+      });
     }, this.SCROLL_DEBOUNCE);
   };
 
@@ -328,10 +398,8 @@ export class BouquetCardHorizontalScroll extends Component<
 
   render(): React.ReactNode {
     const { bouquets, loading = false, maxVisible } = this.props;
-    const displayBouquets = maxVisible
-      ? bouquets.slice(0, maxVisible)
-      : bouquets;
-
+    
+    // Edge case: handle loading state
     if (loading) {
       return (
         <div className={this.baseClass} aria-busy="true" aria-live="polite">
@@ -355,6 +423,12 @@ export class BouquetCardHorizontalScroll extends Component<
         </div>
       );
     }
+
+    // Edge case: handle null/undefined/empty bouquets
+    const safeBouquets = Array.isArray(bouquets) ? bouquets : [];
+    const displayBouquets = maxVisible && maxVisible > 0
+      ? safeBouquets.slice(0, maxVisible)
+      : safeBouquets;
 
     if (displayBouquets.length === 0) {
       return null;

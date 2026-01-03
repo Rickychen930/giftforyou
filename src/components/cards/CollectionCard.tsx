@@ -34,21 +34,45 @@ class CollectionCard extends Component<CollectionContainerProps, CollectionCardS
 
   /**
    * Prevent unnecessary re-renders when props haven't changed
+   * Optimized: check primitive props first (cheaper), then reference equality
+   * Enhanced with edge case handling
    */
   shouldComponentUpdate(nextProps: CollectionContainerProps): boolean {
     const { id, name, description, bouquets } = this.props;
 
-    return (
+    // Edge case: handle null/undefined props
+    const safeBouquets = Array.isArray(bouquets) ? bouquets : [];
+    const safeNextBouquets = Array.isArray(nextProps.bouquets) ? nextProps.bouquets : [];
+
+    // Fast path: check primitive values first
+    if (
       nextProps.id !== id ||
       nextProps.name !== name ||
       nextProps.description !== description ||
-      nextProps.bouquets.length !== bouquets.length ||
-      nextProps.bouquets !== bouquets
-    );
+      safeNextBouquets.length !== safeBouquets.length
+    ) {
+      return true;
+    }
+
+    // Only check reference equality if lengths match (more expensive check)
+    return nextProps.bouquets !== bouquets;
   }
 
+  /**
+   * Get valid bouquets with edge case handling
+   */
   private getValidBouquets(): BouquetCardProps[] {
-    return Array.isArray(this.props.bouquets) ? this.props.bouquets : [];
+    // Edge case: handle null/undefined bouquets
+    if (!this.props.bouquets) return [];
+    if (!Array.isArray(this.props.bouquets)) return [];
+    
+    // Edge case: filter out invalid bouquets
+    return this.props.bouquets.filter((bouquet) => 
+      bouquet != null && 
+      typeof bouquet === "object" && 
+      bouquet._id && 
+      typeof bouquet.name === "string"
+    );
   }
 
   private getPreviewBouquets(): BouquetCardProps[] {
@@ -56,8 +80,19 @@ class CollectionCard extends Component<CollectionContainerProps, CollectionCardS
     return this.getValidBouquets();
   }
 
+  // Memoized href to avoid recalculation
+  private browseHrefCache: string | null = null;
+  private browseHrefCacheKey: string | null = null;
+
   private getBrowseHref(): string {
-    return `/collection?name=${encodeURIComponent(this.props.name)}`;
+    const { name } = this.props;
+    // Cache href to avoid encoding on every render
+    if (this.browseHrefCacheKey === name && this.browseHrefCache) {
+      return this.browseHrefCache;
+    }
+    this.browseHrefCache = `/collection?name=${encodeURIComponent(name)}`;
+    this.browseHrefCacheKey = name;
+    return this.browseHrefCache;
   }
 
   // Removed renderBouquetCard - now using BouquetCardGrid component

@@ -87,22 +87,44 @@ class BouquetCardInternal extends Component<BouquetCardProps & Partial<WithRoute
 
   /**
    * Prevent unnecessary re-renders when props haven't changed
+   * Optimized: check primitive values first (cheaper), then reference equality
    */
   shouldComponentUpdate(nextProps: BouquetCardProps & Partial<WithRouterProps>, nextState: BouquetCardState): boolean {
-    const { _id, image, name, price, status } = this.props;
+    const { _id, image, name, price, status, collectionName, type, size, description } = this.props;
     const { imageLoaded, imageError, isFavorited, showQuickActions } = this.state;
 
-    return (
+    // Fast path: check primitive values first (cheaper operations)
+    if (
       nextProps._id !== _id ||
-      nextProps.image !== image ||
-      nextProps.name !== name ||
       nextProps.price !== price ||
-      nextProps.status !== status ||
       nextState.imageLoaded !== imageLoaded ||
       nextState.imageError !== imageError ||
       nextState.isFavorited !== isFavorited ||
       nextState.showQuickActions !== showQuickActions
-    );
+    ) {
+      return true;
+    }
+
+    // Then check strings (more expensive but still relatively cheap)
+    if (
+      nextProps.image !== image ||
+      nextProps.name !== name ||
+      nextProps.status !== status
+    ) {
+      return true;
+    }
+
+    // Optional props - only check if they exist (avoid unnecessary checks)
+    if (
+      (nextProps.collectionName ?? "") !== (collectionName ?? "") ||
+      (nextProps.type ?? "") !== (type ?? "") ||
+      (nextProps.size ?? "") !== (size ?? "") ||
+      (nextProps.description ?? "") !== (description ?? "")
+    ) {
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -149,7 +171,9 @@ class BouquetCardInternal extends Component<BouquetCardProps & Partial<WithRoute
             });
           },
           {
-            rootMargin: "50px", // Start loading 50px before visible
+            // Optimized rootMargin: larger on desktop for better perceived performance
+            // Smaller on mobile to save bandwidth
+            rootMargin: window.innerWidth >= 768 ? "100px" : "50px",
             threshold: 0.01,
           }
         );

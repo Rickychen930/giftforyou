@@ -37,6 +37,13 @@
 
   animation: slideIn var(--animation-speed-base) cubic-bezier(0.4, 0, 0.2, 1) forwards;
   opacity: 0;
+  /* Performance: use will-change only during animation and hover */
+  will-change: transform, opacity;
+}
+
+/* Remove will-change after animation completes */
+.collectionCard:not(:hover) {
+  will-change: auto;
 }
 
 @keyframes slideIn {
@@ -571,8 +578,9 @@
   border: var(--border-elegant) solid var(--brand-rose-border);
   overflow: hidden;
   box-shadow: var(--shadow-luxury-md);
-  transition: all var(--transition-elegant) cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
+  transition: transform var(--transition-elegant) cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow var(--transition-elegant) cubic-bezier(0.4, 0, 0.2, 1);
+  /* Performance: only animate transform and box-shadow, not all properties */
 
   display: flex;
   flex-direction: column;
@@ -580,6 +588,12 @@
 
   animation: scaleIn var(--animation-speed-base) cubic-bezier(0.4, 0, 0.2, 1) forwards;
   opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* Remove will-change after animation completes */
+.bouquetCard:not(:hover) {
+  will-change: auto;
 }
 
 @keyframes scaleIn {

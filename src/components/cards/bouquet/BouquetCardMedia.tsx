@@ -39,6 +39,23 @@ export class BouquetCardMedia extends Component<BouquetCardMediaProps, BouquetCa
     this.imageRef = React.createRef();
   }
 
+  /**
+   * Prevent unnecessary re-renders when props haven't changed
+   * Optimizes performance by avoiding re-renders when data is the same
+   */
+  shouldComponentUpdate(nextProps: BouquetCardMediaProps): boolean {
+    const { imageUrl, imageAlt, detailHref, imageLoaded, imageError, bouquetId } = this.props;
+
+    return (
+      nextProps.imageUrl !== imageUrl ||
+      nextProps.imageAlt !== imageAlt ||
+      nextProps.detailHref !== detailHref ||
+      nextProps.imageLoaded !== imageLoaded ||
+      nextProps.imageError !== imageError ||
+      nextProps.bouquetId !== bouquetId
+    );
+  }
+
   render(): React.ReactNode {
     const { imageUrl, imageAlt, detailHref, imageLoaded, imageError, onImageLoad, onImageError, imageRef, bouquetId } =
       this.props;

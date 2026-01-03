@@ -68,12 +68,13 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
     const { items, loading, errorMessage } = this.props;
     const { isVisible } = this.state;
 
-    // Clear cache if items changed
+    // Clear cache if items changed (reference or length)
     if (nextProps.items !== items || nextProps.items.length !== items.length) {
       this.preparedCollectionsCache = null;
     }
 
     // Only re-render if props or visibility state changed
+    // Optimized: check length first (cheaper) before reference equality
     return (
       nextProps.loading !== loading ||
       nextProps.errorMessage !== errorMessage ||
@@ -99,6 +100,8 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             this.setState({ isVisible: true });
+            // Disconnect observer after visibility is set to improve performance
+            this.cleanupIntersectionObserver();
           }
         });
       },
@@ -129,55 +132,87 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
     }
   }
 
+  /**
+   * Normalize bouquet data with comprehensive edge case handling
+   * Handles null/undefined, malformed data, and type safety
+   */
   private normalizeBouquet(raw: unknown, collectionName: string): BouquetCardProps | null {
-    if (!raw || typeof raw !== "object") return null;
+    // Edge case: null or undefined
+    if (raw == null || typeof raw !== "object") return null;
 
     const data = raw as Partial<RawBouquet> & { id?: string };
 
+    // Edge case: missing required fields
     const id = data._id ?? data.id;
     const name = data.name;
+    if (!id || !name || typeof name !== "string") return null;
 
-    if (!id || !name) return null;
-
+    // Edge case: handle image with fallback
     const imageCandidate =
-      (typeof data.image === "string" && data.image) ||
-      (typeof data.imageUrl === "string" && data.imageUrl) ||
+      (typeof data.image === "string" && data.image.trim()) ||
+      (typeof data.imageUrl === "string" && data.imageUrl.trim()) ||
       "";
 
+    // Edge case: handle type/category
     const typeCandidate =
-      (typeof data.type === "string" && data.type) ||
-      (typeof (data as any).category === "string" && (data as any).category) ||
+      (typeof data.type === "string" && data.type.trim()) ||
+      (typeof (data as any).category === "string" && String((data as any).category).trim()) ||
       "";
 
+    // Edge case: handle status with validation
     const statusCandidate = data.status === "preorder" ? "preorder" : "ready";
+
+    // Edge case: handle price with validation
+    let priceValue = 0;
+    if (typeof data.price === "number" && !isNaN(data.price) && isFinite(data.price)) {
+      priceValue = Math.max(0, data.price);
+    } else if (data.price != null) {
+      const parsed = Number(data.price);
+      if (!isNaN(parsed) && isFinite(parsed)) {
+        priceValue = Math.max(0, parsed);
+      }
+    }
 
     return {
       _id: String(id),
-      name,
-      description: data.description ?? "",
-      price: typeof data.price === "number" ? data.price : Number(data.price) || 0,
+      name: name.trim(),
+      description: typeof data.description === "string" ? data.description.trim() : "",
+      price: priceValue,
       type: typeCandidate,
-      size: data.size ?? "",
+      size: typeof data.size === "string" ? data.size.trim() : "",
       image: imageCandidate,
       status:
         statusCandidate === "ready" && data.inStock === false ? "preorder" : statusCandidate,
-      collectionName: data.collectionName ?? collectionName,
+      collectionName: typeof data.collectionName === "string" && data.collectionName.trim()
+        ? data.collectionName.trim()
+        : (collectionName || ""),
       isNewEdition: typeof data.isNewEdition === "boolean" ? data.isNewEdition : false,
       isFeatured: typeof data.isFeatured === "boolean" ? data.isFeatured : false,
     };
   }
 
+  /**
+   * Convert collection bouquets to BouquetCardProps with edge case handling
+   */
   private toBouquetProps(collection: Collection): BouquetCardProps[] {
+    // Edge case: handle null/undefined collection
+    if (!collection) return [];
+    
     const list = collection.bouquets;
+    // Edge case: handle non-array or empty array
     if (!Array.isArray(list) || list.length === 0) return [];
 
+    const collectionName = typeof collection.name === "string" ? collection.name : "";
+    
     return list
-      .map((item) => this.normalizeBouquet(item, collection.name))
+      .map((item) => this.normalizeBouquet(item, collectionName))
       .filter((b): b is BouquetCardProps => Boolean(b));
   }
 
   /**
    * Prepare collections with memoization for performance
+   * Optimized cache key generation - uses faster string concatenation instead of JSON.stringify
+   * Enhanced with comprehensive edge case handling
    */
   private prepareCollections(): Array<{
     id: string;
@@ -187,36 +222,42 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
   }> {
     const { items } = this.props;
     
-    // Create cache key from items
-    const cacheKey = JSON.stringify({
-      length: items.length,
-      ids: items.map((c) => {
-        const anyC = c as unknown as { _id?: string; id?: string; name?: string };
-        return anyC?._id ?? anyC?.id ?? anyC?.name ?? "";
-      }).join(","),
-    });
+    // Edge case: handle null/undefined items
+    const safeItems = Array.isArray(items) ? items : [];
+    
+    // Optimized cache key generation - faster than JSON.stringify
+    const cacheKey = safeItems.length + "|" + safeItems.map((c) => {
+      if (!c) return "";
+      const anyC = c as unknown as { _id?: string; id?: string; name?: string };
+      return String(anyC?._id ?? anyC?.id ?? anyC?.name ?? "");
+    }).join(",");
 
     // Return cached result if available
     if (this.preparedCollectionsCache?.key === cacheKey) {
       return this.preparedCollectionsCache.result;
     }
 
-    // Prepare collections
-    const result = (items ?? [])
+    // Prepare collections with edge case handling
+    const result = safeItems
+      .filter((c) => c != null) // Filter out null/undefined
       .map((c) => {
         const anyC = c as unknown as { _id?: string; id?: string; name?: string };
-        const id = anyC?._id ?? anyC?.id ?? anyC?.name ?? "";
+        const id = String(anyC?._id ?? anyC?.id ?? anyC?.name ?? "");
         const name = typeof anyC?.name === "string" ? anyC.name.trim() : "";
+
+        // Edge case: skip collections without valid id and name
+        if (!id || !name) return null;
 
         return {
           id,
           name,
-          description: c.description ?? "",
+          description: typeof c.description === "string" ? c.description.trim() : "",
           bouquets: this.toBouquetProps(c),
         };
       })
+      .filter((c): c is NonNullable<typeof c> => c != null) // Type guard
       .filter((c) => Boolean(c.id) && Boolean(c.name))
-      .filter((c) => c.bouquets.length > 0);
+      .filter((c) => Array.isArray(c.bouquets) && c.bouquets.length > 0); // Only collections with bouquets
 
     // Cache the result
     this.preparedCollectionsCache = { key: cacheKey, result };
@@ -321,8 +362,87 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
   render(): React.ReactNode {
     const { loading = false, errorMessage } = this.props;
     const { isVisible } = this.state;
+    
+    // Edge case: handle loading state - show skeleton
+    if (loading) {
+      return (
+        <section
+          ref={this.sectionRef}
+          className={`${this.baseClass} ${isVisible ? `${this.baseClass}--visible` : ""}`}
+          id="OurCollection"
+          aria-labelledby="ourCollection-title"
+        >
+          <Container variant="default" padding="md" className={`${this.baseClass}__container`}>
+            <SectionHeader
+              eyebrow="Pilihan terbaik untuk setiap momen"
+              title="Koleksi Kami"
+              subtitle="Jelajahi berbagai bouquet dan gift arrangement premium kami. Setiap koleksi dirancang khusus untuk membuat momen Anda lebih berkesan dan berkesan."
+              className={`${this.baseClass}__header`}
+              titleId="ourCollection-title"
+            />
+            <div
+              className={`${this.baseClass}__grid`}
+              aria-busy="true"
+              aria-live="polite"
+            >
+              {this.renderCollectionSkeleton()}
+              {this.renderCollectionSkeleton()}
+            </div>
+          </Container>
+        </section>
+      );
+    }
+
+    // Edge case: handle error state - show error display
+    if (errorMessage) {
+      return (
+        <section
+          ref={this.sectionRef}
+          className={`${this.baseClass} ${isVisible ? `${this.baseClass}--visible` : ""}`}
+          id="OurCollection"
+          aria-labelledby="ourCollection-title"
+        >
+          <Container variant="default" padding="md" className={`${this.baseClass}__container`}>
+            <SectionHeader
+              eyebrow="Pilihan terbaik untuk setiap momen"
+              title="Koleksi Kami"
+              subtitle="Jelajahi berbagai bouquet dan gift arrangement premium kami. Setiap koleksi dirancang khusus untuk membuat momen Anda lebih berkesan dan berkesan."
+              className={`${this.baseClass}__header`}
+              titleId="ourCollection-title"
+            />
+            {this.renderErrorState()}
+          </Container>
+        </section>
+      );
+    }
+
+    // Prepare collections and handle edge cases
     const prepared = this.prepareCollections();
 
+    // Edge case: handle empty state - show empty state component
+    if (!prepared.length) {
+      return (
+        <section
+          ref={this.sectionRef}
+          className={`${this.baseClass} ${isVisible ? `${this.baseClass}--visible` : ""}`}
+          id="OurCollection"
+          aria-labelledby="ourCollection-title"
+        >
+          <Container variant="default" padding="md" className={`${this.baseClass}__container`}>
+            <SectionHeader
+              eyebrow="Pilihan terbaik untuk setiap momen"
+              title="Koleksi Kami"
+              subtitle="Jelajahi berbagai bouquet dan gift arrangement premium kami. Setiap koleksi dirancang khusus untuk membuat momen Anda lebih berkesan dan berkesan."
+              className={`${this.baseClass}__header`}
+              titleId="ourCollection-title"
+            />
+            {this.renderEmptyState()}
+          </Container>
+        </section>
+      );
+    }
+
+    // Normal state: show collections grid
     return (
       <section
         ref={this.sectionRef}
@@ -338,30 +458,14 @@ class OurCollectionSection extends Component<OurCollectionViewProps, OurCollecti
             className={`${this.baseClass}__header`}
             titleId="ourCollection-title"
           />
-
-          {loading ? (
-            <div
-              className={`${this.baseClass}__grid`}
-              aria-busy="true"
-              aria-live="polite"
-            >
-              {this.renderCollectionSkeleton()}
-              {this.renderCollectionSkeleton()}
-            </div>
-          ) : errorMessage ? (
-            this.renderErrorState()
-          ) : !prepared.length ? (
-            this.renderEmptyState()
-          ) : (
-            <CollectionGrid
-              collections={prepared}
-              loading={false}
-              onCollectionClick={(collectionId) => {
-                // Optional: Handle collection click - can be extended for analytics or navigation
-                // Currently handled by CollectionCard's internal Link component
-              }}
-            />
-          )}
+          <CollectionGrid
+            collections={prepared}
+            loading={false}
+            onCollectionClick={(collectionId) => {
+              // Optional: Handle collection click - can be extended for analytics or navigation
+              // Currently handled by CollectionCard's internal Link component
+            }}
+          />
         </Container>
       </section>
     );

@@ -58,14 +58,19 @@ export class CollectionGrid extends Component<CollectionGridProps, CollectionGri
 
   /**
    * Prevent unnecessary re-renders when props haven't changed
+   * Enhanced with edge case handling
    */
   shouldComponentUpdate(nextProps: CollectionGridProps, nextState: CollectionGridState): boolean {
     const { collections, loading } = this.props;
     const { visibleCollections, isIntersecting } = this.state;
 
+    // Edge case: handle null/undefined collections
+    const safeCollections = Array.isArray(collections) ? collections : [];
+    const safeNextCollections = Array.isArray(nextProps.collections) ? nextProps.collections : [];
+
     return (
       nextProps.loading !== loading ||
-      nextProps.collections.length !== collections.length ||
+      safeNextCollections.length !== safeCollections.length ||
       nextProps.collections !== collections ||
       nextState.visibleCollections !== visibleCollections ||
       nextState.isIntersecting !== isIntersecting
@@ -77,7 +82,11 @@ export class CollectionGrid extends Component<CollectionGridProps, CollectionGri
   }
 
   componentDidUpdate(prevProps: CollectionGridProps): void {
-    if (prevProps.collections.length !== this.props.collections.length) {
+    // Edge case: handle null/undefined collections
+    const prevCollections = Array.isArray(prevProps.collections) ? prevProps.collections : [];
+    const currentCollections = Array.isArray(this.props.collections) ? this.props.collections : [];
+    
+    if (prevCollections.length !== currentCollections.length) {
       // Reset visible count when collections change
       this.setState({ visibleCollections: this.INITIAL_VISIBLE });
       // Re-setup observer if container ref exists and observer is not set
@@ -87,12 +96,9 @@ export class CollectionGrid extends Component<CollectionGridProps, CollectionGri
     }
   }
 
-  componentWillUnmount(): void {
-    this.cleanupIntersectionObserver();
-  }
 
   private setupIntersectionObserver(): void {
-    if (!this.containerRef.current) return;
+    if (!this.containerRef.current || this.intersectionObserver) return;
 
     this.intersectionObserver = new IntersectionObserver(
       (entries) => {
@@ -119,20 +125,42 @@ export class CollectionGrid extends Component<CollectionGridProps, CollectionGri
     }
   }
 
+  private loadMoreTimeout: number | null = null;
+
   private loadMoreIfNeeded(): void {
     const { collections } = this.props;
     const { visibleCollections } = this.state;
 
-    if (visibleCollections < collections.length) {
+    // Edge case: handle null/undefined collections
+    const safeCollections = Array.isArray(collections) ? collections : [];
+    const maxCollections = safeCollections.length;
+
+    if (visibleCollections >= maxCollections) return;
+
+    // Throttle load more operations to prevent excessive state updates
+    if (this.loadMoreTimeout) {
+      return;
+    }
+
+    this.loadMoreTimeout = window.setTimeout(() => {
+      this.loadMoreTimeout = null;
       // Load more collections when user scrolls near the end
       requestAnimationFrame(() => {
         this.setState((prevState) => ({
           visibleCollections: Math.min(
             prevState.visibleCollections + 2,
-            collections.length
+            maxCollections
           ),
         }));
       });
+    }, 100); // Throttle to max once per 100ms
+  }
+
+  componentWillUnmount(): void {
+    this.cleanupIntersectionObserver();
+    if (this.loadMoreTimeout) {
+      clearTimeout(this.loadMoreTimeout);
+      this.loadMoreTimeout = null;
     }
   }
 
@@ -144,6 +172,7 @@ export class CollectionGrid extends Component<CollectionGridProps, CollectionGri
     const { collections, loading = false } = this.props;
     const { visibleCollections } = this.state;
 
+    // Edge case: handle loading state
     if (loading) {
       return (
         <div className={this.baseClass} aria-busy="true" aria-live="polite">
@@ -161,11 +190,15 @@ export class CollectionGrid extends Component<CollectionGridProps, CollectionGri
       );
     }
 
-    if (collections.length === 0) {
+    // Edge case: handle null/undefined/empty collections
+    const safeCollections = Array.isArray(collections) ? collections : [];
+    if (safeCollections.length === 0) {
       return null;
     }
 
-    const visibleItems = collections.slice(0, visibleCollections);
+    // Edge case: ensure visibleCollections is within bounds
+    const maxVisible = Math.min(visibleCollections, safeCollections.length);
+    const visibleItems = safeCollections.slice(0, maxVisible);
 
     return (
       <div
@@ -174,16 +207,22 @@ export class CollectionGrid extends Component<CollectionGridProps, CollectionGri
         role="region"
         aria-label="Collections grid"
       >
-        {visibleItems.map((collection, index) => (
-          <CollectionCard
-            key={collection.id}
-            id={collection.id}
-            name={collection.name}
-            description={collection.description}
-            bouquets={collection.bouquets}
-            index={index}
-          />
-        ))}
+        {visibleItems.map((collection, index) => {
+          // Edge case: validate collection data before rendering
+          if (!collection || !collection.id || !collection.name) {
+            return null;
+          }
+          return (
+            <CollectionCard
+              key={collection.id}
+              id={collection.id}
+              name={collection.name}
+              description={collection.description || ""}
+              bouquets={Array.isArray(collection.bouquets) ? collection.bouquets : []}
+              index={index}
+            />
+          );
+        })}
       </div>
     );
   }
