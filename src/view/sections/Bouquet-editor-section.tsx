@@ -104,15 +104,25 @@ export default class BouquetEditorSection extends Component<Props, State> {
   }
 
   componentDidMount(): void {
+    // Enhanced: Load collections and sync bouquets on mount
+    const initializeData = async () => {
+      // Load collections first
+      await this.loadCollections();
+      // Then sync bouquets to ensure collections are properly populated
+      if (this.props.bouquets && this.props.bouquets.length > 0) {
+        this.syncBouquetsFromProps();
+      }
+    };
+
     // Performance: Use requestIdleCallback for non-critical initialization
     if (typeof requestIdleCallback !== "undefined") {
       requestIdleCallback(() => {
-        this.loadCollections();
+        void initializeData();
       }, { timeout: 1000 });
     } else {
       // Fallback for browsers without requestIdleCallback
       setTimeout(() => {
-        this.loadCollections();
+        void initializeData();
       }, 0);
     }
   }
@@ -160,7 +170,9 @@ export default class BouquetEditorSection extends Component<Props, State> {
         const selectedBouquet = this.state.selectedBouquet;
         
         this.loadCollections().then(() => {
-          // Restore view state after reload
+          // Enhanced: Sync bouquets after loading collections
+          this.syncBouquetsFromProps();
+          // Restore view state after reload - preserve current view
           if (currentView !== "collections") {
             this.setState({
               currentView,
@@ -233,13 +245,15 @@ export default class BouquetEditorSection extends Component<Props, State> {
       }
 
       // Enhanced: Check if selectedBouquet still exists in the new bouquets list
+      // IMPORTANT: Preserve current view state - don't navigate away during sync
       let selectedBouquet = prev.selectedBouquet;
-      let currentView: ViewState = prev.currentView;
+      let currentView: ViewState = prev.currentView; // Preserve current view
       
       if (selectedBouquet) {
         const stillExists = updatedBouquets.some((b) => b._id === selectedBouquet?._id);
         if (!stillExists) {
           // Selected bouquet was deleted, clear selection and navigate back
+          // Only navigate if we're actually in edit view and bouquet was deleted
           selectedBouquet = null;
           // Auto-navigate back to collection detail if in edit view
           if (prev.currentView === "bouquet-edit") {
@@ -247,6 +261,7 @@ export default class BouquetEditorSection extends Component<Props, State> {
           }
         } else {
           // Update selectedBouquet with latest data from props
+          // This ensures edited data is reflected in the UI
           const updatedBouquet = updatedBouquets.find((b) => b._id === selectedBouquet?._id);
           if (updatedBouquet) {
             selectedBouquet = updatedBouquet;
@@ -311,6 +326,10 @@ export default class BouquetEditorSection extends Component<Props, State> {
         this.setState({
           collections: normalized,
         });
+        // Enhanced: Sync bouquets after normalizing collections from props
+        if (this.props.bouquets && this.props.bouquets.length > 0) {
+          this.syncBouquetsFromProps();
+        }
         return;
       } catch (err) {
         console.error("Failed to normalize collections:", err);
@@ -340,9 +359,14 @@ export default class BouquetEditorSection extends Component<Props, State> {
         const collections = await res.json();
         // Enhanced: Validate collections data
         if (Array.isArray(collections)) {
+          const normalized = this.normalizeCollections(collections);
           this.setState({
-            collections: this.normalizeCollections(collections),
+            collections: normalized,
           });
+          // Enhanced: Sync bouquets after loading collections to ensure data is in sync
+          if (this.props.bouquets && this.props.bouquets.length > 0) {
+            this.syncBouquetsFromProps();
+          }
         } else {
           throw new Error("Invalid collections data format");
         }
@@ -352,8 +376,9 @@ export default class BouquetEditorSection extends Component<Props, State> {
           console.error("Authentication error loading collections");
         }
         // Fallback: create collections from bouquets
+        const fallbackCollections = this.createCollectionsFromBouquets();
         this.setState({
-          collections: this.createCollectionsFromBouquets(),
+          collections: fallbackCollections,
         });
       }
     } catch (err) {
@@ -364,9 +389,14 @@ export default class BouquetEditorSection extends Component<Props, State> {
         console.error("Failed to load collections:", err);
       }
       // Fallback: create collections from bouquets
+      const fallbackCollections = this.createCollectionsFromBouquets();
       this.setState({
-        collections: this.createCollectionsFromBouquets(),
+        collections: fallbackCollections,
       });
+      // Enhanced: Sync bouquets even in fallback case
+      if (this.props.bouquets && this.props.bouquets.length > 0) {
+        this.syncBouquetsFromProps();
+      }
     }
   };
 
@@ -428,6 +458,18 @@ export default class BouquetEditorSection extends Component<Props, State> {
     const bouquetMap = new Map<string, Bouquet>();
     this.props.bouquets.forEach(b => bouquetMap.set(b._id, b));
 
+    // Enhanced: Also create a map of bouquets by collectionName for fallback matching
+    const bouquetsByCollectionName = new Map<string, Bouquet[]>();
+    this.props.bouquets.forEach(b => {
+      const collectionName = b.collectionName || "Uncategorized";
+      const existing = bouquetsByCollectionName.get(collectionName);
+      if (existing) {
+        existing.push(b);
+      } else {
+        bouquetsByCollectionName.set(collectionName, [b]);
+      }
+    });
+
     const normalized = collections.map((c) => {
       let bouquets: Bouquet[] = [];
       
@@ -446,6 +488,24 @@ export default class BouquetEditorSection extends Component<Props, State> {
             (b): b is Bouquet =>
               typeof b === "object" && b !== null && "_id" in b && allBouquetIdsSet.has((b as Bouquet)._id)
           ) as Bouquet[];
+        }
+      }
+      
+      // Enhanced: If no bouquets found from collection references, try matching by collectionName
+      // This ensures bouquet count is always accurate even if API doesn't return proper references
+      if (bouquets.length === 0 && c.name) {
+        const matchedByCollectionName = bouquetsByCollectionName.get(c.name);
+        if (matchedByCollectionName && matchedByCollectionName.length > 0) {
+          bouquets = matchedByCollectionName;
+        }
+      } else if (bouquets.length > 0) {
+        // Enhanced: Also include bouquets that match by collectionName but weren't in the reference list
+        // This handles cases where bouquet was added but collection wasn't updated
+        const matchedByCollectionName = bouquetsByCollectionName.get(c.name) || [];
+        const existingIds = new Set(bouquets.map(b => b._id));
+        const additionalBouquets = matchedByCollectionName.filter(b => !existingIds.has(b._id));
+        if (additionalBouquets.length > 0) {
+          bouquets = [...bouquets, ...additionalBouquets];
         }
       }
       
@@ -1173,14 +1233,36 @@ export default class BouquetEditorSection extends Component<Props, State> {
       
       // Optimized: Sync with props after save operation
       if (success) {
-        // Use debounced sync to batch updates
+        // Enhanced: Immediately update selectedBouquet with latest data from props
+        // This ensures the edit form shows updated data right away
         const timerKey = "syncAfterSave";
         const existingTimer = this.debounceTimers.get(timerKey);
         if (existingTimer) {
           clearTimeout(existingTimer);
         }
-        const timer = setTimeout(() => {
+        const timer = setTimeout(async () => {
+          // Enhanced: Reload collections from API to ensure they're in sync
+          await this.loadCollections();
+          // Then sync bouquets to update collections with latest bouquet data
           this.syncBouquetsFromProps();
+          
+          // Enhanced: Update selectedBouquet with latest data from props after sync
+          // This ensures edited data appears in the UI
+          this.setState((prev) => {
+            if (prev.selectedBouquet) {
+              const updatedBouquet = this.props.bouquets.find(
+                (b) => b._id === prev.selectedBouquet?._id
+              );
+              if (updatedBouquet) {
+                return {
+                  ...prev,
+                  selectedBouquet: updatedBouquet,
+                };
+              }
+            }
+            return prev;
+          });
+          
           this.debounceTimers.delete(timerKey);
         }, 100);
         this.debounceTimers.set(timerKey, timer);
