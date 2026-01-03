@@ -2,7 +2,6 @@
   "name": "giftforyou.idn",
   "version": "1.0.0",
   "private": true,
-  "proxy": "http://localhost:4000",
   "scripts": {
     "start": "NODE_OPTIONS='--max-http-header-size=16384 --no-deprecation' craco start",
     "build": "craco build",

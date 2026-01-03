@@ -309,9 +309,11 @@ export default class BouquetEditorSection extends Component<Props, State> {
       });
 
       // Check if we need to add new collections that don't exist yet
-      const existingCollectionNames = new Set(prev.collections.map(c => c.name));
+      // Use case-insensitive matching to avoid duplicates
+      const existingCollectionNames = new Set(prev.collections.map(c => (c.name || "").trim().toLowerCase()));
       for (const [name, bouquets] of collectionMap.entries()) {
-        if (!existingCollectionNames.has(name)) {
+        const normalizedName = name.toLowerCase();
+        if (!existingCollectionNames.has(normalizedName)) {
           updatedCollections.push({
             _id: `collection-${updatedCollections.length}`,
             name,
@@ -428,11 +430,12 @@ export default class BouquetEditorSection extends Component<Props, State> {
     }
 
     // Performance: Use Map for O(1) operations
+    // Enhanced: Normalize collection names (trim) for consistency
     const collectionMap = new Map<string, Bouquet[]>();
     
     // Performance: Single pass through bouquets
     for (const bouquet of this.props.bouquets) {
-      const collectionName = bouquet.collectionName || "Uncategorized";
+      const collectionName = (bouquet.collectionName || "Uncategorized").trim();
       const existing = collectionMap.get(collectionName);
       if (existing) {
         existing.push(bouquet);
@@ -1462,29 +1465,33 @@ export default class BouquetEditorSection extends Component<Props, State> {
     );
     
     // Enhanced: If collection found, ensure it has bouquets assigned
-    if (selectedCollection) {
-      // Get bouquets from state collections (which should be normalized)
-      let collectionBouquets = (selectedCollection.bouquets as Bouquet[]) || [];
+    // ALWAYS re-sync bouquets from state (which should be synced from props) to ensure data is up-to-date
+    // Use both state.bouquets (synced) and props.bouquets (source of truth) for maximum accuracy
+    if (selectedCollection && selectedCollection.name) {
+      const collectionName = selectedCollection.name.trim();
       
-      // Fallback: If bouquets are empty or outdated, find bouquets by collectionName
-      if (collectionBouquets.length === 0 && selectedCollection.name) {
-        const collectionName = selectedCollection.name.trim();
-        collectionBouquets = bouquets.filter(b => {
-          const bouquetCollectionName = (b.collectionName || "Uncategorized").trim();
-          // Try exact match first
-          if (bouquetCollectionName === collectionName) {
-            return true;
-          }
-          // Try case-insensitive match
-          return bouquetCollectionName.toLowerCase() === collectionName.toLowerCase();
-        });
-        
-        // Update selectedCollection with found bouquets
-        selectedCollection = {
-          ...selectedCollection,
-          bouquets: collectionBouquets,
-        };
-      }
+      // Use props.bouquets as primary source (most up-to-date), fallback to state.bouquets
+      const sourceBouquets = this.props.bouquets && this.props.bouquets.length > 0 
+        ? this.props.bouquets 
+        : bouquets;
+      
+      // Always find bouquets by collectionName to ensure accuracy
+      // This handles cases where bouquets might not be properly assigned
+      const collectionBouquets = sourceBouquets.filter(b => {
+        const bouquetCollectionName = (b.collectionName || "Uncategorized").trim();
+        // Try exact match first
+        if (bouquetCollectionName === collectionName) {
+          return true;
+        }
+        // Try case-insensitive match
+        return bouquetCollectionName.toLowerCase() === collectionName.toLowerCase();
+      });
+      
+      // Update selectedCollection with found bouquets (always update to ensure accuracy)
+      selectedCollection = {
+        ...selectedCollection,
+        bouquets: collectionBouquets,
+      };
     }
 
     // Enhanced: Add loading state handling

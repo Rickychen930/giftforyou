@@ -38,23 +38,45 @@ module.exports = function(app) {
     }
   };
 
-  // Proxy API requests to backend
+  // IMPORTANT: Only proxy specific paths, NOT static assets
+  // Static assets (/static, /sockjs-node, etc.) are served by webpack dev server
+  
+  // Proxy API requests to backend (only /api/*)
+  // Note: app.use('/api', ...) automatically filters paths starting with /api
   app.use(
     '/api',
-    createProxyMiddleware(proxyOptions)
+    createProxyMiddleware({
+      ...proxyOptions,
+      // Explicitly exclude static assets
+      filter: (pathname, req) => {
+        // Only proxy /api paths, exclude everything else
+        return pathname.startsWith('/api') && !pathname.startsWith('/static');
+      }
+    })
   );
 
-  // Proxy uploads to backend (user uploaded files)
+  // Proxy uploads to backend (user uploaded files, only /uploads/*)
+  // Note: app.use('/uploads', ...) automatically filters paths starting with /uploads
   app.use(
     '/uploads',
     createProxyMiddleware({
       ...proxyOptions,
+      // Explicitly exclude static assets
+      filter: (pathname, req) => {
+        // Only proxy /uploads paths, exclude everything else
+        return pathname.startsWith('/uploads') && !pathname.startsWith('/static');
+      },
       // Don't log every upload request (can be noisy)
       onProxyReq: undefined,
       onProxyRes: undefined,
     })
   );
 
-  // NOTE: /images is NOT proxied - it's served from public/images folder
-  // Only /images/hero/* that are uploaded should go through /uploads/hero/
+  // NOTE: 
+  // - /static is NOT proxied - it's served by webpack dev server (port 3000)
+  // - /sockjs-node is NOT proxied - it's for webpack HMR
+  // - /images is NOT proxied - it's served from public/images folder
+  // - Only /images/hero/* that are uploaded should go through /uploads/hero/
+  // 
+  // IMPORTANT: Access the app from http://localhost:3000 (dev server), NOT http://localhost:4000 (backend)
 };

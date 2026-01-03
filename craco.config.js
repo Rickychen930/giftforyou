@@ -43,7 +43,28 @@ module.exports = {
         }
       }
 
+      // Ensure webpack dev server uses correct publicPath in development
+      // This prevents chunks from being loaded from wrong URL
+      if (webpackConfig.output && process.env.NODE_ENV === 'development') {
+        // In development, use relative paths or ensure publicPath is correct
+        // webpack dev server will handle this automatically, but we ensure it's not overridden
+        if (!webpackConfig.output.publicPath || webpackConfig.output.publicPath === 'auto') {
+          // Let webpack dev server determine the correct publicPath
+          webpackConfig.output.publicPath = '/';
+        }
+      }
+
       return webpackConfig;
+    },
+  },
+  devServer: {
+    // Ensure dev server is accessible and doesn't proxy static assets incorrectly
+    onBeforeSetupMiddleware: (devServer) => {
+      if (!devServer) {
+        return;
+      }
+      console.log('✅ Webpack Dev Server running - access app at http://localhost:3000');
+      console.log('⚠️  Do NOT access the app from http://localhost:4000 (backend)');
     },
   },
 };
