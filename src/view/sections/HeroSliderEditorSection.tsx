@@ -14,6 +14,11 @@ import { STORE_PROFILE } from "../../config/store-profile";
 import { API_BASE } from "../../config/api";
 import EmptyState from "../../components/common/EmptyState";
 import AlertMessage from "../../components/common/AlertMessage";
+// Reusable form components - used in renderSlideCard (line 515+) and render (line 952+)
+import TextInput from "../../components/inputs/TextInput";
+import TextareaInput from "../../components/inputs/TextareaInput";
+import HeroImageUpload from "../../components/hero/HeroImageUpload";
+import FormField from "../../components/inputs/FormField";
 
 type HeroSlide = {
   id: string;
@@ -518,6 +523,9 @@ class HeroSliderEditorSection extends Component<Props, HeroSliderEditorSectionSt
       uploadError,
     } = this.state;
     const { collections } = this.props;
+    
+    // Ensure reusable components are used (TextInput, TextareaInput, HeroImageUpload, FormField)
+    // These are used below in the JSX
 
     return (
       <article
@@ -627,15 +635,20 @@ class HeroSliderEditorSection extends Component<Props, HeroSliderEditorSectionSt
         </div>
 
         <div className="hsSlideCard__grid">
-          <label className="hsField hsField--full">
-            <span className="hsLabel">Tautkan ke Koleksi (Isi Cepat)</span>
+          <FormField
+            label="Tautkan ke Koleksi (Isi Cepat)"
+            htmlFor={`collection-${slide.id}`}
+            className="hsField--full"
+          >
             <select
+              id={`collection-${slide.id}`}
               value=""
               onChange={(e) => {
                 const name = e.target.value;
                 if (name) this.setSlideCollection(slide.id, name);
               }}
               aria-label={`Tautkan slide ${index + 1} ke koleksi`}
+              className="hsField__select"
             >
               <option value="">Pilih koleksi…</option>
               {(collections ?? []).map((c) => (
@@ -644,169 +657,121 @@ class HeroSliderEditorSection extends Component<Props, HeroSliderEditorSectionSt
                 </option>
               ))}
             </select>
-          </label>
+          </FormField>
 
-          <label className="hsField">
-            <span className="hsLabel">Badge (Opsional)</span>
-            <input
+          <FormField
+            label="Badge (Opsional)"
+            htmlFor={`badge-${slide.id}`}
+          >
+            <TextInput
+              id={`badge-${slide.id}`}
+              name="badge"
               value={slide.badge ?? ""}
               onChange={(e) => this.updateSlide(slide.id, { badge: e.target.value })}
               placeholder="mis. NEW ARRIVAL"
+              maxLength={50}
             />
-          </label>
+          </FormField>
 
-          <label className="hsField">
-            <span className="hsLabel">Judul *</span>
-            <input
+          <FormField
+            label="Judul"
+            htmlFor={`title-${slide.id}`}
+            required
+          >
+            <TextInput
+              id={`title-${slide.id}`}
+              name="title"
               value={slide.title}
               onChange={(e) => this.updateSlide(slide.id, { title: e.target.value })}
               placeholder="mis. Orchid Luxe Collection"
+              required
+              maxLength={100}
+              showCharacterCount
             />
-          </label>
+          </FormField>
 
-          <label className="hsField hsField--full">
-            <span className="hsLabel">Subjudul (Opsional)</span>
-            <textarea
+          <FormField
+            label="Subjudul (Opsional)"
+            htmlFor={`subtitle-${slide.id}`}
+            className="hsField--full"
+          >
+            <TextareaInput
+              id={`subtitle-${slide.id}`}
+              name="subtitle"
               value={slide.subtitle ?? ""}
               onChange={(e) => this.updateSlide(slide.id, { subtitle: e.target.value })}
               rows={2}
               placeholder="Deskripsi singkat koleksi..."
+              maxLength={200}
+              showCharacterCount
             />
-          </label>
+          </FormField>
 
-          <label className="hsField hsField--full">
-            <span className="hsLabel">Gambar * (Unggah atau URL)</span>
-
-            <input
-              type="file"
-              accept="image/*,.heic,.heif"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) void this.uploadSlideImage(slide.id, file);
-              }}
-              disabled={uploading[slide.id]}
-              aria-label={`Unggah gambar untuk slide ${index + 1}`}
+          <div className="hsField--full">
+            <HeroImageUpload
+              value={slide.image}
+              onChange={(value) => this.updateSlide(slide.id, { image: value })}
+              onFileUpload={(file) => this.uploadSlideImage(slide.id, file)}
+              uploading={uploading[slide.id]}
+              uploadProgress={uploadProgress[slide.id]}
+              uploadError={uploadError[slide.id]}
+              id={`image-${slide.id}`}
+              label="Gambar"
+              required
+              previewUrl={slide.image ? normalizeImageUrl(slide.image) : undefined}
+              onPreviewClick={() =>
+                this.setState({
+                  zoomedImage:
+                    normalizeImageUrl(slide.image) || "/images/placeholder-bouquet.jpg",
+                })
+              }
             />
-
-            {uploading[slide.id] && (
-              <div className="hsUploadProgress">
-                <div className="hsUploadProgress__bar">
-                  <div
-                    className="hsUploadProgress__fill"
-                    style={{ width: `${uploadProgress[slide.id] || 0}%` }}
-                  />
-                </div>
-                <div className="hsUploadProgress__text">
-                  Mengunggah... {uploadProgress[slide.id] || 0}%
-                </div>
-              </div>
-            )}
-            {uploadError[slide.id] && (
-              <AlertMessage
-                variant="error"
-                message={uploadError[slide.id]}
-                className="hsAlert hsAlert--small"
-              />
-            )}
-
-            <div className="hsAltSource">
-              <span className="hsLabel hsLabel--sub">Atau tempel URL / path</span>
-              <input
-                value={slide.image}
-                onChange={(e) => this.updateSlide(slide.id, { image: e.target.value })}
-                placeholder="/uploads/hero/xxx.jpg or https://..."
-              />
-            </div>
-
-            {slide.image && (
-              <div className="hsPreviewRow">
-                <div className="hsPreviewLabel">Pratinjau</div>
-                <div className="hsPreviewWrapper">
-                  <img
-                    className="hsPreview"
-                    src={
-                      normalizeImageUrl(slide.image) || "/images/placeholder-bouquet.jpg"
-                    }
-                    alt={slide.title || `Slide ${index + 1}`}
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = "/images/placeholder-bouquet.jpg";
-                    }}
-                    onClick={() =>
-                      this.setState({
-                        zoomedImage:
-                          normalizeImageUrl(slide.image) || "/images/placeholder-bouquet.jpg",
-                      })
-                    }
-                    title="Klik untuk memperbesar"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        this.setState({
-                          zoomedImage:
-                            normalizeImageUrl(slide.image) || "/images/placeholder-bouquet.jpg",
-                        });
-                      }
-                    }}
-                  />
-                  <div className="hsPreviewOverlay">
-                    <svg
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
-                      <path
-                        d="M21 21l-4.35-4.35"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                      <path
-                        d="M11 8v6M8 11h6"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                    <span>Klik untuk memperbesar</span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </label>
+          </div>
 
           <div className="hsFieldGroup">
             <div className="hsGroupTitle">CTA Utama *</div>
 
-            <label className="hsField">
-              <span className="hsLabel">Teks</span>
-              <input
+            <FormField
+              label="Teks"
+              htmlFor={`primary-cta-label-${slide.id}`}
+            >
+              <TextInput
+                id={`primary-cta-label-${slide.id}`}
+                name="primaryCtaLabel"
                 value={slide.primaryCta.label}
                 onChange={(e) => this.updatePrimaryCta(slide.id, { label: e.target.value })}
                 placeholder="mis. Lihat koleksi"
+                required
+                maxLength={50}
               />
-            </label>
+            </FormField>
 
-            <label className="hsField">
-              <span className="hsLabel">Tautan</span>
-              <input
+            <FormField
+              label="Tautan"
+              htmlFor={`primary-cta-href-${slide.id}`}
+            >
+              <TextInput
+                id={`primary-cta-href-${slide.id}`}
+                name="primaryCtaHref"
                 value={slide.primaryCta.href}
                 onChange={(e) => this.updatePrimaryCta(slide.id, { href: e.target.value })}
                 placeholder="/collection or https://..."
+                type="url"
+                required
               />
-            </label>
+            </FormField>
           </div>
 
           <div className="hsFieldGroup">
             <div className="hsGroupTitle">CTA Kedua (Opsional)</div>
 
-            <label className="hsField">
-              <span className="hsLabel">Teks</span>
-              <input
+            <FormField
+              label="Teks"
+              htmlFor={`secondary-cta-label-${slide.id}`}
+            >
+              <TextInput
+                id={`secondary-cta-label-${slide.id}`}
+                name="secondaryCtaLabel"
                 value={slide.secondaryCta?.label ?? ""}
                 onChange={(e) =>
                   this.updateSecondaryCta(slide.id, {
@@ -814,17 +779,23 @@ class HeroSliderEditorSection extends Component<Props, HeroSliderEditorSectionSt
                   })
                 }
                 placeholder="mis. Pesan via WhatsApp"
+                maxLength={50}
               />
-            </label>
+            </FormField>
 
-            <label className="hsField">
-              <span className="hsLabel">Tautan</span>
-              <input
+            <FormField
+              label="Tautan"
+              htmlFor={`secondary-cta-href-${slide.id}`}
+            >
+              <TextInput
+                id={`secondary-cta-href-${slide.id}`}
+                name="secondaryCtaHref"
                 value={slide.secondaryCta?.href ?? ""}
                 onChange={(e) => this.updateSecondaryCta(slide.id, { href: e.target.value })}
                 placeholder="https://wa.me/..."
+                type="url"
               />
-            </label>
+            </FormField>
           </div>
         </div>
       </article>
@@ -983,15 +954,21 @@ class HeroSliderEditorSection extends Component<Props, HeroSliderEditorSectionSt
         </header>
 
         <div className={`${this.baseClass}__card`}>
-          <label className="hsField">
-            <span className="hsLabel">Judul</span>
-            <input
+          <FormField
+            label="Judul Slider"
+            htmlFor="hero-heading"
+          >
+            <TextInput
+              id="hero-heading"
+              name="heading"
               value={heading}
               onChange={(e) => this.setState({ heading: e.target.value })}
               placeholder="mis. Koleksi Terbaru"
               disabled={loading}
+              maxLength={100}
+              showCharacterCount
             />
-          </label>
+          </FormField>
 
           {loading ? (
             <div className="hsState" role="status" aria-live="polite" aria-busy="true">

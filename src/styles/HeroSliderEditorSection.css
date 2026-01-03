@@ -460,9 +460,10 @@
   margin-top: 0.5rem;
 }
 
-.hsField input,
-.hsField textarea,
-.hsField select {
+.hsField input:not(.textInput__input):not(.priceInput__input):not(.textareaInput__textarea),
+.hsField textarea:not(.textareaInput__textarea),
+.hsField select,
+.hsField__select {
   border: var(--border-luxury);
   border-color: var(--brand-rose-border);
   border-radius: 14px;
@@ -475,6 +476,17 @@
   box-shadow: var(--shadow-luxury-sm);
   backdrop-filter: var(--backdrop-blur-sm);
   -webkit-backdrop-filter: var(--backdrop-blur-sm);
+  min-height: 48px; /* Touch target */
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23D48C9C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1.15rem center;
+  background-size: 12px 8px;
+  padding-right: 2.5rem;
+}
+
+.hsField__select {
+  cursor: pointer;
 }
 
 .hsField textarea {
@@ -489,18 +501,20 @@
   opacity: 0.7;
 }
 
-.hsField input:hover,
-.hsField textarea:hover,
-.hsField select:hover {
+.hsField input:not(.textInput__input):not(.priceInput__input):not(.textareaInput__textarea):hover,
+.hsField textarea:not(.textareaInput__textarea):hover,
+.hsField select:hover,
+.hsField__select:hover {
   border-color: var(--border-luxury-gold);
   background: var(--gradient-luxury-gold-subtle);
   box-shadow: var(--shadow-luxury-gold), var(--shadow-luxury-md);
   transform: translateY(-1px);
 }
 
-.hsField input:focus,
-.hsField textarea:focus,
-.hsField select:focus {
+.hsField input:not(.textInput__input):not(.priceInput__input):not(.textareaInput__textarea):focus,
+.hsField textarea:not(.textareaInput__textarea):focus,
+.hsField select:focus,
+.hsField__select:focus {
   outline: none;
   border-color: var(--border-luxury-gold-strong);
   box-shadow: 
