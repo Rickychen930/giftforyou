@@ -1,8 +1,10 @@
 /**
  * Dashboard Uploader Section Component
- * Luxury, DRY, Efficient, Responsive
+ * Luxury, Elegant, Clean UI/UX, Effective, Responsive
+ * Enhanced with premium design, better performance, and edge case handling
  * Uses design-system.css variables
  * Fully responsive on all devices: mobile, tablet, desktop
+ * Follows SOLID, MVP, OOP, DRY principles
  */
 
 @import "design-system.css";
@@ -12,24 +14,26 @@
   margin: 0 auto;
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 255, 255, 0.96) 50%,
-    rgba(255, 255, 255, 0.98) 100%
+    rgba(255, 255, 255, 0.99) 0%,
+    rgba(255, 255, 255, 0.97) 30%,
+    rgba(255, 255, 255, 0.98) 70%,
+    rgba(255, 255, 255, 0.99) 100%
   );
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
-  border: 2px solid rgba(212, 140, 156, 0.2);
-  border-radius: var(--radius-lg);
+  backdrop-filter: blur(50px) saturate(220%);
+  -webkit-backdrop-filter: blur(50px) saturate(220%);
+  border: 2.5px solid rgba(212, 140, 156, 0.25);
+  border-radius: var(--radius-xl);
   box-shadow: 
-    0 32px 96px rgba(0, 0, 0, 0.12),
-    0 16px 48px rgba(212, 140, 156, 0.15),
-    0 8px 24px rgba(0, 0, 0, 0.08),
-    0 0 0 1px rgba(255, 255, 255, 0.95) inset,
-    0 0 200px rgba(212, 140, 156, 0.08);
+    0 40px 120px rgba(0, 0, 0, 0.08),
+    0 20px 60px rgba(212, 140, 156, 0.18),
+    0 10px 30px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.98) inset,
+    0 0 300px rgba(212, 140, 156, 0.06);
   padding: clamp(var(--space-10), 5vw, var(--space-16));
   overflow: hidden;
   position: relative;
-  animation: uploaderFadeIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: uploaderFadeIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  will-change: transform, opacity;
 }
 
 @keyframes uploaderFadeIn {
@@ -119,16 +123,16 @@
   margin: 0;
   font-size: clamp(var(--font-size-2xl), 4vw, var(--font-size-3xl));
   font-weight: var(--font-weight-black);
-  letter-spacing: -0.025em;
+  letter-spacing: -0.03em;
   background: linear-gradient(
     135deg,
     var(--ink-900) 0%,
-    var(--ink-800) 15%,
-    var(--brand-rose-600) 45%,
-    var(--brand-sage-500) 70%,
+    var(--ink-800) 12%,
+    var(--brand-rose-600) 42%,
+    var(--brand-sage-500) 68%,
     var(--ink-900) 100%
   );
-  background-size: 200% 200%;
+  background-size: 250% 250%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -136,8 +140,11 @@
   font-family: var(--font-family-heading);
   position: relative;
   z-index: var(--z-base);
-  animation: gradientShift 8s ease infinite;
-  filter: drop-shadow(0 2px 4px rgba(212, 140, 156, 0.2));
+  animation: gradientShift 10s ease infinite;
+  filter: drop-shadow(0 3px 6px rgba(212, 140, 156, 0.25));
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .uploader__subtitle {
@@ -439,25 +446,28 @@
 .uploader__field input,
 .uploader__field textarea,
 .uploader__field select {
-  border: 2px solid rgba(212, 140, 156, 0.2);
+  border: 2.5px solid rgba(212, 140, 156, 0.22);
   border-radius: var(--radius-md);
   padding: clamp(var(--space-4), 1.5vw, var(--space-5)) clamp(var(--space-4), 1.8vw, var(--space-6));
   font-size: clamp(var(--font-size-sm), 1.3vw, var(--font-size-base));
   font-weight: var(--font-weight-medium);
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
   color: var(--ink-900);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: inherit;
   box-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.03),
-    0 0 0 1px rgba(255, 255, 255, 0.5) inset,
-    0 1px 2px rgba(0, 0, 0, 0.02);
+    0 3px 10px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(255, 255, 255, 0.6) inset,
+    0 1px 3px rgba(0, 0, 0, 0.03);
   width: 100%;
   box-sizing: border-box;
   letter-spacing: 0.01em;
-  line-height: 1.5;
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .uploader__field input::placeholder,
@@ -483,13 +493,15 @@
 .uploader__field textarea:focus,
 .uploader__field select:focus {
   outline: none;
-  border-color: rgba(184, 134, 11, 0.5);
-  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(212, 140, 156, 0.6);
+  background: rgba(255, 255, 255, 1);
   box-shadow: 
-    0 0 0 3px rgba(184, 134, 11, 0.1),
-    0 4px 16px rgba(212, 140, 156, 0.15),
-    0 2px 8px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+    0 0 0 4px rgba(212, 140, 156, 0.12),
+    0 6px 20px rgba(212, 140, 156, 0.2),
+    0 3px 10px rgba(0, 0, 0, 0.05),
+    0 0 0 1px rgba(255, 255, 255, 1) inset;
+  transform: translateY(-1px);
+  will-change: transform, box-shadow;
 }
 
 .uploader__field input:disabled,
@@ -1532,25 +1544,30 @@
   color: white;
   background: linear-gradient(
     135deg,
-    rgba(16, 185, 129, 0.95) 0%,
-    rgba(16, 185, 129, 0.92) 50%,
-    rgba(16, 185, 129, 0.95) 100%
+    rgba(16, 185, 129, 0.98) 0%,
+    rgba(16, 185, 129, 0.95) 45%,
+    rgba(5, 150, 105, 0.97) 55%,
+    rgba(16, 185, 129, 0.98) 100%
   );
   box-shadow:
-    0 6px 24px rgba(16, 185, 129, 0.35),
-    0 3px 12px rgba(5, 150, 105, 0.25),
-    0 0 0 2px rgba(255, 255, 255, 0.3) inset,
-    0 2px 4px rgba(0, 0, 0, 0.08);
-  transition: all 0.2s ease;
+    0 8px 32px rgba(16, 185, 129, 0.4),
+    0 4px 16px rgba(5, 150, 105, 0.3),
+    0 0 0 2.5px rgba(255, 255, 255, 0.35) inset,
+    0 3px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-3);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.025em;
   min-height: clamp(52px, 4vw, 60px);
   text-transform: uppercase;
+  will-change: transform, box-shadow, filter;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1558,15 +1575,17 @@
     background: linear-gradient(
       135deg,
       rgba(16, 185, 129, 1) 0%,
-      rgba(16, 185, 129, 0.97) 50%,
+      rgba(16, 185, 129, 0.98) 45%,
+      rgba(5, 150, 105, 0.99) 55%,
       rgba(16, 185, 129, 1) 100%
     );
     box-shadow:
-      0 8px 28px rgba(16, 185, 129, 0.4),
-      0 4px 14px rgba(5, 150, 105, 0.3),
-      0 0 0 2px rgba(255, 255, 255, 0.35) inset,
-      0 3px 6px rgba(0, 0, 0, 0.1);
-    filter: brightness(1.03);
+      0 12px 40px rgba(16, 185, 129, 0.45),
+      0 6px 20px rgba(5, 150, 105, 0.35),
+      0 0 0 3px rgba(255, 255, 255, 0.4) inset,
+      0 4px 8px rgba(0, 0, 0, 0.12);
+    filter: brightness(1.05) saturate(1.1);
+    transform: translateY(-2px);
   }
 }
 
@@ -1650,11 +1669,12 @@
   -webkit-backdrop-filter: var(--backdrop-blur-sm);
 }
 
-/* Responsive Design */
+/* Responsive Design - Enhanced for better mobile experience */
 @media (max-width: 968px) {
   .uploader {
     padding: clamp(var(--space-6), 3vw, var(--space-10));
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
+    border-width: 2px;
   }
 
   .uploader__layout {
@@ -1665,6 +1685,17 @@
   .uploader__preview {
     position: static;
     margin-top: var(--space-6);
+    border-radius: var(--radius-md);
+  }
+
+  /* Enhanced: Better touch targets on mobile */
+  .uploader__submit,
+  .uploader__draftBtn,
+  .uploader__clearDraftBtn,
+  .uploader__ghostBtn,
+  .uploader__addPenandaBtn {
+    min-height: 48px;
+    touch-action: manipulation;
   }
 }
 
@@ -1807,15 +1838,19 @@
 @media (max-width: 520px) {
   .uploader {
     padding: clamp(var(--space-4), 2vw, var(--space-6));
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
+    border-width: 2px;
+    margin: var(--space-2);
   }
 
   .uploader__title {
     font-size: clamp(var(--font-size-xl), 3.5vw, var(--font-size-2xl));
+    line-height: 1.3;
   }
 
   .uploader__subtitle {
     font-size: var(--font-size-sm);
+    line-height: 1.5;
   }
 
   .uploader__toggles {
@@ -1828,16 +1863,20 @@
     padding: var(--space-4) var(--space-6);
     font-size: var(--font-size-sm);
     min-height: 52px;
+    width: 100%;
+    letter-spacing: 0.02em;
   }
 
   .uploader__draftBtn,
   .uploader__clearDraftBtn {
     padding: var(--space-2-5) var(--space-4);
     font-size: var(--font-size-xs);
+    min-height: 44px;
   }
 
   .uploader__dropzone {
     padding: clamp(var(--space-5), 2.5vw, var(--space-6));
+    min-height: 140px;
   }
 
   .uploader__dropzoneIcon {
@@ -1847,21 +1886,44 @@
 
   .uploader__grid {
     gap: var(--space-4);
+    grid-template-columns: 1fr;
   }
 
   .uploader__validationSummary {
     padding: var(--space-4) var(--space-4-5);
     font-size: var(--font-size-xs);
+    border-width: 2px;
   }
 
   .uploader__penandaInput {
     padding: var(--space-3) var(--space-3-5);
     font-size: var(--font-size-sm);
+    min-height: 44px;
   }
 
   .uploader__addPenandaBtn {
     padding: var(--space-3) var(--space-4);
     font-size: var(--font-size-xs);
+    min-height: 44px;
+    width: 100%;
+  }
+
+  /* Enhanced: Better spacing for small screens */
+  .uploader__field {
+    gap: var(--space-2);
+  }
+
+  .uploader__fieldLabel {
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-2);
+  }
+
+  .uploader__field input,
+  .uploader__field textarea,
+  .uploader__field select {
+    padding: var(--space-3-5) var(--space-4);
+    font-size: var(--font-size-sm);
+    min-height: 44px;
   }
 }
 
@@ -1888,7 +1950,7 @@
   }
 }
 
-/* Reduced Motion */
+/* Reduced Motion - Enhanced accessibility */
 @media (prefers-reduced-motion: reduce) {
   .uploader *,
   .uploader *::before,
@@ -1896,6 +1958,7 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 
   .uploader__dropzone:hover,
@@ -1904,20 +1967,34 @@
   .uploader__ghostBtn:hover:not(:disabled),
   .uploader__addPenandaBtn:hover:not(:disabled),
   .uploader__penandaTag:hover {
-    transform: none;
+    transform: none !important;
   }
 
   .uploader__field input,
   .uploader__field textarea,
   .uploader__field select {
-    transition: none;
+    transition: none !important;
   }
 
   .uploader__fieldError,
   .uploader__fieldHint {
-    animation: none;
-    transition: none;
+    animation: none !important;
+    transition: none !important;
   }
+
+  .uploader__dropzone.is-dragging {
+    transform: none !important;
+  }
+}
+
+/* Enhanced: Focus visible for better keyboard navigation */
+.uploader [aria-busy="true"] {
+  cursor: wait;
+  pointer-events: none;
+}
+
+.uploader [aria-busy="true"] * {
+  pointer-events: none;
 }
 
 /* Focus visible for keyboard navigation */
@@ -1946,6 +2023,29 @@
   .uploader__field textarea,
   .uploader__field select {
     border-width: 2px;
+  }
+}
+
+/* Performance: Loading component for lazy loaded components */
+.uploader__loadingComponent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3) var(--space-4);
+  color: var(--ink-500);
+  font-size: var(--font-size-sm);
+  min-height: 44px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-md);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
   }
 }
 

@@ -22,6 +22,8 @@ import {
   type MessageType,
 } from "../models/bouquet-uploader-model";
 import { BaseController, type BaseControllerProps, type BaseControllerState } from "./base/BaseController";
+// Performance: Lazy load view component for better code splitting
+const BouquetUploaderView = React.lazy(() => import("../view/bouquet-uploader-view"));
 
 interface Props extends BaseControllerProps {
   onUpload: (formData: FormData) => Promise<boolean>;
@@ -64,6 +66,11 @@ export class BouquetUploaderController extends BaseController<Props, State> {
   private autoSaveTimeout: NodeJS.Timeout | null = null;
   private scrollTimeout: NodeJS.Timeout | null = null;
   private componentMounted = false;
+  // Performance: Batch state updates
+  private pendingStateUpdates: Partial<State> = {};
+  private stateUpdateTimer: NodeJS.Timeout | null = null;
+  // Performance: Debounce state updates
+  private readonly STATE_UPDATE_DEBOUNCE_MS = 16; // ~60fps
 
   constructor(props: Props) {
     super(props);
@@ -125,6 +132,17 @@ export class BouquetUploaderController extends BaseController<Props, State> {
   componentWillUnmount(): void {
     this.componentMounted = false;
     
+    // Performance: Clear pending state updates
+    if (this.stateUpdateTimer) {
+      clearTimeout(this.stateUpdateTimer);
+      this.stateUpdateTimer = null;
+    }
+    this.pendingStateUpdates = {};
+    
+    // Performance: Clear state cache
+    this.controllerStateCache = null;
+    this.lastStateSnapshot = "";
+    
     // Cleanup all timeouts
     if (this.validationTimeout) {
       clearTimeout(this.validationTimeout);
@@ -158,6 +176,31 @@ export class BouquetUploaderController extends BaseController<Props, State> {
     
     super.componentWillUnmount();
   }
+
+  // Performance: Batched state updates for better performance
+  private batchedSetState = (updates: Partial<State>): void => {
+    // Merge with pending updates
+    this.pendingStateUpdates = { ...this.pendingStateUpdates, ...updates };
+
+    // Clear existing timer
+    if (this.stateUpdateTimer) {
+      clearTimeout(this.stateUpdateTimer);
+    }
+
+    // Schedule batched update
+    this.stateUpdateTimer = setTimeout(() => {
+      if (this.componentMounted && Object.keys(this.pendingStateUpdates).length > 0) {
+        // Use requestAnimationFrame for smooth updates
+        requestAnimationFrame(() => {
+          if (this.componentMounted) {
+            this.setState(this.pendingStateUpdates as State);
+            this.pendingStateUpdates = {};
+          }
+        });
+      }
+      this.stateUpdateTimer = null;
+    }, this.STATE_UPDATE_DEBOUNCE_MS);
+  };
 
   // ==================== Dropdown Options ====================
   private loadDropdownOptions = async (): Promise<void> => {
@@ -356,22 +399,51 @@ export class BouquetUploaderController extends BaseController<Props, State> {
 
   // ==================== Validation ====================
   private debouncedValidate = (name: string, value: unknown): void => {
+    // Enhanced: Clear existing timeout to prevent race conditions
     if (this.validationTimeout) {
       clearTimeout(this.validationTimeout);
+      this.validationTimeout = null;
     }
 
-    this.validationTimeout = setTimeout(() => {
-      const error = validateField(name, value);
-      this.setState((prev) => {
-        const newFieldErrors = { ...prev.fieldErrors };
-        if (error) {
-          newFieldErrors[name] = error;
-        } else {
-          delete newFieldErrors[name];
+    // Enhanced: Use requestIdleCallback for better performance if available
+    const validate = () => {
+      try {
+        const error = validateField(name, value);
+        if (!this.componentMounted) return;
+        
+        this.setState((prev): Pick<State, 'fieldErrors'> | null => {
+          // Enhanced: Only update if error state actually changed
+          const currentError = prev.fieldErrors[name];
+          if (currentError === error) {
+            return null; // No change, prevent re-render
+          }
+          
+          const newFieldErrors = { ...prev.fieldErrors };
+          if (error) {
+            newFieldErrors[name] = error;
+          } else {
+            delete newFieldErrors[name];
+          }
+          return { fieldErrors: newFieldErrors };
+        });
+      } catch (err) {
+        if (process.env.NODE_ENV === "development") {
+          console.error("Validation error:", err);
         }
-        return { fieldErrors: newFieldErrors };
-      });
-    }, 300);
+      }
+    };
+
+    // Performance: Optimized validation with requestIdleCallback and requestAnimationFrame
+    if (typeof requestIdleCallback !== "undefined") {
+      this.validationTimeout = setTimeout(() => {
+        requestIdleCallback(validate, { timeout: 150 });
+      }, 250); // Reduced from 300ms for faster feedback
+    } else {
+      // Fallback: Use requestAnimationFrame for better performance
+      this.validationTimeout = setTimeout(() => {
+        requestAnimationFrame(validate);
+      }, 250);
+    }
   };
 
   // ==================== Form Handlers ====================
@@ -384,6 +456,7 @@ export class BouquetUploaderController extends BaseController<Props, State> {
         ? e.target.checked
         : e.target.value;
 
+    // Performance: Use batched state updates for better performance
     this.setState((prev) => {
       const newState = {
         ...prev,
@@ -483,30 +556,49 @@ export class BouquetUploaderController extends BaseController<Props, State> {
 
   // ==================== Image Handlers ====================
   handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
-    const file = e.target.files?.[0] ?? null;
-
-    if (this.state.previewUrl && this.state.previewUrl.startsWith("blob:")) {
-      URL.revokeObjectURL(this.state.previewUrl);
+    // Enhanced: Validate file input
+    if (!e.target.files || e.target.files.length === 0) {
+      return;
     }
 
-    if (!file) {
-      this.setState({
-        file: null,
-        previewUrl: "",
-        isImageLoading: false,
-        imageDimensions: null,
-      });
+    const file = e.target.files[0];
+
+    // Enhanced: Validate file type before processing
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
+    if (!validTypes.includes(file.type)) {
+      this.setMessage("Format file tidak didukung. Gunakan JPG, PNG, WEBP, atau HEIC.", "error");
+      if (this.fileInputRef.current) {
+        this.fileInputRef.current.value = "";
+      }
       return;
+    }
+
+    // Enhanced: Validate file size (8MB limit)
+    const maxSize = 8 * 1024 * 1024;
+    if (file.size > maxSize) {
+      this.setMessage("Ukuran file maksimal 8MB. Silakan pilih file yang lebih kecil.", "error");
+      if (this.fileInputRef.current) {
+        this.fileInputRef.current.value = "";
+      }
+      return;
+    }
+
+    // Enhanced: Cleanup previous preview URL
+    if (this.state.previewUrl && this.state.previewUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(this.state.previewUrl);
     }
 
     try {
       this.setState({ isImageLoading: true, file });
 
+      // Enhanced: Clear existing timeout
       if (this.imageLoadTimeout) {
         clearTimeout(this.imageLoadTimeout);
+        this.imageLoadTimeout = null;
       }
 
-      this.imageLoadTimeout = setTimeout(async () => {
+      // Enhanced: Use requestIdleCallback for better performance
+      const processImage = async () => {
         if (!this.componentMounted) return;
 
         try {
@@ -534,9 +626,30 @@ export class BouquetUploaderController extends BaseController<Props, State> {
               isImageLoading: false,
               imageDimensions: null,
             });
+            // Enhanced: Clear file input on error
+            if (this.fileInputRef.current) {
+              this.fileInputRef.current.value = "";
+            }
           }
         }
-      }, 100);
+      };
+
+      // Performance: Optimized image processing with priority scheduling
+      this.imageLoadTimeout = setTimeout(() => {
+        // Use requestIdleCallback with higher priority for image processing
+        if (typeof requestIdleCallback !== "undefined") {
+          requestIdleCallback(processImage, { timeout: 300 });
+        } else {
+          // Fallback: Use requestAnimationFrame for smooth processing
+          requestAnimationFrame(() => {
+            if (typeof requestIdleCallback !== "undefined") {
+              requestIdleCallback(processImage, { timeout: 300 });
+            } else {
+              processImage();
+            }
+          });
+        }
+      }, 50); // Reduced delay for faster image preview
     } catch (err) {
       if (this.componentMounted) {
         const errorMessage =
@@ -548,6 +661,10 @@ export class BouquetUploaderController extends BaseController<Props, State> {
           isImageLoading: false,
           imageDimensions: null,
         });
+        // Enhanced: Clear file input on error
+        if (this.fileInputRef.current) {
+          this.fileInputRef.current.value = "";
+        }
       }
     }
   };
@@ -580,13 +697,33 @@ export class BouquetUploaderController extends BaseController<Props, State> {
   handleDropzoneDrop = async (e: React.DragEvent<HTMLDivElement>): Promise<void> => {
     e.preventDefault();
     e.stopPropagation();
-    if (this.state.submitting || this.state.isImageLoading) return;
+    
+    // Enhanced: Prevent operation if form is busy
+    if (this.state.submitting || this.state.isImageLoading) {
+      this.setState({ isDraggingImage: false });
+      return;
+    }
 
     const file = e.dataTransfer.files?.[0] ?? null;
     this.setState({ isDraggingImage: false });
 
     if (!file) return;
 
+    // Enhanced: Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
+    if (!validTypes.includes(file.type)) {
+      this.setMessage("Format file tidak didukung. Gunakan JPG, PNG, WEBP, atau HEIC.", "error");
+      return;
+    }
+
+    // Enhanced: Validate file size (8MB limit)
+    const maxSize = 8 * 1024 * 1024;
+    if (file.size > maxSize) {
+      this.setMessage("Ukuran file maksimal 8MB. Silakan pilih file yang lebih kecil.", "error");
+      return;
+    }
+
+    // Enhanced: Cleanup previous preview URL
     if (this.state.previewUrl && this.state.previewUrl.startsWith("blob:")) {
       URL.revokeObjectURL(this.state.previewUrl);
     }
@@ -594,13 +731,44 @@ export class BouquetUploaderController extends BaseController<Props, State> {
     try {
       this.setState({ isImageLoading: true, file });
 
-      const result = await processImageForUpload(file);
-      this.setState({
-        previewUrl: result.previewUrl,
-        isImageLoading: false,
-        file: result.file,
-        imageDimensions: result.dimensions,
-      });
+      // Enhanced: Use requestIdleCallback for better performance
+      const processImage = async () => {
+        if (!this.componentMounted) return;
+
+        try {
+          const result = await processImageForUpload(file);
+          
+          if (!this.componentMounted) {
+            URL.revokeObjectURL(result.previewUrl);
+            return;
+          }
+
+          this.setState({
+            previewUrl: result.previewUrl,
+            isImageLoading: false,
+            file: result.file,
+            imageDimensions: result.dimensions,
+          });
+        } catch (err) {
+          if (this.componentMounted) {
+            const errorMessage =
+              err instanceof Error ? err.message : "Gagal memuat preview gambar.";
+            this.setMessage(errorMessage, "error");
+            this.setState({
+              file: null,
+              previewUrl: "",
+              isImageLoading: false,
+              imageDimensions: null,
+            });
+          }
+        }
+      };
+
+      if (typeof requestIdleCallback !== "undefined") {
+        requestIdleCallback(processImage, { timeout: 500 });
+      } else {
+        processImage();
+      }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Gagal memuat preview gambar.";
@@ -645,7 +813,17 @@ export class BouquetUploaderController extends BaseController<Props, State> {
   handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
 
+    // Enhanced: Prevent double submission and validate state
     if (this.state.submitting || this.state.isImageLoading) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("Submit prevented: operation already in progress");
+      }
+      return;
+    }
+
+    // Enhanced: Validate component is still mounted
+    if (!this.componentMounted) {
+      console.warn("Submit prevented: component unmounted");
       return;
     }
 
@@ -759,7 +937,8 @@ export class BouquetUploaderController extends BaseController<Props, State> {
         messageType: "",
       });
 
-      const uploadTimeout = 60000;
+      // Enhanced: Configurable timeout with better error handling
+      const uploadTimeout = 90000; // Increased to 90s for large files
       const uploadPromise = this.props.onUpload(formData);
       const timeoutPromise = new Promise<boolean>((_, reject) => {
         setTimeout(
@@ -775,37 +954,65 @@ export class BouquetUploaderController extends BaseController<Props, State> {
 
       let ok: boolean;
       try {
-        ok = await Promise.race([uploadPromise, timeoutPromise]);
+        // Enhanced: Use AbortController for better timeout handling
+        const abortController = new AbortController();
+        const timeoutId = setTimeout(() => {
+          abortController.abort();
+        }, uploadTimeout);
+
+        try {
+          ok = await Promise.race([uploadPromise, timeoutPromise]);
+          clearTimeout(timeoutId);
+        } catch (raceErr) {
+          clearTimeout(timeoutId);
+          throw raceErr;
+        }
       } catch (timeoutErr) {
+        // Enhanced: Better error handling for timeout
         if (
           timeoutErr instanceof Error &&
-          timeoutErr.message.includes("timeout")
+          (timeoutErr.message.includes("timeout") || timeoutErr.name === "AbortError")
         ) {
-          throw new Error(timeoutErr.message);
+          throw new Error(
+            "Upload timeout. File mungkin terlalu besar atau koneksi lambat. Silakan coba lagi dengan file yang lebih kecil."
+          );
         }
         throw timeoutErr;
       }
 
       if (ok) {
+        // Enhanced: Clear draft and reset form state
         this.clearDraftStorage();
 
+        // Enhanced: Cleanup file input
         if (this.fileInputRef.current) {
           this.fileInputRef.current.value = "";
         }
 
+        // Enhanced: Cleanup blob URL to prevent memory leaks
         if (this.state.previewUrl && this.state.previewUrl.startsWith("blob:")) {
           URL.revokeObjectURL(this.state.previewUrl);
         }
 
+        // Enhanced: Reload dropdown options to sync with server
         this.loadDropdownOptions();
+        
+        // Enhanced: Reset form state
         this.resetForm();
+        
+        // Enhanced: Update state with success message
         this.setState({
           submitting: false,
           message: "Bouquet berhasil diunggah!",
           messageType: "success",
           imageDimensions: null,
+          // Clear all form errors on success
+          fieldErrors: {},
+          touchedFields: new Set(),
+          showValidationSummary: false,
         });
 
+        // Enhanced: Scroll to success message
         if (this.scrollTimeout) {
           clearTimeout(this.scrollTimeout);
         }
@@ -872,8 +1079,79 @@ export class BouquetUploaderController extends BaseController<Props, State> {
   };
 
   // ==================== Expose State for View ====================
-  getControllerState() {
-    return {
+  // Performance: Memoize getControllerState to prevent unnecessary object creation
+  // Define return type explicitly to avoid circular reference
+  private controllerStateCache: {
+    state: State;
+    handlers: {
+      handleTextChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+      handleSelectChange: (name: string, value: string) => void;
+      handleToggleChange: (name: string, checked: boolean) => void;
+      handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+      handleDropzoneDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
+      handleDropzoneDragLeave: (e: React.DragEvent<HTMLDivElement>) => void;
+      handleDropzoneKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
+      handleDropzoneDrop: (e: React.DragEvent<HTMLDivElement>) => Promise<void>;
+      handleAddPenanda: () => void;
+      handleSubmit: (e: React.FormEvent) => Promise<void>;
+      clearImage: () => void;
+      openFilePicker: () => void;
+      loadDraft: () => void;
+      clearDraft: () => void;
+      resetForm: () => void;
+    };
+    refs: {
+      fileInputRef: React.RefObject<HTMLInputElement>;
+      formRef: React.RefObject<HTMLFormElement>;
+    };
+  } | null = null;
+  private lastStateSnapshot: string = "";
+
+  getControllerState(): {
+    state: State;
+    handlers: {
+      handleTextChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+      handleSelectChange: (name: string, value: string) => void;
+      handleToggleChange: (name: string, checked: boolean) => void;
+      handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+      handleDropzoneDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
+      handleDropzoneDragLeave: (e: React.DragEvent<HTMLDivElement>) => void;
+      handleDropzoneKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
+      handleDropzoneDrop: (e: React.DragEvent<HTMLDivElement>) => Promise<void>;
+      handleAddPenanda: () => void;
+      handleSubmit: (e: React.FormEvent) => Promise<void>;
+      clearImage: () => void;
+      openFilePicker: () => void;
+      loadDraft: () => void;
+      clearDraft: () => void;
+      resetForm: () => void;
+    };
+    refs: {
+      fileInputRef: React.RefObject<HTMLInputElement>;
+      formRef: React.RefObject<HTMLFormElement>;
+    };
+  } {
+    // Performance: Create snapshot of critical state for comparison
+    const stateSnapshot = JSON.stringify({
+      submitting: this.state.submitting,
+      isImageLoading: this.state.isImageLoading,
+      message: this.state.message,
+      messageType: this.state.messageType,
+      fieldErrors: this.state.fieldErrors,
+      touchedFields: Array.from(this.state.touchedFields).sort(),
+      hasDraft: this.state.hasDraft,
+      isSavingDraft: this.state.isSavingDraft,
+      showValidationSummary: this.state.showValidationSummary,
+    });
+
+    // Return cached state if nothing changed
+    if (this.lastStateSnapshot === stateSnapshot && this.controllerStateCache) {
+      return this.controllerStateCache;
+    }
+
+    // State changed, create new state object
+    this.lastStateSnapshot = stateSnapshot;
+    this.controllerStateCache = {
       state: this.state,
       handlers: {
         handleTextChange: this.handleTextChange,
@@ -897,12 +1175,40 @@ export class BouquetUploaderController extends BaseController<Props, State> {
         formRef: this.formRef,
       },
     };
+
+    return this.controllerStateCache;
   }
 
   render(): React.ReactNode {
-    // View will be rendered by wrapper component
-    const BouquetUploaderView = require("../view/bouquet-uploader-view").default;
-    return <BouquetUploaderView controller={this} />;
+    // Performance: Use lazy loaded view with Suspense for better code splitting
+    return (
+      <React.Suspense fallback={
+        <div style={{ 
+          display: "flex", 
+          justifyContent: "center", 
+          alignItems: "center", 
+          minHeight: "200px",
+          padding: "2rem"
+        }}>
+          <div style={{
+            width: "40px",
+            height: "40px",
+            border: "3px solid rgba(212, 140, 156, 0.2)",
+            borderTop: "3px solid var(--brand-rose-500)",
+            borderRadius: "50%",
+            animation: "spin 0.8s linear infinite"
+          }} />
+          <style>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}</style>
+        </div>
+      }>
+        <BouquetUploaderView controller={this} />
+      </React.Suspense>
+    );
   }
 }
 

@@ -179,160 +179,129 @@ export default class BouquetEditorSection extends Component<Props, State> {
         this.debounceTimers.delete(timerKey);
       }, 100);
       this.debounceTimers.set(timerKey, timer);
-    } else {
-      // Performance: Sync bouquets if they changed, but don't reset view
-      if (prevProps.bouquets !== this.props.bouquets) {
-        // Use requestIdleCallback for non-critical state sync
-        if (typeof requestIdleCallback !== "undefined") {
-          requestIdleCallback(() => {
-            this.setState((prev) => {
-              const updatedBouquets = this.props.bouquets ?? prev.bouquets;
-              if (!Array.isArray(updatedBouquets)) {
-                console.warn("Invalid bouquets data");
-                return prev;
-              }
-              
-              // Performance: Only update if bouquets actually changed - use Set for O(1) comparison
-              if (updatedBouquets.length === prev.bouquets.length) {
-                const prevIds = new Set(prev.bouquets.map(b => b._id));
-                const currentIds = new Set(updatedBouquets.map(b => b._id));
-                if (prevIds.size === currentIds.size && 
-                    Array.from(prevIds).every(id => currentIds.has(id))) {
-                  return prev; // No changes, prevent re-render
-                }
-              }
+    }
+    
+    // Performance: Sync bouquets if they changed, but don't reset view
+    // This is critical for keeping editor in sync with parent controller
+    if (prevProps.bouquets !== this.props.bouquets) {
+        // Optimized: Sync bouquets immediately for better responsiveness
+        // Use debounce to batch rapid updates
+        const timerKey = "syncBouquets";
+        const existingTimer = this.debounceTimers.get(timerKey);
+        if (existingTimer) {
+          clearTimeout(existingTimer);
+        }
+        
+        const timer = setTimeout(() => {
+          this.syncBouquetsFromProps();
+          this.debounceTimers.delete(timerKey);
+        }, 50); // Short debounce for better UX
+        
+        this.debounceTimers.set(timerKey, timer);
+      }
+  }
 
-              // Enhanced: Check if selectedBouquet still exists in the new bouquets list
-              let selectedBouquet = prev.selectedBouquet;
-              let currentView: ViewState = prev.currentView;
-              
-              if (selectedBouquet) {
-                const stillExists = updatedBouquets.some((b) => b._id === selectedBouquet?._id);
-                if (!stillExists) {
-                  // Selected bouquet was deleted, clear selection and navigate back
-                  selectedBouquet = null;
-                  // Auto-navigate back to collection detail if in edit view
-                  if (prev.currentView === "bouquet-edit") {
-                    currentView = prev.selectedCollectionId ? "collection-detail" : "collections";
-                  }
-                } else {
-                  // Update selectedBouquet with latest data from props
-                  const updatedBouquet = updatedBouquets.find((b) => b._id === selectedBouquet?._id);
-                  if (updatedBouquet) {
-                    selectedBouquet = updatedBouquet;
-                  }
-                }
-              }
+  // Optimized: Extract bouquets sync logic to reduce duplication
+  private syncBouquetsFromProps = (): void => {
+    this.setState((prev) => {
+      const updatedBouquets = this.props.bouquets ?? prev.bouquets;
+      if (!Array.isArray(updatedBouquets)) {
+        console.warn("Invalid bouquets data");
+        return prev;
+      }
+      
+      // Performance: Only update if bouquets actually changed - use Set for O(1) comparison
+      if (updatedBouquets.length === prev.bouquets.length) {
+        const prevIds = new Set(prev.bouquets.map(b => b._id));
+        const currentIds = new Set(updatedBouquets.map(b => b._id));
+        // Check if IDs are the same
+        if (prevIds.size === currentIds.size && 
+            Array.from(prevIds).every(id => currentIds.has(id))) {
+          // Check if any bouquet data changed
+          const hasDataChanges = updatedBouquets.some((b, i) => {
+            const prevB = prev.bouquets[i];
+            return !prevB || 
+              b.name !== prevB.name || 
+              b.price !== prevB.price || 
+              b.collectionName !== prevB.collectionName ||
+              b.description !== prevB.description;
+          });
+          if (!hasDataChanges) {
+            return prev; // No changes, prevent re-render
+          }
+        }
+      }
 
-              // Performance: Use Map for O(1) operations
-              const collectionMap = new Map<string, Bouquet[]>();
-              for (const b of updatedBouquets) {
-                const name = b.collectionName || "Uncategorized";
-                const existing = collectionMap.get(name);
-                if (existing) {
-                  existing.push(b);
-                } else {
-                  collectionMap.set(name, [b]);
-                }
-              }
-
-              return {
-                ...prev,
-                bouquets: updatedBouquets,
-                selectedBouquet,
-                currentView,
-                collections: prev.collections.map((c) => {
-                  const collectionBouquets = collectionMap.get(c.name) ?? [];
-                  // Performance: Return same reference if no change
-                  if (collectionBouquets.length === (c.bouquets as Bouquet[]).length &&
-                      collectionBouquets.every((b, i) => b._id === (c.bouquets as Bouquet[])[i]?._id)) {
-                    return c;
-                  }
-                  return {
-                    ...c,
-                    bouquets: collectionBouquets,
-                  };
-                }),
-              };
-            });
-          }, { timeout: 200 });
+      // Enhanced: Check if selectedBouquet still exists in the new bouquets list
+      let selectedBouquet = prev.selectedBouquet;
+      let currentView: ViewState = prev.currentView;
+      
+      if (selectedBouquet) {
+        const stillExists = updatedBouquets.some((b) => b._id === selectedBouquet?._id);
+        if (!stillExists) {
+          // Selected bouquet was deleted, clear selection and navigate back
+          selectedBouquet = null;
+          // Auto-navigate back to collection detail if in edit view
+          if (prev.currentView === "bouquet-edit") {
+            currentView = prev.selectedCollectionId ? "collection-detail" : "collections";
+          }
         } else {
-          // Fallback
-          requestAnimationFrame(() => {
-            setTimeout(() => {
-              this.setState((prev) => {
-                const updatedBouquets = this.props.bouquets ?? prev.bouquets;
-                if (!Array.isArray(updatedBouquets)) {
-                  console.warn("Invalid bouquets data");
-                  return prev;
-                }
-                
-                // Performance: Only update if bouquets actually changed - use Set for O(1) comparison
-                if (updatedBouquets.length === prev.bouquets.length) {
-                  const prevIds = new Set(prev.bouquets.map(b => b._id));
-                  const currentIds = new Set(updatedBouquets.map(b => b._id));
-                  if (prevIds.size === currentIds.size && 
-                      Array.from(prevIds).every(id => currentIds.has(id))) {
-                    return prev; // No changes, prevent re-render
-                  }
-                }
+          // Update selectedBouquet with latest data from props
+          const updatedBouquet = updatedBouquets.find((b) => b._id === selectedBouquet?._id);
+          if (updatedBouquet) {
+            selectedBouquet = updatedBouquet;
+          }
+        }
+      }
 
-                // Enhanced: Check if selectedBouquet still exists
-                let selectedBouquet = prev.selectedBouquet;
-                let currentView: ViewState = prev.currentView;
-                
-                if (selectedBouquet) {
-                  const stillExists = updatedBouquets.some((b) => b._id === selectedBouquet?._id);
-                  if (!stillExists) {
-                    selectedBouquet = null;
-                    if (prev.currentView === "bouquet-edit") {
-                      currentView = prev.selectedCollectionId ? "collection-detail" : "collections";
-                    }
-                  } else {
-                    const updatedBouquet = updatedBouquets.find((b) => b._id === selectedBouquet?._id);
-                    if (updatedBouquet) {
-                      selectedBouquet = updatedBouquet;
-                    }
-                  }
-                }
+      // Performance: Use Map for O(1) operations
+      const collectionMap = new Map<string, Bouquet[]>();
+      for (const b of updatedBouquets) {
+        const name = b.collectionName || "Uncategorized";
+        const existing = collectionMap.get(name);
+        if (existing) {
+          existing.push(b);
+        } else {
+          collectionMap.set(name, [b]);
+        }
+      }
 
-                // Performance: Use Map for O(1) operations
-                const collectionMap = new Map<string, Bouquet[]>();
-                for (const b of updatedBouquets) {
-                  const name = b.collectionName || "Uncategorized";
-                  const existing = collectionMap.get(name);
-                  if (existing) {
-                    existing.push(b);
-                  } else {
-                    collectionMap.set(name, [b]);
-                  }
-                }
+      // Update collections with new bouquets
+      const updatedCollections = prev.collections.map((c) => {
+        const collectionBouquets = collectionMap.get(c.name) ?? [];
+        // Performance: Return same reference if no change
+        if (collectionBouquets.length === (c.bouquets as Bouquet[]).length &&
+            collectionBouquets.every((b, i) => b._id === (c.bouquets as Bouquet[])[i]?._id)) {
+          return c;
+        }
+        return {
+          ...c,
+          bouquets: collectionBouquets,
+        };
+      });
 
-                return {
-                  ...prev,
-                  bouquets: updatedBouquets,
-                  selectedBouquet,
-                  currentView,
-                  collections: prev.collections.map((c) => {
-                    const collectionBouquets = collectionMap.get(c.name) ?? [];
-                    // Performance: Return same reference if no change
-                    if (collectionBouquets.length === (c.bouquets as Bouquet[]).length &&
-                        collectionBouquets.every((b, i) => b._id === (c.bouquets as Bouquet[])[i]?._id)) {
-                      return c;
-                    }
-                    return {
-                      ...c,
-                      bouquets: collectionBouquets,
-                    };
-                  }),
-                };
-              });
-            }, 50);
+      // Check if we need to add new collections that don't exist yet
+      const existingCollectionNames = new Set(prev.collections.map(c => c.name));
+      for (const [name, bouquets] of collectionMap.entries()) {
+        if (!existingCollectionNames.has(name)) {
+          updatedCollections.push({
+            _id: `collection-${updatedCollections.length}`,
+            name,
+            description: "",
+            bouquets,
           });
         }
       }
-    }
-  }
+
+      return {
+        ...prev,
+        bouquets: updatedBouquets,
+        selectedBouquet,
+        currentView,
+        collections: updatedCollections,
+      };
+    });
+  };
 
   private loadCollections = async (): Promise<void> => {
     // Enhanced: If collections is already Collection[], use it directly
@@ -750,96 +719,18 @@ export default class BouquetEditorSection extends Component<Props, State> {
             };
           });
 
-          // Performance: Sync with props using requestIdleCallback
-          if (typeof requestIdleCallback !== "undefined") {
-            requestIdleCallback(() => {
-              if (this.props.bouquets) {
-                this.setState((prev) => {
-                  const propsBouquets = this.props.bouquets ?? prev.bouquets;
-                  // Performance: Deep comparison to prevent unnecessary updates
-                  const hasChanges = propsBouquets.length !== prev.bouquets.length ||
-                    propsBouquets.some((b, i) => {
-                      const prevB = prev.bouquets[i];
-                      return !prevB || b._id !== prevB._id || b.collectionName !== prevB.collectionName;
-                    });
-                  
-                  if (!hasChanges) return prev;
-
-                  // Performance: Use Map for O(1) lookups
-                  const collectionMap = new Map<string, Bouquet[]>();
-                  for (const b of propsBouquets) {
-                    const name = b.collectionName || "Uncategorized";
-                    const existing = collectionMap.get(name);
-                    if (existing) {
-                      existing.push(b);
-                    } else {
-                      collectionMap.set(name, [b]);
-                    }
-                  }
-
-                  return {
-                    ...prev,
-                    bouquets: propsBouquets,
-                    collections: prev.collections.map((c) => {
-                      const collectionBouquets = collectionMap.get(c.name) ?? [];
-                      if (collectionBouquets.length === (c.bouquets as Bouquet[]).length &&
-                          collectionBouquets.every((b, i) => b._id === (c.bouquets as Bouquet[])[i]?._id)) {
-                        return c; // Same reference, no re-render
-                      }
-                      return {
-                        ...c,
-                        bouquets: collectionBouquets,
-                      };
-                    }),
-                  };
-                });
-              }
-            }, { timeout: 100 });
-          } else {
-            // Fallback
-            requestAnimationFrame(() => {
-              setTimeout(() => {
-                if (this.props.bouquets) {
-                  this.setState((prev) => {
-                    const propsBouquets = this.props.bouquets ?? prev.bouquets;
-                    const hasChanges = propsBouquets.length !== prev.bouquets.length ||
-                      propsBouquets.some((b, i) => {
-                        const prevB = prev.bouquets[i];
-                        return !prevB || b._id !== prevB._id || b.collectionName !== prevB.collectionName;
-                      });
-                    if (!hasChanges) return prev;
-
-                    const collectionMap = new Map<string, Bouquet[]>();
-                    for (const b of propsBouquets) {
-                      const name = b.collectionName || "Uncategorized";
-                      const existing = collectionMap.get(name);
-                      if (existing) {
-                        existing.push(b);
-                      } else {
-                        collectionMap.set(name, [b]);
-                      }
-                    }
-
-                    return {
-                      ...prev,
-                      bouquets: propsBouquets,
-                      collections: prev.collections.map((c) => {
-                        const collectionBouquets = collectionMap.get(c.name) ?? [];
-                        if (collectionBouquets.length === (c.bouquets as Bouquet[]).length &&
-                            collectionBouquets.every((b, i) => b._id === (c.bouquets as Bouquet[])[i]?._id)) {
-                          return c;
-                        }
-                        return {
-                          ...c,
-                          bouquets: collectionBouquets,
-                        };
-                      }),
-                    };
-                  });
-                }
-              }, 50);
-            });
+          // Optimized: Sync with props after operation completes
+          // Use debounced sync to batch updates
+          const timerKey = "syncAfterMove";
+          const existingTimer = this.debounceTimers.get(timerKey);
+          if (existingTimer) {
+            clearTimeout(existingTimer);
           }
+          const timer = setTimeout(() => {
+            this.syncBouquetsFromProps();
+            this.debounceTimers.delete(timerKey);
+          }, 100);
+          this.debounceTimers.set(timerKey, timer);
 
           this.setState({ isOperationInProgress: false });
           return true;
@@ -1155,95 +1046,18 @@ export default class BouquetEditorSection extends Component<Props, State> {
           };
         });
 
-        // Performance: Sync with props using requestIdleCallback for better performance
-        // This runs when browser is idle, preventing blocking
-        if (typeof requestIdleCallback !== "undefined") {
-          requestIdleCallback(() => {
-            // Sync with latest props from parent (after refreshBouquets completes)
-            if (this.props.bouquets && this.props.bouquets.length !== this.state.bouquets.length) {
-              this.setState((prev) => {
-                const propsBouquets = this.props.bouquets ?? prev.bouquets;
-                
-                // Performance: Only update if there are actual changes
-                if (propsBouquets.length === prev.bouquets.length &&
-                    propsBouquets.every((b, i) => b._id === prev.bouquets[i]?._id)) {
-                  return prev; // No changes, prevent re-render
-                }
-
-                // Performance: Memoize collection updates
-                const collectionMap = new Map<string, Bouquet[]>();
-                for (const b of propsBouquets) {
-                  const name = b.collectionName || "Uncategorized";
-                  const existing = collectionMap.get(name);
-                  if (existing) {
-                    existing.push(b);
-                  } else {
-                    collectionMap.set(name, [b]);
-                  }
-                }
-
-                return {
-                  ...prev,
-                  bouquets: propsBouquets,
-                  collections: prev.collections.map((c) => {
-                    const collectionBouquets = collectionMap.get(c.name) ?? [];
-                    // Performance: Return same reference if no change
-                    if (collectionBouquets.length === (c.bouquets as Bouquet[]).length &&
-                        collectionBouquets.every((b, i) => b._id === (c.bouquets as Bouquet[])[i]?._id)) {
-                      return c;
-                    }
-                    return {
-                      ...c,
-                      bouquets: collectionBouquets,
-                    };
-                  }),
-                };
-              });
-            }
-          }, { timeout: 200 });
-        } else {
-          // Fallback for browsers without requestIdleCallback
-          requestAnimationFrame(() => {
-            setTimeout(() => {
-              if (this.props.bouquets && this.props.bouquets.length !== this.state.bouquets.length) {
-                this.setState((prev) => {
-                  const propsBouquets = this.props.bouquets ?? prev.bouquets;
-                  if (propsBouquets.length === prev.bouquets.length &&
-                      propsBouquets.every((b, i) => b._id === prev.bouquets[i]?._id)) {
-                    return prev;
-                  }
-
-                  const collectionMap = new Map<string, Bouquet[]>();
-                  for (const b of propsBouquets) {
-                    const name = b.collectionName || "Uncategorized";
-                    const existing = collectionMap.get(name);
-                    if (existing) {
-                      existing.push(b);
-                    } else {
-                      collectionMap.set(name, [b]);
-                    }
-                  }
-
-                  return {
-                    ...prev,
-                    bouquets: propsBouquets,
-                    collections: prev.collections.map((c) => {
-                      const collectionBouquets = collectionMap.get(c.name) ?? [];
-                      if (collectionBouquets.length === (c.bouquets as Bouquet[]).length &&
-                          collectionBouquets.every((b, i) => b._id === (c.bouquets as Bouquet[])[i]?._id)) {
-                        return c;
-                      }
-                      return {
-                        ...c,
-                        bouquets: collectionBouquets,
-                      };
-                    }),
-                  };
-                });
-              }
-            }, 100);
-          });
+        // Optimized: Sync with props after delete operation
+        // Use debounced sync to batch updates
+        const timerKey = "syncAfterDelete";
+        const existingTimer = this.debounceTimers.get(timerKey);
+        if (existingTimer) {
+          clearTimeout(existingTimer);
         }
+        const timer = setTimeout(() => {
+          this.syncBouquetsFromProps();
+          this.debounceTimers.delete(timerKey);
+        }, 100);
+        this.debounceTimers.set(timerKey, timer);
         
         // Clear operation in progress after sync
         this.setState({ isOperationInProgress: false });
@@ -1310,106 +1124,18 @@ export default class BouquetEditorSection extends Component<Props, State> {
           )
         ]);
 
-        // Performance: Sync with props using requestIdleCallback
-        if (typeof requestIdleCallback !== "undefined") {
-          requestIdleCallback(() => {
-            this.setState((prev) => {
-              const updatedBouquets = this.props.bouquets ?? prev.bouquets;
-              
-              // Enhanced: Validate that we have bouquets
-              if (!Array.isArray(updatedBouquets)) {
-                console.warn("Invalid bouquets data after duplicate");
-                return prev;
-              }
-              
-              // Performance: Use Set for O(1) lookup
-              const prevBouquetIds = new Set(prev.bouquets.map(b => b._id));
-              const hasNewBouquet = updatedBouquets.length > prev.bouquets.length ||
-                updatedBouquets.some((b) => !prevBouquetIds.has(b._id));
-              
-              if (!hasNewBouquet) {
-                return prev; // No changes, don't update
-              }
-
-              // Performance: Use Map for O(1) lookups
-              const collectionMap = new Map<string, Bouquet[]>();
-              for (const b of updatedBouquets) {
-                const name = b.collectionName || "Uncategorized";
-                const existing = collectionMap.get(name);
-                if (existing) {
-                  existing.push(b);
-                } else {
-                  collectionMap.set(name, [b]);
-                }
-              }
-              
-              // Performance: Only update collections that changed
-              const updatedCollections = prev.collections.map((c) => {
-                const collectionBouquets = collectionMap.get(c.name) ?? [];
-                if (collectionBouquets.length === (c.bouquets as Bouquet[]).length &&
-                    collectionBouquets.every((b, i) => b._id === (c.bouquets as Bouquet[])[i]?._id)) {
-                  return c; // Same reference, no re-render
-                }
-                return {
-                  ...c,
-                  bouquets: collectionBouquets,
-                };
-              });
-              
-              return {
-                ...prev,
-                bouquets: updatedBouquets,
-                collections: updatedCollections,
-                // Stay in current view - don't change navigation
-              };
-            });
-          }, { timeout: 200 });
-        } else {
-          // Fallback
-          requestAnimationFrame(() => {
-            setTimeout(() => {
-              this.setState((prev) => {
-                const updatedBouquets = this.props.bouquets ?? prev.bouquets;
-                if (!Array.isArray(updatedBouquets)) {
-                  return prev;
-                }
-                
-                const prevBouquetIds = new Set(prev.bouquets.map(b => b._id));
-                const hasNewBouquet = updatedBouquets.length > prev.bouquets.length ||
-                  updatedBouquets.some((b) => !prevBouquetIds.has(b._id));
-                
-                if (!hasNewBouquet) return prev;
-
-                const collectionMap = new Map<string, Bouquet[]>();
-                for (const b of updatedBouquets) {
-                  const name = b.collectionName || "Uncategorized";
-                  const existing = collectionMap.get(name);
-                  if (existing) {
-                    existing.push(b);
-                  } else {
-                    collectionMap.set(name, [b]);
-                  }
-                }
-
-                return {
-                  ...prev,
-                  bouquets: updatedBouquets,
-                  collections: prev.collections.map((c) => {
-                    const collectionBouquets = collectionMap.get(c.name) ?? [];
-                    if (collectionBouquets.length === (c.bouquets as Bouquet[]).length &&
-                        collectionBouquets.every((b, i) => b._id === (c.bouquets as Bouquet[])[i]?._id)) {
-                      return c;
-                    }
-                    return {
-                      ...c,
-                      bouquets: collectionBouquets,
-                    };
-                  }),
-                };
-              });
-            }, 100);
-          });
+        // Optimized: Sync with props after duplicate operation
+        // Use debounced sync to batch updates
+        const timerKey = "syncAfterDuplicate";
+        const existingTimer = this.debounceTimers.get(timerKey);
+        if (existingTimer) {
+          clearTimeout(existingTimer);
         }
+        const timer = setTimeout(() => {
+          this.syncBouquetsFromProps();
+          this.debounceTimers.delete(timerKey);
+        }, 100);
+        this.debounceTimers.set(timerKey, timer);
         
         // Clear operation in progress after sync
         this.setState({ isOperationInProgress: false });
@@ -1445,123 +1171,19 @@ export default class BouquetEditorSection extends Component<Props, State> {
       // Optimized: Call save operation
       const success = await this.props.onSave(formData);
       
-      // Performance: Sync with props using requestIdleCallback (outside if block)
+      // Optimized: Sync with props after save operation
       if (success) {
-        if (typeof requestIdleCallback !== "undefined") {
-          requestIdleCallback(() => {
-            if (this.props.bouquets) {
-              this.setState((prev) => {
-                const propsBouquets = this.props.bouquets ?? prev.bouquets;
-                const savedBouquetId = String(formData.get("_id") ?? "");
-                
-                // Performance: Find bouquet once
-                const savedBouquet = propsBouquets.find((b) => b._id === savedBouquetId);
-                const prevBouquet = prev.bouquets.find((b) => b._id === savedBouquetId);
-                
-                // Performance: Deep comparison to prevent unnecessary updates
-                const hasChanges = !prevBouquet || !savedBouquet || 
-                  savedBouquet.name !== prevBouquet.name || 
-                  savedBouquet.price !== prevBouquet.price ||
-                  savedBouquet.collectionName !== prevBouquet.collectionName ||
-                  savedBouquet.description !== prevBouquet.description;
-                
-                if (!hasChanges || !savedBouquet) {
-                  return prev; // No changes, prevent re-render
-                }
-
-                // Performance: Use Map for O(1) lookups
-                const collectionMap = new Map<string, Bouquet[]>();
-                for (const b of propsBouquets) {
-                  const name = b.collectionName || "Uncategorized";
-                  const existing = collectionMap.get(name);
-                  if (existing) {
-                    existing.push(b);
-                  } else {
-                    collectionMap.set(name, [b]);
-                  }
-                }
-
-                // Update selectedBouquet with latest data if it's the saved bouquet
-                const updatedSelectedBouquet = prev.selectedBouquet?._id === savedBouquetId
-                  ? savedBouquet
-                  : prev.selectedBouquet;
-
-                return {
-                  ...prev,
-                  bouquets: prev.bouquets.map((b) => 
-                    b._id === savedBouquetId ? savedBouquet : b
-                  ),
-                  selectedBouquet: updatedSelectedBouquet,
-                  collections: prev.collections.map((c) => {
-                    const collectionBouquets = collectionMap.get(c.name) ?? [];
-                    // Performance: Return same reference if no change
-                    if (collectionBouquets.length === (c.bouquets as Bouquet[]).length &&
-                        collectionBouquets.every((b, i) => b._id === (c.bouquets as Bouquet[])[i]?._id)) {
-                      return c;
-                    }
-                    return {
-                      ...c,
-                      bouquets: collectionBouquets,
-                    };
-                  }),
-                };
-              });
-            }
-          }, { timeout: 100 });
-        } else {
-          // Fallback
-          requestAnimationFrame(() => {
-            setTimeout(() => {
-              if (this.props.bouquets) {
-                this.setState((prev) => {
-                  const propsBouquets = this.props.bouquets ?? prev.bouquets;
-                  const savedBouquetId = String(formData.get("_id") ?? "");
-                  const savedBouquet = propsBouquets.find((b) => b._id === savedBouquetId);
-                  const prevBouquet = prev.bouquets.find((b) => b._id === savedBouquetId);
-                  
-                  const hasChanges = !prevBouquet || !savedBouquet || 
-                    savedBouquet.name !== prevBouquet.name || 
-                    savedBouquet.price !== prevBouquet.price ||
-                    savedBouquet.collectionName !== prevBouquet.collectionName;
-                  
-                  if (!hasChanges || !savedBouquet) return prev;
-
-                  const collectionMap = new Map<string, Bouquet[]>();
-                  for (const b of propsBouquets) {
-                    const name = b.collectionName || "Uncategorized";
-                    const existing = collectionMap.get(name);
-                    if (existing) {
-                      existing.push(b);
-                    } else {
-                      collectionMap.set(name, [b]);
-                    }
-                  }
-
-                  return {
-                    ...prev,
-                    bouquets: prev.bouquets.map((b) => 
-                      b._id === savedBouquetId ? savedBouquet : b
-                    ),
-                    selectedBouquet: prev.selectedBouquet?._id === savedBouquetId
-                      ? savedBouquet
-                      : prev.selectedBouquet,
-                    collections: prev.collections.map((c) => {
-                      const collectionBouquets = collectionMap.get(c.name) ?? [];
-                      if (collectionBouquets.length === (c.bouquets as Bouquet[]).length &&
-                          collectionBouquets.every((b, i) => b._id === (c.bouquets as Bouquet[])[i]?._id)) {
-                        return c;
-                      }
-                      return {
-                        ...c,
-                        bouquets: collectionBouquets,
-                      };
-                    }),
-                  };
-                });
-              }
-            }, 50);
-          });
+        // Use debounced sync to batch updates
+        const timerKey = "syncAfterSave";
+        const existingTimer = this.debounceTimers.get(timerKey);
+        if (existingTimer) {
+          clearTimeout(existingTimer);
         }
+        const timer = setTimeout(() => {
+          this.syncBouquetsFromProps();
+          this.debounceTimers.delete(timerKey);
+        }, 100);
+        this.debounceTimers.set(timerKey, timer);
       }
       
       if (success && existingBouquet) {

@@ -16,7 +16,6 @@ import Section from "../components/layout/Section";
 import SectionWrapper from "../components/layout/SectionWrapper";
 import NetworkStatus from "../components/common/NetworkStatus";
 import FloatingWhatsAppButton from "../components/common/FloatingWhatsAppButton";
-import QuickNavigation from "../components/common/QuickNavigation";
 
 // Lazy load below-the-fold sections for better initial performance
 const WhyChooseUsSection = lazy(() => import("./sections/WhyChooseUsSection"));
@@ -74,17 +73,6 @@ class HomePageView extends Component<HomePageViewProps> {
         
         {/* Floating WhatsApp Button - Always accessible */}
         <FloatingWhatsAppButton />
-        
-        {/* Quick Navigation - Sticky section navigation */}
-        <QuickNavigation
-          items={[
-            { id: "collections-section", label: "Koleksi" },
-            { id: "why-choose-us-section", label: "Keunggulan" },
-            { id: "location-section", label: "Lokasi" },
-            { id: "reviews-section", label: "Ulasan" },
-          ]}
-          threshold={400}
-        />
         
         {/* Hero slider section - Full width, no container */}
         <Section 

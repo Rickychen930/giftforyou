@@ -954,9 +954,12 @@ class DashboardController extends BaseController<BaseControllerProps, State> {
         throw new Error(errorMessage);
       }
 
-      // Update local state instead of full reload
-      // Collections will be updated by the editor component
-      // No need to reload full dashboard
+      // Refresh bouquets to ensure collection name changes are reflected
+      // This ensures the editor always has the latest data after collection update
+      await this.refreshBouquets();
+      
+      // Clear error on success
+      this.setError(null);
       return true;
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -1012,9 +1015,12 @@ class DashboardController extends BaseController<BaseControllerProps, State> {
         console.warn("Failed to parse delete collection response:", parseErr);
       }
 
-      // Update local state instead of full reload
-      // Collections will be updated by the editor component
-      // No need to reload full dashboard
+      // Refresh bouquets to ensure deleted collection changes are reflected
+      // This ensures the editor always has the latest data after collection deletion
+      await this.refreshBouquets();
+      
+      // Clear error on success
+      this.setError(null);
       return true;
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -1097,9 +1103,12 @@ class DashboardController extends BaseController<BaseControllerProps, State> {
         }
       }
 
-      // Update local state instead of full reload
-      // Bouquets and collections will be updated by the editor component
-      // No need to reload full dashboard
+      // Refresh bouquets from server to ensure data is up to date
+      // This ensures the editor always has the latest data after move operation
+      await this.refreshBouquets();
+      
+      // Clear error on success
+      this.setError(null);
       return true;
     } catch (error) {
       console.error("Failed to move bouquet:", error);

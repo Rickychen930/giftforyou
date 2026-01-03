@@ -10,12 +10,13 @@ import {
   validateField,
   getCharacterCountClass,
 } from "../models/bouquet-uploader-model";
-import DropdownWithModal from "../components/inputs/DropdownWithModal";
-import TagInput from "../components/inputs/TagInput";
 import FormField from "../components/inputs/FormField";
 import TextInput from "../components/inputs/TextInput";
 import PriceInput from "../components/inputs/PriceInput";
 import TextareaInput from "../components/inputs/TextareaInput";
+// Performance: Lazy load heavy components (must be after regular imports)
+const DropdownWithModal = React.lazy(() => import("../components/inputs/DropdownWithModal"));
+const TagInput = React.lazy(() => import("../components/inputs/TagInput"));
 
 interface Props {
   controller: BouquetUploaderController;
@@ -24,10 +25,98 @@ interface Props {
 /**
  * View Component for Bouquet Uploader
  * Handles only presentation logic - follows Single Responsibility Principle
+ * Enhanced with advanced performance optimizations
  */
 class BouquetUploaderView extends Component<Props> {
+  // Performance: Advanced memoization with shallow comparison
+  private lastStateHash: string = "";
+  private memoizedState: ReturnType<typeof this.props.controller.getControllerState> | null = null;
+  private renderCache: Map<string, React.ReactNode> = new Map();
+  private lastRenderTime: number = 0;
+  private readonly RENDER_THROTTLE_MS = 16; // ~60fps
+
+  // Performance: Type-safe cache getter
+  private getCachedRender(cacheKey: string): React.ReactNode | null {
+    const cached = this.renderCache.get(cacheKey);
+    return cached !== undefined ? cached : null;
+  }
+
+  // Performance: Fast shallow comparison instead of JSON.stringify
+  private createStateHash(state: ReturnType<typeof this.props.controller.getControllerState>): string {
+    const { submitting, isImageLoading, message, fieldErrors, touchedFields } = state.state;
+    const errorKeys = Object.keys(fieldErrors).sort().join(',');
+    const touchedArray = Array.from(touchedFields).sort().join(',');
+    return `${submitting}|${isImageLoading}|${message}|${errorKeys}|${touchedArray}`;
+  }
+
   private getControllerState() {
-    return this.props.controller.getControllerState();
+    const state = this.props.controller.getControllerState();
+    const stateHash = this.createStateHash(state);
+
+    // Performance: Return memoized state if nothing changed
+    // This prevents unnecessary re-computations in render methods
+    if (this.lastStateHash === stateHash && this.memoizedState) {
+      return this.memoizedState;
+    }
+
+    // State changed, update cache
+    this.lastStateHash = stateHash;
+    this.memoizedState = state;
+    
+    // Clear render cache when state changes significantly
+    if (this.renderCache.size > 10) {
+      this.renderCache.clear();
+    }
+    
+    return state;
+  }
+
+  // Performance: Optimized re-render with proper state sync
+  shouldComponentUpdate(nextProps: Props): boolean {
+    // Always update if controller reference changed (shouldn't happen, but safety check)
+    if (nextProps.controller !== this.props.controller) {
+      this.lastRenderTime = performance.now();
+      // Clear cache when controller changes
+      this.renderCache.clear();
+      this.memoizedState = null;
+      this.lastStateHash = "";
+      return true;
+    }
+
+    // Performance: Check if state actually changed using hash comparison
+    // This ensures we always sync with latest controller state
+    try {
+      const currentState = nextProps.controller.getControllerState();
+      const newStateHash = this.createStateHash(currentState);
+      
+      // If state hash changed, we need to update
+      if (newStateHash !== this.lastStateHash) {
+        this.lastRenderTime = performance.now();
+        // Clear render cache when state changes significantly
+        if (this.renderCache.size > 20) {
+          this.renderCache.clear();
+        }
+        return true;
+      }
+
+      // No changes detected, skip render
+      return false;
+    } catch (err) {
+      // Enhanced: If getControllerState fails, force update to recover
+      if (process.env.NODE_ENV === "development") {
+        console.warn("Error getting controller state, forcing update:", err);
+      }
+      return true;
+    }
+  }
+
+  private isMounted = true;
+
+  componentWillUnmount(): void {
+    this.isMounted = false;
+    // Performance: Clear caches to free memory
+    this.renderCache.clear();
+    this.memoizedState = null;
   }
 
   // ==================== Header Section ====================
@@ -40,10 +129,15 @@ class BouquetUploaderView extends Component<Props> {
       fieldErrors,
     } = state;
 
+    // Performance: Memoize error count calculation
+    const cacheKey = `header-${showValidationSummary}-${Object.keys(fieldErrors).length}`;
+    const cached = this.getCachedRender(cacheKey);
+    if (cached) return cached;
+
     const errorCount = Object.keys(fieldErrors).length;
     const hasErrors = errorCount > 0;
 
-    return (
+    const header = (
       <header className="uploader__header">
         <div className="uploader__headerTop">
           <div>
@@ -100,58 +194,89 @@ class BouquetUploaderView extends Component<Props> {
               {errorCount === 1 ? "kesalahan" : "kesalahan"} sebelum mengunggah:
             </strong>
             <ul>
-              {Object.entries(fieldErrors).map(([field, error]) => (
+              {Object.entries(fieldErrors).map(([field, error]) => {
+                const errorMessage: string = typeof error === "string" ? error : String(error);
+                return (
                 <li key={field}>
                   <button
                     type="button"
                     onClick={() => {
                       const { refs } = this.getControllerState();
-                      // Optimize: Use requestAnimationFrame for smoother scroll
+                      // Enhanced: Use requestAnimationFrame for smoother scroll with better error handling
                       requestAnimationFrame(() => {
-                        if (field === "customPenanda") {
-                          const penandaSection = refs.formRef.current?.querySelector(
-                            ".uploader__customPenanda"
-                          ) as HTMLElement;
-                          if (penandaSection) {
-                            penandaSection.scrollIntoView({
-                              behavior: "smooth",
-                              block: "center",
-                            });
-                            // Focus after scroll completes
-                            setTimeout(() => {
-                              const input = penandaSection.querySelector(
-                                ".uploader__penandaInput"
-                              ) as HTMLInputElement;
-                              input?.focus();
-                            }, 300);
+                        try {
+                          if (field === "customPenanda") {
+                            const penandaSection = refs.formRef.current?.querySelector(
+                              ".uploader__customPenanda"
+                            ) as HTMLElement;
+                            if (penandaSection) {
+                              penandaSection.scrollIntoView({
+                                behavior: "smooth",
+                                block: "center",
+                              });
+                              // Enhanced: Focus after scroll completes with error handling
+                              setTimeout(() => {
+                                try {
+                                  const input = penandaSection.querySelector(
+                                    ".uploader__penandaInput"
+                                  ) as HTMLInputElement;
+                                  if (input) {
+                                    input.focus();
+                                    input.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                                  }
+                                } catch (focusErr) {
+                                  if (process.env.NODE_ENV === "development") {
+                                    console.warn("Failed to focus penanda input:", focusErr);
+                                  }
+                                }
+                              }, 350);
+                            }
+                          } else {
+                            const fieldEl = refs.formRef.current?.querySelector(
+                              `[name="${field}"]`
+                            ) as HTMLElement;
+                            if (fieldEl) {
+                              fieldEl.scrollIntoView({
+                                behavior: "smooth",
+                                block: "center",
+                              });
+                              // Enhanced: Focus after scroll completes with error handling
+                              setTimeout(() => {
+                                try {
+                                  if (fieldEl instanceof HTMLElement) {
+                                    fieldEl.focus();
+                                    fieldEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                                  }
+                                } catch (focusErr) {
+                                  if (process.env.NODE_ENV === "development") {
+                                    console.warn("Failed to focus field:", focusErr);
+                                  }
+                                }
+                              }, 350);
+                            }
                           }
-                        } else {
-                          const fieldEl = refs.formRef.current?.querySelector(
-                            `[name="${field}"]`
-                          ) as HTMLElement;
-                          if (fieldEl) {
-                            fieldEl.scrollIntoView({
-                              behavior: "smooth",
-                              block: "center",
-                            });
-                            // Focus after scroll completes
-                            setTimeout(() => {
-                              fieldEl.focus();
-                            }, 300);
+                        } catch (scrollErr) {
+                          if (process.env.NODE_ENV === "development") {
+                            console.warn("Failed to scroll to field:", scrollErr);
                           }
                         }
                       });
                     }}
                   >
-                    {error}
+                    {errorMessage}
                   </button>
                 </li>
-              ))}
+                );
+              })}
             </ul>
           </div>
         )}
       </header>
     );
+
+    // Performance: Cache rendered header
+    this.renderCache.set(cacheKey, header);
+    return header;
   }
 
   // ==================== Form Fields ====================
@@ -253,7 +378,8 @@ class BouquetUploaderView extends Component<Props> {
 
         {/* Status Field */}
         <FormField label="Status" htmlFor="uploader-status">
-          <DropdownWithModal
+          <React.Suspense fallback={<div className="uploader__loadingComponent">Loading...</div>}>
+            <DropdownWithModal
             label="Status"
             value={status === "ready" ? "Siap" : "Preorder"}
             options={["Siap", "Preorder"]}
@@ -267,6 +393,7 @@ class BouquetUploaderView extends Component<Props> {
             storageKey=""
             allowAddNew={false}
           />
+          </React.Suspense>
         </FormField>
 
         {/* Collection Field */}
@@ -280,7 +407,8 @@ class BouquetUploaderView extends Component<Props> {
           }
           htmlFor="uploader-collection"
         >
-          <DropdownWithModal
+          <React.Suspense fallback={<div className="uploader__loadingComponent">Loading...</div>}>
+            <DropdownWithModal
             label="Koleksi"
             value={collectionName}
             options={collectionOptions}
@@ -298,22 +426,25 @@ class BouquetUploaderView extends Component<Props> {
             maxLength={100}
             storageKey="uploader_collections"
           />
+          </React.Suspense>
         </FormField>
 
         {/* Type Field */}
         <FormField label="Tipe" htmlFor="uploader-type">
-          <DropdownWithModal
-            label="Tipe"
-            value={type}
-            options={typeOptions}
-            onChange={(value) => {
-              handlers.handleSelectChange("type", value);
-            }}
-            onAddNew={() => {}}
-            placeholder="Pilih atau tambahkan tipe baru..."
-            disabled={isFormDisabled}
-            storageKey="uploader_types"
-          />
+          <React.Suspense fallback={<div className="uploader__loadingComponent">Loading...</div>}>
+            <DropdownWithModal
+              label="Tipe"
+              value={type}
+              options={typeOptions}
+              onChange={(value) => {
+                handlers.handleSelectChange("type", value);
+              }}
+              onAddNew={() => {}}
+              placeholder="Pilih atau tambahkan tipe baru..."
+              disabled={isFormDisabled}
+              storageKey="uploader_types"
+            />
+          </React.Suspense>
         </FormField>
 
         {/* Size Field */}
@@ -327,31 +458,33 @@ class BouquetUploaderView extends Component<Props> {
           }
           htmlFor="uploader-size"
         >
-          <DropdownWithModal
-            label="Ukuran"
-            value={size}
-            options={sizeOptions}
-            onChange={(value) => {
-              handlers.handleSelectChange("size", value);
-            }}
-            onAddNew={(newValue) => {
-              const controller = this.props.controller;
-              controller.setState((prev) => ({
-                ...prev,
-                sizeOptions: [...prev.sizeOptions, newValue],
-                size: newValue,
-              }));
-            }}
-            placeholder="Pilih atau tambahkan ukuran baru..."
-            disabled={isFormDisabled}
-            error={
-              touchedFields.has("size") && fieldErrors.size
-                ? fieldErrors.size
-                : undefined
-            }
-            maxLength={50}
-            storageKey="uploader_sizes"
-          />
+          <React.Suspense fallback={<div className="uploader__loadingComponent">Loading...</div>}>
+            <DropdownWithModal
+              label="Ukuran"
+              value={size}
+              options={sizeOptions}
+              onChange={(value) => {
+                handlers.handleSelectChange("size", value);
+              }}
+              onAddNew={(newValue) => {
+                const controller = this.props.controller;
+                controller.setState((prev) => ({
+                  ...prev,
+                  sizeOptions: [...prev.sizeOptions, newValue],
+                  size: newValue,
+                }));
+              }}
+              placeholder="Pilih atau tambahkan ukuran baru..."
+              disabled={isFormDisabled}
+              error={
+                touchedFields.has("size") && fieldErrors.size
+                  ? fieldErrors.size
+                  : undefined
+              }
+              maxLength={50}
+              storageKey="uploader_sizes"
+            />
+          </React.Suspense>
         </FormField>
 
         {/* Quantity Field */}
@@ -364,31 +497,33 @@ class BouquetUploaderView extends Component<Props> {
           }
           htmlFor="uploader-quantity"
         >
-          <DropdownWithModal
-            label="Stok"
-            value={quantity > 0 ? String(quantity) : ""}
-            options={stockLevelOptions}
-            onChange={(value) => {
-              const num = parseInt(value, 10);
-              if (!isNaN(num) && num >= 0) {
-                handlers.handleSelectChange("quantity", String(num));
+          <React.Suspense fallback={<div className="uploader__loadingComponent">Loading...</div>}>
+            <DropdownWithModal
+              label="Stok"
+              value={quantity > 0 ? String(quantity) : ""}
+              options={stockLevelOptions}
+              onChange={(value) => {
+                const num = parseInt(value, 10);
+                if (!isNaN(num) && num >= 0) {
+                  handlers.handleSelectChange("quantity", String(num));
+                }
+              }}
+              onAddNew={(newValue) => {
+                const num = parseInt(newValue, 10);
+                if (!isNaN(num) && num >= 0) {
+                  handlers.handleSelectChange("quantity", String(num));
+                }
+              }}
+              placeholder="Pilih jumlah stok..."
+              disabled={isFormDisabled}
+              error={
+                touchedFields.has("quantity") && fieldErrors.quantity
+                  ? fieldErrors.quantity
+                  : undefined
               }
-            }}
-            onAddNew={(newValue) => {
-              const num = parseInt(newValue, 10);
-              if (!isNaN(num) && num >= 0) {
-                handlers.handleSelectChange("quantity", String(num));
-              }
-            }}
-            placeholder="Pilih jumlah stok..."
-            disabled={isFormDisabled}
-            error={
-              touchedFields.has("quantity") && fieldErrors.quantity
-                ? fieldErrors.quantity
-                : undefined
-            }
-            storageKey="uploader_stock_levels"
-          />
+              storageKey="uploader_stock_levels"
+            />
+          </React.Suspense>
         </FormField>
 
         {/* Flags Section */}
@@ -442,39 +577,41 @@ class BouquetUploaderView extends Component<Props> {
           htmlFor="uploader-occasions"
           className="uploader__field--full"
         >
-          <TagInput
-            label="Acara"
-            tags={occasions}
-            onChange={(tags) => {
-              const controller = this.props.controller;
-              const error = validateField("occasionsText", tags.join(", "));
-              controller.setState((prev) => {
-                const newErrors = { ...prev.fieldErrors };
-                if (error) {
-                  newErrors.occasionsText = error;
-                } else {
-                  delete newErrors.occasionsText;
-                }
-                return {
-                  ...prev,
-                  occasions: tags,
-                  occasionsText: tags.join(", "),
-                  touchedFields: new Set([...prev.touchedFields, "occasionsText"]),
-                  fieldErrors: newErrors,
-                };
-              });
-            }}
-            placeholder="Tambahkan acara..."
-            disabled={isFormDisabled}
-            maxTags={10}
-            maxLength={50}
-            error={
-              touchedFields.has("occasionsText") && fieldErrors.occasionsText
-                ? fieldErrors.occasionsText
-                : undefined
-            }
-            storageKey="uploader_occasions"
-          />
+          <React.Suspense fallback={<div className="uploader__loadingComponent">Loading...</div>}>
+            <TagInput
+              label="Acara"
+              tags={occasions}
+              onChange={(tags) => {
+                const controller = this.props.controller;
+                const error = validateField("occasionsText", tags.join(", "));
+                controller.setState((prev) => {
+                  const newErrors = { ...prev.fieldErrors };
+                  if (error) {
+                    newErrors.occasionsText = error;
+                  } else {
+                    delete newErrors.occasionsText;
+                  }
+                  return {
+                    ...prev,
+                    occasions: tags,
+                    occasionsText: tags.join(", "),
+                    touchedFields: new Set([...prev.touchedFields, "occasionsText"]),
+                    fieldErrors: newErrors,
+                  };
+                });
+              }}
+              placeholder="Tambahkan acara..."
+              disabled={isFormDisabled}
+              maxTags={10}
+              maxLength={50}
+              error={
+                touchedFields.has("occasionsText") && fieldErrors.occasionsText
+                  ? fieldErrors.occasionsText
+                  : undefined
+              }
+              storageKey="uploader_occasions"
+            />
+          </React.Suspense>
           <div className="uploader__fieldHint" style={{ marginTop: "0.5rem" }}>
             Klik "Tambah Baru" untuk menambahkan acara baru. Maksimal 10 acara.
           </div>
@@ -491,40 +628,42 @@ class BouquetUploaderView extends Component<Props> {
           htmlFor="uploader-flowers"
           className="uploader__field--full"
         >
-          <TagInput
-            label="Bunga"
-            tags={flowers}
-            onChange={(tags) => {
-              const controller = this.props.controller;
-              const error = validateField("flowersText", tags.join(", "));
-              controller.setState((prev) => {
-                const newErrors = { ...prev.fieldErrors };
-                if (error) {
-                  newErrors.flowersText = error;
-                } else {
-                  delete newErrors.flowersText;
-                }
-                return {
-                  ...prev,
-                  flowers: tags,
-                  flowersText: tags.join(", "),
-                  touchedFields: new Set([...prev.touchedFields, "flowersText"]),
-                  fieldErrors: newErrors,
-                };
-              });
-            }}
-            placeholder="Tambahkan jenis bunga..."
-            disabled={isFormDisabled}
-            maxTags={20}
-            maxLength={50}
-            error={
-              touchedFields.has("flowersText") && fieldErrors.flowersText
-                ? fieldErrors.flowersText
-                : undefined
-            }
-            storageKey="uploader_flowers"
-            suggestions={flowerOptions}
-          />
+          <React.Suspense fallback={<div className="uploader__loadingComponent">Loading...</div>}>
+            <TagInput
+              label="Bunga"
+              tags={flowers}
+              onChange={(tags) => {
+                const controller = this.props.controller;
+                const error = validateField("flowersText", tags.join(", "));
+                controller.setState((prev) => {
+                  const newErrors = { ...prev.fieldErrors };
+                  if (error) {
+                    newErrors.flowersText = error;
+                  } else {
+                    delete newErrors.flowersText;
+                  }
+                  return {
+                    ...prev,
+                    flowers: tags,
+                    flowersText: tags.join(", "),
+                    touchedFields: new Set([...prev.touchedFields, "flowersText"]),
+                    fieldErrors: newErrors,
+                  };
+                });
+              }}
+              placeholder="Tambahkan jenis bunga..."
+              disabled={isFormDisabled}
+              maxTags={20}
+              maxLength={50}
+              error={
+                touchedFields.has("flowersText") && fieldErrors.flowersText
+                  ? fieldErrors.flowersText
+                  : undefined
+              }
+              storageKey="uploader_flowers"
+              suggestions={flowerOptions}
+            />
+          </React.Suspense>
           <div className="uploader__fieldHint" style={{ marginTop: "0.5rem" }}>
             Ketik dan tekan Enter/koma untuk menambahkan tag. Klik "Tambah Baru"
             untuk tag baru. Maksimal 20 jenis bunga.
@@ -639,7 +778,7 @@ class BouquetUploaderView extends Component<Props> {
         </span>
         {customPenanda.length > 0 && (
           <div className="uploader__customPenandaList">
-            {customPenanda.map((penanda, index) => (
+            {customPenanda.map((penanda: string, index: number) => (
               <span
                 key={`penanda-${index}-${penanda}`}
                 className="uploader__penandaTag"
@@ -934,21 +1073,47 @@ class BouquetUploaderView extends Component<Props> {
                 className="uploader__previewImg"
                 src={previewUrl}
                 alt="Pratinjau bouquet"
+                loading="lazy"
+                decoding="async"
                 onError={() => {
-                  const { handlers } = this.getControllerState();
-                  handlers.clearImage();
+                  // Enhanced: Better error handling for image load failures
+                  try {
+                    const { handlers } = this.getControllerState();
+                    handlers.clearImage();
+                    // Note: Error message will be handled by controller's clearImage handler
+                  } catch (err) {
+                    if (process.env.NODE_ENV === "development") {
+                      console.error("Error clearing image on load failure:", err);
+                    }
+                  }
                 }}
                 onLoad={(e) => {
-                  const img = e.currentTarget;
-                  const controller = this.props.controller;
-                  if (img.naturalWidth && img.naturalHeight) {
-                    controller.setState((prev) => ({
-                      ...prev,
-                      imageDimensions: {
-                        width: img.naturalWidth,
-                        height: img.naturalHeight,
-                      },
-                    }));
+                  // Enhanced: Better error handling for image dimensions
+                  try {
+                    const img = e.currentTarget;
+                    const controller = this.props.controller;
+                    if (img.naturalWidth && img.naturalHeight) {
+                      // Enhanced: Use requestIdleCallback for non-critical state update
+                      const updateDimensions = () => {
+                        controller.setState((prev) => ({
+                          ...prev,
+                          imageDimensions: {
+                            width: img.naturalWidth,
+                            height: img.naturalHeight,
+                          },
+                        }));
+                      };
+
+                      if (typeof requestIdleCallback !== "undefined") {
+                        requestIdleCallback(updateDimensions, { timeout: 100 });
+                      } else {
+                        updateDimensions();
+                      }
+                    }
+                  } catch (err) {
+                    if (process.env.NODE_ENV === "development") {
+                      console.warn("Error updating image dimensions:", err);
+                    }
                   }
                 }}
               />
@@ -1060,16 +1225,22 @@ class BouquetUploaderView extends Component<Props> {
 
   // ==================== Main Render ====================
   render(): React.ReactNode {
-    const { refs, handlers } = this.getControllerState();
+    const { refs, handlers, state } = this.getControllerState();
+    const { submitting, isImageLoading } = state;
 
     return (
-      <section className="uploader" aria-label="Form unggah bouquet">
+      <section 
+        className="uploader" 
+        aria-label="Form unggah bouquet"
+        aria-busy={submitting || isImageLoading}
+      >
         {this.renderHeader()}
         <form
           ref={refs.formRef}
           className="uploader__form"
           onSubmit={handlers.handleSubmit}
           noValidate
+          aria-label="Form unggah bouquet baru"
         >
           <div className="uploader__layout">
             <div className="uploader__col uploader__col--form">
