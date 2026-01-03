@@ -18,9 +18,17 @@ interface HeroPlayPauseState {
 /**
  * Hero Play Pause Component
  * Class-based component for hero slider play/pause control
+ * Optimized with shouldComponentUpdate for performance
  */
 class HeroPlayPause extends Component<HeroPlayPauseProps, HeroPlayPauseState> {
   private baseClass: string = "hero-play-pause";
+
+  /**
+   * Prevent unnecessary re-renders for better performance
+   */
+  shouldComponentUpdate(nextProps: HeroPlayPauseProps): boolean {
+    return nextProps.isPlaying !== this.props.isPlaying;
+  }
 
   private renderPauseIcon(): React.ReactNode {
     return (

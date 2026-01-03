@@ -23,6 +23,7 @@ interface HeroNavigationState {
 /**
  * Hero Navigation Component
  * Class-based component for hero slider navigation buttons
+ * Optimized with shouldComponentUpdate for performance
  */
 class HeroNavigation extends Component<HeroNavigationProps, HeroNavigationState> {
   private baseClass: string = "hero-nav";
@@ -33,6 +34,17 @@ class HeroNavigation extends Component<HeroNavigationProps, HeroNavigationState>
       isBeginning: true,
       isEnd: false,
     };
+  }
+
+  /**
+   * Prevent unnecessary re-renders for better performance
+   */
+  shouldComponentUpdate(nextProps: HeroNavigationProps, nextState: HeroNavigationState): boolean {
+    return (
+      nextProps.swiperInstance !== this.props.swiperInstance ||
+      nextState.isBeginning !== this.state.isBeginning ||
+      nextState.isEnd !== this.state.isEnd
+    );
   }
 
   componentDidMount(): void {

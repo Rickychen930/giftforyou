@@ -163,22 +163,44 @@ class HeroSlider extends Component<HeroSliderProps, HeroSliderState> {
     this.cleanup();
   }
 
+  /**
+   * Comprehensive cleanup for maximum performance
+   * Ensures no memory leaks and proper resource cleanup
+   */
   private cleanup(): void {
+    // Clear all timeouts
     if (this.touchTimeoutRef) {
       clearTimeout(this.touchTimeoutRef);
+      this.touchTimeoutRef = null;
     }
     if (this.focusTimeoutRef) {
       clearTimeout(this.focusTimeoutRef);
+      this.focusTimeoutRef = null;
     }
+    
+    // Disconnect observers
     if (this.intersectionObserver) {
       this.intersectionObserver.disconnect();
+      this.intersectionObserver = null;
     }
+    
+    // Remove event listeners
     if (this.keyboardHandler) {
       window.removeEventListener("keydown", this.keyboardHandler);
+      this.keyboardHandler = null;
     }
+    
+    // Stop all animations
     this.stopProgressTracking();
+    
+    // Cleanup Swiper listeners
     this.cleanupSwiperListeners();
+    
+    // Cleanup image preloading
     this.cleanupPreloadImages();
+    
+    // Clear image source cache in HeroSlide if accessible
+    // (Note: This would require refactoring, but current cleanup is sufficient)
   }
 
   private getData(): HeroSliderContent {
@@ -186,42 +208,51 @@ class HeroSlider extends Component<HeroSliderProps, HeroSliderState> {
   }
 
   /**
-   * Setup intersection observer with throttled state updates
+   * Setup intersection observer with optimized performance
+   * Uses passive observation and throttled updates
    */
   private setupIntersectionObserver(): void {
     if (!this.heroRef.current || !this.state.swiperInstance) return;
 
     let lastVisibilityState: boolean | null = null;
     let throttleTimeout: NodeJS.Timeout | null = null;
+    let rafId: number | null = null;
 
     this.intersectionObserver = new IntersectionObserver(
       (entries) => {
         const isIntersecting = entries[0]?.isIntersecting ?? true;
         
-        // Throttle state updates to prevent excessive re-renders
+        // Cancel pending throttle
         if (throttleTimeout) {
           clearTimeout(throttleTimeout);
+        }
+
+        // Cancel pending RAF
+        if (rafId !== null) {
+          cancelAnimationFrame(rafId);
         }
 
         throttleTimeout = setTimeout(() => {
           // Only update state if visibility actually changed
           if (lastVisibilityState !== isIntersecting) {
-            this.setState({ isVisible: isIntersecting });
-            lastVisibilityState = isIntersecting;
+            // Use RAF for state updates to batch with browser paint
+            rafId = requestAnimationFrame(() => {
+              this.setState({ isVisible: isIntersecting });
+              lastVisibilityState = isIntersecting;
 
-            const { swiperInstance, isPlaying } = this.state;
-            if (swiperInstance?.autoplay) {
-              if (isIntersecting && isPlaying) {
-                requestAnimationFrame(() => {
+              const { swiperInstance, isPlaying } = this.state;
+              if (swiperInstance?.autoplay) {
+                if (isIntersecting && isPlaying) {
                   swiperInstance.autoplay?.start();
-                });
-              } else if (!isIntersecting) {
-                swiperInstance.autoplay.stop();
+                } else if (!isIntersecting) {
+                  swiperInstance.autoplay.stop();
+                }
               }
-            }
+              rafId = null;
+            });
           }
           throttleTimeout = null;
-        }, 100); // Throttle to 100ms
+        }, 150); // Optimized throttle to 150ms for better performance
       },
       {
         threshold: 0.3,
@@ -232,11 +263,16 @@ class HeroSlider extends Component<HeroSliderProps, HeroSliderState> {
     this.intersectionObserver.observe(this.heroRef.current);
   }
 
+  /**
+   * Setup keyboard shortcuts with optimized performance
+   * Uses requestAnimationFrame for smooth interactions
+   */
   private setupKeyboardShortcuts(): void {
     if (!this.state.swiperInstance) return;
 
     let lastKeyTime = 0;
-    const DEBOUNCE_DELAY = 300;
+    const DEBOUNCE_DELAY = 250; // Optimized debounce delay
+    let rafId: number | null = null;
 
     this.keyboardHandler = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
@@ -252,76 +288,95 @@ class HeroSlider extends Component<HeroSliderProps, HeroSliderState> {
       }
       lastKeyTime = now;
 
-      const { swiperInstance } = this.state;
-      const data = this.getData();
-
-      switch (e.key) {
-        case "ArrowLeft":
-          e.preventDefault();
-          swiperInstance?.slidePrev();
-          break;
-        case "ArrowRight":
-          e.preventDefault();
-          swiperInstance?.slideNext();
-          break;
-        case " ":
-          e.preventDefault();
-          this.toggleAutoplay();
-          break;
-        case "Home":
-          e.preventDefault();
-          if (data.slides.length > 1 && swiperInstance?.params?.loop) {
-            swiperInstance.slideToLoop(0);
-          } else {
-            swiperInstance?.slideTo(0);
-          }
-          break;
-        case "End":
-          e.preventDefault();
-          if (data.slides.length > 1 && swiperInstance?.params?.loop) {
-            swiperInstance.slideToLoop(data.slides.length - 1);
-          } else {
-            swiperInstance?.slideTo(data.slides.length - 1);
-          }
-          break;
+      // Cancel pending RAF
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
       }
+
+      // Use RAF for smooth interactions
+      rafId = requestAnimationFrame(() => {
+        const { swiperInstance } = this.state;
+        const data = this.getData();
+
+        switch (e.key) {
+          case "ArrowLeft":
+            e.preventDefault();
+            swiperInstance?.slidePrev();
+            break;
+          case "ArrowRight":
+            e.preventDefault();
+            swiperInstance?.slideNext();
+            break;
+          case " ":
+            e.preventDefault();
+            this.toggleAutoplay();
+            break;
+          case "Home":
+            e.preventDefault();
+            if (data.slides.length > 1 && swiperInstance?.params?.loop) {
+              swiperInstance.slideToLoop(0);
+            } else {
+              swiperInstance?.slideTo(0);
+            }
+            break;
+          case "End":
+            e.preventDefault();
+            if (data.slides.length > 1 && swiperInstance?.params?.loop) {
+              swiperInstance.slideToLoop(data.slides.length - 1);
+            } else {
+              swiperInstance?.slideTo(data.slides.length - 1);
+            }
+            break;
+        }
+        rafId = null;
+      });
     };
 
     window.addEventListener("keydown", this.keyboardHandler, { passive: false });
   }
 
   /**
-   * Start progress tracking with throttled updates for better performance
-   * Only updates state every ~100ms instead of every frame
+   * Start progress tracking with maximum performance optimization
+   * Uses optimized throttling and RAF for smooth 60fps animations
    */
   private startProgressTracking(): void {
     this.stopProgressTracking();
     const { autoplayDelay = 6000 } = this.props;
     this.progressIsActive = true;
-    this.progressStartTime = Date.now();
+    this.progressStartTime = performance.now(); // Use performance.now() for better accuracy
     let lastUpdateTime = 0;
-    const UPDATE_INTERVAL = 100; // Update every 100ms instead of every frame
+    const UPDATE_INTERVAL = 50; // Optimized to 50ms for smoother visual updates
 
-    const updateProgress = () => {
+    const updateProgress = (): void => {
       if (!this.progressIsActive) return;
 
-      const now = Date.now();
+      const now = performance.now();
       const elapsed = now - this.progressStartTime;
       const progress = Math.min((elapsed / autoplayDelay) * 100, 100);
 
-      // Throttle state updates to reduce re-renders
+      // Optimized throttling with RAF batching
       if (now - lastUpdateTime >= UPDATE_INTERVAL || progress >= 100) {
-        this.setState({ transitionProgress: progress });
+        // Batch state update with RAF for better performance
+        requestAnimationFrame(() => {
+          if (this.progressIsActive) {
+            this.setState({ transitionProgress: progress });
+          }
+        });
         lastUpdateTime = now;
       }
 
       if (progress < 100 && this.progressIsActive) {
         this.progressAnimationFrame = requestAnimationFrame(updateProgress);
       } else if (this.progressIsActive) {
-        this.setState({ transitionProgress: 0 });
-        this.progressStartTime = Date.now();
-        lastUpdateTime = Date.now();
-        this.progressAnimationFrame = requestAnimationFrame(updateProgress);
+        // Reset for next cycle with RAF
+        requestAnimationFrame(() => {
+          if (this.progressIsActive) {
+            this.setState({ transitionProgress: 0 });
+            this.progressStartTime = performance.now();
+            lastUpdateTime = performance.now();
+            this.progressAnimationFrame = requestAnimationFrame(updateProgress);
+          }
+        });
       }
     };
 
@@ -348,17 +403,37 @@ class HeroSlider extends Component<HeroSliderProps, HeroSliderState> {
     }
   }
 
+  /**
+   * Setup Swiper listeners with optimized performance
+   * Uses RAF batching for state updates
+   */
   private setupSwiperListeners(): void {
     const { swiperInstance } = this.state;
     if (!swiperInstance) return;
 
+    let rafId: number | null = null;
+
     this.slideChangeHandler = () => {
-      this.setState({ transitionProgress: 0 });
-      this.progressStartTime = Date.now();
+      // Batch state updates with RAF
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+      rafId = requestAnimationFrame(() => {
+        this.setState({ transitionProgress: 0 });
+        this.progressStartTime = performance.now();
+        rafId = null;
+      });
     };
 
     this.autoplayStopHandler = () => {
-      this.setState({ transitionProgress: 0 });
+      // Batch state updates with RAF
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+      rafId = requestAnimationFrame(() => {
+        this.setState({ transitionProgress: 0 });
+        rafId = null;
+      });
     };
 
     swiperInstance.on("slideChange", this.slideChangeHandler);
@@ -366,125 +441,185 @@ class HeroSlider extends Component<HeroSliderProps, HeroSliderState> {
   }
 
   /**
-   * Optimized image preloading
-   * Only preload first slide immediately (above the fold)
-   * Other slides preload after initial render using requestIdleCallback
+   * Maximum performance image preloading with intelligent strategy
+   * Uses link preload for critical images and requestIdleCallback for others
    */
+  private createImageLoader(imagePath: string, priority: "high" | "low" = "low"): HTMLImageElement {
+    const img = new Image();
+    const imageUrl = imagePath.startsWith("/uploads/") 
+      ? `${API_BASE}${imagePath}` 
+      : imagePath;
+    
+    // Use link preload for high priority images (better than Image() preload)
+    if (priority === "high" && typeof document !== "undefined") {
+      const link = document.createElement("link");
+      link.rel = "preload";
+      link.as = "image";
+      link.href = imageUrl;
+      // Note: fetchPriority is not available on HTMLLinkElement in TypeScript
+      // Browser will handle priority automatically for preload links
+      document.head.appendChild(link);
+    }
+    
+    img.onerror = () => {
+      if (process.env.NODE_ENV === "development") {
+        console.warn(`Failed to preload image: ${imagePath}`);
+      }
+    };
+    
+    img.src = imageUrl;
+    return img;
+  }
+
   private preloadImages(): void {
     const data = this.getData();
     if (data.slides.length === 0) return;
 
     this.cleanupPreloadImages();
 
-    // Preload first slide immediately (critical, above the fold)
+    // Preload first slide immediately with high priority (critical, above the fold)
     if (data.slides.length > 0) {
-      const firstSlide = data.slides[0];
-      const img = new Image();
-      img.onerror = () => {
-        if (process.env.NODE_ENV === "development") {
-          console.warn(`Failed to preload image: ${firstSlide.image}`);
-        }
-      };
-      const imageUrl = firstSlide.image.startsWith("/uploads/") 
-        ? `${API_BASE}${firstSlide.image}` 
-        : firstSlide.image;
-      img.src = imageUrl;
-      this.preloadedImages.push(img);
+      const firstImg = this.createImageLoader(data.slides[0].image, "high");
+      this.preloadedImages.push(firstImg);
     }
 
-    // Preload second slide after a short delay (next likely to be viewed)
+    // Preload second slide after RAF (next likely to be viewed)
     if (data.slides.length > 1) {
-      setTimeout(() => {
-        const secondSlide = data.slides[1];
-        const img = new Image();
-        img.onerror = () => {
-          if (process.env.NODE_ENV === "development") {
-            console.warn(`Failed to preload image: ${secondSlide.image}`);
-          }
-        };
-        const imageUrl = secondSlide.image.startsWith("/uploads/") 
-          ? `${API_BASE}${secondSlide.image}` 
-          : secondSlide.image;
-        img.src = imageUrl;
-        this.preloadedImages.push(img);
-      }, 500);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const secondImg = this.createImageLoader(data.slides[1].image, "low");
+          this.preloadedImages.push(secondImg);
+        });
+      });
     }
 
-    // Preload remaining slides in background using requestIdleCallback
+    // Preload remaining slides in background using requestIdleCallback with longer timeout
     if (data.slides.length > 2) {
       const preloadRemaining = () => {
-        for (let i = 2; i < data.slides.length; i++) {
-          const slide = data.slides[i];
-          const img = new Image();
-          img.onerror = () => {
-            if (process.env.NODE_ENV === "development") {
-              console.warn(`Failed to preload image: ${slide.image}`);
+        // Load one at a time to avoid blocking
+        let currentIndex = 2;
+        const loadNext = () => {
+          if (currentIndex < data.slides.length) {
+            const img = this.createImageLoader(data.slides[currentIndex].image, "low");
+            this.preloadedImages.push(img);
+            currentIndex++;
+            
+            // Use RAF between loads to keep UI responsive
+            if (currentIndex < data.slides.length) {
+              requestAnimationFrame(loadNext);
             }
-          };
-          const imageUrl = slide.image.startsWith("/uploads/")
-            ? `${API_BASE}${slide.image}`
-            : slide.image;
-          img.src = imageUrl;
-          this.preloadedImages.push(img);
-        }
+          }
+        };
+        loadNext();
       };
 
       if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-        window.requestIdleCallback(preloadRemaining, { timeout: 3000 });
+        window.requestIdleCallback(preloadRemaining, { timeout: 5000 });
       } else {
-        setTimeout(preloadRemaining, 2000);
+        // Fallback: stagger loading with delays
+        setTimeout(preloadRemaining, 1000);
       }
     }
   }
 
+  /**
+   * Cleanup preloaded images with proper memory management
+   */
   private cleanupPreloadImages(): void {
     this.preloadedImages.forEach((img) => {
       img.onerror = null;
+      img.onload = null;
       img.src = "";
+      // Remove from DOM if it was added
+      if (img.parentNode) {
+        img.parentNode.removeChild(img);
+      }
     });
-    this.preloadedImages = [];
+    this.preloadedImages.length = 0; // More efficient than reassignment
+    
+    // Also cleanup any link preload elements
+    if (typeof document !== "undefined") {
+      const preloadLinks = document.querySelectorAll('link[rel="preload"][as="image"]');
+      preloadLinks.forEach((link) => {
+        if (link.getAttribute("href")?.includes("/uploads/") || 
+            link.getAttribute("href")?.includes("/images/")) {
+          link.remove();
+        }
+      });
+    }
   }
 
+  /**
+   * Handle Swiper initialization with RAF batching
+   */
   private handleSwiperInit = (swiper: SwiperType): void => {
     try {
-      this.setState({ swiperInstance: swiper, hasError: false });
-      this.setupSwiperListeners();
+      // Use RAF for state update to batch with browser paint
+      requestAnimationFrame(() => {
+        this.setState({ swiperInstance: swiper, hasError: false });
+        this.setupSwiperListeners();
+      });
     } catch (error) {
       console.error("Error initializing Swiper:", error);
-      this.setState({ hasError: true });
-    }
-  };
-
-  private handleSlideChange = (swiper: SwiperType): void => {
-    this.setState({ activeIndex: swiper.realIndex, transitionProgress: 0 });
-  };
-
-  private toggleAutoplay = (): void => {
-    const { swiperInstance, isPlaying } = this.state;
-    if (!swiperInstance?.autoplay) return;
-
-    if (isPlaying) {
-      swiperInstance.autoplay.stop();
-      this.setState({ isPlaying: false, transitionProgress: 0 });
-    } else {
-      swiperInstance.autoplay.start();
-      this.setState({ isPlaying: true });
+      requestAnimationFrame(() => {
+        this.setState({ hasError: true });
+      });
     }
   };
 
   /**
-   * Handle image load with optimization to prevent excessive state updates
+   * Handle slide change with optimized state updates
+   */
+  private handleSlideChange = (swiper: SwiperType): void => {
+    // Batch state updates with RAF
+    requestAnimationFrame(() => {
+      this.setState({ 
+        activeIndex: swiper.realIndex, 
+        transitionProgress: 0 
+      });
+    });
+  };
+
+  /**
+   * Toggle autoplay with optimized state updates
+   */
+  private toggleAutoplay = (): void => {
+    const { swiperInstance, isPlaying } = this.state;
+    if (!swiperInstance?.autoplay) return;
+
+    // Batch state update with RAF
+    requestAnimationFrame(() => {
+      if (isPlaying) {
+        swiperInstance.autoplay.stop();
+        this.setState({ isPlaying: false, transitionProgress: 0 });
+      } else {
+        swiperInstance.autoplay.start();
+        this.setState({ isPlaying: true });
+      }
+    });
+  };
+
+  /**
+   * Handle image load with maximum performance optimization
+   * Uses RAF batching and checks to prevent unnecessary updates
    */
   private handleImageLoad = (slideId: string): void => {
-    // Use functional setState and check if update is needed
-    this.setState((prevState) => {
-      // Only update if state actually changed
-      if (prevState.imageLoadStates[slideId]) {
-        return null; // No update needed
-      }
-      return {
-        imageLoadStates: { ...prevState.imageLoadStates, [slideId]: true },
-      };
+    // Check if already loaded to avoid unnecessary updates
+    if (this.state.imageLoadStates[slideId]) {
+      return;
+    }
+
+    // Batch state update with RAF
+    requestAnimationFrame(() => {
+      this.setState((prevState) => {
+        // Double-check to prevent race conditions
+        if (prevState.imageLoadStates[slideId]) {
+          return null;
+        }
+        return {
+          imageLoadStates: { ...prevState.imageLoadStates, [slideId]: true },
+        };
+      });
     });
   };
 
@@ -613,7 +748,7 @@ class HeroSlider extends Component<HeroSliderProps, HeroSliderState> {
             effect="fade"
             slidesPerView={1}
             loop={data.slides.length > 1}
-            speed={1400}
+            speed={1200}
             parallax={true}
             keyboard={{
               enabled: true,
@@ -631,6 +766,16 @@ class HeroSlider extends Component<HeroSliderProps, HeroSliderState> {
               stopOnLastSlide: false,
               waitForTransition: true,
             }}
+            watchSlidesProgress={true}
+            watchSlidesVisibility={true}
+            lazy={{
+              loadPrevNext: true,
+              loadPrevNextAmount: 1,
+            }}
+            preloadImages={false}
+            updateOnWindowResize={true}
+            observer={true}
+            observeParents={true}
             touchEventsTarget="container"
             touchRatio={1}
             touchAngle={45}
@@ -638,8 +783,6 @@ class HeroSlider extends Component<HeroSliderProps, HeroSliderState> {
             allowTouchMove={true}
             resistance={true}
             resistanceRatio={0.85}
-            watchSlidesProgress={true}
-            watchSlidesVisibility={true}
             onSwiper={this.handleSwiperInit}
             onSlideChange={this.handleSlideChange}
             onTouchStart={this.handleTouchStart}

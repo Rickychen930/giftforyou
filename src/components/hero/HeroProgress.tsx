@@ -20,9 +20,22 @@ interface HeroProgressState {
 /**
  * Hero Progress Component
  * Class-based component for hero slider progress indicator
+ * Optimized with shouldComponentUpdate for performance
  */
 class HeroProgress extends Component<HeroProgressProps, HeroProgressState> {
   private baseClass: string = "hero-progress";
+
+  /**
+   * Prevent unnecessary re-renders for better performance
+   */
+  shouldComponentUpdate(nextProps: HeroProgressProps): boolean {
+    return (
+      nextProps.currentIndex !== this.props.currentIndex ||
+      nextProps.totalSlides !== this.props.totalSlides ||
+      nextProps.autoplayProgress !== this.props.autoplayProgress ||
+      nextProps.isPlaying !== this.props.isPlaying
+    );
+  }
 
   private calculateSlideProgress(): number {
     const { currentIndex, totalSlides } = this.props;

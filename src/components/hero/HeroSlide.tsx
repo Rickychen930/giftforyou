@@ -34,18 +34,54 @@ interface HeroSlideState {
 /**
  * Hero Slide Component
  * Class-based component for hero slider slide
+ * Optimized with shouldComponentUpdate for performance
  */
 class HeroSlide extends Component<HeroSlideProps, HeroSlideState> {
   private baseClass: string = "hero-slide";
+  private imageSrcCache: Map<string, string> = new Map();
 
+  /**
+   * Prevent unnecessary re-renders for better performance
+   * Only re-render when props actually change
+   */
+  shouldComponentUpdate(nextProps: HeroSlideProps): boolean {
+    return (
+      nextProps.slide.id !== this.props.slide.id ||
+      nextProps.slide.image !== this.props.slide.image ||
+      nextProps.slide.title !== this.props.slide.title ||
+      nextProps.slide.subtitle !== this.props.slide.subtitle ||
+      nextProps.slide.badge !== this.props.slide.badge ||
+      nextProps.imageLoaded !== this.props.imageLoaded ||
+      nextProps.index !== this.props.index
+    );
+  }
+
+  /**
+   * Memoized image source resolver for performance
+   * Caches resolved URLs to avoid repeated string operations
+   */
   private resolveImageSrc(image: string): string {
-    const v = (image ?? "").trim();
-    if (!v) return "/images/placeholder-bouquet.jpg";
-    if (v.startsWith("http://") || v.startsWith("https://")) return v;
-    if (v.startsWith("/uploads/")) {
-      return `${API_BASE}${v}`;
+    // Check cache first
+    if (this.imageSrcCache.has(image)) {
+      return this.imageSrcCache.get(image)!;
     }
-    return v;
+
+    const v = (image ?? "").trim();
+    let resolved: string;
+    
+    if (!v) {
+      resolved = "/images/placeholder-bouquet.jpg";
+    } else if (v.startsWith("http://") || v.startsWith("https://")) {
+      resolved = v;
+    } else if (v.startsWith("/uploads/")) {
+      resolved = `${API_BASE}${v}`;
+    } else {
+      resolved = v;
+    }
+
+    // Cache the result
+    this.imageSrcCache.set(image, resolved);
+    return resolved;
   }
 
   render(): React.ReactNode {
@@ -69,8 +105,13 @@ class HeroSlide extends Component<HeroSlideProps, HeroSlideState> {
               decoding="async"
               fetchPriority={index === 0 ? "high" : "auto"}
               sizes="100vw"
+              width="1920"
+              height="1080"
               onLoad={onImageLoad}
               onError={onImageError}
+              style={{
+                contentVisibility: index > 1 ? "auto" : "visible",
+              }}
             />
             {!imageLoaded && (
               <div className={`${this.baseClass}__img-placeholder`} aria-hidden="true" />
