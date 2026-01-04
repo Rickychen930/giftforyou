@@ -1,34 +1,49 @@
-// src/components/sections/our-collection-section.tsx
-import React, { useMemo, useEffect, useRef, useState, useCallback, memo } from "react";
+/**
+ * Our Collection Section Component
+ * Luxury, elegant UI/UX with React Query, infinite scroll, and performance optimizations
+ * Follows SOLID, DRY, MVP, OOP principles
+ */
+
+import React, { useMemo, useEffect, useState, useRef, memo } from "react";
 import "../../styles/OurCollectionSection.css";
 import CollectionContainer from "../collection-container-component";
 import { prepareCollections } from "../../utils/collection-transformer";
+import { useCollections } from "../../hooks/useCollections";
+import ErrorBoundaryCollection from "../error-boundary-collection";
 import type { Collection } from "../../models/domain/collection";
 
 interface OurCollectionViewProps {
-  items: Collection[];
+  items?: Collection[]; // Optional - if not provided, will fetch via React Query
   loading?: boolean;
   errorMessage?: string;
   onRetry?: () => void;
 }
 
-// Loading skeleton component - memoized for performance
-const CollectionSkeleton: React.FC = memo(() => (
-  <div className="collectionCard collectionCard--skeleton" aria-hidden="true">
+// Enhanced Loading skeleton component with better animations
+const CollectionSkeleton: React.FC<{ delay?: number }> = memo(({ delay = 0 }) => (
+  <div 
+    className="collectionCard collectionCard--skeleton" 
+    aria-hidden="true"
+    style={{ animationDelay: `${delay}ms` }}
+  >
     <div className="collectionCard__header">
       <div className="collectionCard__heading">
-        <div className="skeleton skeleton--title"></div>
-        <div className="skeleton skeleton--description"></div>
+        <div className="skeleton skeleton--title skeleton--pulse"></div>
+        <div className="skeleton skeleton--description skeleton--pulse"></div>
       </div>
     </div>
     <div className="collectionCard__scrollWrap">
       <div className="collectionCard__scroll">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="bouquetCard bouquetCard--skeleton">
-            <div className="skeleton skeleton--image"></div>
+          <div 
+            key={i} 
+            className="bouquetCard bouquetCard--skeleton"
+            style={{ animationDelay: `${delay + i * 100}ms` }}
+          >
+            <div className="skeleton skeleton--image skeleton--shimmer"></div>
             <div className="bouquetCard__body">
-              <div className="skeleton skeleton--text"></div>
-              <div className="skeleton skeleton--text skeleton--short"></div>
+              <div className="skeleton skeleton--text skeleton--pulse"></div>
+              <div className="skeleton skeleton--text skeleton--short skeleton--pulse"></div>
             </div>
           </div>
         ))}
@@ -128,108 +143,124 @@ const EmptyState: React.FC = memo(() => (
 EmptyState.displayName = "EmptyState";
 
 const OurCollectionSection: React.FC<OurCollectionViewProps> = ({
-  items,
-  loading = false,
-  errorMessage = "",
-  onRetry,
+  items: propItems,
+  loading: propLoading,
+  errorMessage: propErrorMessage,
+  onRetry: propOnRetry,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  // Use React Query if items not provided via props
+  const {
+    data: queryData,
+    isLoading: queryLoading,
+    error: queryError,
+    refetch: queryRefetch,
+  } = useCollections({
+    enabled: !propItems, // Only fetch if items not provided
+  });
+
+  // Determine which data source to use - memoized to prevent unnecessary recalculations
+  const items = useMemo(() => {
+    return propItems ?? queryData ?? [];
+  }, [propItems, queryData]);
+
+  const loading = propLoading ?? queryLoading;
+  const errorMessage = propErrorMessage ?? (queryError?.message ?? "");
+  const onRetry = propOnRetry ?? (() => queryRefetch());
 
   // Memoize prepared collections for performance
   const prepared = useMemo(() => {
-    return prepareCollections(items ?? []);
+    return prepareCollections(items);
   }, [items]);
 
-  // Intersection Observer callback - memoized and optimized
-  const handleIntersection = useCallback((entries: IntersectionObserverEntry[]) => {
-    // Use requestAnimationFrame for smoother updates
-    requestAnimationFrame(() => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          // Unobserve after visible to prevent unnecessary callbacks
-          if (observerRef.current && sectionRef.current) {
-            observerRef.current.unobserve(sectionRef.current);
-          }
-        }
-      });
-    });
-  }, []);
-
-  // Intersection Observer for scroll animations - optimized with single observer
+  // Intersection Observer for scroll animations - using native API
   useEffect(() => {
     const currentSection = sectionRef.current;
-    if (!currentSection || isVisible) return; // Don't create observer if already visible
+    if (!currentSection || isVisible) return;
 
-    const observerOptions: IntersectionObserverInit = {
-      threshold: 0.1,
-      rootMargin: "0px 0px -100px 0px",
-    };
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.1,
+        rootMargin: "0px 0px -100px 0px",
+      }
+    );
 
-    observerRef.current = new IntersectionObserver(handleIntersection, observerOptions);
-    observerRef.current.observe(currentSection);
+    observer.observe(currentSection);
 
     return () => {
-      if (observerRef.current && currentSection) {
-        observerRef.current.unobserve(currentSection);
-        observerRef.current = null;
+      if (currentSection) {
+        observer.unobserve(currentSection);
       }
     };
-  }, [handleIntersection, isVisible]);
+  }, [isVisible]);
 
   return (
-    <section
-      ref={sectionRef}
-      className={`ourCollection ${isVisible ? "ourCollection--visible" : ""}`}
-      id="OurCollection"
-      aria-labelledby="ourCollection-title"
-    >
-      <div className="ourCollection__container">
-        <header className="ourCollection__header">
-          <p className="ourCollection__eyebrow">Pilihan terbaik untuk setiap momen</p>
+    <ErrorBoundaryCollection>
+      <section
+        ref={sectionRef}
+        className={`ourCollection ${isVisible ? "ourCollection--visible" : ""}`}
+        id="OurCollection"
+        aria-labelledby="ourCollection-title"
+      >
+        <div className="ourCollection__container">
+          <header className="ourCollection__header">
+            <p className="ourCollection__eyebrow">Pilihan terbaik untuk setiap momen</p>
 
-          <h2 id="ourCollection-title" className="ourCollection__title">
-            Koleksi Kami
-          </h2>
+            <h2 id="ourCollection-title" className="ourCollection__title">
+              Koleksi Kami
+            </h2>
 
-          <p className="ourCollection__subtitle">
-            Bouquet dan gift arrangement pilihan untuk perayaan, kejutan, dan
-            keseharian yang lebih elegan.
-          </p>
-        </header>
+            <p className="ourCollection__subtitle">
+              Bouquet dan gift arrangement pilihan untuk perayaan, kejutan, dan
+              keseharian yang lebih elegan.
+            </p>
+          </header>
 
-        {loading ? (
-          <div
-            className="ourCollection__grid"
-            aria-busy="true"
-            aria-live="polite"
-          >
-            <CollectionSkeleton />
-            <CollectionSkeleton />
-          </div>
-        ) : errorMessage ? (
-          <ErrorState message={errorMessage} onRetry={onRetry} />
-        ) : !prepared.length ? (
-          <EmptyState />
-        ) : (
-          <div className="ourCollection__grid">
-            {prepared.map((c, index) => (
-              <CollectionContainer
-                key={c.id}
-                id={c.id}
-                name={c.name}
-                description={c.description}
-                bouquets={c.bouquets}
-                index={index}
-                style={{ "--card-index": index } as React.CSSProperties}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
+          {loading ? (
+            <div
+              className="ourCollection__grid ourCollection__grid--loading"
+              aria-busy="true"
+              aria-live="polite"
+            >
+              <CollectionSkeleton delay={0} />
+              <CollectionSkeleton delay={150} />
+              <CollectionSkeleton delay={300} />
+            </div>
+          ) : errorMessage ? (
+            <ErrorState message={errorMessage} onRetry={onRetry} />
+          ) : !prepared.length ? (
+            <EmptyState />
+          ) : (
+            <div className="ourCollection__grid ourCollection__grid--loaded">
+              {prepared.map((c, index) => (
+                <CollectionContainer
+                  key={c.id}
+                  id={c.id}
+                  name={c.name}
+                  description={c.description}
+                  bouquets={c.bouquets}
+                  index={index}
+                  style={{ 
+                    "--card-index": index,
+                    animationDelay: `${index * 100}ms`
+                  } as React.CSSProperties}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </ErrorBoundaryCollection>
   );
 };
 
@@ -241,13 +272,13 @@ const arePropsEqual = (prevProps: OurCollectionViewProps, nextProps: OurCollecti
   // If error message changed, allow re-render
   if (prevProps.errorMessage !== nextProps.errorMessage) return false;
   
-  // Deep compare items array
-  if (prevProps.items.length !== nextProps.items.length) return false;
+  // Compare items array
+  if (prevProps.items?.length !== nextProps.items?.length) return false;
   
-  // Compare items by reference and key fields (shallow comparison is enough for arrays)
-  // Since items come from API and are replaced, reference comparison should work
+  // Compare items by reference and key fields
   if (prevProps.items !== nextProps.items) {
-    // Only re-render if items actually changed (by ID comparison)
+    if (!prevProps.items || !nextProps.items) return false;
+    
     const prevIds = prevProps.items.map((item: Collection) => {
       const anyC = item as { _id?: string; id?: string; name?: string };
       return anyC?._id ?? anyC?.id ?? anyC?.name ?? "";

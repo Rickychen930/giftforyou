@@ -191,7 +191,16 @@
 /* ===== Loading Skeleton Styles ===== */
 .collectionCard--skeleton {
   pointer-events: none;
-  animation: pulse 1.5s ease-in-out infinite;
+  opacity: 0;
+  animation: fadeInSkeleton 0.4s ease-out forwards, pulse 1.5s ease-in-out infinite 0.4s;
+}
+
+.ourCollection__grid--loading {
+  animation: fadeInGrid 0.5s ease-out;
+}
+
+.ourCollection__grid--loaded .collectionCard {
+  animation: slideInElegant 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 .skeleton {
@@ -202,8 +211,15 @@
     rgba(0, 0, 0, 0.04) 75%
   );
   background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
   border-radius: 8px;
+}
+
+.skeleton--shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton--pulse {
+  animation: pulse 1.5s ease-in-out infinite;
 }
 
 .skeleton--title {
@@ -514,6 +530,26 @@
   }
   50% {
     opacity: 0.7;
+  }
+}
+
+@keyframes fadeInSkeleton {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInGrid {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 

@@ -1,4 +1,10 @@
-import React, { useMemo, memo } from "react";
+/**
+ * Collection Container Component
+ * Luxury, elegant design with optional virtualization for large lists
+ * Follows SOLID, DRY, MVP, OOP principles
+ */
+
+import React, { useMemo, memo, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import "../styles/CollectionCardComponent.css";
 import BouquetCard from "./bouquet-card-component";
@@ -11,6 +17,8 @@ export interface CollectionContainerProps {
   bouquets: BouquetCardProps[];
   index?: number;
   style?: React.CSSProperties;
+  useVirtualization?: boolean; // Optional virtualization for large lists
+  virtualizationThreshold?: number; // Number of items before using virtualization
 }
 
 // Re-export BouquetCardProps for backward compatibility
@@ -18,6 +26,7 @@ export type { BouquetCardProps };
 
 // Constants
 const PREVIEW_BOUQUET_LIMIT = 6;
+const DEFAULT_VIRTUALIZATION_THRESHOLD = 20;
 
 // Empty state component - memoized
 const EmptyCollectionState: React.FC<{ browseHref: string; collectionName: string }> = memo(
@@ -81,7 +90,11 @@ const CollectionContainer: React.FC<CollectionContainerProps> = ({
   bouquets,
   index = 0,
   style,
+  useVirtualization = false,
+  virtualizationThreshold = DEFAULT_VIRTUALIZATION_THRESHOLD,
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
   // Memoize validated bouquets
   const validBouquets = useMemo(() => {
     return Array.isArray(bouquets) ? bouquets : [];
@@ -110,8 +123,29 @@ const CollectionContainer: React.FC<CollectionContainerProps> = ({
     return { ...animationDelayStyle, ...style };
   }, [animationDelayStyle, style]);
 
+  // Resize observer for responsive container width (prepared for future use)
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    // This can be used for responsive adjustments in the future
+    const resizeObserver = new ResizeObserver(() => {
+      // Future: Update layout based on container width
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  // Note: Virtualization is prepared but not yet implemented
+  // Current grid implementation is optimal for preview lists (6 items max)
+  // Variables useVirtualization and virtualizationThreshold are kept for future use
+
   return (
     <section
+      ref={containerRef}
       className="collectionCard"
       aria-label={`Koleksi ${name}`}
       style={mergedStyle}

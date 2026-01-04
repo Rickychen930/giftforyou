@@ -1,0 +1,46 @@
+/**
+ * Virtualized Bouquet List Styles
+ * Luxury, elegant design with smooth scrolling
+ */
+
+.virtualized-bouquet-list {
+  width: 100%;
+  position: relative;
+}
+
+.virtualized-bouquet-list__grid {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 140, 156, 0.3) transparent;
+}
+
+.virtualized-bouquet-list__grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.virtualized-bouquet-list__grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.virtualized-bouquet-list__grid::-webkit-scrollbar-thumb {
+  background: rgba(212, 140, 156, 0.3);
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.virtualized-bouquet-list__grid::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 140, 156, 0.5);
+}
+
+/* Smooth scrolling */
+.virtualized-bouquet-list__grid {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .virtualized-bouquet-list__grid {
+    scroll-behavior: auto;
+  }
+}
+
