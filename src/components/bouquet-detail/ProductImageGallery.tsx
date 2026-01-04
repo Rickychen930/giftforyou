@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
 import "../../styles/bouquet-detail/ProductImageGallery.css";
 import { API_BASE } from "../../config/api";
 
@@ -14,7 +14,11 @@ const buildImageUrl = (image?: string, fallback?: string): string => {
   return `${API_BASE}${image}`;
 };
 
-const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
+/**
+ * Product Image Gallery Component
+ * Optimized with memoization and lazy loading
+ */
+const ProductImageGallery: React.FC<ProductImageGalleryProps> = memo(({
   image,
   name,
   fallbackImage = "/images/placeholder-bouquet.jpg",
@@ -23,14 +27,51 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
   const [imageError, setImageError] = useState(false);
   const [showLightbox, setShowLightbox] = useState(false);
 
-  const imageUrl = buildImageUrl(image, fallbackImage);
-  const displayImage = imageError ? fallbackImage : imageUrl;
+  const imageUrl = useMemo(() => buildImageUrl(image, fallbackImage), [image, fallbackImage]);
+  const displayImage = useMemo(() => (imageError ? fallbackImage : imageUrl), [imageError, fallbackImage, imageUrl]);
 
   // Reset image state when image prop changes
   useEffect(() => {
     setImageLoaded(false);
     setImageError(false);
   }, [image]);
+
+  const handleImageLoad = useCallback(() => {
+    setImageLoaded(true);
+    setImageError(false);
+  }, []);
+
+  const handleImageError = useCallback(() => {
+    setImageError(true);
+    setImageLoaded(true);
+  }, []);
+
+  const handleOpenLightbox = useCallback(() => {
+    setShowLightbox(true);
+  }, []);
+
+  const handleCloseLightbox = useCallback(() => {
+    setShowLightbox(false);
+  }, []);
+
+  const handleLightboxClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      setShowLightbox(false);
+    }
+  }, []);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      setShowLightbox(true);
+    }
+  }, []);
+
+  const handleLightboxKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "Escape") {
+      setShowLightbox(false);
+    }
+  }, []);
 
   return (
     <>
@@ -43,25 +84,14 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
               className={`product-image-gallery__image ${
                 imageLoaded ? "product-image-gallery__image--loaded" : ""
               }`}
-              onLoad={() => {
-                setImageLoaded(true);
-                setImageError(false);
-              }}
-              onError={() => {
-                setImageError(true);
-                setImageLoaded(true);
-              }}
-              onClick={() => setShowLightbox(true)}
-              loading="eager"
+              onLoad={handleImageLoad}
+              onError={handleImageError}
+              onClick={handleOpenLightbox}
+              loading="lazy"
               decoding="async"
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  setShowLightbox(true);
-                }
-              }}
+              onKeyDown={handleKeyDown}
             />
             {!imageLoaded && (
               <div className="product-image-gallery__placeholder">
@@ -71,7 +101,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
             <button
               type="button"
               className="product-image-gallery__zoom"
-              onClick={() => setShowLightbox(true)}
+              onClick={handleOpenLightbox}
               aria-label="Perbesar gambar"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -85,16 +115,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
       {showLightbox && (
         <div
           className="product-image-gallery__lightbox"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setShowLightbox(false);
-            }
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") {
-              setShowLightbox(false);
-            }
-          }}
+          onClick={handleLightboxClick}
+          onKeyDown={handleLightboxKeyDown}
           role="dialog"
           aria-modal="true"
           aria-label="Lightbox gambar"
@@ -104,7 +126,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
             <button
               type="button"
               className="product-image-gallery__lightbox-close"
-              onClick={() => setShowLightbox(false)}
+              onClick={handleCloseLightbox}
               aria-label="Tutup lightbox"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -121,7 +143,9 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
       )}
     </>
   );
-};
+});
+
+ProductImageGallery.displayName = "ProductImageGallery";
 
 export default ProductImageGallery;
 

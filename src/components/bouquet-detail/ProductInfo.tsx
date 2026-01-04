@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, memo } from "react";
 import "../../styles/bouquet-detail/ProductInfo.css";
 import {
   formatBouquetType,
@@ -13,7 +13,21 @@ interface ProductInfoProps {
   bouquet: Bouquet;
 }
 
-const ProductInfo: React.FC<ProductInfoProps> = ({ bouquet }) => {
+/**
+ * Product Info Component
+ * Displays product details, occasions, flowers, and care instructions
+ * Optimized with memoization
+ */
+const ProductInfo: React.FC<ProductInfoProps> = memo(({ bouquet }) => {
+  const formattedOccasions = useMemo(
+    () => bouquet.occasions.map(formatOccasion).join(", "),
+    [bouquet.occasions]
+  );
+
+  const formattedFlowers = useMemo(
+    () => bouquet.flowers.map(formatFlowerName).join(", "),
+    [bouquet.flowers]
+  );
   return (
     <div className="product-info">
       <div className="product-info__chips">
@@ -79,7 +93,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ bouquet }) => {
             <div className="product-info__detail-content">
               <h3 className="product-info__detail-title">Cocok Untuk</h3>
               <p className="product-info__detail-text">
-                {bouquet.occasions.map(formatOccasion).join(", ")}
+                {formattedOccasions}
               </p>
             </div>
           </div>
@@ -95,7 +109,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ bouquet }) => {
             <div className="product-info__detail-content">
               <h3 className="product-info__detail-title">Jenis Bunga</h3>
               <p className="product-info__detail-text">
-                {bouquet.flowers.map(formatFlowerName).join(", ")}
+                {formattedFlowers}
               </p>
             </div>
           </div>
@@ -117,7 +131,9 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ bouquet }) => {
       </div>
     </div>
   );
-};
+});
+
+ProductInfo.displayName = "ProductInfo";
 
 export default ProductInfo;
 

@@ -1,0 +1,286 @@
+@import "../colors.css";
+
+/* Skeleton Loading Styles - Luxury & Elegant */
+.bouquet-detail-skeleton {
+  width: 100%;
+  min-height: 100vh;
+  padding: clamp(2rem, 4vw, 3rem) 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(250, 248, 255, 0.96) 50%,
+    rgba(255, 255, 255, 0.98) 100%
+  );
+}
+
+.bouquet-detail-skeleton__container {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 3vw, 2rem);
+}
+
+.bouquet-detail-skeleton__breadcrumb {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.bouquet-detail-skeleton__breadcrumb-item {
+  height: 20px;
+  width: 80px;
+  background: linear-gradient(
+    90deg,
+    rgba(212, 140, 156, 0.1) 0%,
+    rgba(212, 140, 156, 0.2) 50%,
+    rgba(212, 140, 156, 0.1) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 8px;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+.bouquet-detail-skeleton__layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(2rem, 4vw, 3rem);
+}
+
+@media (min-width: 1024px) {
+  .bouquet-detail-skeleton__layout {
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: clamp(3rem, 6vw, 5rem);
+  }
+}
+
+.bouquet-detail-skeleton__main {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5rem, 3vw, 2rem);
+}
+
+.bouquet-detail-skeleton__gallery {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: 24px;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.1) 0%,
+    rgba(168, 213, 186, 0.1) 100%
+  );
+}
+
+.bouquet-detail-skeleton__image {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(212, 140, 156, 0.1) 0%,
+    rgba(212, 140, 156, 0.2) 50%,
+    rgba(212, 140, 156, 0.1) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+.bouquet-detail-skeleton__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.bouquet-detail-skeleton__title {
+  height: 40px;
+  width: 80%;
+  background: linear-gradient(
+    90deg,
+    rgba(212, 140, 156, 0.1) 0%,
+    rgba(212, 140, 156, 0.2) 50%,
+    rgba(212, 140, 156, 0.1) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 12px;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+.bouquet-detail-skeleton__title-short {
+  height: 32px;
+  width: 60%;
+  background: linear-gradient(
+    90deg,
+    rgba(212, 140, 156, 0.1) 0%,
+    rgba(212, 140, 156, 0.2) 50%,
+    rgba(212, 140, 156, 0.1) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 8px;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+.bouquet-detail-skeleton__price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.bouquet-detail-skeleton__price {
+  height: 48px;
+  width: 180px;
+  background: linear-gradient(
+    90deg,
+    rgba(212, 140, 156, 0.15) 0%,
+    rgba(212, 140, 156, 0.25) 50%,
+    rgba(212, 140, 156, 0.15) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 12px;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+.bouquet-detail-skeleton__status {
+  height: 36px;
+  width: 120px;
+  background: linear-gradient(
+    90deg,
+    rgba(168, 213, 186, 0.15) 0%,
+    rgba(168, 213, 186, 0.25) 50%,
+    rgba(168, 213, 186, 0.15) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 12px;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+.bouquet-detail-skeleton__chips {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.bouquet-detail-skeleton__chip {
+  height: 32px;
+  width: 100px;
+  background: linear-gradient(
+    90deg,
+    rgba(212, 140, 156, 0.1) 0%,
+    rgba(212, 140, 156, 0.2) 50%,
+    rgba(212, 140, 156, 0.1) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 16px;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+.bouquet-detail-skeleton__description {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.bouquet-detail-skeleton__line {
+  height: 20px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(212, 140, 156, 0.08) 0%,
+    rgba(212, 140, 156, 0.15) 50%,
+    rgba(212, 140, 156, 0.08) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 8px;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+.bouquet-detail-skeleton__line-short {
+  height: 20px;
+  width: 70%;
+  background: linear-gradient(
+    90deg,
+    rgba(212, 140, 156, 0.08) 0%,
+    rgba(212, 140, 156, 0.15) 50%,
+    rgba(212, 140, 156, 0.08) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 8px;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+.bouquet-detail-skeleton__sidebar {
+  position: sticky;
+  top: clamp(2rem, 4vw, 3rem);
+  align-self: start;
+}
+
+.bouquet-detail-skeleton__order-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+  border-radius: 24px;
+  border: 1.5px solid rgba(212, 140, 156, 0.15);
+  padding: clamp(1.5rem, 3vw, 2rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.bouquet-detail-skeleton__order-title {
+  height: 28px;
+  width: 60%;
+  background: linear-gradient(
+    90deg,
+    rgba(212, 140, 156, 0.1) 0%,
+    rgba(212, 140, 156, 0.2) 50%,
+    rgba(212, 140, 156, 0.1) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 8px;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+.bouquet-detail-skeleton__order-item {
+  height: 24px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(212, 140, 156, 0.08) 0%,
+    rgba(212, 140, 156, 0.15) 50%,
+    rgba(212, 140, 156, 0.08) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 8px;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+.bouquet-detail-skeleton__order-button {
+  height: 56px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(212, 140, 156, 0.2) 0%,
+    rgba(212, 140, 156, 0.3) 50%,
+    rgba(212, 140, 156, 0.2) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 16px;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+  margin-top: 1rem;
+}
+
+@keyframes skeletonShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@media (max-width: 1023px) {
+  .bouquet-detail-skeleton__sidebar {
+    position: static;
+  }
+}
+

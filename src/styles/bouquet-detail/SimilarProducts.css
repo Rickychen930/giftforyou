@@ -24,6 +24,27 @@
   gap: clamp(1rem, 2vw, 1.5rem);
 }
 
+.similar-products__container {
+  width: 100%;
+  overflow: hidden;
+}
+
+.similar-products__virtual-grid {
+  margin: 0 auto;
+}
+
+/* Ensure proper spacing for virtualized grid */
+.similar-products__virtual-grid > div {
+  padding: 0.5rem;
+}
+
+/* Responsive adjustments for virtualized grid */
+@media (max-width: 767px) {
+  .similar-products__container {
+    padding: 0;
+  }
+}
+
 .similar-products__card {
   display: flex;
   flex-direction: column;

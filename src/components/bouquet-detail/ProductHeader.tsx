@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, memo } from "react";
 import "../../styles/bouquet-detail/ProductHeader.css";
 import { formatIDR } from "../../utils/money";
 import { formatBouquetName } from "../../utils/text-formatter";
@@ -11,17 +11,24 @@ interface ProductHeaderProps {
   onFavoriteToggle: () => void;
 }
 
-const ProductHeader: React.FC<ProductHeaderProps> = ({
+/**
+ * Product Header Component
+ * Displays product name, price, status, and favorite button
+ * Optimized with memoization
+ */
+const ProductHeader: React.FC<ProductHeaderProps> = memo(({
   name,
   price,
   status,
   isFavorite,
   onFavoriteToggle,
 }) => {
+  const formattedName = useMemo(() => formatBouquetName(name), [name]);
+  const formattedPrice = useMemo(() => formatIDR(price), [price]);
   return (
     <div className="product-header">
       <div className="product-header__top">
-        <h1 className="product-header__title">{formatBouquetName(name)}</h1>
+        <h1 className="product-header__title">{formattedName}</h1>
         <button
           type="button"
           className={`product-header__favorite ${
@@ -39,7 +46,7 @@ const ProductHeader: React.FC<ProductHeaderProps> = ({
       <div className="product-header__price-row">
         <div className="product-header__price">
           <span className="product-header__price-label">Harga</span>
-          <span className="product-header__price-value">{formatIDR(price)}</span>
+          <span className="product-header__price-value">{formattedPrice}</span>
         </div>
         <div className={`product-header__status product-header__status--${status}`}>
           {status === "ready" ? (
@@ -61,7 +68,9 @@ const ProductHeader: React.FC<ProductHeaderProps> = ({
       </div>
     </div>
   );
-};
+});
+
+ProductHeader.displayName = "ProductHeader";
 
 export default ProductHeader;
 

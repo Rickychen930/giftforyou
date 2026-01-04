@@ -644,14 +644,16 @@ class BouquetCatalogView extends Component<Props> {
                 {/* This provides luxury, elegant UX with infinite scroll and virtualization */}
                 {useInfiniteScroll ? (
                   <CatalogInfiniteGridWrapper
-                    priceRange={priceRange}
-                    selectedTypes={selectedTypes}
-                    selectedSizes={selectedSizes}
-                    selectedCollections={selectedCollections}
-                    collectionNameFilter={collectionNameFilter}
-                    searchQuery={searchQuery}
-                    sortBy={sortBy}
-                    loading={loading}
+                    priceRange={Array.isArray(priceRange) && priceRange.length === 2 
+                      ? [Math.max(0, priceRange[0] || 0), Math.max(priceRange[0] || 0, priceRange[1] || 1000000)]
+                      : [0, 1000000]}
+                    selectedTypes={Array.isArray(selectedTypes) ? selectedTypes : []}
+                    selectedSizes={Array.isArray(selectedSizes) ? selectedSizes : []}
+                    selectedCollections={Array.isArray(selectedCollections) ? selectedCollections : []}
+                    collectionNameFilter={typeof collectionNameFilter === "string" ? collectionNameFilter : ""}
+                    searchQuery={typeof searchQuery === "string" ? searchQuery : ""}
+                    sortBy={typeof sortBy === "string" ? sortBy : ""}
+                    loading={Boolean(loading)}
                     onPriceChange={this.props.onPriceChange}
                     onToggleFilter={this.props.onToggleFilter}
                     onClearFilter={this.props.onClearFilter}
@@ -665,23 +667,29 @@ class BouquetCatalogView extends Component<Props> {
                   <>
                     {/* Use standard grid for smaller datasets (< 50 bouquets) */}
                     <div className="catalogGrid" role="list" aria-label={`Menampilkan ${pageItems.length} dari ${total} bouquet`}>
-                      {pageItems.map((b) => (
-                        <BouquetCard
-                          key={b._id}
-                          _id={String(b._id)}
-                          name={b.name}
-                          description={b.description}
-                          price={b.price}
-                          type={b.type}
-                          size={b.size}
-                          image={b.image}
-                          status={b.status}
-                          collectionName={b.collectionName}
-                          customPenanda={b.customPenanda}
-                          isNewEdition={b.isNewEdition}
-                          isFeatured={b.isFeatured}
-                        />
-                      ))}
+                      {pageItems.map((b) => {
+                        // Validate bouquet data before rendering
+                        if (!b || typeof b !== "object" || !b._id) {
+                          return null;
+                        }
+                        return (
+                          <BouquetCard
+                            key={String(b._id)}
+                            _id={String(b._id)}
+                            name={typeof b.name === "string" ? b.name : ""}
+                            description={b.description}
+                            price={typeof b.price === "number" && Number.isFinite(b.price) ? b.price : 0}
+                            type={b.type}
+                            size={b.size}
+                            image={b.image}
+                            status={b.status || "ready"}
+                            collectionName={b.collectionName}
+                            customPenanda={Array.isArray(b.customPenanda) ? b.customPenanda : []}
+                            isNewEdition={Boolean(b.isNewEdition)}
+                            isFeatured={Boolean(b.isFeatured)}
+                          />
+                        );
+                      })}
                     </div>
                     {/* Show total count for better UX - Professional Enhancement */}
                     <SearchResultCount

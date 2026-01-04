@@ -72,17 +72,41 @@ const CatalogInfiniteGridWrapper: React.FC<CatalogInfiniteGridWrapperProps> = ({
   }, [sortBy]);
 
   // Build filters for InfiniteBouquetGrid
+  // Validate all inputs to prevent invalid filter values
   const filters: Omit<BouquetQueryParams, "page"> = useMemo(() => {
     const DEFAULT_PRICE: [number, number] = [0, 1_000_000];
     
+    // Validate priceRange
+    const safePriceRange: [number, number] = Array.isArray(priceRange) && 
+      priceRange.length === 2 &&
+      typeof priceRange[0] === "number" && Number.isFinite(priceRange[0]) &&
+      typeof priceRange[1] === "number" && Number.isFinite(priceRange[1])
+      ? [Math.max(0, priceRange[0]), Math.max(priceRange[0], priceRange[1])]
+      : DEFAULT_PRICE;
+    
+    // Validate arrays
+    const safeSelectedCollections = Array.isArray(selectedCollections) 
+      ? selectedCollections.filter((c): c is string => typeof c === "string" && c.trim().length > 0)
+      : [];
+    const safeSelectedTypes = Array.isArray(selectedTypes)
+      ? selectedTypes.filter((t): t is string => typeof t === "string" && t.trim().length > 0)
+      : [];
+    const safeSelectedSizes = Array.isArray(selectedSizes)
+      ? selectedSizes.filter((s): s is string => typeof s === "string" && s.trim().length > 0)
+      : [];
+    
+    // Validate strings
+    const safeSearchQuery = typeof searchQuery === "string" ? searchQuery.trim() : "";
+    const safeCollectionNameFilter = typeof collectionNameFilter === "string" ? collectionNameFilter.trim() : "";
+    
     return {
-      search: searchQuery.trim() || undefined,
-      collectionName: collectionNameFilter.trim() || undefined,
-      collections: selectedCollections.length > 0 ? selectedCollections : undefined,
-      types: selectedTypes.length > 0 ? selectedTypes : undefined,
-      sizes: selectedSizes.length > 0 ? selectedSizes : undefined,
-      minPrice: priceRange[0] !== DEFAULT_PRICE[0] ? priceRange[0] : undefined,
-      maxPrice: priceRange[1] !== DEFAULT_PRICE[1] ? priceRange[1] : undefined,
+      search: safeSearchQuery || undefined,
+      collectionName: safeCollectionNameFilter || undefined,
+      collections: safeSelectedCollections.length > 0 ? safeSelectedCollections : undefined,
+      types: safeSelectedTypes.length > 0 ? safeSelectedTypes : undefined,
+      sizes: safeSelectedSizes.length > 0 ? safeSelectedSizes : undefined,
+      minPrice: safePriceRange[0] !== DEFAULT_PRICE[0] ? safePriceRange[0] : undefined,
+      maxPrice: safePriceRange[1] !== DEFAULT_PRICE[1] ? safePriceRange[1] : undefined,
       sortBy: apiSortBy,
       limit: 20, // Optimal for infinite scroll
     };
@@ -141,13 +165,23 @@ const CatalogInfiniteGridWrapper: React.FC<CatalogInfiniteGridWrapperProps> = ({
   // Calculate container height dynamically for optimal viewport usage
   const containerHeight = useMemo(() => {
     if (typeof window === "undefined") return 800;
-    // Account for header, filters, and padding
-    const headerHeight = 250;
-    const filtersHeight = 120;
-    const padding = 80;
-    const calculated = window.innerHeight - headerHeight - filtersHeight - padding;
-    // Ensure minimum height for good UX, max for very large screens
-    return Math.max(600, Math.min(calculated, 1200));
+    try {
+      // Account for header, filters, and padding
+      const headerHeight = 250;
+      const filtersHeight = 120;
+      const padding = 80;
+      const windowHeight = typeof window.innerHeight === "number" && Number.isFinite(window.innerHeight)
+        ? window.innerHeight
+        : 800;
+      const calculated = windowHeight - headerHeight - filtersHeight - padding;
+      // Ensure minimum height for good UX, max for very large screens
+      const height = Math.max(600, Math.min(calculated, 1200));
+      // Final validation
+      return Number.isFinite(height) && height > 0 ? height : 800;
+    } catch (error) {
+      console.error("[CatalogInfiniteGridWrapper] Error calculating container height:", error);
+      return 800;
+    }
   }, []);
 
   return (

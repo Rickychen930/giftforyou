@@ -201,23 +201,33 @@ export async function getBouquets(
       throw new Error("API returned unexpected format (expected an array).");
     }
 
+    // Normalize bouquets and filter out invalid ones
     const allBouquets = normalizeBouquets(data);
     
-    // Apply client-side filtering and sorting
-    const filtered = applyFilters(allBouquets, params);
+    // Ensure we have a valid array (never null/undefined)
+    const safeBouquets = Array.isArray(allBouquets) ? allBouquets : [];
     
-    // Apply pagination
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedBouquets = filtered.slice(startIndex, endIndex);
-    const hasMore = endIndex < filtered.length;
+    // Apply client-side filtering and sorting
+    const filtered = applyFilters(safeBouquets, params);
+    
+    // Ensure filtered is always an array
+    const safeFiltered = Array.isArray(filtered) ? filtered : [];
+    
+    // Apply pagination with validation
+    const safePage = typeof page === "number" && page > 0 ? page : 1;
+    const safeLimit = typeof limit === "number" && limit > 0 ? limit : 20;
+    const startIndex = (safePage - 1) * safeLimit;
+    const endIndex = startIndex + safeLimit;
+    const paginatedBouquets = safeFiltered.slice(startIndex, endIndex);
+    const hasMore = endIndex < safeFiltered.length;
 
+    // Ensure we always return a valid response structure
     return {
-      bouquets: paginatedBouquets,
-      total: filtered.length,
-      page,
-      limit,
-      hasMore,
+      bouquets: Array.isArray(paginatedBouquets) ? paginatedBouquets : [],
+      total: safeFiltered.length,
+      page: safePage,
+      limit: safeLimit,
+      hasMore: Boolean(hasMore),
     };
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
@@ -266,8 +276,17 @@ export async function getBouquetById(
     );
   }
 
+  // Handle single object response
   if (!Array.isArray(data) && typeof data === "object" && data !== null) {
     const normalized = normalizeBouquets([data]);
+    if (normalized.length > 0) {
+      return normalized[0];
+    }
+  }
+
+  // Handle array response (shouldn't happen, but handle gracefully)
+  if (Array.isArray(data) && data.length > 0) {
+    const normalized = normalizeBouquets(data);
     if (normalized.length > 0) {
       return normalized[0];
     }

@@ -9,6 +9,7 @@ import { useInView } from "../hooks/useInView";
 import { useInfiniteBouquets, type BouquetQueryParams, type BouquetResponse } from "../hooks/useBouquets";
 import VirtualizedBouquetGrid from "./virtualized-bouquet-grid";
 import BouquetCard from "./bouquet-card-component";
+import GridErrorBoundary from "./grid-error-boundary";
 import type { InfiniteData } from "@tanstack/react-query";
 import "../styles/InfiniteBouquetGrid.css";
 
@@ -55,23 +56,39 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
   } = useInfiniteBouquets(filters);
 
   // Flatten all pages into a single array with deduplication
+  // Handle edge cases: null/undefined data, invalid pages, missing bouquets
   const allBouquets = useMemo(() => {
-    if (!data?.pages) return [];
-    const all = (data as InfiniteData<BouquetResponse>).pages.flatMap((page: BouquetResponse) => {
-      // Ensure page.bouquets is an array
-      return Array.isArray(page?.bouquets) ? page.bouquets : [];
-    });
-    // Deduplicate by _id to prevent duplicate items
-    const seen = new Set<string>();
-    return all.filter((bouquet) => {
-      if (!bouquet || !bouquet._id) return false;
-      const id = String(bouquet._id);
-      if (seen.has(id)) {
-        return false;
-      }
-      seen.add(id);
-      return true;
-    });
+    if (!data) return [];
+    if (!data.pages) return [];
+    if (!Array.isArray(data.pages)) return [];
+    
+    try {
+      const all = (data as InfiniteData<BouquetResponse>).pages.flatMap((page: BouquetResponse | null | undefined) => {
+        // Handle null/undefined pages
+        if (!page || typeof page !== "object") return [];
+        // Ensure page.bouquets is an array
+        if (!Array.isArray(page.bouquets)) return [];
+        // Filter out null/undefined bouquets
+        return page.bouquets.filter((b): b is NonNullable<typeof b> => b != null && typeof b === "object");
+      });
+      
+      // Deduplicate by _id to prevent duplicate items
+      const seen = new Set<string>();
+      return all.filter((bouquet) => {
+        if (!bouquet || typeof bouquet !== "object") return false;
+        if (!bouquet._id) return false;
+        const id = String(bouquet._id);
+        if (!id || id === "undefined" || id === "null") return false;
+        if (seen.has(id)) {
+          return false;
+        }
+        seen.add(id);
+        return true;
+      });
+    } catch (error) {
+      console.error("[InfiniteBouquetGrid] Error processing bouquets:", error);
+      return [];
+    }
   }, [data]);
 
   // Handle container width changes with ResizeObserver for better performance
@@ -250,36 +267,50 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
   }
 
   // Disable virtualization on mobile for better UX
-  const shouldUseVirtualization = useVirtualization && !isMobile && containerWidth > 0;
+  // Ensure containerWidth is valid before using virtualization
+  const safeContainerWidth = typeof containerWidth === "number" && Number.isFinite(containerWidth) && containerWidth > 0
+    ? containerWidth
+    : 1200;
+  const safeContainerHeight = typeof containerHeight === "number" && Number.isFinite(containerHeight) && containerHeight > 0
+    ? containerHeight
+    : 800;
+  const shouldUseVirtualization = useVirtualization && !isMobile && safeContainerWidth > 0 && allBouquets.length > 0;
 
   return (
-    <div className="infinite-grid-wrapper" ref={containerRef}>
-      {shouldUseVirtualization ? (
-        <VirtualizedBouquetGrid
-          bouquets={allBouquets}
-          containerWidth={containerWidth}
-          containerHeight={containerHeight}
-          gap={16}
-        />
-      ) : (
+    <GridErrorBoundary>
+      <div className="infinite-grid-wrapper" ref={containerRef}>
+        {shouldUseVirtualization ? (
+          <VirtualizedBouquetGrid
+            bouquets={allBouquets}
+            containerWidth={safeContainerWidth}
+            containerHeight={safeContainerHeight}
+            gap={16}
+          />
+        ) : (
         <div className="infinite-grid-standard" role="list" aria-label="Daftar bouquet">
-          {allBouquets.map((bouquet) => (
-            <BouquetCard
-              key={bouquet._id}
-              _id={bouquet._id}
-              name={bouquet.name}
-              description={bouquet.description}
-              price={bouquet.price}
-              type={bouquet.type}
-              size={bouquet.size}
-              image={bouquet.image}
-              status={bouquet.status}
-              collectionName={bouquet.collectionName}
-              customPenanda={bouquet.customPenanda}
-              isNewEdition={bouquet.isNewEdition}
-              isFeatured={bouquet.isFeatured}
-            />
-          ))}
+          {allBouquets.map((bouquet) => {
+            // Validate bouquet before rendering
+            if (!bouquet || typeof bouquet !== "object" || !bouquet._id) {
+              return null;
+            }
+            return (
+              <BouquetCard
+                key={String(bouquet._id)}
+                _id={String(bouquet._id)}
+                name={bouquet.name || ""}
+                description={bouquet.description}
+                price={typeof bouquet.price === "number" ? bouquet.price : 0}
+                type={bouquet.type}
+                size={bouquet.size}
+                image={bouquet.image}
+                status={bouquet.status || "ready"}
+                collectionName={bouquet.collectionName}
+                customPenanda={Array.isArray(bouquet.customPenanda) ? bouquet.customPenanda : []}
+                isNewEdition={Boolean(bouquet.isNewEdition)}
+                isFeatured={Boolean(bouquet.isFeatured)}
+              />
+            );
+          })}
         </div>
       )}
 
@@ -320,7 +351,8 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
           <p>Semua bouquet telah dimuat ({allBouquets.length} bouquet)</p>
         </div>
       )}
-    </div>
+      </div>
+    </GridErrorBoundary>
   );
 };
 

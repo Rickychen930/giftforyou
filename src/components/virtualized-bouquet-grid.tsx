@@ -32,11 +32,36 @@ interface CellProps {
 }
 
 const Cell: React.FC<CellProps> = memo(({ columnIndex, rowIndex, style, data }) => {
+  // Validate data prop to prevent errors
+  if (!data || typeof data !== "object") {
+    return <div style={style} />;
+  }
+
   const { bouquets, columnCount, gap } = data;
+  
+  // Validate extracted values
+  if (!Array.isArray(bouquets)) {
+    return <div style={style} />;
+  }
+
+  if (typeof columnCount !== "number" || columnCount <= 0) {
+    return <div style={style} />;
+  }
+
+  if (typeof gap !== "number" || gap < 0) {
+    return <div style={style} />;
+  }
+
   const index = rowIndex * columnCount + columnIndex;
+  
+  // Validate index
+  if (!Number.isFinite(index) || index < 0 || index >= bouquets.length) {
+    return <div style={style} />;
+  }
+
   const bouquet = bouquets[index];
 
-  if (!bouquet) {
+  if (!bouquet || typeof bouquet !== "object") {
     return <div style={style} />;
   }
 
@@ -79,13 +104,27 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
 }) => {
   // Ensure bouquets is always an array to prevent undefined/null errors
   const safeBouquets = useMemo(() => {
-    return Array.isArray(bouquets) ? bouquets : [];
+    if (!bouquets) return [];
+    if (!Array.isArray(bouquets)) return [];
+    // Filter out any null/undefined items
+    return bouquets.filter((b): b is BouquetCardProps => b != null && typeof b === "object" && b._id != null);
   }, [bouquets]);
 
   // Ensure containerWidth is valid (greater than 0)
   const safeContainerWidth = useMemo(() => {
-    return typeof containerWidth === "number" && containerWidth > 0 ? containerWidth : 1200;
+    if (typeof containerWidth !== "number" || !Number.isFinite(containerWidth) || containerWidth <= 0) {
+      return 1200;
+    }
+    return containerWidth;
   }, [containerWidth]);
+
+  // Ensure containerHeight is valid
+  const safeContainerHeight = useMemo(() => {
+    if (typeof containerHeight !== "number" || !Number.isFinite(containerHeight) || containerHeight <= 0) {
+      return 800;
+    }
+    return containerHeight;
+  }, [containerHeight]);
 
   // Calculate column count based on container width
   const columnCount = useMemo(() => {
@@ -109,15 +148,21 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
     return Math.ceil(safeBouquets.length / columnCount);
   }, [safeBouquets.length, columnCount]);
 
-  // Memoize cell data - ensure it's always a valid object
-  const cellData = useMemo(
-    () => ({
-      bouquets: safeBouquets,
-      columnCount,
-      gap,
-    }),
-    [safeBouquets, columnCount, gap]
-  );
+  // Memoize cell data - ensure it's always a valid object (never null/undefined)
+  // This is critical because react-window's Grid uses Object.values() on itemData
+  const cellData = useMemo(() => {
+    // Always return a valid object, never null or undefined
+    const data = {
+      bouquets: Array.isArray(safeBouquets) ? safeBouquets : [],
+      columnCount: typeof columnCount === "number" && columnCount > 0 ? columnCount : 4,
+      gap: typeof gap === "number" && gap >= 0 ? gap : 16,
+    };
+    // Double-check that we're returning a valid object
+    if (data == null || typeof data !== "object") {
+      return { bouquets: [], columnCount: 4, gap: 16 };
+    }
+    return data;
+  }, [safeBouquets, columnCount, gap]);
 
   // Handle items rendered callback
   const handleItemsRendered = useCallback(
@@ -141,6 +186,7 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
     [onItemsRendered, columnCount, safeBouquets.length]
   );
 
+  // Early return for empty bouquets
   if (safeBouquets.length === 0) {
     return (
       <div className="virtualized-grid-empty">
@@ -149,8 +195,55 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
     );
   }
 
+  // Validate all required values before rendering Grid
+  // This prevents react-window from receiving invalid props
+  if (!cellData || typeof cellData !== "object") {
+    console.error("[VirtualizedBouquetGrid] Invalid cellData:", cellData);
+    return (
+      <div className="virtualized-grid-empty">
+        <p>Error: Data tidak valid</p>
+      </div>
+    );
+  }
+
+  if (columnCount <= 0 || !Number.isFinite(columnCount)) {
+    console.error("[VirtualizedBouquetGrid] Invalid columnCount:", columnCount);
+    return (
+      <div className="virtualized-grid-empty">
+        <p>Error: Konfigurasi grid tidak valid</p>
+      </div>
+    );
+  }
+
+  if (columnWidth <= 0 || !Number.isFinite(columnWidth)) {
+    console.error("[VirtualizedBouquetGrid] Invalid columnWidth:", columnWidth);
+    return (
+      <div className="virtualized-grid-empty">
+        <p>Error: Lebar kolom tidak valid</p>
+      </div>
+    );
+  }
+
+  if (rowCount <= 0 || !Number.isFinite(rowCount)) {
+    console.error("[VirtualizedBouquetGrid] Invalid rowCount:", rowCount);
+    return (
+      <div className="virtualized-grid-empty">
+        <p>Error: Jumlah baris tidak valid</p>
+      </div>
+    );
+  }
+
+  // Ensure rowHeight is valid
+  const safeRowHeight = typeof propRowHeight === "number" && propRowHeight > 0 && Number.isFinite(propRowHeight)
+    ? propRowHeight
+    : 400;
+
   // Render function for Grid children - using memoized component
   const GridCell = memo(({ columnIndex, rowIndex, style }: { columnIndex: number; rowIndex: number; style: React.CSSProperties }) => {
+    // Ensure data is always valid
+    if (!cellData || typeof cellData !== "object") {
+      return <div style={style} />;
+    }
     return <Cell columnIndex={columnIndex} rowIndex={rowIndex} style={style} data={cellData} />;
   });
 
@@ -160,7 +253,7 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
     <div 
       className="virtualized-grid-container"
       style={{
-        height: containerHeight,
+        height: safeContainerHeight,
         width: safeContainerWidth,
         overflow: "auto",
       }}
@@ -171,10 +264,10 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
           columnCount,
           columnWidth,
           rowCount,
-          rowHeight: propRowHeight,
+          rowHeight: safeRowHeight,
           width: safeContainerWidth,
-          height: containerHeight,
-          itemData: cellData,
+          height: safeContainerHeight,
+          itemData: cellData, // This must always be a valid object
           onItemsRendered: handleItemsRendered,
           overscanRowCount: 2,
           overscanColumnCount: 1,
