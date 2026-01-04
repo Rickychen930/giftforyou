@@ -274,43 +274,58 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
     );
   }
 
-  // Empty state - only show if not loading and no bouquets
-  // Don't show empty state if still loading (bouquets might be coming)
-  if (safeAllBouquets.length === 0 && !isLoading && !error) {
-    return (
-      <div className="infinite-grid-empty" role="status">
-        <svg
-          width="64"
-          height="64"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <path
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            opacity="0.4"
-          />
-        </svg>
-        <h3>Tidak ada bouquet ditemukan</h3>
-        <p>Coba sesuaikan filter atau hapus beberapa filter untuk melihat lebih banyak hasil.</p>
-      </div>
-    );
+  // Empty state - only show if not loading, no error, and truly no bouquets
+  // IMPORTANT: Don't show empty state if still loading or if there's an error
+  // Also, don't show empty state immediately - wait a bit to ensure data has loaded
+  // This prevents showing empty state when filters are cleared (which should show all bouquets)
+  if (safeAllBouquets.length === 0 && !isLoading && !error && !isRefetching) {
+    // Only show empty state if we're sure there are no bouquets
+    // Check if data exists and has been loaded at least once
+    const hasLoadedData = data && data.pages && data.pages.length > 0;
+    if (hasLoadedData) {
+      return (
+        <div className="infinite-grid-empty" role="status">
+          <svg
+            width="64"
+            height="64"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <path
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.4"
+            />
+          </svg>
+          <h3>Tidak ada bouquet ditemukan</h3>
+          <p>Coba sesuaikan filter atau hapus beberapa filter untuk melihat lebih banyak hasil.</p>
+        </div>
+      );
+    }
+    // If no data has been loaded yet, don't show empty state - let it load first
   }
 
 
-  // CRITICAL: Only use virtualization if we have bouquets AND valid container dimensions
-  // This prevents Grid from receiving invalid itemData
+  // CRITICAL: Only use virtualization if we have valid container dimensions
+  // Allow virtualization even with empty bouquets array (during loading or when filters are cleared)
+  // Grid can handle empty arrays gracefully - it just won't render any cells
+  // This ensures Grid is always available when filters are cleared (to show all bouquets)
+  // IMPORTANT: We check for valid array (even if empty) rather than length > 0
+  // This allows Grid to render and populate when data arrives
   const shouldUseVirtualization = useVirtualization && 
                                   !isMobile && 
                                   safeContainerWidth > 0 && 
                                   safeContainerHeight > 0 &&
-                                  Array.isArray(safeAllBouquets) &&
-                                  safeAllBouquets.length > 0;
+                                  Array.isArray(safeAllBouquets);
+                                  // Removed: safeAllBouquets.length > 0
+                                  // Reason: Allow Grid to render even with empty array
+                                  // When filters are cleared, array might be empty initially but will populate
+                                  // Grid can handle empty arrays - it just won't render cells until data arrives
 
   return (
     <GridErrorBoundary>

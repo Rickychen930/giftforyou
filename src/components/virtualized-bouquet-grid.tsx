@@ -391,14 +391,16 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
   }, []);
 
   // Early return for empty bouquets - NOW all hooks are called first
-  // BUT: Only return early if we're sure there are no bouquets AND stableItemData is empty
-  // This prevents early return when bouquets are still loading or being filtered
+  // BUT: Only return early if we're ABSOLUTELY sure there are no bouquets
+  // This prevents early return when bouquets are still loading or when filters are cleared
+  // IMPORTANT: When filters are cleared, all bouquets should be shown, so don't return early
+  // Only return early if we have confirmed there are truly no bouquets to display
+  // Note: We allow empty array to pass through to Grid - Grid can handle empty arrays gracefully
+  // The check below is just for user feedback, not for preventing Grid render
   if (safeBouquets.length === 0 && stableItemData.bouquets.length === 0) {
-    return (
-      <div className="virtualized-grid-empty">
-        <p>Tidak ada bouquet ditemukan</p>
-      </div>
-    );
+    // Only show empty message if we're sure there are no bouquets
+    // Don't prevent Grid from rendering - let it handle empty state internally
+    // This ensures Grid is always rendered, even with empty data
   }
 
   // CRITICAL: Validate all values before rendering Grid
@@ -480,15 +482,20 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
     );
   }
 
-  // CRITICAL: Do not render Grid if there are no bouquets
-  // This prevents Grid from being rendered with empty itemData which can cause Object.values() error
-  if (finalItemData.bouquets.length === 0) {
-    return (
-      <div className="virtualized-grid-empty">
-        <p>Tidak ada bouquet ditemukan</p>
-      </div>
-    );
-  }
+  // CRITICAL: Allow Grid to render even with empty bouquets array
+  // Empty array is valid for itemData - it just means no items to display
+  // Grid can handle empty arrays gracefully, and this allows filters to work correctly
+  // When filters are cleared, bouquets array might be empty initially but will populate
+  // IMPORTANT: We only prevent Grid render if itemData itself is invalid, not if bouquets array is empty
+  // Empty bouquets array is a valid state (means no results match filters)
+  // But we still need to ensure itemData structure is valid (object with bouquets, columnCount, gap)
+  // So we check itemData validity, not bouquets.length
+  // 
+  // NOTE: We removed the early return for empty bouquets array because:
+  // 1. Empty array is a valid state (no results match current filters)
+  // 2. When filters are cleared, we want to show all bouquets, so we shouldn't prevent Grid render
+  // 3. Grid can handle empty arrays - it just won't render any cells
+  // 4. The empty state message is handled by the parent component (InfiniteBouquetGrid)
 
   // CRITICAL: Final validation - ensure finalItemData is absolutely valid before passing to Grid
   // Double-check all properties exist and are valid
