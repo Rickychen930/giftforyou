@@ -109,12 +109,26 @@ class BouquetCatalogView extends Component<Props> {
 
   componentDidUpdate(prevProps: Props): void {
     // Reset page if out of bounds after filtering
-    // Only check if bouquets actually changed to prevent infinite loops
-    const bouquetsChanged = prevProps.bouquets !== this.props.bouquets;
+    // Compare array length and content, not just reference, to prevent infinite loops
+    const prevBouquetsLength = Array.isArray(prevProps.bouquets) ? prevProps.bouquets.length : 0;
+    const currentBouquetsLength = Array.isArray(this.props.bouquets) ? this.props.bouquets.length : 0;
+    const bouquetsLengthChanged = prevBouquetsLength !== currentBouquetsLength;
+    
+    // Also check if bouquets content actually changed (compare first few items)
+    let bouquetsContentChanged = false;
+    if (prevBouquetsLength === currentBouquetsLength && prevBouquetsLength > 0) {
+      const prevFirst = prevProps.bouquets[0]?._id;
+      const currentFirst = this.props.bouquets[0]?._id;
+      bouquetsContentChanged = prevFirst !== currentFirst;
+    } else if (prevBouquetsLength !== currentBouquetsLength) {
+      bouquetsContentChanged = true;
+    }
+    
+    const bouquetsChanged = bouquetsLengthChanged || bouquetsContentChanged;
     const currentPageChanged = prevProps.currentPage !== this.props.currentPage;
     
     if (bouquetsChanged || currentPageChanged) {
-      const total = Array.isArray(this.props.bouquets) ? this.props.bouquets.length : 0;
+      const total = currentBouquetsLength;
       const itemsPerPage = typeof this.props.itemsPerPage === "number" && this.props.itemsPerPage > 0
         ? this.props.itemsPerPage
         : 9;
@@ -125,8 +139,15 @@ class BouquetCatalogView extends Component<Props> {
       
       // Only update if currentPage is actually out of bounds AND different from 1
       // This prevents infinite loop if currentPage is already 1
+      // Also check if we're not already on page 1 to prevent unnecessary calls
+      // CRITICAL: Only call onPageChange if prevProps.currentPage is different from 1
+      // This prevents infinite loop when currentPage is already 1
       if (currentPage > totalPages && totalPages > 0 && currentPage !== 1 && this.props.onPageChange) {
-        this.props.onPageChange(1);
+        // Only call onPageChange if previous page was not 1
+        // This prevents calling onPageChange(1) when we're already on page 1
+        if (prevProps.currentPage !== 1 && prevProps.currentPage !== currentPage) {
+          this.props.onPageChange(1);
+        }
       }
     }
     
@@ -343,17 +364,12 @@ class BouquetCatalogView extends Component<Props> {
 
     // Ensure bouquets is an array
     const safeBouquets = Array.isArray(bouquets) ? bouquets : [];
-    console.log("safeBouquets", safeBouquets);
-    console.log("bouquets", bouquets);
     const total = safeBouquets.length;
     
     // Ensure itemsPerPage is valid (prevent division by zero)
     const safeItemsPerPage = typeof itemsPerPage === "number" && itemsPerPage > 0 && Number.isFinite(itemsPerPage)
       ? itemsPerPage
       : 9;
-
-      console.log("safeItemsPerPage", safeItemsPerPage);
-      console.log("itemsPerPage", itemsPerPage);
     
     // Ensure currentPage is valid and within bounds
     const totalPages = Math.max(1, Math.ceil(total / safeItemsPerPage));
@@ -400,9 +416,7 @@ class BouquetCatalogView extends Component<Props> {
           priceRange,
         });
       }
-      if (pageItems.length > 0) {
-        console.log(`[Catalog View] Rendering ${pageItems.length} bouquets on page ${currentPage}`);
-      }
+      // Removed console.log to prevent infinite loop
     }
 
     const sortLabel = (() => {

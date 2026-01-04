@@ -43,6 +43,13 @@ class BouquetCatalogController extends Component<
     bouquetsHash: string;
   } | null = null;
 
+  // Memoize filtered and sorted bouquets to prevent unnecessary re-renders
+  private memoizedBouquets: {
+    filtered: Bouquet[];
+    sorted: Bouquet[];
+    hash: string;
+  } | null = null;
+
   constructor(props: {}) {
     super(props);
     this.state = {
@@ -551,8 +558,35 @@ class BouquetCatalogController extends Component<
     // Ensure bouquets is an array
     const safeBouquets = Array.isArray(this.state.bouquets) ? this.state.bouquets : [];
     
-    const filtered = this.getFilteredBouquets();
-    const sorted = this.getSortedBouquets(filtered);
+    // Create hash for current filter/sort state to detect changes
+    const filterHash = JSON.stringify({
+      selectedTypes: this.state.selectedTypes,
+      selectedSizes: this.state.selectedSizes,
+      selectedCollections: this.state.selectedCollections,
+      priceRange: this.state.priceRange,
+      searchQuery: this.state.searchQuery,
+      collectionNameFilter: this.state.collectionNameFilter,
+      sortBy: this.state.sortBy,
+      bouquetsLength: safeBouquets.length,
+    });
+    
+    // Only recalculate filtered/sorted bouquets if filters or bouquets changed
+    let filtered: Bouquet[];
+    let sorted: Bouquet[];
+    
+    if (!this.memoizedBouquets || this.memoizedBouquets.hash !== filterHash) {
+      filtered = this.getFilteredBouquets();
+      sorted = this.getSortedBouquets(filtered);
+      this.memoizedBouquets = {
+        filtered,
+        sorted,
+        hash: filterHash,
+      };
+    } else {
+      // Use memoized values to prevent unnecessary re-renders
+      filtered = this.memoizedBouquets.filtered;
+      sorted = this.memoizedBouquets.sorted;
+    }
     
     // Ensure currentPage is valid after filtering
     const totalFiltered = filtered.length;

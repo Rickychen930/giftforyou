@@ -210,68 +210,78 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
   }
 
   // Error state with better recovery
-  if (error) {
-    return (
-      <div className="infinite-grid-error" role="alert">
-        <div className="infinite-grid-error__icon" aria-hidden="true">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-        <h3 className="infinite-grid-error__title">Gagal Memuat Bouquet</h3>
-        <p className="infinite-grid-error__message">
-          {isOffline
-            ? "Tidak ada koneksi internet. Pastikan perangkat Anda terhubung ke internet."
-            : error.message || "Terjadi kesalahan saat memuat data. Silakan coba lagi."}
-        </p>
-        <div className="infinite-grid-error__actions">
-          <button
-            onClick={() => refetch()}
-            className="infinite-grid-retry"
-            disabled={isRefetching || isOffline}
-            aria-label="Coba muat ulang bouquet"
-          >
-            {isRefetching ? (
-              <>
-                <div className="becSpinner" style={{ width: "16px", height: "16px", borderWidth: "2px" }}></div>
-                <span>Memuat ulang...</span>
-              </>
-            ) : (
-              <>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path
-                    d="M1 4v6h6M23 20v-6h-6"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M20.49 9A9 9 0 003.51 15M3.51 9a9 9 0 0016.98 6"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <span>Coba Lagi</span>
-              </>
+  // CRITICAL: Only show error if loading is complete AND there's a real error
+  // Don't show error while still loading - wait for fetch to complete first
+  // This prevents showing "gagal membuat grid" when server is still loading
+  if (error && !isLoading && !isRefetching) {
+    // Only show error if we're sure the fetch has completed and failed
+    // Check if we have no data AND error exists (meaning fetch truly failed)
+    const hasNoData = !data || !data.pages || data.pages.length === 0;
+    if (hasNoData) {
+      return (
+        <div className="infinite-grid-error" role="alert">
+          <div className="infinite-grid-error__icon" aria-hidden="true">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+          <h3 className="infinite-grid-error__title">Gagal Memuat Bouquet</h3>
+          <p className="infinite-grid-error__message">
+            {isOffline
+              ? "Tidak ada koneksi internet. Pastikan perangkat Anda terhubung ke internet."
+              : error.message || "Terjadi kesalahan saat memuat data. Silakan coba lagi."}
+          </p>
+          <div className="infinite-grid-error__actions">
+            <button
+              onClick={() => refetch()}
+              className="infinite-grid-retry"
+              disabled={isRefetching || isOffline}
+              aria-label="Coba muat ulang bouquet"
+            >
+              {isRefetching ? (
+                <>
+                  <div className="becSpinner" style={{ width: "16px", height: "16px", borderWidth: "2px" }}></div>
+                  <span>Memuat ulang...</span>
+                </>
+              ) : (
+                <>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path
+                      d="M1 4v6h6M23 20v-6h-6"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M20.49 9A9 9 0 003.51 15M3.51 9a9 9 0 0016.98 6"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <span>Coba Lagi</span>
+                </>
+              )}
+            </button>
+            {isOffline && (
+              <p className="infinite-grid-error__offline-hint">
+                Periksa koneksi internet Anda dan coba lagi.
+              </p>
             )}
-          </button>
-          {isOffline && (
-            <p className="infinite-grid-error__offline-hint">
-              Periksa koneksi internet Anda dan coba lagi.
-            </p>
-          )}
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
+    // If we have data but there's an error, it might be a partial error
+    // Don't show error UI, let Grid render with existing data
   }
 
   // Empty state - only show if not loading, no error, and truly no bouquets
@@ -327,11 +337,15 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
                                   // When filters are cleared, array might be empty initially but will populate
                                   // Grid can handle empty arrays - it just won't render cells until data arrives
 
-  // CRITICAL: Only render VirtualizedBouquetGrid if we have valid data
-  // This prevents Grid from rendering with invalid itemData
+  // CRITICAL: Only render VirtualizedBouquetGrid if loading is complete AND we have valid data
+  // This prevents Grid from rendering with invalid itemData during loading
+  // IMPORTANT: Don't render Grid while still loading - wait for fetch to complete first
+  // This prevents "gagal membuat grid" error when server is still loading
   // Even if bouquets array is empty, we still render Grid (it can handle empty arrays)
   // But we ensure safeAllBouquets is always a valid array before passing to Grid
-  const canRenderGrid = Array.isArray(safeAllBouquets) && 
+  const canRenderGrid = !isLoading && 
+                        !isRefetching &&
+                        Array.isArray(safeAllBouquets) && 
                         typeof safeContainerWidth === "number" && 
                         safeContainerWidth > 0 &&
                         typeof safeContainerHeight === "number" && 
@@ -347,8 +361,9 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
             containerHeight={safeContainerHeight}
             gap={16}
           />
-        ) : shouldUseVirtualization && !canRenderGrid ? (
-          // Show loading state if Grid can't render yet
+        ) : shouldUseVirtualization && !canRenderGrid && (isLoading || isRefetching) ? (
+          // Show loading state if Grid can't render yet because still loading
+          // This ensures we show loading instead of error while fetch is in progress
           <div className="infinite-grid-loading" aria-live="polite" aria-busy="true">
             <div className="infinite-grid-skeleton-grid" role="list" aria-label="Memuat bouquet">
               {Array.from({ length: 12 }).map((_, idx) => (
@@ -361,6 +376,12 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
                   </div>
                 </div>
               ))}
+            </div>
+            <div className="infinite-grid-loading__message">
+              <div className="infinite-grid-spinner">
+                <div className="becSpinner" style={{ width: "24px", height: "24px", borderWidth: "2px" }}></div>
+              </div>
+              <p>Memuat bouquet...</p>
             </div>
           </div>
         ) : (
