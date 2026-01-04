@@ -155,16 +155,6 @@ const CollectionContainer: React.FC<CollectionContainerProps> = ({
           )}
         </div>
 
-        <div className="collectionCard__headerActions">
-          <Link
-            to={browseHref}
-            className="collectionCard__ctaBtn collectionCard__ctaBtn--small"
-            aria-label={`Lihat koleksi ${name}`}
-            title="Lihat koleksi"
-          >
-            Lihat koleksi
-          </Link>
-        </div>
       </header>
 
       {isEmpty ? (

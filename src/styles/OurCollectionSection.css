@@ -154,29 +154,14 @@
   opacity: 1;
 }
 
-/* ===== Elegant Grid Layout (3 Columns) ===== */
+/* ===== Elegant Vertical Layout (1 Column) ===== */
 .ourCollection__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
-  gap: clamp(2rem, 4vw, 3rem);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2.5rem, 4vw, 3.5rem);
   padding: 2rem 0;
   max-width: 100%;
   contain: layout;
-}
-
-/* Responsive: 1 column on mobile, 2 on tablet, 3 on desktop */
-@media (min-width: 768px) {
-  .ourCollection__grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: clamp(2rem, 3.5vw, 2.75rem);
-  }
-}
-
-@media (min-width: 1024px) {
-  .ourCollection__grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: clamp(2.25rem, 4vw, 3rem);
-  }
 }
 
 /* Premium card styling with refined shadows and transitions */
