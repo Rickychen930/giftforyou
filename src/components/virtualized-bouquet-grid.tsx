@@ -660,6 +660,76 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
     return <Cell columnIndex={columnIndex} rowIndex={rowIndex} style={style} data={{ bouquets, columnCount, gap }} />;
   }, []);
 
+  // CRITICAL: Use useMemo to create finalItemDataForGrid that is ALWAYS valid
+  // This ensures itemData is stable and never null/undefined
+  // MUST be called before any early returns to comply with Rules of Hooks
+  const finalItemDataForGrid = useMemo((): { bouquets: BouquetCardProps[]; columnCount: number; gap: number } => {
+    // ABSOLUTE FINAL FALLBACK - this will ALWAYS work
+    const absoluteFallback: { bouquets: BouquetCardProps[]; columnCount: number; gap: number } = { 
+      bouquets: [], 
+      columnCount: 4, 
+      gap: 16 
+    };
+    
+    try {
+      // Validate guaranteedItemData one more time
+      if (!guaranteedItemData || typeof guaranteedItemData !== "object" || Array.isArray(guaranteedItemData)) {
+        console.error("[VirtualizedBouquetGrid] CRITICAL: guaranteedItemData invalid at final step");
+        return absoluteFallback;
+      }
+      
+      // Extract values with validation
+      const validBouquets = Array.isArray(guaranteedItemData.bouquets) ? guaranteedItemData.bouquets : [];
+      const validColumnCount = typeof guaranteedItemData.columnCount === "number" && 
+                                Number.isFinite(guaranteedItemData.columnCount) && 
+                                guaranteedItemData.columnCount > 0 
+                                ? guaranteedItemData.columnCount 
+                                : 4;
+      const validGap = typeof guaranteedItemData.gap === "number" && 
+                        Number.isFinite(guaranteedItemData.gap) && 
+                        guaranteedItemData.gap >= 0 
+                        ? guaranteedItemData.gap 
+                        : 16;
+      
+      // Create a completely fresh object literal - this ensures Object.values() will always work
+      const result: { bouquets: BouquetCardProps[]; columnCount: number; gap: number } = {
+        bouquets: validBouquets,
+        columnCount: validColumnCount,
+        gap: validGap,
+      };
+      
+      // CRITICAL: Test Object.values() to ensure it works
+      // This is the exact same operation react-window will do
+      try {
+        const testValues = Object.values(result);
+        if (!Array.isArray(testValues)) {
+          console.error("[VirtualizedBouquetGrid] CRITICAL: Object.values() returned non-array");
+          return absoluteFallback;
+        }
+      } catch (error) {
+        console.error("[VirtualizedBouquetGrid] CRITICAL: Object.values() test failed:", error);
+        return absoluteFallback;
+      }
+      
+      // Final validation - ensure result is valid
+      if (!result || typeof result !== "object" || Array.isArray(result)) {
+        console.error("[VirtualizedBouquetGrid] CRITICAL: result is invalid after creation");
+        return absoluteFallback;
+      }
+      
+      // Ensure all properties exist
+      if (!("bouquets" in result) || !("columnCount" in result) || !("gap" in result)) {
+        console.error("[VirtualizedBouquetGrid] CRITICAL: result missing required properties");
+        return absoluteFallback;
+      }
+      
+      return result;
+    } catch (error) {
+      console.error("[VirtualizedBouquetGrid] CRITICAL: Unexpected error creating finalItemDataForGrid:", error);
+      return absoluteFallback;
+    }
+  }, [guaranteedItemData]);
+
   // CRITICAL: Allow Grid to render even with empty bouquets array
   // Empty array is a valid state (means no results match current filters, or data is still loading)
   // Grid can handle empty arrays gracefully - it just won't render any cells
@@ -778,65 +848,27 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
   }
 
   // CRITICAL: Final validation before rendering Grid
-  // Ensure guaranteedItemData is valid - if not, don't render Grid
+  // Ensure finalItemDataForGrid is valid - if not, don't render Grid
   // This prevents Object.values() error in react-window
-  if (!guaranteedItemData || typeof guaranteedItemData !== "object" || Array.isArray(guaranteedItemData)) {
-    console.error("[VirtualizedBouquetGrid] CRITICAL: guaranteedItemData is invalid, cannot render Grid:", guaranteedItemData);
+  if (!finalItemDataForGrid || typeof finalItemDataForGrid !== "object" || Array.isArray(finalItemDataForGrid)) {
+    console.error("[VirtualizedBouquetGrid] CRITICAL: finalItemDataForGrid is invalid, cannot render Grid");
     return (
       <div className="virtualized-grid-empty">
         <p>Error: Data tidak valid untuk grid</p>
       </div>
     );
   }
-
+  
   // Test Object.values() one final time before rendering Grid
   try {
-    Object.values(guaranteedItemData);
+    Object.values(finalItemDataForGrid);
   } catch (error) {
-    console.error("[VirtualizedBouquetGrid] CRITICAL: Object.values() test failed before Grid render:", error);
+    console.error("[VirtualizedBouquetGrid] CRITICAL: finalItemDataForGrid Object.values() test failed before Grid render:", error);
     return (
       <div className="virtualized-grid-empty">
         <p>Error: Data tidak valid untuk grid</p>
       </div>
     );
-  }
-
-  // Create final itemData object - ensure it's always a fresh object literal
-  // ABSOLUTE FINAL FALLBACK - this will ALWAYS work
-  const absoluteFallback = { bouquets: [], columnCount: 4, gap: 16 };
-  
-  let finalItemDataForGrid: { bouquets: BouquetCardProps[]; columnCount: number; gap: number };
-  
-  try {
-    // Validate guaranteedItemData one more time
-    if (!guaranteedItemData || typeof guaranteedItemData !== "object" || Array.isArray(guaranteedItemData)) {
-      console.error("[VirtualizedBouquetGrid] CRITICAL: guaranteedItemData invalid at final step");
-      finalItemDataForGrid = absoluteFallback;
-    } else {
-      // Create a completely fresh object literal
-      finalItemDataForGrid = {
-        bouquets: Array.isArray(guaranteedItemData.bouquets) ? guaranteedItemData.bouquets : [],
-        columnCount: typeof guaranteedItemData.columnCount === "number" && Number.isFinite(guaranteedItemData.columnCount) && guaranteedItemData.columnCount > 0 ? guaranteedItemData.columnCount : 4,
-        gap: typeof guaranteedItemData.gap === "number" && Number.isFinite(guaranteedItemData.gap) && guaranteedItemData.gap >= 0 ? guaranteedItemData.gap : 16,
-      };
-      
-      // Final test - ensure finalItemDataForGrid is valid
-      try {
-        Object.values(finalItemDataForGrid);
-      } catch (error) {
-        console.error("[VirtualizedBouquetGrid] CRITICAL: finalItemDataForGrid Object.values() test failed:", error);
-        finalItemDataForGrid = absoluteFallback;
-      }
-    }
-  } catch (error) {
-    console.error("[VirtualizedBouquetGrid] CRITICAL: Unexpected error creating finalItemDataForGrid:", error);
-    finalItemDataForGrid = absoluteFallback;
-  }
-  
-  // ABSOLUTE FINAL CHECK - ensure finalItemDataForGrid is valid
-  if (!finalItemDataForGrid || typeof finalItemDataForGrid !== "object" || Array.isArray(finalItemDataForGrid)) {
-    console.error("[VirtualizedBouquetGrid] CRITICAL: finalItemDataForGrid is invalid, using absolute fallback");
-    finalItemDataForGrid = absoluteFallback;
   }
 
   return (
@@ -859,10 +891,25 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
           height: safeContainerHeight,
           // CRITICAL: itemData MUST be a valid object, never null/undefined
           // react-window uses Object.values() internally on this prop
-          // Use finalItemDataForGrid which is ALWAYS a valid object literal
-          // This is the absolute final guarantee - even if all previous validations fail
-          // Add inline fallback as absolute last defense
-          itemData: finalItemDataForGrid || { bouquets: [], columnCount: 4, gap: 16 },
+          // Use finalItemDataForGrid which is ALWAYS a valid object literal (created with useMemo)
+          // We've already validated it above, so it's guaranteed to be valid here
+          // But add inline fallback as absolute last defense (should never be needed)
+          itemData: (() => {
+            // This IIFE ensures we always return a valid object
+            // Even if finalItemDataForGrid is somehow invalid (which shouldn't happen)
+            if (!finalItemDataForGrid || typeof finalItemDataForGrid !== "object" || Array.isArray(finalItemDataForGrid)) {
+              console.error("[VirtualizedBouquetGrid] CRITICAL: finalItemDataForGrid invalid at Grid render, using fallback");
+              return { bouquets: [], columnCount: 4, gap: 16 };
+            }
+            // Test Object.values() one more time
+            try {
+              Object.values(finalItemDataForGrid);
+              return finalItemDataForGrid;
+            } catch (error) {
+              console.error("[VirtualizedBouquetGrid] CRITICAL: Object.values() failed at Grid render:", error);
+              return { bouquets: [], columnCount: 4, gap: 16 };
+            }
+          })(),
           onItemsRendered: handleItemsRendered,
           overscanRowCount: 2,
           overscanColumnCount: 1,

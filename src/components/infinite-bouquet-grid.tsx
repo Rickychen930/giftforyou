@@ -327,16 +327,42 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
                                   // When filters are cleared, array might be empty initially but will populate
                                   // Grid can handle empty arrays - it just won't render cells until data arrives
 
+  // CRITICAL: Only render VirtualizedBouquetGrid if we have valid data
+  // This prevents Grid from rendering with invalid itemData
+  // Even if bouquets array is empty, we still render Grid (it can handle empty arrays)
+  // But we ensure safeAllBouquets is always a valid array before passing to Grid
+  const canRenderGrid = Array.isArray(safeAllBouquets) && 
+                        typeof safeContainerWidth === "number" && 
+                        safeContainerWidth > 0 &&
+                        typeof safeContainerHeight === "number" && 
+                        safeContainerHeight > 0;
+
   return (
     <GridErrorBoundary>
       <div className="infinite-grid-wrapper" ref={containerRef}>
-        {shouldUseVirtualization ? (
+        {shouldUseVirtualization && canRenderGrid ? (
           <VirtualizedBouquetGrid
             bouquets={safeAllBouquets}
             containerWidth={safeContainerWidth}
             containerHeight={safeContainerHeight}
             gap={16}
           />
+        ) : shouldUseVirtualization && !canRenderGrid ? (
+          // Show loading state if Grid can't render yet
+          <div className="infinite-grid-loading" aria-live="polite" aria-busy="true">
+            <div className="infinite-grid-skeleton-grid" role="list" aria-label="Memuat bouquet">
+              {Array.from({ length: 12 }).map((_, idx) => (
+                <div key={idx} className="infinite-grid-skeleton-card" aria-hidden="true">
+                  <div className="infinite-grid-skeleton-card__image" />
+                  <div className="infinite-grid-skeleton-card__body">
+                    <div className="infinite-grid-skeleton-card__line infinite-grid-skeleton-card__line--title" />
+                    <div className="infinite-grid-skeleton-card__line infinite-grid-skeleton-card__line--medium" />
+                    <div className="infinite-grid-skeleton-card__line infinite-grid-skeleton-card__line--short" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         ) : (
         <div className="infinite-grid-standard" role="list" aria-label="Daftar bouquet">
           {safeAllBouquets.map((bouquet) => {

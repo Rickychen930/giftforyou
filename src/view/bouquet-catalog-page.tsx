@@ -343,12 +343,17 @@ class BouquetCatalogView extends Component<Props> {
 
     // Ensure bouquets is an array
     const safeBouquets = Array.isArray(bouquets) ? bouquets : [];
+    console.log("safeBouquets", safeBouquets);
+    console.log("bouquets", bouquets);
     const total = safeBouquets.length;
     
     // Ensure itemsPerPage is valid (prevent division by zero)
     const safeItemsPerPage = typeof itemsPerPage === "number" && itemsPerPage > 0 && Number.isFinite(itemsPerPage)
       ? itemsPerPage
       : 9;
+
+      console.log("safeItemsPerPage", safeItemsPerPage);
+      console.log("itemsPerPage", itemsPerPage);
     
     // Ensure currentPage is valid and within bounds
     const totalPages = Math.max(1, Math.ceil(total / safeItemsPerPage));
