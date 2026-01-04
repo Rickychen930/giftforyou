@@ -36,7 +36,7 @@
   transform: translateZ(0);
 
   animation: slideInElegant 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  opacity: 0;
+  opacity: 1 !important; /* Ensure visible by default - animation will enhance */
   will-change: transform, box-shadow;
 }
 
@@ -372,7 +372,8 @@
 .collectionCard__previewGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 1.25rem;
+  padding: 0.5rem 0;
 }
 
 /* Collection context styling - BouquetCard already uses bouquetCard class */
@@ -394,14 +395,14 @@
 @media (min-width: 720px) {
   .collectionCard__previewGrid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1.15rem;
+    gap: 1.5rem;
   }
 }
 
 @media (min-width: 1024px) {
   .collectionCard__previewGrid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1.15rem;
+    gap: 1.5rem;
   }
 }
 
@@ -600,7 +601,7 @@
   min-height: 100%;
 
   animation: scaleIn 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  opacity: 0;
+  opacity: 1 !important; /* Ensure visible by default - animation will enhance */
 }
 
 @keyframes scaleIn {

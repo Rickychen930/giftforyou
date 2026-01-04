@@ -443,6 +443,28 @@
   scroll-margin-top: 7.25rem;
 }
 
+.catalogResults__info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem 1rem;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.catalogResults__count {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--catalog-muted);
+  line-height: 1.6;
+}
+
+.catalogResults__count strong {
+  font-weight: 700;
+  color: var(--catalog-text-strong);
+}
+
 
 .catalogSummary__clear {
   border: 1.5px solid rgba(212, 140, 156, 0.25);

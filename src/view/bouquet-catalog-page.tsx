@@ -4,6 +4,13 @@ import "../styles/BouquetCatalogPage.css";
 import type { Bouquet } from "../models/domain/bouquet";
 import FilterPanel from "../components/filter-panel-component";
 import BouquetCard from "../components/bouquet-card-component";
+import CatalogInfiniteGridWrapper from "../components/catalog-infinite-grid-wrapper";
+import {
+  QuickFilterChips,
+  ActiveFilterBadge,
+  BackToTop,
+  EnhancedEmptyState,
+} from "../components/catalog-ux-enhancements";
 import { setSeo } from "../utils/seo";
 import { formatIDR } from "../utils/money";
 import { observeFadeIn, revealOnScroll, staggerFadeIn } from "../utils/luxury-enhancements";
@@ -295,6 +302,9 @@ class BouquetCatalogView extends Component<Props> {
     const total = bouquets.length;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const pageItems = bouquets.slice(startIndex, startIndex + itemsPerPage);
+    
+    // Use infinite scroll for large datasets (50+ bouquets)
+    const useInfiniteScroll = total > 50;
 
     const skeletonCount = Math.max(6, Math.min(itemsPerPage || 0, 12));
 
@@ -506,6 +516,16 @@ class BouquetCatalogView extends Component<Props> {
             </div>
             {hasActiveFilters && !loading && (
               <div className="catalogSummary__actions">
+                <ActiveFilterBadge
+                  count={chips.length}
+                  onClick={() => {
+                    // Scroll to filters section
+                    const filtersEl = document.querySelector(".catalogFilters");
+                    if (filtersEl) {
+                      filtersEl.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }
+                  }}
+                />
                 <button
                   className="catalogSummary__clear"
                   onClick={this.props.onClearAll}
@@ -541,6 +561,20 @@ class BouquetCatalogView extends Component<Props> {
             </div>
           )}
         </header>
+
+        {/* Quick Filter Chips - Priority UX Feature */}
+        {!loading && (allTypes.length > 0 || allSizes.length > 0 || allCollections.length > 0) && (
+          <QuickFilterChips
+            allTypes={allTypes}
+            allSizes={allSizes}
+            allCollections={allCollections}
+            selectedTypes={selectedTypes}
+            selectedSizes={selectedSizes}
+            selectedCollections={selectedCollections}
+            onToggleFilter={this.props.onToggleFilter}
+            onClearAll={this.props.onClearAll}
+          />
+        )}
 
         <div className="catalogLayout">
           <div className="catalogFilters catalogFilters--top" aria-label="Filter">
@@ -627,92 +661,82 @@ class BouquetCatalogView extends Component<Props> {
                 </div>
               </>
             ) : pageItems.length > 0 ? (
-              <div className="catalogGrid" role="list" aria-label={`Menampilkan ${pageItems.length} dari ${total} bouquet`}>
-                {pageItems.map((b) => (
-                  <BouquetCard
-                    key={b._id}
-                    _id={String(b._id)}
-                    name={b.name}
-                    description={b.description}
-                    price={b.price}
-                    type={b.type}
-                    size={b.size}
-                    image={b.image}
-                    status={b.status}
-                    collectionName={b.collectionName}
-                    customPenanda={b.customPenanda}
-                    isNewEdition={b.isNewEdition}
-                    isFeatured={b.isFeatured}
+              <>
+                {/* Use InfiniteBouquetGrid for better performance with large datasets (50+ bouquets) */}
+                {/* This provides luxury, elegant UX with infinite scroll and virtualization */}
+                {useInfiniteScroll ? (
+                  <CatalogInfiniteGridWrapper
+                    priceRange={priceRange}
+                    selectedTypes={selectedTypes}
+                    selectedSizes={selectedSizes}
+                    selectedCollections={selectedCollections}
+                    collectionNameFilter={collectionNameFilter}
+                    searchQuery={searchQuery}
+                    sortBy={sortBy}
+                    loading={loading}
+                    onPriceChange={this.props.onPriceChange}
+                    onToggleFilter={this.props.onToggleFilter}
+                    onClearFilter={this.props.onClearFilter}
+                    onClearAll={this.props.onClearAll}
+                    onSortChange={this.props.onSortChange}
+                    onClearSearchQuery={this.props.onClearSearchQuery}
+                    onClearCollectionNameFilter={this.props.onClearCollectionNameFilter}
+                    onSearchChange={this.props.onSearchChange}
                   />
-                ))}
-              </div>
-            ) : (
-              <div className="catalogEmpty" role="status" aria-live="polite">
-                <div className="catalogEmpty__icon" aria-hidden="true">
-                  <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.4"/>
-                  </svg>
-                </div>
-                <h3 className="catalogEmpty__title">Tidak ada bouquet ditemukan</h3>
-                <p className="catalogEmpty__description">
-                  {hasActiveFilters
-                    ? "Tidak ada bouquet yang sesuai dengan filter Anda. Coba sesuaikan filter atau hapus beberapa filter untuk melihat lebih banyak hasil."
-                    : "Belum ada bouquet tersedia saat ini. Silakan kembali lagi nanti."}
-                </p>
-
-                {chips.length > 0 && (
-                  <div className="catalogEmpty__filters" aria-label="Filter aktif">
-                    <p className="catalogEmpty__filtersHint">
-                      Filter aktif saat ini:
-                    </p>
-                    <div className="catalogActiveFilters catalogActiveFilters--empty">
-                      {chips.map((c) => (
-                        <button
-                          key={c.key}
-                          type="button"
-                          className="catalogChip"
-                          onClick={c.onRemove}
-                          disabled={Boolean(loading)}
-                          aria-label={c.ariaLabel}
-                          title={c.ariaLabel}
-                        >
-                          <span className="catalogChip__label">{c.label}</span>
-                          <span className="catalogChip__x" aria-hidden="true">
-                            ×
-                          </span>
-                        </button>
+                ) : (
+                  <>
+                    {/* Use standard grid for smaller datasets (< 50 bouquets) */}
+                    <div className="catalogGrid" role="list" aria-label={`Menampilkan ${pageItems.length} dari ${total} bouquet`}>
+                      {pageItems.map((b) => (
+                        <BouquetCard
+                          key={b._id}
+                          _id={String(b._id)}
+                          name={b.name}
+                          description={b.description}
+                          price={b.price}
+                          type={b.type}
+                          size={b.size}
+                          image={b.image}
+                          status={b.status}
+                          collectionName={b.collectionName}
+                          customPenanda={b.customPenanda}
+                          isNewEdition={b.isNewEdition}
+                          isFeatured={b.isFeatured}
+                        />
                       ))}
                     </div>
-                  </div>
+                    {/* Show total count for better UX */}
+                    {total > itemsPerPage && (
+                      <div className="catalogResults__info" aria-live="polite">
+                        <p className="catalogResults__count">
+                          Menampilkan <strong>{startIndex + 1}</strong>–<strong>{Math.min(startIndex + itemsPerPage, total)}</strong> dari <strong>{total}</strong> bouquet
+                        </p>
+                      </div>
+                    )}
+                  </>
                 )}
-
-                <div className="catalogEmpty__actions">
-                  {chips.length > 0 && (
-                    <button
-                      type="button"
-                      className="catalogEmpty__btn catalogEmpty__btn--secondary"
-                      onClick={chips[chips.length - 1].onRemove}
-                      disabled={loading}
-                    >
-                      Hapus filter terakhir
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    className="catalogEmpty__btn"
-                    onClick={this.props.onClearAll}
-                    disabled={loading}
-                  >
-                    Atur ulang filter
-                  </button>
-                </div>
-              </div>
+              </>
+            ) : (
+              <EnhancedEmptyState
+                searchQuery={searchQuery}
+                hasActiveFilters={hasActiveFilters}
+                onClearSearch={this.props.onClearSearchQuery}
+                onClearAllFilters={this.props.onClearAll}
+                suggestions={[
+                  "Coba hapus beberapa filter",
+                  "Gunakan kata kunci yang berbeda",
+                  "Periksa koleksi populer",
+                ]}
+              />
             )}
 
-            {!loading && this.renderPagination(total)}
+            {/* Only show pagination for standard grid (small datasets) */}
+            {!loading && total <= 50 && this.renderPagination(total)}
           </main>
         </div>
+
+        {/* Back to Top Button - Priority UX Feature */}
+        <BackToTop threshold={400} />
       </section>
     );
   }

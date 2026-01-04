@@ -24,7 +24,9 @@ const CollectionContainer: React.FC<CollectionContainerProps> = ({
 }) => {
   // Validate bouquets array
   const validBouquets = Array.isArray(bouquets) ? bouquets : [];
-  const previewBouquets = validBouquets.slice(0, 6);
+  // Show only 4 items initially for better performance and UX
+  const INITIAL_PREVIEW_COUNT = 4;
+  const previewBouquets = validBouquets.slice(0, INITIAL_PREVIEW_COUNT);
   const browseHref = `/collection?name=${encodeURIComponent(name)}`;
 
   const renderBouquetCard = (b: BouquetCardProps, cardIndex: number) => {

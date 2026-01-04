@@ -51,14 +51,14 @@
 .ourCollection__header {
   text-align: center;
   margin-bottom: clamp(2.5rem, 4vw, 3.5rem);
-  opacity: 1;
+  opacity: 1 !important; /* Ensure visible by default */
   transform: translateY(0);
   position: relative;
   animation: fadeInUpElegant 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
 .ourCollection--visible .ourCollection__header {
-  opacity: 1;
+  opacity: 1 !important;
   transform: translateY(0);
 }
 
@@ -69,13 +69,13 @@
   text-transform: uppercase;
   font-size: clamp(0.7rem, 0.9vw, 0.8rem);
   color: var(--ink-550);
-  opacity: 1;
+  opacity: 1 !important; /* Ensure visible by default */
   position: relative;
   animation: fadeInElegant 0.65s ease-out 0.2s forwards;
 }
 
 .ourCollection--visible .ourCollection__eyebrow {
-  opacity: 1;
+  opacity: 1 !important;
 }
 
 .ourCollection__title {
@@ -96,7 +96,7 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  opacity: 1;
+  opacity: 1 !important; /* Ensure visible by default */
   font-family: "Playfair Display", Georgia, serif;
   line-height: 1.08;
   text-wrap: balance;
@@ -106,7 +106,7 @@
 }
 
 .ourCollection--visible .ourCollection__title {
-  opacity: 1;
+  opacity: 1 !important;
   transform: translateY(0);
 }
 
@@ -144,14 +144,14 @@
   font-size: clamp(1rem, 1.3vw, 1.1rem);
   line-height: 1.8;
   text-wrap: pretty;
-  opacity: 1;
+  opacity: 1 !important; /* Ensure visible by default */
   font-weight: 450;
   letter-spacing: 0.01em;
   animation: fadeInElegant 0.85s ease-out 0.5s forwards;
 }
 
 .ourCollection--visible .ourCollection__subtitle {
-  opacity: 1;
+  opacity: 1 !important;
 }
 
 /* ===== Elegant Vertical Layout (1 Column) ===== */

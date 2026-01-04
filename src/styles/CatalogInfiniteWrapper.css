@@ -1,0 +1,51 @@
+/**
+ * Catalog Infinite Wrapper Styles
+ * Luxury, elegant design for infinite scroll catalog
+ */
+
+.catalogInfiniteWrapper {
+  width: 100%;
+  position: relative;
+  min-height: 600px;
+  contain: layout style paint;
+}
+
+/* Smooth transitions */
+.catalogInfiniteWrapper * {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Loading state overlay */
+.catalogInfiniteWrapper--loading {
+  position: relative;
+  min-height: 400px;
+}
+
+.catalogInfiniteWrapper--loading::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .catalogInfiniteWrapper {
+    min-height: 500px;
+  }
+}
+
+@media (max-width: 480px) {
+  .catalogInfiniteWrapper {
+    min-height: 400px;
+  }
+}
+

@@ -1,0 +1,46 @@
+/**
+ * Virtualized Bouquet Grid Styles
+ * Luxury, elegant design with performance optimizations
+ */
+
+.virtualized-grid-container {
+  width: 100%;
+  position: relative;
+  contain: layout style paint;
+}
+
+.virtualized-grid-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 3rem 2rem;
+  text-align: center;
+  color: var(--welcome-color-text);
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.virtualized-grid-container > div {
+  /* Ensure smooth scrolling */
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .virtualized-grid-empty {
+    min-height: 300px;
+    padding: 2rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .virtualized-grid-empty {
+    min-height: 250px;
+    padding: 1.5rem 1rem;
+    font-size: 0.95rem;
+  }
+}
+
