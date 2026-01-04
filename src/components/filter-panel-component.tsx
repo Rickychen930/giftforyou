@@ -656,4 +656,35 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   );
 };
 
-export default FilterPanel;
+// Memoize FilterPanel to prevent unnecessary re-renders
+// Only re-render when props actually change
+export default React.memo(FilterPanel, (prevProps, nextProps) => {
+  // Custom comparison function to prevent re-renders when arrays have same content
+  const arraysEqual = (a: string[], b: string[]): boolean => {
+    if (a.length !== b.length) return false;
+    return a.every((val, idx) => val === b[idx]);
+  };
+
+  const rangeEqual = (a: Range, b: Range): boolean => {
+    return a[0] === b[0] && a[1] === b[1];
+  };
+
+  return (
+    rangeEqual(prevProps.priceRange, nextProps.priceRange) &&
+    arraysEqual(prevProps.selectedTypes, nextProps.selectedTypes) &&
+    arraysEqual(prevProps.selectedSizes, nextProps.selectedSizes) &&
+    arraysEqual(prevProps.selectedCollections, nextProps.selectedCollections) &&
+    arraysEqual(prevProps.allTypes, nextProps.allTypes) &&
+    arraysEqual(prevProps.allSizes, nextProps.allSizes) &&
+    arraysEqual(prevProps.allCollections, nextProps.allCollections) &&
+    prevProps.sortBy === nextProps.sortBy &&
+    prevProps.embedded === nextProps.embedded &&
+    prevProps.hideHeader === nextProps.hideHeader &&
+    prevProps.variant === nextProps.variant &&
+    prevProps.disabled === nextProps.disabled &&
+    prevProps.onPriceChange === nextProps.onPriceChange &&
+    prevProps.onToggleFilter === nextProps.onToggleFilter &&
+    prevProps.onClearFilter === nextProps.onClearFilter &&
+    prevProps.onSortChange === nextProps.onSortChange
+  );
+});

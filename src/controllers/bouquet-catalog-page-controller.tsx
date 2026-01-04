@@ -36,6 +36,12 @@ class BouquetCatalogController extends Component<
   State
 > {
   private abortController: AbortController | null = null;
+  private memoizedFilterOptions: {
+    allTypes: string[];
+    allSizes: string[];
+    allCollections: string[];
+    bouquetsHash: string;
+  } | null = null;
 
   constructor(props: {}) {
     super(props);
@@ -408,6 +414,10 @@ class BouquetCatalogController extends Component<
     this.setState({ sortBy: value, currentPage: 1 });
   };
 
+  private handlePageChange = (page: number) => {
+    this.setState({ currentPage: page });
+  };
+
   private handlePriceRangeChange = (range: Range) => {
     // Validate price range - ensure min <= max
     if (!Array.isArray(range) || range.length !== 2) {
@@ -540,31 +550,47 @@ class BouquetCatalogController extends Component<
     
     // Note: Page reset will be handled in componentDidUpdate to avoid setState during render
 
-    // Extract filter options from bouquets
-    // Ensure we always have valid arrays, even if empty
-    const allTypes: string[] = Array.isArray(safeBouquets) && safeBouquets.length > 0
-      ? Array.from(
-          new Set(safeBouquets.map((b) => b?.type).filter(isNonEmptyString))
-        )
-      : ["Orchid", "Mixed"]; // Default fallback
-
-    const allSizes: string[] = Array.isArray(safeBouquets) && safeBouquets.length > 0
-      ? getBouquetSizeFilterOptions(
-          safeBouquets.map((b) => b?.size).filter((s): s is string => typeof s === "string")
-        )
-      : []; // Empty array is fine, filter panel handles it
-
-    const allCollections: string[] = Array.isArray(safeBouquets) && safeBouquets.length > 0
-      ? Array.from(
-          new Set(
-            safeBouquets
-              .map((b) => b?.collectionName)
-              .filter((c): c is string => typeof c === "string" && c.trim().length > 0)
-              .map((v) => v.trim())
-              .filter(Boolean)
+    // Memoize filter options to prevent unnecessary re-renders
+    // Create a simple hash based on bouquets length and IDs to detect changes
+    const bouquetsHash = safeBouquets.length > 0
+      ? `${safeBouquets.length}-${safeBouquets.slice(0, 10).map(b => b?._id || "").join(",")}`
+      : "0";
+    
+    // Only recalculate if bouquets actually changed
+    if (!this.memoizedFilterOptions || this.memoizedFilterOptions.bouquetsHash !== bouquetsHash) {
+      const allTypes: string[] = Array.isArray(safeBouquets) && safeBouquets.length > 0
+        ? Array.from(
+            new Set(safeBouquets.map((b) => b?.type).filter(isNonEmptyString))
           )
-        )
-      : []; // Empty array is fine, filter panel handles it
+        : ["Orchid", "Mixed"]; // Default fallback
+
+      const allSizes: string[] = Array.isArray(safeBouquets) && safeBouquets.length > 0
+        ? getBouquetSizeFilterOptions(
+            safeBouquets.map((b) => b?.size).filter((s): s is string => typeof s === "string")
+          )
+        : []; // Empty array is fine, filter panel handles it
+
+      const allCollections: string[] = Array.isArray(safeBouquets) && safeBouquets.length > 0
+        ? Array.from(
+            new Set(
+              safeBouquets
+                .map((b) => b?.collectionName)
+                .filter((c): c is string => typeof c === "string" && c.trim().length > 0)
+                .map((v) => v.trim())
+                .filter(Boolean)
+            )
+          )
+        : []; // Empty array is fine, filter panel handles it
+
+      this.memoizedFilterOptions = {
+        allTypes,
+        allSizes,
+        allCollections,
+        bouquetsHash,
+      };
+    }
+
+    const { allTypes, allSizes, allCollections } = this.memoizedFilterOptions;
 
     return (
       <BouquetCatalogView
@@ -589,7 +615,7 @@ class BouquetCatalogController extends Component<
         onClearSearchQuery={this.clearSearchQuery}
         onClearCollectionNameFilter={this.clearCollectionNameFilter}
         onSearchChange={this.setSearchQuery}
-        onPageChange={(page) => this.setState({ currentPage: page })}
+        onPageChange={this.handlePageChange}
         loading={this.state.loading}
         error={this.state.error}
       />
