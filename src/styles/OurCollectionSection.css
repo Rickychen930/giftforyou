@@ -54,7 +54,15 @@
   opacity: 1 !important; /* Ensure visible by default */
   transform: translateY(0);
   position: relative;
+  /* Animation only enhances, doesn't hide */
   animation: fadeInUpElegant 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Ensure header is always visible, even before animation */
+.ourCollection__header,
+.ourCollection__header * {
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .ourCollection--visible .ourCollection__header {
@@ -611,7 +619,7 @@
 
 @keyframes fadeInElegant {
   from {
-    opacity: 0;
+    opacity: 0.3; /* Start from slightly visible instead of 0 */
   }
   to {
     opacity: 1;
@@ -631,7 +639,7 @@
 
 @keyframes fadeInUpElegant {
   from {
-    opacity: 0;
+    opacity: 0.3; /* Start from slightly visible instead of 0 */
     transform: translateY(20px);
   }
   to {

@@ -5,7 +5,7 @@
  */
 
 import { useQuery, useInfiniteQuery, UseQueryOptions, UseInfiniteQueryOptions, type InfiniteData } from "@tanstack/react-query";
-import { getBouquets, getAllBouquets, type BouquetQueryParams, type BouquetResponse } from "../services/bouquet.service";
+import { getBouquets, getAllBouquets, getBouquetById, type BouquetQueryParams, type BouquetResponse } from "../services/bouquet.service";
 import type { Bouquet } from "../models/domain/bouquet";
 
 // Re-export BouquetQueryParams for convenience
@@ -86,6 +86,40 @@ export function useAllBouquets(
     refetchOnMount: false,
     placeholderData: (previousData) => previousData ?? [],
     structuralSharing: true,
+    ...options,
+  });
+}
+
+/**
+ * Fetch a single bouquet by ID with React Query caching
+ */
+export function useBouquet(
+  id: string | undefined,
+  options?: Omit<UseQueryOptions<Bouquet, Error>, "queryKey" | "queryFn" | "enabled">
+) {
+  return useQuery<Bouquet, Error>({
+    queryKey: bouquetKeys.detail(id || ""),
+    queryFn: async ({ signal }) => {
+      if (!id) {
+        throw new Error("Bouquet ID is required");
+      }
+      try {
+        return await getBouquetById(id, signal);
+      } catch (error) {
+        if (error instanceof Error) {
+          throw new Error(`Failed to fetch bouquet: ${error.message}`);
+        }
+        throw new Error("Failed to fetch bouquet: Unknown error");
+      }
+    },
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
+    refetchOnMount: true,
     ...options,
   });
 }

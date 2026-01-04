@@ -232,6 +232,51 @@ export async function getBouquets(
 }
 
 /**
+ * Fetch a single bouquet by ID
+ */
+export async function getBouquetById(
+  id: string,
+  signal?: AbortSignal
+): Promise<Bouquet> {
+  const url = `${API_BASE}/api/bouquets/${id}`;
+
+  const res = await fetch(url, { signal });
+
+  if (signal?.aborted) {
+    throw new Error("Request was cancelled");
+  }
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to fetch bouquet (${res.status}): ${text}`);
+  }
+
+  let data: unknown;
+  try {
+    const text = await res.text();
+    if (!text.trim()) {
+      throw new Error("Empty response body");
+    }
+    data = JSON.parse(text);
+  } catch (parseErr) {
+    throw new Error(
+      `Failed to parse response: ${
+        parseErr instanceof Error ? parseErr.message : "Invalid JSON"
+      }`
+    );
+  }
+
+  if (!Array.isArray(data) && typeof data === "object" && data !== null) {
+    const normalized = normalizeBouquets([data]);
+    if (normalized.length > 0) {
+      return normalized[0];
+    }
+  }
+
+  throw new Error("Bouquet not found or invalid format");
+}
+
+/**
  * Fetch all bouquets (for backward compatibility)
  */
 export async function getAllBouquets(

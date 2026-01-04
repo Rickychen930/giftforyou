@@ -195,8 +195,10 @@ const OurCollectionSection: React.FC<OurCollectionViewProps> = ({
   }, [items]);
 
   // Get featured collections (first 3) - memoized for performance
+  // Optimized: Limit to 3 collections to reduce scroll length
   const featuredCollections = useMemo(() => {
     if (!prepared || prepared.length === 0) return [];
+    // Always show max 3 collections to prevent excessive scrolling
     return prepared.slice(0, FEATURED_COLLECTIONS_COUNT);
   }, [prepared]);
 
