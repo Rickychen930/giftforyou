@@ -150,6 +150,7 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
 
   // Memoize cell data - ensure it's always a valid object (never null/undefined)
   // This is critical because react-window's Grid uses Object.values() on itemData
+  // CRITICAL: Even if bouquets is empty, we must return a valid object
   const cellData = useMemo(() => {
     // Always return a valid object, never null or undefined
     // Ensure all values are valid before creating the object
@@ -157,21 +158,32 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
     const validColumnCount = typeof columnCount === "number" && columnCount > 0 && Number.isFinite(columnCount) ? columnCount : 4;
     const validGap = typeof gap === "number" && gap >= 0 && Number.isFinite(gap) ? gap : 16;
     
-    const data = {
+    // CRITICAL: Always return a valid object structure, even if bouquets is empty
+    // This prevents Object.values() error in react-window
+    const data: {
+      bouquets: BouquetCardProps[];
+      columnCount: number;
+      gap: number;
+    } = {
       bouquets: validBouquets,
       columnCount: validColumnCount,
       gap: validGap,
     };
     
-    // Triple-check that we're returning a valid object with all required properties
-    if (!data || typeof data !== "object" || !data.bouquets || !Array.isArray(data.bouquets)) {
+    // Final validation - ensure we always return a valid object
+    // Even if bouquets is empty, the object structure must be valid
+    if (!data || typeof data !== "object") {
       return { bouquets: [], columnCount: 4, gap: 16 };
     }
     
-    // Ensure all properties exist and are valid
+    if (!Array.isArray(data.bouquets)) {
+      return { bouquets: [], columnCount: validColumnCount, gap: validGap };
+    }
+    
     if (typeof data.columnCount !== "number" || !Number.isFinite(data.columnCount) || data.columnCount <= 0) {
       return { bouquets: validBouquets, columnCount: 4, gap: validGap };
     }
+    
     if (typeof data.gap !== "number" || !Number.isFinite(data.gap) || data.gap < 0) {
       return { bouquets: validBouquets, columnCount: validColumnCount, gap: 16 };
     }
@@ -422,13 +434,40 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
     );
   }
 
-  // CRITICAL: Do not render Grid if finalItemData is invalid
+  // CRITICAL: Do not render Grid if finalItemData is invalid OR if bouquets is empty
   // This prevents react-window from receiving null/undefined itemData
+  // Even though finalItemData.bouquets might be empty array (which is valid), we should not render Grid with 0 items
   if (!finalItemData || typeof finalItemData !== "object" || !Array.isArray(finalItemData.bouquets)) {
     console.error("[VirtualizedBouquetGrid] CRITICAL: finalItemData is still invalid, cannot render Grid:", finalItemData);
     return (
       <div className="virtualized-grid-empty">
         <p>Error: Data tidak valid untuk grid</p>
+      </div>
+    );
+  }
+
+  // CRITICAL: Do not render Grid if there are no bouquets
+  // This prevents Grid from being rendered with empty itemData which can cause Object.values() error
+  if (finalItemData.bouquets.length === 0) {
+    return (
+      <div className="virtualized-grid-empty">
+        <p>Tidak ada bouquet ditemukan</p>
+      </div>
+    );
+  }
+
+  // CRITICAL: Final validation - ensure finalItemData is absolutely valid before passing to Grid
+  // Double-check all properties exist and are valid
+  if (typeof finalItemData.columnCount !== "number" || 
+      !Number.isFinite(finalItemData.columnCount) || 
+      finalItemData.columnCount <= 0 ||
+      typeof finalItemData.gap !== "number" || 
+      !Number.isFinite(finalItemData.gap) || 
+      finalItemData.gap < 0) {
+    console.error("[VirtualizedBouquetGrid] CRITICAL: finalItemData properties invalid:", finalItemData);
+    return (
+      <div className="virtualized-grid-empty">
+        <p>Error: Konfigurasi grid tidak valid</p>
       </div>
     );
   }

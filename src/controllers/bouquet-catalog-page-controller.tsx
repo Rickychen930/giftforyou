@@ -540,28 +540,36 @@ class BouquetCatalogController extends Component<
     
     // Note: Page reset will be handled in componentDidUpdate to avoid setState during render
 
-    const allTypes: string[] = Array.from(
-      new Set(safeBouquets.map((b) => b?.type).filter(isNonEmptyString))
-    );
+    // Extract filter options from bouquets
+    // Ensure we always have valid arrays, even if empty
+    const allTypes: string[] = Array.isArray(safeBouquets) && safeBouquets.length > 0
+      ? Array.from(
+          new Set(safeBouquets.map((b) => b?.type).filter(isNonEmptyString))
+        )
+      : ["Orchid", "Mixed"]; // Default fallback
 
-    const allSizes: string[] = getBouquetSizeFilterOptions(
-      safeBouquets.map((b) => b?.size).filter((s): s is string => typeof s === "string")
-    );
+    const allSizes: string[] = Array.isArray(safeBouquets) && safeBouquets.length > 0
+      ? getBouquetSizeFilterOptions(
+          safeBouquets.map((b) => b?.size).filter((s): s is string => typeof s === "string")
+        )
+      : []; // Empty array is fine, filter panel handles it
 
-    const allCollections: string[] = Array.from(
-      new Set(
-        safeBouquets
-          .map((b) => b?.collectionName)
-          .filter((c): c is string => typeof c === "string" && c.trim().length > 0)
-          .map((v) => v.trim())
-          .filter(Boolean)
-      )
-    );
+    const allCollections: string[] = Array.isArray(safeBouquets) && safeBouquets.length > 0
+      ? Array.from(
+          new Set(
+            safeBouquets
+              .map((b) => b?.collectionName)
+              .filter((c): c is string => typeof c === "string" && c.trim().length > 0)
+              .map((v) => v.trim())
+              .filter(Boolean)
+          )
+        )
+      : []; // Empty array is fine, filter panel handles it
 
     return (
       <BouquetCatalogView
         bouquets={sorted}
-        allTypes={allTypes.length ? allTypes : ["Orchid", "Mixed"]}
+        allTypes={allTypes}
         allSizes={allSizes}
         allCollections={allCollections}
         collectionNameFilter={this.state.collectionNameFilter}

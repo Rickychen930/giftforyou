@@ -274,7 +274,15 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
   const safeContainerHeight = typeof containerHeight === "number" && Number.isFinite(containerHeight) && containerHeight > 0
     ? containerHeight
     : 800;
-  const shouldUseVirtualization = useVirtualization && !isMobile && safeContainerWidth > 0 && allBouquets.length > 0;
+  
+  // CRITICAL: Only use virtualization if we have bouquets AND valid container dimensions
+  // This prevents Grid from receiving invalid itemData
+  const shouldUseVirtualization = useVirtualization && 
+                                  !isMobile && 
+                                  safeContainerWidth > 0 && 
+                                  safeContainerHeight > 0 &&
+                                  Array.isArray(allBouquets) &&
+                                  allBouquets.length > 0;
 
   return (
     <GridErrorBoundary>
