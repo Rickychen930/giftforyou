@@ -526,27 +526,69 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
           height: safeContainerHeight,
           // CRITICAL: itemData MUST be a valid object, never null/undefined
           // react-window uses Object.values() internally on this prop
-          // Double-check before passing to ensure it's never null/undefined
+          // This is the ABSOLUTE last line of defense - must always return a valid object
           itemData: (() => {
+            // Default fallback - ALWAYS return this if anything goes wrong
+            const defaultItemData: { bouquets: BouquetCardProps[]; columnCount: number; gap: number } = { 
+              bouquets: [], 
+              columnCount: 4, 
+              gap: 16 
+            };
+            
             // Final safety check - ensure stableItemData is always valid
             if (!stableItemData || typeof stableItemData !== "object" || Array.isArray(stableItemData)) {
               console.error("[VirtualizedBouquetGrid] CRITICAL: stableItemData invalid at Grid render, using fallback:", stableItemData);
-              return { bouquets: [], columnCount: 4, gap: 16 };
+              return defaultItemData;
             }
-            // Ensure all properties exist and are valid
-            if (!Array.isArray(stableItemData.bouquets)) {
-              console.error("[VirtualizedBouquetGrid] CRITICAL: stableItemData.bouquets invalid, using fallback:", stableItemData);
-              return { bouquets: [], columnCount: stableItemData.columnCount || 4, gap: stableItemData.gap || 16 };
+            
+            // Validate bouquets - must be an array
+            let validBouquets: BouquetCardProps[] = [];
+            if (Array.isArray(stableItemData.bouquets)) {
+              validBouquets = stableItemData.bouquets.filter((b): b is BouquetCardProps => 
+                b != null && typeof b === "object" && b._id != null
+              );
+            } else {
+              console.error("[VirtualizedBouquetGrid] CRITICAL: stableItemData.bouquets is not an array:", stableItemData);
+              return { ...defaultItemData, bouquets: [] };
             }
-            if (typeof stableItemData.columnCount !== "number" || !Number.isFinite(stableItemData.columnCount) || stableItemData.columnCount <= 0) {
-              console.error("[VirtualizedBouquetGrid] CRITICAL: stableItemData.columnCount invalid, using fallback:", stableItemData);
-              return { bouquets: stableItemData.bouquets, columnCount: 4, gap: stableItemData.gap || 16 };
+            
+            // Validate columnCount - must be a positive number
+            let validColumnCount = 4;
+            if (typeof stableItemData.columnCount === "number" && 
+                Number.isFinite(stableItemData.columnCount) && 
+                stableItemData.columnCount > 0) {
+              validColumnCount = stableItemData.columnCount;
+            } else {
+              console.error("[VirtualizedBouquetGrid] CRITICAL: stableItemData.columnCount invalid:", stableItemData);
+              return { bouquets: validBouquets, columnCount: 4, gap: stableItemData.gap || 16 };
             }
-            if (typeof stableItemData.gap !== "number" || !Number.isFinite(stableItemData.gap) || stableItemData.gap < 0) {
-              console.error("[VirtualizedBouquetGrid] CRITICAL: stableItemData.gap invalid, using fallback:", stableItemData);
-              return { bouquets: stableItemData.bouquets, columnCount: stableItemData.columnCount, gap: 16 };
+            
+            // Validate gap - must be a non-negative number
+            let validGap = 16;
+            if (typeof stableItemData.gap === "number" && 
+                Number.isFinite(stableItemData.gap) && 
+                stableItemData.gap >= 0) {
+              validGap = stableItemData.gap;
+            } else {
+              console.error("[VirtualizedBouquetGrid] CRITICAL: stableItemData.gap invalid:", stableItemData);
+              return { bouquets: validBouquets, columnCount: validColumnCount, gap: 16 };
             }
-            return stableItemData;
+            
+            // CRITICAL: Return a completely new object literal - this ensures Object.values() will always work
+            // This object MUST be a plain object, never null/undefined
+            const result: { bouquets: BouquetCardProps[]; columnCount: number; gap: number } = {
+              bouquets: validBouquets,
+              columnCount: validColumnCount,
+              gap: validGap,
+            };
+            
+            // Final validation - ensure result is valid
+            if (!result || typeof result !== "object" || Array.isArray(result)) {
+              console.error("[VirtualizedBouquetGrid] CRITICAL: result invalid, using fallback:", result);
+              return defaultItemData;
+            }
+            
+            return result;
           })(),
           onItemsRendered: handleItemsRendered,
           overscanRowCount: 2,

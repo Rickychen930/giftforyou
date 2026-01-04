@@ -57,10 +57,14 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
 
   // Flatten all pages into a single array with deduplication
   // Handle edge cases: null/undefined data, invalid pages, missing bouquets
+  // CRITICAL: Always return a valid array, never null/undefined
   const allBouquets = useMemo(() => {
-    if (!data) return [];
-    if (!data.pages) return [];
-    if (!Array.isArray(data.pages)) return [];
+    // Default fallback - always return an array
+    const defaultBouquets: any[] = [];
+    
+    if (!data) return defaultBouquets;
+    if (!data.pages) return defaultBouquets;
+    if (!Array.isArray(data.pages)) return defaultBouquets;
     
     try {
       const all = (data as InfiniteData<BouquetResponse>).pages.flatMap((page: BouquetResponse | null | undefined) => {
@@ -74,7 +78,7 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
       
       // Deduplicate by _id to prevent duplicate items
       const seen = new Set<string>();
-      return all.filter((bouquet) => {
+      const filtered = all.filter((bouquet) => {
         if (!bouquet || typeof bouquet !== "object") return false;
         if (!bouquet._id) return false;
         const id = String(bouquet._id);
@@ -85,9 +89,12 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
         seen.add(id);
         return true;
       });
+      
+      // CRITICAL: Ensure we always return an array, never null/undefined
+      return Array.isArray(filtered) ? filtered : defaultBouquets;
     } catch (error) {
       console.error("[InfiniteBouquetGrid] Error processing bouquets:", error);
-      return [];
+      return defaultBouquets;
     }
   }, [data]);
 
@@ -276,28 +283,40 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
     ? containerHeight
     : 800;
   
+  // CRITICAL: Ensure allBouquets is always a valid array before using it
+  // This prevents passing null/undefined to VirtualizedBouquetGrid
+  const safeAllBouquets = useMemo(() => {
+    // Always return a valid array, never null/undefined
+    if (!allBouquets) return [];
+    if (!Array.isArray(allBouquets)) return [];
+    // Filter out any invalid items
+    return allBouquets.filter((b): b is NonNullable<typeof b> => 
+      b != null && typeof b === "object" && b._id != null
+    );
+  }, [allBouquets]);
+
   // CRITICAL: Only use virtualization if we have bouquets AND valid container dimensions
   // This prevents Grid from receiving invalid itemData
   const shouldUseVirtualization = useVirtualization && 
                                   !isMobile && 
                                   safeContainerWidth > 0 && 
                                   safeContainerHeight > 0 &&
-                                  Array.isArray(allBouquets) &&
-                                  allBouquets.length > 0;
+                                  Array.isArray(safeAllBouquets) &&
+                                  safeAllBouquets.length > 0;
 
   return (
     <GridErrorBoundary>
       <div className="infinite-grid-wrapper" ref={containerRef}>
         {shouldUseVirtualization ? (
           <VirtualizedBouquetGrid
-            bouquets={allBouquets}
+            bouquets={safeAllBouquets}
             containerWidth={safeContainerWidth}
             containerHeight={safeContainerHeight}
             gap={16}
           />
         ) : (
         <div className="infinite-grid-standard" role="list" aria-label="Daftar bouquet">
-          {allBouquets.map((bouquet) => {
+          {safeAllBouquets.map((bouquet) => {
             // Validate bouquet before rendering
             if (!bouquet || typeof bouquet !== "object" || !bouquet._id) {
               return null;
