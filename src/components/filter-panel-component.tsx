@@ -71,19 +71,35 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     return min <= max ? [min, max] : [0, 1_000_000];
   }, [priceRange]);
   const isTopbar = variant === "topbar";
+  
+  // Ensure arrays are always valid
+  const safeAllTypes = Array.isArray(allTypes) && allTypes.length > 0 ? allTypes : ["Orchid", "Mixed"];
+  const safeAllSizes = Array.isArray(allSizes) && allSizes.length > 0 ? allSizes : [...BOUQUET_SIZES];
+  const safeAllCollections = Array.isArray(allCollections) ? allCollections : [];
+  const safeSelectedTypes = Array.isArray(selectedTypes) ? selectedTypes : [];
+  const safeSelectedSizes = Array.isArray(selectedSizes) ? selectedSizes : [];
+  const safeSelectedCollections = Array.isArray(selectedCollections) ? selectedCollections : [];
+  
   const [openGroups, setOpenGroups] = React.useState<
     Record<"selectedTypes" | "selectedSizes" | "selectedCollections", boolean>
   >(() => {
-    const types = allTypes.length ? allTypes : ["Orchid", "Mixed"];
-    const sizes = allSizes.length ? allSizes : [...BOUQUET_SIZES];
-    const collections = allCollections;
-
     return {
-      selectedTypes: isTopbar ? true : selectedTypes.length > 0 || types.length <= 8,
-      selectedSizes: isTopbar ? true : selectedSizes.length > 0 || sizes.length <= 8,
-      selectedCollections: isTopbar ? true : selectedCollections.length > 0 || collections.length <= 8,
+      selectedTypes: isTopbar ? true : safeSelectedTypes.length > 0 || safeAllTypes.length <= 8,
+      selectedSizes: isTopbar ? true : safeSelectedSizes.length > 0 || safeAllSizes.length <= 8,
+      selectedCollections: isTopbar ? true : safeSelectedCollections.length > 0 || safeAllCollections.length <= 8,
     };
   });
+  
+  // Update openGroups when arrays change to ensure filters are visible
+  React.useEffect(() => {
+    if (isTopbar) return; // Topbar always shows filters
+    
+    setOpenGroups((prev) => ({
+      selectedTypes: prev.selectedTypes || safeSelectedTypes.length > 0 || safeAllTypes.length <= 8,
+      selectedSizes: prev.selectedSizes || safeSelectedSizes.length > 0 || safeAllSizes.length <= 8,
+      selectedCollections: prev.selectedCollections || safeSelectedCollections.length > 0 || safeAllCollections.length <= 8,
+    }));
+  }, [isTopbar, safeAllTypes.length, safeAllSizes.length, safeAllCollections.length, safeSelectedTypes.length, safeSelectedSizes.length, safeSelectedCollections.length]);
 
   // Search state for filter options (memoized to prevent unnecessary re-renders)
   const [searchQueries, setSearchQueries] = React.useState<
@@ -191,15 +207,22 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     selected: string[];
     k: "selectedTypes" | "selectedSizes" | "selectedCollections";
   }> = ({ title, options, selected, k }) => {
+    // Ensure selected is an array
+    const safeSelected = Array.isArray(selected) ? selected : [];
+    
     const isOpen = isTopbar ? true : openGroups[k];
     const panelId = `fp-panel-${k}`;
-    const meta = selected.length ? `${selected.length} dipilih` : "Semua";
-    const searchQuery = debouncedSearchQueries[k].toLowerCase();
+    const meta = safeSelected.length ? `${safeSelected.length} dipilih` : "Semua";
+    const searchQuery = debouncedSearchQueries[k] ? debouncedSearchQueries[k].toLowerCase() : "";
     
-    // Remove duplicates from options (case-insensitive)
+    // Remove duplicates from options (case-insensitive) - move safeOptions inside useMemo
     const uniqueOptions = React.useMemo(() => {
+      // Ensure options is an array inside useMemo to fix ESLint warning
+      const safeOptions = Array.isArray(options) ? options : [];
+      if (safeOptions.length === 0) return [];
       const seen = new Set<string>();
-      return options.filter((opt) => {
+      return safeOptions.filter((opt) => {
+        if (!opt || typeof opt !== "string") return false;
         const lower = opt.toLowerCase();
         if (seen.has(lower)) return false;
         seen.add(lower);
@@ -210,10 +233,14 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     // Memoize filtered options to avoid recalculating on every render
     const filteredOptions = React.useMemo(() => {
       if (!searchQuery) return uniqueOptions;
-      return uniqueOptions.filter((opt) => opt.toLowerCase().includes(searchQuery));
+      return uniqueOptions.filter((opt) => {
+        if (!opt || typeof opt !== "string") return false;
+        return opt.toLowerCase().includes(searchQuery);
+      });
     }, [uniqueOptions, searchQuery]);
     
-    const showSearch = uniqueOptions.length > 6;
+    // Show search if there are more than 6 options OR if there's an active search query
+    const showSearch = uniqueOptions.length > 6 || (searchQuery && searchQuery.length > 0);
     
     // Clear search when filter is cleared
     const handleClearFilter = React.useCallback(() => {
@@ -228,9 +255,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           {isTopbar ? (
             <div className="fpGroup__toggle fpGroup__toggle--static" aria-hidden="true">
               <span className="fpGroup__title">{title}</span>
-              {selected.length > 0 && (
-                <span className="fpGroup__badge" aria-label={`${selected.length} dipilih`}>
-                  {selected.length}
+              {safeSelected.length > 0 && (
+                <span className="fpGroup__badge" aria-label={`${safeSelected.length} dipilih`}>
+                  {safeSelected.length}
                 </span>
               )}
               <span className="fpGroup__meta">{meta}</span>
@@ -245,9 +272,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
               disabled={Boolean(disabled)}
             >
               <span className="fpGroup__title">{title}</span>
-              {selected.length > 0 && (
-                <span className="fpGroup__badge" aria-label={`${selected.length} dipilih`}>
-                  {selected.length}
+              {safeSelected.length > 0 && (
+                <span className="fpGroup__badge" aria-label={`${safeSelected.length} dipilih`}>
+                  {safeSelected.length}
                 </span>
               )}
               <span className="fpGroup__meta">{meta}</span>
@@ -259,7 +286,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           type="button"
           className="fpGroup__clear"
           onClick={handleClearFilter}
-          disabled={Boolean(disabled) || selected.length === 0}
+          disabled={Boolean(disabled) || safeSelected.length === 0}
           aria-label={`Hapus filter ${title}`}
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -352,17 +379,17 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           <div className="fpOptions" role="list">
             <button
               type="button"
-              className={`fpOption ${selected.length === 0 ? "is-active" : ""}`}
+              className={`fpOption ${safeSelected.length === 0 ? "is-active" : ""}`}
               onClick={handleClearFilter}
               disabled={Boolean(disabled)}
-              aria-pressed={selected.length === 0}
+              aria-pressed={safeSelected.length === 0}
             >
               <span className="fpOption__label">Semua</span>
             </button>
 
             {filteredOptions.length > 0 ? (
               filteredOptions.map((opt) => {
-                const isSelected = selected.includes(opt);
+                const isSelected = safeSelected.includes(opt);
                 return (
                   <button
                     type="button"
@@ -558,25 +585,25 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
         {/* Type */}
         <FilterGroup
           title="Tipe"
-          options={allTypes.length ? allTypes : ["Orchid", "Mixed"]}
-          selected={selectedTypes}
+          options={safeAllTypes}
+          selected={safeSelectedTypes}
           k="selectedTypes"
         />
 
         {/* Size */}
         <FilterGroup
           title="Ukuran"
-          options={allSizes.length ? allSizes : [...BOUQUET_SIZES]}
-          selected={selectedSizes}
+          options={safeAllSizes}
+          selected={safeSelectedSizes}
           k="selectedSizes"
         />
 
         {/* Collection */}
-        {allCollections.length > 0 ? (
+        {safeAllCollections.length > 0 ? (
           <FilterGroup
             title="Koleksi"
-            options={allCollections}
-            selected={selectedCollections}
+            options={safeAllCollections}
+            selected={safeSelectedCollections}
             k="selectedCollections"
           />
         ) : null}

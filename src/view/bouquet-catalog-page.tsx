@@ -108,6 +108,20 @@ class BouquetCatalogView extends Component<Props> {
   }
 
   componentDidUpdate(prevProps: Props): void {
+    // Reset page if out of bounds after filtering
+    const total = Array.isArray(this.props.bouquets) ? this.props.bouquets.length : 0;
+    const itemsPerPage = typeof this.props.itemsPerPage === "number" && this.props.itemsPerPage > 0
+      ? this.props.itemsPerPage
+      : 9;
+    const totalPages = Math.max(1, Math.ceil(total / itemsPerPage));
+    const currentPage = typeof this.props.currentPage === "number" && this.props.currentPage > 0
+      ? this.props.currentPage
+      : 1;
+    
+    if (currentPage > totalPages && totalPages > 0 && this.props.onPageChange) {
+      this.props.onPageChange(1);
+    }
+    
     if (
       prevProps.selectedTypes !== this.props.selectedTypes ||
       prevProps.selectedSizes !== this.props.selectedSizes ||
@@ -172,17 +186,32 @@ class BouquetCatalogView extends Component<Props> {
   private renderPagination(totalItems: number): React.ReactNode {
     const { currentPage, itemsPerPage, onPageChange } = this.props;
 
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    if (totalPages <= 1) return null;
+    // Ensure itemsPerPage is valid (prevent division by zero)
+    const safeItemsPerPage = typeof itemsPerPage === "number" && itemsPerPage > 0 && Number.isFinite(itemsPerPage)
+      ? itemsPerPage
+      : 9;
+    
+    // Ensure totalItems is valid
+    const safeTotalItems = typeof totalItems === "number" && totalItems >= 0 && Number.isFinite(totalItems)
+      ? totalItems
+      : 0;
 
-    const start = Math.max(1, currentPage - 2);
+    const totalPages = Math.max(1, Math.ceil(safeTotalItems / safeItemsPerPage));
+    if (totalPages <= 1) return null;
+    
+    // Ensure currentPage is within bounds
+    const safeCurrentPage = typeof currentPage === "number" && currentPage > 0 && Number.isFinite(currentPage)
+      ? Math.min(Math.max(1, currentPage), totalPages)
+      : 1;
+
+    const start = Math.max(1, safeCurrentPage - 2);
     const end = Math.min(totalPages, start + 4);
 
     const pages: number[] = [];
     for (let p = start; p <= end; p++) pages.push(p);
 
-    const startItem = (currentPage - 1) * itemsPerPage + 1;
-    const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+    const startItem = (safeCurrentPage - 1) * safeItemsPerPage + 1;
+    const endItem = Math.min(safeCurrentPage * safeItemsPerPage, safeTotalItems);
 
     return (
       <div className="catalogPagination-wrapper">
@@ -192,10 +221,10 @@ class BouquetCatalogView extends Component<Props> {
         <nav className="catalogPagination" aria-label="Navigasi halaman">
           <button
             className="catalogPagination__btn catalogPagination__btn--prev"
-            disabled={currentPage === 1}
-            onClick={() => onPageChange(currentPage - 1)}
+            disabled={safeCurrentPage === 1}
+            onClick={() => onPageChange(Math.max(1, safeCurrentPage - 1))}
             aria-label="Halaman sebelumnya"
-            aria-disabled={currentPage === 1}
+            aria-disabled={safeCurrentPage === 1}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -225,11 +254,11 @@ class BouquetCatalogView extends Component<Props> {
               <button
                 key={p}
                 className={`catalogPagination__page ${
-                  currentPage === p ? "is-active" : ""
+                  safeCurrentPage === p ? "is-active" : ""
                 }`}
                 onClick={() => onPageChange(p)}
                 aria-label={`Halaman ${p}`}
-                aria-current={currentPage === p ? "page" : undefined}
+                aria-current={safeCurrentPage === p ? "page" : undefined}
                 role="listitem"
               >
                 {p}
@@ -256,10 +285,10 @@ class BouquetCatalogView extends Component<Props> {
 
           <button
             className="catalogPagination__btn catalogPagination__btn--next"
-            disabled={currentPage === totalPages}
-            onClick={() => onPageChange(currentPage + 1)}
+            disabled={safeCurrentPage === totalPages}
+            onClick={() => onPageChange(Math.min(totalPages, safeCurrentPage + 1))}
             aria-label="Halaman berikutnya"
-            aria-disabled={currentPage === totalPages}
+            aria-disabled={safeCurrentPage === totalPages}
           >
             <span>Berikutnya</span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -304,14 +333,28 @@ class BouquetCatalogView extends Component<Props> {
       );
     }
 
-    const total = bouquets.length;
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const pageItems = bouquets.slice(startIndex, startIndex + itemsPerPage);
+    // Ensure bouquets is an array
+    const safeBouquets = Array.isArray(bouquets) ? bouquets : [];
+    const total = safeBouquets.length;
+    
+    // Ensure itemsPerPage is valid (prevent division by zero)
+    const safeItemsPerPage = typeof itemsPerPage === "number" && itemsPerPage > 0 && Number.isFinite(itemsPerPage)
+      ? itemsPerPage
+      : 9;
+    
+    // Ensure currentPage is valid and within bounds
+    const totalPages = Math.max(1, Math.ceil(total / safeItemsPerPage));
+    const safeCurrentPage = typeof currentPage === "number" && currentPage > 0 && Number.isFinite(currentPage)
+      ? Math.min(currentPage, totalPages)
+      : 1;
+    
+    const startIndex = (safeCurrentPage - 1) * safeItemsPerPage;
+    const pageItems = safeBouquets.slice(startIndex, startIndex + safeItemsPerPage);
     
     // Use infinite scroll for large datasets (50+ bouquets)
     const useInfiniteScroll = total > 50;
 
-    const skeletonCount = Math.max(6, Math.min(itemsPerPage || 0, 12));
+    const skeletonCount = Math.max(6, Math.min(safeItemsPerPage, 12));
 
     const DEFAULT_PRICE: Range = [0, 1_000_000];
 

@@ -1126,7 +1126,11 @@
   }
 
   .catalogHeader {
-    text-align: left;
+    /* Keep text-align center for title */
+  }
+
+  .catalogHeader__content {
+    text-align: center;
   }
 
   .catalogSubtitle {
