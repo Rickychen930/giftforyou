@@ -91,14 +91,58 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   });
   
   // Update openGroups when arrays change to ensure filters are visible
+  // Use ref to track previous values and only update when actually changed
+  const prevLengthsRef = React.useRef({
+    allTypes: safeAllTypes.length,
+    allSizes: safeAllSizes.length,
+    allCollections: safeAllCollections.length,
+    selectedTypes: safeSelectedTypes.length,
+    selectedSizes: safeSelectedSizes.length,
+    selectedCollections: safeSelectedCollections.length,
+  });
+  
   React.useEffect(() => {
     if (isTopbar) return; // Topbar always shows filters
     
-    setOpenGroups((prev) => ({
-      selectedTypes: prev.selectedTypes || safeSelectedTypes.length > 0 || safeAllTypes.length <= 8,
-      selectedSizes: prev.selectedSizes || safeSelectedSizes.length > 0 || safeAllSizes.length <= 8,
-      selectedCollections: prev.selectedCollections || safeSelectedCollections.length > 0 || safeAllCollections.length <= 8,
-    }));
+    // Only update if lengths actually changed to prevent unnecessary re-renders
+    const lengthsChanged = 
+      prevLengthsRef.current.allTypes !== safeAllTypes.length ||
+      prevLengthsRef.current.allSizes !== safeAllSizes.length ||
+      prevLengthsRef.current.allCollections !== safeAllCollections.length ||
+      prevLengthsRef.current.selectedTypes !== safeSelectedTypes.length ||
+      prevLengthsRef.current.selectedSizes !== safeSelectedSizes.length ||
+      prevLengthsRef.current.selectedCollections !== safeSelectedCollections.length;
+    
+    if (lengthsChanged) {
+      // Update ref first to prevent infinite loop
+      prevLengthsRef.current = {
+        allTypes: safeAllTypes.length,
+        allSizes: safeAllSizes.length,
+        allCollections: safeAllCollections.length,
+        selectedTypes: safeSelectedTypes.length,
+        selectedSizes: safeSelectedSizes.length,
+        selectedCollections: safeSelectedCollections.length,
+      };
+      
+      // Only update state if the new value is different from current
+      setOpenGroups((prev) => {
+        const newState = {
+          selectedTypes: prev.selectedTypes || safeSelectedTypes.length > 0 || safeAllTypes.length <= 8,
+          selectedSizes: prev.selectedSizes || safeSelectedSizes.length > 0 || safeAllSizes.length <= 8,
+          selectedCollections: prev.selectedCollections || safeSelectedCollections.length > 0 || safeAllCollections.length <= 8,
+        };
+        
+        // Only return new state if it's actually different
+        if (
+          newState.selectedTypes !== prev.selectedTypes ||
+          newState.selectedSizes !== prev.selectedSizes ||
+          newState.selectedCollections !== prev.selectedCollections
+        ) {
+          return newState;
+        }
+        return prev; // Return same reference to prevent re-render
+      });
+    }
   }, [isTopbar, safeAllTypes.length, safeAllSizes.length, safeAllCollections.length, safeSelectedTypes.length, safeSelectedSizes.length, safeSelectedCollections.length]);
 
   // Search state for filter options (memoized to prevent unnecessary re-renders)

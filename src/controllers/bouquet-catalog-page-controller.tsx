@@ -82,15 +82,29 @@ class BouquetCatalogController extends Component<
     }
 
     // Reset page if out of bounds after filtering
-    const filtered = this.getFilteredBouquets();
-    const totalFiltered = filtered.length;
-    const itemsPerPage = typeof this.state.itemsPerPage === "number" && this.state.itemsPerPage > 0
-      ? this.state.itemsPerPage
-      : 9;
-    const maxPage = Math.max(1, Math.ceil(totalFiltered / itemsPerPage));
+    // Only check if filters actually changed to prevent infinite loops
+    const filtersChanged = 
+      prevState.selectedTypes !== this.state.selectedTypes ||
+      prevState.selectedSizes !== this.state.selectedSizes ||
+      prevState.selectedCollections !== this.state.selectedCollections ||
+      prevState.priceRange[0] !== this.state.priceRange[0] ||
+      prevState.priceRange[1] !== this.state.priceRange[1] ||
+      prevState.searchQuery !== this.state.searchQuery ||
+      prevState.collectionNameFilter !== this.state.collectionNameFilter;
     
-    if (this.state.currentPage > maxPage && maxPage > 0) {
-      this.setState({ currentPage: 1 });
+    if (filtersChanged) {
+      const filtered = this.getFilteredBouquets();
+      const totalFiltered = filtered.length;
+      const itemsPerPage = typeof this.state.itemsPerPage === "number" && this.state.itemsPerPage > 0
+        ? this.state.itemsPerPage
+        : 9;
+      const maxPage = Math.max(1, Math.ceil(totalFiltered / itemsPerPage));
+      
+      // Only update if currentPage is actually out of bounds AND different from 1
+      // This prevents infinite loop if currentPage is already 1
+      if (this.state.currentPage > maxPage && maxPage > 0 && this.state.currentPage !== 1) {
+        this.setState({ currentPage: 1 });
+      }
     }
 
     // Keep URL in sync with current filters/sort/page so the state is shareable.
