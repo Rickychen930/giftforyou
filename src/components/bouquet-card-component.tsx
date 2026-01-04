@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo, memo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/BouquetCardComponent.css";
 
@@ -49,13 +49,14 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
   const [isFavorited, setIsFavorited] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(false);
 
-  const imageUrl = image
-    ? image.startsWith("http")
-      ? image
-      : `${API_BASE}${image}`
-    : FALLBACK_IMAGE;
+  // Memoize imageUrl to prevent recalculation on every render
+  const imageUrl = useMemo(() => {
+    if (!image) return FALLBACK_IMAGE;
+    return image.startsWith("http") ? image : `${API_BASE}${image}`;
+  }, [image]);
 
-  const detailHref = `/bouquet/${_id}`;
+  // Memoize detailHref
+  const detailHref = useMemo(() => `/bouquet/${_id}`, [_id]);
 
   const handleCardNavigate = useCallback(() => {
     // Track recently viewed
@@ -118,8 +119,8 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
     setIsFavorited(isFavorite(_id));
   }, [_id]);
 
-  // Build quick order message
-  const buildQuickOrderMessage = useCallback(() => {
+  // Build quick order message - memoized with useMemo instead of useCallback for better performance
+  const quickOrderMessage = useMemo(() => {
     const detailUrl = `${window.location.origin}/bouquet/${_id}`;
     const lines = [
       `Halo ${STORE_PROFILE.brand.displayName}, saya ingin pesan:`,
@@ -149,10 +150,9 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
   const handleQuickOrder = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const message = buildQuickOrderMessage();
-    const waLink = buildWhatsAppLink(message);
+    const waLink = buildWhatsAppLink(quickOrderMessage);
     window.open(waLink, "_blank", "noopener,noreferrer");
-  }, [buildQuickOrderMessage]);
+  }, [quickOrderMessage]);
 
   const handleAddToCart = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -275,7 +275,7 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
                 </svg>
               </button>
               <a
-                href={buildWhatsAppLink(buildQuickOrderMessage())}
+                href={buildWhatsAppLink(quickOrderMessage)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bouquetCard__quickAction bouquetCard__quickAction--order"
@@ -337,4 +337,27 @@ const BouquetCard: React.FC<BouquetCardProps> = ({
   );
 };
 
-export default BouquetCard;
+// Custom comparison function for memo to prevent unnecessary re-renders
+const areBouquetCardPropsEqual = (
+  prevProps: BouquetCardProps,
+  nextProps: BouquetCardProps
+): boolean => {
+  // Compare all props that affect rendering
+  return (
+    prevProps._id === nextProps._id &&
+    prevProps.name === nextProps.name &&
+    prevProps.description === nextProps.description &&
+    prevProps.price === nextProps.price &&
+    prevProps.type === nextProps.type &&
+    prevProps.size === nextProps.size &&
+    prevProps.image === nextProps.image &&
+    prevProps.status === nextProps.status &&
+    prevProps.collectionName === nextProps.collectionName &&
+    prevProps.isNewEdition === nextProps.isNewEdition &&
+    prevProps.isFeatured === nextProps.isFeatured &&
+    JSON.stringify(prevProps.customPenanda ?? []) === JSON.stringify(nextProps.customPenanda ?? [])
+  );
+};
+
+// Memoize component with custom comparison for optimal performance
+export default memo(BouquetCard, areBouquetCardPropsEqual);

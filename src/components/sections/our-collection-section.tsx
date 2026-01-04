@@ -1,80 +1,19 @@
 // src/components/sections/our-collection-section.tsx
-import React, { useMemo, useEffect, useRef, useState } from "react";
+import React, { useMemo, useEffect, useRef, useState, useCallback, memo } from "react";
 import "../../styles/OurCollectionSection.css";
 import CollectionContainer from "../collection-container-component";
-import type { BouquetCardProps } from "../collection-container-component";
-// formatCollectionName is used in CollectionCard component
-
+import { prepareCollections } from "../../utils/collection-transformer";
 import type { Collection } from "../../models/domain/collection";
-import type { Bouquet } from "../../models/domain/bouquet";
 
 interface OurCollectionViewProps {
   items: Collection[];
   loading?: boolean;
   errorMessage?: string;
+  onRetry?: () => void;
 }
 
-type RawBouquet = Bouquet & {
-  imageUrl?: string;
-  category?: string;
-  inStock?: boolean;
-};
-
-const normalizeBouquet = (
-  raw: unknown,
-  collectionName: string
-): BouquetCardProps | null => {
-  if (!raw || typeof raw !== "object") return null;
-
-  const data = raw as Partial<RawBouquet> & { id?: string };
-
-  const id = data._id ?? data.id;
-  const name = data.name;
-
-  if (!id || !name) return null;
-
-  const imageCandidate =
-    (typeof data.image === "string" && data.image) ||
-    (typeof data.imageUrl === "string" && data.imageUrl) ||
-    "";
-
-  const typeCandidate =
-    (typeof data.type === "string" && data.type) ||
-    (typeof (data as any).category === "string" &&
-      (data as any).category) ||
-    "";
-
-  const statusCandidate = data.status === "preorder" ? "preorder" : "ready";
-
-  return {
-    _id: String(id),
-    name,
-    description: data.description ?? "",
-    price: typeof data.price === "number" ? data.price : Number(data.price) || 0,
-    type: typeCandidate,
-    size: data.size ?? "",
-    image: imageCandidate,
-    status:
-      statusCandidate === "ready" && data.inStock === false
-        ? "preorder"
-        : statusCandidate,
-    collectionName: data.collectionName ?? collectionName,
-    isNewEdition: typeof data.isNewEdition === "boolean" ? data.isNewEdition : false,
-    isFeatured: typeof data.isFeatured === "boolean" ? data.isFeatured : false,
-  };
-};
-
-const toBouquetProps = (collection: Collection): BouquetCardProps[] => {
-  const list = collection.bouquets;
-  if (!Array.isArray(list) || list.length === 0) return [];
-
-  return list
-    .map((item) => normalizeBouquet(item, collection.name))
-    .filter((b): b is BouquetCardProps => Boolean(b));
-};
-
-// Loading skeleton component
-const CollectionSkeleton: React.FC = () => (
+// Loading skeleton component - memoized for performance
+const CollectionSkeleton: React.FC = memo(() => (
   <div className="collectionCard collectionCard--skeleton" aria-hidden="true">
     <div className="collectionCard__header">
       <div className="collectionCard__heading">
@@ -96,62 +35,149 @@ const CollectionSkeleton: React.FC = () => (
       </div>
     </div>
   </div>
-);
+));
+
+CollectionSkeleton.displayName = "CollectionSkeleton";
+
+// Error state component with retry functionality
+const ErrorState: React.FC<{ message: string; onRetry?: () => void }> = memo(({ message, onRetry }) => (
+  <div className="ourCollection__error" role="alert" aria-live="polite">
+    <div className="ourCollection__errorIcon" aria-hidden="true">
+      <svg
+        width="48"
+        height="48"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 9V13"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <path
+          d="M12 17H12.01"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <path
+          d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </div>
+    <h3 className="ourCollection__errorTitle">Gagal memuat koleksi</h3>
+    <p className="ourCollection__errorText">{message}</p>
+    {onRetry && (
+      <button
+        onClick={onRetry}
+        className="ourCollection__errorRetry"
+        aria-label="Coba lagi memuat koleksi"
+      >
+        Coba Lagi
+      </button>
+    )}
+  </div>
+));
+
+ErrorState.displayName = "ErrorState";
+
+// Empty state component
+const EmptyState: React.FC = memo(() => (
+  <div
+    className="ourCollection__empty"
+    role="status"
+    aria-live="polite"
+  >
+    <div className="ourCollection__emptyIcon" aria-hidden="true">
+      <svg
+        width="48"
+        height="48"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M20 7H4C2.89543 7 2 7.89543 2 9V19C2 20.1046 2.89543 21 4 21H20C21.1046 21 22 20.1046 22 19V9C22 7.89543 21.1046 7 20 7Z"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M16 7V5C16 4.46957 15.7893 3.96086 15.4142 3.58579C15.0391 3.21071 14.5304 3 14 3H10C9.46957 3 8.96086 3.21071 8.58579 3.58579C8.21071 3.96086 8 4.46957 8 5V7"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </div>
+    <h3 className="ourCollection__emptyTitle">Belum ada koleksi</h3>
+    <p className="ourCollection__emptyText">
+      Silakan cek kembali — koleksi baru akan ditambahkan secara
+      berkala.
+    </p>
+  </div>
+));
+
+EmptyState.displayName = "EmptyState";
 
 const OurCollectionSection: React.FC<OurCollectionViewProps> = ({
   items,
   loading = false,
   errorMessage = "",
+  onRetry,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
+  // Memoize prepared collections for performance
   const prepared = useMemo(() => {
-    return (items ?? [])
-      .map((c) => {
-        const anyC = c as unknown as { _id?: string; id?: string; name?: string };
-        const id = anyC?._id ?? anyC?.id ?? anyC?.name ?? "";
-        const name = typeof anyC?.name === "string" ? anyC.name.trim() : "";
-
-        return {
-          id,
-          name,
-          description: c.description ?? "",
-          bouquets: toBouquetProps(c),
-        };
-      })
-      .filter((c) => Boolean(c.id) && Boolean(c.name))
-      .filter((c) => c.bouquets.length > 0);
+    return prepareCollections(items ?? []);
   }, [items]);
 
-  // Intersection Observer for scroll animations
+  // Intersection Observer callback - memoized and optimized
+  const handleIntersection = useCallback((entries: IntersectionObserverEntry[]) => {
+    // Use requestAnimationFrame for smoother updates
+    requestAnimationFrame(() => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          // Unobserve after visible to prevent unnecessary callbacks
+          if (observerRef.current && sectionRef.current) {
+            observerRef.current.unobserve(sectionRef.current);
+          }
+        }
+      });
+    });
+  }, []);
+
+  // Intersection Observer for scroll animations - optimized with single observer
   useEffect(() => {
     const currentSection = sectionRef.current;
+    if (!currentSection || isVisible) return; // Don't create observer if already visible
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsVisible(true);
-          }
-        });
-      },
-      {
-        threshold: 0.1,
-        rootMargin: "0px 0px -100px 0px",
-      }
-    );
+    const observerOptions: IntersectionObserverInit = {
+      threshold: 0.1,
+      rootMargin: "0px 0px -100px 0px",
+    };
 
-    if (currentSection) {
-      observer.observe(currentSection);
-    }
+    observerRef.current = new IntersectionObserver(handleIntersection, observerOptions);
+    observerRef.current.observe(currentSection);
 
     return () => {
-      if (currentSection) {
-        observer.unobserve(currentSection);
+      if (observerRef.current && currentSection) {
+        observerRef.current.unobserve(currentSection);
+        observerRef.current = null;
       }
     };
-  }, []);
+  }, [handleIntersection, isVisible]);
 
   return (
     <section
@@ -184,74 +210,9 @@ const OurCollectionSection: React.FC<OurCollectionViewProps> = ({
             <CollectionSkeleton />
           </div>
         ) : errorMessage ? (
-          <div className="ourCollection__error" role="alert" aria-live="polite">
-            <div className="ourCollection__errorIcon" aria-hidden="true">
-              <svg
-                width="48"
-                height="48"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M12 9V13"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M12 17H12.01"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-            <h3 className="ourCollection__errorTitle">Gagal memuat koleksi</h3>
-            <p className="ourCollection__errorText">{errorMessage}</p>
-          </div>
+          <ErrorState message={errorMessage} onRetry={onRetry} />
         ) : !prepared.length ? (
-          <div
-            className="ourCollection__empty"
-            role="status"
-            aria-live="polite"
-          >
-            <div className="ourCollection__emptyIcon" aria-hidden="true">
-              <svg
-                width="48"
-                height="48"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M20 7H4C2.89543 7 2 7.89543 2 9V19C2 20.1046 2.89543 21 4 21H20C21.1046 21 22 20.1046 22 19V9C22 7.89543 21.1046 7 20 7Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M16 7V5C16 4.46957 15.7893 3.96086 15.4142 3.58579C15.0391 3.21071 14.5304 3 14 3H10C9.46957 3 8.96086 3.21071 8.58579 3.58579C8.21071 3.96086 8 4.46957 8 5V7"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-            <h3 className="ourCollection__emptyTitle">Belum ada koleksi</h3>
-            <p className="ourCollection__emptyText">
-              Silakan cek kembali — koleksi baru akan ditambahkan secara
-              berkala.
-            </p>
-          </div>
+          <EmptyState />
         ) : (
           <div className="ourCollection__grid">
             {prepared.map((c, index) => (
@@ -262,6 +223,7 @@ const OurCollectionSection: React.FC<OurCollectionViewProps> = ({
                 description={c.description}
                 bouquets={c.bouquets}
                 index={index}
+                style={{ "--card-index": index } as React.CSSProperties}
               />
             ))}
           </div>
@@ -271,4 +233,36 @@ const OurCollectionSection: React.FC<OurCollectionViewProps> = ({
   );
 };
 
-export default OurCollectionSection;
+// Custom comparison function for memo to prevent unnecessary re-renders
+const arePropsEqual = (prevProps: OurCollectionViewProps, nextProps: OurCollectionViewProps): boolean => {
+  // If loading state changed, allow re-render
+  if (prevProps.loading !== nextProps.loading) return false;
+  
+  // If error message changed, allow re-render
+  if (prevProps.errorMessage !== nextProps.errorMessage) return false;
+  
+  // Deep compare items array
+  if (prevProps.items.length !== nextProps.items.length) return false;
+  
+  // Compare items by reference and key fields (shallow comparison is enough for arrays)
+  // Since items come from API and are replaced, reference comparison should work
+  if (prevProps.items !== nextProps.items) {
+    // Only re-render if items actually changed (by ID comparison)
+    const prevIds = prevProps.items.map((item: Collection) => {
+      const anyC = item as { _id?: string; id?: string; name?: string };
+      return anyC?._id ?? anyC?.id ?? anyC?.name ?? "";
+    }).sort().join(",");
+    
+    const nextIds = nextProps.items.map((item: Collection) => {
+      const anyC = item as { _id?: string; id?: string; name?: string };
+      return anyC?._id ?? anyC?.id ?? anyC?.name ?? "";
+    }).sort().join(",");
+    
+    if (prevIds !== nextIds) return false;
+  }
+  
+  return true;
+};
+
+// Memoize component with custom comparison for optimal performance
+export default memo(OurCollectionSection, arePropsEqual);

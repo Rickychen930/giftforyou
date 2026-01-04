@@ -1,5 +1,5 @@
 // src/components/HomePage.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import "../styles/HomePage.css";
 
 import type { Collection } from "../models/domain/collection";
@@ -27,6 +27,21 @@ const HomePage: React.FC = () => {
   );
   const [heroLoading, setHeroLoading] = useState<boolean>(true);
 
+  // Memoized load function for retry functionality
+  const loadCollections = useCallback(async (signal: AbortSignal) => {
+    try {
+      setState("loading");
+      setErrorMessage("");
+      const data = await getCollections(signal);
+      setCollections(data);
+      setState("success");
+    } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
+      setState("error");
+      setErrorMessage(err instanceof Error ? err.message : "Unknown error");
+    }
+  }, []);
+
   useEffect(() => {
     const controller = new AbortController();
 
@@ -40,39 +55,35 @@ const HomePage: React.FC = () => {
     });
 
     const load = async () => {
-      try {
-        setState("loading");
-        setErrorMessage("");
+      // 1) Fetch hero content (non-blocking, uses service layer)
+      setHeroLoading(true);
+      heroSliderService
+        .fetchHeroSlider(controller.signal)
+        .then((data) => {
+          setHeroContent(data);
+        })
+        .catch(() => {
+          // Service handles errors gracefully, just set to null
+          setHeroContent(null);
+        })
+        .finally(() => {
+          setHeroLoading(false);
+        });
 
-        // 1) Fetch hero content (non-blocking, uses service layer)
-        setHeroLoading(true);
-        heroSliderService
-          .fetchHeroSlider(controller.signal)
-          .then((data) => {
-            setHeroContent(data);
-          })
-          .catch(() => {
-            // Service handles errors gracefully, just set to null
-            setHeroContent(null);
-          })
-          .finally(() => {
-            setHeroLoading(false);
-          });
-
-        // 2) Fetch collections
-        const data = await getCollections(controller.signal);
-        setCollections(data);
-        setState("success");
-      } catch (err: unknown) {
-        if (err instanceof DOMException && err.name === "AbortError") return;
-        setState("error");
-        setErrorMessage(err instanceof Error ? err.message : "Unknown error");
-      }
+      // 2) Fetch collections
+      await loadCollections(controller.signal);
     };
 
     load();
     return () => controller.abort();
-  }, []);
+  }, [loadCollections]);
+
+  // Retry function for error state
+  const handleRetry = useCallback(() => {
+    const controller = new AbortController();
+    loadCollections(controller.signal);
+    return () => controller.abort();
+  }, [loadCollections]);
 
   useEffect(() => {
     // Initialize luxury enhancements
@@ -102,6 +113,7 @@ const HomePage: React.FC = () => {
         items={collections}
         loading={state === "loading"}
         errorMessage={state === "error" ? errorMessage : ""}
+        onRetry={handleRetry}
       />
 
       <StoreLocationSection />
