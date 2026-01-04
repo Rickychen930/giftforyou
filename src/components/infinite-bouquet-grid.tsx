@@ -57,10 +57,14 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
   // Flatten all pages into a single array with deduplication
   const allBouquets = useMemo(() => {
     if (!data?.pages) return [];
-    const all = (data as InfiniteData<BouquetResponse>).pages.flatMap((page: BouquetResponse) => page.bouquets);
+    const all = (data as InfiniteData<BouquetResponse>).pages.flatMap((page: BouquetResponse) => {
+      // Ensure page.bouquets is an array
+      return Array.isArray(page?.bouquets) ? page.bouquets : [];
+    });
     // Deduplicate by _id to prevent duplicate items
     const seen = new Set<string>();
     return all.filter((bouquet) => {
+      if (!bouquet || !bouquet._id) return false;
       const id = String(bouquet._id);
       if (seen.has(id)) {
         return false;

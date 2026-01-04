@@ -77,35 +77,46 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
   gap = 16,
   onItemsRendered,
 }) => {
+  // Ensure bouquets is always an array to prevent undefined/null errors
+  const safeBouquets = useMemo(() => {
+    return Array.isArray(bouquets) ? bouquets : [];
+  }, [bouquets]);
+
+  // Ensure containerWidth is valid (greater than 0)
+  const safeContainerWidth = useMemo(() => {
+    return typeof containerWidth === "number" && containerWidth > 0 ? containerWidth : 1200;
+  }, [containerWidth]);
+
   // Calculate column count based on container width
   const columnCount = useMemo(() => {
     if (propColumnCount) return propColumnCount;
     
     // Responsive column count
-    if (containerWidth >= 1200) return 4;
-    if (containerWidth >= 768) return 3;
-    if (containerWidth >= 480) return 2;
+    if (safeContainerWidth >= 1200) return 4;
+    if (safeContainerWidth >= 768) return 3;
+    if (safeContainerWidth >= 480) return 2;
     return 1;
-  }, [containerWidth, propColumnCount]);
+  }, [safeContainerWidth, propColumnCount]);
 
   // Calculate column width
   const columnWidth = useMemo(() => {
-    return (containerWidth - gap * (columnCount + 1)) / columnCount;
-  }, [containerWidth, columnCount, gap]);
+    const calculatedWidth = (safeContainerWidth - gap * (columnCount + 1)) / columnCount;
+    return calculatedWidth > 0 ? calculatedWidth : 200; // Fallback to minimum width
+  }, [safeContainerWidth, columnCount, gap]);
 
   // Calculate row count
   const rowCount = useMemo(() => {
-    return Math.ceil(bouquets.length / columnCount);
-  }, [bouquets.length, columnCount]);
+    return Math.ceil(safeBouquets.length / columnCount);
+  }, [safeBouquets.length, columnCount]);
 
-  // Memoize cell data
+  // Memoize cell data - ensure it's always a valid object
   const cellData = useMemo(
     () => ({
-      bouquets,
+      bouquets: safeBouquets,
       columnCount,
       gap,
     }),
-    [bouquets, columnCount, gap]
+    [safeBouquets, columnCount, gap]
   );
 
   // Handle items rendered callback
@@ -124,13 +135,13 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
       if (onItemsRendered) {
         const startIndex = visibleRowStartIndex * columnCount + visibleColumnStartIndex;
         const stopIndex = visibleRowStopIndex * columnCount + visibleColumnStopIndex;
-        onItemsRendered(startIndex, Math.min(stopIndex, bouquets.length - 1));
+        onItemsRendered(startIndex, Math.min(stopIndex, safeBouquets.length - 1));
       }
     },
-    [onItemsRendered, columnCount, bouquets.length]
+    [onItemsRendered, columnCount, safeBouquets.length]
   );
 
-  if (bouquets.length === 0) {
+  if (safeBouquets.length === 0) {
     return (
       <div className="virtualized-grid-empty">
         <p>Tidak ada bouquet ditemukan</p>
@@ -150,7 +161,7 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
       className="virtualized-grid-container"
       style={{
         height: containerHeight,
-        width: containerWidth,
+        width: safeContainerWidth,
         overflow: "auto",
       }}
     >
@@ -161,7 +172,7 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
           columnWidth,
           rowCount,
           rowHeight: propRowHeight,
-          width: containerWidth,
+          width: safeContainerWidth,
           height: containerHeight,
           itemData: cellData,
           onItemsRendered: handleItemsRendered,

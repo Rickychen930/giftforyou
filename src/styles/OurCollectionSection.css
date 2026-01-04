@@ -54,6 +54,7 @@
   opacity: 1 !important; /* Ensure visible by default */
   transform: translateY(0);
   position: relative;
+  visibility: visible !important;
   /* Animation only enhances, doesn't hide */
   animation: fadeInUpElegant 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
@@ -65,9 +66,18 @@
   visibility: visible !important;
 }
 
+/* Force visibility on all child elements */
+.ourCollection__header .ourCollection__eyebrow,
+.ourCollection__header .ourCollection__title,
+.ourCollection__header .ourCollection__subtitle {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
 .ourCollection--visible .ourCollection__header {
   opacity: 1 !important;
   transform: translateY(0);
+  visibility: visible !important;
 }
 
 .ourCollection__eyebrow {
@@ -78,12 +88,14 @@
   font-size: clamp(0.7rem, 0.9vw, 0.8rem);
   color: var(--ink-550);
   opacity: 1 !important; /* Ensure visible by default */
+  visibility: visible !important;
   position: relative;
   animation: fadeInElegant 0.65s ease-out 0.2s forwards;
 }
 
 .ourCollection--visible .ourCollection__eyebrow {
   opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .ourCollection__title {
@@ -105,6 +117,7 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   opacity: 1 !important; /* Ensure visible by default */
+  visibility: visible !important;
   font-family: "Playfair Display", Georgia, serif;
   line-height: 1.08;
   text-wrap: balance;
@@ -116,6 +129,7 @@
 .ourCollection--visible .ourCollection__title {
   opacity: 1 !important;
   transform: translateY(0);
+  visibility: visible !important;
 }
 
 /* Elegant animated divider with refined gradient and glow */
