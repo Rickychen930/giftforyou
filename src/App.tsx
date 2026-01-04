@@ -9,7 +9,7 @@ import {
 } from "react-router-dom";
 
 import { NAV_LINKS } from "./constants/app-constants";
-import Header from "./view/header";
+import HeaderView from "./view/header-view";
 import Footer from "./view/footer";
 
 import HomePage from "./view/home-page";
@@ -153,7 +153,7 @@ const AppLayout: React.FC = () => {
 
   return (
     <>
-      <Header navLinks={navLinks} />
+      <HeaderView navLinks={navLinks} />
 
       <PageTransition>
         <Routes location={location}>
