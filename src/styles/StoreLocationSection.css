@@ -1,32 +1,51 @@
 @import "colors.css";
 
 /* =========================
-   Store Location Section - Enhanced
-========================= */
+   Store Location Section - Luxury & Elegant Design
+   ========================= */
 .storeLocation {
   position: relative;
   width: 100%;
   min-height: auto;
   --sl-gutter: clamp(1rem, 3vw, 1.5rem);
-  padding: clamp(3rem, 6vw, 4.5rem) 0;
+  padding: clamp(4rem, 8vw, 6rem) 0;
   background:
-    radial-gradient(900px 460px at 14% 8%, var(--sl-bg-1), transparent 62%),
-    radial-gradient(900px 520px at 92% 16%, var(--sl-bg-2), transparent 62%),
+    radial-gradient(1200px 600px at 12% 6%, var(--sl-bg-1), transparent 65%),
+    radial-gradient(1200px 650px at 88% 14%, var(--sl-bg-2), transparent 65%),
     linear-gradient(135deg, var(--sl-bg-3) 0%, var(--sl-bg-4) 100%);
   border-top: 1px solid var(--sl-section-top-border);
   overflow: hidden;
   z-index: 1;
 }
 
-/* Animated gradient overlay */
+/* Animated gradient overlay with luxury effect */
 .storeLocation::before {
   content: "";
   position: absolute;
   inset: 0 0 auto 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(212, 140, 156, 0.28), transparent);
-  opacity: 0.9;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(212, 140, 156, 0.35),
+    rgba(168, 213, 186, 0.28),
+    rgba(212, 140, 156, 0.35),
+    transparent
+  );
+  opacity: 0.95;
   pointer-events: none;
+  animation: shimmer 8s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 0.6;
+    transform: translateX(-100%);
+  }
+  50% {
+    opacity: 0.95;
+    transform: translateX(100%);
+  }
 }
 
 /* Full-screen container layout */
@@ -38,77 +57,135 @@
   grid-template-columns: 1fr;
   grid-template-rows: 1fr;
   gap: 0;
-  border-radius: 18px;
+  border-radius: 24px;
   overflow: hidden;
-  box-shadow: var(--sl-shadow);
+  box-shadow: 
+    0 32px 96px rgba(0, 0, 0, 0.12),
+    0 16px 48px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
   border: 1px solid var(--sl-border);
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
 }
 
 /* =========================
-   Info Panel - Dynamic Height
-========================= */
+   Section Visibility Animation
+   ========================= */
+.storeLocation {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity, transform;
+}
+
+.storeLocation--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* =========================
+   Info Panel - Premium Glass Morphism
+   ========================= */
 .storeLocation__info {
   position: relative;
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.98) 0%, 
-    rgba(252, 244, 248, 0.96) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(252, 244, 248, 0.97) 50%,
+    rgba(255, 255, 255, 0.98) 100%
+  );
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
   border-right: none;
-  backdrop-filter: blur(20px);
-  padding: clamp(1.75rem, 2.6vw, 2.5rem) clamp(1.25rem, 2.2vw, 2rem);
+  padding: clamp(2.5rem, 4vw, 3.5rem) clamp(1.75rem, 3vw, 2.5rem);
   display: flex;
   flex-direction: column;
-  gap: 1.35rem;
+  gap: 1.75rem;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s,
+              transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;
+  will-change: opacity, transform;
+}
+
+.storeLocation__info--visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Custom scrollbar for info panel */
 .storeLocation__info::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 .storeLocation__info::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(0, 0, 0, 0.04);
   border-radius: 10px;
 }
 
 .storeLocation__info::-webkit-scrollbar-thumb {
-  background: rgba(212, 140, 156, 0.3);
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.4),
+    rgba(168, 213, 186, 0.35)
+  );
   border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 .storeLocation__info::-webkit-scrollbar-thumb:hover {
-  background: rgba(212, 140, 156, 0.5);
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.6),
+    rgba(168, 213, 186, 0.5)
+  );
+  background-clip: padding-box;
 }
 
-/* Decorative floating elements (subtle luxury detail) */
+/* Decorative floating elements (luxury detail) */
 .storeLocation__decorFloater {
   position: absolute;
   color: var(--brand-rose-500);
   pointer-events: none;
-  opacity: 0.26;
+  opacity: 0.22;
+  z-index: 0;
+  transition: opacity 0.4s ease;
 }
 
 .storeLocation__decorFloater--1 {
-  top: 10%;
-  right: 10%;
+  top: 8%;
+  right: 8%;
+  animation: float 12s ease-in-out infinite;
 }
 
 .storeLocation__decorFloater--2 {
-  bottom: 14%;
-  left: 8%;
-  animation-delay: 2.8s;
+  bottom: 12%;
+  left: 6%;
+  animation: float 14s ease-in-out infinite 2s;
 }
 
 @keyframes float {
   0%, 100% {
-    transform: translateY(0);
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.22;
   }
-  50% {
-    transform: translateY(-10px);
+  33% {
+    transform: translateY(-12px) rotate(2deg);
+    opacity: 0.28;
+  }
+  66% {
+    transform: translateY(-8px) rotate(-1deg);
+    opacity: 0.25;
   }
 }
 
 /* Respect reduced-motion preferences */
 @media (prefers-reduced-motion: reduce) {
+  .storeLocation,
   .storeLocation *,
   .storeLocation *::before,
   .storeLocation *::after {
@@ -121,56 +198,90 @@
   .storeLocation__decorFloater {
     display: none !important;
   }
+
+  .storeLocation::before {
+    animation: none !important;
+  }
+
+  .storeLocation__info {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .storeLocation--visible {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
-/* Kicker + title (restored base styles) */
+/* =========================
+   Typography - Elegant & Clean
+   ========================= */
 .storeLocation__kicker {
   margin: 0;
   font-weight: 800;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   font-size: 0.75rem;
   color: var(--sl-kicker);
+  position: relative;
+  z-index: 1;
 }
 
 .storeLocation__title {
-  margin: 0.2rem 0 1.15rem;
-  font-size: clamp(1.65rem, 2.4vw, 2.2rem);
+  margin: 0.4rem 0 1.5rem;
+  font-size: clamp(1.85rem, 3vw, 2.5rem);
   font-weight: 950;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   color: var(--welcome-color-title);
-  line-height: 1.15;
+  line-height: 1.2;
   font-family: "Playfair Display", Georgia, serif;
   text-wrap: balance;
+  position: relative;
+  z-index: 1;
 }
 
 .storeLocation__title::after {
   content: "";
   display: block;
-  width: 80px;
-  height: 4px;
-  margin-top: 1rem;
+  width: clamp(80px, 12vw, 120px);
+  height: 5px;
+  margin-top: 1.25rem;
   border-radius: 999px;
   background: linear-gradient(
     90deg,
     rgba(212, 140, 156, 0.95),
-    rgba(168, 213, 186, 0.85)
+    rgba(168, 213, 186, 0.85),
+    rgba(212, 140, 156, 0.95)
   );
+  background-size: 200% 100%;
+  animation: gradient-shift 3s ease-in-out infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 /* =========================
-   Cards - Enhanced Design
-========================= */
+   Cards - Premium Design with Glass Morphism
+   ========================= */
 .storeLocation__cards {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.1rem;
+  gap: 1.5rem;
+  position: relative;
+  z-index: 1;
 }
 
 @media (min-width: 980px) {
   .storeLocation__cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
+    gap: 1.25rem;
   }
 
   .storeLocation__cards > .storeLocation__card:nth-child(3) {
@@ -180,14 +291,20 @@
 
 .storeLocation__card {
   position: relative;
-  border-radius: 16px;
-  padding: 1.3rem 1.25rem;
-  background: var(--sl-card-surface);
-  border: 1px solid var(--sl-card-border);
-  box-shadow: var(--sl-card-shadow);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 20px;
+  padding: clamp(1.5rem, 2.5vw, 2rem) clamp(1.35rem, 2vw, 1.75rem);
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 
+    0 12px 32px rgba(0, 0, 0, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
-  backdrop-filter: blur(10px);
+  will-change: transform, box-shadow;
+  contain: layout style paint;
 }
 
 /* Card hover glow effect */
@@ -197,63 +314,101 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 3px;
+  height: 4px;
   background: linear-gradient(
     90deg,
     transparent,
     var(--brand-rose-500),
+    var(--brand-sage-400),
+    var(--brand-rose-500),
     transparent
   );
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.4s ease;
+  z-index: 0;
 }
 
-/* Card icons */
+/* Card shimmer effect */
+.storeLocation__card::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Card icons - Premium design */
 .storeLocation__cardIcon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  margin-bottom: 1rem;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(212, 140, 156, 0.18), rgba(168, 213, 186, 0.18));
+  width: clamp(52px, 5vw, 56px);
+  height: clamp(52px, 5vw, 56px);
+  margin-bottom: 1.25rem;
+  border-radius: 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(212, 140, 156, 0.2),
+    rgba(168, 213, 186, 0.18)
+  );
   color: var(--brand-rose-500);
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow-1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 8px 20px rgba(212, 140, 156, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  position: relative;
+  z-index: 2;
+  will-change: transform;
+  transform: translateZ(0); /* GPU acceleration */
 }
 
 .storeLocation__cardIcon svg {
-  transition: transform 0.3s ease;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 2px 4px rgba(212, 140, 156, 0.2));
 }
 
 /* Card titles */
 .storeLocation__cardTitle {
-  margin: 0 0 0.95rem;
-  font-size: 1.2rem;
+  margin: 0 0 1.15rem;
+  font-size: clamp(1.15rem, 1.8vw, 1.35rem);
   font-weight: 950;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
   color: var(--sl-title);
-  transition: color 0.3s ease;
+  transition: color 0.4s ease;
+  position: relative;
+  z-index: 2;
 }
 
-/* Text with icons */
+/* Text with elegant styling */
 .storeLocation__text {
   display: flex;
   align-items: flex-start;
-  gap: 0.6rem;
-  margin: 0.5rem 0;
+  gap: 0.65rem;
+  margin: 0.6rem 0;
   color: var(--sl-muted);
-  line-height: 1.75;
+  line-height: 1.8;
   font-weight: 600;
-  font-size: 0.95rem;
-  transition: all 0.2s ease;
+  font-size: clamp(0.92rem, 1.1vw, 1rem);
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
 }
 
 .storeLocation__textIcon {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   flex-shrink: 0;
-  margin-top: 0.1rem;
+  margin-top: 0.15rem;
   transition: transform 0.3s ease;
 }
 
@@ -261,138 +416,227 @@
   color: var(--sl-link);
   text-decoration: none;
   font-weight: 700;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   position: relative;
+  display: inline-block;
 }
 
 .storeLocation__text a::after {
   content: "";
   position: absolute;
-  bottom: -2px;
+  bottom: -3px;
   left: 0;
   width: 0;
-  height: 2px;
-  background: var(--brand-rose-500);
-  transition: width 0.3s ease;
+  height: 2.5px;
+  background: linear-gradient(
+    90deg,
+    var(--brand-rose-500),
+    var(--brand-sage-400)
+  );
+  border-radius: 2px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .storeLocation__text a:focus-visible {
-  outline: 3px solid rgba(212, 140, 156, 0.35);
-  outline-offset: 3px;
-  border-radius: 8px;
+  outline: 3px solid rgba(212, 140, 156, 0.4);
+  outline-offset: 4px;
+  border-radius: 6px;
 }
 
 .storeLocation__text--closed {
-  opacity: 0.7;
+  opacity: 0.65;
+}
+
+.storeLocation__text--empty {
+  opacity: 0.6;
+  font-style: italic;
+  color: var(--sl-muted);
 }
 
 /* =========================
-   Action Buttons
-========================= */
-.storeLocation__directionsBtn,
-.storeLocation__whatsappBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  margin-top: 1rem;
-  padding: 0.75rem 1.4rem;
-  border-radius: 12px;
-  font-size: 0.92rem;
-  font-weight: 900;
-  text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  border: none;
-}
-
+   Action Buttons - Premium Design
+   ========================= */
 .storeLocation__actionsRow {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-top: 0.85rem;
+  gap: 0.85rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 2;
 }
 
-.storeLocation__copyBtn {
+.storeLocation__actionBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.55rem;
-  padding: 0.7rem 1rem;
-  border-radius: 12px;
-  border: 1px solid rgba(212, 140, 156, 0.22);
-  background: rgba(255, 255, 255, 0.78);
-  color: var(--sl-title);
-  font-size: 0.9rem;
+  gap: 0.65rem;
+  padding: clamp(0.75rem, 1.2vw, 0.9rem) clamp(1.25rem, 2vw, 1.6rem);
+  border-radius: 14px;
+  font-size: clamp(0.88rem, 1.1vw, 0.95rem);
   font-weight: 900;
+  text-decoration: none;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  border: none;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  will-change: transform, box-shadow;
+  transform: translateZ(0); /* GPU acceleration */
 }
 
-.storeLocation__copyBtn:focus-visible {
-  outline: 3px solid rgba(212, 140, 156, 0.35);
-  outline-offset: 3px;
+.storeLocation__actionBtn--loading {
+  opacity: 0.7;
+  cursor: wait;
+  pointer-events: none;
+}
+
+.storeLocation__actionBtn--loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin-left: 0.5rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.storeLocation__actionBtn svg {
+  flex-shrink: 0;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Primary button (Directions) */
+.storeLocation__actionBtn--primary {
+  background: linear-gradient(
+    135deg,
+    var(--brand-rose-500) 0%,
+    var(--brand-wine-700) 100%
+  );
+  color: var(--neutral-0);
+  border: none;
+  box-shadow: 
+    0 12px 28px rgba(212, 140, 156, 0.28),
+    0 4px 12px rgba(212, 140, 156, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+}
+
+.storeLocation__actionBtn--primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+/* Secondary button (Copy) */
+.storeLocation__actionBtn--secondary {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--sl-title);
+  border: 1.5px solid rgba(212, 140, 156, 0.25);
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+}
+
+/* WhatsApp button */
+.storeLocation__actionBtn--whatsapp {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: rgba(18, 140, 126, 0.95);
+  border: 1.5px solid rgba(18, 140, 126, 0.32);
+  box-shadow: 
+    0 10px 24px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
 }
 
 .storeLocation__copyHint {
-  min-width: 56px;
+  min-width: 64px;
   min-height: 1em;
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   font-size: 0.72rem;
   color: var(--sl-kicker);
-  transition: opacity 0.2s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  display: inline-flex;
+  align-items: center;
 }
 
+.storeLocation__copyHint:not(:empty) {
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Legacy class names for backward compatibility */
 .storeLocation__directionsBtn {
-  background: linear-gradient(135deg, var(--brand-rose-500), var(--brand-wine-700));
-  color: var(--neutral-0);
-  border: none;
-  box-shadow: var(--brand-shadow);
-}
-
-.storeLocation__directionsBtn svg {
-  transition: transform 0.3s ease;
+  margin-top: 1rem;
 }
 
 .storeLocation__whatsappBtn {
-  background: rgba(255, 255, 255, 0.78);
-  color: rgba(18, 140, 126, 0.95);
-  border: 1px solid rgba(18, 140, 126, 0.30);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+  margin-top: 1rem;
 }
 
-.storeLocation__whatsappBtn svg {
-  transition: transform 0.3s ease;
+.storeLocation__copyBtn {
+  /* Now using actionBtn--secondary */
 }
 
-.storeLocation__directionsBtn:focus-visible,
-.storeLocation__whatsappBtn:focus-visible,
+.storeLocation__actionBtn:focus-visible,
 .storeLocation__socialLink:focus-visible {
-  outline: 3px solid rgba(212, 140, 156, 0.35);
-  outline-offset: 3px;
+  outline: 3px solid rgba(212, 140, 156, 0.4);
+  outline-offset: 4px;
+  border-radius: 8px;
 }
 
 /* =========================
-   Social Media Section
-========================= */
+   Social Media Section - Elegant Design
+   ========================= */
 .storeLocation__social {
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--sl-card-border);
+  padding-top: 2rem;
+  border-top: 1.5px solid rgba(212, 140, 156, 0.15);
+  position: relative;
+  z-index: 2;
 }
 
 .storeLocation__socialTitle {
-  margin: 0 0 1.2rem;
-  font-size: 0.95rem;
+  margin: 0 0 1.4rem;
+  font-size: clamp(0.92rem, 1.2vw, 1rem);
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--sl-kicker);
 }
 
 .storeLocation__socialLinks {
   display: flex;
-  gap: 1rem;
+  gap: 1.15rem;
   flex-wrap: wrap;
 }
 
@@ -400,26 +644,47 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: var(--surface-3);
-  border: 1px solid var(--sl-card-border);
+  width: clamp(50px, 5vw, 54px);
+  height: clamp(50px, 5vw, 54px);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(212, 140, 156, 0.2);
   color: var(--sl-muted);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  position: relative;
+  overflow: hidden;
 }
 
-
+.storeLocation__socialLink::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
 
 .storeLocation__socialLink svg {
-  transition: transform 0.3s ease;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 1;
 }
 
-/* Hover interactions only on hover-capable devices (avoid sticky hover on touch) */
+/* =========================
+   Hover Interactions (hover-capable devices only)
+   ========================= */
 @media (hover: hover) and (pointer: fine) {
   .storeLocation__decorFloater {
-    animation: float 9s ease-in-out infinite;
+    animation: float 12s ease-in-out infinite;
   }
 
   .storeLocation__text a:hover {
@@ -429,25 +694,49 @@
   .storeLocation__text a:hover::after {
     width: 100%;
   }
+
   .storeLocation__card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--sl-card-shadow-hover);
-    border-color: rgba(212, 140, 156, 0.28);
-    background: rgba(255, 255, 255, 0.95);
+    transform: translateY(-4px);
+    box-shadow: 
+      0 20px 48px rgba(0, 0, 0, 0.12),
+      0 8px 20px rgba(0, 0, 0, 0.08),
+      0 0 0 1px rgba(255, 255, 255, 0.95) inset;
+    border-color: rgba(212, 140, 156, 0.35);
+    background: rgba(255, 255, 255, 0.88);
   }
 
   .storeLocation__card:hover::before {
     opacity: 1;
   }
 
+  .storeLocation__card:hover::after {
+    opacity: 1;
+    animation: shimmer-sweep 1.5s ease-in-out;
+  }
+
+  @keyframes shimmer-sweep {
+    0% {
+      transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    }
+    100% {
+      transform: translateX(200%) translateY(200%) rotate(45deg);
+    }
+  }
+
   .storeLocation__card:hover .storeLocation__cardIcon {
-    transform: scale(1.06) rotate(1deg);
-    background: linear-gradient(135deg, rgba(212, 140, 156, 0.26), rgba(168, 213, 186, 0.22));
-    box-shadow: var(--brand-shadow);
+    transform: scale(1.08) rotate(2deg);
+    background: linear-gradient(
+      135deg,
+      rgba(212, 140, 156, 0.28),
+      rgba(168, 213, 186, 0.24)
+    );
+    box-shadow: 
+      0 12px 28px rgba(212, 140, 156, 0.25),
+      0 0 0 1px rgba(255, 255, 255, 0.9) inset;
   }
 
   .storeLocation__card:hover .storeLocation__cardIcon svg {
-    transform: scale(1.05);
+    transform: scale(1.1);
   }
 
   .storeLocation__card:hover .storeLocation__cardTitle {
@@ -455,92 +744,131 @@
   }
 
   .storeLocation__text:hover .storeLocation__textIcon {
-    transform: scale(1.08);
+    transform: scale(1.1);
   }
 
-  .storeLocation__copyBtn:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--brand-shadow);
-    border-color: rgba(212, 140, 156, 0.32);
-  }
-
-  .storeLocation__directionsBtn:hover {
+  .storeLocation__actionBtn--secondary:hover {
     transform: translateY(-2px);
-    box-shadow: var(--brand-shadow-hover);
+    box-shadow: 
+      0 14px 32px rgba(0, 0, 0, 0.1),
+      0 0 0 1px rgba(255, 255, 255, 0.95) inset;
+    border-color: rgba(212, 140, 156, 0.4);
+    background: rgba(255, 255, 255, 0.95);
   }
 
-  .storeLocation__directionsBtn:hover svg {
-    transform: translateX(2px);
+  .storeLocation__actionBtn--primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+      0 18px 40px rgba(212, 140, 156, 0.38),
+      0 6px 16px rgba(212, 140, 156, 0.24),
+      0 0 0 1px rgba(255, 255, 255, 0.3) inset;
   }
 
-  .storeLocation__whatsappBtn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.10);
-    border-color: rgba(18, 140, 126, 0.45);
+  .storeLocation__actionBtn--primary:hover::before {
+    opacity: 1;
   }
 
-  .storeLocation__whatsappBtn:hover svg {
-    transform: scale(1.06);
+  .storeLocation__actionBtn--primary:hover svg {
+    transform: translateX(3px);
+  }
+
+  .storeLocation__actionBtn--whatsapp:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+      0 16px 36px rgba(0, 0, 0, 0.12),
+      0 0 0 1px rgba(255, 255, 255, 0.95) inset;
+    border-color: rgba(18, 140, 126, 0.5);
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  .storeLocation__actionBtn--whatsapp:hover svg {
+    transform: scale(1.1);
   }
 
   .storeLocation__socialLink:hover {
-    transform: translateY(-2px) scale(1.04);
+    transform: translateY(-3px) scale(1.05);
+  }
+
+  .storeLocation__socialLink:hover::before {
+    opacity: 1;
   }
 
   .storeLocation__socialLink:hover svg {
-    transform: scale(1.08);
+    transform: scale(1.12);
   }
 
   .storeLocation__socialLink--instagram:hover {
-    background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    background: linear-gradient(
+      135deg,
+      #f09433 0%,
+      #e6683c 25%,
+      #dc2743 50%,
+      #cc2366 75%,
+      #bc1888 100%
+    );
     color: var(--neutral-0);
     border-color: transparent;
-    box-shadow: 0 12px 24px rgba(225, 48, 108, 0.28);
+    box-shadow: 
+      0 16px 36px rgba(225, 48, 108, 0.32),
+      0 0 0 1px rgba(255, 255, 255, 0.2) inset;
   }
 
   .storeLocation__socialLink--tiktok:hover {
     background: #000000;
     color: var(--neutral-0);
     border-color: transparent;
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.22);
+    box-shadow: 
+      0 16px 36px rgba(0, 0, 0, 0.28),
+      0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   }
-
 }
 
 /* =========================
-   Responsive Design
-========================= */
+   Responsive Design - All Devices
+   ========================= */
 
-@media (max-width: 1400px) {
+/* Large Desktop (1400px+) */
+@media (min-width: 1400px) {
   .storeLocation__container {
-    max-width: var(--max);
-    grid-template-columns: 1fr;
+    max-width: 1280px;
   }
-}
 
-@media (max-width: 1200px) {
-  .storeLocation__container {
-    max-width: var(--max);
-    grid-template-columns: 1fr;
-    border-radius: 16px;
-  }
-  
   .storeLocation__info {
-    padding: 2.5rem 2rem;
+    padding: 4rem 3rem;
   }
-  
 }
 
-@media (max-width: 980px) {
+/* Desktop (1200px - 1399px) */
+@media (max-width: 1399px) {
+  .storeLocation__container {
+    max-width: var(--max);
+  }
+}
+
+/* Tablet Landscape (980px - 1199px) */
+@media (max-width: 1199px) {
+  .storeLocation__container {
+    max-width: var(--max);
+    border-radius: 20px;
+  }
+
+  .storeLocation__info {
+    padding: clamp(2.25rem, 3.5vw, 3rem) clamp(1.5rem, 2.5vw, 2rem);
+  }
+}
+
+/* Tablet Portrait (768px - 979px) */
+@media (max-width: 979px) {
   .storeLocation {
-    min-height: auto;
-    padding: 3rem 0;
+    padding: clamp(3rem, 6vw, 4rem) 0;
   }
 
   .storeLocation__container {
     grid-template-columns: 1fr;
-    box-shadow: var(--sl-shadow);
-    border-radius: 12px;
+    box-shadow: 
+      0 24px 64px rgba(0, 0, 0, 0.1),
+      0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+    border-radius: 18px;
     max-width: var(--max);
     min-height: auto;
   }
@@ -548,7 +876,7 @@
   .storeLocation__info {
     border-right: none;
     border-bottom: none;
-    padding: 2rem 1.6rem;
+    padding: clamp(2rem, 3vw, 2.5rem) clamp(1.5rem, 2.5vw, 2rem);
     max-height: none;
   }
 
@@ -557,24 +885,177 @@
   }
 
   .storeLocation__cards {
-    gap: 1.2rem;
+    gap: 1.35rem;
   }
 
+  .storeLocation__card {
+    padding: 1.6rem 1.5rem;
+  }
 }
 
-@media (max-width: 640px) {
+/* Mobile Landscape (640px - 767px) */
+@media (max-width: 767px) {
+  .storeLocation {
+    padding: clamp(2.5rem, 5vw, 3.5rem) 0;
+  }
+
   .storeLocation__container {
-    max-width: var(--max);
-    border-radius: 10px;
+    border-radius: 16px;
+  }
+
+  .storeLocation__info {
+    padding: 1.85rem 1.4rem;
+    gap: 1.5rem;
+  }
+
+  .storeLocation__title {
+    font-size: 1.75rem;
+    margin-bottom: 1.35rem;
+  }
+
+  .storeLocation__cards {
+    gap: 1.25rem;
+  }
+
+  .storeLocation__card {
+    padding: 1.5rem 1.3rem;
+    border-radius: 18px;
+  }
+
+  .storeLocation__cardIcon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 1.1rem;
+  }
+
+  .storeLocation__cardTitle {
+    font-size: 1.15rem;
+    margin-bottom: 1rem;
+  }
+
+  .storeLocation__actionBtn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.9rem 1.3rem;
+  }
+
+  .storeLocation__actionsRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .storeLocation__copyHint {
+    min-width: 0;
+    text-align: center;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .storeLocation__socialLinks {
+    justify-content: center;
+  }
+
+  .storeLocation__socialLink {
+    width: 52px;
+    height: 52px;
+  }
+}
+
+/* Mobile Portrait (480px - 639px) */
+@media (max-width: 639px) {
+  .storeLocation {
+    padding: 2.25rem 0;
+  }
+
+  .storeLocation__container {
+    border-radius: 14px;
   }
 
   .storeLocation__info {
     padding: 1.65rem 1.25rem;
+    gap: 1.35rem;
   }
 
   .storeLocation__title {
-    font-size: 1.65rem;
+    font-size: 1.6rem;
     margin-bottom: 1.25rem;
+  }
+
+  .storeLocation__title::after {
+    width: 70px;
+    height: 4px;
+    margin-top: 1rem;
+  }
+
+  .storeLocation__cards {
+    gap: 1.15rem;
+  }
+
+  .storeLocation__card {
+    padding: 1.4rem 1.2rem;
+    border-radius: 16px;
+  }
+
+  .storeLocation__cardIcon {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 1rem;
+  }
+
+  .storeLocation__cardTitle {
+    font-size: 1.1rem;
+    margin-bottom: 0.95rem;
+  }
+
+  .storeLocation__text {
+    font-size: 0.9rem;
+    margin: 0.55rem 0;
+  }
+
+  .storeLocation__actionBtn {
+    padding: 0.85rem 1.2rem;
+    font-size: 0.88rem;
+  }
+
+  .storeLocation__socialLink {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* Small Mobile (320px - 479px) */
+@media (max-width: 479px) {
+  .storeLocation {
+    padding: 2rem 0;
+  }
+
+  .storeLocation__container {
+    border-radius: 12px;
+    --sl-gutter: 1rem;
+  }
+
+  .storeLocation__info {
+    padding: 1.5rem 1.1rem;
+    gap: 1.25rem;
+  }
+
+  .storeLocation__kicker {
+    font-size: 0.7rem;
+  }
+
+  .storeLocation__title {
+    font-size: 1.45rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .storeLocation__title::after {
+    width: 60px;
+    height: 3.5px;
+  }
+
+  .storeLocation__cards {
+    gap: 1rem;
   }
 
   .storeLocation__card {
@@ -583,92 +1064,100 @@
   }
 
   .storeLocation__cardIcon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 0.9rem;
+  }
+
+  .storeLocation__cardTitle {
+    font-size: 1.05rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .storeLocation__text {
+    font-size: 0.88rem;
+    margin: 0.5rem 0;
+  }
+
+  .storeLocation__actionBtn {
+    padding: 0.8rem 1.1rem;
+    font-size: 0.85rem;
+  }
+
+  .storeLocation__socialLink {
     width: 44px;
     height: 44px;
   }
 
-  .storeLocation__cardTitle {
-    font-size: 1.1rem;
+  .storeLocation__socialTitle {
+    font-size: 0.88rem;
+    margin-bottom: 1.2rem;
   }
-
-  .storeLocation__directionsBtn,
-  .storeLocation__whatsappBtn {
-    width: 100%;
-    justify-content: center;
-    padding: 0.85rem 1.1rem;
-    font-size: 0.9rem;
-  }
-
-  .storeLocation__socialLinks {
-    justify-content: center;
-  }
-
-  .storeLocation__socialLink {
-    width: 48px;
-    height: 48px;
-  }
-
-  .storeLocation__actionsRow {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .storeLocation__copyBtn {
-    width: 100%;
-  }
-
-  .storeLocation__copyHint {
-    min-width: 0;
-    text-align: center;
-  }
-
 }
 
-@media (max-width: 480px) {
-  .storeLocation {
-    padding: 2rem 0;
-  }
-
+/* Extra Small Mobile (max-width: 319px) */
+@media (max-width: 319px) {
   .storeLocation__container {
-    max-width: var(--max);
-    border-radius: 8px;
+    --sl-gutter: 0.75rem;
+    border-radius: 10px;
   }
 
   .storeLocation__info {
-    padding: 1.5rem 1.1rem;
+    padding: 1.35rem 1rem;
   }
 
   .storeLocation__title {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .storeLocation__cards {
-    gap: 1rem;
+    font-size: 1.35rem;
   }
 
   .storeLocation__card {
     padding: 1.2rem 1rem;
   }
+}
 
-  .storeLocation__cardIcon {
-    width: 40px;
-    height: 40px;
+/* Error State */
+.storeLocation__error {
+  padding: 2rem;
+  text-align: center;
+  color: var(--sl-muted);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  border: 1px solid var(--sl-card-border);
+}
+
+.storeLocation__error p {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* Print Styles */
+@media print {
+  .storeLocation {
+    background: white;
+    padding: 2rem 0;
+    opacity: 1 !important;
+    transform: none !important;
   }
 
-  .storeLocation__text {
-    font-size: 0.88rem;
+  .storeLocation__decorFloater,
+  .storeLocation::before {
+    display: none;
   }
 
-  .storeLocation__directionsBtn,
-  .storeLocation__whatsappBtn {
-    padding: 0.8rem 1rem;
-    font-size: 0.88rem;
-  }
-
+  .storeLocation__actionBtn,
   .storeLocation__socialLink {
-    width: 44px;
-    height: 44px;
+    display: none;
   }
 
+  .storeLocation__card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+
+  .storeLocation__info {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
