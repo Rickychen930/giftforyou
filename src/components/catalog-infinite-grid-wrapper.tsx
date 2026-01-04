@@ -107,13 +107,24 @@ const CatalogInfiniteGridWrapper: React.FC<CatalogInfiniteGridWrapperProps> = ({
   const typesLength = selectedTypes.length;
   const sizesLength = selectedSizes.length;
 
-  // Scroll to top when filters change
+  // Scroll to top and manage focus when filters change
   useEffect(() => {
     const resultsElement = document.querySelector(".catalogResults");
     if (resultsElement) {
       // Use requestAnimationFrame for smooth scroll
       requestAnimationFrame(() => {
         resultsElement.scrollIntoView({ behavior: "smooth", block: "start" });
+        // Focus management for accessibility
+        const firstResult = resultsElement.querySelector(".catalogGrid, .infinite-grid-wrapper");
+        if (firstResult instanceof HTMLElement) {
+          // Set focus to results container for screen readers
+          firstResult.setAttribute("tabIndex", "-1");
+          firstResult.focus();
+          // Remove tabIndex after focus to prevent tab navigation issues
+          setTimeout(() => {
+            firstResult.removeAttribute("tabIndex");
+          }, 100);
+        }
       });
     }
   }, [

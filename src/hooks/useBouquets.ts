@@ -108,8 +108,14 @@ export function useInfiniteBouquets(
     queryKey,
     queryFn: async ({ pageParam = 1, signal }) => {
       try {
+        // AbortSignal is automatically passed by React Query
+        // When queryKey changes, previous requests are automatically cancelled
         return await getBouquets({ ...params, page: pageParam as number, limit }, signal);
       } catch (error) {
+        // Don't throw error if request was aborted (cancelled)
+        if (error instanceof Error && error.name === "AbortError") {
+          throw error; // Let React Query handle abort errors
+        }
         if (error instanceof Error) {
           throw new Error(`Failed to fetch bouquets: ${error.message}`);
         }
@@ -125,8 +131,9 @@ export function useInfiniteBouquets(
     retry: 2,
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
-    // Reset when filters change
+    // Reset when filters change (queryKey changes automatically cancel previous requests)
     refetchOnMount: true,
+    // React Query automatically cancels in-flight requests when queryKey changes
     ...options,
   });
 }

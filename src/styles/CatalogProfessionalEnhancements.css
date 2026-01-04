@@ -1,0 +1,139 @@
+/**
+ * Professional Catalog Enhancements Styles
+ * Luxury, elegant, clean, effective, responsive
+ */
+
+/* ============================================================================
+   Search Result Count
+   ============================================================================ */
+
+.searchResultCount {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--catalog-muted, #718096);
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.searchResultCount__text {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.searchResultCount__text strong {
+  font-weight: 600;
+  color: var(--catalog-text, #2d3748);
+}
+
+.searchResultCount__query {
+  margin-left: 0.5rem;
+  font-style: italic;
+  color: var(--catalog-accent, #d48c9c);
+}
+
+.searchResultCount__query strong {
+  color: var(--catalog-accent, #d48c9c);
+  font-weight: 600;
+}
+
+/* ============================================================================
+   Search Loading Indicator
+   ============================================================================ */
+
+.searchLoadingIndicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  color: var(--catalog-muted, #718096);
+  background: rgba(212, 140, 156, 0.05);
+  border-radius: 8px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.searchLoadingIndicator__spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.searchLoadingIndicator__text {
+  font-weight: 500;
+}
+
+/* ============================================================================
+   View Mode Toggle
+   ============================================================================ */
+
+.viewModeToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(212, 140, 156, 0.15);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+}
+
+.viewModeToggle__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  color: var(--catalog-muted, #718096);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.viewModeToggle__btn:hover {
+  color: var(--catalog-text, #2d3748);
+  background: rgba(212, 140, 156, 0.08);
+}
+
+.viewModeToggle__btn.is-active {
+  color: white;
+  background: linear-gradient(135deg, #d48c9c 0%, #c97a8a 100%);
+  box-shadow:
+    0 2px 8px rgba(212, 140, 156, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+.viewModeToggle__btn:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 768px) {
+  .viewModeToggle {
+    gap: 0.125rem;
+    padding: 0.125rem;
+  }
+
+  .viewModeToggle__btn {
+    width: 32px;
+    height: 32px;
+  }
+}
+

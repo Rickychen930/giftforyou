@@ -5,12 +5,18 @@ import type { Bouquet } from "../models/domain/bouquet";
 import FilterPanel from "../components/filter-panel-component";
 import BouquetCard from "../components/bouquet-card-component";
 import CatalogInfiniteGridWrapper from "../components/catalog-infinite-grid-wrapper";
+import CatalogSearchInput from "../components/catalog-search-input";
 import {
   QuickFilterChips,
   ActiveFilterBadge,
   BackToTop,
   EnhancedEmptyState,
 } from "../components/catalog-ux-enhancements";
+import {
+  SearchResultCount,
+  KeyboardShortcuts,
+} from "../components/catalog-professional-enhancements";
+import { COLLECTION_SUGGESTIONS } from "../constants/app-constants";
 import { setSeo } from "../utils/seo";
 import { formatIDR } from "../utils/money";
 import { observeFadeIn, revealOnScroll, staggerFadeIn } from "../utils/luxury-enhancements";
@@ -465,54 +471,26 @@ class BouquetCatalogView extends Component<Props> {
 
           <div className="catalogSummary">
             <div className="catalogSearch">
-              <form
-                className="catalogSearch__form"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.currentTarget);
-                  const query = (formData.get("q") as string)?.trim() || "";
+              <CatalogSearchInput
+                value={searchQuery}
+                placeholder="Cari bouquet, koleksi, momen..."
+                onSearch={(query) => {
                   if (this.props.onSearchChange) {
                     this.props.onSearchChange(query);
-                  } else {
-                    // Fallback: update URL directly
-                    const params = new URLSearchParams(window.location.search);
-                    if (query) {
-                      params.set("q", query);
-                    } else {
-                      params.delete("q");
-                    }
-                    window.location.search = params.toString() ? `?${params.toString()}` : "";
                   }
                 }}
-              >
-                <div className="catalogSearch__wrapper">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="catalogSearch__icon" aria-hidden="true">
-                    <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <input
-                    type="search"
-                    name="q"
-                    className="catalogSearch__input"
-                    placeholder="Cari bouquet, koleksi, momen..."
-                    defaultValue={searchQuery}
-                    aria-label="Cari bouquet"
-                  />
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      className="catalogSearch__clear"
-                      onClick={() => {
-                        this.props.onClearSearchQuery();
-                      }}
-                      aria-label="Hapus pencarian"
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              </form>
+                onClear={this.props.onClearSearchQuery}
+                debounceMs={400}
+                minLength={2}
+                showSuggestions={true}
+                suggestions={[
+                  ...COLLECTION_SUGGESTIONS,
+                  ...allCollections.slice(0, 10),
+                  ...allTypes.slice(0, 5),
+                ]}
+                disabled={Boolean(loading)}
+                className="catalogSearch__inputWrapper"
+              />
             </div>
             {hasActiveFilters && !loading && (
               <div className="catalogSummary__actions">
@@ -705,14 +683,14 @@ class BouquetCatalogView extends Component<Props> {
                         />
                       ))}
                     </div>
-                    {/* Show total count for better UX */}
-                    {total > itemsPerPage && (
-                      <div className="catalogResults__info" aria-live="polite">
-                        <p className="catalogResults__count">
-                          Menampilkan <strong>{startIndex + 1}</strong>–<strong>{Math.min(startIndex + itemsPerPage, total)}</strong> dari <strong>{total}</strong> bouquet
-                        </p>
-                      </div>
-                    )}
+                    {/* Show total count for better UX - Professional Enhancement */}
+                    <SearchResultCount
+                      total={total}
+                      filtered={pageItems.length}
+                      searchQuery={searchQuery}
+                      hasActiveFilters={hasActiveFilters}
+                      loading={loading}
+                    />
                   </>
                 )}
               </>
@@ -737,6 +715,9 @@ class BouquetCatalogView extends Component<Props> {
 
         {/* Back to Top Button - Priority UX Feature */}
         <BackToTop threshold={400} />
+
+        {/* Keyboard Shortcuts - Professional Enhancement */}
+        <KeyboardShortcuts />
       </section>
     );
   }

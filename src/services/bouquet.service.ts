@@ -175,6 +175,11 @@ export async function getBouquets(
   try {
     const res = await fetch(url, { signal });
 
+    // Check if request was aborted
+    if (signal?.aborted) {
+      throw new Error("Request was cancelled");
+    }
+
     if (!res.ok) {
       const text = await res.text();
       throw new Error(`Failed to fetch bouquets (${res.status}): ${text}`);

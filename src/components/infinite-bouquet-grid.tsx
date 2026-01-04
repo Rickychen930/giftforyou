@@ -4,7 +4,7 @@
  * Follows SOLID, DRY, MVP principles
  */
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useInView } from "../hooks/useInView";
 import { useInfiniteBouquets, type BouquetQueryParams, type BouquetResponse } from "../hooks/useBouquets";
 import VirtualizedBouquetGrid from "./virtualized-bouquet-grid";
@@ -50,12 +50,24 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
     isFetchingNextPage,
     isLoading,
     error,
+    refetch,
+    isRefetching,
   } = useInfiniteBouquets(filters);
 
-  // Flatten all pages into a single array
+  // Flatten all pages into a single array with deduplication
   const allBouquets = useMemo(() => {
     if (!data?.pages) return [];
-    return (data as InfiniteData<BouquetResponse>).pages.flatMap((page: BouquetResponse) => page.bouquets);
+    const all = (data as InfiniteData<BouquetResponse>).pages.flatMap((page: BouquetResponse) => page.bouquets);
+    // Deduplicate by _id to prevent duplicate items
+    const seen = new Set<string>();
+    return all.filter((bouquet) => {
+      const id = String(bouquet._id);
+      if (seen.has(id)) {
+        return false;
+      }
+      seen.add(id);
+      return true;
+    });
   }, [data]);
 
   // Handle container width changes with ResizeObserver for better performance
@@ -87,36 +99,121 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
     };
   }, []);
 
+  // Network offline detection
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
   // Load more when in view
   useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
+    if (inView && hasNextPage && !isFetchingNextPage && !isOffline) {
       fetchNextPage();
     }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage, isOffline]);
 
-  // Loading state
+  // Skeleton loading component
+  const SkeletonCard = useCallback(() => (
+    <div className="infinite-grid-skeleton-card" aria-hidden="true">
+      <div className="infinite-grid-skeleton-card__image" />
+      <div className="infinite-grid-skeleton-card__body">
+        <div className="infinite-grid-skeleton-card__line infinite-grid-skeleton-card__line--title" />
+        <div className="infinite-grid-skeleton-card__line infinite-grid-skeleton-card__line--medium" />
+        <div className="infinite-grid-skeleton-card__line infinite-grid-skeleton-card__line--short" />
+      </div>
+    </div>
+  ), []);
+
+  // Loading state with skeleton
   if (isLoading) {
     return (
       <div className="infinite-grid-loading" aria-live="polite" aria-busy="true">
-        <div className="infinite-grid-spinner">
-          <div className="becSpinner" style={{ width: "32px", height: "32px", borderWidth: "3px" }}></div>
+        <div className="infinite-grid-skeleton-grid" role="list" aria-label="Memuat bouquet">
+          {Array.from({ length: 12 }).map((_, idx) => (
+            <SkeletonCard key={idx} />
+          ))}
         </div>
-        <p>Memuat bouquet...</p>
+        <div className="infinite-grid-loading__message">
+          <div className="infinite-grid-spinner">
+            <div className="becSpinner" style={{ width: "24px", height: "24px", borderWidth: "2px" }}></div>
+          </div>
+          <p>Memuat bouquet...</p>
+        </div>
       </div>
     );
   }
 
-  // Error state
+  // Error state with better recovery
   if (error) {
     return (
       <div className="infinite-grid-error" role="alert">
-        <p>Gagal memuat bouquet: {error.message}</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="infinite-grid-retry"
-        >
-          Coba Lagi
-        </button>
+        <div className="infinite-grid-error__icon" aria-hidden="true">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+        <h3 className="infinite-grid-error__title">Gagal Memuat Bouquet</h3>
+        <p className="infinite-grid-error__message">
+          {isOffline
+            ? "Tidak ada koneksi internet. Pastikan perangkat Anda terhubung ke internet."
+            : error.message || "Terjadi kesalahan saat memuat data. Silakan coba lagi."}
+        </p>
+        <div className="infinite-grid-error__actions">
+          <button
+            onClick={() => refetch()}
+            className="infinite-grid-retry"
+            disabled={isRefetching || isOffline}
+            aria-label="Coba muat ulang bouquet"
+          >
+            {isRefetching ? (
+              <>
+                <div className="becSpinner" style={{ width: "16px", height: "16px", borderWidth: "2px" }}></div>
+                <span>Memuat ulang...</span>
+              </>
+            ) : (
+              <>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path
+                    d="M1 4v6h6M23 20v-6h-6"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M20.49 9A9 9 0 003.51 15M3.51 9a9 9 0 0016.98 6"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span>Coba Lagi</span>
+              </>
+            )}
+          </button>
+          {isOffline && (
+            <p className="infinite-grid-error__offline-hint">
+              Periksa koneksi internet Anda dan coba lagi.
+            </p>
+          )}
+        </div>
       </div>
     );
   }
@@ -186,17 +283,28 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
       {hasNextPage && (
         <div ref={loadMoreRef} className="infinite-grid-load-more">
           {isFetchingNextPage ? (
-            <div className="infinite-grid-spinner">
-              <div className="becSpinner" style={{ width: "24px", height: "24px", borderWidth: "2px" }}></div>
-              <span>Memuat lebih banyak...</span>
+            <div className="infinite-grid-load-more__loading">
+              <div className="infinite-grid-skeleton-grid infinite-grid-skeleton-grid--compact" aria-hidden="true">
+                {Array.from({ length: 4 }).map((_, idx) => (
+                  <SkeletonCard key={idx} />
+                ))}
+              </div>
+              <div className="infinite-grid-spinner">
+                <div className="becSpinner" style={{ width: "20px", height: "20px", borderWidth: "2px" }}></div>
+                <span>Memuat lebih banyak...</span>
+              </div>
             </div>
           ) : (
             <button
               onClick={() => fetchNextPage()}
               className="infinite-grid-load-more-btn"
               aria-label="Muat lebih banyak bouquet"
+              disabled={isOffline}
             >
-              Muat Lebih Banyak
+              <span>Muat Lebih Banyak</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M12 5v14m7-7H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </button>
           )}
         </div>

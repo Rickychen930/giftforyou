@@ -97,11 +97,11 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   // Debounced search queries for better performance
   const [debouncedSearchQueries, setDebouncedSearchQueries] = React.useState(searchQueries);
 
-  // Debounce search queries
+  // Debounce search queries - Increased to 300ms to prevent excessive re-renders
   React.useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQueries(searchQueries);
-    }, 150); // 150ms debounce
+    }, 300); // 300ms debounce for better performance
 
     return () => clearTimeout(timer);
   }, [searchQueries]);

@@ -1,13 +1,18 @@
 /**
- * Custom hook for debouncing values
+ * Custom debounce hook
+ * Prevents excessive re-renders and API calls
+ * Follows SOLID, DRY principles
  */
 
 import { useState, useEffect } from "react";
 
 /**
- * Debounce a value
+ * Hook to debounce a value
+ * @param value - The value to debounce
+ * @param delay - Delay in milliseconds (default: 300ms)
+ * @returns Debounced value
  */
-export function useDebounce<T>(value: T, delay: number): T {
+export function useDebounce<T>(value: T, delay: number = 300): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
   useEffect(() => {
@@ -22,4 +27,3 @@ export function useDebounce<T>(value: T, delay: number): T {
 
   return debouncedValue;
 }
-
