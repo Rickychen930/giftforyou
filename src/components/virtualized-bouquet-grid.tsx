@@ -518,6 +518,108 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
     return gridItemData;
   }, [gridItemData]);
 
+  // ABSOLUTE FINAL CHECK: Create a guaranteed-valid itemData object using useMemo
+  // This is the absolute last line of defense - must ALWAYS return a valid object
+  // Even if finalGridItemData is somehow invalid, we return a default object
+  // This prevents Object.values() error in react-window
+  // MUST be called before any early returns to comply with Rules of Hooks
+  const guaranteedItemData = useMemo((): { bouquets: BouquetCardProps[]; columnCount: number; gap: number } => {
+    // ABSOLUTE DEFAULT - this is the fallback that will ALWAYS work
+    const absoluteDefault: { bouquets: BouquetCardProps[]; columnCount: number; gap: number } = {
+      bouquets: [],
+      columnCount: 4,
+      gap: 16,
+    };
+    
+    try {
+      // If finalGridItemData is invalid, return default immediately
+      if (!finalGridItemData) {
+        console.error("[VirtualizedBouquetGrid] CRITICAL: finalGridItemData is null/undefined");
+        return absoluteDefault;
+      }
+      
+      if (typeof finalGridItemData !== "object") {
+        console.error("[VirtualizedBouquetGrid] CRITICAL: finalGridItemData is not an object:", typeof finalGridItemData);
+        return absoluteDefault;
+      }
+      
+      if (Array.isArray(finalGridItemData)) {
+        console.error("[VirtualizedBouquetGrid] CRITICAL: finalGridItemData is an array");
+        return absoluteDefault;
+      }
+      
+      // Validate bouquets - must be an array (can be empty, but must be an array)
+      const validBouquets = Array.isArray(finalGridItemData.bouquets) 
+        ? finalGridItemData.bouquets 
+        : [];
+      
+      // Validate columnCount - must be a positive number
+      const validColumnCount = typeof finalGridItemData.columnCount === "number" && 
+                                Number.isFinite(finalGridItemData.columnCount) && 
+                                finalGridItemData.columnCount > 0
+                                ? finalGridItemData.columnCount
+                                : 4;
+      
+      // Validate gap - must be a non-negative number
+      const validGap = typeof finalGridItemData.gap === "number" && 
+                        Number.isFinite(finalGridItemData.gap) && 
+                        finalGridItemData.gap >= 0
+                        ? finalGridItemData.gap
+                        : 16;
+      
+      // Create a completely fresh object literal - this ensures Object.values() will always work
+      // This MUST be a plain object, never null/undefined
+      const result: { bouquets: BouquetCardProps[]; columnCount: number; gap: number } = {
+        bouquets: validBouquets,
+        columnCount: validColumnCount,
+        gap: validGap,
+      };
+      
+      // CRITICAL: Test Object.values() to ensure it works
+      // This is the exact same operation react-window will do
+      let testValues: unknown[];
+      try {
+        testValues = Object.values(result);
+        if (!Array.isArray(testValues)) {
+          console.error("[VirtualizedBouquetGrid] CRITICAL: Object.values() returned non-array");
+          return absoluteDefault;
+        }
+      } catch (error) {
+        console.error("[VirtualizedBouquetGrid] CRITICAL: Object.values() threw error:", error);
+        return absoluteDefault;
+      }
+      
+      // Final validation - ensure result is valid
+      if (!result) {
+        console.error("[VirtualizedBouquetGrid] CRITICAL: result is null/undefined after creation");
+        return absoluteDefault;
+      }
+      
+      if (typeof result !== "object") {
+        console.error("[VirtualizedBouquetGrid] CRITICAL: result is not an object after creation:", typeof result);
+        return absoluteDefault;
+      }
+      
+      if (Array.isArray(result)) {
+        console.error("[VirtualizedBouquetGrid] CRITICAL: result is an array after creation");
+        return absoluteDefault;
+      }
+      
+      // Ensure all properties exist
+      if (!("bouquets" in result) || !("columnCount" in result) || !("gap" in result)) {
+        console.error("[VirtualizedBouquetGrid] CRITICAL: result missing required properties");
+        return absoluteDefault;
+      }
+      
+      // Return the validated result
+      return result;
+    } catch (error) {
+      // Catch any unexpected errors and return default
+      console.error("[VirtualizedBouquetGrid] CRITICAL: Unexpected error in guaranteedItemData:", error);
+      return absoluteDefault;
+    }
+  }, [finalGridItemData]);
+
   // Render function for Grid children - using useCallback for stability
   // IMPORTANT: react-window spreads itemData into props, so we access bouquets, columnCount, gap directly from props
   // CRITICAL: This function receives props which includes itemData spread into it
@@ -701,9 +803,10 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
           height: safeContainerHeight,
           // CRITICAL: itemData MUST be a valid object, never null/undefined
           // react-window uses Object.values() internally on this prop
-          // Use finalGridItemData which has been validated one more time
-          // This ensures itemData is always a valid object, never null/undefined
-          itemData: finalGridItemData,
+          // Use guaranteedItemData which is ALWAYS a valid object literal
+          // This is the absolute final guarantee - even if all previous validations fail
+          // Add inline fallback as absolute last defense
+          itemData: guaranteedItemData || { bouquets: [], columnCount: 4, gap: 16 },
           onItemsRendered: handleItemsRendered,
           overscanRowCount: 2,
           overscanColumnCount: 1,
