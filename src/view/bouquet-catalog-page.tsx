@@ -7,7 +7,6 @@ import BouquetCard from "../components/bouquet-card-component";
 import CatalogInfiniteGridWrapper from "../components/catalog-infinite-grid-wrapper";
 import CatalogSearchInput from "../components/catalog-search-input";
 import {
-  QuickFilterChips,
   ActiveFilterBadge,
   BackToTop,
   EnhancedEmptyState,
@@ -539,20 +538,6 @@ class BouquetCatalogView extends Component<Props> {
             </div>
           )}
         </header>
-
-        {/* Quick Filter Chips - Priority UX Feature */}
-        {!loading && (allTypes.length > 0 || allSizes.length > 0 || allCollections.length > 0) && (
-          <QuickFilterChips
-            allTypes={allTypes}
-            allSizes={allSizes}
-            allCollections={allCollections}
-            selectedTypes={selectedTypes}
-            selectedSizes={selectedSizes}
-            selectedCollections={selectedCollections}
-            onToggleFilter={this.props.onToggleFilter}
-            onClearAll={this.props.onClearAll}
-          />
-        )}
 
         <div className="catalogLayout">
           <div className="catalogFilters catalogFilters--top" aria-label="Filter">
