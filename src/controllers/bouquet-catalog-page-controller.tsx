@@ -75,6 +75,18 @@ class BouquetCatalogController extends Component<
       }
     }
 
+    // Reset page if out of bounds after filtering
+    const filtered = this.getFilteredBouquets();
+    const totalFiltered = filtered.length;
+    const itemsPerPage = typeof this.state.itemsPerPage === "number" && this.state.itemsPerPage > 0
+      ? this.state.itemsPerPage
+      : 9;
+    const maxPage = Math.max(1, Math.ceil(totalFiltered / itemsPerPage));
+    
+    if (this.state.currentPage > maxPage && maxPage > 0) {
+      this.setState({ currentPage: 1 });
+    }
+
     // Keep URL in sync with current filters/sort/page so the state is shareable.
     // Only runs when we have a navigate function (react-router v6).
     this.syncUrlFromState();
@@ -397,7 +409,14 @@ class BouquetCatalogController extends Component<
   };
 
   private handlePriceRangeChange = (range: Range) => {
-    this.setState({ priceRange: range, currentPage: 1 });
+    // Validate price range - ensure min <= max
+    if (!Array.isArray(range) || range.length !== 2) {
+      return;
+    }
+    const [minRaw, maxRaw] = range;
+    const min = Math.max(0, typeof minRaw === "number" && Number.isFinite(minRaw) ? minRaw : 0);
+    const max = Math.max(min, typeof maxRaw === "number" && Number.isFinite(maxRaw) ? maxRaw : 1_000_000);
+    this.setState({ priceRange: [min, max], currentPage: 1 });
   };
 
   private getFilteredBouquets(): Bouquet[] {
@@ -410,28 +429,55 @@ class BouquetCatalogController extends Component<
       collectionNameFilter,
       searchQuery,
     } = this.state;
-    const [min, max] = priceRange;
+    
+    // Ensure bouquets is an array
+    if (!Array.isArray(bouquets) || bouquets.length === 0) {
+      return [];
+    }
+    
+    // Validate and normalize price range
+    const [minRaw, maxRaw] = Array.isArray(priceRange) && priceRange.length === 2
+      ? priceRange
+      : [0, 1_000_000];
+    const min = Math.max(0, typeof minRaw === "number" && Number.isFinite(minRaw) ? minRaw : 0);
+    const max = Math.max(min, typeof maxRaw === "number" && Number.isFinite(maxRaw) ? maxRaw : 1_000_000);
 
-    const collectionNeedle = collectionNameFilter.trim().toLowerCase();
-    const queryNeedle = searchQuery.trim().toLowerCase();
+    const collectionNeedle = (collectionNameFilter ?? "").trim().toLowerCase();
+    const queryNeedle = (searchQuery ?? "").trim().toLowerCase();
 
-    const selectedCollectionsNormalized = selectedCollections
-      .map((v) => v.trim())
+    // Ensure arrays are valid
+    const safeSelectedTypes = Array.isArray(selectedTypes) ? selectedTypes : [];
+    const safeSelectedSizes = Array.isArray(selectedSizes) ? selectedSizes : [];
+    const safeSelectedCollections = Array.isArray(selectedCollections) ? selectedCollections : [];
+
+    const selectedCollectionsNormalized = safeSelectedCollections
+      .map((v) => (v ?? "").trim())
       .filter(Boolean);
 
     return bouquets.filter((b) => {
-      const priceOk = b.price >= min && b.price <= max;
+      // Validate bouquet object
+      if (!b || typeof b !== "object") return false;
+      
+      // Price filter - handle missing or invalid prices
+      const price = typeof b.price === "number" && Number.isFinite(b.price) ? b.price : 0;
+      const priceOk = price >= min && price <= max;
+      
+      // Type filter
       const typeOk =
-        selectedTypes.length === 0 || selectedTypes.includes(b.type ?? "");
+        safeSelectedTypes.length === 0 || safeSelectedTypes.includes(b.type ?? "");
+      
+      // Size filter
       const sizeOk =
-        selectedSizes.length === 0 || selectedSizes.includes(b.size ?? "");
+        safeSelectedSizes.length === 0 || safeSelectedSizes.includes(b.size ?? "");
 
+      // Collection filter
       const collectionName = (b.collectionName ?? "").trim();
       const collectionOk =
         selectedCollectionsNormalized.length > 0
           ? selectedCollectionsNormalized.includes(collectionName)
           : !collectionNeedle || collectionName.toLowerCase() === collectionNeedle;
 
+      // Search query filter
       const queryOk =
         !queryNeedle ||
         [
@@ -454,13 +500,23 @@ class BouquetCatalogController extends Component<
     return [...list].sort((a, b) => {
       switch (sortBy) {
         case "price-asc":
-          return a.price - b.price;
+          // Handle missing or invalid prices
+          const priceA = typeof a.price === "number" && Number.isFinite(a.price) ? a.price : 0;
+          const priceB = typeof b.price === "number" && Number.isFinite(b.price) ? b.price : 0;
+          return priceA - priceB;
         case "price-desc":
-          return b.price - a.price;
+          const priceADesc = typeof a.price === "number" && Number.isFinite(a.price) ? a.price : 0;
+          const priceBDesc = typeof b.price === "number" && Number.isFinite(b.price) ? b.price : 0;
+          return priceBDesc - priceADesc;
         case "name-asc":
-          return a.name.localeCompare(b.name);
+          // Handle missing or null names
+          const nameA = (a.name ?? "").trim();
+          const nameB = (b.name ?? "").trim();
+          return nameA.localeCompare(nameB);
         case "name-desc":
-          return b.name.localeCompare(a.name);
+          const nameADesc = (a.name ?? "").trim();
+          const nameBDesc = (b.name ?? "").trim();
+          return nameBDesc.localeCompare(nameADesc);
         default:
           return 0;
       }
@@ -468,21 +524,34 @@ class BouquetCatalogController extends Component<
   }
 
   render(): React.ReactNode {
+    // Ensure bouquets is an array
+    const safeBouquets = Array.isArray(this.state.bouquets) ? this.state.bouquets : [];
+    
     const filtered = this.getFilteredBouquets();
     const sorted = this.getSortedBouquets(filtered);
+    
+    // Ensure currentPage is valid after filtering
+    const totalFiltered = filtered.length;
+    const itemsPerPage = typeof this.state.itemsPerPage === "number" && this.state.itemsPerPage > 0
+      ? this.state.itemsPerPage
+      : 9;
+    const maxPage = Math.max(1, Math.ceil(totalFiltered / itemsPerPage));
+    const safeCurrentPage = Math.min(Math.max(1, this.state.currentPage), maxPage);
+    
+    // Note: Page reset will be handled in componentDidUpdate to avoid setState during render
 
     const allTypes: string[] = Array.from(
-      new Set(this.state.bouquets.map((b) => b.type).filter(isNonEmptyString))
+      new Set(safeBouquets.map((b) => b?.type).filter(isNonEmptyString))
     );
 
     const allSizes: string[] = getBouquetSizeFilterOptions(
-      this.state.bouquets.map((b) => b.size)
+      safeBouquets.map((b) => b?.size).filter((s): s is string => typeof s === "string")
     );
 
     const allCollections: string[] = Array.from(
       new Set(
-        this.state.bouquets
-          .map((b) => b.collectionName)
+        safeBouquets
+          .map((b) => b?.collectionName)
           .filter((c): c is string => typeof c === "string" && c.trim().length > 0)
           .map((v) => v.trim())
           .filter(Boolean)
@@ -502,8 +571,8 @@ class BouquetCatalogController extends Component<
         selectedSizes={this.state.selectedSizes}
         selectedCollections={this.state.selectedCollections}
         sortBy={this.state.sortBy}
-        currentPage={this.state.currentPage}
-        itemsPerPage={this.state.itemsPerPage}
+        currentPage={safeCurrentPage}
+        itemsPerPage={itemsPerPage}
         onPriceChange={this.handlePriceRangeChange}
         onToggleFilter={this.toggleFilter}
         onClearFilter={this.clearFilter}

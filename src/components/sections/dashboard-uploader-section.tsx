@@ -1398,9 +1398,11 @@ class BouquetUploader extends Component<Props, State> {
         errorMessage = `Field wajib belum diisi: ${missingFields}. Silakan lengkapi semua field wajib terlebih dahulu.`;
       } else {
         // Show first error message for non-required fields
-        const firstError = Object.values(validation.errors)[0];
-        if (firstError) {
-          errorMessage = firstError;
+        if (validation.errors && typeof validation.errors === "object") {
+          const firstError = Object.values(validation.errors)[0];
+          if (firstError) {
+            errorMessage = firstError;
+          }
         }
       }
       

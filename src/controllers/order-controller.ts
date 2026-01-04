@@ -388,6 +388,47 @@ export async function updateOrder(req: Request, res: Response): Promise<void> {
   }
 }
 
+export async function getOrderById(req: Request, res: Response): Promise<void> {
+  try {
+    const id = normalizeString(req.params?.id, "", 64);
+    if (!id) {
+      res.status(400).json({ message: "Missing id" });
+      return;
+    }
+
+    const order = await OrderModel.findById(id).lean().exec();
+    if (!order) {
+      res.status(404).json({ message: "Order not found" });
+      return;
+    }
+
+    // Check if user is authorized to view this order
+    const userId = (req as any).user?.id;
+    const userRole = (req as any).user?.role;
+    
+    if (userRole === "admin") {
+      // Admin can see all orders
+      res.status(200).json(order);
+      return;
+    }
+
+    if (userRole === "customer" && userId) {
+      // Customer can only see their own orders
+      const customer = await CustomerModel.findOne({ userId }).lean().exec();
+      if (customer && customer._id && String(order.customerId) === String(customer._id)) {
+        res.status(200).json(order);
+        return;
+      }
+    }
+
+    // Not authorized
+    res.status(403).json({ message: "Access denied" });
+  } catch (err) {
+    console.error("getOrderById failed:", err);
+    res.status(500).json({ message: "Failed to get order", error: err instanceof Error ? err.message : "Unknown error" });
+  }
+}
+
 export async function getOrders(req: Request, res: Response): Promise<void> {
   try {
     if (process.env.NODE_ENV === "development") {
@@ -398,6 +439,11 @@ export async function getOrders(req: Request, res: Response): Promise<void> {
     const limitParsed = Number.parseInt(limitRaw, 10);
     // Allow up to 1000 for dashboard needs
     const limit = Number.isFinite(limitParsed) ? Math.min(Math.max(limitParsed, 1), 1000) : 100;
+
+    const pageRaw = typeof req.query.page === "string" ? req.query.page : "1";
+    const pageParsed = Number.parseInt(pageRaw, 10);
+    const page = Number.isFinite(pageParsed) && pageParsed > 0 ? pageParsed : 1;
+    const skip = (page - 1) * limit;
 
     const qRaw = typeof req.query.q === "string" ? req.query.q.trim() : "";
     const q = qRaw.slice(0, 120);
@@ -431,13 +477,29 @@ export async function getOrders(req: Request, res: Response): Promise<void> {
       return;
     }
 
+    // Get total count for pagination
+    const total = await OrderModel.countDocuments(filter).exec();
+    
     const orders = await OrderModel.find(filter)
       .sort({ createdAt: -1 })
+      .skip(skip)
       .limit(limit)
       .lean()
       .exec();
 
-    res.status(200).json(orders);
+    // Return paginated response if page parameter is provided
+    if (req.query.page) {
+      res.status(200).json({
+        orders,
+        total,
+        page,
+        limit,
+        hasMore: skip + orders.length < total,
+      });
+    } else {
+      // Backward compatibility: return array if no page parameter
+      res.status(200).json(orders);
+    }
   } catch (err) {
     console.error("getOrders failed:", err);
     res.status(500).json({ message: "Failed to get orders" });

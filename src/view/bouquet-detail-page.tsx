@@ -20,6 +20,7 @@ import { getAccessToken, isAuthenticated } from "../utils/auth-utils";
 import ProductImageGallery from "../components/bouquet-detail/ProductImageGallery";
 import ProductHeader from "../components/bouquet-detail/ProductHeader";
 import ProductInfo from "../components/bouquet-detail/ProductInfo";
+import ProductReviews from "../components/ProductReviews";
 import OrderForm, { OrderFormData } from "../components/bouquet-detail/OrderForm";
 import PriceSummary from "../components/bouquet-detail/PriceSummary";
 import SimilarProducts from "../components/bouquet-detail/SimilarProducts";
@@ -590,6 +591,13 @@ const BouquetDetailPage: React.FC<Props> = ({
         {similarBouquets.length > 0 && (
           <div className="bouquet-detail-page__similar">
             <SimilarProducts bouquets={similarBouquets} />
+          </div>
+        )}
+
+        {/* Product Reviews */}
+        {bouquet && (
+          <div className="bouquet-detail-page__reviews">
+            <ProductReviews bouquetId={bouquet._id} bouquetName={bouquet.name} />
           </div>
         )}
 

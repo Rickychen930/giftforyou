@@ -373,25 +373,29 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 <h3 className="analyticsCard__title">Order Status Breakdown</h3>
                 <div className="analyticsCard__content">
                   <div className="analyticsBreakdown">
-                    {Object.entries(data.orderStatusBreakdown).map(([status, count]) => {
-                      const total = Object.values(data.orderStatusBreakdown).reduce((sum, c) => sum + c, 0);
-                      const percentage = total > 0 ? (count / total) * 100 : 0;
-                      
-                      return (
-                        <div key={status} className="analyticsBreakdown__item">
-                          <div className="analyticsBreakdown__header">
-                            <span className="analyticsBreakdown__label">{status.replace(/_/g, " ")}</span>
-                            <span className="analyticsBreakdown__value">{count}</span>
-                          </div>
-                          <div className="analyticsBreakdown__bar">
-                            <div
-                              className="analyticsBreakdown__fill"
-                              style={{ width: `${percentage}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                    {data.orderStatusBreakdown && typeof data.orderStatusBreakdown === "object" 
+                      ? Object.entries(data.orderStatusBreakdown).map(([status, count]) => {
+                          const breakdown = data.orderStatusBreakdown;
+                          if (!breakdown || typeof breakdown !== "object") return null;
+                          const total = Object.values(breakdown).reduce((sum: number, c: any) => sum + (typeof c === "number" ? c : 0), 0);
+                          const percentage = total > 0 ? (count / total) * 100 : 0;
+                          
+                          return (
+                            <div key={status} className="analyticsBreakdown__item">
+                              <div className="analyticsBreakdown__header">
+                                <span className="analyticsBreakdown__label">{status.replace(/_/g, " ")}</span>
+                                <span className="analyticsBreakdown__value">{count}</span>
+                              </div>
+                              <div className="analyticsBreakdown__bar">
+                                <div
+                                  className="analyticsBreakdown__fill"
+                                  style={{ width: `${percentage}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                          );
+                        })
+                      : <p>Tidak ada data status order</p>}
                   </div>
                 </div>
               </div>
@@ -541,25 +545,29 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 <h3 className="analyticsCard__title">Order Status Breakdown</h3>
                 <div className="analyticsCard__content">
                   <div className="analyticsBreakdown">
-                    {Object.entries(data.orderStatusBreakdown).map(([status, count]) => {
-                      const total = Object.values(data.orderStatusBreakdown).reduce((sum, c) => sum + c, 0);
-                      const percentage = total > 0 ? (count / total) * 100 : 0;
-                      
-                      return (
-                        <div key={status} className="analyticsBreakdown__item">
-                          <div className="analyticsBreakdown__header">
-                            <span className="analyticsBreakdown__label">{status.replace(/_/g, " ")}</span>
-                            <span className="analyticsBreakdown__value">{count}</span>
-                          </div>
-                          <div className="analyticsBreakdown__bar">
-                            <div
-                              className="analyticsBreakdown__fill"
-                              style={{ width: `${percentage}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                    {data.orderStatusBreakdown && typeof data.orderStatusBreakdown === "object" 
+                      ? Object.entries(data.orderStatusBreakdown).map(([status, count]) => {
+                          const breakdown = data.orderStatusBreakdown;
+                          if (!breakdown || typeof breakdown !== "object") return null;
+                          const total = Object.values(breakdown).reduce((sum: number, c: any) => sum + (typeof c === "number" ? c : 0), 0);
+                          const percentage = total > 0 ? (count / total) * 100 : 0;
+                          
+                          return (
+                            <div key={status} className="analyticsBreakdown__item">
+                              <div className="analyticsBreakdown__header">
+                                <span className="analyticsBreakdown__label">{status.replace(/_/g, " ")}</span>
+                                <span className="analyticsBreakdown__value">{count}</span>
+                              </div>
+                              <div className="analyticsBreakdown__bar">
+                                <div
+                                  className="analyticsBreakdown__fill"
+                                  style={{ width: `${percentage}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                          );
+                        })
+                      : <p>Tidak ada data status order</p>}
                   </div>
                 </div>
               </div>

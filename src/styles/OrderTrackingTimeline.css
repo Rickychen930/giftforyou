@@ -1,0 +1,171 @@
+/**
+ * Order Tracking Timeline Styles
+ * Luxury, elegant timeline design
+ */
+
+.timeline {
+  position: relative;
+  padding: 1.5rem 0;
+}
+
+.timeline--empty {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.timeline__emptyText {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.timeline__line {
+  position: absolute;
+  left: 20px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    rgba(99, 102, 241, 0.2) 0%,
+    rgba(99, 102, 241, 0.4) 50%,
+    rgba(99, 102, 241, 0.2) 100%
+  );
+  border-radius: 2px;
+}
+
+.timeline__item {
+  position: relative;
+  display: flex;
+  gap: 1.5rem;
+  padding-bottom: 2rem;
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.timeline__item:last-child {
+  padding-bottom: 0;
+}
+
+.timeline__item--active .timeline__icon {
+  animation: pulse 2s ease-in-out infinite;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px rgba(99, 102, 241, 0.15);
+  }
+}
+
+.timeline__icon {
+  position: relative;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 3px solid white;
+  transition: all 0.3s ease;
+}
+
+.timeline__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.timeline__icon--created {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+}
+
+.timeline__icon--status {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+.timeline__icon--payment {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.timeline__icon--delivery {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+}
+
+.timeline__icon--bouquet {
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+  color: white;
+}
+
+.timeline__icon--default {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
+}
+
+.timeline__content {
+  flex: 1;
+  padding-top: 0.5rem;
+}
+
+.timeline__message {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.5;
+}
+
+.timeline__time {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .timeline__item {
+    gap: 1rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .timeline__icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .timeline__icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .timeline__message {
+    font-size: 0.9rem;
+  }
+
+  .timeline__time {
+    font-size: 0.8rem;
+  }
+}
+

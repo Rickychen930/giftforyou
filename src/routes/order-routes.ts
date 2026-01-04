@@ -1,6 +1,6 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
-import { createOrder, deleteOrder, getOrders, updateOrder } from "../controllers/order-controller";
+import { createOrder, deleteOrder, getOrders, getOrderById, updateOrder } from "../controllers/order-controller";
 import { authenticate, requireAdmin } from "../middleware/auth-middleware";
 import { OrderModel } from "../models/order-model";
 
@@ -12,11 +12,14 @@ router.use((req, res, next) => {
   next();
 });
 
-// Protected routes - all order operations require authentication
-router.get("/", authenticate, getOrders);
+// Public routes (must come before /:id routes)
 router.get("/stats", getOrderStats); // Public endpoint for order stats
 router.get("/stats/recent", getRecentOrderStats); // Public endpoint for recent order stats
 router.post("/", createOrder); // Public for customers to create orders
+
+// Protected routes - all order operations require authentication
+router.get("/", authenticate, getOrders);
+router.get("/:id", authenticate, getOrderById); // Get single order by ID
 router.patch("/:id", authenticate, requireAdmin, updateOrder);
 router.delete("/:id", authenticate, requireAdmin, deleteOrder);
 

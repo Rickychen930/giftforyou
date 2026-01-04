@@ -14,6 +14,7 @@ import collectionRoutes from "../routes/collection-routes";
 import heroSliderRoutes from "../routes/hero-slider-routes";
 import orderRoutes from "../routes/order-routes";
 import customerRoutes from "../routes/customer-routes";
+import reviewRoutes from "../routes/review-routes";
 import instagramRoutes from "../routes/instagram-routes";
 import { securityHeaders } from "../middleware/security-headers";
 import { apiRateLimit } from "../middleware/rate-limit-middleware";
@@ -112,6 +113,7 @@ app.use("/api/hero-slider", heroSliderRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/customer", customerRoutes); // Alias for customer profile routes
+app.use("/api/reviews", reviewRoutes);
 app.use("/api/instagram", instagramRoutes);
 
 // Log registered routes (always log)
@@ -123,6 +125,7 @@ console.log("  - /api/collections");
 console.log("  - /api/hero-slider");
 console.log("  - /api/orders");
 console.log("  - /api/customers");
+console.log("  - /api/reviews");
 console.log("  - /api/instagram");
 
 // 404 handler for API routes (must come after all route registrations)

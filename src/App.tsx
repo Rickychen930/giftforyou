@@ -26,6 +26,7 @@ import CheckoutPage from "./view/checkout-page";
 import CustomerRegisterPage from "./view/customer-register-page";
 import CustomerLoginPage from "./view/customer-login-page";
 import CustomerDashboardPage from "./view/customer-dashboard-page";
+import CustomerOrderDetailPage from "./view/customer-order-detail-page";
 import CustomerProfilePage from "./view/customer-profile-page";
 import CustomerAddressesPage from "./view/customer-addresses-page";
 import CustomerChangePasswordPage from "./view/customer-change-password-page";
@@ -33,6 +34,7 @@ import CustomerNotificationsPage from "./view/customer-notifications-page";
 import ErrorBoundary from "./components/error-boundary";
 import ScrollToTop from "./components/scroll-to-top";
 import LuxuryToastContainer from "./components/LuxuryToastContainer";
+import LiveChatWidget from "./components/LiveChatWidget";
 import { toast } from "./utils/toast";
 import { trackPageview } from "./services/analytics.service";
 
@@ -183,6 +185,14 @@ const AppLayout: React.FC = () => {
             }
           />
           <Route
+            path="/customer/orders/:id"
+            element={
+              <CustomerProtectedRoute>
+                <CustomerOrderDetailPage />
+              </CustomerProtectedRoute>
+            }
+          />
+          <Route
             path="/customer/profile"
             element={
               <CustomerProtectedRoute>
@@ -234,6 +244,8 @@ const AppLayout: React.FC = () => {
         toasts={toasts} 
         onRemove={(id) => toast.remove(id)} 
       />
+      
+      <LiveChatWidget />
     </>
   );
 };
