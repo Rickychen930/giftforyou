@@ -80,6 +80,8 @@ const OrderSearchFilter: React.FC<OrderSearchFilterProps> = ({
           </svg>
           <input
             type="text"
+            id="order-search-filter-input"
+            name="order-search-filter"
             className="orderSearchFilter__input"
             placeholder="Cari pesanan..."
             value={localSearch}

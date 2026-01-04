@@ -1800,6 +1800,7 @@ class BouquetUploader extends Component<Props, State> {
                     Nama <span className="uploader__required" aria-label="wajib diisi">*</span>
                   </span>
                   <input
+                    id="bouquet-name"
                     name="name"
                     value={this.state.name}
                     onChange={this.handleChange}
@@ -1824,6 +1825,7 @@ class BouquetUploader extends Component<Props, State> {
                   </span>
                   <div className="uploader__priceInputWrapper">
                   <input
+                    id="bouquet-price"
                     name="price"
                     type="number"
                       value={this.state.price || ""}
@@ -2009,6 +2011,7 @@ class BouquetUploader extends Component<Props, State> {
                     <label className="uploader__toggle">
                       <input
                         type="checkbox"
+                        id="bouquet-is-new-edition"
                         name="isNewEdition"
                         checked={this.state.isNewEdition}
                         onChange={this.handleChange}
@@ -2021,6 +2024,7 @@ class BouquetUploader extends Component<Props, State> {
                     <label className="uploader__toggle">
                       <input
                         type="checkbox"
+                        id="bouquet-is-featured"
                         name="isFeatured"
                         checked={this.state.isFeatured}
                         onChange={this.handleChange}
@@ -2086,6 +2090,8 @@ class BouquetUploader extends Component<Props, State> {
                         <div className="uploader__penandaInputWrapper">
                           <input
                             type="text"
+                            id="bouquet-new-penanda"
+                            name="bouquet-new-penanda"
                             className="uploader__penandaInput"
                             value={this.state.newPenandaInput}
                             onChange={(e) => {
@@ -2368,6 +2374,8 @@ class BouquetUploader extends Component<Props, State> {
 
                     <input
                       ref={this.fileInputRef}
+                      id="bouquet-image-upload"
+                      name="bouquet-image-upload"
                       className="uploader__fileInput"
                       type="file"
                       accept="image/*,.heic,.heif"

@@ -530,6 +530,7 @@ class CheckoutPage extends Component<{}, CheckoutState> {
                     <label className={`checkoutForm__radio ${deliveryType === "delivery" ? "checkoutForm__radio--active" : ""}`}>
                       <input
                         type="radio"
+                        id="delivery-type-delivery"
                         name="deliveryType"
                         value="delivery"
                         checked={deliveryType === "delivery"}
@@ -545,6 +546,7 @@ class CheckoutPage extends Component<{}, CheckoutState> {
                     <label className={`checkoutForm__radio ${deliveryType === "pickup" ? "checkoutForm__radio--active" : ""}`}>
                       <input
                         type="radio"
+                        id="delivery-type-pickup"
                         name="deliveryType"
                         value="pickup"
                         checked={deliveryType === "pickup"}
@@ -568,6 +570,8 @@ class CheckoutPage extends Component<{}, CheckoutState> {
                   </label>
                   <input
                     type="date"
+                    id="checkout-delivery-date"
+                    name="deliveryDate"
                     className={`checkoutForm__input ${formErrors.deliveryDate ? "checkoutForm__input--error" : ""}`}
                     min={minDate}
                     value={deliveryDate}

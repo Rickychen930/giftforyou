@@ -305,6 +305,8 @@ const DropdownWithModal: React.FC<DropdownWithModalProps> = ({
                 <input
                   ref={inputRef}
                   type="text"
+                  id={`dropdown-modal-input-${label.toLowerCase().replace(/\s+/g, '-')}`}
+                  name={`dropdown-modal-input-${label.toLowerCase().replace(/\s+/g, '-')}`}
                   value={newValue}
                   onChange={(e) => setNewValue(e.target.value)}
                   placeholder={`Masukkan ${label.toLowerCase()} baru`}

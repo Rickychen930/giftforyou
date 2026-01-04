@@ -272,6 +272,7 @@ class CustomerLoginPage extends Component<{}, LoginState> {
                 </label>
                 <input
                   type="text"
+                  id="login-username"
                   name="username"
                   className="customerAuthForm__input"
                   value={username}
@@ -290,6 +291,7 @@ class CustomerLoginPage extends Component<{}, LoginState> {
                 <div className="customerAuthForm__passwordWrapper">
                   <input
                     type={showPassword ? "text" : "password"}
+                    id="login-password"
                     name="password"
                     className="customerAuthForm__input"
                     value={password}
@@ -322,6 +324,8 @@ class CustomerLoginPage extends Component<{}, LoginState> {
                   <label className="customerAuthForm__checkbox">
                     <input
                       type="checkbox"
+                      id="login-remember-me"
+                      name="rememberMe"
                       checked={rememberMe}
                       onChange={(e) => this.handleChange("rememberMe", e.target.checked)}
                     />

@@ -38,6 +38,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
           <label className="order-form__radio">
             <input
               type="radio"
+              id="order-delivery-type-delivery"
               name="deliveryType"
               value="delivery"
               checked={formData.deliveryType === "delivery"}
@@ -53,6 +54,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
           <label className="order-form__radio">
             <input
               type="radio"
+              id="order-delivery-type-pickup"
               name="deliveryType"
               value="pickup"
               checked={formData.deliveryType === "pickup"}
@@ -76,6 +78,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
         </label>
         <input
           id="delivery-date"
+          name="deliveryDate"
           type="date"
           className={`order-form__input ${errors.deliveryDate ? "order-form__input--error" : ""}`}
           value={formData.deliveryDate}
@@ -96,6 +99,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
           </label>
           <input
             id="delivery-time"
+            name="deliveryTimeSlot"
             type="time"
             className="order-form__input"
             value={formData.deliveryTimeSlot || ""}
@@ -148,6 +152,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
           </button>
           <input
             id="quantity"
+            name="quantity"
             type="number"
             className="order-form__quantity-input"
             min="1"

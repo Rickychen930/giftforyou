@@ -155,6 +155,8 @@ const Footer: React.FC = () => {
             >
               <input
                 type="email"
+                id="footer-newsletter-email"
+                name="newsletter-email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Langganan newsletter"

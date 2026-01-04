@@ -325,6 +325,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ bouquetId, bouquetName 
               </label>
               <input
                 id="customerName"
+                name="customerName"
                 type="text"
                 className="productReviews__formInput"
                 value={formData.customerName}

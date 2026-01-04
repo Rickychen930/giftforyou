@@ -207,6 +207,8 @@ const TagInput: React.FC<TagInputProps> = ({
               <input
                 ref={inputRef}
                 type="text"
+                id={`tag-input-${label.toLowerCase().replace(/\s+/g, '-')}`}
+                name={`tag-input-${label.toLowerCase().replace(/\s+/g, '-')}`}
                 className="tagInput__input"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
@@ -329,6 +331,8 @@ const TagInput: React.FC<TagInputProps> = ({
                 <span>Nama Tag</span>
                 <input
                   type="text"
+                  id="tag-input-new-tag"
+                  name="tag-input-new-tag"
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   placeholder="Masukkan nama tag"

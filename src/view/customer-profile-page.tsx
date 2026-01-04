@@ -306,6 +306,8 @@ class CustomerProfilePage extends Component<{}, ProfileState> {
                   </label>
                   <input
                     type="text"
+                    id="profile-full-name"
+                    name="fullName"
                     className={`customerProfile__input ${errors.fullName ? "customerProfile__input--error" : ""}`}
                     value={formData.fullName}
                     onChange={(e) => this.handleChange("fullName", e.target.value)}
@@ -327,6 +329,8 @@ class CustomerProfilePage extends Component<{}, ProfileState> {
                   </label>
                   <input
                     type="tel"
+                    id="profile-phone-number"
+                    name="phoneNumber"
                     className={`customerProfile__input ${errors.phoneNumber ? "customerProfile__input--error" : ""}`}
                     value={formData.phoneNumber}
                     onChange={(e) => this.handleChange("phoneNumber", e.target.value)}

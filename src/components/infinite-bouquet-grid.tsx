@@ -239,8 +239,9 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
     );
   }
 
-  // Empty state
-  if (allBouquets.length === 0) {
+  // Empty state - only show if not loading and no bouquets
+  // Don't show empty state if still loading (bouquets might be coming)
+  if (allBouquets.length === 0 && !isLoading && !error) {
     return (
       <div className="infinite-grid-empty" role="status">
         <svg

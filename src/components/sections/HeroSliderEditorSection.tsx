@@ -500,6 +500,8 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
         <label className="hsField">
           <span className="hsLabel">Judul</span>
           <input
+            id="hero-slider-heading"
+            name="hero-slider-heading"
             value={heading}
             onChange={(e) => setHeading(e.target.value)}
             placeholder="mis. Koleksi Terbaru"
@@ -685,6 +687,8 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                       <label className="hsField">
                         <span className="hsLabel">Badge (Opsional)</span>
                         <input
+                          id={`hero-slide-badge-${s.id}`}
+                          name={`hero-slide-badge-${s.id}`}
                           value={s.badge ?? ""}
                           onChange={(e) =>
                             updateSlide(s.id, { badge: e.target.value })
@@ -696,6 +700,8 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                       <label className="hsField">
                         <span className="hsLabel">Judul *</span>
                         <input
+                          id={`hero-slide-title-${s.id}`}
+                          name={`hero-slide-title-${s.id}`}
                           value={s.title}
                           onChange={(e) =>
                             updateSlide(s.id, { title: e.target.value })
@@ -721,6 +727,8 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
 
                         <input
                           type="file"
+                          id={`hero-slide-image-upload-${s.id}`}
+                          name={`hero-slide-image-upload-${s.id}`}
                           accept="image/*,.heic,.heif"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
@@ -756,6 +764,8 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                             Atau tempel URL / path
                           </span>
                           <input
+                            id={`hero-slide-image-url-${s.id}`}
+                            name={`hero-slide-image-url-${s.id}`}
                             value={s.image}
                             onChange={(e) =>
                               updateSlide(s.id, { image: e.target.value })
@@ -839,6 +849,8 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                         <label className="hsField">
                           <span className="hsLabel">Teks</span>
                           <input
+                            id={`hero-slide-primary-cta-label-${s.id}`}
+                            name={`hero-slide-primary-cta-label-${s.id}`}
                             value={s.primaryCta.label}
                             onChange={(e) =>
                               updatePrimaryCta(s.id, { label: e.target.value })
@@ -850,6 +862,8 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                         <label className="hsField">
                           <span className="hsLabel">Tautan</span>
                           <input
+                            id={`hero-slide-primary-cta-href-${s.id}`}
+                            name={`hero-slide-primary-cta-href-${s.id}`}
                             value={s.primaryCta.href}
                             onChange={(e) =>
                               updatePrimaryCta(s.id, { href: e.target.value })
@@ -867,6 +881,8 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                         <label className="hsField">
                           <span className="hsLabel">Teks</span>
                           <input
+                            id={`hero-slide-secondary-cta-label-${s.id}`}
+                            name={`hero-slide-secondary-cta-label-${s.id}`}
                             value={s.secondaryCta?.label ?? ""}
                             onChange={(e) =>
                               updateSecondaryCta(s.id, {
@@ -880,6 +896,8 @@ const HeroSliderEditorSection: React.FC<Props> = ({ collections, onSaved }) => {
                         <label className="hsField">
                           <span className="hsLabel">Tautan</span>
                           <input
+                            id={`hero-slide-secondary-cta-href-${s.id}`}
+                            name={`hero-slide-secondary-cta-href-${s.id}`}
                             value={s.secondaryCta?.href ?? ""}
                             onChange={(e) =>
                               updateSecondaryCta(s.id, { href: e.target.value })

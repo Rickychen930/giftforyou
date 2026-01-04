@@ -150,6 +150,8 @@ const FAQPage: React.FC = () => {
           <div className="faq-search">
             <input
               type="text"
+              id="faq-search-input"
+              name="faq-search"
               placeholder="Cari pertanyaan..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

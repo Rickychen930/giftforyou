@@ -258,6 +258,8 @@ class CustomerChangePasswordPage extends Component<{}, ChangePasswordState> {
                 <div className="customerChangePassword__passwordWrapper">
                   <input
                     type={showPassword.current ? "text" : "password"}
+                    id="change-password-current"
+                    name="currentPassword"
                     className={`customerChangePassword__input ${errors.currentPassword ? "customerChangePassword__input--error" : ""}`}
                     value={formData.currentPassword}
                     onChange={(e) => this.handleChange("currentPassword", e.target.value)}
@@ -302,6 +304,8 @@ class CustomerChangePasswordPage extends Component<{}, ChangePasswordState> {
                 <div className="customerChangePassword__passwordWrapper">
                   <input
                     type={showPassword.new ? "text" : "password"}
+                    id="change-password-new"
+                    name="newPassword"
                     className={`customerChangePassword__input ${errors.newPassword ? "customerChangePassword__input--error" : ""}`}
                     value={formData.newPassword}
                     onChange={(e) => this.handleChange("newPassword", e.target.value)}
@@ -349,6 +353,8 @@ class CustomerChangePasswordPage extends Component<{}, ChangePasswordState> {
                 <div className="customerChangePassword__passwordWrapper">
                   <input
                     type={showPassword.confirm ? "text" : "password"}
+                    id="change-password-confirm"
+                    name="confirmPassword"
                     className={`customerChangePassword__input ${errors.confirmPassword ? "customerChangePassword__input--error" : ""}`}
                     value={formData.confirmPassword}
                     onChange={(e) => this.handleChange("confirmPassword", e.target.value)}

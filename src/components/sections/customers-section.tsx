@@ -529,6 +529,8 @@ export default function CustomersSection({ onSelectCustomer }: Props) {
             </svg>
             <input
               type="text"
+              id="customers-search-input"
+              name="customers-search"
               placeholder="Cari customer..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

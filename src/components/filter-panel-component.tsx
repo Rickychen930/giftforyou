@@ -349,6 +349,8 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
               </svg>
               <input
                 type="text"
+                id={`fp-search-${k}`}
+                name={`fp-search-${k}`}
                 className="fpGroup__searchInput"
                 placeholder={`Cari ${title.toLowerCase()}...`}
                 value={searchQueries[k]}

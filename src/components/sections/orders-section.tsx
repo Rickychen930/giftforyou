@@ -1274,6 +1274,8 @@ export default function OrdersSection({ bouquets }: Props) {
                   <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                 </svg>
                 <input
+                  id="orders-list-search"
+                  name="orders-list-search"
                   className="ordersInput"
                   value={listQuery}
                   onChange={(e) => setListQuery(e.target.value)}
@@ -1662,6 +1664,8 @@ export default function OrdersSection({ bouquets }: Props) {
                       <div className="ordersCard__checkboxWrapper">
                         <input
                           type="checkbox"
+                          id={`order-checkbox-${orderId}`}
+                          name={`order-checkbox-${orderId}`}
                           className="ordersCard__checkbox"
                           checked={Boolean(isBulkSelected)}
                           onChange={(e) => {
@@ -1870,6 +1874,8 @@ export default function OrdersSection({ bouquets }: Props) {
               <span className="ordersLabel">Pilih user</span>
               <div className="ordersInlineActions" role="group" aria-label="Cari user">
                 <input
+                  id="orders-customer-search"
+                  name="orders-customer-search"
                   className="ordersInput"
                   ref={customerSearchRef}
                   value={customerSearch}
@@ -1930,6 +1936,8 @@ export default function OrdersSection({ bouquets }: Props) {
                   <label className="ordersField">
                     <span className="ordersLabel">Nama</span>
                     <input
+                      id="new-customer-name"
+                      name="new-customer-name"
                       className="ordersInput"
                       value={newCustomerName}
                       onChange={(e) => setNewCustomerName(e.target.value)}
@@ -1942,6 +1950,8 @@ export default function OrdersSection({ bouquets }: Props) {
                   <label className="ordersField">
                     <span className="ordersLabel">No. HP</span>
                     <input
+                      id="new-customer-phone"
+                      name="new-customer-phone"
                       className="ordersInput"
                       value={newCustomerPhone}
                       onChange={(e) => setNewCustomerPhone(e.target.value)}
@@ -1993,6 +2003,8 @@ export default function OrdersSection({ bouquets }: Props) {
                     <label className="ordersField">
                       <span className="ordersLabel">Nama pembeli</span>
                       <input
+                        id="order-buyer-name"
+                        name="order-buyer-name"
                         className="ordersInput"
                         value={buyerName}
                         onChange={(ev) => setBuyerName(ev.target.value)}
@@ -2007,6 +2019,8 @@ export default function OrdersSection({ bouquets }: Props) {
                     <label className="ordersField">
                       <span className="ordersLabel">No. HP</span>
                       <input
+                        id="order-phone-number"
+                        name="order-phone-number"
                         className="ordersInput"
                         value={phoneNumber}
                         onChange={(ev) => setPhoneNumber(ev.target.value)}
@@ -2063,6 +2077,8 @@ export default function OrdersSection({ bouquets }: Props) {
             <label className="ordersField">
               <span className="ordersLabel">Waktu deliver</span>
               <input
+                id="order-delivery-at"
+                name="order-delivery-at"
                 className="ordersInput"
                 type="datetime-local"
                 value={deliveryAt}
@@ -2131,6 +2147,8 @@ export default function OrdersSection({ bouquets }: Props) {
             <label className="ordersField">
               <span className="ordersLabel">Status pembayaran</span>
               <input
+                id="order-payment-status"
+                name="order-payment-status"
                 className="ordersInput"
                 value={derivedNumbers.derivedPaymentStatus.replace(/_/g, " ")}
                 readOnly
@@ -2190,6 +2208,8 @@ export default function OrdersSection({ bouquets }: Props) {
             <label className="ordersField">
               <span className="ordersLabel">Nominal DP</span>
               <input
+                id="order-down-payment-amount"
+                name="order-down-payment-amount"
                 className="ordersInput"
                 value={downPaymentAmount}
                 onChange={(ev) => setDownPaymentAmount(ev.target.value)}

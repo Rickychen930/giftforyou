@@ -202,6 +202,8 @@ const CollectionListView: React.FC<Props> = ({
                       <input
                         ref={inputRef}
                         type="text"
+                        id={`collection-edit-input-${collection._id}`}
+                        name={`collection-edit-input-${collection._id}`}
                         className="collectionListView__editInput"
                         value={editValue}
                         onChange={(e) => setEditValue(e.target.value)}

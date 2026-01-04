@@ -439,6 +439,8 @@ class CustomerAddressesPage extends Component<{}, AddressesState> {
                   </label>
                   <input
                     type="text"
+                    id="address-label"
+                    name="address-label"
                     className={`customerAddresses__input ${errors.label ? "customerAddresses__input--error" : ""}`}
                     value={formData.label}
                     onChange={(e) => this.handleChange("label", e.target.value)}
@@ -475,6 +477,8 @@ class CustomerAddressesPage extends Component<{}, AddressesState> {
                   <label className="customerAddresses__checkbox">
                     <input
                       type="checkbox"
+                      id="address-is-default"
+                      name="address-is-default"
                       checked={formData.isDefault}
                       onChange={(e) => this.handleChange("isDefault", e.target.checked)}
                     />

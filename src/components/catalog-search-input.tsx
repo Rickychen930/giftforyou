@@ -116,6 +116,8 @@ const CatalogSearchInput: React.FC<CatalogSearchInputProps> = ({
         <input
           ref={inputRef}
           type="search"
+          id="catalog-search-input"
+          name="catalog-search"
           className="catalogSearchInput__input"
           placeholder={placeholder}
           value={localValue}

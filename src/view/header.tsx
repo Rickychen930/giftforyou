@@ -679,6 +679,7 @@ const Header: React.FC<HeaderProps> = ({
                 <SearchIcon className="search-icon" width={24} height={24} />
                 <input
                   ref={searchRef}
+                  id="header-search-input"
                   name="q"
                   list="search-suggestions"
                   value={query}

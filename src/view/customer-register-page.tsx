@@ -255,6 +255,7 @@ class CustomerRegisterPage extends Component<{}, RegisterState> {
                 </label>
                 <input
                   type="text"
+                  id="register-full-name"
                   name="fullName"
                   className={`customerAuthForm__input ${errors.fullName ? "customerAuthForm__input--error" : ""}`}
                   value={this.state.fullName}
@@ -277,6 +278,7 @@ class CustomerRegisterPage extends Component<{}, RegisterState> {
                 </label>
                 <input
                   type="text"
+                  id="register-username"
                   name="username"
                   className={`customerAuthForm__input ${errors.username ? "customerAuthForm__input--error" : ""}`}
                   value={this.state.username}
@@ -299,6 +301,7 @@ class CustomerRegisterPage extends Component<{}, RegisterState> {
                 </label>
                 <input
                   type="email"
+                  id="register-email"
                   name="email"
                   className={`customerAuthForm__input ${errors.email ? "customerAuthForm__input--error" : ""}`}
                   value={this.state.email}
@@ -321,6 +324,7 @@ class CustomerRegisterPage extends Component<{}, RegisterState> {
                 </label>
                 <input
                   type="tel"
+                  id="register-phone-number"
                   name="phoneNumber"
                   className={`customerAuthForm__input ${errors.phoneNumber ? "customerAuthForm__input--error" : ""}`}
                   value={this.state.phoneNumber}
@@ -344,6 +348,7 @@ class CustomerRegisterPage extends Component<{}, RegisterState> {
                 <div className="customerAuthForm__passwordWrapper">
                   <input
                     type={showPassword ? "text" : "password"}
+                    id="register-password"
                     name="password"
                     className={`customerAuthForm__input ${errors.password ? "customerAuthForm__input--error" : ""}`}
                     value={this.state.password}
@@ -391,6 +396,7 @@ class CustomerRegisterPage extends Component<{}, RegisterState> {
                 <div className="customerAuthForm__passwordWrapper">
                   <input
                     type={showConfirmPassword ? "text" : "password"}
+                    id="register-confirm-password"
                     name="confirmPassword"
                     className={`customerAuthForm__input ${errors.confirmPassword ? "customerAuthForm__input--error" : ""}`}
                     value={this.state.confirmPassword}
@@ -431,6 +437,7 @@ class CustomerRegisterPage extends Component<{}, RegisterState> {
                 <label className="customerAuthForm__checkbox">
                   <input
                     type="checkbox"
+                    id="register-agree-to-terms"
                     name="agreeToTerms"
                     checked={this.state.agreeToTerms}
                     onChange={(e) => this.handleChange("agreeToTerms", e.target.checked)}

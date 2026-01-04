@@ -110,6 +110,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
             <SearchIcon className="search-icon" width={24} height={24} />
             <input
               ref={searchRef}
+              id="search-modal-input"
               name="q"
               list="search-suggestions"
               value={query}

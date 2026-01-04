@@ -167,6 +167,8 @@ const InventoryManager: React.FC<InventoryManagerProps> = ({
             </svg>
             <input
               type="text"
+              id="inventory-manager-search"
+              name="inventory-manager-search"
               placeholder="Cari bouquet..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
