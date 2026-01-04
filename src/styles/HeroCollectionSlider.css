@@ -235,6 +235,24 @@ html {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
+.hero__retryBtn {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--hero-brand-1);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.hero__retryBtn:hover {
+  background: var(--hero-brand-2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(212, 140, 156, 0.3);
+}
+
 /* Slide container */
 .heroSlide {
   position: relative;
@@ -288,6 +306,19 @@ html {
   background: linear-gradient(135deg, rgba(212, 140, 156, 0.1), rgba(168, 213, 186, 0.1));
   animation: shimmerPlaceholder 2s infinite;
   z-index: 0;
+}
+
+/* Screen reader only text */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 
 /* Skip link for accessibility */
@@ -1789,4 +1820,50 @@ html {
   .hero__counter {
     transition: none !important;
   }
+}
+
+/* Performance optimizations - reduce animations on low-end devices */
+.hero--reduced-animations .heroSlide__img,
+.hero--reduced-animations .heroSlide__glow {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+}
+
+.hero--reduced-animations .swiper-slide-active .heroSlide__img {
+  transform: scale(1.05) !important;
+  animation: none !important;
+}
+
+.hero--reduced-animations .swiper-slide-active .heroSlide__badge,
+.hero--reduced-animations .swiper-slide-active .heroSlide__heading,
+.hero--reduced-animations .swiper-slide-active .heroSlide__subtitle,
+.hero--reduced-animations .swiper-slide-active .heroSlide__actions {
+  animation-duration: 0.3s !important;
+}
+
+/* Content visibility optimization for off-screen slides */
+.swiper-slide:not(.swiper-slide-active) .heroSlide__content {
+  content-visibility: auto;
+  contain-intrinsic-size: 200px;
+}
+
+/* Will-change optimization - only on active slide */
+.swiper-slide-active .heroSlide__img,
+.swiper-slide-active .heroSlide__panel {
+  will-change: transform, opacity;
+}
+
+.swiper-slide:not(.swiper-slide-active) .heroSlide__img,
+.swiper-slide:not(.swiper-slide-active) .heroSlide__panel {
+  will-change: auto;
+}
+
+/* GPU acceleration for smooth animations */
+.heroSlide__img,
+.heroSlide__panel,
+.hero__nav,
+.hero__playPause {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
 }

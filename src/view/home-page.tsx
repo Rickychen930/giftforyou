@@ -4,42 +4,28 @@ import "../styles/HomePage.css";
 
 import type { Collection } from "../models/domain/collection";
 import { getCollections } from "../services/collection.service";
+import { heroSliderService } from "../services/hero-slider.service";
 import HeroCollectionSlider from "../components/sections/hero-collection-slider";
 import OurCollectionSection from "../components/sections/our-collection-section";
 import StoreLocationSection from "../components/sections/store-location-section";
 import GoogleMapsReviewsSection from "../components/sections/google-maps-reviews-section";
 
-import { API_BASE } from "../config/api";
-// import { STORE_PROFILE } from "../config/store-profile"; FIXED ME
+import type { HeroSliderContent } from "../components/sections/hero-collection-slider";
 import { setSeo } from "../utils/seo";
 import { observeFadeIn, revealOnScroll, lazyLoadImages } from "../utils/luxury-enhancements";
 
 type LoadState = "idle" | "loading" | "success" | "error";
-
-type HeroSlide = {
-  id: string;
-  badge?: string;
-  title: string;
-  subtitle?: string;
-  image: string;
-  primaryCta: { label: string; href: string };
-  secondaryCta?: { label: string; href: string };
-};
-
-type HeroSliderContent = {
-  heading?: string;
-  slides: HeroSlide[];
-}; // adjust path depending on folder depth
 
 const HomePage: React.FC = () => {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [state, setState] = useState<LoadState>("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
 
-  // ✅ Hero slider content from API (optional)
+  // Hero slider content from API (optional)
   const [heroContent, setHeroContent] = useState<HeroSliderContent | null>(
     null
   );
+  const [heroLoading, setHeroLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -58,23 +44,22 @@ const HomePage: React.FC = () => {
         setState("loading");
         setErrorMessage("");
 
-        // 1) fetch hero content (do not block page if it fails)
-        fetch(`${API_BASE}/api/hero-slider/home`, { signal: controller.signal })
-          .then((r) => (r.ok ? r.json() : null))
+        // 1) Fetch hero content (non-blocking, uses service layer)
+        setHeroLoading(true);
+        heroSliderService
+          .fetchHeroSlider(controller.signal)
           .then((data) => {
-            const hasSlides =
-              data &&
-              typeof data === "object" &&
-              Array.isArray((data as any).slides) &&
-              (data as any).slides.length > 0;
-            setHeroContent(hasSlides ? (data as HeroSliderContent) : null);
+            setHeroContent(data);
           })
-          .catch((err: unknown) => {
-            if (err instanceof DOMException && err.name === "AbortError") return;
+          .catch(() => {
+            // Service handles errors gracefully, just set to null
             setHeroContent(null);
+          })
+          .finally(() => {
+            setHeroLoading(false);
           });
 
-        // 2) fetch collections
+        // 2) Fetch collections
         const data = await getCollections(controller.signal);
         setCollections(data);
         setState("success");
@@ -104,9 +89,15 @@ const HomePage: React.FC = () => {
 
   return (
     <main className="Home-page-container">
-      {/* ✅ Big hero slider (DB content if exists, otherwise component uses defaultContent) */}
-      <HeroCollectionSlider content={heroContent ?? undefined} />
+      {/* Hero slider with loading state (DB content if exists, otherwise component uses defaultContent) */}
+      <HeroCollectionSlider
+        content={heroContent ?? undefined}
+        loading={heroLoading}
+      />
 
+      {/* Main content anchor for skip link */}
+      <div id="main-content" tabIndex={-1} style={{ position: "absolute", top: "-100px" }} aria-hidden="true" />
+      
       <OurCollectionSection
         items={collections}
         loading={state === "loading"}
