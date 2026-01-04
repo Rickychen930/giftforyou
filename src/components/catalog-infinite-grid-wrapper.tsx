@@ -99,17 +99,50 @@ const CatalogInfiniteGridWrapper: React.FC<CatalogInfiniteGridWrapperProps> = ({
     const safeSearchQuery = typeof searchQuery === "string" ? searchQuery.trim() : "";
     const safeCollectionNameFilter = typeof collectionNameFilter === "string" ? collectionNameFilter.trim() : "";
     
-    return {
-      search: safeSearchQuery || undefined,
-      collectionName: safeCollectionNameFilter || undefined,
-      collections: safeSelectedCollections.length > 0 ? safeSelectedCollections : undefined,
-      types: safeSelectedTypes.length > 0 ? safeSelectedTypes : undefined,
-      sizes: safeSelectedSizes.length > 0 ? safeSelectedSizes : undefined,
-      minPrice: safePriceRange[0] !== DEFAULT_PRICE[0] ? safePriceRange[0] : undefined,
-      maxPrice: safePriceRange[1] !== DEFAULT_PRICE[1] ? safePriceRange[1] : undefined,
-      sortBy: apiSortBy,
-      limit: 20, // Optimal for infinite scroll
+    // Build filter object - only include filters that are actually set
+    // When all filters are empty/undefined, return empty object {} which means "show all bouquets"
+    // This ensures that when filters are cleared, all bouquets are displayed
+    const filterObj: Omit<BouquetQueryParams, "page"> = {
+      limit: 20, // Always include limit
     };
+    
+    // Only add filter properties if they have values
+    // This ensures empty filters don't prevent showing all bouquets
+    if (safeSearchQuery) {
+      filterObj.search = safeSearchQuery;
+    }
+    
+    if (safeCollectionNameFilter) {
+      filterObj.collectionName = safeCollectionNameFilter;
+    }
+    
+    if (safeSelectedCollections.length > 0) {
+      filterObj.collections = safeSelectedCollections;
+    }
+    
+    if (safeSelectedTypes.length > 0) {
+      filterObj.types = safeSelectedTypes;
+    }
+    
+    if (safeSelectedSizes.length > 0) {
+      filterObj.sizes = safeSelectedSizes;
+    }
+    
+    // Only add price filters if they differ from default (meaning user has set a price range)
+    if (safePriceRange[0] !== DEFAULT_PRICE[0]) {
+      filterObj.minPrice = safePriceRange[0];
+    }
+    
+    if (safePriceRange[1] !== DEFAULT_PRICE[1]) {
+      filterObj.maxPrice = safePriceRange[1];
+    }
+    
+    // Only add sortBy if it's set
+    if (apiSortBy) {
+      filterObj.sortBy = apiSortBy;
+    }
+    
+    return filterObj;
   }, [
     searchQuery,
     collectionNameFilter,

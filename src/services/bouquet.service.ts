@@ -55,9 +55,29 @@ function applyFilters(
     sizes,
   } = params;
 
+  // CRITICAL: Start with all bouquets
+  // If no filters are applied, return all bouquets
   let filtered = bouquets;
 
-  // Price filter
+  // Check if any filters are actually set
+  // If no filters are set, return all bouquets immediately
+  const hasAnyFilter = 
+    (search && search.trim().length > 0) ||
+    (collectionName && collectionName.trim().length > 0) ||
+    (collections && collections.length > 0) ||
+    (types && types.length > 0) ||
+    (sizes && sizes.length > 0) ||
+    (type && (Array.isArray(type) ? type.length > 0 : type.trim().length > 0)) ||
+    (size && (Array.isArray(size) ? size.length > 0 : size.trim().length > 0)) ||
+    minPrice !== undefined ||
+    maxPrice !== undefined;
+
+  // If no filters are set, return all bouquets
+  if (!hasAnyFilter) {
+    return filtered;
+  }
+
+  // Price filter - only apply if minPrice or maxPrice is explicitly set
   if (minPrice !== undefined || maxPrice !== undefined) {
     const min = minPrice ?? 0;
     const max = maxPrice ?? Number.MAX_SAFE_INTEGER;
