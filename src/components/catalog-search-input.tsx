@@ -135,7 +135,7 @@ const CatalogSearchInput: React.FC<CatalogSearchInputProps> = ({
           disabled={disabled}
           aria-label="Cari bouquet"
           aria-autocomplete="list"
-          aria-controls={showSuggestionsList ? "search-suggestions" : undefined}
+          aria-controls={showSuggestionsList ? "catalog-search-suggestions" : undefined}
         />
         {showClearButton && (
           <button
@@ -166,7 +166,7 @@ const CatalogSearchInput: React.FC<CatalogSearchInputProps> = ({
       {/* Search Suggestions */}
       {showSuggestionsList && filteredSuggestions.length > 0 && (
         <div
-          id="search-suggestions"
+          id="catalog-search-suggestions"
           className="catalogSearchInput__suggestions"
           role="listbox"
           aria-label="Saran pencarian"

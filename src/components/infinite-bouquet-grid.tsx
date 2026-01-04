@@ -278,11 +278,12 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
   // IMPORTANT: Don't show empty state if still loading or if there's an error
   // Also, don't show empty state immediately - wait a bit to ensure data has loaded
   // This prevents showing empty state when filters are cleared (which should show all bouquets)
-  if (safeAllBouquets.length === 0 && !isLoading && !error && !isRefetching) {
-    // Only show empty state if we're sure there are no bouquets
-    // Check if data exists and has been loaded at least once
-    const hasLoadedData = data && data.pages && data.pages.length > 0;
-    if (hasLoadedData) {
+  // CRITICAL: Only show empty state if data has been loaded AND there are truly no bouquets
+  // This ensures Grid is always rendered when filters are cleared (to show all bouquets)
+  if (safeAllBouquets.length === 0 && !isLoading && !error && !isRefetching && data && data.pages && data.pages.length > 0) {
+    // Check if all pages are empty
+    const allPagesEmpty = data.pages.every((page) => !page || !page.bouquets || page.bouquets.length === 0);
+    if (allPagesEmpty) {
       return (
         <div className="infinite-grid-empty" role="status">
           <svg
@@ -307,7 +308,6 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
         </div>
       );
     }
-    // If no data has been loaded yet, don't show empty state - let it load first
   }
 
 

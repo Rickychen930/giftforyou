@@ -100,10 +100,11 @@ const CatalogInfiniteGridWrapper: React.FC<CatalogInfiniteGridWrapperProps> = ({
     const safeCollectionNameFilter = typeof collectionNameFilter === "string" ? collectionNameFilter.trim() : "";
     
     // Build filter object - only include filters that are actually set
-    // When all filters are empty/undefined, return empty object {} which means "show all bouquets"
+    // When all filters are empty/undefined, return object with only limit which means "show all bouquets"
     // This ensures that when filters are cleared, all bouquets are displayed
+    // CRITICAL: Always include limit to ensure consistent queryKey and pagination
     const filterObj: Omit<BouquetQueryParams, "page"> = {
-      limit: 20, // Always include limit
+      limit: 20, // Always include limit for consistent queryKey
     };
     
     // Only add filter properties if they have values
