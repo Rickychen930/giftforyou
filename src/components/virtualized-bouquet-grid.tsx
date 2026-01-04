@@ -5,7 +5,7 @@
  */
 
 import React, { memo, useMemo, useCallback } from "react";
-import { Grid } from "react-window";
+import { Grid, CellComponentProps } from "react-window";
 import BouquetCard from "./bouquet-card-component";
 import type { BouquetCardProps } from "./bouquet-card-component";
 import "../styles/VirtualizedBouquetGrid.css";
@@ -273,39 +273,37 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
   }, [propRowHeight]);
 
   // Render function for Grid children - using useCallback for stability
-  // IMPORTANT: react-window passes itemData as 'data' prop to children render function
-  // We must use the data prop from the render function, not from closure
-  // CRITICAL: This function receives 'data' which is the itemData prop passed to Grid
+  // IMPORTANT: react-window spreads itemData into props, so we access bouquets, columnCount, gap directly from props
+  // CRITICAL: This function receives props which includes itemData spread into it
   // We validate it here as a final safety check
   // MUST be called before any early returns to comply with Rules of Hooks
-  const renderCell = useCallback(({ 
-    columnIndex, 
-    rowIndex, 
-    style, 
-    data 
-  }: { 
-    columnIndex: number; 
-    rowIndex: number; 
-    style: React.CSSProperties;
-    data: {
-      bouquets: BouquetCardProps[];
-      columnCount: number;
-      gap: number;
-    };
-  }) => {
+  // Using CellComponentProps for proper typing
+  const renderCell = useCallback((props: CellComponentProps<{
+    bouquets: BouquetCardProps[];
+    columnCount: number;
+    gap: number;
+  }>) => {
+    const { columnIndex, rowIndex, style, bouquets, columnCount, gap } = props;
+    
     // CRITICAL: Final validation of data received from react-window
+    // itemData is spread into props, so we access bouquets, columnCount, gap directly
     // This should never be null/undefined because we validate finalItemData before passing to Grid
     // But we add this check as absolute last line of defense
-    if (!data || typeof data !== "object") {
-      console.error("[VirtualizedBouquetGrid] renderCell received invalid data:", data);
+    if (!bouquets || !Array.isArray(bouquets)) {
+      console.error("[VirtualizedBouquetGrid] renderCell received invalid bouquets:", bouquets);
       return <div style={style} />;
     }
     // Validate data structure
-    if (!Array.isArray(data.bouquets) || typeof data.columnCount !== "number" || typeof data.gap !== "number") {
-      console.error("[VirtualizedBouquetGrid] renderCell received invalid data structure:", data);
+    if (typeof columnCount !== "number" || !Number.isFinite(columnCount) || columnCount <= 0) {
+      console.error("[VirtualizedBouquetGrid] renderCell received invalid columnCount:", columnCount);
       return <div style={style} />;
     }
-    return <Cell columnIndex={columnIndex} rowIndex={rowIndex} style={style} data={data} />;
+    if (typeof gap !== "number" || !Number.isFinite(gap) || gap < 0) {
+      console.error("[VirtualizedBouquetGrid] renderCell received invalid gap:", gap);
+      return <div style={style} />;
+    }
+    // Pass data as object to Cell component
+    return <Cell columnIndex={columnIndex} rowIndex={rowIndex} style={style} data={{ bouquets, columnCount, gap }} />;
   }, []);
 
   // Early return for empty bouquets - NOW all hooks are called first
@@ -445,22 +443,23 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
       }}
     >
       <Grid
-        columnCount={columnCount}
-        columnWidth={columnWidth}
-        rowCount={rowCount}
-        rowHeight={safeRowHeight}
-        width={safeContainerWidth}
-        height={safeContainerHeight}
-        itemData={finalItemData} // This is ABSOLUTELY guaranteed to be a valid object - never null/undefined
-        onItemsRendered={handleItemsRendered}
-        overscanRowCount={2}
-        overscanColumnCount={1}
-        style={{
-          overflowX: "hidden",
-        }}
-      >
-        {renderCell}
-      </Grid>
+        {...({
+          columnCount,
+          columnWidth,
+          rowCount,
+          rowHeight: safeRowHeight,
+          width: safeContainerWidth,
+          height: safeContainerHeight,
+          itemData: finalItemData, // This is ABSOLUTELY guaranteed to be a valid object - never null/undefined
+          onItemsRendered: handleItemsRendered,
+          overscanRowCount: 2,
+          overscanColumnCount: 1,
+          style: {
+            overflowX: "hidden",
+          },
+          cellComponent: renderCell,
+        } as any)}
+      />
     </div>
   );
 };
