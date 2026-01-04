@@ -1,10 +1,18 @@
 /**
  * Our Collection Section Component
- * Luxury, elegant UI/UX with React Query, infinite scroll, and performance optimizations
+ * Luxury, elegant UI/UX with React Query, performance optimizations
  * Follows SOLID, DRY, MVP, OOP principles
+ * 
+ * Features:
+ * - Displays 3 featured collections in elegant grid
+ * - "See More" button for full collection view
+ * - React Query for data fetching & caching
+ * - Responsive design for all devices
+ * - Smooth animations and transitions
  */
 
-import React, { useMemo, useEffect, useState, useRef, memo } from "react";
+import React, { useMemo, useEffect, useState, useRef, memo, useCallback } from "react";
+import { Link } from "react-router-dom";
 import "../../styles/OurCollectionSection.css";
 import CollectionContainer from "../collection-container-component";
 import { prepareCollections } from "../../utils/collection-transformer";
@@ -19,7 +27,10 @@ interface OurCollectionViewProps {
   onRetry?: () => void;
 }
 
-// Enhanced Loading skeleton component with better animations
+// Constants
+const FEATURED_COLLECTIONS_COUNT = 3;
+
+// Enhanced Loading skeleton component
 const CollectionSkeleton: React.FC<{ delay?: number }> = memo(({ delay = 0 }) => (
   <div 
     className="collectionCard collectionCard--skeleton" 
@@ -32,8 +43,8 @@ const CollectionSkeleton: React.FC<{ delay?: number }> = memo(({ delay = 0 }) =>
         <div className="skeleton skeleton--description skeleton--pulse"></div>
       </div>
     </div>
-    <div className="collectionCard__scrollWrap">
-      <div className="collectionCard__scroll">
+    <div className="collectionCard__previewWrap">
+      <div className="collectionCard__previewGrid">
         {[1, 2, 3].map((i) => (
           <div 
             key={i} 
@@ -54,7 +65,7 @@ const CollectionSkeleton: React.FC<{ delay?: number }> = memo(({ delay = 0 }) =>
 
 CollectionSkeleton.displayName = "CollectionSkeleton";
 
-// Error state component with retry functionality
+// Error state component
 const ErrorState: React.FC<{ message: string; onRetry?: () => void }> = memo(({ message, onRetry }) => (
   <div className="ourCollection__error" role="alert" aria-live="polite">
     <div className="ourCollection__errorIcon" aria-hidden="true">
@@ -168,38 +179,86 @@ const OurCollectionSection: React.FC<OurCollectionViewProps> = ({
 
   const loading = propLoading ?? queryLoading;
   const errorMessage = propErrorMessage ?? (queryError?.message ?? "");
-  const onRetry = propOnRetry ?? (() => queryRefetch());
+  
+  // Memoize retry handler for performance
+  const onRetry = useCallback(() => {
+    if (propOnRetry) {
+      propOnRetry();
+    } else {
+      queryRefetch();
+    }
+  }, [propOnRetry, queryRefetch]);
 
   // Memoize prepared collections for performance
   const prepared = useMemo(() => {
     return prepareCollections(items);
   }, [items]);
 
-  // Intersection Observer for scroll animations - using native API
+  // Get featured collections (first 3) - memoized for performance
+  const featuredCollections = useMemo(() => {
+    if (!prepared || prepared.length === 0) return [];
+    return prepared.slice(0, FEATURED_COLLECTIONS_COUNT);
+  }, [prepared]);
+
+  // Check if there are more collections to show - memoized
+  const hasMoreCollections = useMemo(() => {
+    return prepared.length > FEATURED_COLLECTIONS_COUNT;
+  }, [prepared.length]);
+
+  // Intersection Observer for scroll animations - optimized
   useEffect(() => {
     const currentSection = sectionRef.current;
     if (!currentSection || isVisible) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsVisible(true);
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      {
-        threshold: 0.1,
-        rootMargin: "0px 0px -100px 0px",
-      }
-    );
+    // Check if IntersectionObserver is supported
+    if (typeof window === "undefined" || !window.IntersectionObserver) {
+      setIsVisible(true);
+      return;
+    }
 
-    observer.observe(currentSection);
+    // Check if element is already in view on mount (performance optimization)
+    const rect = currentSection.getBoundingClientRect();
+    const isInView = rect.top < window.innerHeight && rect.bottom > 0;
+    if (isInView) {
+      setIsVisible(true);
+      return;
+    }
+
+    let observer: IntersectionObserver | null = null;
+
+    try {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setIsVisible(true);
+              if (observer && entry.target) {
+                observer.unobserve(entry.target);
+              }
+            }
+          });
+        },
+        {
+          threshold: 0.1,
+          rootMargin: "0px 0px -100px 0px",
+        }
+      );
+
+      observer.observe(currentSection);
+    } catch (error) {
+      // Fallback: show immediately if IntersectionObserver fails
+      console.warn("IntersectionObserver error:", error);
+      setIsVisible(true);
+    }
 
     return () => {
-      if (currentSection) {
-        observer.unobserve(currentSection);
+      if (observer && currentSection) {
+        try {
+          observer.unobserve(currentSection);
+          observer.disconnect();
+        } catch (error) {
+          // Silently handle cleanup errors
+        }
       }
     };
   }, [isVisible]);
@@ -241,22 +300,53 @@ const OurCollectionSection: React.FC<OurCollectionViewProps> = ({
           ) : !prepared.length ? (
             <EmptyState />
           ) : (
-            <div className="ourCollection__grid ourCollection__grid--loaded">
-              {prepared.map((c, index) => (
-                <CollectionContainer
-                  key={c.id}
-                  id={c.id}
-                  name={c.name}
-                  description={c.description}
-                  bouquets={c.bouquets}
-                  index={index}
-                  style={{ 
-                    "--card-index": index,
-                    animationDelay: `${index * 100}ms`
-                  } as React.CSSProperties}
-                />
-              ))}
-            </div>
+            <>
+              <div className="ourCollection__grid ourCollection__grid--loaded">
+                {featuredCollections.map((c, index) => (
+                  <CollectionContainer
+                    key={c.id}
+                    id={c.id}
+                    name={c.name}
+                    description={c.description}
+                    bouquets={c.bouquets}
+                    index={index}
+                    style={{ 
+                      "--card-index": index,
+                      animationDelay: `${index * 100}ms`
+                    } as React.CSSProperties}
+                  />
+                ))}
+              </div>
+
+              {hasMoreCollections && (
+                <div className="ourCollection__footer">
+                  <Link
+                    to="/collection"
+                    className="ourCollection__seeMoreBtn"
+                    aria-label={`Lihat semua ${prepared.length} koleksi`}
+                  >
+                    <span className="ourCollection__seeMoreText">Lihat Semua Koleksi</span>
+                    <span className="ourCollection__seeMoreCount">
+                      ({prepared.length} koleksi)
+                    </span>
+                    <svg
+                      className="ourCollection__seeMoreIcon"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>

@@ -4,7 +4,7 @@
  * Follows SOLID, DRY, MVP, OOP principles
  */
 
-import React, { useMemo, memo, useEffect, useRef } from "react";
+import React, { useMemo, memo, useRef } from "react";
 import { Link } from "react-router-dom";
 import "../styles/CollectionCardComponent.css";
 import BouquetCard from "./bouquet-card-component";
@@ -123,21 +123,8 @@ const CollectionContainer: React.FC<CollectionContainerProps> = ({
     return { ...animationDelayStyle, ...style };
   }, [animationDelayStyle, style]);
 
-  // Resize observer for responsive container width (prepared for future use)
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    // This can be used for responsive adjustments in the future
-    const resizeObserver = new ResizeObserver(() => {
-      // Future: Update layout based on container width
-    });
-
-    resizeObserver.observe(containerRef.current);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, []);
+  // ResizeObserver removed for performance - not needed currently
+  // Can be re-added if responsive adjustments are needed in the future
 
   // Note: Virtualization is prepared but not yet implemented
   // Current grid implementation is optimal for preview lists (6 items max)
