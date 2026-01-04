@@ -201,6 +201,25 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
     [onItemsRendered, columnCount, safeBouquets.length]
   );
 
+  // Final safety check: ensure cellData is always a valid object before rendering Grid
+  // react-window's Grid uses Object.values() internally on itemData, so it must never be null/undefined
+  // This hook must be called before any early returns to comply with Rules of Hooks
+  const safeItemData = useMemo(() => {
+    if (!cellData || typeof cellData !== "object") {
+      return { bouquets: [], columnCount: 4, gap: 16 };
+    }
+    if (!Array.isArray(cellData.bouquets)) {
+      return { bouquets: [], columnCount: cellData.columnCount || 4, gap: cellData.gap || 16 };
+    }
+    if (typeof cellData.columnCount !== "number" || !Number.isFinite(cellData.columnCount) || cellData.columnCount <= 0) {
+      return { bouquets: cellData.bouquets, columnCount: 4, gap: cellData.gap || 16 };
+    }
+    if (typeof cellData.gap !== "number" || !Number.isFinite(cellData.gap) || cellData.gap < 0) {
+      return { bouquets: cellData.bouquets, columnCount: cellData.columnCount, gap: 16 };
+    }
+    return cellData;
+  }, [cellData]);
+
   // Early return for empty bouquets
   if (safeBouquets.length === 0) {
     return (
@@ -274,24 +293,6 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
   });
 
   GridCell.displayName = "GridCell";
-
-  // Final safety check: ensure cellData is always a valid object before rendering Grid
-  // react-window's Grid uses Object.values() internally on itemData, so it must never be null/undefined
-  const safeItemData = useMemo(() => {
-    if (!cellData || typeof cellData !== "object") {
-      return { bouquets: [], columnCount: 4, gap: 16 };
-    }
-    if (!Array.isArray(cellData.bouquets)) {
-      return { bouquets: [], columnCount: cellData.columnCount || 4, gap: cellData.gap || 16 };
-    }
-    if (typeof cellData.columnCount !== "number" || !Number.isFinite(cellData.columnCount) || cellData.columnCount <= 0) {
-      return { bouquets: cellData.bouquets, columnCount: 4, gap: cellData.gap || 16 };
-    }
-    if (typeof cellData.gap !== "number" || !Number.isFinite(cellData.gap) || cellData.gap < 0) {
-      return { bouquets: cellData.bouquets, columnCount: cellData.columnCount, gap: 16 };
-    }
-    return cellData;
-  }, [cellData]);
 
   return (
     <div 
