@@ -157,12 +157,20 @@ const VirtualizedFavoritesList: React.FC<VirtualizedFavoritesListProps> = ({
   }, []);
 
   // Memoized item data for react-window
-  const itemData = useMemo(() => ({
-    favorites,
-    columnCount,
-    onRemove: handleRemove,
-    showRemoveButton,
-  }), [favorites, columnCount, handleRemove, showRemoveButton]);
+  // CRITICAL: Always return a valid object, never null/undefined
+  // react-window's Grid uses Object.values() internally on itemData
+  const itemData = useMemo(() => {
+    // Ensure all values are valid before creating the object
+    const validFavorites = Array.isArray(favorites) ? favorites : [];
+    const validColumnCount = typeof columnCount === "number" && Number.isFinite(columnCount) && columnCount > 0 ? columnCount : 4;
+    
+    return {
+      favorites: validFavorites,
+      columnCount: validColumnCount,
+      onRemove: handleRemove || (() => {}),
+      showRemoveButton: typeof showRemoveButton === "boolean" ? showRemoveButton : false,
+    };
+  }, [favorites, columnCount, handleRemove, showRemoveButton]);
 
   // Cell component with proper typing
   const CellComponent = useCallback(({ columnIndex, rowIndex, style }: { columnIndex: number; rowIndex: number; style: React.CSSProperties }) => {
@@ -352,6 +360,20 @@ const VirtualizedFavoritesList: React.FC<VirtualizedFavoritesListProps> = ({
   // Use virtualization for 8+ items, regular grid for fewer
   const shouldVirtualize = favorites.length > 8;
 
+  // CRITICAL: Final validation before rendering Grid
+  // Ensure itemData is always a valid object (never null/undefined)
+  const finalItemData = (() => {
+    if (!itemData || typeof itemData !== "object") {
+      console.error("[VirtualizedFavoritesList] itemData is invalid:", itemData);
+      return { favorites: [], columnCount: 4, onRemove: () => {}, showRemoveButton: false };
+    }
+    if (!Array.isArray(itemData.favorites)) {
+      console.error("[VirtualizedFavoritesList] itemData.favorites is not an array:", itemData);
+      return { favorites: [], columnCount: itemData.columnCount || 4, onRemove: itemData.onRemove || (() => {}), showRemoveButton: itemData.showRemoveButton || false };
+    }
+    return itemData;
+  })();
+
   return (
     <div className="virtualizedFavoritesList">
       {shouldVirtualize ? (
@@ -365,7 +387,7 @@ const VirtualizedFavoritesList: React.FC<VirtualizedFavoritesListProps> = ({
               rowCount: Math.max(0, rowCount),
               rowHeight: itemHeight,
               width: containerWidth,
-              itemData: itemData,
+              itemData: finalItemData, // Always a valid object - never null/undefined
               overscanRowCount: 2,
               overscanColumnCount: 1,
               className: "virtualizedFavoritesList__grid",

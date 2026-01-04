@@ -190,10 +190,17 @@ const VirtualizedOrderList: React.FC<VirtualizedOrderListProps> = ({
   }, []);
 
   // Memoized item data for react-window
-  const itemData = useMemo(() => ({
-    orders: safeOrders,
-    onItemClick: handleItemClick,
-  }), [safeOrders, handleItemClick]);
+  // CRITICAL: Always return a valid object, never null/undefined
+  // react-window's List uses Object.values() internally on itemData
+  const itemData = useMemo(() => {
+    // Ensure all values are valid before creating the object
+    const validOrders = Array.isArray(safeOrders) ? safeOrders : [];
+    
+    return {
+      orders: validOrders,
+      onItemClick: handleItemClick || (() => {}),
+    };
+  }, [safeOrders, handleItemClick]);
 
   // Row component with proper typing
   const RowComponent = useCallback(({ index, style }: { index: number; style: React.CSSProperties }) => {
@@ -323,6 +330,20 @@ const VirtualizedOrderList: React.FC<VirtualizedOrderListProps> = ({
   // Use virtualization for 10+ items, regular list for fewer
   const shouldVirtualize = safeOrders.length > 10;
 
+  // CRITICAL: Final validation before rendering List
+  // Ensure itemData is always a valid object (never null/undefined)
+  const finalItemData = (() => {
+    if (!itemData || typeof itemData !== "object") {
+      console.error("[VirtualizedOrderList] itemData is invalid:", itemData);
+      return { orders: [], onItemClick: () => {} };
+    }
+    if (!Array.isArray(itemData.orders)) {
+      console.error("[VirtualizedOrderList] itemData.orders is not an array:", itemData);
+      return { orders: [], onItemClick: itemData.onItemClick || (() => {}) };
+    }
+    return itemData;
+  })();
+
   return (
     <div className="virtualizedOrderList">
       {shouldVirtualize ? (
@@ -334,7 +355,7 @@ const VirtualizedOrderList: React.FC<VirtualizedOrderListProps> = ({
               itemCount: safeOrders.length,
               itemSize: itemHeight,
               width: "100%",
-              itemData: itemData,
+              itemData: finalItemData, // Always a valid object - never null/undefined
               overscanCount: 5,
               className: "virtualizedOrderList__list",
               rowComponent: RowComponent,

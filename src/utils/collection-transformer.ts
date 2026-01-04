@@ -74,8 +74,11 @@ export function normalizeBouquetToCardProps(
 export function transformBouquetsToCardProps(
   collection: Collection
 ): BouquetCardProps[] {
+  // Handle null/undefined bouquets explicitly
   const list = collection.bouquets;
-  if (!Array.isArray(list) || list.length === 0) return [];
+  if (list == null) return [];
+  if (!Array.isArray(list)) return [];
+  if (list.length === 0) return [];
 
   return list
     .map((item) => normalizeBouquetToCardProps(item, collection.name))
@@ -111,6 +114,9 @@ export function prepareCollections(
 
   return collections
     .map((c) => {
+      // Handle null/undefined collection
+      if (!c || typeof c !== "object") return null;
+
       const id = extractCollectionId(c);
       const name = extractCollectionName(c);
 
@@ -118,15 +124,18 @@ export function prepareCollections(
 
       const bouquets = transformBouquetsToCardProps(c);
 
+      // Ensure bouquets is always an array (safety check)
+      const safeBouquets = Array.isArray(bouquets) ? bouquets : [];
+
       return {
         id,
         name,
         description: c.description ?? "",
-        bouquets,
+        bouquets: safeBouquets,
       };
     })
     .filter((c): c is PreparedCollection => {
-      return c !== null && Boolean(c.id) && Boolean(c.name) && c.bouquets.length > 0;
+      return c !== null && Boolean(c.id) && Boolean(c.name) && Array.isArray(c.bouquets) && c.bouquets.length > 0;
     });
 }
 

@@ -201,23 +201,41 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
     [onItemsRendered, columnCount, safeBouquets.length]
   );
 
-  // Final safety check: ensure cellData is always a valid object before rendering Grid
+  // Final safety check: ensure safeItemData is ALWAYS a valid object (never null/undefined)
   // react-window's Grid uses Object.values() internally on itemData, so it must never be null/undefined
   // This hook must be called before any early returns to comply with Rules of Hooks
   const safeItemData = useMemo(() => {
+    // Default fallback object - always return a valid object
+    const defaultData = { bouquets: [], columnCount: 4, gap: 16 };
+    
+    // If cellData is invalid, return default
     if (!cellData || typeof cellData !== "object") {
-      return { bouquets: [], columnCount: 4, gap: 16 };
+      return defaultData;
     }
-    if (!Array.isArray(cellData.bouquets)) {
-      return { bouquets: [], columnCount: cellData.columnCount || 4, gap: cellData.gap || 16 };
-    }
-    if (typeof cellData.columnCount !== "number" || !Number.isFinite(cellData.columnCount) || cellData.columnCount <= 0) {
-      return { bouquets: cellData.bouquets, columnCount: 4, gap: cellData.gap || 16 };
-    }
-    if (typeof cellData.gap !== "number" || !Number.isFinite(cellData.gap) || cellData.gap < 0) {
-      return { bouquets: cellData.bouquets, columnCount: cellData.columnCount, gap: 16 };
-    }
-    return cellData;
+    
+    // Ensure bouquets is always an array
+    const validBouquets = Array.isArray(cellData.bouquets) ? cellData.bouquets : [];
+    
+    // Ensure columnCount is always a valid number
+    const validColumnCount = typeof cellData.columnCount === "number" && 
+                             Number.isFinite(cellData.columnCount) && 
+                             cellData.columnCount > 0 
+                             ? cellData.columnCount 
+                             : 4;
+    
+    // Ensure gap is always a valid number
+    const validGap = typeof cellData.gap === "number" && 
+                      Number.isFinite(cellData.gap) && 
+                      cellData.gap >= 0 
+                      ? cellData.gap 
+                      : 16;
+    
+    // Always return a valid object with all required properties
+    return {
+      bouquets: validBouquets,
+      columnCount: validColumnCount,
+      gap: validGap,
+    };
   }, [cellData]);
 
   // Early return for empty bouquets
@@ -229,24 +247,42 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
     );
   }
 
-  // Validate all required values before rendering Grid
-  // This prevents react-window from receiving invalid props
-  // Additional validation to ensure cellData is a proper object with all required properties
-  if (!cellData || typeof cellData !== "object" || !("bouquets" in cellData) || !("columnCount" in cellData) || !("gap" in cellData)) {
-    console.error("[VirtualizedBouquetGrid] Invalid cellData:", cellData);
+  // CRITICAL: Validate safeItemData before rendering Grid
+  // This is the final check to ensure itemData is never null/undefined
+  // react-window will crash if itemData is null/undefined
+  if (!safeItemData || typeof safeItemData !== "object") {
+    console.error("[VirtualizedBouquetGrid] safeItemData is null/undefined:", safeItemData);
     return (
       <div className="virtualized-grid-empty">
-        <p>Error: Data tidak valid</p>
+        <p>Error: Data tidak valid untuk grid</p>
       </div>
     );
   }
   
-  // Ensure cellData properties are valid
-  if (!Array.isArray(cellData.bouquets) || typeof cellData.columnCount !== "number" || typeof cellData.gap !== "number") {
-    console.error("[VirtualizedBouquetGrid] Invalid cellData properties:", cellData);
+  // Ensure all required properties exist and are valid
+  if (!Array.isArray(safeItemData.bouquets)) {
+    console.error("[VirtualizedBouquetGrid] safeItemData.bouquets is not an array:", safeItemData);
     return (
       <div className="virtualized-grid-empty">
-        <p>Error: Konfigurasi data tidak valid</p>
+        <p>Error: Data bouquet tidak valid</p>
+      </div>
+    );
+  }
+  
+  if (typeof safeItemData.columnCount !== "number" || !Number.isFinite(safeItemData.columnCount) || safeItemData.columnCount <= 0) {
+    console.error("[VirtualizedBouquetGrid] safeItemData.columnCount is invalid:", safeItemData);
+    return (
+      <div className="virtualized-grid-empty">
+        <p>Error: Konfigurasi kolom tidak valid</p>
+      </div>
+    );
+  }
+  
+  if (typeof safeItemData.gap !== "number" || !Number.isFinite(safeItemData.gap) || safeItemData.gap < 0) {
+    console.error("[VirtualizedBouquetGrid] safeItemData.gap is invalid:", safeItemData);
+    return (
+      <div className="virtualized-grid-empty">
+        <p>Error: Konfigurasi gap tidak valid</p>
       </div>
     );
   }
@@ -284,15 +320,83 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
     : 400;
 
   // Render function for Grid children - using memoized component
-  const GridCell = memo(({ columnIndex, rowIndex, style }: { columnIndex: number; rowIndex: number; style: React.CSSProperties }) => {
-    // Ensure data is always valid
-    if (!cellData || typeof cellData !== "object") {
+  // IMPORTANT: react-window passes itemData as 'data' prop to children
+  // We must use the data prop, not cellData from closure, to ensure consistency
+  const GridCell = memo(({ 
+    columnIndex, 
+    rowIndex, 
+    style, 
+    data 
+  }: { 
+    columnIndex: number; 
+    rowIndex: number; 
+    style: React.CSSProperties;
+    data: typeof safeItemData;
+  }) => {
+    // Ensure data is always valid - this is the itemData passed from Grid
+    if (!data || typeof data !== "object") {
       return <div style={style} />;
     }
-    return <Cell columnIndex={columnIndex} rowIndex={rowIndex} style={style} data={cellData} />;
+    // Validate data structure
+    if (!Array.isArray(data.bouquets) || typeof data.columnCount !== "number" || typeof data.gap !== "number") {
+      return <div style={style} />;
+    }
+    return <Cell columnIndex={columnIndex} rowIndex={rowIndex} style={style} data={data} />;
   });
 
   GridCell.displayName = "GridCell";
+
+  // Final validation: ensure safeItemData is ALWAYS a valid object before rendering Grid
+  // react-window's Grid uses Object.values() internally on itemData, so it must never be null/undefined
+  if (!safeItemData || typeof safeItemData !== "object" || !Array.isArray(safeItemData.bouquets)) {
+    console.error("[VirtualizedBouquetGrid] safeItemData is invalid, cannot render Grid:", safeItemData);
+    return (
+      <div className="virtualized-grid-empty">
+        <p>Error: Data tidak valid untuk grid</p>
+      </div>
+    );
+  }
+
+  // Additional validation for all required properties
+  if (typeof safeItemData.columnCount !== "number" || !Number.isFinite(safeItemData.columnCount) || safeItemData.columnCount <= 0) {
+    console.error("[VirtualizedBouquetGrid] Invalid columnCount in safeItemData:", safeItemData);
+    return (
+      <div className="virtualized-grid-empty">
+        <p>Error: Konfigurasi kolom tidak valid</p>
+      </div>
+    );
+  }
+
+  if (typeof safeItemData.gap !== "number" || !Number.isFinite(safeItemData.gap) || safeItemData.gap < 0) {
+    console.error("[VirtualizedBouquetGrid] Invalid gap in safeItemData:", safeItemData);
+    return (
+      <div className="virtualized-grid-empty">
+        <p>Error: Konfigurasi gap tidak valid</p>
+      </div>
+    );
+  }
+
+  // ABSOLUTE FINAL CHECK: Ensure safeItemData is valid before passing to Grid
+  // This is the last line of defense against null/undefined itemData
+  const finalItemData = (() => {
+    if (!safeItemData || typeof safeItemData !== "object") {
+      console.error("[VirtualizedBouquetGrid] CRITICAL: safeItemData is invalid at render time:", safeItemData);
+      return { bouquets: [], columnCount: 4, gap: 16 };
+    }
+    if (!Array.isArray(safeItemData.bouquets)) {
+      console.error("[VirtualizedBouquetGrid] CRITICAL: safeItemData.bouquets is not an array at render time:", safeItemData);
+      return { bouquets: [], columnCount: safeItemData.columnCount || 4, gap: safeItemData.gap || 16 };
+    }
+    if (typeof safeItemData.columnCount !== "number" || !Number.isFinite(safeItemData.columnCount) || safeItemData.columnCount <= 0) {
+      console.error("[VirtualizedBouquetGrid] CRITICAL: safeItemData.columnCount is invalid at render time:", safeItemData);
+      return { bouquets: safeItemData.bouquets, columnCount: 4, gap: safeItemData.gap || 16 };
+    }
+    if (typeof safeItemData.gap !== "number" || !Number.isFinite(safeItemData.gap) || safeItemData.gap < 0) {
+      console.error("[VirtualizedBouquetGrid] CRITICAL: safeItemData.gap is invalid at render time:", safeItemData);
+      return { bouquets: safeItemData.bouquets, columnCount: safeItemData.columnCount, gap: 16 };
+    }
+    return safeItemData;
+  })();
 
   return (
     <div 
@@ -303,7 +407,7 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
         overflow: "auto",
       }}
     >
-      {safeItemData && typeof safeItemData === "object" && Array.isArray(safeItemData.bouquets) && createElement(
+      {createElement(
         Grid as any,
         {
           columnCount,
@@ -312,7 +416,7 @@ const VirtualizedBouquetGrid: React.FC<VirtualizedBouquetGridProps> = ({
           rowHeight: safeRowHeight,
           width: safeContainerWidth,
           height: safeContainerHeight,
-          itemData: safeItemData, // This must always be a valid object - never null/undefined
+          itemData: finalItemData, // This is ABSOLUTELY guaranteed to be a valid object - never null/undefined
           onItemsRendered: handleItemsRendered,
           overscanRowCount: 2,
           overscanColumnCount: 1,
