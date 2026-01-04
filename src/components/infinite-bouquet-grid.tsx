@@ -150,6 +150,34 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage, isOffline]);
 
+  // CRITICAL: Ensure allBouquets is always a valid array before using it
+  // This prevents passing null/undefined to VirtualizedBouquetGrid
+  // MUST be called before any early returns to comply with Rules of Hooks
+  const safeAllBouquets = useMemo(() => {
+    // Always return a valid array, never null/undefined
+    if (!allBouquets) return [];
+    if (!Array.isArray(allBouquets)) return [];
+    // Filter out any invalid items
+    return allBouquets.filter((b): b is NonNullable<typeof b> => 
+      b != null && typeof b === "object" && b._id != null
+    );
+  }, [allBouquets]);
+
+  // Disable virtualization on mobile for better UX
+  // Ensure containerWidth is valid before using virtualization
+  // MUST be called before any early returns to comply with Rules of Hooks
+  const safeContainerWidth = useMemo(() => {
+    return typeof containerWidth === "number" && Number.isFinite(containerWidth) && containerWidth > 0
+      ? containerWidth
+      : 1200;
+  }, [containerWidth]);
+
+  const safeContainerHeight = useMemo(() => {
+    return typeof containerHeight === "number" && Number.isFinite(containerHeight) && containerHeight > 0
+      ? containerHeight
+      : 800;
+  }, [containerHeight]);
+
   // Skeleton loading component
   const SkeletonCard = useCallback(() => (
     <div className="infinite-grid-skeleton-card" aria-hidden="true">
@@ -248,7 +276,7 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
 
   // Empty state - only show if not loading and no bouquets
   // Don't show empty state if still loading (bouquets might be coming)
-  if (allBouquets.length === 0 && !isLoading && !error) {
+  if (safeAllBouquets.length === 0 && !isLoading && !error) {
     return (
       <div className="infinite-grid-empty" role="status">
         <svg
@@ -274,26 +302,6 @@ const InfiniteBouquetGrid: React.FC<InfiniteBouquetGridProps> = ({
     );
   }
 
-  // Disable virtualization on mobile for better UX
-  // Ensure containerWidth is valid before using virtualization
-  const safeContainerWidth = typeof containerWidth === "number" && Number.isFinite(containerWidth) && containerWidth > 0
-    ? containerWidth
-    : 1200;
-  const safeContainerHeight = typeof containerHeight === "number" && Number.isFinite(containerHeight) && containerHeight > 0
-    ? containerHeight
-    : 800;
-  
-  // CRITICAL: Ensure allBouquets is always a valid array before using it
-  // This prevents passing null/undefined to VirtualizedBouquetGrid
-  const safeAllBouquets = useMemo(() => {
-    // Always return a valid array, never null/undefined
-    if (!allBouquets) return [];
-    if (!Array.isArray(allBouquets)) return [];
-    // Filter out any invalid items
-    return allBouquets.filter((b): b is NonNullable<typeof b> => 
-      b != null && typeof b === "object" && b._id != null
-    );
-  }, [allBouquets]);
 
   // CRITICAL: Only use virtualization if we have bouquets AND valid container dimensions
   // This prevents Grid from receiving invalid itemData
